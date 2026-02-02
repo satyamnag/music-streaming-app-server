@@ -946,8 +946,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "898fd4ebcef77f5177b08aa6f9b9047bd02c6b9b"
+      ref: ab3ff415114b7b43593e6ee718ad3d760af18350
+      resolved-ref: ab3ff415114b7b43593e6ee718ad3d760af18350
       url: "https://github.com/KRTirtho/flutter_new_pipe_extractor.git"
     source: git
     version: "0.1.0"
@@ -2728,10 +2728,10 @@ packages:
     dependency: "direct main"
     description:
       name: youtube_explode_dart
-      sha256: add33de45d80c7f71a5e3dd464dd82fafd7fb5ab875fd303c023f30f76618325
+      sha256: "3d731d71df9901b1915bae806781df519cff32517e36db279f844ae619669e45"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.5"
   yt_dlp_dart:
     dependency: "direct main"
     description:
