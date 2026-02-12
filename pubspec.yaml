@@ -121,8 +121,7 @@ dependencies:
       ref: 4e5310e14af74bdbb51e2a4766e66d6c6a2562a8
   flutter_new_pipe_extractor:
     git:
-      url: https://github.com/KRTirtho/flutter_new_pipe_extractor.git
-      ref: ab3ff415114b7b43593e6ee718ad3d760af18350
+      url: https://github.com/KRTirtho/flutter_new_pipe_extractor
   http_parser: ^4.1.2
   collection: any
   archive: ^4.0.7
@@ -240,6 +239,8 @@ flutter:
     - packages/hetu_std/assets/bytecode/std.out
     - packages/hetu_otp_util/assets/bytecode/otp_util.out
     - packages/hetu_spotube_plugin/assets/bytecode/spotube_plugin.out
+    # NewPipe binaries (desktop only)
+    - packages/flutter_new_pipe_extractor/assets/
   fonts:
     - family: RadixIcons
       fonts:
