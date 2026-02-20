@@ -240,7 +240,7 @@ flutter:
     - packages/hetu_otp_util/assets/bytecode/otp_util.out
     - packages/hetu_spotube_plugin/assets/bytecode/spotube_plugin.out
     # NewPipe binaries (desktop only)
-    - packages/flutter_new_pipe_extractor/assets/
+    # - packages/flutter_new_pipe_extractor/assets/
   fonts:
     - family: RadixIcons
       fonts:
