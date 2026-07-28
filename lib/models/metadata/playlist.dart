@@ -1,34 +1,34 @@
 part of 'metadata.dart';
 
 @freezed
-class SpotubeFullPlaylistObject with _$SpotubeFullPlaylistObject {
-  factory SpotubeFullPlaylistObject({
+class SangeetFullPlaylistObject with _$SangeetFullPlaylistObject {
+  factory SangeetFullPlaylistObject({
     required String id,
     required String name,
     required String description,
     required String externalUri,
-    required SpotubeUserObject owner,
-    @Default([]) List<SpotubeImageObject> images,
-    @Default([]) List<SpotubeUserObject> collaborators,
+    required SangeetUserObject owner,
+    @Default([]) List<SangeetImageObject> images,
+    @Default([]) List<SangeetUserObject> collaborators,
     @Default(false) bool collaborative,
     @Default(false) bool public,
-  }) = _SpotubeFullPlaylistObject;
+  }) = _SangeetFullPlaylistObject;
 
-  factory SpotubeFullPlaylistObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeFullPlaylistObjectFromJson(json);
+  factory SangeetFullPlaylistObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetFullPlaylistObjectFromJson(json);
 }
 
 @freezed
-class SpotubeSimplePlaylistObject with _$SpotubeSimplePlaylistObject {
-  factory SpotubeSimplePlaylistObject({
+class SangeetSimplePlaylistObject with _$SangeetSimplePlaylistObject {
+  factory SangeetSimplePlaylistObject({
     required String id,
     required String name,
     required String description,
     required String externalUri,
-    required SpotubeUserObject owner,
-    @Default([]) List<SpotubeImageObject> images,
-  }) = _SpotubeSimplePlaylistObject;
+    required SangeetUserObject owner,
+    @Default([]) List<SangeetImageObject> images,
+  }) = _SangeetSimplePlaylistObject;
 
-  factory SpotubeSimplePlaylistObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeSimplePlaylistObjectFromJson(json);
+  factory SangeetSimplePlaylistObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetSimplePlaylistObjectFromJson(json);
 }

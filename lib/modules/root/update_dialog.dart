@@ -1,7 +1,7 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/components/links/anchor_button.dart';
+import 'package:sangeet/components/links/anchor_button.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:spotube/extensions/context.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:version/version.dart';
 
 class RootAppUpdateDialog extends StatelessWidget {
@@ -14,8 +14,8 @@ class RootAppUpdateDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const url = "https://spotube.krtirtho.dev/downloads";
-    const nightlyUrl = "https://spotube.krtirtho.dev/downloads/nightly";
+    const url = "https://sangeet.app/downloads";
+    const nightlyUrl = "https://sangeet.app/downloads/nightly";
     return AlertDialog(
       title: Text(context.l10n.spotube_has_an_update),
       actions: [

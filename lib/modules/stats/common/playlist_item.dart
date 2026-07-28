@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/routes.gr.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/components/ui/button_tile.dart';
-import 'package:spotube/extensions/string.dart';
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/extensions/string.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
 class StatsPlaylistItem extends StatelessWidget {
-  final SpotubeSimplePlaylistObject playlist;
+  final SangeetSimplePlaylistObject playlist;
   final Widget info;
   const StatsPlaylistItem(
       {super.key, required this.playlist, required this.info});

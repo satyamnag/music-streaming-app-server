@@ -1,14 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/routes.gr.dart';
-import 'package:spotube/components/links/artist_link.dart';
-import 'package:spotube/components/ui/button_tile.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/modules/album/album_card.dart';
-import 'package:spotube/components/image/universal_image.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/components/links/artist_link.dart';
+import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/album/album_card.dart';
+import 'package:sangeet/components/image/universal_image.dart';
 
 class StatsAlbumItem extends StatelessWidget {
-  final SpotubeSimpleAlbumObject album;
+  final SangeetSimpleAlbumObject album;
   final Widget info;
   const StatsAlbumItem({super.key, required this.album, required this.info});
 

@@ -2,9 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/collections/routes.gr.dart';
-import 'package:spotube/provider/metadata_plugin/core/auth.dart';
-import 'package:spotube/services/kv_store/kv_store.dart';
+import 'package:sangeet/collections/routes.gr.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -25,20 +23,6 @@ class AppRouter extends RootStackRouter {
               path: "home",
               page: HomeRoute.page,
               initial: true,
-              guards: [
-                AutoRouteGuardCallback(
-                  (resolver, router) async {
-                    final authenticated = await ref
-                        .read(metadataPluginAuthenticatedProvider.future);
-
-                    if (!authenticated && !KVStoreService.doneGettingStarted) {
-                      resolver.redirect(const GettingStartedRoute());
-                    } else {
-                      resolver.next(true);
-                    }
-                  },
-                ),
-              ],
             ),
             AutoRoute(
               path: "home/sections/:sectionId",
@@ -77,7 +61,6 @@ class AppRouter extends RootStackRouter {
             AutoRoute(
               path: "local/folder",
               page: LocalLibraryRoute.page,
-              // parentNavigatorKey: shellRouteNavigatorKey,
             ),
             AutoRoute(
               path: "lyrics",
@@ -106,7 +89,7 @@ class AppRouter extends RootStackRouter {
               ),
             AutoRoute(
               path: "settings/about",
-              page: AboutSpotubeRoute.page,
+              page: AboutSangeetRoute.page,
             ),
             AutoRoute(
               path: "settings/scrobbling",
@@ -211,17 +194,10 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           path: "/mini-player",
           page: MiniLyricsRoute.page,
-          // parentNavigatorKey: rootNavigatorKey,
-        ),
-        AutoRoute(
-          path: "/getting-started",
-          page: GettingStartedRoute.page,
-          // parentNavigatorKey: rootNavigatorKey,
         ),
         AutoRoute(
           path: "/lastfm-login",
           page: LastFMLoginRoute.page,
-          // parentNavigatorKey: rootNavigatorKey,
         ),
       ];
 }

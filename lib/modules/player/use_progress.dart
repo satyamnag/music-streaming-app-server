@@ -1,6 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
 
 ({
   double progressStatic,

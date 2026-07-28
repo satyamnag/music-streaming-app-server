@@ -1,4 +1,4 @@
-package oss.krtirtho.spotube.glance.models
+package com.sangeet.app.glance.models
 
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package oss.krtirtho.spotube.glance
+package com.sangeet.app.glance
 
 import HomeWidgetGlanceWidgetReceiver
 

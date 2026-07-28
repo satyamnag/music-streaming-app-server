@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/models/database/database.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/database/database.dart';
+import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/database/database.dart';
 
 class BlackListNotifier extends AsyncNotifier<List<BlacklistTableData>> {
   @override
@@ -33,7 +33,7 @@ class BlackListNotifier extends AsyncNotifier<List<BlacklistTableData>> {
         .go();
   }
 
-  bool contains(SpotubeTrackObject track) {
+  bool contains(SangeetTrackObject track) {
     final containsTrack =
         state.asData?.value.any((element) => element.elementId == track.id) ??
             false;
@@ -53,7 +53,7 @@ class BlackListNotifier extends AsyncNotifier<List<BlacklistTableData>> {
   }
 
   /// Filters the non blacklisted tracks from the given [tracks]
-  Iterable<SpotubeTrackObject> filter(Iterable<SpotubeTrackObject> tracks) {
+  Iterable<SangeetTrackObject> filter(Iterable<SangeetTrackObject> tracks) {
     return tracks.whereNot(contains).toList();
   }
 }

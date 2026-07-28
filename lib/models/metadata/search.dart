@@ -1,14 +1,14 @@
 part of 'metadata.dart';
 
 @freezed
-class SpotubeSearchResponseObject with _$SpotubeSearchResponseObject {
-  factory SpotubeSearchResponseObject({
-    required List<SpotubeSimpleAlbumObject> albums,
-    required List<SpotubeFullArtistObject> artists,
-    required List<SpotubeSimplePlaylistObject> playlists,
-    required List<SpotubeFullTrackObject> tracks,
-  }) = _SpotubeSearchResponseObject;
+class SangeetSearchResponseObject with _$SangeetSearchResponseObject {
+  factory SangeetSearchResponseObject({
+    required List<SangeetSimpleAlbumObject> albums,
+    required List<SangeetFullArtistObject> artists,
+    required List<SangeetSimplePlaylistObject> playlists,
+    required List<SangeetFullTrackObject> tracks,
+  }) = _SangeetSearchResponseObject;
 
-  factory SpotubeSearchResponseObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeSearchResponseObjectFromJson(json);
+  factory SangeetSearchResponseObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetSearchResponseObjectFromJson(json);
 }

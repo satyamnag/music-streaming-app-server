@@ -1,6 +1,6 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
 class MetadataPluginBrowseEndpoint {
   final Hetu hetu;
@@ -10,7 +10,7 @@ class MetadataPluginBrowseEndpoint {
       (hetu.fetch("metadataPlugin") as HTInstance).memberGet("browse")
           as HTInstance;
 
-  Future<SpotubePaginationResponseObject<SpotubeBrowseSectionObject<Object>>>
+  Future<SangeetPaginationResponseObject<SangeetBrowseSectionObject<Object>>>
       sections({
     int? offset,
     int? limit,
@@ -23,24 +23,24 @@ class MetadataPluginBrowseEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<
-        SpotubeBrowseSectionObject<Object>>.fromJson(
+    return SangeetPaginationResponseObject<
+        SangeetBrowseSectionObject<Object>>.fromJson(
       raw.cast<String, dynamic>(),
-      (Map json) => SpotubeBrowseSectionObject<Object>.fromJson(
+      (Map json) => SangeetBrowseSectionObject<Object>.fromJson(
         json.cast<String, dynamic>(),
         (json) {
           final isPlaylist = json["owner"] != null;
           final isAlbum = json["artists"] != null;
           if (isPlaylist) {
-            return SpotubeSimplePlaylistObject.fromJson(
+            return SangeetSimplePlaylistObject.fromJson(
               json.cast<String, dynamic>(),
             );
           } else if (isAlbum) {
-            return SpotubeSimpleAlbumObject.fromJson(
+            return SangeetSimpleAlbumObject.fromJson(
               json.cast<String, dynamic>(),
             );
           } else {
-            return SpotubeFullArtistObject.fromJson(
+            return SangeetFullArtistObject.fromJson(
               json.cast<String, dynamic>(),
             );
           }
@@ -49,7 +49,7 @@ class MetadataPluginBrowseEndpoint {
     );
   }
 
-  Future<SpotubePaginationResponseObject<Object>> sectionItems(
+  Future<SangeetPaginationResponseObject<Object>> sectionItems(
     String id, {
     int? offset,
     int? limit,
@@ -63,21 +63,21 @@ class MetadataPluginBrowseEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<Object>.fromJson(
+    return SangeetPaginationResponseObject<Object>.fromJson(
       raw.cast<String, dynamic>(),
       (json) {
         final isPlaylist = json["owner"] != null;
         final isAlbum = json["artists"] != null;
         if (isPlaylist) {
-          return SpotubeSimplePlaylistObject.fromJson(
+          return SangeetSimplePlaylistObject.fromJson(
             json.cast<String, dynamic>(),
           );
         } else if (isAlbum) {
-          return SpotubeSimpleAlbumObject.fromJson(
+          return SangeetSimpleAlbumObject.fromJson(
             json.cast<String, dynamic>(),
           );
         } else {
-          return SpotubeFullArtistObject.fromJson(
+          return SangeetFullArtistObject.fromJson(
             json.cast<String, dynamic>(),
           );
         }

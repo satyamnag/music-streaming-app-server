@@ -1,43 +1,43 @@
 import 'dart:io';
 
 import 'package:media_kit/media_kit.dart' hide Track;
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/logger/logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:spotube/services/audio_player/custom_player.dart';
+import 'package:sangeet/services/audio_player/custom_player.dart';
 import 'dart:async';
 
 import 'package:media_kit/media_kit.dart' as mk;
 
-import 'package:spotube/services/audio_player/playback_state.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/services/audio_player/playback_state.dart';
+import 'package:sangeet/utils/platform.dart';
 
 part 'audio_players_streams_mixin.dart';
 part 'audio_player_impl.dart';
 
-class SpotubeMedia extends mk.Media {
+class SangeetMedia extends mk.Media {
   static int serverPort = 0;
 
   static String get _host =>
       kIsWindows ? "localhost" : InternetAddress.anyIPv4.address;
 
-  final SpotubeTrackObject track;
-  SpotubeMedia(this.track)
+  final SangeetTrackObject track;
+  SangeetMedia(this.track)
       : assert(
-          track is SpotubeLocalTrackObject || track is SpotubeFullTrackObject,
+          track is SangeetLocalTrackObject || track is SangeetFullTrackObject,
           "Track must be a either a local track or a full track object with ISRC",
         ),
         // If the track is a local track, use its path, otherwise use the server URL
         super(
-          track is SpotubeLocalTrackObject
+          track is SangeetLocalTrackObject
               ? track.path
               : "http://$_host:$serverPort/stream/${track.id}",
           extras: track.toJson(),
         );
 
-  factory SpotubeMedia.media(Media media) {
+  factory SangeetMedia.media(Media media) {
     assert(media.extras != null, "[Media] must have extra metadata set");
-    return SpotubeMedia(SpotubeTrackObject.fromJson(media.extras!));
+    return SangeetMedia(SangeetTrackObject.fromJson(media.extras!));
   }
 }
 
@@ -47,7 +47,7 @@ abstract class AudioPlayerInterface {
   AudioPlayerInterface()
       : _mkPlayer = CustomPlayer(
           configuration: const mk.PlayerConfiguration(
-            title: "Spotube",
+            title: "Sangeet",
             logLevel: kDebugMode ? mk.MPVLogLevel.info : mk.MPVLogLevel.error,
             async: true,
           ),

@@ -32,7 +32,7 @@ if (keystorePropertiesFile.exists()) {
 def composeVersion = "1.4.8"
 
 android {
-    namespace "oss.krtirtho.spotube"
+    namespace "com.sangeet.app"
     
     compileSdkVersion 36
 
@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "oss.krtirtho.spotube"
+        applicationId "com.sangeet.app"
         minSdkVersion 24
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
@@ -92,21 +92,21 @@ android {
     productFlavors {
         nightly {
             dimension "default"
-            resValue "string", "app_name_en", "Spotube Nightly"
+            resValue "string", "app_name_en", "Sangeet Nightly"
             applicationIdSuffix ".nightly"
             versionNameSuffix "-nightly"
             signingConfig signingConfigs.release
         }
         dev {
             dimension "default"
-            resValue "string", "app_name_en", "Spotube Dev"
+            resValue "string", "app_name_en", "Sangeet Dev"
             applicationIdSuffix ".dev"
             versionNameSuffix "-dev"
             signingConfig signingConfigs.release
         }
         stable {
             dimension "default"
-            resValue "string", "app_name_en", "Spotube"
+            resValue "string", "app_name_en", "Sangeet"
             signingConfig signingConfigs.release
         }
     }

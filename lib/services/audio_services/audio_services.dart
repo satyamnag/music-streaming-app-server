@@ -1,13 +1,13 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/collections/env.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/audio_services/mobile_audio_service.dart';
-import 'package:spotube/services/audio_services/windows_audio_service.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_services/mobile_audio_service.dart';
+import 'package:sangeet/services/audio_services/windows_audio_service.dart';
+import 'package:sangeet/utils/platform.dart';
 
 class AudioServices with WidgetsBindingObserver {
   final MobileAudioService? mobile;
@@ -29,14 +29,14 @@ class AudioServices with WidgetsBindingObserver {
                 kIsLinux,
                 Env.releaseChannel
               )) {
-                (true, _) => "spotube",
-                (_, ReleaseChannel.stable) => "oss.krtirtho.spotube",
-                (_, ReleaseChannel.nightly) => "oss.krtirtho.spotube.nightly",
+                (true, _) => "sangeet",
+                (_, ReleaseChannel.stable) => "com.sangeet.app",
+                (_, ReleaseChannel.nightly) => "com.sangeet.app.nightly",
               },
-              androidNotificationChannelName: 'Spotube',
+              androidNotificationChannelName: 'Sangeet',
               androidNotificationOngoing: false,
               androidStopForegroundOnPause: false,
-              androidNotificationChannelDescription: "Spotube Media Controls",
+              androidNotificationChannelDescription: "Sangeet Media Controls",
             ),
           )
         : null;
@@ -45,7 +45,7 @@ class AudioServices with WidgetsBindingObserver {
     return AudioServices(mobile, smtc);
   }
 
-  Future<void> addTrack(SpotubeTrackObject track) async {
+  Future<void> addTrack(SangeetTrackObject track) async {
     await smtc?.addTrack(track);
     mobile?.addItem(MediaItem(
       id: track.id,

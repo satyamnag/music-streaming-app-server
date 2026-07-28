@@ -1,16 +1,16 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/links/artist_link.dart';
-import 'package:spotube/components/links/hyper_link.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/extensions/duration.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/server/sourced_track_provider.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/links/artist_link.dart';
+import 'package:sangeet/components/links/hyper_link.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/extensions/duration.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/server/sourced_track_provider.dart';
 
 class TrackDetailsDialog extends HookConsumerWidget {
-  final SpotubeFullTrackObject track;
+  final SangeetFullTrackObject track;
   const TrackDetailsDialog({
     super.key,
     required this.track,
@@ -70,7 +70,7 @@ class TrackDetailsDialog extends HookConsumerWidget {
       title: Row(
         spacing: 8,
         children: [
-          const Icon(SpotubeIcons.info),
+          const Icon(SangeetIcons.info),
           Text(
             context.l10n.details,
             style: theme.typography.h4,

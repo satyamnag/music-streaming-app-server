@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:encrypt/encrypt.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:spotube/models/database/database.dart';
-import 'package:spotube/services/wm_tools/wm_tools.dart';
+import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/services/wm_tools/wm_tools.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class KVStoreService {
@@ -13,11 +13,6 @@ abstract class KVStoreService {
   static Future<void> initialize() async {
     _sharedPreferences = await SharedPreferences.getInstance();
   }
-
-  static bool get doneGettingStarted =>
-      sharedPreferences.getBool('doneGettingStarted') ?? false;
-  static Future<void> setDoneGettingStarted(bool value) async =>
-      await sharedPreferences.setBool('doneGettingStarted', value);
 
   static bool get askedForBatteryOptimization =>
       sharedPreferences.getBool('askedForBatteryOptimization') ?? false;

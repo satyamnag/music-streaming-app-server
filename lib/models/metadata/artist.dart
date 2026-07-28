@@ -1,40 +1,40 @@
 part of 'metadata.dart';
 
 @freezed
-class SpotubeFullArtistObject with _$SpotubeFullArtistObject {
-  factory SpotubeFullArtistObject({
+class SangeetFullArtistObject with _$SangeetFullArtistObject {
+  factory SangeetFullArtistObject({
     required String id,
     required String name,
     required String externalUri,
-    @Default([]) List<SpotubeImageObject> images,
+    @Default([]) List<SangeetImageObject> images,
     List<String>? genres,
     int? followers,
-  }) = _SpotubeFullArtistObject;
+  }) = _SangeetFullArtistObject;
 
-  factory SpotubeFullArtistObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeFullArtistObjectFromJson(json);
+  factory SangeetFullArtistObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetFullArtistObjectFromJson(json);
 }
 
 @freezed
-class SpotubeSimpleArtistObject with _$SpotubeSimpleArtistObject {
-  factory SpotubeSimpleArtistObject({
+class SangeetSimpleArtistObject with _$SangeetSimpleArtistObject {
+  factory SangeetSimpleArtistObject({
     required String id,
     required String name,
     required String externalUri,
-    List<SpotubeImageObject>? images,
-  }) = _SpotubeSimpleArtistObject;
+    List<SangeetImageObject>? images,
+  }) = _SangeetSimpleArtistObject;
 
-  factory SpotubeSimpleArtistObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeSimpleArtistObjectFromJson(json);
+  factory SangeetSimpleArtistObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetSimpleArtistObjectFromJson(json);
 }
 
-extension SpotubeFullArtistObjectAsString on List<SpotubeFullArtistObject> {
+extension SangeetFullArtistObjectAsString on List<SangeetFullArtistObject> {
   String asString() {
     return map((e) => e.name).join(", ");
   }
 }
 
-extension SpotubeSimpleArtistObjectAsString on List<SpotubeSimpleArtistObject> {
+extension SangeetSimpleArtistObjectAsString on List<SangeetSimpleArtistObject> {
   String asString() {
     return map((e) => e.name).join(", ");
   }

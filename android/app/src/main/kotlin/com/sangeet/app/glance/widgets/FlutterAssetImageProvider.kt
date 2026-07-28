@@ -1,4 +1,4 @@
-package oss.krtirtho.spotube.glance.widgets
+package com.sangeet.app.glance.widgets
 
 import android.content.Context
 import android.graphics.BitmapFactory

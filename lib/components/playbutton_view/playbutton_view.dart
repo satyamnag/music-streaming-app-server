@@ -3,12 +3,12 @@ import 'package:flutter_undraw/flutter_undraw.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/playbutton_view/playbutton_card.dart';
-import 'package:spotube/components/playbutton_view/playbutton_tile.dart';
-import 'package:spotube/components/waypoint.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
+import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
+import 'package:sangeet/components/waypoint.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 
 const _dummyPlaybuttonCard = PlaybuttonCard(
@@ -86,7 +86,7 @@ class PlaybuttonView extends StatelessWidget {
                       isGrid.value = value;
                       hasUserInteracted.value = true;
                     },
-                    child: const Icon(SpotubeIcons.grid),
+                    child: const Icon(SangeetIcons.grid),
                   ),
                   const SizedBox(width: 8),
                   Toggle(
@@ -97,7 +97,7 @@ class PlaybuttonView extends StatelessWidget {
                       isGrid.value = !value;
                       hasUserInteracted.value = true;
                     },
-                    child: const Icon(SpotubeIcons.list),
+                    child: const Icon(SangeetIcons.list),
                   ),
                 ],
               ),

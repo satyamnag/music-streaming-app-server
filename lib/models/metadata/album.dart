@@ -1,42 +1,42 @@
 part of 'metadata.dart';
 
-enum SpotubeAlbumType {
+enum SangeetAlbumType {
   album,
   single,
   compilation,
 }
 
 @freezed
-class SpotubeFullAlbumObject with _$SpotubeFullAlbumObject {
-  factory SpotubeFullAlbumObject({
+class SangeetFullAlbumObject with _$SangeetFullAlbumObject {
+  factory SangeetFullAlbumObject({
     required String id,
     required String name,
-    required List<SpotubeSimpleArtistObject> artists,
-    @Default([]) List<SpotubeImageObject> images,
+    required List<SangeetSimpleArtistObject> artists,
+    @Default([]) List<SangeetImageObject> images,
     required String releaseDate,
     required String externalUri,
     required int totalTracks,
-    required SpotubeAlbumType albumType,
+    required SangeetAlbumType albumType,
     String? recordLabel,
     List<String>? genres,
-  }) = _SpotubeFullAlbumObject;
+  }) = _SangeetFullAlbumObject;
 
-  factory SpotubeFullAlbumObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeFullAlbumObjectFromJson(json);
+  factory SangeetFullAlbumObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetFullAlbumObjectFromJson(json);
 }
 
 @freezed
-class SpotubeSimpleAlbumObject with _$SpotubeSimpleAlbumObject {
-  factory SpotubeSimpleAlbumObject({
+class SangeetSimpleAlbumObject with _$SangeetSimpleAlbumObject {
+  factory SangeetSimpleAlbumObject({
     required String id,
     required String name,
     required String externalUri,
-    required List<SpotubeSimpleArtistObject> artists,
-    @Default([]) List<SpotubeImageObject> images,
-    required SpotubeAlbumType albumType,
+    required List<SangeetSimpleArtistObject> artists,
+    @Default([]) List<SangeetImageObject> images,
+    required SangeetAlbumType albumType,
     String? releaseDate,
-  }) = _SpotubeSimpleAlbumObject;
+  }) = _SangeetSimpleAlbumObject;
 
-  factory SpotubeSimpleAlbumObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeSimpleAlbumObjectFromJson(json);
+  factory SangeetSimpleAlbumObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetSimpleAlbumObjectFromJson(json);
 }

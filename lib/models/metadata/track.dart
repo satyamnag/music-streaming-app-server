@@ -1,58 +1,58 @@
 part of 'metadata.dart';
 
 @freezed
-class SpotubeTrackObject with _$SpotubeTrackObject {
-  factory SpotubeTrackObject.local({
+class SangeetTrackObject with _$SangeetTrackObject {
+  factory SangeetTrackObject.local({
     required String id,
     required String name,
     required String externalUri,
-    @Default([]) List<SpotubeSimpleArtistObject> artists,
-    required SpotubeSimpleAlbumObject album,
+    @Default([]) List<SangeetSimpleArtistObject> artists,
+    required SangeetSimpleAlbumObject album,
     required int durationMs,
     required String path,
-  }) = SpotubeLocalTrackObject;
+  }) = SangeetLocalTrackObject;
 
-  factory SpotubeTrackObject.full({
+  factory SangeetTrackObject.full({
     required String id,
     required String name,
     required String externalUri,
-    @Default([]) List<SpotubeSimpleArtistObject> artists,
-    required SpotubeSimpleAlbumObject album,
+    @Default([]) List<SangeetSimpleArtistObject> artists,
+    required SangeetSimpleAlbumObject album,
     required int durationMs,
     required String isrc,
     required bool explicit,
-  }) = SpotubeFullTrackObject;
+  }) = SangeetFullTrackObject;
 
-  factory SpotubeTrackObject.localTrackFromFile(
+  factory SangeetTrackObject.localTrackFromFile(
     File file, {
     Metadata? metadata,
     String? art,
   }) {
-    return SpotubeLocalTrackObject(
+    return SangeetLocalTrackObject(
       id: file.absolute.path,
       name: metadata?.title ?? basenameWithoutExtension(file.path),
       externalUri: "file://${file.absolute.path}",
       artists: metadata?.artist?.split(",").map((a) {
-            return SpotubeSimpleArtistObject(
+            return SangeetSimpleArtistObject(
               id: a.trim(),
               name: a.trim(),
               externalUri: "file://${file.absolute.path}",
             );
           }).toList() ??
           [
-            SpotubeSimpleArtistObject(
+            SangeetSimpleArtistObject(
               id: "unknown",
               name: "Unknown Artist",
               externalUri: "file://${file.absolute.path}",
             ),
           ],
-      album: SpotubeSimpleAlbumObject(
-        albumType: SpotubeAlbumType.album,
+      album: SangeetSimpleAlbumObject(
+        albumType: SangeetAlbumType.album,
         id: metadata?.album ?? "unknown",
         name: metadata?.album ?? "Unknown Album",
         externalUri: "file://${file.absolute.path}",
         artists: [
-          SpotubeSimpleArtistObject(
+          SangeetSimpleArtistObject(
             id: metadata?.albumArtist ?? "unknown",
             name: metadata?.albumArtist ?? "Unknown Artist",
             externalUri: "file://${file.absolute.path}",
@@ -62,7 +62,7 @@ class SpotubeTrackObject with _$SpotubeTrackObject {
             metadata?.year != null ? "${metadata!.year}-01-01" : "1970-01-01",
         images: [
           if (art != null)
-            SpotubeImageObject(
+            SangeetImageObject(
               url: art,
               width: 300,
               height: 300,
@@ -74,21 +74,21 @@ class SpotubeTrackObject with _$SpotubeTrackObject {
     );
   }
 
-  factory SpotubeTrackObject.fromJson(Map<String, dynamic> json) =>
-      _$SpotubeTrackObjectFromJson(
+  factory SangeetTrackObject.fromJson(Map<String, dynamic> json) =>
+      _$SangeetTrackObjectFromJson(
         json.containsKey("path")
             ? {...json, "runtimeType": "local"}
             : {...json, "runtimeType": "full"},
       );
 }
 
-extension AsMediaListSpotubeTrackObject on Iterable<SpotubeTrackObject> {
-  List<SpotubeMedia> asMediaList() {
-    return map((track) => SpotubeMedia(track)).toList();
+extension AsMediaListSangeetTrackObject on Iterable<SangeetTrackObject> {
+  List<SangeetMedia> asMediaList() {
+    return map((track) => SangeetMedia(track)).toList();
   }
 }
 
-extension ToMetadataSpotubeFullTrackObject on SpotubeFullTrackObject {
+extension ToMetadataSangeetFullTrackObject on SangeetFullTrackObject {
   Metadata toMetadata({
     required int fileLength,
     Uint8List? imageBytes,

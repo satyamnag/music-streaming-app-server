@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/modules/metadata_plugins/plugin_update_available_dialog.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/updater/update_checker.dart';
-import 'package:spotube/provider/server/routes/connect.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/connectivity_adapter.dart';
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/metadata_plugins/plugin_update_available_dialog.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/updater/update_checker.dart';
+import 'package:sangeet/provider/server/routes/connect.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/connectivity_adapter.dart';
+import 'package:sangeet/utils/service_utils.dart';
 
 void useGlobalSubscriptions(WidgetRef ref) {
   final context = useContext();
@@ -87,7 +87,7 @@ void useGlobalSubscriptions(WidgetRef ref) {
             if (connected) {
               return SurfaceCard(
                 child: Basic(
-                  leading: const Icon(SpotubeIcons.wifi),
+                  leading: const Icon(SangeetIcons.wifi),
                   title: Text(context.l10n.connection_restored),
                 ),
               );
@@ -98,7 +98,7 @@ void useGlobalSubscriptions(WidgetRef ref) {
               filled: true,
               child: Basic(
                 leading: Icon(
-                  SpotubeIcons.noWifi,
+                  SangeetIcons.noWifi,
                   color: theme.colorScheme.destructiveForeground,
                 ),
                 trailing: Text(
@@ -123,7 +123,7 @@ void useGlobalSubscriptions(WidgetRef ref) {
               filled: true,
               child: Basic(
                 leading: const Icon(
-                  SpotubeIcons.error,
+                  SangeetIcons.error,
                   color: Colors.black,
                 ),
                 title: Text(

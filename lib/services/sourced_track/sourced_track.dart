@@ -4,18 +4,18 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/models/database/database.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/models/playback/track_sources.dart';
-import 'package:spotube/provider/database/database.dart';
-import 'package:spotube/provider/metadata_plugin/audio_source/quality_presets.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/services/dio/dio.dart';
-import 'package:spotube/services/logger/logger.dart';
-import 'package:spotube/services/metadata/errors/exceptions.dart';
+import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/models/playback/track_sources.dart';
+import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/services/dio/dio.dart';
+import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
-import 'package:spotube/services/sourced_track/exceptions.dart';
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/services/sourced_track/exceptions.dart';
+import 'package:sangeet/utils/service_utils.dart';
 
 final officialMusicRegex = RegExp(
   r"official\s(video|audio|music\svideo|lyric\svideo|visualizer)",
@@ -35,7 +35,7 @@ class SourcedTrack extends BasicSourcedTrack {
   });
 
   static Future<SourcedTrack> fetchFromTrack({
-    required SpotubeFullTrackObject query,
+    required SangeetFullTrackObject query,
     required Ref ref,
   }) async {
     final audioSource = await ref.read(audioSourcePluginProvider.future);
@@ -83,7 +83,7 @@ class SourcedTrack extends BasicSourcedTrack {
         query: query,
       );
     }
-    final item = SpotubeAudioSourceMatchObject.fromJson(
+    final item = SangeetAudioSourceMatchObject.fromJson(
       jsonDecode(cachedSource.sourceInfo),
     );
     final manifest = await audioSource.audioSource.streams(item);
@@ -102,9 +102,9 @@ class SourcedTrack extends BasicSourcedTrack {
     return sourcedTrack;
   }
 
-  static List<SpotubeAudioSourceMatchObject> rankResults(
-    List<SpotubeAudioSourceMatchObject> results,
-    SpotubeFullTrackObject track,
+  static List<SangeetAudioSourceMatchObject> rankResults(
+    List<SangeetAudioSourceMatchObject> results,
+    SangeetFullTrackObject track,
   ) {
     return results
         .map((sibling) {
@@ -151,8 +151,8 @@ class SourcedTrack extends BasicSourcedTrack {
         .toList();
   }
 
-  static Future<List<SpotubeAudioSourceMatchObject>> fetchSiblings({
-    required SpotubeFullTrackObject query,
+  static Future<List<SangeetAudioSourceMatchObject>> fetchSiblings({
+    required SangeetFullTrackObject query,
     required Ref ref,
   }) async {
     final audioSource = await ref.read(audioSourcePluginProvider.future);
@@ -161,7 +161,7 @@ class SourcedTrack extends BasicSourcedTrack {
       throw MetadataPluginException.noDefaultAudioSourcePlugin();
     }
 
-    final videoResults = <SpotubeAudioSourceMatchObject>[];
+    final videoResults = <SangeetAudioSourceMatchObject>[];
 
     final searchResults = await audioSource.audioSource.matches(query);
 
@@ -191,7 +191,7 @@ class SourcedTrack extends BasicSourcedTrack {
   }
 
   Future<SourcedTrack?> swapWithSibling(
-    SpotubeAudioSourceMatchObject sibling,
+    SangeetAudioSourceMatchObject sibling,
   ) async {
     if (sibling.id == info.id) {
       return null;
@@ -259,7 +259,7 @@ class SourcedTrack extends BasicSourcedTrack {
       throw MetadataPluginException.noDefaultAudioSourcePlugin();
     }
 
-    List<SpotubeAudioSourceStreamObject> validStreams = [];
+    List<SangeetAudioSourceStreamObject> validStreams = [];
 
     final stringBuffer = StringBuffer();
     for (final source in sources) {
@@ -313,8 +313,8 @@ class SourcedTrack extends BasicSourcedTrack {
   ///
   /// If no sources match the codec, it will return the first or last source
   /// based on the user's audio quality preference.
-  SpotubeAudioSourceStreamObject? getStreamOfQuality(
-    SpotubeAudioSourceContainerPreset preset,
+  SangeetAudioSourceStreamObject? getStreamOfQuality(
+    SangeetAudioSourceContainerPreset preset,
     int qualityIndex,
   ) {
     if (sources.isEmpty) return null;
@@ -325,12 +325,12 @@ class SourcedTrack extends BasicSourcedTrack {
       (source) {
         if (source.container != preset.name) return false;
 
-        if (quality case SpotubeAudioLosslessContainerQuality()) {
+        if (quality case SangeetAudioLosslessContainerQuality()) {
           return source.sampleRate == quality.sampleRate &&
               source.bitDepth == quality.bitDepth;
         } else {
           return source.bitrate ==
-              (quality as SpotubeAudioLossyContainerQuality).bitrate;
+              (quality as SangeetAudioLossyContainerQuality).bitrate;
         }
       },
     );
@@ -343,7 +343,7 @@ class SourcedTrack extends BasicSourcedTrack {
     return sources.where((source) {
       return source.container == preset.name;
     }).reduce((prev, curr) {
-      if (quality is SpotubeAudioLosslessContainerQuality) {
+      if (quality is SangeetAudioLosslessContainerQuality) {
         final prevDiff = ((prev.sampleRate ?? 0) - quality.sampleRate).abs() +
             ((prev.bitDepth ?? 0) - quality.bitDepth).abs();
         final currDiff = ((curr.sampleRate ?? 0) - quality.sampleRate).abs() +
@@ -351,7 +351,7 @@ class SourcedTrack extends BasicSourcedTrack {
         return currDiff < prevDiff ? curr : prev;
       } else {
         final prevDiff = ((prev.bitrate ?? 0) -
-                (quality as SpotubeAudioLossyContainerQuality).bitrate)
+                (quality as SangeetAudioLossyContainerQuality).bitrate)
             .abs();
         final currDiff = ((curr.bitrate ?? 0) - quality.bitrate).abs();
         return currDiff < prevDiff ? curr : prev;
@@ -360,13 +360,13 @@ class SourcedTrack extends BasicSourcedTrack {
   }
 
   String? getUrlOfQuality(
-    SpotubeAudioSourceContainerPreset preset,
+    SangeetAudioSourceContainerPreset preset,
     int qualityIndex,
   ) {
     return getStreamOfQuality(preset, qualityIndex)?.url;
   }
 
-  SpotubeAudioSourceContainerPreset? get qualityPreset {
+  SangeetAudioSourceContainerPreset? get qualityPreset {
     final presetState = ref.read(audioSourcePresetsProvider);
     return presetState.presets
         .elementAtOrNull(presetState.selectedStreamingContainerIndex);

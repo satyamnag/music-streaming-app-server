@@ -1,6 +1,6 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
 class MetadataPluginSearchEndpoint {
   final Hetu hetu;
@@ -14,9 +14,9 @@ class MetadataPluginSearchEndpoint {
     return (hetuMetadataSearch.memberGet("chips") as List).cast<String>();
   }
 
-  Future<SpotubeSearchResponseObject> all(String query) async {
+  Future<SangeetSearchResponseObject> all(String query) async {
     if (query.isEmpty) {
-      return SpotubeSearchResponseObject(
+      return SangeetSearchResponseObject(
         albums: [],
         artists: [],
         playlists: [],
@@ -29,16 +29,16 @@ class MetadataPluginSearchEndpoint {
       positionalArgs: [query],
     ) as Map;
 
-    return SpotubeSearchResponseObject.fromJson(raw.cast<String, dynamic>());
+    return SangeetSearchResponseObject.fromJson(raw.cast<String, dynamic>());
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>> albums(
+  Future<SangeetPaginationResponseObject<SangeetSimpleAlbumObject>> albums(
     String query, {
     int? limit,
     int? offset,
   }) async {
     if (query.isEmpty) {
-      return SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>(
+      return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>(
         items: [],
         total: 0,
         limit: limit ?? 20,
@@ -56,19 +56,19 @@ class MetadataPluginSearchEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>.fromJson(
+    return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
       raw.cast<String, dynamic>(),
-      (json) => SpotubeSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
+      (json) => SangeetSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
     );
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeFullArtistObject>> artists(
+  Future<SangeetPaginationResponseObject<SangeetFullArtistObject>> artists(
     String query, {
     int? limit,
     int? offset,
   }) async {
     if (query.isEmpty) {
-      return SpotubePaginationResponseObject<SpotubeFullArtistObject>(
+      return SangeetPaginationResponseObject<SangeetFullArtistObject>(
         items: [],
         total: 0,
         limit: limit ?? 20,
@@ -86,22 +86,22 @@ class MetadataPluginSearchEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<SpotubeFullArtistObject>.fromJson(
+    return SangeetPaginationResponseObject<SangeetFullArtistObject>.fromJson(
       raw.cast<String, dynamic>(),
-      (json) => SpotubeFullArtistObject.fromJson(
+      (json) => SangeetFullArtistObject.fromJson(
         json.cast<String, dynamic>(),
       ),
     );
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeSimplePlaylistObject>>
+  Future<SangeetPaginationResponseObject<SangeetSimplePlaylistObject>>
       playlists(
     String query, {
     int? limit,
     int? offset,
   }) async {
     if (query.isEmpty) {
-      return SpotubePaginationResponseObject<SpotubeSimplePlaylistObject>(
+      return SangeetPaginationResponseObject<SangeetSimplePlaylistObject>(
         items: [],
         total: 0,
         limit: limit ?? 20,
@@ -119,22 +119,22 @@ class MetadataPluginSearchEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<
-        SpotubeSimplePlaylistObject>.fromJson(
+    return SangeetPaginationResponseObject<
+        SangeetSimplePlaylistObject>.fromJson(
       raw.cast<String, dynamic>(),
-      (json) => SpotubeSimplePlaylistObject.fromJson(
+      (json) => SangeetSimplePlaylistObject.fromJson(
         json.cast<String, dynamic>(),
       ),
     );
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeFullTrackObject>> tracks(
+  Future<SangeetPaginationResponseObject<SangeetFullTrackObject>> tracks(
     String query, {
     int? limit,
     int? offset,
   }) async {
     if (query.isEmpty) {
-      return SpotubePaginationResponseObject<SpotubeFullTrackObject>(
+      return SangeetPaginationResponseObject<SangeetFullTrackObject>(
         items: [],
         total: 0,
         limit: limit ?? 20,
@@ -152,9 +152,9 @@ class MetadataPluginSearchEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<SpotubeFullTrackObject>.fromJson(
+    return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
       raw.cast<String, dynamic>(),
-      (json) => SpotubeFullTrackObject.fromJson(json.cast<String, dynamic>()),
+      (json) => SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
   }
 }

@@ -3,16 +3,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 
-import 'package:spotube/components/titlebar/titlebar.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/hooks/utils/use_palette_color.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/pages/lyrics/plain_lyrics.dart';
-import 'package:spotube/pages/lyrics/synced_lyrics.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/lyrics/synced.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/hooks/utils/use_palette_color.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/pages/lyrics/plain_lyrics.dart';
+import 'package:sangeet/pages/lyrics/synced_lyrics.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/lyrics/synced.dart';
+import 'package:sangeet/utils/platform.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()

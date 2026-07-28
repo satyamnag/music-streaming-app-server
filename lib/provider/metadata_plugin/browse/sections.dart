@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/core/auth.dart';
-import 'package:spotube/provider/metadata_plugin/utils/paginated.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/paginated.dart';
 
 class MetadataPluginBrowseSectionsNotifier
-    extends PaginatedAsyncNotifier<SpotubeBrowseSectionObject<Object>> {
+    extends PaginatedAsyncNotifier<SangeetBrowseSectionObject<Object>> {
   @override
-  Future<SpotubePaginationResponseObject<SpotubeBrowseSectionObject<Object>>>
+  Future<SangeetPaginationResponseObject<SangeetBrowseSectionObject<Object>>>
       fetch(
     int offset,
     int limit,
@@ -26,6 +26,6 @@ class MetadataPluginBrowseSectionsNotifier
 
 final metadataPluginBrowseSectionsProvider = AsyncNotifierProvider<
     MetadataPluginBrowseSectionsNotifier,
-    SpotubePaginationResponseObject<SpotubeBrowseSectionObject<Object>>>(
+    SangeetPaginationResponseObject<SangeetBrowseSectionObject<Object>>>(
   () => MetadataPluginBrowseSectionsNotifier(),
 );

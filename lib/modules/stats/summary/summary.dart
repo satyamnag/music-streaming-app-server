@@ -2,13 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:spotube/collections/fake.dart';
-import 'package:spotube/collections/formatters.dart';
-import 'package:spotube/collections/routes.gr.dart';
-import 'package:spotube/modules/stats/summary/summary_card.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/provider/history/summary.dart';
+import 'package:sangeet/collections/fake.dart';
+import 'package:sangeet/collections/formatters.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/modules/stats/summary/summary_card.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/provider/history/summary.dart';
 
 class StatsPageSummarySection extends HookConsumerWidget {
   const StatsPageSummarySection({super.key});

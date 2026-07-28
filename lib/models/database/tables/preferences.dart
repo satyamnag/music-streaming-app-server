@@ -61,7 +61,7 @@ class PreferencesTable extends Table {
       .withDefault(Constant(CloseBehavior.close.name))();
   TextColumn get accentColorScheme => text()
       .withDefault(const Constant("Slate:0xff64748b"))
-      .map(const SpotubeColorConverter())();
+      .map(const SangeetColorConverter())();
   TextColumn get layoutMode =>
       textEnum<LayoutMode>().withDefault(Constant(LayoutMode.adaptive.name))();
   TextColumn get locale => text()
@@ -102,7 +102,7 @@ class PreferencesTable extends Table {
       systemTitleBar: false,
       skipNonMusic: false,
       closeBehavior: CloseBehavior.close,
-      accentColorScheme: SpotubeColor(Colors.slate.value, name: "Slate"),
+      accentColorScheme: SangeetColor(Colors.slate.value, name: "Slate"),
       layoutMode: LayoutMode.adaptive,
       locale: const Locale("system", "system"),
       market: Market.US,

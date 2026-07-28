@@ -1,7 +1,7 @@
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
 class TrackNotFoundError extends Error {
-  final SpotubeTrackObject track;
+  final SangeetTrackObject track;
 
   TrackNotFoundError(this.track);
 

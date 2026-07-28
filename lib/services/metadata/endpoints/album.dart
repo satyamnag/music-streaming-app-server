@@ -1,6 +1,6 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
 class MetadataPluginAlbumEndpoint {
   final Hetu hetu;
@@ -10,16 +10,16 @@ class MetadataPluginAlbumEndpoint {
       (hetu.fetch("metadataPlugin") as HTInstance).memberGet("album")
           as HTInstance;
 
-  Future<SpotubeFullAlbumObject> getAlbum(String id) async {
+  Future<SangeetFullAlbumObject> getAlbum(String id) async {
     final raw =
         await hetuMetadataAlbum.invoke("getAlbum", positionalArgs: [id]) as Map;
 
-    return SpotubeFullAlbumObject.fromJson(
+    return SangeetFullAlbumObject.fromJson(
       raw.cast<String, dynamic>(),
     );
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeFullTrackObject>> tracks(
+  Future<SangeetPaginationResponseObject<SangeetFullTrackObject>> tracks(
     String id, {
     int? offset,
     int? limit,
@@ -33,14 +33,14 @@ class MetadataPluginAlbumEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<SpotubeFullTrackObject>.fromJson(
+    return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
       raw.cast<String, dynamic>(),
       (Map json) =>
-          SpotubeFullTrackObject.fromJson(json.cast<String, dynamic>()),
+          SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
   }
 
-  Future<SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>> releases({
+  Future<SangeetPaginationResponseObject<SangeetSimpleAlbumObject>> releases({
     int? offset,
     int? limit,
   }) async {
@@ -52,10 +52,10 @@ class MetadataPluginAlbumEndpoint {
       }..removeWhere((key, value) => value == null),
     ) as Map;
 
-    return SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>.fromJson(
+    return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
       raw.cast<String, dynamic>(),
       (Map json) =>
-          SpotubeSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
+          SangeetSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
     );
   }
 

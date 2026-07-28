@@ -1,5 +1,5 @@
 import 'package:envied/envied.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/utils/platform.dart';
 
 part 'env.g.dart';
 
@@ -30,6 +30,9 @@ abstract class Env {
   static ReleaseChannel get releaseChannel => _releaseChannel == "stable"
       ? ReleaseChannel.stable
       : ReleaseChannel.nightly;
+
+  @EnviedField(varName: 'LISTENBRAINZ_TOKEN')
+  static final String listenbrainzToken = _Env.listenbrainzToken;
 
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";

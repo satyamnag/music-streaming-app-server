@@ -2,17 +2,17 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/collections/routes.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/ui/button_tile.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/track_options/track_options_provider.dart';
+import 'package:sangeet/collections/routes.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/track_options/track_options_provider.dart';
 
-/// [track] must be a [SpotubeFullTrackObject] or [SpotubeLocalTrackObject]
+/// [track] must be a [SangeetFullTrackObject] or [SangeetLocalTrackObject]
 class TrackOptions extends HookConsumerWidget {
-  final SpotubeTrackObject track;
+  final SangeetTrackObject track;
   final bool userPlaylist;
   final String? playlistId;
   final Widget? icon;
@@ -26,8 +26,8 @@ class TrackOptions extends HookConsumerWidget {
     this.icon,
     this.onTapItem,
   }) : assert(
-          track is SpotubeFullTrackObject || track is SpotubeLocalTrackObject,
-          "Track must be a SpotubeFullTrackObject, SpotubeLocalTrackObject",
+          track is SangeetFullTrackObject || track is SangeetLocalTrackObject,
+          "Track must be a SangeetFullTrackObject, SangeetLocalTrackObject",
         );
 
   @override
@@ -44,7 +44,7 @@ class TrackOptions extends HookConsumerWidget {
       :isLiked,
       :downloadTask
     ) = ref.watch(trackOptionsStateProvider(track));
-    final isLocalTrack = track is SpotubeLocalTrackObject;
+    final isLocalTrack = track is SangeetLocalTrackObject;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -62,7 +62,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.trash),
+            leading: const Icon(SangeetIcons.trash),
             title: Text(context.l10n.delete),
           ),
         if (mediaQuery.smAndDown && !isLocalTrack)
@@ -76,7 +76,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.album),
+            leading: const Icon(SangeetIcons.album),
             title: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +100,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.queueAdd),
+            leading: const Icon(SangeetIcons.queueAdd),
             title: Text(context.l10n.add_to_queue),
           ),
           ButtonTile(
@@ -113,7 +113,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.lightning),
+            leading: const Icon(SangeetIcons.lightning),
             title: Text(context.l10n.play_next),
           ),
         ] else
@@ -128,7 +128,7 @@ class TrackOptions extends HookConsumerWidget {
               onTapItem?.call();
             },
             enabled: !isActiveTrack,
-            leading: const Icon(SpotubeIcons.queueRemove),
+            leading: const Icon(SangeetIcons.queueRemove),
             title: Text(context.l10n.remove_from_queue),
           ),
         if (isAuthenticated && !isLocalTrack)
@@ -144,10 +144,10 @@ class TrackOptions extends HookConsumerWidget {
             },
             leading: isLiked
                 ? const Icon(
-                    SpotubeIcons.heartFilled,
+                    SangeetIcons.heartFilled,
                     color: Colors.pink,
                   )
-                : const Icon(SpotubeIcons.heart),
+                : const Icon(SangeetIcons.heart),
             title: Text(
               isLiked
                   ? context.l10n.remove_from_favorites
@@ -165,7 +165,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.radio),
+            leading: const Icon(SangeetIcons.radio),
             title: Text(context.l10n.start_a_radio),
           ),
           ButtonTile(
@@ -178,7 +178,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.playlistAdd),
+            leading: const Icon(SangeetIcons.playlistAdd),
             title: Text(context.l10n.add_to_playlist),
           ),
         ],
@@ -193,7 +193,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.removeFilled),
+            leading: const Icon(SangeetIcons.removeFilled),
             title: Text(context.l10n.remove_from_playlist),
           ),
         if (!isLocalTrack)
@@ -222,7 +222,7 @@ class TrackOptions extends HookConsumerWidget {
                       );
                     },
                   )
-                : const Icon(SpotubeIcons.download),
+                : const Icon(SangeetIcons.download),
             title: Text(context.l10n.download_track),
           ),
         if (!isLocalTrack)
@@ -237,7 +237,7 @@ class TrackOptions extends HookConsumerWidget {
               onTapItem?.call();
             },
             leading: Icon(
-              SpotubeIcons.playlistRemove,
+              SangeetIcons.playlistRemove,
               color: isBlacklisted != true ? Colors.red[400] : null,
             ),
             title: Text(
@@ -260,7 +260,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.share),
+            leading: const Icon(SangeetIcons.share),
             title: Text(context.l10n.share),
           ),
         if (!isLocalTrack)
@@ -274,7 +274,7 @@ class TrackOptions extends HookConsumerWidget {
               );
               onTapItem?.call();
             },
-            leading: const Icon(SpotubeIcons.info),
+            leading: const Icon(SangeetIcons.info),
             title: Text(context.l10n.details),
           ),
       ],

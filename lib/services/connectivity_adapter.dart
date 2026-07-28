@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/services/logger/logger.dart';
 
 class ConnectionCheckerService with WidgetsBindingObserver {
   final _connectionStreamController = StreamController<bool>.broadcast();
@@ -14,7 +14,12 @@ class ConnectionCheckerService with WidgetsBindingObserver {
 
   static ConnectionCheckerService get instance => _instance;
 
-  ConnectionCheckerService._() : dio = Dio() {
+  ConnectionCheckerService._()
+      : dio = Dio(
+          BaseOptions(
+            validateStatus: (status) => status != null && status < 500,
+          ),
+        ) {
     Timer? timer;
 
     onConnectivityChanged.listen((connected) {

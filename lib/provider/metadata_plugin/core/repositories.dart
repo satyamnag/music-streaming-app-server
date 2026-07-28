@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/utils/paginated.dart';
-import 'package:spotube/services/dio/dio.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/paginated.dart';
+import 'package:sangeet/services/dio/dio.dart';
 
 class MetadataPluginRepositoriesNotifier
     extends PaginatedAsyncNotifier<MetadataPluginRepository> {
@@ -39,7 +39,9 @@ class MetadataPluginRepositoriesNotifier
       if (_hasMore["codeberg.org"] ?? true) codebergSearch,
     ]);
 
-    final repos = responses
+    final okResponses = responses.where((r) => r.statusCode == 200);
+
+    final repos = okResponses
         .expand(
       (response) => response.data["data"] ?? response.data["items"] ?? [],
     )
@@ -53,7 +55,7 @@ class MetadataPluginRepositoriesNotifier
       );
     }).toList();
 
-    final hasMore = responses.any((response) {
+    final hasMore = okResponses.any((response) {
       final items =
           (response.data["data"] ?? response.data["items"] ?? []) as List;
       _hasMore[response.requestOptions.uri.host] =
@@ -62,7 +64,7 @@ class MetadataPluginRepositoriesNotifier
       return _hasMore[response.requestOptions.uri.host] ?? false;
     });
 
-    return SpotubePaginationResponseObject(
+    return SangeetPaginationResponseObject(
       items: repos,
       total: responses.fold<int>(
         0,
@@ -85,6 +87,6 @@ class MetadataPluginRepositoriesNotifier
 
 final metadataPluginRepositoriesProvider = AsyncNotifierProvider<
     MetadataPluginRepositoriesNotifier,
-    SpotubePaginationResponseObject<MetadataPluginRepository>>(
+    SangeetPaginationResponseObject<MetadataPluginRepository>>(
   () => MetadataPluginRepositoriesNotifier(),
 );

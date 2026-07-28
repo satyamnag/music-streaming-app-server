@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/logger/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:metadata_god/metadata_god.dart';
@@ -10,10 +10,10 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' show FrbException;
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/utils/service_utils.dart';
 
 const supportedAudioTypes = [
   "audio/webm",
@@ -42,10 +42,10 @@ typedef MetadataFile = ({
 });
 
 final localTracksProvider =
-    FutureProvider<Map<String, List<SpotubeLocalTrackObject>>>((ref) async {
+    FutureProvider<Map<String, List<SangeetLocalTrackObject>>>((ref) async {
   try {
     if (kIsWeb) return {};
-    final Map<String, List<SpotubeLocalTrackObject>> libraryToTracks = {};
+    final Map<String, List<SangeetLocalTrackObject>> libraryToTracks = {};
 
     final downloadLocation = ref.watch(
       userPreferencesProvider.select((s) => s.downloadLocation),
@@ -103,7 +103,7 @@ final localTracksProvider =
             final imageFile = File(
               join(
                 (await getTemporaryDirectory()).path,
-                "spotube",
+                "sangeet",
                 ServiceUtils.sanitizeFilename(
                         basenameWithoutExtension(file.path)) +
                     imgMimeToExt[metadata.picture?.mimeType ?? "image/jpeg"]!,
@@ -130,11 +130,11 @@ final localTracksProvider =
 
       final tracksFromMetadata = filesWithMetadata
           .map(
-            (fileWithMetadata) => SpotubeTrackObject.localTrackFromFile(
+            (fileWithMetadata) => SangeetTrackObject.localTrackFromFile(
               fileWithMetadata.file,
               metadata: fileWithMetadata.metadata,
               art: fileWithMetadata.art,
-            ) as SpotubeLocalTrackObject,
+            ) as SangeetLocalTrackObject,
           )
           .toList();
 

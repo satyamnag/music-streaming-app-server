@@ -2,14 +2,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/components/titlebar/titlebar.dart';
-import 'package:spotube/components/track_presentation/presentation_list.dart';
-import 'package:spotube/components/track_presentation/presentation_props.dart';
-import 'package:spotube/components/track_presentation/presentation_top.dart';
-import 'package:spotube/components/track_presentation/presentation_modifiers.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/components/track_presentation/presentation_list.dart';
+import 'package:sangeet/components/track_presentation/presentation_props.dart';
+import 'package:sangeet/components/track_presentation/presentation_top.dart';
+import 'package:sangeet/components/track_presentation/presentation_modifiers.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/utils/platform.dart';
 
 class TrackPresentation extends HookConsumerWidget {
   final TrackPresentationOptions options;

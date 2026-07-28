@@ -1,7 +1,7 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/extensions/constrains.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/extensions/constrains.dart';
 
 class PlayerQueueActionButton extends StatelessWidget {
   final Widget Function(BuildContext context, VoidCallback close) builder;
@@ -38,7 +38,7 @@ class PlayerQueueActionButton extends StatelessWidget {
           );
         }
       },
-      icon: const Icon(SpotubeIcons.moreHorizontal),
+      icon: const Icon(SangeetIcons.moreHorizontal),
     );
   }
 }

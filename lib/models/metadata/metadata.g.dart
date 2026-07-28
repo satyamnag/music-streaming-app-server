@@ -6,78 +6,78 @@ part of 'metadata.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SpotubeAudioSourceContainerPresetLossyImpl
-    _$$SpotubeAudioSourceContainerPresetLossyImplFromJson(Map json) =>
-        _$SpotubeAudioSourceContainerPresetLossyImpl(
-          type: $enumDecode(_$SpotubeMediaCompressionTypeEnumMap, json['type']),
+_$SangeetAudioSourceContainerPresetLossyImpl
+    _$$SangeetAudioSourceContainerPresetLossyImplFromJson(Map json) =>
+        _$SangeetAudioSourceContainerPresetLossyImpl(
+          type: $enumDecode(_$SangeetMediaCompressionTypeEnumMap, json['type']),
           name: json['name'] as String,
           qualities: (json['qualities'] as List<dynamic>)
-              .map((e) => SpotubeAudioLossyContainerQuality.fromJson(
+              .map((e) => SangeetAudioLossyContainerQuality.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList(),
         );
 
-Map<String, dynamic> _$$SpotubeAudioSourceContainerPresetLossyImplToJson(
-        _$SpotubeAudioSourceContainerPresetLossyImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioSourceContainerPresetLossyImplToJson(
+        _$SangeetAudioSourceContainerPresetLossyImpl instance) =>
     <String, dynamic>{
-      'type': _$SpotubeMediaCompressionTypeEnumMap[instance.type]!,
+      'type': _$SangeetMediaCompressionTypeEnumMap[instance.type]!,
       'name': instance.name,
       'qualities': instance.qualities.map((e) => e.toJson()).toList(),
     };
 
-const _$SpotubeMediaCompressionTypeEnumMap = {
-  SpotubeMediaCompressionType.lossy: 'lossy',
-  SpotubeMediaCompressionType.lossless: 'lossless',
+const _$SangeetMediaCompressionTypeEnumMap = {
+  SangeetMediaCompressionType.lossy: 'lossy',
+  SangeetMediaCompressionType.lossless: 'lossless',
 };
 
-_$SpotubeAudioSourceContainerPresetLosslessImpl
-    _$$SpotubeAudioSourceContainerPresetLosslessImplFromJson(Map json) =>
-        _$SpotubeAudioSourceContainerPresetLosslessImpl(
-          type: $enumDecode(_$SpotubeMediaCompressionTypeEnumMap, json['type']),
+_$SangeetAudioSourceContainerPresetLosslessImpl
+    _$$SangeetAudioSourceContainerPresetLosslessImplFromJson(Map json) =>
+        _$SangeetAudioSourceContainerPresetLosslessImpl(
+          type: $enumDecode(_$SangeetMediaCompressionTypeEnumMap, json['type']),
           name: json['name'] as String,
           qualities: (json['qualities'] as List<dynamic>)
-              .map((e) => SpotubeAudioLosslessContainerQuality.fromJson(
+              .map((e) => SangeetAudioLosslessContainerQuality.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList(),
         );
 
-Map<String, dynamic> _$$SpotubeAudioSourceContainerPresetLosslessImplToJson(
-        _$SpotubeAudioSourceContainerPresetLosslessImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioSourceContainerPresetLosslessImplToJson(
+        _$SangeetAudioSourceContainerPresetLosslessImpl instance) =>
     <String, dynamic>{
-      'type': _$SpotubeMediaCompressionTypeEnumMap[instance.type]!,
+      'type': _$SangeetMediaCompressionTypeEnumMap[instance.type]!,
       'name': instance.name,
       'qualities': instance.qualities.map((e) => e.toJson()).toList(),
     };
 
-_$SpotubeAudioLossyContainerQualityImpl
-    _$$SpotubeAudioLossyContainerQualityImplFromJson(Map json) =>
-        _$SpotubeAudioLossyContainerQualityImpl(
+_$SangeetAudioLossyContainerQualityImpl
+    _$$SangeetAudioLossyContainerQualityImplFromJson(Map json) =>
+        _$SangeetAudioLossyContainerQualityImpl(
           bitrate: (json['bitrate'] as num).toInt(),
         );
 
-Map<String, dynamic> _$$SpotubeAudioLossyContainerQualityImplToJson(
-        _$SpotubeAudioLossyContainerQualityImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioLossyContainerQualityImplToJson(
+        _$SangeetAudioLossyContainerQualityImpl instance) =>
     <String, dynamic>{
       'bitrate': instance.bitrate,
     };
 
-_$SpotubeAudioLosslessContainerQualityImpl
-    _$$SpotubeAudioLosslessContainerQualityImplFromJson(Map json) =>
-        _$SpotubeAudioLosslessContainerQualityImpl(
+_$SangeetAudioLosslessContainerQualityImpl
+    _$$SangeetAudioLosslessContainerQualityImplFromJson(Map json) =>
+        _$SangeetAudioLosslessContainerQualityImpl(
           bitDepth: (json['bitDepth'] as num).toInt(),
           sampleRate: (json['sampleRate'] as num).toInt(),
         );
 
-Map<String, dynamic> _$$SpotubeAudioLosslessContainerQualityImplToJson(
-        _$SpotubeAudioLosslessContainerQualityImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioLosslessContainerQualityImplToJson(
+        _$SangeetAudioLosslessContainerQualityImpl instance) =>
     <String, dynamic>{
       'bitDepth': instance.bitDepth,
       'sampleRate': instance.sampleRate,
     };
 
-_$SpotubeAudioSourceMatchObjectImpl
-    _$$SpotubeAudioSourceMatchObjectImplFromJson(Map json) =>
-        _$SpotubeAudioSourceMatchObjectImpl(
+_$SangeetAudioSourceMatchObjectImpl
+    _$$SangeetAudioSourceMatchObjectImplFromJson(Map json) =>
+        _$SangeetAudioSourceMatchObjectImpl(
           id: json['id'] as String,
           title: json['title'] as String,
           artists: (json['artists'] as List<dynamic>)
@@ -88,8 +88,8 @@ _$SpotubeAudioSourceMatchObjectImpl
           externalUri: json['externalUri'] as String,
         );
 
-Map<String, dynamic> _$$SpotubeAudioSourceMatchObjectImplToJson(
-        _$SpotubeAudioSourceMatchObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioSourceMatchObjectImplToJson(
+        _$SangeetAudioSourceMatchObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
@@ -99,54 +99,54 @@ Map<String, dynamic> _$$SpotubeAudioSourceMatchObjectImplToJson(
       'externalUri': instance.externalUri,
     };
 
-_$SpotubeAudioSourceStreamObjectImpl
-    _$$SpotubeAudioSourceStreamObjectImplFromJson(Map json) =>
-        _$SpotubeAudioSourceStreamObjectImpl(
+_$SangeetAudioSourceStreamObjectImpl
+    _$$SangeetAudioSourceStreamObjectImplFromJson(Map json) =>
+        _$SangeetAudioSourceStreamObjectImpl(
           url: json['url'] as String,
           container: json['container'] as String,
-          type: $enumDecode(_$SpotubeMediaCompressionTypeEnumMap, json['type']),
+          type: $enumDecode(_$SangeetMediaCompressionTypeEnumMap, json['type']),
           codec: json['codec'] as String?,
           bitrate: (json['bitrate'] as num?)?.toDouble(),
           bitDepth: (json['bitDepth'] as num?)?.toInt(),
           sampleRate: (json['sampleRate'] as num?)?.toDouble(),
         );
 
-Map<String, dynamic> _$$SpotubeAudioSourceStreamObjectImplToJson(
-        _$SpotubeAudioSourceStreamObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetAudioSourceStreamObjectImplToJson(
+        _$SangeetAudioSourceStreamObjectImpl instance) =>
     <String, dynamic>{
       'url': instance.url,
       'container': instance.container,
-      'type': _$SpotubeMediaCompressionTypeEnumMap[instance.type]!,
+      'type': _$SangeetMediaCompressionTypeEnumMap[instance.type]!,
       'codec': instance.codec,
       'bitrate': instance.bitrate,
       'bitDepth': instance.bitDepth,
       'sampleRate': instance.sampleRate,
     };
 
-_$SpotubeFullAlbumObjectImpl _$$SpotubeFullAlbumObjectImplFromJson(Map json) =>
-    _$SpotubeFullAlbumObjectImpl(
+_$SangeetFullAlbumObjectImpl _$$SangeetFullAlbumObjectImplFromJson(Map json) =>
+    _$SangeetFullAlbumObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       artists: (json['artists'] as List<dynamic>)
-          .map((e) => SpotubeSimpleArtistObject.fromJson(
+          .map((e) => SangeetSimpleArtistObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       releaseDate: json['releaseDate'] as String,
       externalUri: json['externalUri'] as String,
       totalTracks: (json['totalTracks'] as num).toInt(),
-      albumType: $enumDecode(_$SpotubeAlbumTypeEnumMap, json['albumType']),
+      albumType: $enumDecode(_$SangeetAlbumTypeEnumMap, json['albumType']),
       recordLabel: json['recordLabel'] as String?,
       genres:
           (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
-Map<String, dynamic> _$$SpotubeFullAlbumObjectImplToJson(
-        _$SpotubeFullAlbumObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetFullAlbumObjectImplToJson(
+        _$SangeetFullAlbumObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -155,56 +155,56 @@ Map<String, dynamic> _$$SpotubeFullAlbumObjectImplToJson(
       'releaseDate': instance.releaseDate,
       'externalUri': instance.externalUri,
       'totalTracks': instance.totalTracks,
-      'albumType': _$SpotubeAlbumTypeEnumMap[instance.albumType]!,
+      'albumType': _$SangeetAlbumTypeEnumMap[instance.albumType]!,
       'recordLabel': instance.recordLabel,
       'genres': instance.genres,
     };
 
-const _$SpotubeAlbumTypeEnumMap = {
-  SpotubeAlbumType.album: 'album',
-  SpotubeAlbumType.single: 'single',
-  SpotubeAlbumType.compilation: 'compilation',
+const _$SangeetAlbumTypeEnumMap = {
+  SangeetAlbumType.album: 'album',
+  SangeetAlbumType.single: 'single',
+  SangeetAlbumType.compilation: 'compilation',
 };
 
-_$SpotubeSimpleAlbumObjectImpl _$$SpotubeSimpleAlbumObjectImplFromJson(
+_$SangeetSimpleAlbumObjectImpl _$$SangeetSimpleAlbumObjectImplFromJson(
         Map json) =>
-    _$SpotubeSimpleAlbumObjectImpl(
+    _$SangeetSimpleAlbumObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       externalUri: json['externalUri'] as String,
       artists: (json['artists'] as List<dynamic>)
-          .map((e) => SpotubeSimpleArtistObject.fromJson(
+          .map((e) => SangeetSimpleArtistObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
-      albumType: $enumDecode(_$SpotubeAlbumTypeEnumMap, json['albumType']),
+      albumType: $enumDecode(_$SangeetAlbumTypeEnumMap, json['albumType']),
       releaseDate: json['releaseDate'] as String?,
     );
 
-Map<String, dynamic> _$$SpotubeSimpleAlbumObjectImplToJson(
-        _$SpotubeSimpleAlbumObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetSimpleAlbumObjectImplToJson(
+        _$SangeetSimpleAlbumObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'externalUri': instance.externalUri,
       'artists': instance.artists.map((e) => e.toJson()).toList(),
       'images': instance.images.map((e) => e.toJson()).toList(),
-      'albumType': _$SpotubeAlbumTypeEnumMap[instance.albumType]!,
+      'albumType': _$SangeetAlbumTypeEnumMap[instance.albumType]!,
       'releaseDate': instance.releaseDate,
     };
 
-_$SpotubeFullArtistObjectImpl _$$SpotubeFullArtistObjectImplFromJson(
+_$SangeetFullArtistObjectImpl _$$SangeetFullArtistObjectImplFromJson(
         Map json) =>
-    _$SpotubeFullArtistObjectImpl(
+    _$SangeetFullArtistObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       externalUri: json['externalUri'] as String,
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
@@ -213,8 +213,8 @@ _$SpotubeFullArtistObjectImpl _$$SpotubeFullArtistObjectImplFromJson(
       followers: (json['followers'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$$SpotubeFullArtistObjectImplToJson(
-        _$SpotubeFullArtistObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetFullArtistObjectImplToJson(
+        _$SangeetFullArtistObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -224,20 +224,20 @@ Map<String, dynamic> _$$SpotubeFullArtistObjectImplToJson(
       'followers': instance.followers,
     };
 
-_$SpotubeSimpleArtistObjectImpl _$$SpotubeSimpleArtistObjectImplFromJson(
+_$SangeetSimpleArtistObjectImpl _$$SangeetSimpleArtistObjectImplFromJson(
         Map json) =>
-    _$SpotubeSimpleArtistObjectImpl(
+    _$SangeetSimpleArtistObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       externalUri: json['externalUri'] as String,
       images: (json['images'] as List<dynamic>?)
           ?.map((e) =>
-              SpotubeImageObject.fromJson(Map<String, dynamic>.from(e as Map)))
+              SangeetImageObject.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
 
-Map<String, dynamic> _$$SpotubeSimpleArtistObjectImplToJson(
-        _$SpotubeSimpleArtistObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetSimpleArtistObjectImplToJson(
+        _$SangeetSimpleArtistObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -245,12 +245,12 @@ Map<String, dynamic> _$$SpotubeSimpleArtistObjectImplToJson(
       'images': instance.images?.map((e) => e.toJson()).toList(),
     };
 
-_$SpotubeBrowseSectionObjectImpl<T>
-    _$$SpotubeBrowseSectionObjectImplFromJson<T>(
+_$SangeetBrowseSectionObjectImpl<T>
+    _$$SangeetBrowseSectionObjectImplFromJson<T>(
   Map json,
   T Function(Object? json) fromJsonT,
 ) =>
-        _$SpotubeBrowseSectionObjectImpl<T>(
+        _$SangeetBrowseSectionObjectImpl<T>(
           id: json['id'] as String,
           title: json['title'] as String,
           externalUri: json['externalUri'] as String,
@@ -258,8 +258,8 @@ _$SpotubeBrowseSectionObjectImpl<T>
           items: (json['items'] as List<dynamic>).map(fromJsonT).toList(),
         );
 
-Map<String, dynamic> _$$SpotubeBrowseSectionObjectImplToJson<T>(
-  _$SpotubeBrowseSectionObjectImpl<T> instance,
+Map<String, dynamic> _$$SangeetBrowseSectionObjectImplToJson<T>(
+  _$SangeetBrowseSectionObjectImpl<T> instance,
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{
@@ -316,27 +316,27 @@ Map<String, dynamic> _$$MetadataFormFieldTextObjectImplToJson(
       'text': instance.text,
     };
 
-_$SpotubeImageObjectImpl _$$SpotubeImageObjectImplFromJson(Map json) =>
-    _$SpotubeImageObjectImpl(
+_$SangeetImageObjectImpl _$$SangeetImageObjectImplFromJson(Map json) =>
+    _$SangeetImageObjectImpl(
       url: json['url'] as String,
       width: (json['width'] as num?)?.toInt(),
       height: (json['height'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$$SpotubeImageObjectImplToJson(
-        _$SpotubeImageObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetImageObjectImplToJson(
+        _$SangeetImageObjectImpl instance) =>
     <String, dynamic>{
       'url': instance.url,
       'width': instance.width,
       'height': instance.height,
     };
 
-_$SpotubePaginationResponseObjectImpl<T>
-    _$$SpotubePaginationResponseObjectImplFromJson<T>(
+_$SangeetPaginationResponseObjectImpl<T>
+    _$$SangeetPaginationResponseObjectImplFromJson<T>(
   Map json,
   T Function(Object? json) fromJsonT,
 ) =>
-        _$SpotubePaginationResponseObjectImpl<T>(
+        _$SangeetPaginationResponseObjectImpl<T>(
           limit: (json['limit'] as num).toInt(),
           nextOffset: (json['nextOffset'] as num?)?.toInt(),
           total: (json['total'] as num).toInt(),
@@ -344,8 +344,8 @@ _$SpotubePaginationResponseObjectImpl<T>
           items: (json['items'] as List<dynamic>).map(fromJsonT).toList(),
         );
 
-Map<String, dynamic> _$$SpotubePaginationResponseObjectImplToJson<T>(
-  _$SpotubePaginationResponseObjectImpl<T> instance,
+Map<String, dynamic> _$$SangeetPaginationResponseObjectImplToJson<T>(
+  _$SangeetPaginationResponseObjectImpl<T> instance,
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{
@@ -356,22 +356,22 @@ Map<String, dynamic> _$$SpotubePaginationResponseObjectImplToJson<T>(
       'items': instance.items.map(toJsonT).toList(),
     };
 
-_$SpotubeFullPlaylistObjectImpl _$$SpotubeFullPlaylistObjectImplFromJson(
+_$SangeetFullPlaylistObjectImpl _$$SangeetFullPlaylistObjectImplFromJson(
         Map json) =>
-    _$SpotubeFullPlaylistObjectImpl(
+    _$SangeetFullPlaylistObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
       externalUri: json['externalUri'] as String,
-      owner: SpotubeUserObject.fromJson(
+      owner: SangeetUserObject.fromJson(
           Map<String, dynamic>.from(json['owner'] as Map)),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       collaborators: (json['collaborators'] as List<dynamic>?)
-              ?.map((e) => SpotubeUserObject.fromJson(
+              ?.map((e) => SangeetUserObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
@@ -379,8 +379,8 @@ _$SpotubeFullPlaylistObjectImpl _$$SpotubeFullPlaylistObjectImplFromJson(
       public: json['public'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$$SpotubeFullPlaylistObjectImplToJson(
-        _$SpotubeFullPlaylistObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetFullPlaylistObjectImplToJson(
+        _$SangeetFullPlaylistObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -393,24 +393,24 @@ Map<String, dynamic> _$$SpotubeFullPlaylistObjectImplToJson(
       'public': instance.public,
     };
 
-_$SpotubeSimplePlaylistObjectImpl _$$SpotubeSimplePlaylistObjectImplFromJson(
+_$SangeetSimplePlaylistObjectImpl _$$SangeetSimplePlaylistObjectImplFromJson(
         Map json) =>
-    _$SpotubeSimplePlaylistObjectImpl(
+    _$SangeetSimplePlaylistObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
       externalUri: json['externalUri'] as String,
-      owner: SpotubeUserObject.fromJson(
+      owner: SangeetUserObject.fromJson(
           Map<String, dynamic>.from(json['owner'] as Map)),
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
     );
 
-Map<String, dynamic> _$$SpotubeSimplePlaylistObjectImplToJson(
-        _$SpotubeSimplePlaylistObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetSimplePlaylistObjectImplToJson(
+        _$SangeetSimplePlaylistObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -420,29 +420,29 @@ Map<String, dynamic> _$$SpotubeSimplePlaylistObjectImplToJson(
       'images': instance.images.map((e) => e.toJson()).toList(),
     };
 
-_$SpotubeSearchResponseObjectImpl _$$SpotubeSearchResponseObjectImplFromJson(
+_$SangeetSearchResponseObjectImpl _$$SangeetSearchResponseObjectImplFromJson(
         Map json) =>
-    _$SpotubeSearchResponseObjectImpl(
+    _$SangeetSearchResponseObjectImpl(
       albums: (json['albums'] as List<dynamic>)
-          .map((e) => SpotubeSimpleAlbumObject.fromJson(
+          .map((e) => SangeetSimpleAlbumObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       artists: (json['artists'] as List<dynamic>)
-          .map((e) => SpotubeFullArtistObject.fromJson(
+          .map((e) => SangeetFullArtistObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       playlists: (json['playlists'] as List<dynamic>)
-          .map((e) => SpotubeSimplePlaylistObject.fromJson(
+          .map((e) => SangeetSimplePlaylistObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       tracks: (json['tracks'] as List<dynamic>)
-          .map((e) => SpotubeFullTrackObject.fromJson(
+          .map((e) => SangeetFullTrackObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
 
-Map<String, dynamic> _$$SpotubeSearchResponseObjectImplToJson(
-        _$SpotubeSearchResponseObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetSearchResponseObjectImplToJson(
+        _$SangeetSearchResponseObjectImpl instance) =>
     <String, dynamic>{
       'albums': instance.albums.map((e) => e.toJson()).toList(),
       'artists': instance.artists.map((e) => e.toJson()).toList(),
@@ -450,26 +450,26 @@ Map<String, dynamic> _$$SpotubeSearchResponseObjectImplToJson(
       'tracks': instance.tracks.map((e) => e.toJson()).toList(),
     };
 
-_$SpotubeLocalTrackObjectImpl _$$SpotubeLocalTrackObjectImplFromJson(
+_$SangeetLocalTrackObjectImpl _$$SangeetLocalTrackObjectImplFromJson(
         Map json) =>
-    _$SpotubeLocalTrackObjectImpl(
+    _$SangeetLocalTrackObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       externalUri: json['externalUri'] as String,
       artists: (json['artists'] as List<dynamic>?)
-              ?.map((e) => SpotubeSimpleArtistObject.fromJson(
+              ?.map((e) => SangeetSimpleArtistObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
-      album: SpotubeSimpleAlbumObject.fromJson(
+      album: SangeetSimpleAlbumObject.fromJson(
           Map<String, dynamic>.from(json['album'] as Map)),
       durationMs: (json['durationMs'] as num).toInt(),
       path: json['path'] as String,
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SpotubeLocalTrackObjectImplToJson(
-        _$SpotubeLocalTrackObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetLocalTrackObjectImplToJson(
+        _$SangeetLocalTrackObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -481,17 +481,17 @@ Map<String, dynamic> _$$SpotubeLocalTrackObjectImplToJson(
       'runtimeType': instance.$type,
     };
 
-_$SpotubeFullTrackObjectImpl _$$SpotubeFullTrackObjectImplFromJson(Map json) =>
-    _$SpotubeFullTrackObjectImpl(
+_$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
+    _$SangeetFullTrackObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       externalUri: json['externalUri'] as String,
       artists: (json['artists'] as List<dynamic>?)
-              ?.map((e) => SpotubeSimpleArtistObject.fromJson(
+              ?.map((e) => SangeetSimpleArtistObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
-      album: SpotubeSimpleAlbumObject.fromJson(
+      album: SangeetSimpleAlbumObject.fromJson(
           Map<String, dynamic>.from(json['album'] as Map)),
       durationMs: (json['durationMs'] as num).toInt(),
       isrc: json['isrc'] as String,
@@ -499,8 +499,8 @@ _$SpotubeFullTrackObjectImpl _$$SpotubeFullTrackObjectImplFromJson(Map json) =>
       $type: json['runtimeType'] as String?,
     );
 
-Map<String, dynamic> _$$SpotubeFullTrackObjectImplToJson(
-        _$SpotubeFullTrackObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
+        _$SangeetFullTrackObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -513,20 +513,20 @@ Map<String, dynamic> _$$SpotubeFullTrackObjectImplToJson(
       'runtimeType': instance.$type,
     };
 
-_$SpotubeUserObjectImpl _$$SpotubeUserObjectImplFromJson(Map json) =>
-    _$SpotubeUserObjectImpl(
+_$SangeetUserObjectImpl _$$SangeetUserObjectImplFromJson(Map json) =>
+    _$SangeetUserObjectImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       images: (json['images'] as List<dynamic>?)
-              ?.map((e) => SpotubeImageObject.fromJson(
+              ?.map((e) => SangeetImageObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       externalUri: json['externalUri'] as String,
     );
 
-Map<String, dynamic> _$$SpotubeUserObjectImplToJson(
-        _$SpotubeUserObjectImpl instance) =>
+Map<String, dynamic> _$$SangeetUserObjectImplToJson(
+        _$SangeetUserObjectImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,

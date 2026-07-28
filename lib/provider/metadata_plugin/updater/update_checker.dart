@@ -1,6 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 
 final metadataPluginUpdateCheckerProvider =
     FutureProvider<PluginUpdateAvailable?>((ref) async {

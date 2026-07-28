@@ -1,9 +1,9 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/extensions/string.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/extensions/string.dart';
+import 'package:sangeet/utils/platform.dart';
 
 class PlaybuttonCard extends StatelessWidget {
   final void Function()? onTap;
@@ -93,7 +93,7 @@ class PlaybuttonCard extends StatelessWidget {
                               ? 1
                               : 0,
                           child: IconButton.secondary(
-                            icon: const Icon(SpotubeIcons.queueAdd),
+                            icon: const Icon(SangeetIcons.queueAdd),
                             onPressed: onAddToQueuePressed,
                             size: ButtonSize.small,
                           ),
@@ -122,8 +122,8 @@ class PlaybuttonCard extends StatelessWidget {
                               (true, _) => const CircularProgressIndicator(
                                   size: 15,
                                 ),
-                              (false, false) => const Icon(SpotubeIcons.play),
-                              (false, true) => const Icon(SpotubeIcons.pause)
+                              (false, false) => const Icon(SangeetIcons.play),
+                              (false, true) => const Icon(SangeetIcons.pause)
                             },
                             enabled: !isLoading,
                             onPressed: onPlaybuttonPressed,
@@ -145,7 +145,7 @@ class PlaybuttonCard extends StatelessWidget {
                     shape: ButtonShape.circle,
                     size: ButtonSize.small,
                   ),
-                  child: Icon(SpotubeIcons.user),
+                  child: Icon(SangeetIcons.user),
                 ),
               ),
           ],

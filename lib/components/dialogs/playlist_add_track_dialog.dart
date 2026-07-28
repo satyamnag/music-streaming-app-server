@@ -1,18 +1,18 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/models/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 
-import 'package:spotube/modules/playlist/playlist_create_dialog.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/provider/metadata_plugin/library/playlists.dart';
-import 'package:spotube/provider/metadata_plugin/core/user.dart';
+import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
+import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 
 class PlaylistAddTrackDialog extends HookConsumerWidget {
   /// The id of the playlist this dialog was opened from
   final String? openFromPlaylist;
-  final List<SpotubeTrackObject> tracks;
+  final List<SangeetTrackObject> tracks;
   const PlaylistAddTrackDialog({
     required this.tracks,
     required this.openFromPlaylist,

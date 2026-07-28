@@ -3,11 +3,11 @@ import 'dart:math';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shelf/shelf_io.dart';
-import 'package:spotube/provider/server/pipeline.dart';
-import 'package:spotube/provider/server/router.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/provider/server/pipeline.dart';
+import 'package:sangeet/provider/server/router.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/logger/logger.dart';
 
 final serverProvider = FutureProvider(
   (ref) async {
@@ -23,12 +23,12 @@ final serverProvider = FutureProvider(
     // When connect port is -1, we need to generate a random port
     // but we shouldn't reset it if it's already been set (caused by a state change)
     if (connectPort == -1) {
-      if (SpotubeMedia.serverPort == 0) {
+      if (SangeetMedia.serverPort == 0) {
         final port = Random().nextInt(17500) + 5000;
-        SpotubeMedia.serverPort = port;
+        SangeetMedia.serverPort = port;
       }
     } else {
-      SpotubeMedia.serverPort = connectPort;
+      SangeetMedia.serverPort = connectPort;
     }
 
     final server = await serve(
@@ -36,7 +36,7 @@ final serverProvider = FutureProvider(
       enabledRemoteConnect
           ? InternetAddress.anyIPv4
           : InternetAddress.loopbackIPv4,
-      SpotubeMedia.serverPort,
+      SangeetMedia.serverPort,
     );
 
     AppLogger.log.t(
@@ -49,7 +49,7 @@ final serverProvider = FutureProvider(
 
     return (
       server: server,
-      port: SpotubeMedia.serverPort,
+      port: SangeetMedia.serverPort,
     );
   },
 );

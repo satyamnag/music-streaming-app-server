@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/library/playlists.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/core/user.dart';
-import 'package:spotube/provider/metadata_plugin/utils/common.dart';
-import 'package:spotube/services/metadata/errors/exceptions.dart';
-import 'package:spotube/services/metadata/metadata.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/core/user.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
+import 'package:sangeet/services/metadata/errors/exceptions.dart';
+import 'package:sangeet/services/metadata/metadata.dart';
 
 class MetadataPluginPlaylistNotifier
-    extends AutoDisposeFamilyAsyncNotifier<SpotubeFullPlaylistObject, String> {
+    extends AutoDisposeFamilyAsyncNotifier<SangeetFullPlaylistObject, String> {
   Future<MetadataPlugin> get metadataPlugin async {
     final metadataPlugin = await ref.read(metadataPluginProvider.future);
 
@@ -126,6 +126,6 @@ class MetadataPluginPlaylistNotifier
 }
 
 final metadataPluginPlaylistProvider = AutoDisposeAsyncNotifierProviderFamily<
-    MetadataPluginPlaylistNotifier, SpotubeFullPlaylistObject, String>(
+    MetadataPluginPlaylistNotifier, SangeetFullPlaylistObject, String>(
   () => MetadataPluginPlaylistNotifier(),
 );

@@ -1,10 +1,10 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/services/wikipedia/wikipedia.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/wikipedia/wikipedia.dart';
 import 'package:wikipedia_api/wikipedia_api.dart';
 
 final artistWikipediaSummaryProvider =
-    FutureProvider.autoDispose.family<Summary?, SpotubeFullArtistObject>(
+    FutureProvider.autoDispose.family<Summary?, SangeetFullArtistObject>(
   (ref, artist) async {
     final query = artist.name.replaceAll(" ", "_");
     final res = await wikipedia.pageContent.pageSummaryTitleGet(query);

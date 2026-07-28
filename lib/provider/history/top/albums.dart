@@ -3,18 +3,18 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/database/database.dart';
-import 'package:spotube/provider/history/top.dart';
-import 'package:spotube/provider/metadata_plugin/utils/family_paginated.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/provider/history/top.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
 
-typedef PlaybackHistoryAlbum = ({int count, SpotubeSimpleAlbumObject album});
+typedef PlaybackHistoryAlbum = ({int count, SangeetSimpleAlbumObject album});
 
 class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
     PlaybackHistoryAlbum, HistoryDuration> {
   HistoryTopAlbumsNotifier() : super();
 
-  Selectable<SpotubeSimpleAlbumObject> createAlbumsQuery(
+  Selectable<SangeetSimpleAlbumObject> createAlbumsQuery(
       {int? limit, int? offset}) {
     final database = ref.read(databaseProvider);
 
@@ -58,7 +58,7 @@ class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
       readsFrom: {database.historyTable},
     ).map((row) {
       final data = row.read<String>('data');
-      final album = SpotubeSimpleAlbumObject.fromJson(jsonDecode(data));
+      final album = SangeetSimpleAlbumObject.fromJson(jsonDecode(data));
       return album;
     });
   }
@@ -69,7 +69,7 @@ class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
 
     final items = getAlbumsWithCount(await albumsQuery.get());
 
-    return SpotubePaginationResponseObject(
+    return SangeetPaginationResponseObject(
       items: items,
       limit: limit,
       hasMore: items.length == limit,
@@ -96,7 +96,7 @@ class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
   }
 
   List<PlaybackHistoryAlbum> getAlbumsWithCount(
-    List<SpotubeSimpleAlbumObject> albumsWithTrackAlbums,
+    List<SangeetSimpleAlbumObject> albumsWithTrackAlbums,
   ) {
     return groupBy(albumsWithTrackAlbums, (album) => album.id)
         .entries
@@ -110,7 +110,7 @@ class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
 
 final historyTopAlbumsProvider = AsyncNotifierProviderFamily<
     HistoryTopAlbumsNotifier,
-    SpotubePaginationResponseObject<PlaybackHistoryAlbum>,
+    SangeetPaginationResponseObject<PlaybackHistoryAlbum>,
     HistoryDuration>(
   () => HistoryTopAlbumsNotifier(),
 );

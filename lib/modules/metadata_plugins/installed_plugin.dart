@@ -1,21 +1,21 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/markdown/markdown.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/modules/metadata_plugins/plugin_update_available_dialog.dart';
-import 'package:spotube/provider/metadata_plugin/core/auth.dart';
-import 'package:spotube/provider/metadata_plugin/core/support.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/updater/update_checker.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/markdown/markdown.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/metadata_plugins/plugin_update_available_dialog.dart';
+import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
+import 'package:sangeet/provider/metadata_plugin/core/support.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/updater/update_checker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final validAbilities = {
-  PluginAbilities.metadata: ("Metadata", SpotubeIcons.album),
-  PluginAbilities.audioSource: ("Audio Source", SpotubeIcons.music),
+  PluginAbilities.metadata: ("Metadata", SangeetIcons.album),
+  PluginAbilities.audioSource: ("Audio Source", SangeetIcons.music),
 };
 
 class MetadataInstalledPluginItem extends HookConsumerWidget {
@@ -103,7 +103,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                           color: context.theme.colorScheme.secondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(SpotubeIcons.plugin),
+                        child: const Icon(SangeetIcons.plugin),
                       ),
                 title: Text(plugin.name),
                 subtitle: Column(
@@ -130,7 +130,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                         children: [
                           if (isOfficial)
                             PrimaryBadge(
-                              leading: const Icon(SpotubeIcons.done),
+                              leading: const Icon(SangeetIcons.done),
                               child: Text(context.l10n.official),
                             )
                           else ...[
@@ -148,7 +148,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 spacing: 4,
                                 children: [
-                                  const Icon(SpotubeIcons.warning, size: 14),
+                                  const Icon(SangeetIcons.warning, size: 14),
                                   Text(
                                     context.l10n.third_party,
                                     style: const TextStyle(color: Colors.white),
@@ -158,7 +158,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                             ),
                           ],
                           SecondaryBadge(
-                            leading: const Icon(SpotubeIcons.connect),
+                            leading: const Icon(SangeetIcons.connect),
                             child: Text(repoUrl.host),
                             onPressed: () {
                               launchUrl(repoUrl);
@@ -181,7 +181,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                     await pluginsNotifier.removePlugin(plugin);
                   },
                   icon: const Icon(
-                    SpotubeIcons.trash,
+                    SangeetIcons.trash,
                     color: Colors.red,
                   ),
                 ),
@@ -204,7 +204,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                     Row(
                       spacing: 8,
                       children: [
-                        const Icon(SpotubeIcons.warning, color: Colors.yellow),
+                        const Icon(SangeetIcons.warning, color: Colors.yellow),
                         Text(context.l10n.plugin_requires_authentication),
                       ],
                     ),
@@ -212,7 +212,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: Basic(
-                        leading: const Icon(SpotubeIcons.update),
+                        leading: const Icon(SangeetIcons.update),
                         title: Text(context.l10n.update_available),
                         subtitle: Text(
                           updateAvailable!.asData!.value!.version,
@@ -236,7 +236,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: Basic(
-                        leading: const Icon(SpotubeIcons.info),
+                        leading: const Icon(SangeetIcons.info),
                         title: Text(context.l10n.supports_scrobbling),
                         subtitle: Text(context.l10n.plugin_scrobbling_info),
                       ),
@@ -334,7 +334,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                             );
                           },
                         ),
-                        leading: const Icon(SpotubeIcons.heartFilled),
+                        leading: const Icon(SangeetIcons.heartFilled),
                         child: Text(context.l10n.support),
                         onPressed: () {
                           showDialog(
@@ -381,7 +381,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                         await pluginSnapshot?.asData?.value?.auth
                             .authenticate();
                       },
-                      leading: const Icon(SpotubeIcons.login),
+                      leading: const Icon(SangeetIcons.login),
                       child: Text(context.l10n.login),
                     )
                   else if ((isDefaultMetadata || isDefaultAudioSource) &&
@@ -391,7 +391,7 @@ class MetadataInstalledPluginItem extends HookConsumerWidget {
                       onPressed: () async {
                         await pluginSnapshot?.asData?.value?.auth.logout();
                       },
-                      leading: const Icon(SpotubeIcons.logout),
+                      leading: const Icon(SangeetIcons.logout),
                       child: Text(context.l10n.logout),
                     ),
                 ],

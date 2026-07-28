@@ -5,16 +5,16 @@ import 'package:media_kit/media_kit.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/collections/intents.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/extensions/duration.dart';
-import 'package:spotube/modules/player/use_progress.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/audio_player/querying_track_info.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/collections/intents.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/extensions/duration.dart';
+import 'package:sangeet/modules/player/use_progress.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/audio_player/querying_track_info.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/utils/platform.dart';
 
 class PlayerControls extends HookConsumerWidget {
   final PaletteGenerator? palette;
@@ -155,7 +155,7 @@ class PlayerControls extends HookConsumerWidget {
                       child: IconButton(
                         size: buttonSize,
                         icon: Icon(
-                          SpotubeIcons.shuffle,
+                          SangeetIcons.shuffle,
                           color: shuffled ? theme.colorScheme.primary : null,
                           size: 22,
                         ),
@@ -181,7 +181,7 @@ class PlayerControls extends HookConsumerWidget {
                     child: IconButton.ghost(
                       size: buttonSize,
                       enabled: !isFetchingActiveTrack,
-                      icon: const Icon(SpotubeIcons.skipBack),
+                      icon: const Icon(SangeetIcons.skipBack),
                       onPressed: audioPlayer.skipToPrevious,
                     ),
                   ),
@@ -203,7 +203,7 @@ class PlayerControls extends HookConsumerWidget {
                               child: CircularProgressIndicator(),
                             )
                           : Icon(
-                              playing ? SpotubeIcons.pause : SpotubeIcons.play,
+                              playing ? SangeetIcons.pause : SangeetIcons.play,
                             ),
                       onPressed: isFetchingActiveTrack
                           ? null
@@ -219,7 +219,7 @@ class PlayerControls extends HookConsumerWidget {
                             .call,
                     child: IconButton.ghost(
                       size: buttonSize,
-                      icon: const Icon(SpotubeIcons.skipForward),
+                      icon: const Icon(SangeetIcons.skipForward),
                       onPressed:
                           isFetchingActiveTrack ? null : audioPlayer.skipToNext,
                     ),
@@ -242,8 +242,8 @@ class PlayerControls extends HookConsumerWidget {
                         size: buttonSize,
                         icon: Icon(
                           loopMode == PlaylistMode.single
-                              ? SpotubeIcons.repeatOne
-                              : SpotubeIcons.repeat,
+                              ? SangeetIcons.repeatOne
+                              : SangeetIcons.repeat,
                           color: loopMode != PlaylistMode.none
                               ? theme.colorScheme.primary
                               : null,

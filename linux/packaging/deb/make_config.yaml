@@ -30,7 +30,7 @@ suggested_dependencies:
   - yt-dlp
 
 essential: false
-icon: assets/branding/spotube-logo.png
+icon: assets/branding/sangeet-logo.png
 
 keywords:
   - Music

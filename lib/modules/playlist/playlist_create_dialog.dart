@@ -11,14 +11,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/form/checkbox_form_field.dart';
-import 'package:spotube/components/form/text_form_field.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/library/playlists.dart';
-import 'package:spotube/provider/metadata_plugin/playlist/playlist.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/form/checkbox_form_field.dart';
+import 'package:sangeet/components/form/text_form_field.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
+import 'package:sangeet/provider/metadata_plugin/playlist/playlist.dart';
 
 class PlaylistCreateDialog extends HookConsumerWidget {
   /// Track ids to add to the playlist
@@ -134,7 +134,7 @@ class PlaylistCreateDialog extends HookConsumerWidget {
             !ref
                 .read(metadataPluginPlaylistProvider(playlistId ?? ""))
                 .hasError) {
-          context.router.maybePop<SpotubeFullPlaylistObject>(
+          context.router.maybePop<SangeetFullPlaylistObject>(
             await ref
                 .read(metadataPluginPlaylistProvider(playlistId ?? "").future),
           );
@@ -207,7 +207,7 @@ class PlaylistCreateDialog extends HookConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Button.secondary(
-                            leading: const Icon(SpotubeIcons.edit),
+                            leading: const Icon(SangeetIcons.edit),
                             child: Text(
                               field.value?.path != null ||
                                       updatingPlaylist?.images != null
@@ -228,7 +228,7 @@ class PlaylistCreateDialog extends HookConsumerWidget {
                           ),
                           const SizedBox(width: 10),
                           IconButton.destructive(
-                            icon: const Icon(SpotubeIcons.trash),
+                            icon: const Icon(SangeetIcons.trash),
                             enabled: field.value != null,
                             onPressed: () {
                               field.didChange(null);
@@ -299,7 +299,7 @@ class PlaylistCreateDialogButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return Button.secondary(
-      leading: const Icon(SpotubeIcons.addFilled),
+      leading: const Icon(SangeetIcons.addFilled),
       child: Text(context.l10n.playlist),
       onPressed: () => showPlaylistDialog(context),
     );

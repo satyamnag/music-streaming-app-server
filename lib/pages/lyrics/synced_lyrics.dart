@@ -4,19 +4,19 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/modules/lyrics/zoom_controls.dart';
-import 'package:spotube/components/shimmers/shimmer_lyrics.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/hooks/controllers/use_auto_scroll_controller.dart';
-import 'package:spotube/modules/lyrics/use_synced_lyrics.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/lyrics/zoom_controls.dart';
+import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/hooks/controllers/use_auto_scroll_controller.dart';
+import 'package:sangeet/modules/lyrics/use_synced_lyrics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/lyrics/synced.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/lyrics/synced.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/logger/logger.dart';
 
 class SyncedLyrics extends HookConsumerWidget {
   final PaletteColor palette;
@@ -209,7 +209,7 @@ class SyncedLyrics extends HookConsumerWidget {
               ),
               const SliverGap(26),
               const SliverToBoxAdapter(
-                child: Icon(SpotubeIcons.noLyrics, size: 60),
+                child: Icon(SangeetIcons.noLyrics, size: 60),
               ),
             ] else if (lyricsState.asData?.value.static == true)
               SliverFillRemaining(
@@ -247,8 +247,8 @@ class SyncedLyrics extends HookConsumerWidget {
                     ref.read(syncedLyricsDelayProvider.notifier).state = value,
                 interval: 1,
                 unit: "s",
-                increaseIcon: const Icon(SpotubeIcons.add),
-                decreaseIcon: const Icon(SpotubeIcons.remove),
+                increaseIcon: const Icon(SangeetIcons.add),
+                decreaseIcon: const Icon(SangeetIcons.remove),
                 direction: isModal == true ? Axis.horizontal : Axis.vertical,
               ),
               ZoomControls(

@@ -6,15 +6,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/routes.gr.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/image/universal_image.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/extensions/string.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/local_tracks/local_tracks_provider.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/extensions/string.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
 class LocalFolderItem extends HookConsumerWidget {
   final String folder;
@@ -62,7 +62,7 @@ class LocalFolderItem extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Icon(
-                SpotubeIcons.folder,
+                SangeetIcons.folder,
                 size: mediaQuery.smAndDown
                     ? 95
                     : mediaQuery.mdAndDown
@@ -120,7 +120,7 @@ class LocalFolderItem extends HookConsumerWidget {
                           return DropdownMenu(
                             children: [
                               MenuButton(
-                                leading: Icon(SpotubeIcons.folderRemove,
+                                leading: Icon(SangeetIcons.folderRemove,
                                     color: colorScheme.destructive),
                                 child:
                                     Text(context.l10n.remove_library_location),

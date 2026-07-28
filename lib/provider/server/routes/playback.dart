@@ -9,18 +9,18 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:path/path.dart';
 import 'package:shelf/shelf.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/models/parser/range_headers.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/audio_player/state.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/models/parser/range_headers.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/audio_player/state.dart';
 
-import 'package:spotube/provider/server/active_track_sources.dart';
-import 'package:spotube/provider/server/sourced_track_provider.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/logger/logger.dart';
-import 'package:spotube/services/sourced_track/sourced_track.dart';
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/provider/server/active_track_sources.dart';
+import 'package:sangeet/provider/server/sourced_track_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/services/sourced_track/sourced_track.dart';
+import 'package:sangeet/utils/service_utils.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 final _deviceClients = Set.unmodifiable({
@@ -66,11 +66,11 @@ class ServerPlaybackRoutes {
     final media = audioPlayer.playlist.medias
         .firstWhere((e) => e.uri == request.requestedUri.toString());
     final spotubeMedia =
-        media is SpotubeMedia ? media : SpotubeMedia.media(media);
+        media is SangeetMedia ? media : SangeetMedia.media(media);
     final sourcedTrack = activeSourcedTrack?.track.id == track.id
         ? activeSourcedTrack?.source
         : await ref.read(
-            sourcedTrackProvider(spotubeMedia.track as SpotubeFullTrackObject)
+            sourcedTrackProvider(spotubeMedia.track as SangeetFullTrackObject)
                 .future,
           );
 
@@ -116,7 +116,7 @@ class ServerPlaybackRoutes {
         "Connection": "keep-alive",
         "host": Uri.parse(url).host,
       },
-      validateStatus: (status) => status! < 400,
+      validateStatus: (status) => status != null && status < 500,
     );
 
     final res = await dio.head(url, options: options);
@@ -171,7 +171,7 @@ class ServerPlaybackRoutes {
         "host": Uri.parse(url).host,
       },
       responseType: ResponseType.stream,
-      validateStatus: (status) => status! < 400,
+      validateStatus: (status) => status != null && status < 500,
     );
 
     final contentLengthRes = await Future<dio_lib.Response?>.value(

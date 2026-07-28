@@ -1,11 +1,11 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/core/auth.dart';
-import 'package:spotube/provider/metadata_plugin/utils/common.dart';
-import 'package:spotube/provider/metadata_plugin/utils/paginated.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/paginated.dart';
 
 class MetadataPluginSavedTracksNotifier
-    extends AutoDisposePaginatedAsyncNotifier<SpotubeFullTrackObject> {
+    extends AutoDisposePaginatedAsyncNotifier<SangeetFullTrackObject> {
   MetadataPluginSavedTracksNotifier() : super();
 
   @override
@@ -26,7 +26,7 @@ class MetadataPluginSavedTracksNotifier
     return await fetch(0, 20);
   }
 
-  Future<void> addFavorite(List<SpotubeTrackObject> tracks) async {
+  Future<void> addFavorite(List<SangeetTrackObject> tracks) async {
     if (state.value == null) {
       return;
     }
@@ -35,7 +35,7 @@ class MetadataPluginSavedTracksNotifier
     state = AsyncData(
       state.value!.copyWith(
         items: [
-          ...tracks.whereType<SpotubeFullTrackObject>(),
+          ...tracks.whereType<SangeetFullTrackObject>(),
           ...state.value!.items
         ],
       ),
@@ -49,7 +49,7 @@ class MetadataPluginSavedTracksNotifier
     }
   }
 
-  Future<void> removeFavorite(List<SpotubeTrackObject> tracks) async {
+  Future<void> removeFavorite(List<SangeetTrackObject> tracks) async {
     if (state.value == null) {
       return;
     }
@@ -78,7 +78,7 @@ class MetadataPluginSavedTracksNotifier
 
 final metadataPluginSavedTracksProvider = AutoDisposeAsyncNotifierProvider<
     MetadataPluginSavedTracksNotifier,
-    SpotubePaginationResponseObject<SpotubeFullTrackObject>>(
+    SangeetPaginationResponseObject<SangeetFullTrackObject>>(
   () => MetadataPluginSavedTracksNotifier(),
 );
 

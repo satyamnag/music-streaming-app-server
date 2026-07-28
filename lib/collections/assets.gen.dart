@@ -14,20 +14,20 @@ import 'package:flutter/widgets.dart';
 class $AssetsBrandingGen {
   const $AssetsBrandingGen();
 
-  /// File path: assets/branding/spotube-logo-light.png
-  AssetGenImage get spotubeLogoLight =>
-      const AssetGenImage('assets/branding/spotube-logo-light.png');
+  /// File path: assets/branding/sangeet-logo-light.png
+  AssetGenImage get sangeetLogoLight =>
+      const AssetGenImage('assets/branding/sangeet-logo-light.png');
 
-  /// File path: assets/branding/spotube-logo.ico
-  String get spotubeLogoIco => 'assets/branding/spotube-logo.ico';
+  /// File path: assets/branding/sangeet-logo.ico
+  String get sangeetLogoIco => 'assets/branding/sangeet-logo.ico';
 
-  /// File path: assets/branding/spotube-logo.png
-  AssetGenImage get spotubeLogoPng =>
-      const AssetGenImage('assets/branding/spotube-logo.png');
+  /// File path: assets/branding/sangeet-logo.png
+  AssetGenImage get sangeetLogoPng =>
+      const AssetGenImage('assets/branding/sangeet-logo.png');
 
   /// List of all assets
   List<dynamic> get values =>
-      [spotubeLogoLight, spotubeLogoIco, spotubeLogoPng];
+      [sangeetLogoLight, sangeetLogoIco, sangeetLogoPng];
 }
 
 class $AssetsImagesGen {

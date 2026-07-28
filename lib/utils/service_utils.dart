@@ -6,15 +6,15 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'package:html/dom.dart' hide Text;
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Element;
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/pages/library/user_local_tracks/user_local_tracks.dart';
-import 'package:spotube/modules/root/update_dialog.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/pages/library/user_local_tracks/user_local_tracks.dart';
+import 'package:sangeet/modules/root/update_dialog.dart';
 
-import 'package:spotube/provider/database/database.dart';
-import 'package:spotube/services/dio/dio.dart';
-import 'package:spotube/services/logger/logger.dart';
+import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/services/dio/dio.dart';
+import 'package:sangeet/services/logger/logger.dart';
 
-import 'package:spotube/utils/primitive_utils.dart';
+import 'package:sangeet/utils/primitive_utils.dart';
 import 'package:collection/collection.dart';
 import 'package:html/parser.dart' as parser;
 
@@ -22,7 +22,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:spotube/collections/env.dart';
+import 'package:sangeet/collections/env.dart';
 
 import 'package:version/version.dart';
 
@@ -187,7 +187,7 @@ abstract class ServiceUtils {
     return lyrics;
   }
 
-  static DateTime parseSpotifyAlbumDate(SpotubeFullAlbumObject? album) {
+  static DateTime parseSpotifyAlbumDate(SangeetFullAlbumObject? album) {
     if (album == null) {
       return DateTime.parse("1975-01-01");
     }
@@ -195,7 +195,7 @@ abstract class ServiceUtils {
     return DateTime.parse(album.releaseDate);
   }
 
-  static List<T> sortTracks<T extends SpotubeTrackObject>(
+  static List<T> sortTracks<T extends SangeetTrackObject>(
       List<T> tracks, SortBy sortBy) {
     if (sortBy == SortBy.none) return tracks;
     return List<T>.from(tracks)
@@ -242,59 +242,71 @@ abstract class ServiceUtils {
     final packageInfo = await PackageInfo.fromPlatform();
 
     if (Env.releaseChannel == ReleaseChannel.nightly) {
-      final value = await globalDio.getUri(
-        Uri.parse(
-          "https://api.github.com/repos/KRTirtho/spotube/actions/workflows/spotube-release-binary.yml/runs?status=success&per_page=1",
-        ),
-        options: Options(
-          responseType: ResponseType.json,
-        ),
-      );
+      try {
+        final value = await globalDio.getUri(
+          Uri.parse(
+            "https://api.github.com/repos/user/sangeet/actions/workflows/spotube-release-binary.yml/runs?status=success&per_page=1",
+          ),
+          options: Options(
+            responseType: ResponseType.json,
+          ),
+        );
 
-      final buildNum = value.data["workflow_runs"][0]["run_number"] as int;
+        if (value.statusCode != 200) return;
 
-      if (buildNum <= int.parse(packageInfo.buildNumber) || !context.mounted) {
-        return;
-      }
+        final buildNum =
+            value.data["workflow_runs"][0]["run_number"] as int;
 
-      await showDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierColor: Colors.black.withAlpha(66),
-        builder: (context) {
-          return RootAppUpdateDialog.nightly(nightlyBuildNum: buildNum);
-        },
-      );
+        if (buildNum <= int.parse(packageInfo.buildNumber) ||
+            !context.mounted) {
+          return;
+        }
+
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierColor: Colors.black.withAlpha(66),
+          builder: (context) {
+            return RootAppUpdateDialog.nightly(nightlyBuildNum: buildNum);
+          },
+        );
+      } catch (_) {}
     } else {
-      final value = await globalDio.getUri(
-        Uri.parse(
-          "https://api.github.com/repos/KRTirtho/spotube/releases/latest",
-        ),
-      );
-      final tagName = (value.data["tag_name"] as String).replaceAll("v", "");
-      final currentVersion = packageInfo.version == "Unknown"
-          ? null
-          : Version.parse(packageInfo.version);
-      final latestVersion =
-          tagName == "nightly" ? null : Version.parse(tagName);
+      try {
+        final value = await globalDio.getUri(
+          Uri.parse(
+            "https://api.github.com/repos/user/sangeet/releases/latest",
+          ),
+        );
 
-      if (currentVersion == null ||
-          latestVersion == null ||
-          (latestVersion.isPreRelease && !currentVersion.isPreRelease) ||
-          (!latestVersion.isPreRelease && currentVersion.isPreRelease)) {
-        return;
-      }
+        if (value.statusCode != 200) return;
 
-      if (latestVersion <= currentVersion || !context.mounted) return;
+        final tagName =
+            (value.data["tag_name"] as String).replaceAll("v", "");
+        final currentVersion = packageInfo.version == "Unknown"
+            ? null
+            : Version.parse(packageInfo.version);
+        final latestVersion =
+            tagName == "nightly" ? null : Version.parse(tagName);
 
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierColor: Colors.black.withAlpha(66),
-        builder: (context) {
-          return RootAppUpdateDialog(version: latestVersion);
-        },
-      );
+        if (currentVersion == null ||
+            latestVersion == null ||
+            (latestVersion.isPreRelease && !currentVersion.isPreRelease) ||
+            (!latestVersion.isPreRelease && currentVersion.isPreRelease)) {
+          return;
+        }
+
+        if (latestVersion <= currentVersion || !context.mounted) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierColor: Colors.black.withAlpha(66),
+          builder: (context) {
+            return RootAppUpdateDialog(version: latestVersion);
+          },
+        );
+      } catch (_) {}
     }
   }
 

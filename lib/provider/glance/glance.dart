@@ -5,12 +5,12 @@ import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/server/server.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/logger/logger.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/server/server.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/utils/platform.dart';
 
 @pragma("vm:entry-point")
 Future<void> glanceBackgroundCallback(Uri? data) async {
@@ -57,7 +57,7 @@ Future<void> _updateWidget() async {
       await HomeWidget.updateWidget(
         androidName: 'HomePlayerWidgetReceiver',
         qualifiedAndroidName:
-            'oss.krtirtho.spotube.glance.HomePlayerWidgetReceiver',
+            'com.sangeet.app.glance.HomePlayerWidgetReceiver',
       );
     }
     if (kIsIOS) {
@@ -71,7 +71,7 @@ Future<void> _updateWidget() async {
   }
 }
 
-Future<void> _sendActiveTrack(SpotubeTrackObject? track) async {
+Future<void> _sendActiveTrack(SangeetTrackObject? track) async {
   if (track == null) {
     await _saveWidgetData("activeTrack", null);
     await _updateWidget();

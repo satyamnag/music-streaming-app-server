@@ -1,10 +1,10 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/markdown/markdown.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/markdown/markdown.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 
 class MetadataPluginUpdateAvailableDialog extends HookConsumerWidget {
   final PluginConfiguration plugin;
@@ -26,12 +26,12 @@ class MetadataPluginUpdateAvailableDialog extends HookConsumerWidget {
             builder: (context, overlay) {
               return SurfaceCard(
                 child: Basic(
-                  leading: const Icon(SpotubeIcons.error, color: Colors.red),
+                  leading: const Icon(SangeetIcons.error, color: Colors.red),
                   title: Text(message),
                   leadingAlignment: Alignment.center,
                   trailing: IconButton.ghost(
                     size: ButtonSize.small,
-                    icon: const Icon(SpotubeIcons.close),
+                    icon: const Icon(SangeetIcons.close),
                     onPressed: () {
                       overlay.close();
                     },

@@ -2,15 +2,15 @@ import 'package:collection/collection.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:spotube/components/dialogs/prompt_dialog.dart';
-import 'package:spotube/components/dialogs/select_device_dialog.dart';
-import 'package:spotube/components/track_tile/track_tile.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/connect/connect.dart';
-import 'package:spotube/pages/search/search.dart';
-import 'package:spotube/provider/connect/connect.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/metadata_plugin/search/all.dart';
+import 'package:sangeet/components/dialogs/prompt_dialog.dart';
+import 'package:sangeet/components/dialogs/select_device_dialog.dart';
+import 'package:sangeet/components/track_tile/track_tile.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/connect/connect.dart';
+import 'package:sangeet/pages/search/search.dart';
+import 'package:sangeet/provider/connect/connect.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/metadata_plugin/search/all.dart';
 
 class SearchTracksSection extends HookConsumerWidget {
   const SearchTracksSection({

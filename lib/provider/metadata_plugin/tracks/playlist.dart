@@ -1,11 +1,11 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/utils/family_paginated.dart';
-import 'package:spotube/provider/metadata_plugin/utils/common.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
 
 class MetadataPluginPlaylistTracksNotifier
-    extends AutoDisposeFamilyPaginatedAsyncNotifier<SpotubeFullTrackObject,
+    extends AutoDisposeFamilyPaginatedAsyncNotifier<SangeetFullTrackObject,
         String> {
   MetadataPluginPlaylistTracksNotifier() : super();
 
@@ -31,6 +31,6 @@ class MetadataPluginPlaylistTracksNotifier
 
 final metadataPluginPlaylistTracksProvider =
     AutoDisposeAsyncNotifierProviderFamily<MetadataPluginPlaylistTracksNotifier,
-        SpotubePaginationResponseObject<SpotubeFullTrackObject>, String>(
+        SangeetPaginationResponseObject<SangeetFullTrackObject>, String>(
   () => MetadataPluginPlaylistTracksNotifier(),
 );

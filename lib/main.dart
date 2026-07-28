@@ -16,37 +16,39 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:smtc_windows/smtc_windows.dart';
-import 'package:spotube/collections/env.dart';
-import 'package:spotube/collections/http-override.dart';
-import 'package:spotube/collections/intents.dart';
-import 'package:spotube/collections/routes.dart';
-import 'package:spotube/hooks/configurators/use_close_behavior.dart';
-import 'package:spotube/hooks/configurators/use_deep_linking.dart';
-import 'package:spotube/hooks/configurators/use_disable_battery_optimizations.dart';
-import 'package:spotube/hooks/configurators/use_fix_window_stretching.dart';
-import 'package:spotube/hooks/configurators/use_get_storage_perms.dart';
-import 'package:spotube/hooks/configurators/use_has_touch.dart';
-import 'package:spotube/models/database/database.dart';
-import 'package:spotube/modules/settings/color_scheme_picker_dialog.dart';
-import 'package:spotube/provider/audio_player/audio_player_streams.dart';
-import 'package:spotube/provider/database/database.dart';
-import 'package:spotube/provider/glance/glance.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/updater/update_checker.dart';
-import 'package:spotube/provider/server/bonsoir.dart';
-import 'package:spotube/provider/server/server.dart';
-import 'package:spotube/provider/tray_manager/tray_manager.dart';
-import 'package:spotube/l10n/l10n.dart';
-import 'package:spotube/provider/connect/clients.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
-import 'package:spotube/services/audio_player/audio_player.dart';
-import 'package:spotube/services/cli/cli.dart';
-import 'package:spotube/services/kv_store/encrypted_kv_store.dart';
-import 'package:spotube/services/kv_store/kv_store.dart';
-import 'package:spotube/services/logger/logger.dart';
-import 'package:spotube/services/wm_tools/wm_tools.dart';
-import 'package:spotube/utils/migrations/sandbox.dart';
-import 'package:spotube/utils/platform.dart';
+import 'dart:convert';
+
+import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/collections/http-override.dart';
+import 'package:sangeet/collections/intents.dart';
+import 'package:sangeet/collections/routes.dart';
+import 'package:sangeet/hooks/configurators/use_close_behavior.dart';
+import 'package:sangeet/hooks/configurators/use_deep_linking.dart';
+import 'package:sangeet/hooks/configurators/use_disable_battery_optimizations.dart';
+import 'package:sangeet/hooks/configurators/use_fix_window_stretching.dart';
+import 'package:sangeet/hooks/configurators/use_get_storage_perms.dart';
+import 'package:sangeet/hooks/configurators/use_has_touch.dart';
+import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
+import 'package:sangeet/provider/audio_player/audio_player_streams.dart';
+import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/provider/glance/glance.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/updater/update_checker.dart';
+import 'package:sangeet/provider/server/bonsoir.dart';
+import 'package:sangeet/provider/server/server.dart';
+import 'package:sangeet/provider/tray_manager/tray_manager.dart';
+import 'package:sangeet/l10n/l10n.dart';
+import 'package:sangeet/provider/connect/clients.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/cli/cli.dart';
+import 'package:sangeet/services/kv_store/encrypted_kv_store.dart';
+import 'package:sangeet/services/kv_store/kv_store.dart';
+import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/services/wm_tools/wm_tools.dart';
+import 'package:sangeet/utils/migrations/sandbox.dart';
+import 'package:sangeet/utils/platform.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -94,6 +96,23 @@ Future<void> main(List<String> rawArgs) async {
 
     await KVStoreService.initialize();
 
+    if (Env.listenbrainzToken.isNotEmpty) {
+      final credKey =
+          "spotube_plugin.musicbrainz-and-listenbrainz.lb_creds";
+      final existing = KVStoreService.sharedPreferences.getString(credKey);
+      if (existing == null || existing.isEmpty) {
+        KVStoreService.sharedPreferences.setString(
+          credKey,
+          jsonEncode({
+            "token": Env.listenbrainzToken,
+            "username": "SATYAM NAG",
+            "lb_url": "https://api.listenbrainz.org/1",
+            "mb_url": "https://musicbrainz.org/ws/2",
+          }),
+        );
+      }
+    }
+
     if (kIsDesktop) {
       await windowManager.setPreventClose(true);
       await YtDlp.instance
@@ -114,12 +133,12 @@ Future<void> main(List<String> rawArgs) async {
     final database = AppDatabase();
 
     if (kIsDesktop) {
-      await localNotifier.setup(appName: "Spotube");
+      await localNotifier.setup(appName: "Sangeet");
       await WindowManagerTools.initialize();
     }
 
     if (kIsIOS) {
-      HomeWidget.setAppGroupId("group.spotube_home_player_widget");
+      HomeWidget.setAppGroupId("group.sangeet_home_player_widget");
     }
 
     runApp(
@@ -130,14 +149,14 @@ Future<void> main(List<String> rawArgs) async {
         observers: const [
           AppLoggerProviderObserver(),
         ],
-        child: const Spotube(),
+        child: const Sangeet(),
       ),
     );
   });
 }
 
-class Spotube extends HookConsumerWidget {
-  const Spotube({super.key});
+class Sangeet extends HookConsumerWidget {
+  const Sangeet({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -191,7 +210,7 @@ class Spotube extends HookConsumerWidget {
       ],
       routerConfig: router.config(),
       debugShowCheckedModeBanner: false,
-      title: 'Spotube',
+      title: 'Sangeet',
       builder: (context, child) {
         child = ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(

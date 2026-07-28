@@ -3,20 +3,20 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/extensions/context.dart';
+import 'package:sangeet/extensions/context.dart';
 
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
-class SpotubeColor extends Color {
+class SangeetColor extends Color {
   final String name;
 
-  const SpotubeColor(super.color, {required this.name});
+  const SangeetColor(super.color, {required this.name});
 
-  const SpotubeColor.from(super.value, {required this.name});
+  const SangeetColor.from(super.value, {required this.name});
 
-  factory SpotubeColor.fromString(String string) {
+  factory SangeetColor.fromString(String string) {
     final slices = string.split(":");
-    return SpotubeColor(int.parse(slices.last), name: slices.first);
+    return SangeetColor(int.parse(slices.last), name: slices.first);
   }
 
   @override
@@ -25,19 +25,19 @@ class SpotubeColor extends Color {
   }
 }
 
-final Set<SpotubeColor> colorsMap = {
-  SpotubeColor(Colors.slate.value, name: "slate"),
-  SpotubeColor(Colors.gray.value, name: "gray"),
-  SpotubeColor(Colors.zinc.value, name: "zinc"),
-  SpotubeColor(Colors.neutral.value, name: "neutral"),
-  SpotubeColor(Colors.stone.value, name: "stone"),
-  SpotubeColor(Colors.red.value, name: "red"),
-  SpotubeColor(Colors.orange.value, name: "orange"),
-  SpotubeColor(Colors.yellow.value, name: "yellow"),
-  SpotubeColor(Colors.green.value, name: "green"),
-  SpotubeColor(Colors.blue.value, name: "blue"),
-  SpotubeColor(Colors.violet.value, name: "violet"),
-  SpotubeColor(Colors.rose.value, name: "rose"),
+final Set<SangeetColor> colorsMap = {
+  SangeetColor(Colors.slate.value, name: "slate"),
+  SangeetColor(Colors.gray.value, name: "gray"),
+  SangeetColor(Colors.zinc.value, name: "zinc"),
+  SangeetColor(Colors.neutral.value, name: "neutral"),
+  SangeetColor(Colors.stone.value, name: "stone"),
+  SangeetColor(Colors.red.value, name: "red"),
+  SangeetColor(Colors.orange.value, name: "orange"),
+  SangeetColor(Colors.yellow.value, name: "yellow"),
+  SangeetColor(Colors.green.value, name: "green"),
+  SangeetColor(Colors.blue.value, name: "blue"),
+  SangeetColor(Colors.violet.value, name: "violet"),
+  SangeetColor(Colors.rose.value, name: "rose"),
 };
 
 final colorSchemeMap = {

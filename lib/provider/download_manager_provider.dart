@@ -7,15 +7,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:path/path.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide join;
-import 'package:spotube/collections/routes.dart';
-import 'package:spotube/components/dialogs/replace_downloaded_dialog.dart';
-import 'package:spotube/extensions/dio.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/audio_source/quality_presets.dart';
-import 'package:spotube/provider/server/sourced_track_provider.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
-import 'package:spotube/services/logger/logger.dart';
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/collections/routes.dart';
+import 'package:sangeet/components/dialogs/replace_downloaded_dialog.dart';
+import 'package:sangeet/extensions/dio.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
+import 'package:sangeet/provider/server/sourced_track_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/utils/service_utils.dart';
 
 enum DownloadStatus {
   queued,
@@ -26,7 +26,7 @@ enum DownloadStatus {
 }
 
 class DownloadTask {
-  final SpotubeFullTrackObject track;
+  final SangeetFullTrackObject track;
   final DownloadStatus status;
   final CancelToken cancelToken;
   final int? totalSizeBytes;
@@ -45,7 +45,7 @@ class DownloadTask {
             downloadedBytesStreamController ?? StreamController.broadcast();
 
   DownloadTask copyWith({
-    SpotubeFullTrackObject? track,
+    SangeetFullTrackObject? track,
     DownloadStatus? status,
     CancelToken? cancelToken,
     int? totalSizeBytes,
@@ -65,7 +65,11 @@ class DownloadTask {
 class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
   final Dio dio;
   DownloadManagerNotifier()
-      : dio = Dio(),
+      : dio = Dio(
+          BaseOptions(
+            validateStatus: (status) => status != null && status < 500,
+          ),
+        ),
         super();
 
   @override
@@ -86,7 +90,7 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
     return state.firstWhereOrNull((element) => element.track.id == trackId);
   }
 
-  void addToQueue(SpotubeFullTrackObject track) {
+  void addToQueue(SangeetFullTrackObject track) {
     if (state.any((element) => element.track.id == track.id)) return;
     state = [
       ...state,
@@ -102,7 +106,7 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
     _startDownloading(); // No await should be invoked to avoid stuck UI
   }
 
-  void addAllToQueue(List<SpotubeFullTrackObject> tracks) {
+  void addAllToQueue(List<SangeetFullTrackObject> tracks) {
     state = [
       ...state,
       ...tracks.map((e) => DownloadTask(
@@ -116,7 +120,7 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
     _startDownloading(); // No await should be invoked to avoid stuck UI
   }
 
-  void retry(SpotubeFullTrackObject track) {
+  void retry(SangeetFullTrackObject track) {
     if (state.firstWhereOrNull((e) => e.track.id == track.id)?.status
         case DownloadStatus.canceled || DownloadStatus.failed) {
       _setStatus(track, DownloadStatus.queued);
@@ -124,7 +128,7 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
     }
   }
 
-  void cancel(SpotubeFullTrackObject track) {
+  void cancel(SangeetFullTrackObject track) {
     if (state.firstWhereOrNull((e) => e.track.id == track.id)?.status ==
         DownloadStatus.failed) {
       return;
@@ -141,7 +145,7 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
     state = [];
   }
 
-  void _setStatus(SpotubeFullTrackObject track, DownloadStatus status) {
+  void _setStatus(SangeetFullTrackObject track, DownloadStatus status) {
     state = state.map((e) {
       if (e.track.id == track.id) {
         if ((status == DownloadStatus.canceled) && e.cancelToken.isCancelled) {

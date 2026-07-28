@@ -1,4 +1,4 @@
-package oss.krtirtho.spotube.glance
+package com.sangeet.app.glance
 
 import HomeWidgetGlanceState
 import HomeWidgetGlanceStateDefinition
@@ -47,11 +47,11 @@ import androidx.glance.state.GlanceStateDefinition
 import com.google.gson.Gson
 import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.actionStartActivity
-import oss.krtirtho.spotube.MainActivity
-import oss.krtirtho.spotube.glance.models.Track
-import oss.krtirtho.spotube.glance.widgets.FlutterAssetImageProvider
-import oss.krtirtho.spotube.glance.widgets.TrackDetailsView
-import oss.krtirtho.spotube.glance.widgets.TrackProgress
+import com.sangeet.app.MainActivity
+import com.sangeet.app.glance.models.Track
+import com.sangeet.app.glance.widgets.FlutterAssetImageProvider
+import com.sangeet.app.glance.widgets.TrackDetailsView
+import com.sangeet.app.glance.widgets.TrackProgress
 
 val gson = Gson()
 val serverAddressKey = ActionParameters.Key<String>("serverAddress")
@@ -200,7 +200,7 @@ abstract class InteractiveAction(val command: String) : ActionCallback {
 
         val backgroundIntent = HomeWidgetBackgroundIntent.getBroadcast(
             context,
-            Uri.parse("spotube://playback/$command?serverAddress=$serverAddress")
+            Uri.parse("sangeet://playback/$command?serverAddress=$serverAddress")
         )
         backgroundIntent.send()
     }

@@ -1,4 +1,4 @@
-package oss.krtirtho.spotube.glance.models
+package com.sangeet.app.glance.models
 
 import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable

@@ -1,16 +1,16 @@
 import 'package:collection/collection.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/pages/library/user_local_tracks/user_local_tracks.dart';
-import 'package:spotube/provider/metadata_plugin/library/tracks.dart';
-import 'package:spotube/provider/metadata_plugin/tracks/album.dart';
-import 'package:spotube/provider/metadata_plugin/tracks/playlist.dart';
-import 'package:spotube/utils/service_utils.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/pages/library/user_local_tracks/user_local_tracks.dart';
+import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
+import 'package:sangeet/provider/metadata_plugin/tracks/album.dart';
+import 'package:sangeet/provider/metadata_plugin/tracks/playlist.dart';
+import 'package:sangeet/utils/service_utils.dart';
 
 class PresentationState {
-  final List<SpotubeTrackObject> selectedTracks;
-  final List<SpotubeTrackObject> presentationTracks;
+  final List<SangeetTrackObject> selectedTracks;
+  final List<SangeetTrackObject> presentationTracks;
   final SortBy sortBy;
 
   const PresentationState({
@@ -20,8 +20,8 @@ class PresentationState {
   });
 
   PresentationState copyWith({
-    List<SpotubeTrackObject>? selectedTracks,
-    List<SpotubeTrackObject>? presentationTracks,
+    List<SangeetTrackObject>? selectedTracks,
+    List<SangeetTrackObject>? presentationTracks,
     SortBy? sortBy,
   }) {
     return PresentationState(
@@ -36,7 +36,7 @@ class PresentationStateNotifier
     extends AutoDisposeFamilyNotifier<PresentationState, Object> {
   @override
   PresentationState build(collection) {
-    if (arg case SpotubeSimplePlaylistObject() || SpotubeSimpleAlbumObject()) {
+    if (arg case SangeetSimplePlaylistObject() || SangeetSimpleAlbumObject()) {
       if (isSavedTrackPlaylist) {
         ref.listen(
           metadataPluginSavedTracksProvider,
@@ -53,11 +53,11 @@ class PresentationStateNotifier
         );
       } else {
         ref.listen(
-          arg is SpotubeSimplePlaylistObject
+          arg is SangeetSimplePlaylistObject
               ? metadataPluginPlaylistTracksProvider(
-                  (arg as SpotubeSimplePlaylistObject).id)
+                  (arg as SangeetSimplePlaylistObject).id)
               : metadataPluginAlbumTracksProvider(
-                  (arg as SpotubeSimpleAlbumObject).id),
+                  (arg as SangeetSimpleAlbumObject).id),
           (previous, next) {
             next.whenData((value) {
               state = state.copyWith(
@@ -80,39 +80,39 @@ class PresentationStateNotifier
   }
 
   bool get isSavedTrackPlaylist =>
-      arg is SpotubeSimplePlaylistObject &&
-      (arg as SpotubeSimplePlaylistObject).id == "user-liked-tracks";
+      arg is SangeetSimplePlaylistObject &&
+      (arg as SangeetSimplePlaylistObject).id == "user-liked-tracks";
 
-  List<SpotubeTrackObject> get tracks {
+  List<SangeetTrackObject> get tracks {
     assert(
-      arg is SpotubeSimplePlaylistObject || arg is SpotubeSimpleAlbumObject,
-      "arg must be SpotubeSimplePlaylistObject or SpotubeSimpleAlbumObject",
+      arg is SangeetSimplePlaylistObject || arg is SangeetSimpleAlbumObject,
+      "arg must be SangeetSimplePlaylistObject or SangeetSimpleAlbumObject",
     );
 
-    final isPlaylist = arg is SpotubeSimplePlaylistObject;
+    final isPlaylist = arg is SangeetSimplePlaylistObject;
 
     final tracks = switch ((isPlaylist, isSavedTrackPlaylist)) {
           (true, true) =>
             ref.read(metadataPluginSavedTracksProvider).asData?.value.items,
           (true, false) => ref
               .read(metadataPluginPlaylistTracksProvider(
-                  (arg as SpotubeSimplePlaylistObject).id))
+                  (arg as SangeetSimplePlaylistObject).id))
               .asData
               ?.value
               .items,
           _ => ref
               .read(metadataPluginAlbumTracksProvider(
-                  (arg as SpotubeSimpleAlbumObject).id))
+                  (arg as SangeetSimpleAlbumObject).id))
               .asData
               ?.value
               .items,
         } ??
-        <SpotubeFullTrackObject>[];
+        <SangeetFullTrackObject>[];
 
     return tracks;
   }
 
-  void selectTrack(SpotubeTrackObject track) {
+  void selectTrack(SangeetTrackObject track) {
     if (state.selectedTracks.any((e) => e.id == track.id)) {
       return;
     }
@@ -128,7 +128,7 @@ class PresentationStateNotifier
     );
   }
 
-  void deselectTrack(SpotubeTrackObject track) {
+  void deselectTrack(SangeetTrackObject track) {
     state = state.copyWith(
       selectedTracks: state.selectedTracks.where((e) => e != track).toList(),
     );

@@ -6,13 +6,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/modules/library/local_folder/local_folder_item.dart';
-import 'package:spotube/extensions/constrains.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/provider/local_tracks/local_tracks_provider.dart';
-import 'package:spotube/provider/user_preferences/user_preferences_provider.dart';
-import 'package:spotube/utils/platform.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/modules/library/local_folder/local_folder_item.dart';
+import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/utils/platform.dart';
 
 enum SortBy {
   none,
@@ -74,7 +74,7 @@ class UserLocalLibraryPage extends HookConsumerWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Button.secondary(
-                      leading: const Icon(SpotubeIcons.folderAdd),
+                      leading: const Icon(SangeetIcons.folderAdd),
                       onPressed: addLocalLibraryLocation,
                       child: Text(context.l10n.add_library_location),
                     ),

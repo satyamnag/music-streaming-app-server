@@ -3,16 +3,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:spotube/collections/fake.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/dialogs/select_device_dialog.dart';
-import 'package:spotube/components/track_tile/track_tile.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/connect/connect.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/connect/connect.dart';
-import 'package:spotube/provider/audio_player/audio_player.dart';
-import 'package:spotube/provider/metadata_plugin/artist/top_tracks.dart';
+import 'package:sangeet/collections/fake.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/dialogs/select_device_dialog.dart';
+import 'package:sangeet/components/track_tile/track_tile.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/connect/connect.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/connect/connect.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/metadata_plugin/artist/top_tracks.dart';
 
 class ArtistPageTopTracks extends HookConsumerWidget {
   final String artistId;
@@ -29,7 +29,7 @@ class ArtistPageTopTracks extends HookConsumerWidget {
         ref.watch(metadataPluginArtistTopTracksProvider(artistId));
 
     final isPlaylistPlaying = playlist.containsTracks(
-      topTracksQuery.asData?.value.items ?? <SpotubeTrackObject>[],
+      topTracksQuery.asData?.value.items ?? <SangeetTrackObject>[],
     );
 
     if (topTracksQuery.hasError) {
@@ -44,8 +44,8 @@ class ArtistPageTopTracks extends HookConsumerWidget {
         List.generate(10, (index) => FakeData.track);
 
     void playPlaylist(
-      List<SpotubeFullTrackObject> tracks, {
-      SpotubeTrackObject? currentTrack,
+      List<SangeetFullTrackObject> tracks, {
+      SangeetTrackObject? currentTrack,
     }) async {
       isLoading.value = true;
 
@@ -109,7 +109,7 @@ class ArtistPageTopTracks extends HookConsumerWidget {
               if (!isPlaylistPlaying)
                 IconButton.outline(
                   icon: const Icon(
-                    SpotubeIcons.queueAdd,
+                    SangeetIcons.queueAdd,
                   ),
                   onPressed: () {
                     playlistNotifier.addTracks(topTracks.toList());
@@ -140,8 +140,8 @@ class ArtistPageTopTracks extends HookConsumerWidget {
                     : Skeleton.keep(
                         child: Icon(
                           isPlaylistPlaying
-                              ? SpotubeIcons.pause
-                              : SpotubeIcons.play,
+                              ? SangeetIcons.pause
+                              : SangeetIcons.play,
                         ),
                       ),
                 onPressed: () => playPlaylist(topTracks.toList()),

@@ -3,17 +3,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/markdown/markdown.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/markdown/markdown.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:change_case/change_case.dart';
 
 final validTopics = {
-  "spotube-metadata-plugin": ("Metadata", SpotubeIcons.album),
-  "spotube-audio-source-plugin": ("Audio Source", SpotubeIcons.music),
+  "sangeet-metadata-plugin": ("Metadata", SangeetIcons.album),
+  "sangeet-audio-source-plugin": ("Audio Source", SangeetIcons.music),
 };
 
 class MetadataPluginRepositoryItem extends HookConsumerWidget {
@@ -102,7 +102,7 @@ class MetadataPluginRepositoryItem extends HookConsumerWidget {
                                                       BorderRadius.circular(8),
                                                 ),
                                                 child: const Icon(
-                                                    SpotubeIcons.plugin),
+                                                    SangeetIcons.plugin),
                                               ),
                                         title: Text(pluginConfig.name),
                                         subtitle:
@@ -153,7 +153,7 @@ class MetadataPluginRepositoryItem extends HookConsumerWidget {
                         color: context.theme.colorScheme.primaryForeground,
                       ),
                     )
-                  : const Icon(SpotubeIcons.add),
+                  : const Icon(SangeetIcons.add),
               child: Text(context.l10n.install),
             ),
           ),
@@ -183,7 +183,7 @@ class MetadataPluginRepositoryItem extends HookConsumerWidget {
             children: [
               if (pluginRepo.owner == "KRTirtho")
                 PrimaryBadge(
-                  leading: const Icon(SpotubeIcons.done),
+                  leading: const Icon(SangeetIcons.done),
                   child: Text(context.l10n.official),
                 )
               else ...[
@@ -204,7 +204,7 @@ class MetadataPluginRepositoryItem extends HookConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 4,
                     children: [
-                      const Icon(SpotubeIcons.warning, size: 14),
+                      const Icon(SangeetIcons.warning, size: 14),
                       Text(
                         context.l10n.third_party,
                         style: const TextStyle(color: Colors.white),
@@ -221,7 +221,7 @@ class MetadataPluginRepositoryItem extends HookConsumerWidget {
                   ),
               SecondaryBadge(
                 leading: host == "github.com"
-                    ? const Icon(SpotubeIcons.github)
+                    ? const Icon(SangeetIcons.github)
                     : null,
                 child: Text(host),
                 onPressed: () {

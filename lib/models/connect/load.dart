@@ -6,21 +6,21 @@ class WebSocketLoadEventData with _$WebSocketLoadEventData {
 
   factory WebSocketLoadEventData.playlist({
     @Assert(
-      "tracks is List<SpotubeFullTrackObject>",
-      "tracks must be a list of SpotubeFullTrackObject",
+      "tracks is List<SangeetFullTrackObject>",
+      "tracks must be a list of SangeetFullTrackObject",
     )
-    required List<SpotubeTrackObject> tracks,
-    SpotubeSimplePlaylistObject? collection,
+    required List<SangeetTrackObject> tracks,
+    SangeetSimplePlaylistObject? collection,
     int? initialIndex,
   }) = WebSocketLoadEventDataPlaylist;
 
   factory WebSocketLoadEventData.album({
     @Assert(
-      "tracks is List<SpotubeFullTrackObject>",
-      "tracks must be a list of SpotubeFullTrackObject",
+      "tracks is List<SangeetFullTrackObject>",
+      "tracks must be a list of SangeetFullTrackObject",
     )
-    required List<SpotubeTrackObject> tracks,
-    SpotubeSimpleAlbumObject? collection,
+    required List<SangeetTrackObject> tracks,
+    SangeetSimpleAlbumObject? collection,
     int? initialIndex,
   }) = WebSocketLoadEventDataAlbum;
 

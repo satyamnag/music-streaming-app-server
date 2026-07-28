@@ -4,13 +4,13 @@ import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-import 'package:spotube/collections/spotube_icons.dart';
-import 'package:spotube/components/button/back_button.dart';
-import 'package:spotube/components/inter_scrollbar/inter_scrollbar.dart';
-import 'package:spotube/components/titlebar/titlebar.dart';
-import 'package:spotube/components/ui/button_tile.dart';
-import 'package:spotube/extensions/context.dart';
-import 'package:spotube/provider/blacklist_provider.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/button/back_button.dart';
+import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
+import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -64,7 +64,7 @@ class BlackListPage extends HookConsumerWidget {
               child: TextField(
                 onChanged: (value) => searchText.value = value,
                 placeholder: Text(context.l10n.search),
-                // prefixIcon: const Icon(SpotubeIcons.search),
+                // prefixIcon: const Icon(SangeetIcons.search),
               ),
             ),
             InterScrollbar(
@@ -81,7 +81,7 @@ class BlackListPage extends HookConsumerWidget {
                     title: Text("${item.name} (${item.elementType.name})"),
                     subtitle: Text(item.elementId),
                     trailing: IconButton.ghost(
-                      icon: Icon(SpotubeIcons.trash, color: Colors.red[400]),
+                      icon: Icon(SangeetIcons.trash, color: Colors.red[400]),
                       onPressed: () {
                         ref.read(blacklistProvider.notifier).remove(
                             filteredBlacklist.elementAt(index).elementId);

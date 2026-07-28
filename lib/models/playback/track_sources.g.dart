@@ -7,17 +7,17 @@ part of 'track_sources.dart';
 // **************************************************************************
 
 BasicSourcedTrack _$BasicSourcedTrackFromJson(Map json) => BasicSourcedTrack(
-      query: SpotubeFullTrackObject.fromJson(
+      query: SangeetFullTrackObject.fromJson(
           Map<String, dynamic>.from(json['query'] as Map)),
       source: json['source'] as String,
-      info: SpotubeAudioSourceMatchObject.fromJson(
+      info: SangeetAudioSourceMatchObject.fromJson(
           Map<String, dynamic>.from(json['info'] as Map)),
       sources: (json['sources'] as List<dynamic>)
-          .map((e) => SpotubeAudioSourceStreamObject.fromJson(
+          .map((e) => SangeetAudioSourceStreamObject.fromJson(
               Map<String, dynamic>.from(e as Map)))
           .toList(),
       siblings: (json['siblings'] as List<dynamic>?)
-              ?.map((e) => SpotubeAudioSourceMatchObject.fromJson(
+              ?.map((e) => SangeetAudioSourceMatchObject.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],

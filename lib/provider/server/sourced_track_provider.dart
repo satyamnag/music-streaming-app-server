@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/audio_source/quality_presets.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/services/sourced_track/sourced_track.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/services/sourced_track/sourced_track.dart';
 
 class SourcedTrackNotifier
-    extends FamilyAsyncNotifier<SourcedTrack, SpotubeFullTrackObject> {
+    extends FamilyAsyncNotifier<SourcedTrack, SangeetFullTrackObject> {
   @override
   FutureOr<SourcedTrack> build(query) {
     ref.watch(audioSourcePluginProvider);
@@ -29,7 +29,7 @@ class SourcedTrackNotifier
   }
 
   Future<SourcedTrack> swapWithSibling(
-    SpotubeAudioSourceMatchObject sibling,
+    SangeetAudioSourceMatchObject sibling,
   ) async {
     return await update((prev) async {
       return await prev.swapWithSibling(sibling) ?? prev;
@@ -44,6 +44,6 @@ class SourcedTrackNotifier
 }
 
 final sourcedTrackProvider = AsyncNotifierProviderFamily<SourcedTrackNotifier,
-    SourcedTrack, SpotubeFullTrackObject>(
+    SourcedTrack, SangeetFullTrackObject>(
   () => SourcedTrackNotifier(),
 );

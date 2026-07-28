@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:spotube/models/metadata/metadata.dart';
-import 'package:spotube/provider/metadata_plugin/metadata_plugin_provider.dart';
-import 'package:spotube/provider/metadata_plugin/utils/family_paginated.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
 
 class MetadataPluginArtistAlbumNotifier
-    extends FamilyPaginatedAsyncNotifier<SpotubeSimpleAlbumObject, String> {
+    extends FamilyPaginatedAsyncNotifier<SangeetSimpleAlbumObject, String> {
   @override
-  Future<SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>> fetch(
+  Future<SangeetPaginationResponseObject<SangeetSimpleAlbumObject>> fetch(
     int offset,
     int limit,
   ) async {
@@ -26,7 +26,7 @@ class MetadataPluginArtistAlbumNotifier
 
 final metadataPluginArtistAlbumsProvider = AsyncNotifierProviderFamily<
     MetadataPluginArtistAlbumNotifier,
-    SpotubePaginationResponseObject<SpotubeSimpleAlbumObject>,
+    SangeetPaginationResponseObject<SangeetSimpleAlbumObject>,
     String>(
   () => MetadataPluginArtistAlbumNotifier(),
 );
