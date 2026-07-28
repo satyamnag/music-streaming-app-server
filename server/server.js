@@ -18,15 +18,25 @@ const supabase = createClient(
 )
 
 const app = express()
+app.set('trust proxy', 1)
 app.use(cors())
 app.use(express.json())
+
+function escapePostgrestValue(value) {
+  // PostgREST reserved characters (, . ( )) in values must be double-quoted
+  // https://postgrest.org/en/stable/api.html#reserved-characters
+  if (/[,()]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
 
 app.get('/search', async (req, res, next) => {
   try {
     const q = (req.query.q || '').trim()
     if (!q) return res.json([])
 
-    const pattern = `%${q}%`
+    const pattern = escapePostgrestValue(`%${q}%`)
     const orConditions = [
       `title.ilike.${pattern}`,
       `artist_names_text.ilike.${pattern}`,
