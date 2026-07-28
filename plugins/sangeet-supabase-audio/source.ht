@@ -1,0 +1,53 @@
+class SupabaseAudioSourceImpl {
+  var _baseUrl
+
+  construct (baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun supportedPresets {
+    return [
+      struct { "type": "lossy", "name": "mp3", "qualities": [struct { "bitrate": 128000 }] },
+      struct { "type": "lossy", "name": "opus", "qualities": [struct { "bitrate": 96000 }] }
+    ]
+  }
+
+  fun matches(trackJson) {
+    var query = trackJson["name"]
+    var artists = trackJson["artists"]
+    if (artists != null && artists.length > 0) {
+      var names = []
+      for (var i = 0; i < artists.length; i++) {
+        names.add(artists[i]["name"])
+      }
+      query = query + " " + names.join(" ")
+    }
+    var client = HttpClient(struct { "baseUrl": _baseUrl, "connectTimeout": 10000, "receiveTimeout": 30000 })
+    return client.get_req("/search", struct { "queryParameters": struct { "q": query } }).then((response) {
+      if (response.statusCode != 200) {
+        return []
+      }
+      return response.data
+    })
+  }
+
+  fun streams(matchJson) {
+    var client = HttpClient(struct { "baseUrl": _baseUrl, "connectTimeout": 10000, "receiveTimeout": 30000 })
+    return client.get_req("/stream/" + matchJson["id"]).then((response) {
+      if (response.statusCode != 200) {
+        return []
+      }
+      return [response.data]
+    })
+  }
+}
+
+class SupabaseAudioSource {
+  var audioSource
+
+  construct {
+    audioSource = SupabaseAudioSourceImpl("https://your-api.com")
+  }
+}
+
+export { SupabaseAudioSource }

@@ -1,0 +1,11 @@
+{
+  "name": "Sangeet Supabase Audio",
+  "author": "You",
+  "description": "Stream devotional music from your Supabase music library",
+  "version": "1.0.0",
+  "entryPoint": "SupabaseAudioSource",
+  "pluginApiVersion": "2.0.0",
+  "repository": "https://github.com/you/sangeet-supabase-audio",
+  "abilities": ["audioSource"],
+  "apis": []
+}
