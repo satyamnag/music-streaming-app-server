@@ -476,19 +476,28 @@ app.delete('/api/admin/tracks/:id', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Upload opus file to Supabase storage
+// Upload file to Supabase storage (opus or image)
 app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
     const ext = req.file.originalname.split('.').pop().toLowerCase()
-    if (ext !== 'opus') return res.status(400).json({ error: 'Only .opus files are allowed' })
-    const fileName = `${Date.now()}-${req.file.originalname}`
+    const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext)
+    const isAudio = ext === 'opus'
+    if (!isImage && !isAudio) return res.status(400).json({ error: 'Allowed: .opus for audio, .png/.jpg/.jpeg/.webp for thumbnails' })
+    const folder = isImage ? 'thumbnails' : ''
+    const fileName = folder ? `${folder}/${Date.now()}-${req.file.originalname}` : `${Date.now()}-${req.file.originalname}`
+    const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
     const { data, error } = await supabase.storage.from('music').upload(fileName, req.file.buffer, {
-      contentType: 'audio/ogg',
+      contentType,
       upsert: false,
     })
     if (error) return res.status(500).json({ error: error.message })
-    res.json({ storage_path: fileName })
+    if (isImage) {
+      const { data: { publicUrl } } = supabase.storage.from('music').getPublicUrl(fileName)
+      res.json({ thumbnail_url: publicUrl })
+    } else {
+      res.json({ storage_path: fileName })
+    }
   } catch (err) { next(err) }
 })
 
