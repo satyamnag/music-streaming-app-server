@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Admin</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; padding: 20px; }
+h1 { margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+th { background: #fafafa; font-weight: 600; }
+tr:hover { background: #f0f7ff; }
+.btn { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-success { background: #22c55e; color: #fff; }
+.btn-secondary { background: #6b7280; color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.toolbar { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; }
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
+.modal-content { background: #fff; max-width: 520px; margin: 60px auto; padding: 24px; border-radius: 8px; }
+.modal-content h2 { margin-bottom: 16px; }
+.modal-content label { display: block; margin: 10px 0 4px; font-weight: 500; font-size: 13px; }
+.modal-content input { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+.modal-content .btn-row { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
+.actions { display: flex; gap: 4px; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
+.toast.show { opacity: 1; }
+@media (max-width: 768px) { th, td { font-size: 12px; padding: 8px; } }
+</style>
+</head>
+<body>
+<h1>Music Library Admin</h1>
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="showAdd()">+ Add Track</button>
+  <button class="btn btn-secondary" onclick="loadTracks()">Refresh</button>
+  <span id="count" style="font-size:14px;color:#666;"></span>
+</div>
+<table><thead><tr>
+  <th>Title</th><th>Artist</th><th>Album</th><th>Duration (s)</th><th>Storage Path</th><th>Actions</th>
+</tr></thead><tbody id="tbody"></tbody></table>
+
+<div id="modal" class="modal">
+<div class="modal-content">
+<h2 id="modalTitle">Add Track</h2>
+<input type="hidden" id="editId">
+<label>Title *</label><input id="fTitle" placeholder="Track title">
+<label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
+<label>Album</label><input id="fAlbum" placeholder="Album name">
+<label>Duration (seconds)</label><input id="fDuration" type="number" placeholder="e.g. 240">
+<label>Thumbnail URL</label><input id="fThumbnail" placeholder="https://...">
+<label>Storage Path (.opus file name) *</label>
+<div style="display:flex;gap:8px;">
+  <input id="fStorage" placeholder="e.g. song.opus" style="flex:1;">
+  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fileInput').click()">Upload</button>
+</div>
+<input type="file" id="fileInput" accept=".opus" style="display:none" onchange="handleFileUpload(this)">
+<div id="uploadStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div class="btn-row">
+  <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+  <button class="btn btn-success" onclick="saveTrack()">Save</button>
+</div>
+</div></div>
+
+<div id="toast" class="toast"></div>
+<script>
+let tracks = [];
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+
+async function loadTracks() {
+  try {
+    const res = await fetch('/api/admin/tracks');
+    tracks = await res.json();
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = tracks.map(t => `<tr>
+      <td>${esc(t.title)}</td>
+      <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
+      <td>${esc(t.album || '')}</td>
+      <td>${t.duration || 0}</td>
+      <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
+      <td class="actions">
+        <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.id}')">Del</button>
+      </td>
+    </tr>`).join('');
+    document.getElementById('count').textContent = `${tracks.length} track(s)`;
+  } catch (e) { toast('Failed to load: ' + e.message); }
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function showAdd() {
+  document.getElementById('modalTitle').textContent = 'Add Track';
+  document.getElementById('editId').value = '';
+  ['fTitle','fArtist','fAlbum','fDuration','fThumbnail','fStorage'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('uploadStatus').textContent = '';
+  document.getElementById('modal').style.display = 'block';
+}
+
+function showEdit(id) {
+  const t = tracks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('modalTitle').textContent = 'Edit Track';
+  document.getElementById('editId').value = id;
+  document.getElementById('fTitle').value = t.title || '';
+  document.getElementById('fArtist').value = (t.artist_names || []).join(', ');
+  document.getElementById('fAlbum').value = t.album || '';
+  document.getElementById('fDuration').value = t.duration || '';
+  document.getElementById('fThumbnail').value = t.thumbnail || '';
+  document.getElementById('fStorage').value = t.storage_path || '';
+  document.getElementById('uploadStatus').textContent = '';
+  document.getElementById('modal').style.display = 'block';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+async function saveTrack() {
+  const id = document.getElementById('editId').value;
+  const title = document.getElementById('fTitle').value.trim();
+  const artistStr = document.getElementById('fArtist').value.trim();
+  const album = document.getElementById('fAlbum').value.trim();
+  const duration = parseInt(document.getElementById('fDuration').value) || 0;
+  const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
+  const storage_path = document.getElementById('fStorage').value.trim();
+  if (!title) { toast('Title is required'); return; }
+  if (!storage_path) { toast('Storage path is required'); return; }
+  const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
+  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path };
+  try {
+    const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
+    toast(id ? 'Updated' : 'Created');
+    closeModal();
+    loadTracks();
+  } catch (e) { toast('Error: ' + e.message); }
+}
+
+async function deleteTrack(id) {
+  if (!confirm('Delete this track?')) return;
+  try {
+    const res = await fetch(`/api/admin/tracks/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Delete failed');
+    toast('Deleted');
+    loadTracks();
+  } catch (e) { toast('Error: ' + e.message); }
+}
+
+async function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.name.endsWith('.opus')) { toast('Only .opus files allowed'); input.value = ''; return; }
+  document.getElementById('uploadStatus').textContent = 'Uploading...';
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('fStorage').value = data.storage_path;
+    document.getElementById('uploadStatus').textContent = 'Uploaded: ' + data.storage_path;
+  } catch (e) { document.getElementById('uploadStatus').textContent = 'Upload error: ' + e.message; }
+  input.value = '';
+}
+
+loadTracks();
+</script>
+</body>
+</html>

@@ -1,6 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function trackToJson(t, req) {
   const artists = (t.artist_names || []).map((name) => ({
@@ -398,6 +406,90 @@ app.get('/artists/:id/top-tracks', async (req, res, next) => {
 
 app.get('/users/me', (req, res) => {
   res.json(DEFAULT_USER)
+})
+
+// ----- Admin CRUD -----
+import multer from 'multer'
+const upload = multer({ storage: multer.memoryStorage() })
+
+// Serve admin HTML
+app.get('/admin', (req, res) => {
+  const htmlPath = path.join(__dirname, 'admin.html')
+  if (fs.existsSync(htmlPath)) {
+    res.sendFile(htmlPath)
+  } else {
+    res.status(500).send('admin.html not found')
+  }
+})
+
+// List all tracks
+app.get('/api/admin/tracks', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('tracks').select('*').order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Create track
+app.post('/api/admin/tracks', async (req, res, next) => {
+  try {
+    const { title, artist_names, album, duration, thumbnail, storage_path } = req.body
+    if (!title || !storage_path) return res.status(400).json({ error: 'title and storage_path required' })
+    const { data, error } = await supabase.from('tracks').insert({
+      title,
+      artist_names: artist_names || ['Unknown Artist'],
+      artist_names_text: (artist_names || ['Unknown Artist']).join(', '),
+      album: album || title,
+      duration: duration || 0,
+      thumbnail: thumbnail || null,
+      storage_path,
+    }).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+// Update track
+app.put('/api/admin/tracks/:id', async (req, res, next) => {
+  try {
+    const { title, artist_names, album, duration, thumbnail, storage_path } = req.body
+    const updates = {}
+    if (title !== undefined) updates.title = title
+    if (artist_names !== undefined) { updates.artist_names = artist_names; updates.artist_names_text = artist_names.join(', ') }
+    if (album !== undefined) updates.album = album
+    if (duration !== undefined) updates.duration = duration
+    if (thumbnail !== undefined) updates.thumbnail = thumbnail
+    if (storage_path !== undefined) updates.storage_path = storage_path
+    const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Delete track
+app.delete('/api/admin/tracks/:id', async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('tracks').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// Upload opus file to Supabase storage
+app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
+    const ext = req.file.originalname.split('.').pop().toLowerCase()
+    if (ext !== 'opus') return res.status(400).json({ error: 'Only .opus files are allowed' })
+    const fileName = `${Date.now()}-${req.file.originalname}`
+    const { data, error } = await supabase.storage.from('music').upload(fileName, req.file.buffer, {
+      contentType: 'audio/ogg',
+      upsert: false,
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ storage_path: fileName })
+  } catch (err) { next(err) }
 })
 
 app.use((err, req, res, next) => {
