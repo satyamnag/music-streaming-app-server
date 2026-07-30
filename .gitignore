@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Miscellaneous
 *.class
 *.log
@@ -88,3 +89,7 @@ android/app/.cxx
 android/app/stable/release/
 server/node_modules/
 .git-rewrite
+=======
+node_modules/
+.env
+>>>>>>> origin/main

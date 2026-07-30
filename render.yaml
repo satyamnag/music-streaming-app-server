@@ -2,7 +2,11 @@ services:
   - type: web
     runtime: node
     name: sangeet-supabase-server
+<<<<<<< HEAD
     rootDir: server
+=======
+    rootDir: .
+>>>>>>> origin/main
     buildCommand: npm install
     startCommand: npm start
     envVars:
