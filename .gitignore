@@ -93,3 +93,4 @@ server/node_modules/
 node_modules/
 .env
 >>>>>>> origin/main
+android/app/stable/release/
