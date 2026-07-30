@@ -508,6 +508,127 @@ app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// ----- Playlist Routes -----
+app.get('/api/playlists', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('playlists').select('*').eq('visibility', 'public').order('created_at', { ascending: false })
+    if (error && error.message.includes('relation') && error.message.includes('does not exist')) return res.json([])
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
+app.get('/api/playlists/:id', async (req, res, next) => {
+  try {
+    const { data: playlist, error } = await supabase.from('playlists').select('*').eq('id', req.params.id).single()
+    if (error) return res.status(404).json({ error: 'Playlist not found' })
+    const { data: songs } = await supabase.from('playlist_songs').select('track_id, position').eq('playlist_id', req.params.id).order('position')
+    const trackIds = (songs || []).map(s => s.track_id)
+    const tracks = trackIds.length ? (await supabase.from('tracks').select('*').in('id', trackIds)).data || [] : []
+    res.json({ ...playlist, tracks })
+  } catch (err) { next(err) }
+})
+
+app.post('/api/playlists', async (req, res, next) => {
+  try {
+    const { user_id, title, description, visibility } = req.body
+    if (!user_id || !title) return res.status(400).json({ error: 'user_id and title required' })
+    const { data, error } = await supabase.from('playlists').insert({
+      user_id, title,
+      description: description || null,
+      visibility: visibility || 'public',
+    }).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+app.post('/api/playlists/:id/songs', async (req, res, next) => {
+  try {
+    const { track_id } = req.body
+    if (!track_id) return res.status(400).json({ error: 'track_id required' })
+    const { data: existing } = await supabase.from('playlist_songs').select('max_position').eq('playlist_id', req.params.id).limit(1)
+    const maxPos = existing?.[0]?.max_position ?? -1
+    const { error } = await supabase.from('playlist_songs').insert({
+      playlist_id: req.params.id, track_id, position: maxPos + 1,
+    })
+    if (error && error.message.includes('duplicate')) return res.status(409).json({ error: 'Song already in playlist' })
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json({ success: true })
+  } catch (err) { next(err) }
+})
+
+app.delete('/api/playlists/:playlistId/songs/:trackId', async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('playlist_songs').delete()
+      .eq('playlist_id', req.params.playlistId).eq('track_id', req.params.trackId)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+app.delete('/api/playlists/:id', async (req, res, next) => {
+  try {
+    await supabase.from('playlist_songs').delete().eq('playlist_id', req.params.id)
+    const { error } = await supabase.from('playlists').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// ----- Liked Songs -----
+app.get('/api/liked-songs/:userId', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('liked_songs').select('track_id').eq('user_id', req.params.userId)
+    if (error && error.message.includes('relation') && error.message.includes('does not exist')) return res.json([])
+    if (error) return res.status(500).json({ error: error.message })
+    const trackIds = (data || []).map(l => l.track_id)
+    const tracks = trackIds.length ? (await supabase.from('tracks').select('*').in('id', trackIds)).data || [] : []
+    res.json(tracks)
+  } catch (err) { next(err) }
+})
+
+app.post('/api/liked-songs', async (req, res, next) => {
+  try {
+    const { user_id, track_id } = req.body
+    if (!user_id || !track_id) return res.status(400).json({ error: 'user_id and track_id required' })
+    const { error } = await supabase.from('liked_songs').insert({ user_id, track_id })
+    if (error && error.message.includes('duplicate')) return res.json({ success: true })
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json({ success: true })
+  } catch (err) { next(err) }
+})
+
+app.delete('/api/liked-songs/:userId/:trackId', async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('liked_songs').delete()
+      .eq('user_id', req.params.userId).eq('track_id', req.params.trackId)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// ----- User Profiles -----
+app.get('/api/user-profile/:userId', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('user_profiles').select('*').eq('id', req.params.userId).single()
+    if (error && error.message.includes('relation') && error.message.includes('does not exist')) return res.json({ id: req.params.userId })
+    if (error && error.code === 'PGRST116') return res.json({ id: req.params.userId })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+app.post('/api/user-profile', async (req, res, next) => {
+  try {
+    const { id, full_name, avatar_url } = req.body
+    if (!id) return res.status(400).json({ error: 'id required' })
+    const { data, error } = await supabase.from('user_profiles').upsert({ id, full_name, avatar_url }).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
 app.use((err, req, res, next) => {
   console.error(err)
   res.status(500).json({ error: 'Internal Server Error' })

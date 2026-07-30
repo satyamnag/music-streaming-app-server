@@ -264,25 +264,53 @@ class SupabasePlaylistEndpoint {
   }
 
   fun create(userId, {name, description, public, collaborative}) {
-    return null
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/api/playlists", queryParameters: struct { "q": "create" }).then((response) {
+      if (response.statusCode != 200) {
+        return null
+      }
+      return response.data
+    })
   }
 
   fun update(playlistId, {name, description, public, collaborative}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    client.get_req("/api/playlists/" + playlistId).then((response) {
+    })
   }
 
   fun addTracks(playlistId, {trackIds, position}) {
+    if (trackIds != null && trackIds.length > 0) {
+      var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+      client.get_req("/api/playlists/" + playlistId + "/songs", queryParameters: struct { "track_id": trackIds[0] }).then((response) {
+      })
+    }
   }
 
   fun removeTracks(playlistId, {trackIds}) {
+    if (trackIds != null && trackIds.length > 0) {
+      var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+      client.get_req("/api/playlists/" + playlistId + "/songs/" + trackIds[0]).then((response) {
+      })
+    }
   }
 
   fun save(playlistId) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    client.get_req("/api/playlists/" + playlistId).then((response) {
+    })
   }
 
   fun unsave(playlistId) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    client.get_req("/api/playlists/" + playlistId).then((response) {
+    })
   }
 
   fun deletePlaylist(playlistId) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    client.get_req("/api/playlists/" + playlistId).then((response) {
+    })
   }
 }
 
@@ -304,7 +332,13 @@ class SupabaseUserEndpoint {
   }
 
   fun savedTracks({offset, limit}) {
-    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/liked-songs/supabase").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return struct { "items": response.data, "limit": 20, "nextOffset": null, "total": response.data.length, "hasMore": false }
+    })
   }
 
   fun savedPlaylists({offset, limit}) {
