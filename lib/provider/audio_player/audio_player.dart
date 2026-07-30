@@ -13,6 +13,7 @@ import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/discord_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void _log(String msg) {
   print('[SANGEET] $msg');
@@ -395,6 +396,19 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       autoPlay: autoPlay,
     );
     _log('load(): openPlaylist completed');
+
+    // Restore saved playback position after crash/restart
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedIdx = prefs.getInt('last_track_index') ?? -1;
+      final savedPos = prefs.getInt('last_position_ms') ?? 0;
+      if (savedIdx >= 0 && savedIdx == initialIndex && savedPos > 0) {
+        await audioPlayer.seek(Duration(milliseconds: savedPos));
+        // Clear saved position so it only restores once
+        await prefs.remove('last_position_ms');
+        await prefs.remove('last_track_index');
+      }
+    } catch (_) {}
 
     await _updatePlayerState(
       AudioPlayerStateTableCompanion(

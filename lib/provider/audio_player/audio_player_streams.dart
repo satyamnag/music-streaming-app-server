@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
@@ -133,10 +134,27 @@ class AudioPlayerStreamListeners {
   }
 
   StreamSubscription subscribeToPosition() {
-    String lastTrack = ""; // used to prevent multiple calls to the same track
+    String lastTrack = "";
+    int lastSaveMs = 0;
     return audioPlayer.positionStream.listen((event) async {
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final posMs = event.inMilliseconds;
       final percentProgress =
           (event.inSeconds / max(audioPlayer.duration.inSeconds, 1)) * 100;
+
+      // Save playback position every 10 seconds for crash recovery
+      if (posMs > 0 && audioPlayerState.currentIndex >= 0) {
+        final saveInterval = nowMs - lastSaveMs;
+        if (saveInterval > 10000) {
+          lastSaveMs = nowMs;
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setInt('last_position_ms', posMs);
+            await prefs.setInt('last_track_index', audioPlayerState.currentIndex);
+          } catch (_) {}
+        }
+      }
+
       try {
         if (percentProgress < 80 ||
             audioPlayerState.currentIndex == -1 ||

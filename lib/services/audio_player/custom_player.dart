@@ -20,6 +20,11 @@ class CustomPlayer extends Player {
   AndroidAudioManager? _androidAudioManager;
   bool _pausedByInterruption = false;
   bool _pausedByNoisy = false;
+  int _errorRetryCount = 0;
+  static const int _maxErrorRetries = 3;
+  String? _positionSaveKey;
+  int _lastSavedPosition = 0;
+  int _lastSaveTime = 0;
 
   CustomPlayer({super.configuration})
       : _playerStateStream = StreamController.broadcast() {
@@ -29,6 +34,7 @@ class CustomPlayer extends Player {
     nativePlayer.setProperty("demuxer-max-bytes", "100M");
     nativePlayer.setProperty("demuxer-max-back-bytes", "50M");
     nativePlayer.setProperty("gapless-audio", "yes");
+    nativePlayer.setProperty("audio-pitch-correction", "no");
 
     _subscriptions = [
       stream.buffering.listen((event) {
@@ -36,6 +42,7 @@ class CustomPlayer extends Player {
       }),
       stream.playing.listen((playing) {
         if (playing) {
+          _errorRetryCount = 0;
           _playerStateStream.add(AudioPlaybackState.playing);
         } else {
           _playerStateStream.add(AudioPlaybackState.paused);
@@ -43,6 +50,8 @@ class CustomPlayer extends Player {
       }),
       stream.completed.listen((isCompleted) async {
         if (!isCompleted) return;
+        _errorRetryCount = 0;
+        _lastSavedPosition = 0;
         _playerStateStream.add(AudioPlaybackState.completed);
       }),
       stream.playlist.listen((event) {
@@ -50,8 +59,26 @@ class CustomPlayer extends Player {
           _playerStateStream.add(AudioPlaybackState.stopped);
         }
       }),
+      stream.position.listen((pos) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        final posMs = pos.inMilliseconds;
+        if (posMs > 0 && posMs != _lastSavedPosition && now - _lastSaveTime > 10000) {
+          _lastSavedPosition = posMs;
+          _lastSaveTime = now;
+        }
+      }),
       stream.error.listen((event) {
         AppLogger.reportError('[MediaKitError] \n$event', StackTrace.current);
+        if (_errorRetryCount < _maxErrorRetries && state.playlist.index >= 0) {
+          _errorRetryCount++;
+          final idx = state.playlist.index;
+          final medias = state.playlist.medias;
+          if (idx < medias.length) {
+            Future.delayed(Duration(seconds: _errorRetryCount), () {
+              jump(idx);
+            });
+          }
+        }
       }),
     ];
     PackageInfo.fromPlatform().then((packageInfo) {
@@ -202,4 +229,17 @@ class CustomPlayer extends Player {
       sizeInBytes.toString(),
     );
   }
+
+  /// Restores playback to a saved position after app restart.
+  /// Call this after opening a playlist.
+  Future<void> restorePosition({required int savedPositionMs, required int trackIndex}) async {
+    if (savedPositionMs <= 0) return;
+    if (state.playlist.index != trackIndex) {
+      await jump(trackIndex);
+    }
+    await seek(Duration(milliseconds: savedPositionMs));
+  }
+
+  /// Gets the last saved position for persistence.
+  int get savedPosition => _lastSavedPosition;
 }
