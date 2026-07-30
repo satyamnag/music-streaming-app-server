@@ -130,7 +130,7 @@ Future<void> main(List<String> rawArgs) async {
     final database = AppDatabase();
 
     if (kIsDesktop) {
-      await localNotifier.setup(appName: "Sangeet");
+      await localNotifier.setup(appName: "Soulful Bhakti");
       await WindowManagerTools.initialize();
     }
 
@@ -205,7 +205,7 @@ class Sangeet extends HookConsumerWidget {
       ],
       routerConfig: router.config(),
       debugShowCheckedModeBanner: false,
-      title: 'Sangeet',
+      title: 'Soulful Bhakti',
       builder: (context, child) {
         child = ScrollConfiguration(
           behavior: ScrollConfiguration.of(context).copyWith(

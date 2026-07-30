@@ -61,7 +61,7 @@ abstract class AudioPlayerInterface {
   AudioPlayerInterface()
       : _mkPlayer = CustomPlayer(
           configuration: const mk.PlayerConfiguration(
-            title: "Sangeet",
+            title: "Soulful Bhakti",
             logLevel: kDebugMode ? mk.MPVLogLevel.info : mk.MPVLogLevel.error,
             async: true,
           ),

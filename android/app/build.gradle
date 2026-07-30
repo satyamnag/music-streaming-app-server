@@ -110,7 +110,7 @@ android {
         }
         stable {
             dimension "default"
-            resValue "string", "app_name_en", "Sangeet Devotional"
+            resValue "string", "app_name_en", "Soulful Bhakti"
             signingConfig signingConfigs.release
         }
     }

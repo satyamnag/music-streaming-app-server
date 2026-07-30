@@ -48,7 +48,7 @@ class HomePage extends HookConsumerWidget {
                       letterSpacing: 1.8,
                       color: theme.colorScheme.foreground,
                     ),
-                    child: const Text("Sangeet"),
+                    child: const Text("Soulful Bhakti"),
                   ),
                   backgroundColor: theme.colorScheme.background,
                   foregroundColor: theme.colorScheme.foreground,

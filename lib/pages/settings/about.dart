@@ -39,7 +39,7 @@ class AboutSangeetPage extends HookConsumerWidget {
                 const SizedBox(height: 20),
                 Center(
                   child: const Text(
-                    "Sangeet is an extensible devotional music streaming platform",
+                    "Soulful Bhakti is a devotional music streaming platform",
                   )
                       .semiBold()
                       .large(),

@@ -60,7 +60,7 @@ class Sidebar extends HookConsumerWidget {
                   letterSpacing: 1.8,
                   color: colorScheme.foreground,
                 ),
-                child: const Text("Sangeet"),
+                child: const Text("Soulful Bhakti"),
               )
             : const Text(""),
       ),
