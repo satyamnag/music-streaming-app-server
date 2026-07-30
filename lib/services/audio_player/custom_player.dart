@@ -18,10 +18,17 @@ class CustomPlayer extends Player {
   int _androidAudioSessionId = 0;
   String _packageName = "";
   AndroidAudioManager? _androidAudioManager;
+  bool _pausedByInterruption = false;
+  bool _pausedByNoisy = false;
 
   CustomPlayer({super.configuration})
       : _playerStateStream = StreamController.broadcast() {
     nativePlayer.setProperty("network-timeout", "120");
+    nativePlayer.setProperty("cache", "yes");
+    nativePlayer.setProperty("cache-secs", "60");
+    nativePlayer.setProperty("demuxer-max-bytes", "100M");
+    nativePlayer.setProperty("demuxer-max-back-bytes", "50M");
+    nativePlayer.setProperty("gapless-audio", "yes");
 
     _subscriptions = [
       stream.buffering.listen((event) {
@@ -53,6 +60,46 @@ class CustomPlayer extends Player {
     if (kIsAndroid) {
       _androidAudioManager = AndroidAudioManager();
       AudioSession.instance.then((s) async {
+        // Configure audio session for music playback per official docs:
+        // https://github.com/ryanheise/audio_session#configure
+        await s.configure(const AudioSessionConfiguration(
+          androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+          androidWillPauseWhenDucked: true,
+        ));
+
+        // Handle audio interruptions (phone calls, other apps) per official docs:
+        // https://github.com/ryanheise/audio_session#interruption-event-stream
+        s.interruptionEventStream.listen((event) {
+          if (event.begin) {
+            switch (event.type) {
+              case AudioInterruptionType.pause:
+              case AudioInterruptionType.unknown:
+                if (state.playing) {
+                  _pausedByInterruption = true;
+                  pause();
+                }
+                break;
+              case AudioInterruptionType.duck:
+                // Will auto-duck due to androidWillPauseWhenDucked: true
+                break;
+            }
+          } else {
+            if (_pausedByInterruption) {
+              _pausedByInterruption = false;
+              play();
+            }
+          }
+        });
+
+        // Pause on headphone unplug per official docs:
+        // https://github.com/ryanheise/audio_session#becoming-noisy
+        s.becomingNoisyEventStream.listen((_) {
+          if (state.playing) {
+            _pausedByNoisy = true;
+            pause();
+          }
+        });
+
         _androidAudioSessionId =
             await _androidAudioManager!.generateAudioSessionId();
         notifyAudioSessionUpdate(true);
