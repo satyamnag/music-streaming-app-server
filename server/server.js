@@ -202,26 +202,33 @@ app.get('/browse/sections', async (req, res, next) => {
       return res.status(500).json({ error: 'Browse failed' })
     }
 
-    const playlistItems = [{
-      id: PLAYLIST_ID,
-      name: 'Supabase Songs',
-      description: `${data.length} devotional tracks`,
+    // Each track becomes an individual album item inside a section
+    const albumItems = data.map((t) => ({
+      id: `album-${t.id}`,
+      name: t.title,
       externalUri: '',
-      owner: DEFAULT_USER,
-      images: data[0]?.thumbnail ? [{ url: data[0].thumbnail, width: 300, height: 300 }] : [],
-    }]
+      artists: (t.artist_names || []).map((name) => ({
+        id: name.toLowerCase().replace(/\s+/g, '-'),
+        name,
+        externalUri: '',
+        images: null,
+      })),
+      images: t.thumbnail ? [{ url: t.thumbnail, width: 300, height: 300 }] : [],
+      albumType: 'single',
+      releaseDate: null,
+    }))
 
     res.json({
       items: [{
-        id: 'sections-supabase',
-        title: 'Supabase Songs',
+        id: 'sections-all',
+        title: 'All Songs',
         externalUri: '',
         browseMore: false,
-        items: playlistItems,
+        items: albumItems,
       }],
-      limit: 50,
+      limit: 100,
       nextOffset: null,
-      total: 1,
+      total: albumItems.length,
       hasMore: false,
     })
   } catch (err) {
