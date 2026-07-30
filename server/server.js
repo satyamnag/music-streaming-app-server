@@ -221,7 +221,7 @@ app.get('/browse/sections', async (req, res, next) => {
     res.json({
       items: [{
         id: 'sections-all',
-        title: 'All Songs',
+        title: 'Devotional Songs',
         externalUri: '',
         browseMore: false,
         items: albumItems,
