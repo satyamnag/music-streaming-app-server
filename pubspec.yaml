@@ -58,7 +58,7 @@ dependencies:
   flutter_inappwebview: ^6.1.5
   flutter_localizations:
     sdk: flutter
-  flutter_native_splash: ^2.4.6
+  # flutter_native_splash removed
   flutter_riverpod: ^2.5.1
   flutter_sharing_intent: ^1.1.0
   flutter_undraw: ^0.2.1
@@ -162,8 +162,8 @@ dev_dependencies:
   flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
-  integration_test:
-    sdk: flutter
+  # integration_test (flutter SDK) - add when running integration tests, removed for release builds
+  # to avoid GeneratedPluginRegistrant compilation error
   json_serializable: ^6.6.2
   freezed: ^2.5.2
   process_run: ^0.14.2
@@ -222,6 +222,7 @@ flutter:
     - assets/branding/sangeet-logo.ico
     - assets/plugins/spotube-plugin-musicbrainz-listenbrainz/plugin.smplug
     - assets/plugins/spotube-plugin-youtube-audio/plugin.smplug
+    - assets/plugins/sangeet-supabase-audio/plugin.smplug
     - LICENSE
     - packages/flutter_undraw/assets/undraw/access_denied.svg
     - packages/flutter_undraw/assets/undraw/fixing_bugs.svg
@@ -271,12 +272,4 @@ flutter:
 flutter_gen:
   output: lib/collections
 
-flutter_native_splash:
-  background_image: assets/bengali-patterns-bg.jpg
-  image: assets/sangeet-logo.png
-  branding: assets/branding.png
-  android_12:
-    image: assets/sangeet-logo_android12.png
-    branding: assets/branding.png
-    color: "#000000"
-    icon_background_color: "#000000"
+# flutter_native_splash removed

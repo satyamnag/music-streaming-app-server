@@ -46,7 +46,7 @@ class SupabaseAudioSource {
   var audioSource
 
   construct {
-    audioSource = SupabaseAudioSourceImpl("https://your-api.com")
+    audioSource = SupabaseAudioSourceImpl("https://music-streaming-app-server.onrender.com")
   }
 }
 

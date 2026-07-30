@@ -49,7 +49,6 @@ import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/wm_tools/wm_tools.dart';
 import 'package:sangeet/utils/migrations/sandbox.dart';
 import 'package:sangeet/utils/platform.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:window_manager/window_manager.dart';
@@ -75,8 +74,6 @@ Future<void> main(List<String> rawArgs) async {
     // await registerWindowsScheme("spotify");
 
     tz.initializeTimeZones();
-
-    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
     MediaKit.ensureInitialized();
 
@@ -186,8 +183,6 @@ class Sangeet extends HookConsumerWidget {
     useGetStoragePermissions(ref);
 
     useEffect(() {
-      FlutterNativeSplash.remove();
-
       if (kIsMobile) {
         HomeWidget.registerInteractivityCallback(glanceBackgroundCallback);
       }
