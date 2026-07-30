@@ -543,6 +543,19 @@ app.post('/api/playlists', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+app.put('/api/playlists/:id', async (req, res, next) => {
+  try {
+    const { title, description, visibility } = req.body
+    const updates = {}
+    if (title !== undefined) updates.title = title
+    if (description !== undefined) updates.description = description
+    if (visibility !== undefined) updates.visibility = visibility
+    const { data, error } = await supabase.from('playlists').update(updates).eq('id', req.params.id).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
 app.post('/api/playlists/:id/songs', async (req, res, next) => {
   try {
     const { track_id } = req.body
