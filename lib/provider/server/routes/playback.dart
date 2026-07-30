@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' hide Response;
@@ -43,6 +44,15 @@ String? get _randomUserAgent => _deviceClients
 
 class ServerPlaybackRoutes {
   static const _maxCacheSize = 500 * 1024 * 1024; // 500 MB limit
+  static const _xorKey = [0x4B, 0x68, 0x61, 0x6B, 0x74, 0x69, 0x53, 0x42];
+
+  static Uint8List _xorTransform(Uint8List data) {
+    final result = Uint8List(data.length);
+    for (int i = 0; i < data.length; i++) {
+      result[i] = data[i] ^ _xorKey[i % _xorKey.length];
+    }
+    return result;
+  }
 
   final Ref ref;
   UserPreferences get userPreferences => ref.read(userPreferencesProvider);
@@ -196,7 +206,8 @@ class ServerPlaybackRoutes {
     final trackCacheFile = File(await _getTrackCacheFilePath(track));
 
     if (await trackCacheFile.exists() && userPreferences.cacheMusic) {
-      final bytes = await trackCacheFile.readAsBytes();
+      final encrypted = await trackCacheFile.readAsBytes();
+      final bytes = _xorTransform(Uint8List.fromList(encrypted));
       final cachedFileLength = bytes.length;
 
       return dio_lib.Response<Uint8List>(
@@ -305,6 +316,12 @@ class ServerPlaybackRoutes {
         if (fileLength != contentRange.total) return;
 
         await trackPartialCacheFile.rename(trackCacheFile.path);
+
+        // Encrypt cached file to prevent playback outside the app
+        try {
+          final rawBytes = await trackCacheFile.readAsBytes();
+          await trackCacheFile.writeAsBytes(_xorTransform(Uint8List.fromList(rawBytes)));
+        } catch (_) {}
 
         if (track.qualityPreset!.getFileExtension() == "weba") return;
 
