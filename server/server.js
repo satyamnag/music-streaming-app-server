@@ -202,33 +202,33 @@ app.get('/browse/sections', async (req, res, next) => {
       return res.status(500).json({ error: 'Browse failed' })
     }
 
-    // Each track becomes an individual album item inside a section
-    const albumItems = data.map((t) => ({
-      id: `album-${t.id}`,
-      name: t.title,
+    // Each track is its own section — completely independent, no grouping
+    const sections = data.map((t) => ({
+      id: `section-${t.id}`,
+      title: t.title,
       externalUri: '',
-      artists: (t.artist_names || []).map((name) => ({
-        id: name.toLowerCase().replace(/\s+/g, '-'),
-        name,
+      browseMore: false,
+      items: [{
+        id: `album-${t.id}`,
+        name: t.title,
         externalUri: '',
-        images: null,
-      })),
-      images: t.thumbnail ? [{ url: t.thumbnail, width: 300, height: 300 }] : [],
-      albumType: 'single',
-      releaseDate: null,
+        artists: (t.artist_names || []).map((name) => ({
+          id: name.toLowerCase().replace(/\s+/g, '-'),
+          name,
+          externalUri: '',
+          images: null,
+        })),
+        images: t.thumbnail ? [{ url: t.thumbnail, width: 300, height: 300 }] : [],
+        albumType: 'single',
+        releaseDate: null,
+      }],
     }))
 
     res.json({
-      items: [{
-        id: 'sections-all',
-        title: 'Devotional Songs',
-        externalUri: '',
-        browseMore: false,
-        items: albumItems,
-      }],
+      items: sections,
       limit: 100,
       nextOffset: null,
-      total: albumItems.length,
+      total: sections.length,
       hasMore: false,
     })
   } catch (err) {
