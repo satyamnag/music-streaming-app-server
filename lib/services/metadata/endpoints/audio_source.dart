@@ -60,13 +60,14 @@ class MetadataPluginAudioSourceEndpoint {
         .map((e) => SangeetAudioSourceStreamObject.fromJson(e))
         .toList();
 
-    // Cache the signed URL for 1 hour
+    // Cache the signed URL for 30 min (Supabase signed URL expires in 60 min,
+    // this margin prevents stale-URL mid-playback issues)
     await prefs.setString(
       cacheKey,
       jsonEncode({
         'streams': result.map((s) => s.toJson()).toList(),
         '_expires':
-            DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+            DateTime.now().add(const Duration(minutes: 30)).toIso8601String(),
       }),
     );
 

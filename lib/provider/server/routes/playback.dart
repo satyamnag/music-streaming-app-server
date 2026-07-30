@@ -302,12 +302,45 @@ class ServerPlaybackRoutes {
         ? ContentRangeHeader.parse(res.headers.value("content-range") ?? "")
         : ContentRangeHeader(0, 0, 0);
 
+    bool retried = false;
     resStream.listen(
       (data) {
         partialCacheFileSink.add(data);
       },
-      onError: (e, stack) {
-        partialCacheFileSink.close();
+      onError: (e, stack) async {
+        await partialCacheFileSink.close();
+        // On stream error (e.g. expired signed URL), retry once with fresh URL
+        if (!retried) {
+          retried = true;
+          AppLogger.log.i('Stream error, retrying with fresh URL: $e');
+          try {
+            final freshTrack = await ref
+                .read(sourcedTrackProvider(track.query).notifier)
+                .refreshStreamingUrl();
+            if (freshTrack.url != null) {
+              url = freshTrack.url!;
+              options.headers?['host'] = Uri.parse(url).host;
+              final retryRes = await dio.get<ResponseBody>(url, options: options);
+              final retryStream = retryRes.data!.stream;
+              retryStream.listen(
+                (data) => partialCacheFileSink.add(data),
+                onDone: () async {
+                  await partialCacheFileSink.close();
+                  final fileLength = await trackPartialCacheFile.length();
+                  if (fileLength == contentRange.total) {
+                    await trackPartialCacheFile.rename(trackCacheFile.path);
+                    try {
+                      final rawBytes = await trackCacheFile.readAsBytes();
+                      await trackCacheFile.writeAsBytes(_xorTransform(Uint8List.fromList(rawBytes)));
+                    } catch (_) {}
+                  }
+                },
+                cancelOnError: true,
+              );
+              return;
+            }
+          } catch (_) {}
+        }
       },
       onDone: () async {
         await partialCacheFileSink.close();
