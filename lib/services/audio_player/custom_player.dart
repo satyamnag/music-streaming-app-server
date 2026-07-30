@@ -230,8 +230,41 @@ class CustomPlayer extends Player {
     );
   }
 
+  /// Crossfade: sets duration in seconds between tracks. 0 = disabled.
+  Future<void> setCrossfade(int durationSeconds) async {
+    if (durationSeconds > 0) {
+      await nativePlayer.setProperty('audio-delay', (-durationSeconds * 0.5).toString());
+      await nativePlayer.setProperty('gapless-audio', 'weak');
+    } else {
+      await nativePlayer.setProperty('audio-delay', '0');
+      await nativePlayer.setProperty('gapless-audio', 'yes');
+    }
+  }
+
+  /// Sets the 10-band graphic equalizer using mpv audio filter.
+  /// Gains: -12 to +12 dB for each band. Frequencies: [31,62,125,250,500,1k,2k,4k,8k,16k] Hz.
+  Future<void> setEqualizer(List<double> gains) async {
+    if (gains.length != 10) return;
+    const freq = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+    final filterParts = <String>[];
+    for (int i = 0; i < 10; i++) {
+      final g = gains[i].clamp(-12.0, 12.0);
+      filterParts.add('equalizer=${freq[i]}:0.5:${g.toStringAsFixed(1)}');
+    }
+    await nativePlayer.setProperty('af', filterParts.join(','));
+  }
+
+  /// Resets equalizer to flat (0 dB for all bands).
+  Future<void> resetEqualizer() async {
+    await nativePlayer.setProperty('af', '');
+  }
+
+  /// Sets pitch without changing playback speed (0.5 to 2.0, 1.0 = normal).
+  Future<void> setPitch(double pitch) async {
+    await nativePlayer.setProperty('pitch', pitch.toStringAsFixed(3));
+  }
+
   /// Restores playback to a saved position after app restart.
-  /// Call this after opening a playlist.
   Future<void> restorePosition({required int savedPositionMs, required int trackIndex}) async {
     if (savedPositionMs <= 0) return;
     if (state.playlist.index != trackIndex) {
