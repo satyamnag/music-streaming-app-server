@@ -1,24 +1,16 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show ListTile;
-
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/adaptive/adaptive_select_tile.dart';
-import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/settings/playback/edit_connect_port_dialog.dart';
 import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/modules/settings/youtube_engine_not_installed_dialog.dart';
 import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
-import 'package:sangeet/services/kv_store/kv_store.dart';
-import 'package:sangeet/services/youtube_engine/yt_dlp_engine.dart';
-
 import 'package:sangeet/utils/platform.dart';
 
 class SettingsPlaybackSection extends HookConsumerWidget {
@@ -32,53 +24,21 @@ class SettingsPlaybackSection extends HookConsumerWidget {
     final sourcePresetsNotifier =
         ref.watch(audioSourcePresetsProvider.notifier);
     final theme = Theme.of(context);
+    final opusIdx = sourcePresets.presets.indexWhere((p) => p.name == 'opus');
+    final opusContainerIdx = opusIdx >= 0 ? opusIdx : 0;
 
     return SectionCardWithHeading(
       heading: context.l10n.playback,
       children: [
-        AdaptiveSelectTile<YoutubeClientEngine>(
-          secondary: const Icon(SangeetIcons.engine),
-          title: Text(context.l10n.youtube_engine),
-          value: preferences.youtubeClientEngine,
-          options: YoutubeClientEngine.values
-              .where((e) => e.isAvailableForPlatform())
-              .map((e) => SelectItemButton(
-                    value: e,
-                    child: Text(e.label),
-                  ))
-              .toList(),
-          onChanged: (value) async {
-            if (value == null) return;
-            if (value == YoutubeClientEngine.ytDlp) {
-              final customPath = KVStoreService.getYoutubeEnginePath(value);
-              if (!await YtDlpEngine.isInstalled() &&
-                  (customPath == null || !await File(customPath).exists()) &&
-                  context.mounted) {
-                final hasInstalled = await showDialog<bool>(
-                  context: context,
-                  builder: (context) =>
-                      YouTubeEngineNotInstalledDialog(engine: value),
-                );
-                if (hasInstalled != true) return;
-              }
-            }
-            preferencesNotifier.setYoutubeClientEngine(value);
-          },
-        ),
         if (sourcePresets.presets.isNotEmpty) ...[
           AdaptiveSelectTile(
             secondary: const Icon(SangeetIcons.plugin),
             title: Text(context.l10n.streaming_music_format),
-            value: sourcePresets.selectedStreamingContainerIndex,
+            value: opusContainerIdx,
             options: [
-              for (final MapEntry(:key, value: preset)
-                  in sourcePresets.presets.asMap().entries)
-                SelectItemButton(value: key, child: Text(preset.name)),
+              SelectItemButton(value: opusContainerIdx, child: const Text('opus')),
             ],
-            onChanged: (value) {
-              if (value == null) return;
-              sourcePresetsNotifier.setSelectedStreamingContainerIndex(value);
-            },
+            onChanged: null,
           ),
           AdaptiveSelectTile(
             secondary: const Icon(SangeetIcons.audioQuality),
@@ -131,29 +91,9 @@ class SettingsPlaybackSection extends HookConsumerWidget {
         ],
         ListTile(
           title: Text(context.l10n.cache_music),
-          subtitle: kIsMobile
-              ? null
-              : Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: "${context.l10n.open} "),
-                      TextSpan(
-                        text: context.l10n.cache_folder.toLowerCase(),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = preferencesNotifier.openCacheFolder,
-                        style: theme.typography.normal.copyWith(
-                          color: theme.colorScheme.primary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+          subtitle: const Text('Always enabled'),
           leading: const Icon(SangeetIcons.cache),
-          trailing: Switch(
-            value: preferences.cacheMusic,
-            onChanged: preferencesNotifier.setCacheMusic,
-          ),
+          trailing: const Icon(SangeetIcons.done),
         ),
         ListTile(
           leading: const Icon(SangeetIcons.playlistRemove),

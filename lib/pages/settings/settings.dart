@@ -5,7 +5,6 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/pages/settings/sections/about.dart';
-import 'package:sangeet/pages/settings/sections/accounts.dart';
 import 'package:sangeet/pages/settings/sections/appearance.dart';
 import 'package:sangeet/pages/settings/sections/desktop.dart';
 import 'package:sangeet/pages/settings/sections/downloads.dart';
@@ -46,7 +45,6 @@ class SettingsPage extends HookConsumerWidget {
                   child: ListView(
                     controller: controller,
                     children: [
-                      const SettingsAccountSection(),
                       const SettingsLanguageRegionSection(),
                       const SettingsAppearanceSection(),
                       const SettingsPlaybackSection(),

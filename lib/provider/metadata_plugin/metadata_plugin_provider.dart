@@ -169,6 +169,24 @@ class MetadataPluginNotifier extends AsyncNotifier<MetadataPluginState> {
       }
     }
 
+    // Auto-select first metadata/audio-source plugin if none explicitly set
+    if (defaultMetadataPlugin == -1) {
+      for (int i = 0; i < pluginConfigs.length; i++) {
+        if (pluginConfigs[i].abilities.contains(PluginAbilities.metadata)) {
+          defaultMetadataPlugin = i;
+          break;
+        }
+      }
+    }
+    if (defaultAudioSourcePlugin == -1) {
+      for (int i = 0; i < pluginConfigs.length; i++) {
+        if (pluginConfigs[i].abilities.contains(PluginAbilities.audioSource)) {
+          defaultAudioSourcePlugin = i;
+          break;
+        }
+      }
+    }
+
     return MetadataPluginState(
       plugins: pluginConfigs,
       defaultMetadataPlugin: defaultMetadataPlugin,
@@ -178,8 +196,6 @@ class MetadataPluginNotifier extends AsyncNotifier<MetadataPluginState> {
 
   Future<void> _loadDefaultPlugins(MetadataPluginState pluginState) async {
     const plugins = [
-      "spotube-plugin-musicbrainz-listenbrainz",
-      "spotube-plugin-youtube-audio",
       "sangeet-supabase-audio",
     ];
 

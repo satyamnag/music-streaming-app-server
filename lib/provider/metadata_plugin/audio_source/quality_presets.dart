@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -28,6 +29,10 @@ class AudioSourcePresetsState with _$AudioSourcePresetsState {
 
 class AudioSourceAvailableQualityPresetsNotifier
     extends Notifier<AudioSourcePresetsState> {
+  final _readyCompleter = Completer<void>();
+
+  Future<void> get ready => _readyCompleter.future;
+
   @override
   build() {
     final audioSourceSnapshot = ref.watch(audioSourcePluginProvider);
@@ -59,25 +64,41 @@ class AudioSourceAvailableQualityPresetsNotifier
     AsyncValue<MetadataPlugin?> audioSourceSnapshot,
     AsyncValue<PluginConfiguration?> audioSourceConfigSnapshot,
   ) async {
+    print('[SANGEET] _initialize: audioSourceSnapshot=$audioSourceSnapshot');
+    print('[SANGEET] _initialize: audioSourceConfigSnapshot=$audioSourceConfigSnapshot');
     audioSourceConfigSnapshot.whenData((audioSourceConfig) {
       audioSourceSnapshot.whenData((audioSource) async {
+        print('[SANGEET] _initialize: audioSource=$audioSource config=$audioSourceConfig');
         if (audioSource == null || audioSourceConfig == null) {
-          throw MetadataPluginException.noDefaultAudioSourcePlugin();
+          print('[SANGEET] _initialize: null sources');
+          return;
         }
         final preferences = await SharedPreferences.getInstance();
         final persistedStateStr =
             preferences.getString("audioSourceState-${audioSourceConfig.slug}");
 
+        final presets = audioSource.audioSource.supportedPresets;
+        final opusIdx = presets.indexWhere((p) => p.name == 'opus');
+        final defaultContainerIdx = opusIdx >= 0 ? opusIdx : 0;
+
         if (persistedStateStr != null) {
+          print('[SANGEET] _initialize: loading persisted state');
           state =
               AudioSourcePresetsState.fromJson(jsonDecode(persistedStateStr))
                   .copyWith(
-            presets: audioSource.audioSource.supportedPresets,
+            presets: presets,
+            selectedStreamingContainerIndex: defaultContainerIdx,
           );
         } else {
+          print('[SANGEET] _initialize: fresh state, presets from plugin');
           state = AudioSourcePresetsState(
-            presets: audioSource.audioSource.supportedPresets,
+            presets: presets,
+            selectedStreamingContainerIndex: defaultContainerIdx,
           );
+        }
+        print('[SANGEET] _initialize: presets loaded, count=${state.presets.length}');
+        if (!_readyCompleter.isCompleted) {
+          _readyCompleter.complete();
         }
       });
     });

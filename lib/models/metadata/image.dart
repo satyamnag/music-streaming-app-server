@@ -43,7 +43,7 @@ extension SangeetImageExtensions on List<SangeetImageObject>? {
         : placeholderUrlMap[placeholder]!;
   }
 
-  Uri asUri({
+  Uri? asUri({
     int index = 1,
     required ImagePlaceholder placeholder,
   }) {
@@ -51,7 +51,7 @@ extension SangeetImageExtensions on List<SangeetImageObject>? {
     if (url.startsWith("http")) {
       return Uri.parse(url);
     }
-    return Uri.file(url);
+    return null;
   }
 
   String smallest(ImagePlaceholder placeholder) {

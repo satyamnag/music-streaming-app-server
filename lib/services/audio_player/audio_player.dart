@@ -17,9 +17,23 @@ part 'audio_player_impl.dart';
 
 class SangeetMedia extends mk.Media {
   static int serverPort = 0;
+  static final Completer<int> _portReady = Completer<int>();
+
+  static Future<void> ensurePortReady() async {
+    if (serverPort == 0) {
+      await _portReady.future;
+    }
+  }
+
+  static void setPort(int port) {
+    serverPort = port;
+    if (!_portReady.isCompleted) {
+      _portReady.complete(port);
+    }
+  }
 
   static String get _host =>
-      kIsWindows ? "localhost" : InternetAddress.anyIPv4.address;
+      kIsWindows ? "localhost" : "127.0.0.1";
 
   final SangeetTrackObject track;
   SangeetMedia(this.track)

@@ -45,6 +45,9 @@ class SourcedTrack extends BasicSourcedTrack {
       throw MetadataPluginException.noDefaultAudioSourcePlugin();
     }
 
+    // Ensure presets are loaded before building SourcedTrack
+    await ref.read(audioSourcePresetsProvider.notifier).ready;
+
     final database = ref.read(databaseProvider);
     final cachedSource = await (database.select(database.sourceMatchTable)
           ..where((s) =>
@@ -64,17 +67,21 @@ class SourcedTrack extends BasicSourcedTrack {
         throw TrackNotFoundError(query);
       }
 
-      await database.into(database.sourceMatchTable).insert(
-            SourceMatchTableCompanion.insert(
-              trackId: query.id,
-              sourceInfo: Value(jsonEncode(siblings.first)),
-              sourceType: audioSourceConfig.slug,
-            ),
-          );
+      try {
+        await database.into(database.sourceMatchTable).insert(
+              SourceMatchTableCompanion.insert(
+                trackId: query.id,
+                sourceInfo: Value(jsonEncode(siblings.first)),
+                sourceType: audioSourceConfig.slug,
+              ),
+            );
+      } catch (dbError) {
+        // Duplicate insert is harmless (concurrent builds)
+      }
 
       final manifest = await audioSource.audioSource.streams(siblings.first);
 
-      return SourcedTrack(
+      final result = SourcedTrack(
         ref: ref,
         siblings: siblings.skip(1).toList(),
         info: siblings.first,
@@ -82,6 +89,7 @@ class SourcedTrack extends BasicSourcedTrack {
         sources: manifest,
         query: query,
       );
+      return result;
     }
     final item = SangeetAudioSourceMatchObject.fromJson(
       jsonDecode(cachedSource.sourceInfo),
@@ -98,7 +106,6 @@ class SourcedTrack extends BasicSourcedTrack {
     );
 
     AppLogger.log.i("${query.name}: ${sourcedTrack.url}");
-
     return sourcedTrack;
   }
 
@@ -301,8 +308,13 @@ class SourcedTrack extends BasicSourcedTrack {
   String? get url {
     final preferences = ref.read(audioSourcePresetsProvider);
 
+    final preset = preferences.presets.elementAtOrNull(
+      preferences.selectedStreamingContainerIndex,
+    );
+    if (preset == null) return null;
+
     return getUrlOfQuality(
-      preferences.presets[preferences.selectedStreamingContainerIndex],
+      preset,
       preferences.selectedStreamingQualityIndex,
     );
   }
@@ -339,10 +351,16 @@ class SourcedTrack extends BasicSourcedTrack {
       return exactMatch;
     }
 
-    // Find the preset with closest quality to the supplied quality
-    return sources.where((source) {
+    // Find the source with closest quality to the supplied quality
+    // Dart docs: reduce throws StateError on empty iterable
+    final matchingSources = sources.where((source) {
       return source.container == preset.name;
-    }).reduce((prev, curr) {
+    });
+    if (matchingSources.isEmpty) {
+      // No sources match the container — return the first available source
+      return sources.first;
+    }
+    return matchingSources.reduce((prev, curr) {
       if (quality is SangeetAudioLosslessContainerQuality) {
         final prevDiff = ((prev.sampleRate ?? 0) - quality.sampleRate).abs() +
             ((prev.bitDepth ?? 0) - quality.bitDepth).abs();

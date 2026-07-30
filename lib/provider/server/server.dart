@@ -25,10 +25,10 @@ final serverProvider = FutureProvider(
     if (connectPort == -1) {
       if (SangeetMedia.serverPort == 0) {
         final port = Random().nextInt(17500) + 5000;
-        SangeetMedia.serverPort = port;
+        SangeetMedia.setPort(port);
       }
     } else {
-      SangeetMedia.serverPort = connectPort;
+      SangeetMedia.setPort(connectPort);
     }
 
     final server = await serve(

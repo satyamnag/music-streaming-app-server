@@ -87,3 +87,4 @@ android/app/.cxx
 *.apk
 android/app/stable/release/
 server/node_modules/
+.git-rewrite

@@ -53,8 +53,7 @@ class SettingsLanguageRegionSection extends HookConsumerWidget {
         AdaptiveSelectTile<Market>(
           breakLayout: mediaQuery.lgAndUp,
           secondary: const Icon(SangeetIcons.shoppingBag),
-          title: Text(context.l10n.market_place_region),
-          subtitle: Text(context.l10n.recommendation_country),
+          title: Text(context.l10n.country),
           value: preferences.market,
           onChanged: (value) {
             if (value == null) return;

@@ -846,7 +846,7 @@ abstract class AppLocalizations {
   /// No description provided for @language_region.
   ///
   /// In en, this message translates to:
-  /// **'Language & Region'**
+  /// **'Language & Country'**
   String get language_region;
 
   /// No description provided for @language.

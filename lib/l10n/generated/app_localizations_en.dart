@@ -386,7 +386,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout_of_this_account => 'Logout of this account';
 
   @override
-  String get language_region => 'Language & Region';
+  String get language_region => 'Language & Country';
 
   @override
   String get language => 'Language';

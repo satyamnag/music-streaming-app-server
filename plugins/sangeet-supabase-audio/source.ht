@@ -1,3 +1,8 @@
+import "module:std" as std
+var HttpClient = std.HttpClient
+var HttpBaseOptions = std.HttpBaseOptions
+var HttpResponse = std.HttpResponse
+
 class SupabaseAudioSourceImpl {
   var _baseUrl
 
@@ -5,7 +10,7 @@ class SupabaseAudioSourceImpl {
     _baseUrl = baseUrl
   }
 
-  fun supportedPresets {
+  get supportedPresets {
     return [
       struct { "type": "lossy", "name": "mp3", "qualities": [struct { "bitrate": 128000 }] },
       struct { "type": "lossy", "name": "opus", "qualities": [struct { "bitrate": 96000 }] }
@@ -13,17 +18,8 @@ class SupabaseAudioSourceImpl {
   }
 
   fun matches(trackJson) {
-    var query = trackJson["name"]
-    var artists = trackJson["artists"]
-    if (artists != null && artists.length > 0) {
-      var names = []
-      for (var i = 0; i < artists.length; i++) {
-        names.add(artists[i]["name"])
-      }
-      query = query + " " + names.join(" ")
-    }
-    var client = HttpClient(struct { "baseUrl": _baseUrl, "connectTimeout": 10000, "receiveTimeout": 30000 })
-    return client.get_req("/search", struct { "queryParameters": struct { "q": query } }).then((response) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 15000, receiveTimeout: 30000))
+    return client.get_req("/search?q=" + trackJson["name"]).then((response) {
       if (response.statusCode != 200) {
         return []
       }
@@ -32,7 +28,7 @@ class SupabaseAudioSourceImpl {
   }
 
   fun streams(matchJson) {
-    var client = HttpClient(struct { "baseUrl": _baseUrl, "connectTimeout": 10000, "receiveTimeout": 30000 })
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
     return client.get_req("/stream/" + matchJson["id"]).then((response) {
       if (response.statusCode != 200) {
         return []
@@ -42,11 +38,369 @@ class SupabaseAudioSourceImpl {
   }
 }
 
+class SupabaseBrowseEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun sections({offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/browse/sections").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return response.data
+    })
+  }
+
+  fun sectionItems(id, {offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/browse/sections/" + id + "/items").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return response.data
+    })
+  }
+}
+
+class SupabaseSearchEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  get chips {
+    return ["Supabase Songs"]
+  }
+
+  fun all(query) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/search?q=" + query + "&all=true").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "tracks": [], "albums": [], "artists": [], "playlists": [] }
+      }
+      return response.data
+    })
+  }
+
+  fun albums(query, {limit, offset}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/search?q=" + query + "&albums=true").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+    })
+  }
+
+  fun artists(query, {limit, offset}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun playlists(query, {limit, offset}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun tracks(query, {limit, offset}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/search?q=" + query + "&tracks=true").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return struct { "items": response.data, "limit": 20, "nextOffset": null, "total": response.data.length, "hasMore": false }
+    })
+  }
+}
+
+class SupabaseTrackEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun getTrack(id) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/tracks/" + id).then((response) {
+      if (response.statusCode != 200) {
+        return null
+      }
+      return response.data
+    })
+  }
+
+  fun save(ids) {
+  }
+
+  fun unsave(ids) {
+  }
+
+  fun radio(id) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/tracks").then((response) {
+      if (response.statusCode != 200) {
+        return []
+      }
+      return response.data.items
+    })
+  }
+}
+
+class SupabaseAlbumEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun getAlbum(id) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/albums/" + id).then((response) {
+      if (response.statusCode != 200) {
+        return null
+      }
+      return response.data
+    })
+  }
+
+  fun tracks(id, {offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/albums/" + id + "/tracks").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return response.data
+    })
+  }
+
+  fun releases({offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/tracks").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+    })
+  }
+
+  fun save(ids) {
+  }
+
+  fun unsave(ids) {
+  }
+}
+
+class SupabaseArtistEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun getArtist(id) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/artists/" + id).then((response) {
+      if (response.statusCode != 200) {
+        return null
+      }
+      return response.data
+    })
+  }
+
+  fun topTracks(id, {offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/artists/" + id + "/top-tracks").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return response.data
+    })
+  }
+
+  fun albums(id, {offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun related(id, {offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun save(ids) {
+  }
+
+  fun unsave(ids) {
+  }
+}
+
+class SupabasePlaylistEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun getPlaylist(id) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/playlists/" + id).then((response) {
+      if (response.statusCode != 200) {
+        return null
+      }
+      return response.data
+    })
+  }
+
+  fun tracks(id, {offset, limit}) {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/playlists/" + id + "/tracks").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+      }
+      return response.data
+    })
+  }
+
+  fun create(userId, {name, description, public, collaborative}) {
+    return null
+  }
+
+  fun update(playlistId, {name, description, public, collaborative}) {
+  }
+
+  fun addTracks(playlistId, {trackIds, position}) {
+  }
+
+  fun removeTracks(playlistId, {trackIds}) {
+  }
+
+  fun save(playlistId) {
+  }
+
+  fun unsave(playlistId) {
+  }
+
+  fun deletePlaylist(playlistId) {
+  }
+}
+
+class SupabaseUserEndpoint {
+  var _baseUrl
+
+  construct(baseUrl) {
+    _baseUrl = baseUrl
+  }
+
+  fun me() {
+    var client = HttpClient(HttpBaseOptions(baseUrl: _baseUrl, connectTimeout: 10000, receiveTimeout: 30000))
+    return client.get_req("/users/me").then((response) {
+      if (response.statusCode != 200) {
+        return struct { "id": "", "name": "", "images": [], "externalUri": "" }
+      }
+      return response.data
+    })
+  }
+
+  fun savedTracks({offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun savedPlaylists({offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun savedAlbums({offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun savedArtists({offset, limit}) {
+    return struct { "items": [], "limit": 20, "nextOffset": null, "total": 0, "hasMore": false }
+  }
+
+  fun isSavedPlaylist(playlistId) {
+    return false
+  }
+
+  fun isSavedTracks(ids) {
+    var result = []
+    for (var i = 0; i < ids.length; i++) {
+      result.add(false)
+    }
+    return result
+  }
+
+  fun isSavedAlbums(ids) {
+    var result = []
+    for (var i = 0; i < ids.length; i++) {
+      result.add(false)
+    }
+    return result
+  }
+
+  fun isSavedArtists(ids) {
+    var result = []
+    for (var i = 0; i < ids.length; i++) {
+      result.add(false)
+    }
+    return result
+  }
+}
+
+class SupabaseAuthEndpoint {
+  get authStateStream {
+    return null
+  }
+
+  fun isAuthenticated {
+    return false
+  }
+
+  fun authenticate {
+  }
+
+  fun logout {
+  }
+}
+
+class SupabaseCoreEndpoint {
+  get support {
+    return ""
+  }
+
+  fun checkUpdate(pluginConfigJson) {
+    return null
+  }
+
+  fun scrobble(details) {
+  }
+}
+
 class SupabaseAudioSource {
   var audioSource
+  var browse
+  var search
+  var track
+  var album
+  var artist
+  var playlist
+  var user
+  var auth
+  var core
 
   construct {
-    audioSource = SupabaseAudioSourceImpl("https://music-streaming-app-server.onrender.com")
+    var baseUrl = "https://music-streaming-app-server.onrender.com"
+    audioSource = SupabaseAudioSourceImpl(baseUrl)
+    browse = SupabaseBrowseEndpoint(baseUrl)
+    search = SupabaseSearchEndpoint(baseUrl)
+    track = SupabaseTrackEndpoint(baseUrl)
+    album = SupabaseAlbumEndpoint(baseUrl)
+    artist = SupabaseArtistEndpoint(baseUrl)
+    playlist = SupabasePlaylistEndpoint(baseUrl)
+    user = SupabaseUserEndpoint(baseUrl)
+    auth = SupabaseAuthEndpoint()
+    core = SupabaseCoreEndpoint()
   }
 }
 

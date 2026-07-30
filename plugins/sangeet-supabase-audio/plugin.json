@@ -6,6 +6,6 @@
   "entryPoint": "SupabaseAudioSource",
   "pluginApiVersion": "2.0.0",
   "repository": "https://github.com/you/sangeet-supabase-audio",
-  "abilities": ["audio-source"],
+  "abilities": ["audio-source", "metadata"],
   "apis": []
 }

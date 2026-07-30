@@ -47,15 +47,16 @@ class AudioServices with WidgetsBindingObserver {
 
   Future<void> addTrack(SangeetTrackObject track) async {
     await smtc?.addTrack(track);
+    final images = track.album.images;
     mobile?.addItem(MediaItem(
       id: track.id,
       album: track.album.name,
       title: track.name,
       artist: track.artists.asString(),
       duration: Duration(milliseconds: track.durationMs),
-      artUri: (track.album.images).asUri(
-        placeholder: ImagePlaceholder.albumArt,
-      ),
+      artUri: (images != null && images.isNotEmpty)
+          ? images.asUri(placeholder: ImagePlaceholder.albumArt)
+          : null,
       playable: true,
     ));
   }

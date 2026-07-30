@@ -32,8 +32,7 @@ class SettingsAppearanceSection extends HookConsumerWidget {
     final children = [
       AdaptiveSelectTile<LayoutMode>(
         secondary: const Icon(SangeetIcons.dashboard),
-        title: Text(context.l10n.layout_mode),
-        subtitle: Text(context.l10n.override_layout_settings),
+        title: const Text('Layout'),
         value: preferences.layoutMode,
         onChanged: (value) {
           if (value != null) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' hide Response;
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:flutter/foundation.dart';
@@ -14,7 +15,7 @@ import 'package:sangeet/models/parser/range_headers.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 
-import 'package:sangeet/provider/server/active_track_sources.dart';
+import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -22,6 +23,10 @@ import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/sourced_track/sourced_track.dart';
 import 'package:sangeet/utils/service_utils.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+void _log(String msg) {
+  print('[SANGEET] $msg');
+}
 
 final _deviceClients = Set.unmodifiable({
   YoutubeApiClient.ios,
@@ -37,6 +42,8 @@ String? get _randomUserAgent => _deviceClients
     .payload["context"]["client"]["userAgent"];
 
 class ServerPlaybackRoutes {
+  static const _maxCacheSize = 500 * 1024 * 1024; // 500 MB limit
+
   final Ref ref;
   UserPreferences get userPreferences => ref.read(userPreferencesProvider);
   AudioPlayerState get playlist => ref.read(audioPlayerProvider);
@@ -53,28 +60,80 @@ class ServerPlaybackRoutes {
     );
   }
 
+  Future<void> _evictCacheIfNeeded() async {
+    if (!userPreferences.cacheMusic) return;
+    final cacheDir = Directory(await UserPreferencesNotifier.getMusicCacheDir());
+    if (!await cacheDir.exists()) return;
+
+    final files = <FileSystemEntity>[];
+    await for (final entity in cacheDir.list()) {
+      files.add(entity);
+    }
+
+    // Calculate total size
+    int totalSize = 0;
+    for (final f in files) {
+      if (f is File) totalSize += await f.length();
+    }
+
+    if (totalSize <= _maxCacheSize) return;
+
+    // Sort by last modified (oldest first) and delete until under limit
+    files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+    for (final f in files) {
+      if (totalSize <= _maxCacheSize) break;
+      if (f is File) {
+        final len = await f.length();
+        await f.delete();
+        totalSize -= len;
+      }
+    }
+  }
+
   Future<SourcedTrack?> _getSourcedTrack(
     Request request,
     String trackId,
   ) async {
-    final track =
-        playlist.tracks.firstWhere((element) => element.id == trackId);
+    _log('_getSourcedTrack: trackId=$trackId, playlist.tracks=${playlist.tracks.length}');
 
-    final activeSourcedTrack =
-        await ref.read(activeTrackSourcesProvider.future);
+    try {
+      // firstWhere throws StateError if no match (Dart docs), use firstWhereOrNull
+      final track = playlist.tracks.firstWhereOrNull(
+        (element) => element.id == trackId,
+      );
+      if (track == null) {
+        _log('_getSourcedTrack: track $trackId NOT in playlist state');
+        return null;
+      }
+      _log('_getSourcedTrack: found track ${track.name} in playlist state');
 
-    final media = audioPlayer.playlist.medias
-        .firstWhere((e) => e.uri == request.requestedUri.toString());
-    final spotubeMedia =
-        media is SangeetMedia ? media : SangeetMedia.media(media);
-    final sourcedTrack = activeSourcedTrack?.track.id == track.id
-        ? activeSourcedTrack?.source
-        : await ref.read(
-            sourcedTrackProvider(spotubeMedia.track as SangeetFullTrackObject)
-                .future,
+      // Resolve stream URL directly from the audio source plugin,
+      // bypassing sourcedTrackProvider to avoid Riverpod rebuild races
+      final fullTrack = track as SangeetFullTrackObject;
+      final audioSource = await ref.read(audioSourcePluginProvider.future);
+      SourcedTrack? sourcedTrack;
+      if (audioSource != null) {
+        final matches = await audioSource.audioSource.matches(fullTrack);
+        if (matches.isNotEmpty) {
+          final manifest = await audioSource.audioSource.streams(matches.first);
+          sourcedTrack = SourcedTrack(
+            ref: ref,
+            siblings: matches.skip(1).toList(),
+            info: matches.first,
+            source: '',
+            sources: manifest,
+            query: fullTrack,
           );
-
-    return sourcedTrack;
+        }
+      }
+      _log('_getSourcedTrack: sourcedTrack url=${sourcedTrack?.url}');
+      return sourcedTrack;
+    } catch (e, stack) {
+      _log('_getSourcedTrack ERROR: $e');
+      _log('_getSourcedTrack STACK: $stack');
+      AppLogger.reportError(e, stack);
+      return null;
+    }
   }
 
   Future<dio_lib.Response> streamTrackInformation(
@@ -265,6 +324,9 @@ class ServerPlaybackRoutes {
         ).catchError((e, stackTrace) {
           AppLogger.reportError(e, stackTrace);
         });
+
+        // Evict old cache files if total exceeds 500 MB limit
+        await _evictCacheIfNeeded();
       },
       cancelOnError: true,
     );

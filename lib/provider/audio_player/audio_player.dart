@@ -11,9 +11,12 @@ import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/discord_provider.dart';
-import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/logger/logger.dart';
+
+void _log(String msg) {
+  print('[SANGEET] $msg');
+}
 
 class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   BlackListNotifier get _blacklist => ref.read(blacklistProvider.notifier);
@@ -355,7 +358,12 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     int initialIndex = 0,
     bool autoPlay = false,
   }) async {
+    _log('load() called: ${tracks.length} tracks, port=${SangeetMedia.serverPort}');
     _assertAllowedTracks(tracks);
+
+    _log('load(): ensuring port ready...');
+    await SangeetMedia.ensurePortReady();
+    _log('load(): port ready=${SangeetMedia.serverPort}');
 
     final medias = _blacklist
         .filter(tracks)
@@ -363,18 +371,15 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
         .asMediaList()
         .unique((a, b) => a.uri == b.uri);
 
-    // Giving the initial track a boost so MediaKit won't skip
-    // because of timeout
-    final intendedActiveTrack = medias.elementAt(initialIndex);
-    if (intendedActiveTrack.track is! SangeetLocalTrackObject) {
-      ref.read(
-        sourcedTrackProvider(
-          intendedActiveTrack.track as SangeetFullTrackObject,
-        ).future,
-      );
+    _log('load(): ${medias.length} medias after filter');
+    if (medias.isNotEmpty) {
+      _log('load(): first media uri=${medias.first.uri}');
     }
 
-    if (medias.isEmpty) return;
+    if (medias.isEmpty) {
+      _log('load(): FAILED - medias is empty');
+      return;
+    }
 
     state = state.copyWith(
       // These are filtered tracks as well
@@ -383,11 +388,13 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       collections: [],
     );
 
+    _log('load(): state.tracks set, calling openPlaylist...');
     await audioPlayer.openPlaylist(
       medias,
       initialIndex: initialIndex,
       autoPlay: autoPlay,
     );
+    _log('load(): openPlaylist completed');
 
     await _updatePlayerState(
       AudioPlayerStateTableCompanion(
