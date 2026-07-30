@@ -608,6 +608,15 @@ app.delete('/api/liked-songs/:userId/:trackId', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// ----- Storage Usage (matches getStorageUsageAction.ts) -----
+app.get('/api/storage-usage', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.from('tracks').select('storage_path')
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ total_tracks: (data || []).length })
+  } catch (err) { next(err) }
+})
+
 // ----- User Profiles -----
 app.get('/api/user-profile/:userId', async (req, res, next) => {
   try {
