@@ -194,7 +194,7 @@ class SettingsMetadataProviderPage extends HookConsumerWidget {
                             final result = await openFile(
                               acceptedTypeGroups: [
                                 const XTypeGroup(
-                                  label: 'Sangeet Metadata Plugin',
+                                  label: 'Soulful Bhakti Metadata Plugin',
                                   extensions: ['smplug'],
                                 ),
                               ],

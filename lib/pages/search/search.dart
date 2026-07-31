@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -41,13 +42,13 @@ class SearchPage extends HookConsumerWidget {
     final searchTerm = ref.watch(searchTermStateProvider);
     final searchChipSnapshot = ref.watch(metadataPluginSearchChipsProvider);
     final selectedChip = useState<String?>(
-      searchChipSnapshot.asData?.value.first ?? "all",
+      searchChipSnapshot.asData?.value.firstOrNull ?? "all",
     );
 
     ref.listen(
       metadataPluginSearchChipsProvider,
       (previous, next) {
-        selectedChip.value = next.asData?.value.first ?? "all";
+        selectedChip.value = next.asData?.value.firstOrNull ?? "all";
       },
     );
 

@@ -90,12 +90,6 @@ class SettingsPlaybackSection extends HookConsumerWidget {
           ),
         ],
         ListTile(
-          title: Text(context.l10n.cache_music),
-          subtitle: const Text('Always enabled'),
-          leading: const Icon(SangeetIcons.cache),
-          trailing: const Icon(SangeetIcons.done),
-        ),
-        ListTile(
           leading: const Icon(SangeetIcons.playlistRemove),
           title: Text(context.l10n.blacklist),
           subtitle: Text(context.l10n.blacklist_description),

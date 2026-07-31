@@ -32,7 +32,7 @@ Future<ArgResults> startCLI(List<String> args) async {
 
   if (arguments["version"] == true) {
     final package = await PackageInfo.fromPlatform();
-    print("Sangeet v${package.version}");
+    print("Soulful Bhakti v${package.version}");
     exit(0);
   }
 

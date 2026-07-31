@@ -87,7 +87,7 @@ class PreferencesTable extends Table {
       boolean().withDefault(const Constant(true))();
   BoolColumn get enableConnect =>
       boolean().withDefault(const Constant(false))();
-  IntColumn get connectPort => integer().withDefault(const Constant(-1))();
+  IntColumn get connectPort => integer().withDefault(const Constant(19876))();
   BoolColumn get cacheMusic => boolean().withDefault(const Constant(true))();
 
   // Default values as PreferencesTableData
@@ -102,7 +102,7 @@ class PreferencesTable extends Table {
       systemTitleBar: false,
       skipNonMusic: false,
       closeBehavior: CloseBehavior.close,
-      accentColorScheme: SangeetColor(Colors.slate.value, name: "Slate"),
+      accentColorScheme: SangeetColor(0xFF520101, name: "maroon"),
       layoutMode: LayoutMode.adaptive,
       locale: const Locale("system", "system"),
       market: Market.US,

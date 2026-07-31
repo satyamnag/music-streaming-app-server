@@ -487,13 +487,13 @@ class AppLocalizationsCs extends AppLocalizations {
   String get about => 'O aplikaci';
 
   @override
-  String get u_love_spotube => 'Víme, že milujete Sangeet';
+  String get u_love_spotube => 'Víme, že milujete Soulful Bhakti';
 
   @override
   String get check_for_updates => 'Zkontrolovat aktualizace';
 
   @override
-  String get about_spotube => 'O Sangeet';
+  String get about_spotube => 'O Soulful Bhakti';
 
   @override
   String get blacklist => 'Černá listina';
@@ -503,7 +503,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, rychlý, multiplatformní, bezplatný Spotify klient';
+      'Soulful Bhakti, rychlý, multiplatformní, bezplatný Spotify klient';
 
   @override
   String get version => 'Verze';
@@ -725,7 +725,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'Mimochodem, vaše IP může být na YouTube zablokována kvůli nadměrným požadavkům na stahování. Blokování IP znamená, že nemůžete používat YouTube (i když jste přihlášeni) alespoň 2-3 měsíce ze zařízení s touto IP. A Sangeet nenese žádnou odpovědnost, pokud se to někdy stane';
+      'Mimochodem, vaše IP může být na YouTube zablokována kvůli nadměrným požadavkům na stahování. Blokování IP znamená, že nemůžete používat YouTube (i když jste přihlášeni) alespoň 2-3 měsíce ze zařízení s touto IP. A Soulful Bhakti nenese žádnou odpovědnost, pokud se to někdy stane';
 
   @override
   String get by_clicking_accept_terms =>
@@ -822,7 +822,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet používá šifrování k bezpečnému ukládání vašich dat. Ale selhalo. Takže se vrátí k nezabezpečenému úložišti\nPokud používáte linux, ujistěte se, že máte nainstalovanou jakoukoli službu k ukládání bezpečnostních pověření (gnome-keyring, kde-wallet, keepassxc atd.)';
+      'Soulful Bhakti používá šifrování k bezpečnému ukládání vašich dat. Ale selhalo. Takže se vrátí k nezabezpečenému úložišti\nPokud používáte linux, ujistěte se, že máte nainstalovanou jakoukoli službu k ukládání bezpečnostních pověření (gnome-keyring, kde-wallet, keepassxc atd.)';
 
   @override
   String get querying_info => 'Získávání informací...';
@@ -1002,7 +1002,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'To pomůže Sangeet ukázat vám správný obsah\npro vaši lokalitu.';
+      'To pomůže Soulful Bhakti ukázat vám správný obsah\npro vaši lokalitu.';
 
   @override
   String get choose_your_language => 'Vyberte svůj jazyk';
@@ -1012,7 +1012,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet je open-source projekt. Můžete pomoci tomuto projektu růst tím, že přispějete do projektu, nahlásíte chyby nebo navrhnete nové funkce.';
+      'Soulful Bhakti je open-source projekt. Můžete pomoci tomuto projektu růst tím, že přispějete do projektu, nahlásíte chyby nebo navrhnete nové funkce.';
 
   @override
   String get contribute_on_github => 'Přispějte na GitHub';
@@ -1028,7 +1028,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get enable_connect_description =>
-      'Ovládejte Sangeet z jiného zařízení';
+      'Ovládejte Soulful Bhakti z jiného zařízení';
 
   @override
   String get devices => 'Zařízení';
@@ -1076,19 +1076,19 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeet má aktualizaci';
+  String get spotube_has_an_update => 'Soulful Bhakti má aktualizaci';
 
   @override
   String get download_now => 'Stáhnout nyní';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Byla vydána noční verze Sangeet $nightlyBuildNum';
+    return 'Byla vydána noční verze Soulful Bhakti $nightlyBuildNum';
   }
 
   @override
   String release_version(Object version) {
-    return 'Byla vydána verze Sangeet v$version';
+    return 'Byla vydána verze Soulful Bhakti v$version';
   }
 
   @override
@@ -1226,6 +1226,9 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'Dluženo umělcům\nTento měsíc';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'umělců';
@@ -1513,7 +1516,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Tým Sangeet nenese žádnou odpovědnost (včetně právní) za pluginy „třetích stran“.\nPoužívejte je na vlastní riziko. Pro chyby/problémy je nahlaste do repozitáře pluginu.\n\nPokud jakýkoli plugin „třetí strany“ porušuje podmínky služby nebo DMCA kteréhokoli poskytovatele či právního subjektu, požádejte autora pluginu nebo hostingovou platformu (např. GitHub/Codeberg), aby podnikla kroky. Pluginy označené jako „třetí strana“ jsou otevřené a spravovány komunitou; nespravujeme je, tudíž nemůžeme jednat.\n\n';
+      'Tým Soulful Bhakti nenese žádnou odpovědnost (včetně právní) za pluginy „třetích stran“.\nPoužívejte je na vlastní riziko. Pro chyby/problémy je nahlaste do repozitáře pluginu.\n\nPokud jakýkoli plugin „třetí strany“ porušuje podmínky služby nebo DMCA kteréhokoli poskytovatele či právního subjektu, požádejte autora pluginu nebo hostingovou platformu (např. GitHub/Codeberg), aby podnikla kroky. Pluginy označené jako „třetí strana“ jsou otevřené a spravovány komunitou; nespravujeme je, tudíž nemůžeme jednat.\n\n';
 
   @override
   String get input_does_not_match_format =>

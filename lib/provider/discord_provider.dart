@@ -89,7 +89,7 @@ class DiscordNotifier extends AsyncNotifier<void> {
               track.album.images.firstOrNull?.url ?? "sangeet-logo-foreground",
           largeText: track.album.name,
           smallImage: "sangeet-logo-foreground",
-          smallText: "Sangeet",
+          smallText: "Soulful Bhakti",
         ),
         buttons: [
           RPCButton(

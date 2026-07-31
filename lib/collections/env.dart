@@ -34,6 +34,12 @@ abstract class Env {
   @EnviedField(varName: 'LISTENBRAINZ_TOKEN')
   static final String listenbrainzToken = _Env.listenbrainzToken;
 
+  @EnviedField(varName: 'SUPABASE_URL')
+  static final String supabaseUrl = _Env.supabaseUrl;
+
+  @EnviedField(varName: 'SUPABASE_SERVICE_KEY')
+  static final String supabaseServiceKey = _Env.supabaseServiceKey;
+
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";
 

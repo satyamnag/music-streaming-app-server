@@ -37,7 +37,7 @@ class SyncedLyricsNotifier
       options: Options(
         headers: {
           "User-Agent":
-              "Sangeet v${packageInfo.version} (https://github.com/user/sangeet)"
+              "Soulful Bhakti v${packageInfo.version} (https://github.com/user/sangeet)"
         },
         responseType: ResponseType.json,
       ),

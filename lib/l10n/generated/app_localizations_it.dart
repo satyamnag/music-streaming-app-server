@@ -489,13 +489,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get about => 'A proposito di';
 
   @override
-  String get u_love_spotube => 'Sappiamo che ami Sangeet';
+  String get u_love_spotube => 'Sappiamo che ami Soulful Bhakti';
 
   @override
   String get check_for_updates => 'Controlla aggiornamenti';
 
   @override
-  String get about_spotube => 'A proposito di Sangeet';
+  String get about_spotube => 'A proposito di Soulful Bhakti';
 
   @override
   String get blacklist => 'Blacklist';
@@ -505,7 +505,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, un client spotify gratis per tutti, multipiattaforma e leggero';
+      'Soulful Bhakti, un client spotify gratis per tutti, multipiattaforma e leggero';
 
   @override
   String get version => 'Versione';
@@ -729,7 +729,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'A proposito, il tuo IP può essere bloccato da YouTube per il numero di richieste di download eccessive rispetto la norma. Il blocco IP significa che non puoi usare YoutTube (anche hai effettuato l\'accesso) per almeno 2-3 mesi dal dispositivo con questo IP. Sangeet non ha responsabilità se questo dovesse accadere';
+      'A proposito, il tuo IP può essere bloccato da YouTube per il numero di richieste di download eccessive rispetto la norma. Il blocco IP significa che non puoi usare YoutTube (anche hai effettuato l\'accesso) per almeno 2-3 mesi dal dispositivo con questo IP. Soulful Bhakti non ha responsabilità se questo dovesse accadere';
 
   @override
   String get by_clicking_accept_terms =>
@@ -745,7 +745,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get download_agreement_3 =>
-      'Sono completamente cosciente che il mio IP può essere bloccato da YouTube & non riterrò responsabili Sangeet o i suoi autori/contributori per ogni inconveniente causato dalla mia azione corrente';
+      'Sono completamente cosciente che il mio IP può essere bloccato da YouTube & non riterrò responsabili Soulful Bhakti o i suoi autori/contributori per ogni inconveniente causato dalla mia azione corrente';
 
   @override
   String get decline => 'Declino';
@@ -827,7 +827,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet usa la criptazione per memorizzare in modo sicuro i dati. Ma ha fallito a farlo. Passerà quindi in ripiego alla memorizzazione non siscura\nSe stai usando Linux assicurati di avere un servizio di segretezza installato (gnome-keyring, kde-wallet, keepassxc etc)';
+      'Soulful Bhakti usa la criptazione per memorizzare in modo sicuro i dati. Ma ha fallito a farlo. Passerà quindi in ripiego alla memorizzazione non siscura\nSe stai usando Linux assicurati di avere un servizio di segretezza installato (gnome-keyring, kde-wallet, keepassxc etc)';
 
   @override
   String get querying_info => 'Richiesta informazioni...';
@@ -1008,7 +1008,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Questo aiuterà Sangeet a mostrarti il contenuto giusto per la tua posizione.';
+      'Questo aiuterà Soulful Bhakti a mostrarti il contenuto giusto per la tua posizione.';
 
   @override
   String get choose_your_language => 'Scegli la tua lingua';
@@ -1018,7 +1018,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet è un progetto open-source. Puoi aiutare questo progetto a crescere contribuendo al progetto, segnalando bug o suggerendo nuove funzionalità.';
+      'Soulful Bhakti è un progetto open-source. Puoi aiutare questo progetto a crescere contribuendo al progetto, segnalando bug o suggerendo nuove funzionalità.';
 
   @override
   String get contribute_on_github => 'Contribuisci su GitHub';
@@ -1034,7 +1034,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get enable_connect_description =>
-      'Controlla Sangeet da altri dispositivi';
+      'Controlla Soulful Bhakti da altri dispositivi';
 
   @override
   String get devices => 'Dispositivi';
@@ -1082,19 +1082,19 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeet ha un aggiornamento';
+  String get spotube_has_an_update => 'Soulful Bhakti ha un aggiornamento';
 
   @override
   String get download_now => 'Scarica ora';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Sangeet Nightly $nightlyBuildNum è stato rilasciato';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum è stato rilasciato';
   }
 
   @override
   String release_version(Object version) {
-    return 'Sangeet v$version è stato rilasciato';
+    return 'Soulful Bhakti v$version è stato rilasciato';
   }
 
   @override
@@ -1231,6 +1231,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'Dovuto agli artisti\nquesto mese';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'dell\'artista';
@@ -1519,7 +1522,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Il team di Sangeet non si assume alcuna responsabilità (anche legale) per i plugin di \"terze parti\".\nUsali a tuo rischio e pericolo. Per eventuali bug/problemi, segnalali al repository del plugin.\n\nSe un plugin di \"terze parti\" sta violando i ToS/DMCA di un servizio/entità legale, per favore chiedi all\'autore del plugin \"terzo\" o alla piattaforma di hosting, ad esempio GitHub/Codeberg, di agire. Quelli elencati sopra (etichettati come \"terze parti\") sono tutti plugin pubblici/mantenuti dalla comunità. Non li curiamo, quindi non possiamo intraprendere alcuna azione su di essi.\n\n';
+      'Il team di Soulful Bhakti non si assume alcuna responsabilità (anche legale) per i plugin di \"terze parti\".\nUsali a tuo rischio e pericolo. Per eventuali bug/problemi, segnalali al repository del plugin.\n\nSe un plugin di \"terze parti\" sta violando i ToS/DMCA di un servizio/entità legale, per favore chiedi all\'autore del plugin \"terzo\" o alla piattaforma di hosting, ad esempio GitHub/Codeberg, di agire. Quelli elencati sopra (etichettati come \"terze parti\") sono tutti plugin pubblici/mantenuti dalla comunità. Non li curiamo, quindi non possiamo intraprendere alcuna azione su di essi.\n\n';
 
   @override
   String get input_does_not_match_format =>

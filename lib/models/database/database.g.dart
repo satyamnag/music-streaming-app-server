@@ -753,7 +753,7 @@ class $PreferencesTableTable extends PreferencesTable
       'connect_port', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultValue: const Constant(-1));
+      defaultValue: const Constant(19876));
   static const VerificationMeta _cacheMusicMeta =
       const VerificationMeta('cacheMusic');
   @override

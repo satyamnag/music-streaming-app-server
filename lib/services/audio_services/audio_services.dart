@@ -30,13 +30,13 @@ class AudioServices with WidgetsBindingObserver {
                 Env.releaseChannel
               )) {
                 (true, _) => "sangeet",
-                (_, ReleaseChannel.stable) => "com.sangeet.app",
-                (_, ReleaseChannel.nightly) => "com.sangeet.app.nightly",
+                (_, ReleaseChannel.stable) => "com.soulfulbhakti.app",
+                (_, ReleaseChannel.nightly) => "com.soulfulbhakti.app.nightly",
               },
               androidNotificationChannelName: 'Sangeet',
               androidNotificationOngoing: false,
               androidStopForegroundOnPause: false,
-              androidNotificationChannelDescription: "Sangeet Media Controls",
+              androidNotificationChannelDescription: "Soulful Bhakti Media Controls",
             ),
           )
         : null;

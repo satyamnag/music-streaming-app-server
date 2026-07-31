@@ -140,6 +140,7 @@ dependencies:
       ref: main
   get_it: ^8.0.3
   flutter_markdown_plus: ^1.0.3
+  supabase: ^2.6.0
   pub_semver: ^2.2.0
   change_case: ^1.1.0
   flutter_secure_storage: ^9.2.4

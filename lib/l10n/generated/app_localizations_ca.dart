@@ -491,13 +491,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get about => 'Sobre';
 
   @override
-  String get u_love_spotube => 'Sabem que li encanta Sangeet';
+  String get u_love_spotube => 'Sabem que li encanta Soulful Bhakti';
 
   @override
   String get check_for_updates => 'Buscar actualitzacions';
 
   @override
-  String get about_spotube => 'Sobre Sangeet';
+  String get about_spotube => 'Sobre Soulful Bhakti';
 
   @override
   String get blacklist => 'Llista negra';
@@ -507,7 +507,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, un client lleuger, multiplataforma i gratuït de Spotify';
+      'Soulful Bhakti, un client lleuger, multiplataforma i gratuït de Spotify';
 
   @override
   String get version => 'Versió';
@@ -731,7 +731,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'Per cert, la seva IP pot ser bloquejada a YouTube degut a solicituds de descàrrega excessives. El bloqueig d\'IP vol dir que no podrà utilitzar YouTube (fins i tot si ha iniciat sessió) durant un mínim de 2-3 meses desde esa dirección IP. I Sangeet no es fa responsable si això succeeix en alguna ocasió';
+      'Per cert, la seva IP pot ser bloquejada a YouTube degut a solicituds de descàrrega excessives. El bloqueig d\'IP vol dir que no podrà utilitzar YouTube (fins i tot si ha iniciat sessió) durant un mínim de 2-3 meses desde esa dirección IP. I Soulful Bhakti no es fa responsable si això succeeix en alguna ocasió';
 
   @override
   String get by_clicking_accept_terms =>
@@ -747,7 +747,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get download_agreement_3 =>
-      'Sóc completament conscient que la meva IP pot ser bloqueada per YouTube i no responsabilizo a Sangeet ni als seus propietaris/contribuents per qualsevol incident causat per la meva acció actual';
+      'Sóc completament conscient que la meva IP pot ser bloqueada per YouTube i no responsabilizo a Soulful Bhakti ni als seus propietaris/contribuents per qualsevol incident causat per la meva acció actual';
 
   @override
   String get decline => 'Rebutjar';
@@ -829,7 +829,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet utilitza el xifrado per emmagatzemar les seves dades de forma segura. Però ha fallat. Per tant, tornarà a un emmagatzament no segur\nSi estè utilizant Linux, asseguri\'s de tenir instal·lats els serveis secrets com gnome-keyring, kde-wallet i keepassxc';
+      'Soulful Bhakti utilitza el xifrado per emmagatzemar les seves dades de forma segura. Però ha fallat. Per tant, tornarà a un emmagatzament no segur\nSi estè utilizant Linux, asseguri\'s de tenir instal·lats els serveis secrets com gnome-keyring, kde-wallet i keepassxc';
 
   @override
   String get querying_info => 'Consultant informació...';
@@ -1013,7 +1013,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Això ajudarà a Sangeet a mostrar-vos el contingut adequat\nper a la vostra ubicació.';
+      'Això ajudarà a Soulful Bhakti a mostrar-vos el contingut adequat\nper a la vostra ubicació.';
 
   @override
   String get choose_your_language => 'Trieu el vostre idioma';
@@ -1023,7 +1023,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet és un projecte de codi obert. Podeu ajudar a fer créixer aquest projecte contribuint al projecte, informant d\'errors o suggerint noves funcionalitats.';
+      'Soulful Bhakti és un projecte de codi obert. Podeu ajudar a fer créixer aquest projecte contribuint al projecte, informant d\'errors o suggerint noves funcionalitats.';
 
   @override
   String get contribute_on_github => 'Contribueix a GitHub';
@@ -1039,7 +1039,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get enable_connect_description =>
-      'Controla Sangeet des d\'altres dispositius';
+      'Controla Soulful Bhakti des d\'altres dispositius';
 
   @override
   String get devices => 'Dispositius';
@@ -1087,19 +1087,19 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeet té una actualització';
+  String get spotube_has_an_update => 'Soulful Bhakti té una actualització';
 
   @override
   String get download_now => 'Descarregar ara';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Sangeet Nightly $nightlyBuildNum ha estat publicat';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum ha estat publicat';
   }
 
   @override
   String release_version(Object version) {
-    return 'Sangeet v$version ha estat publicat';
+    return 'Soulful Bhakti v$version ha estat publicat';
   }
 
   @override
@@ -1237,6 +1237,9 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'degut als artistes\nAquest mes';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'artistes';
@@ -1526,7 +1529,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'L’equip de Sangeet no accepta cap responsabilitat (inclosa legal) pels complements de “tercers”.\nFes-los servir sota la teva responsabilitat. Si detectes errors/problemes, informa’ls al repositori del complement.\n\nSi algun complement de “tercers” incompleix els ToS/DMCA d’un servei o entitat legal, contacta amb l’autor del complement o amb la plataforma d’allotjament (per exemple GitHub/Codeberg) per prendre mesures. Els complements etiquetats com a “tercers” són públics i gestionats per la comunitat; no els curatem, per la qual cosa no podem intervenir-hi.\n\n';
+      'L’equip de Soulful Bhakti no accepta cap responsabilitat (inclosa legal) pels complements de “tercers”.\nFes-los servir sota la teva responsabilitat. Si detectes errors/problemes, informa’ls al repositori del complement.\n\nSi algun complement de “tercers” incompleix els ToS/DMCA d’un servei o entitat legal, contacta amb l’autor del complement o amb la plataforma d’allotjament (per exemple GitHub/Codeberg) per prendre mesures. Els complements etiquetats com a “tercers” són públics i gestionats per la comunitat; no els curatem, per la qual cosa no podem intervenir-hi.\n\n';
 
   @override
   String get input_does_not_match_format =>

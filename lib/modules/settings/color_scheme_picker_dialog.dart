@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/settings/bhakti_color_scheme.dart';
 
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
@@ -38,6 +39,7 @@ final Set<SangeetColor> colorsMap = {
   SangeetColor(Colors.blue.value, name: "blue"),
   SangeetColor(Colors.violet.value, name: "violet"),
   SangeetColor(Colors.rose.value, name: "rose"),
+  SangeetColor(0xFF520101, name: "maroon"),
 };
 
 final colorSchemeMap = {
@@ -53,6 +55,7 @@ final colorSchemeMap = {
   "blue": LegacyColorSchemes.blue,
   "violet": LegacyColorSchemes.violet,
   "rose": LegacyColorSchemes.rose,
+  "maroon": BhaktiColorSchemes.maroon,
 };
 
 class ColorSchemePickerDialog extends HookConsumerWidget {

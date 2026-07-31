@@ -1,28 +1,22 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' hide Response;
 import 'package:dio/dio.dart' as dio_lib;
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:metadata_god/metadata_god.dart';
-import 'package:path/path.dart';
 import 'package:shelf/shelf.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/models/parser/range_headers.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
+import 'package:sangeet/provider/server/active_track_sources.dart';
+import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
-import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/sourced_track/sourced_track.dart';
-import 'package:sangeet/utils/service_utils.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 void _log(String msg) {
@@ -43,62 +37,11 @@ String? get _randomUserAgent => _deviceClients
     .payload["context"]["client"]["userAgent"];
 
 class ServerPlaybackRoutes {
-  static const _maxCacheSize = 500 * 1024 * 1024; // 500 MB limit
-  static const _xorKey = [0x4B, 0x68, 0x61, 0x6B, 0x74, 0x69, 0x53, 0x42];
-
-  static Uint8List _xorTransform(Uint8List data) {
-    final result = Uint8List(data.length);
-    for (int i = 0; i < data.length; i++) {
-      result[i] = data[i] ^ _xorKey[i % _xorKey.length];
-    }
-    return result;
-  }
-
   final Ref ref;
-  UserPreferences get userPreferences => ref.read(userPreferencesProvider);
   AudioPlayerState get playlist => ref.read(audioPlayerProvider);
   final Dio dio;
 
   ServerPlaybackRoutes(this.ref) : dio = Dio();
-
-  Future<String> _getTrackCacheFilePath(SourcedTrack track) async {
-    return join(
-      await UserPreferencesNotifier.getMusicCacheDir(),
-      ServiceUtils.sanitizeFilename(
-        '${track.query.name} - ${track.query.artists.map((d) => d.name).join(",")} (${track.info.id}).${track.qualityPreset!.getFileExtension()}',
-      ),
-    );
-  }
-
-  Future<void> _evictCacheIfNeeded() async {
-    if (!userPreferences.cacheMusic) return;
-    final cacheDir = Directory(await UserPreferencesNotifier.getMusicCacheDir());
-    if (!await cacheDir.exists()) return;
-
-    final files = <FileSystemEntity>[];
-    await for (final entity in cacheDir.list()) {
-      files.add(entity);
-    }
-
-    // Calculate total size
-    int totalSize = 0;
-    for (final f in files) {
-      if (f is File) totalSize += await f.length();
-    }
-
-    if (totalSize <= _maxCacheSize) return;
-
-    // Sort by last modified (oldest first) and delete until under limit
-    files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
-    for (final f in files) {
-      if (totalSize <= _maxCacheSize) break;
-      if (f is File) {
-        final len = await f.length();
-        await f.delete();
-        totalSize -= len;
-      }
-    }
-  }
 
   Future<SourcedTrack?> _getSourcedTrack(
     Request request,
@@ -112,28 +55,40 @@ class ServerPlaybackRoutes {
         (element) => element.id == trackId,
       );
       if (track == null) {
-        _log('_getSourcedTrack: track $trackId NOT in playlist state');
-        return null;
+        _log('_getSourcedTrack: track $trackId NOT in playlist state, resolving from Supabase');
+        return _resolveFromSupabase(trackId);
       }
       _log('_getSourcedTrack: found track ${track.name} in playlist state');
 
-      // Resolve stream URL directly from the audio source plugin,
-      // bypassing sourcedTrackProvider to avoid Riverpod rebuild races
+      // Use activeTrackSourcesProvider which already calls sourcedTrackProvider
+      // internally — this avoids duplicate matches()+streams() calls
       final fullTrack = track as SangeetFullTrackObject;
-      final audioSource = await ref.read(audioSourcePluginProvider.future);
       SourcedTrack? sourcedTrack;
-      if (audioSource != null) {
-        final matches = await audioSource.audioSource.matches(fullTrack);
-        if (matches.isNotEmpty) {
-          final manifest = await audioSource.audioSource.streams(matches.first);
-          sourcedTrack = SourcedTrack(
-            ref: ref,
-            siblings: matches.skip(1).toList(),
-            info: matches.first,
-            source: '',
-            sources: manifest,
-            query: fullTrack,
-          );
+
+      try {
+        final activeSourcedTrack = await ref.read(activeTrackSourcesProvider.future);
+        if (activeSourcedTrack?.track.id == track.id) {
+          sourcedTrack = activeSourcedTrack?.source;
+          _log('_getSourcedTrack: reused from active source');
+        }
+      } catch (_) {}
+
+      if (sourcedTrack == null) {
+        // Fallback: resolve directly from plugin
+        final audioSource = await ref.read(audioSourcePluginProvider.future);
+        if (audioSource != null) {
+          final matches = await audioSource.audioSource.matches(fullTrack);
+          if (matches.isNotEmpty) {
+            final manifest = await audioSource.audioSource.streams(matches.first);
+            sourcedTrack = SourcedTrack(
+              ref: ref,
+              siblings: matches.skip(1).toList(),
+              info: matches.first,
+              source: '',
+              sources: manifest,
+              query: fullTrack,
+            );
+          }
         }
       }
       _log('_getSourcedTrack: sourcedTrack url=${sourcedTrack?.url}');
@@ -146,6 +101,66 @@ class ServerPlaybackRoutes {
     }
   }
 
+  /// Resolves a stream source for a track that is not in the current player
+  /// playlist by fetching the track from Supabase directly. This makes the
+  /// stream proxy work regardless of the audio player's playlist state.
+  Future<SourcedTrack?> _resolveFromSupabase(String trackId) async {
+    try {
+      final supabase = ref.read(supabaseClientProvider);
+
+      final data = await supabase
+          .from('tracks')
+          .select()
+          .eq('id', trackId)
+          .single();
+      final rawArtists = data['artist_names'] as List<dynamic>?;
+      final artists = rawArtists
+              ?.map((name) => SangeetSimpleArtistObject(
+                    id: name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
+                    name: name.toString(),
+                    externalUri: '',
+                  ))
+              .toList() ??
+          [];
+
+      final fullTrack = SangeetFullTrackObject(
+        id: data['id'].toString(),
+        name: data['title']?.toString() ?? 'Unknown',
+        externalUri: '',
+        artists: artists,
+        album: SangeetSimpleAlbumObject(
+          id: 'album-${data['id']}',
+          name: data['title']?.toString() ?? 'Unknown',
+          externalUri: '',
+          artists: artists,
+          albumType: SangeetAlbumType.single,
+          images: data['thumbnail'] != null
+              ? [
+                  SangeetImageObject(
+                    url: data['thumbnail'].toString(),
+                    width: 300,
+                    height: 300,
+                  ),
+                ]
+              : [],
+        ),
+        durationMs: ((data['duration'] ?? 0) * 1000).toInt(),
+        isrc: '',
+        explicit: false,
+      );
+
+      final sourcedTrack = await SourcedTrack.fetchFromTrack(
+        query: fullTrack,
+        ref: ref,
+      );
+      _log('_resolveFromSupabase: url=${sourcedTrack.url}');
+      return sourcedTrack;
+    } catch (e) {
+      _log('_resolveFromSupabase ERROR: $e');
+      return null;
+    }
+  }
+
   Future<dio_lib.Response> streamTrackInformation(
     Request request,
     SourcedTrack track,
@@ -154,23 +169,6 @@ class ServerPlaybackRoutes {
       "HEAD request for track: ${track.query.name}\n"
       "Headers: ${request.headers}",
     );
-
-    final trackCacheFile = File(await _getTrackCacheFilePath(track));
-
-    if (await trackCacheFile.exists() && userPreferences.cacheMusic) {
-      final fileLength = await trackCacheFile.length();
-
-      return dio_lib.Response(
-        statusCode: 200,
-        headers: Headers.fromMap({
-          "content-type": ["audio/${track.qualityPreset!.name}"],
-          "content-length": ["$fileLength"],
-          "accept-ranges": ["bytes"],
-          "content-range": ["bytes 0-$fileLength/$fileLength"],
-        }),
-        requestOptions: RequestOptions(path: request.requestedUri.toString()),
-      );
-    }
 
     String url = track.url ??
         await ref
@@ -203,43 +201,26 @@ class ServerPlaybackRoutes {
       "Headers: ${request.headers}",
     );
 
-    final trackCacheFile = File(await _getTrackCacheFilePath(track));
-
-    if (await trackCacheFile.exists() && userPreferences.cacheMusic) {
-      final encrypted = await trackCacheFile.readAsBytes();
-      final bytes = _xorTransform(Uint8List.fromList(encrypted));
-      final cachedFileLength = bytes.length;
-
-      return dio_lib.Response<Uint8List>(
-        statusCode: 200,
-        headers: Headers.fromMap({
-          "content-type": ["audio/${track.qualityPreset!.name}"],
-          "content-length": ["${cachedFileLength - 1}"],
-          "accept-ranges": ["bytes"],
-          "content-range": [
-            "bytes 0-${cachedFileLength - 1}/$cachedFileLength"
-          ],
-          "connection": ["close"],
-        }),
-        requestOptions: RequestOptions(path: request.requestedUri.toString()),
-        data: bytes,
-      );
-    }
-
     String url = track.url ??
         await ref
             .read(sourcedTrackProvider(track.query).notifier)
             .swapWithNextSibling()
             .then((track) => track.url!);
 
+    // Forward only safe headers — omit Range/Accept-Encoding that could
+    // cause truncated responses or decoding issues on the device
+    final safeHeaders = <String, dynamic>{
+      "user-agent": _randomUserAgent,
+      "Cache-Control": "max-age=3600",
+      "Connection": "keep-alive",
+      "host": Uri.parse(url).host,
+    };
+    for (final key in ['if-range', 'if-modified-since', 'if-none-match']) {
+      if (headers[key] != null) safeHeaders[key] = headers[key];
+    }
+
     final options = Options(
-      headers: {
-        ...headers,
-        "user-agent": _randomUserAgent,
-        "Cache-Control": "max-age=3600",
-        "Connection": "keep-alive",
-        "host": Uri.parse(url).host,
-      },
+      headers: safeHeaders,
       responseType: ResponseType.stream,
       validateStatus: (status) => status != null && status < 500,
     );
@@ -284,105 +265,6 @@ class ServerPlaybackRoutes {
       "Headers: ${res.headers.map}",
     );
 
-    if (!userPreferences.cacheMusic) {
-      return res;
-    }
-
-    final resStream = res.data!.stream.asBroadcastStream();
-
-    final trackPartialCacheFile = File("${trackCacheFile.path}.part");
-    if (!await trackPartialCacheFile.exists()) {
-      await trackPartialCacheFile.create(recursive: true);
-    }
-
-    // Write the stream to the file based on the range
-    final partialCacheFileSink =
-        trackPartialCacheFile.openWrite(mode: FileMode.writeOnlyAppend);
-    final contentRange = res.headers.value("content-range") != null
-        ? ContentRangeHeader.parse(res.headers.value("content-range") ?? "")
-        : ContentRangeHeader(0, 0, 0);
-
-    bool retried = false;
-    resStream.listen(
-      (data) {
-        partialCacheFileSink.add(data);
-      },
-      onError: (e, stack) async {
-        await partialCacheFileSink.close();
-        // On stream error (e.g. expired signed URL), retry once with fresh URL
-        if (!retried) {
-          retried = true;
-          AppLogger.log.i('Stream error, retrying with fresh URL: $e');
-          try {
-            final freshTrack = await ref
-                .read(sourcedTrackProvider(track.query).notifier)
-                .refreshStreamingUrl();
-            if (freshTrack.url != null) {
-              url = freshTrack.url!;
-              options.headers?['host'] = Uri.parse(url).host;
-              final retryRes = await dio.get<ResponseBody>(url, options: options);
-              final retryStream = retryRes.data!.stream;
-              retryStream.listen(
-                (data) => partialCacheFileSink.add(data),
-                onDone: () async {
-                  await partialCacheFileSink.close();
-                  final fileLength = await trackPartialCacheFile.length();
-                  if (fileLength == contentRange.total) {
-                    await trackPartialCacheFile.rename(trackCacheFile.path);
-                    try {
-                      final rawBytes = await trackCacheFile.readAsBytes();
-                      await trackCacheFile.writeAsBytes(_xorTransform(Uint8List.fromList(rawBytes)));
-                    } catch (_) {}
-                  }
-                },
-                cancelOnError: true,
-              );
-              return;
-            }
-          } catch (_) {}
-        }
-      },
-      onDone: () async {
-        await partialCacheFileSink.close();
-
-        final fileLength = await trackPartialCacheFile.length();
-        if (fileLength != contentRange.total) return;
-
-        await trackPartialCacheFile.rename(trackCacheFile.path);
-
-        // Encrypt cached file to prevent playback outside the app
-        try {
-          final rawBytes = await trackCacheFile.readAsBytes();
-          await trackCacheFile.writeAsBytes(_xorTransform(Uint8List.fromList(rawBytes)));
-        } catch (_) {}
-
-        if (track.qualityPreset!.getFileExtension() == "weba") return;
-
-        final imageBytes = await ServiceUtils.downloadImage(
-          track.query.album.images.asUrlString(
-            placeholder: ImagePlaceholder.albumArt,
-            index: 1,
-          ),
-        );
-
-        await MetadataGod.writeMetadata(
-          file: trackCacheFile.path,
-          metadata: track.query.toMetadata(
-            imageBytes: imageBytes,
-            fileLength: fileLength,
-          ),
-        ).catchError((e, stackTrace) {
-          AppLogger.reportError(e, stackTrace);
-        });
-
-        // Evict old cache files if total exceeds 500 MB limit
-        await _evictCacheIfNeeded();
-      },
-      cancelOnError: true,
-    );
-
-    res.data?.stream =
-        resStream; // To avoid Stream has been already listened to exception
     return res;
   }
 
@@ -425,18 +307,29 @@ class ServerPlaybackRoutes {
         request.headers,
       );
 
+      // Build clean streaming headers. We intentionally do NOT forward the
+      // upstream content-length or connection headers: shelf streams the body
+      // with chunked transfer encoding, and forwarding a stale content-length
+      // (or upstream connection/set-cookie headers) makes mpv stall after the
+      // first buffered chunk.
+      final contentType = res.headers.value('content-type') ?? 'audio/ogg';
+      final streamHeaders = <String, String>{
+        'content-type': contentType,
+        'accept-ranges': 'bytes',
+      };
+
       if (res.data is ResponseBody) {
         return Response(
           res.statusCode!,
           body: (res.data as ResponseBody).stream,
-          headers: res.headers.map,
+          headers: streamHeaders,
         );
       }
 
       return Response(
         res.statusCode!,
         body: res.data,
-        headers: res.headers.map,
+        headers: streamHeaders,
       );
     } catch (e, stack) {
       AppLogger.reportError(e, stack);

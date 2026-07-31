@@ -492,13 +492,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get about => 'Hakkında';
 
   @override
-  String get u_love_spotube => 'Sangeet\'u sevdiğinizi biliyoruz';
+  String get u_love_spotube => 'Soulful Bhakti\'u sevdiğinizi biliyoruz';
 
   @override
   String get check_for_updates => 'Güncellemeleri kontrol et';
 
   @override
-  String get about_spotube => 'Sangeet hakkında';
+  String get about_spotube => 'Soulful Bhakti hakkında';
 
   @override
   String get blacklist => 'Kara liste';
@@ -508,7 +508,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, hafif, platformlar arası uyumlu ve herkes için ücretsiz bir Spotify istemcisidir.';
+      'Soulful Bhakti, hafif, platformlar arası uyumlu ve herkes için ücretsiz bir Spotify istemcisidir.';
 
   @override
   String get version => 'Sürüm';
@@ -730,7 +730,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'Ayrıca, normalden fazla indirme istekleri nedeniyle YouTube\'da IP\'niz engellenebilir. IP engeli, en az 2-3 ay boyunca YouTube\'u (hatta oturum açmış olsanız bile) o IP cihazından kullanamayacağınız anlamına gelir. Ve eğer böyle bir durum yaşanırsa, Sangeet bundan hiçbir sorumluluk kabul etmez.';
+      'Ayrıca, normalden fazla indirme istekleri nedeniyle YouTube\'da IP\'niz engellenebilir. IP engeli, en az 2-3 ay boyunca YouTube\'u (hatta oturum açmış olsanız bile) o IP cihazından kullanamayacağınız anlamına gelir. Ve eğer böyle bir durum yaşanırsa, Soulful Bhakti bundan hiçbir sorumluluk kabul etmez.';
 
   @override
   String get by_clicking_accept_terms =>
@@ -746,7 +746,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get download_agreement_3 =>
-      'YouTube\'da IP\'min engellenebileceğinin tamamen farkındayım ve mevcut eylemlerimden kaynaklanan herhangi bir kaza için Sangeet\'u veya sahiplerini/katkıda bulunanları sorumlu tutmuyorum.';
+      'YouTube\'da IP\'min engellenebileceğinin tamamen farkındayım ve mevcut eylemlerimden kaynaklanan herhangi bir kaza için Soulful Bhakti\'u veya sahiplerini/katkıda bulunanları sorumlu tutmuyorum.';
 
   @override
   String get decline => 'Reddet';
@@ -828,7 +828,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet, verilerinizi güvenli bir şekilde depolamak için şifreleme kullanır. Ancak bunu başaramadı. Bu nedenle, güvensiz depolamaya geri dönecektir\nLinux kullanıyorsanız, lütfen gnome-keyring, kde-wallet, keepassxc vb. herhangi bir gizli servisin yüklü olduğundan emin olun.';
+      'Soulful Bhakti, verilerinizi güvenli bir şekilde depolamak için şifreleme kullanır. Ancak bunu başaramadı. Bu nedenle, güvensiz depolamaya geri dönecektir\nLinux kullanıyorsanız, lütfen gnome-keyring, kde-wallet, keepassxc vb. herhangi bir gizli servisin yüklü olduğundan emin olun.';
 
   @override
   String get querying_info => 'Bilgi sorgulanıyor...';
@@ -1007,7 +1007,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Bu, Sangeet\'un konumunuza uygun içerikleri göstermesine yardımcı olacaktır.';
+      'Bu, Soulful Bhakti\'un konumunuza uygun içerikleri göstermesine yardımcı olacaktır.';
 
   @override
   String get choose_your_language => 'Dilinizi seçin';
@@ -1017,7 +1017,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet açık kaynaklı bir projedir. Projeye katkıda bulunarak, hataları bildirerek veya yeni özellikler önererek bu projenin büyümesine yardımcı olabilirsiniz.';
+      'Soulful Bhakti açık kaynaklı bir projedir. Projeye katkıda bulunarak, hataları bildirerek veya yeni özellikler önererek bu projenin büyümesine yardımcı olabilirsiniz.';
 
   @override
   String get contribute_on_github => 'GitHub\'da katkıda bulun';
@@ -1033,7 +1033,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get enable_connect_description =>
-      'Sangeet\'u diğer cihazlardan kontrol edin';
+      'Soulful Bhakti\'u diğer cihazlardan kontrol edin';
 
   @override
   String get devices => 'Cihazlar';
@@ -1081,19 +1081,19 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeet bir güncelleme aldı';
+  String get spotube_has_an_update => 'Soulful Bhakti bir güncelleme aldı';
 
   @override
   String get download_now => 'Şimdi İndir';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Sangeet Nightly $nightlyBuildNum yayımlandı';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum yayımlandı';
   }
 
   @override
   String release_version(Object version) {
-    return 'Sangeet v$version yayımlandı';
+    return 'Soulful Bhakti v$version yayımlandı';
   }
 
   @override
@@ -1231,6 +1231,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'Sanatçılara borç\nbu ay';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'sanatçının';
@@ -1521,7 +1524,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Sangeet ekibi, herhangi bir \"Üçüncü taraf\" eklentisi için herhangi bir sorumluluk (yasal olanlar dahil) kabul etmez.\nLütfen bunları kendi riskinizde kullanın. Herhangi bir hata/sorun için lütfen bunları eklenti deposuna bildirin.\n\nHerhangi bir \"Üçüncü taraf\" eklentisi bir hizmetin/yasal varlığın ToS/DMCA\'sını ihlal ediyorsa, lütfen \"Üçüncü taraf\" eklenti yazarından veya barındırma platformundan, örneğin GitHub/Codeberg\'den harekete geçmesini isteyin. Yukarıda listelenen (\"Üçüncü taraf\" olarak etiketlenen) eklentilerin tümü genel/topluluk tarafından sürdürülen eklentilerdir. Biz bunları küratörlüğünü yapmıyoruz, bu yüzden onlar üzerinde herhangi bir işlem yapamayız.\n\n';
+      'Soulful Bhakti ekibi, herhangi bir \"Üçüncü taraf\" eklentisi için herhangi bir sorumluluk (yasal olanlar dahil) kabul etmez.\nLütfen bunları kendi riskinizde kullanın. Herhangi bir hata/sorun için lütfen bunları eklenti deposuna bildirin.\n\nHerhangi bir \"Üçüncü taraf\" eklentisi bir hizmetin/yasal varlığın ToS/DMCA\'sını ihlal ediyorsa, lütfen \"Üçüncü taraf\" eklenti yazarından veya barındırma platformundan, örneğin GitHub/Codeberg\'den harekete geçmesini isteyin. Yukarıda listelenen (\"Üçüncü taraf\" olarak etiketlenen) eklentilerin tümü genel/topluluk tarafından sürdürülen eklentilerdir. Biz bunları küratörlüğünü yapmıyoruz, bu yüzden onlar üzerinde herhangi bir işlem yapamayız.\n\n';
 
   @override
   String get input_does_not_match_format => 'Girdi, gerekli biçimle eşleşmiyor';

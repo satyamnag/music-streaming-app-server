@@ -492,13 +492,13 @@ class AppLocalizationsUk extends AppLocalizations {
   String get about => 'Про';
 
   @override
-  String get u_love_spotube => 'Ми знаємо, що ви любите Sangeet';
+  String get u_love_spotube => 'Ми знаємо, що ви любите Soulful Bhakti';
 
   @override
   String get check_for_updates => 'Перевірити наявність оновлень';
 
   @override
-  String get about_spotube => 'Про Sangeet';
+  String get about_spotube => 'Про Soulful Bhakti';
 
   @override
   String get blacklist => 'Чорний список';
@@ -508,7 +508,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, легкий, кросплатформовий, безкоштовний клієнт Spotify';
+      'Soulful Bhakti, легкий, кросплатформовий, безкоштовний клієнт Spotify';
 
   @override
   String get version => 'Версія';
@@ -731,7 +731,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'До речі, ваш IP може бути заблокований на YouTube через надмірну кількість запитів на завантаження, ніж зазвичай. Блокування IP-адреси означає, що ви не зможете користуватися YouTube (навіть якщо ви увійшли в систему) протягом щонайменше 2-3 місяців з цього пристрою. І Sangeet не несе жодної відповідальності, якщо це станеться';
+      'До речі, ваш IP може бути заблокований на YouTube через надмірну кількість запитів на завантаження, ніж зазвичай. Блокування IP-адреси означає, що ви не зможете користуватися YouTube (навіть якщо ви увійшли в систему) протягом щонайменше 2-3 місяців з цього пристрою. І Soulful Bhakti не несе жодної відповідальності, якщо це станеться';
 
   @override
   String get by_clicking_accept_terms =>
@@ -746,7 +746,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get download_agreement_3 =>
-      'Я повністю усвідомлюю, що мій IP може бути заблокований на YouTube, і я не покладаю на Sangeet або його власників/контрибуторів відповідальність за будь-які нещасні випадки, спричинені моїми діями.';
+      'Я повністю усвідомлюю, що мій IP може бути заблокований на YouTube, і я не покладаю на Soulful Bhakti або його власників/контрибуторів відповідальність за будь-які нещасні випадки, спричинені моїми діями.';
 
   @override
   String get decline => 'Відхилити';
@@ -828,7 +828,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet використовує шифрування для безпечного зберігання ваших даних. Але не вдалося цього зробити. Тому він перейде до небезпечного зберігання\nЯкщо ви використовуєте Linux, переконайтеся, що у вас встановлено будь-який секретний сервіс (gnome-keyring, kde-wallet, keepassxc тощо)';
+      'Soulful Bhakti використовує шифрування для безпечного зберігання ваших даних. Але не вдалося цього зробити. Тому він перейде до небезпечного зберігання\nЯкщо ви використовуєте Linux, переконайтеся, що у вас встановлено будь-який секретний сервіс (gnome-keyring, kde-wallet, keepassxc тощо)';
 
   @override
   String get querying_info => 'Запит інформації...';
@@ -1009,7 +1009,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Це допоможе Sangeet показати вам правильний контент\nдля вашого місцезнаходження.';
+      'Це допоможе Soulful Bhakti показати вам правильний контент\nдля вашого місцезнаходження.';
 
   @override
   String get choose_your_language => 'Виберіть свою мову';
@@ -1019,7 +1019,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet - це проект з відкритим кодом. Ви можете допомогти цьому проекту зростати, вносячи свій внесок у проект, повідомляючи про помилки або пропонуючи нові функції.';
+      'Soulful Bhakti - це проект з відкритим кодом. Ви можете допомогти цьому проекту зростати, вносячи свій внесок у проект, повідомляючи про помилки або пропонуючи нові функції.';
 
   @override
   String get contribute_on_github => 'Долучайтесь на GitHub';
@@ -1034,7 +1034,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get enable_connect => 'Увімкнути підключення';
 
   @override
-  String get enable_connect_description => 'Керуйте Sangeet з інших пристроїв';
+  String get enable_connect_description =>
+      'Керуйте Soulful Bhakti з інших пристроїв';
 
   @override
   String get devices => 'Пристрої';
@@ -1082,19 +1083,19 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeet має оновлення';
+  String get spotube_has_an_update => 'Soulful Bhakti має оновлення';
 
   @override
   String get download_now => 'Завантажити Зараз';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Sangeet Nightly $nightlyBuildNum було випущено';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum було випущено';
   }
 
   @override
   String release_version(Object version) {
-    return 'Sangeet v$version було випущено';
+    return 'Soulful Bhakti v$version було випущено';
   }
 
   @override
@@ -1232,6 +1233,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'Заборгованість артистам\nцього місяця';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'артистів';
@@ -1517,7 +1521,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Команда Sangeet не несе жодної відповідальності (включно з юридичною) за будь-які плагіни \"третіх сторін\".\nБудь ласка, використовуйте їх на свій страх і ризик. Про будь-які помилки/проблеми повідомляйте в репозиторій плагіна.\n\nЯкщо якийсь плагін \"третьої сторони\" порушує ToS/DMCA будь-якої служби/юридичної особи, будь ласка, попросіть автора плагіна \"третьої сторони\" або хостингову платформу, наприклад, GitHub/Codeberg, вжити заходів. Усі перераховані вище (позначені як \"треті сторони\") є плагінами, які підтримуються публічно/спільнотою. Ми не куруємо їх, тому не можемо вжити жодних заходів щодо них.\n\n';
+      'Команда Soulful Bhakti не несе жодної відповідальності (включно з юридичною) за будь-які плагіни \"третіх сторін\".\nБудь ласка, використовуйте їх на свій страх і ризик. Про будь-які помилки/проблеми повідомляйте в репозиторій плагіна.\n\nЯкщо якийсь плагін \"третьої сторони\" порушує ToS/DMCA будь-якої служби/юридичної особи, будь ласка, попросіть автора плагіна \"третьої сторони\" або хостингову платформу, наприклад, GitHub/Codeberg, вжити заходів. Усі перераховані вище (позначені як \"треті сторони\") є плагінами, які підтримуються публічно/спільнотою. Ми не куруємо їх, тому не можемо вжити жодних заходів щодо них.\n\n';
 
   @override
   String get input_does_not_match_format =>

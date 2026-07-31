@@ -37,6 +37,10 @@ class $AssetsImagesGen {
   AssetGenImage get albumPlaceholder =>
       const AssetGenImage('assets/images/album-placeholder.png');
 
+  /// File path: assets/images/app_logo.png
+  AssetGenImage get appLogo =>
+      const AssetGenImage('assets/images/app_logo.png');
+
   /// File path: assets/images/bengali-patterns-bg.jpg
   AssetGenImage get bengaliPatternsBg =>
       const AssetGenImage('assets/images/bengali-patterns-bg.jpg');
@@ -59,6 +63,7 @@ class $AssetsImagesGen {
   /// List of all assets
   List<AssetGenImage> get values => [
         albumPlaceholder,
+        appLogo,
         bengaliPatternsBg,
         likedTracks,
         placeholder,

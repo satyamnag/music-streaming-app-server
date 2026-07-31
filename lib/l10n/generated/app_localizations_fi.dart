@@ -489,13 +489,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get about => 'Tietoa';
 
   @override
-  String get u_love_spotube => 'Tiedämme että rakastat Sangeeta';
+  String get u_love_spotube => 'Tiedämme että rakastat Soulful Bhaktia';
 
   @override
   String get check_for_updates => 'Tarkista päivitykset';
 
   @override
-  String get about_spotube => 'Tietoa Sangeet:sta';
+  String get about_spotube => 'Tietoa Soulful Bhakti:sta';
 
   @override
   String get blacklist => 'Mustalista';
@@ -505,7 +505,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Sangeet, kevyt, cross-platform, vapaa-kaikille spotify clientti';
+      'Soulful Bhakti, kevyt, cross-platform, vapaa-kaikille spotify clientti';
 
   @override
   String get version => 'Versio';
@@ -727,7 +727,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get download_ip_ban_warning =>
-      'BTW, YouTube voi estää IP-Osoitteesi tavallista liiallisten latauspyyntöjen takia. IP-Osoitteen esto tarkoittaa sitä, ettet voi käyttää YouTubea (vaikka olisit kirjautunut) vähintään 2-3kk aikana kyseiseltä laitteelta. Sangeet ei kanna yhtään vastuuta jos se tapahtuu.';
+      'BTW, YouTube voi estää IP-Osoitteesi tavallista liiallisten latauspyyntöjen takia. IP-Osoitteen esto tarkoittaa sitä, ettet voi käyttää YouTubea (vaikka olisit kirjautunut) vähintään 2-3kk aikana kyseiseltä laitteelta. Soulful Bhakti ei kanna yhtään vastuuta jos se tapahtuu.';
 
   @override
   String get by_clicking_accept_terms =>
@@ -743,7 +743,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get download_agreement_3 =>
-      'Ymmärrän että minun YouTube voi estää IP-Osoitteeni ja en pidä Sangeeta tai omistajiinsa/avustajia vastuullisena mistään omista teoistsani';
+      'Ymmärrän että minun YouTube voi estää IP-Osoitteeni ja en pidä Soulful Bhaktia tai omistajiinsa/avustajia vastuullisena mistään omista teoistsani';
 
   @override
   String get decline => 'Hylkää';
@@ -825,7 +825,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Sangeet käyttää salausta tallentaakseen tietosi, mutta epäonnistui, joten se palaa epäturvalliseen tallennukseen\nJos käytät Linuxia, varmista että sinulla on turvallisuuspalvelu (gnome-keyring, kde-wallet, keepassxc jne) asennettu';
+      'Soulful Bhakti käyttää salausta tallentaakseen tietosi, mutta epäonnistui, joten se palaa epäturvalliseen tallennukseen\nJos käytät Linuxia, varmista että sinulla on turvallisuuspalvelu (gnome-keyring, kde-wallet, keepassxc jne) asennettu';
 
   @override
   String get querying_info => 'Hankitaan tietoa...';
@@ -1004,7 +1004,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Tämä auttaa Sangeet näyttämään sinulle oikeaa sisältöä\nsijaintiasi varten.';
+      'Tämä auttaa Soulful Bhakti näyttämään sinulle oikeaa sisältöä\nsijaintiasi varten.';
 
   @override
   String get choose_your_language => 'Valitse kielesi';
@@ -1014,7 +1014,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Sangeet projekti minkä lähdekoodi on julkisesti saatavilla. Voit autta tätä projektia kasvamaan muutoksilla, ilmoittamalla bugeista, tai ehdottamalla uusia ominaisuuksia.';
+      'Soulful Bhakti projekti minkä lähdekoodi on julkisesti saatavilla. Voit autta tätä projektia kasvamaan muutoksilla, ilmoittamalla bugeista, tai ehdottamalla uusia ominaisuuksia.';
 
   @override
   String get contribute_on_github => 'Auta GitHub:ssa';
@@ -1029,7 +1029,8 @@ class AppLocalizationsFi extends AppLocalizations {
   String get enable_connect => 'Ota käyttöön yhdistäminen';
 
   @override
-  String get enable_connect_description => 'Ohjaa Sangeeta toiselta laitteelta';
+  String get enable_connect_description =>
+      'Ohjaa Soulful Bhaktia toiselta laitteelta';
 
   @override
   String get devices => 'Laitteet';
@@ -1077,19 +1078,19 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Sangeetlla on päivitys';
+  String get spotube_has_an_update => 'Soulful Bhaktilla on päivitys';
 
   @override
   String get download_now => 'Lataa nyt';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Sangeet Nightly $nightlyBuildNum on julkaistu';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum on julkaistu';
   }
 
   @override
   String release_version(Object version) {
-    return 'Sangeet v$version on julkaistu';
+    return 'Soulful Bhakti v$version on julkaistu';
   }
 
   @override
@@ -1227,6 +1228,9 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get summary_owed_to_artists => 'Maksettava artisteille\nTässä kuussa';
+
+  @override
+  String get summary_top_artist => 'Top artist\nthis period';
 
   @override
   String get summary_artists => 'artisti';
@@ -1512,7 +1516,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Sangeet-tiimi ei ota mitään vastuuta (mukaan lukien oikeudellinen) mistään \"kolmannen osapuolen\" lisäosista.\nKäytä niitä omalla vastuullasi. Ilmoita kaikista virheistä/ongelmista lisäosan arkistoon.\n\nJos jokin \"kolmannen osapuolen\" lisäosa rikkoo jonkin palvelun/oikeushenkilön käyttöehtoja/DMCA:ta, pyydä \"kolmannen osapuolen\" lisäosan tekijää tai isännöintialustaa, esim. GitHubia/Codebergiä, ryhtymään toimiin. Yllä luetellut (\"kolmannen osapuolen\" merkityt) ovat kaikki julkisia/yhteisön ylläpitämiä lisäosia. Emme kuratoi niitä, joten emme voi ryhtyä niihin toimiin.\n\n';
+      'Soulful Bhakti-tiimi ei ota mitään vastuuta (mukaan lukien oikeudellinen) mistään \"kolmannen osapuolen\" lisäosista.\nKäytä niitä omalla vastuullasi. Ilmoita kaikista virheistä/ongelmista lisäosan arkistoon.\n\nJos jokin \"kolmannen osapuolen\" lisäosa rikkoo jonkin palvelun/oikeushenkilön käyttöehtoja/DMCA:ta, pyydä \"kolmannen osapuolen\" lisäosan tekijää tai isännöintialustaa, esim. GitHubia/Codebergiä, ryhtymään toimiin. Yllä luetellut (\"kolmannen osapuolen\" merkityt) ovat kaikki julkisia/yhteisön ylläpitämiä lisäosia. Emme kuratoi niitä, joten emme voi ryhtyä niihin toimiin.\n\n';
 
   @override
   String get input_does_not_match_format => 'Syöte ei vastaa vaadittua muotoa';

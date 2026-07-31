@@ -30,6 +30,8 @@ import 'package:sangeet/hooks/configurators/use_get_storage_perms.dart';
 import 'package:sangeet/hooks/configurators/use_has_touch.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
+import 'package:sangeet/modules/settings/bhakti_color_scheme.dart';
+import 'package:sangeet/modules/splash/splash_screen.dart';
 import 'package:sangeet/provider/audio_player/audio_player_streams.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/glance/glance.dart';
@@ -169,6 +171,7 @@ class Sangeet extends HookConsumerWidget {
     ref.listen(bonsoirProvider, (_, __) {});
     ref.listen(connectClientsProvider, (_, __) {});
     ref.listen(serverProvider, (_, __) {});
+    ref.read(serverProvider);
     ref.listen(trayManagerProvider, (_, __) {});
     ref.listen(metadataPluginsProvider, (_, __) {});
     ref.listen(metadataPluginProvider, (_, __) {});
@@ -227,6 +230,18 @@ class Sangeet extends HookConsumerWidget {
           );
         }
 
+        // Show the splash screen until the metadata plugin and local playback
+        // server have finished initializing, then transition to the app.
+        final pluginLoading = ref.watch(
+          metadataPluginProvider.select((s) => s.isLoading),
+        );
+        final serverLoading = ref.watch(
+          serverProvider.select((s) => s.isLoading),
+        );
+        if (pluginLoading || serverLoading) {
+          child = const SplashScreen();
+        }
+
         return child;
       },
       scaling: const AdaptiveScaling(1),
@@ -235,7 +250,7 @@ class Sangeet extends HookConsumerWidget {
         iconTheme: const IconThemeProperties(),
         colorScheme:
             colorSchemeMap[accentMaterialColor.name]?.call(ThemeMode.light) ??
-                LegacyColorSchemes.lightSlate(),
+                BhaktiColorSchemes.lightMaroon(),
         surfaceOpacity: .8,
         surfaceBlur: 10,
       ),
@@ -244,7 +259,7 @@ class Sangeet extends HookConsumerWidget {
         iconTheme: const IconThemeProperties(),
         colorScheme:
             colorSchemeMap[accentMaterialColor.name]?.call(ThemeMode.dark) ??
-                LegacyColorSchemes.darkSlate(),
+                BhaktiColorSchemes.darkMaroon(),
         surfaceOpacity: .8,
         surfaceBlur: 10,
       ),

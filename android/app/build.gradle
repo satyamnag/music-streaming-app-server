@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.sangeet.app"
+        applicationId "com.soulfulbhakti.app"
         minSdkVersion 24
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
@@ -96,14 +96,14 @@ android {
     productFlavors {
         nightly {
             dimension "default"
-            resValue "string", "app_name_en", "Sangeet Nightly"
+            resValue "string", "app_name_en", "Soulful Bhakti Nightly"
             applicationIdSuffix ".nightly"
             versionNameSuffix "-nightly"
             signingConfig signingConfigs.release
         }
         dev {
             dimension "default"
-            resValue "string", "app_name_en", "Sangeet Dev"
+            resValue "string", "app_name_en", "Soulful Bhakti Dev"
             applicationIdSuffix ".dev"
             versionNameSuffix "-dev"
             signingConfig signingConfigs.release

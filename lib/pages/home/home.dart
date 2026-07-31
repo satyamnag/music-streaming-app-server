@@ -5,14 +5,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/fallbacks/error_box.dart';
+import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/connect/connect_device.dart';
-import 'package:sangeet/modules/home/sections/featured.dart';
-import 'package:sangeet/modules/home/sections/sections.dart';
-import 'package:sangeet/modules/home/sections/new_releases.dart';
-import 'package:sangeet/modules/home/sections/recent.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/pages/auth/login_page.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/utils/platform.dart';
 
@@ -28,6 +29,8 @@ class HomePage extends HookConsumerWidget {
     final mediaQuery = MediaQuery.of(context);
     final layoutMode =
         ref.watch(userPreferencesProvider.select((s) => s.layoutMode));
+    final playlist = ref.watch(audioPlayerProvider);
+    final tracksAsync = ref.watch(homeTracksProvider);
 
     return SafeArea(
         bottom: false,
@@ -41,19 +44,37 @@ class HomePage extends HookConsumerWidget {
               if (mediaQuery.smAndDown || layoutMode == LayoutMode.compact)
                 SliverAppBar(
                   floating: true,
-                  title: DefaultTextStyle(
-                    style: TextStyle(
-                      fontFamily: "Cookie",
-                      fontSize: 30,
-                      letterSpacing: 1.8,
-                      color: theme.colorScheme.foreground,
+                  title: ClipOval(
+                    child: Image.asset(
+                      'assets/branding/sangeet-logo.png',
+                      height: 32,
+                      width: 32,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Text(
+                        'Soulful Bhakti',
+                        style: TextStyle(
+                          fontFamily: "Cookie",
+                          fontSize: 30,
+                          letterSpacing: 1.8,
+                          color: theme.colorScheme.foreground,
+                        ),
+                      ),
                     ),
-                    child: const Text("Soulful Bhakti"),
                   ),
                   backgroundColor: theme.colorScheme.background,
                   foregroundColor: theme.colorScheme.foreground,
                   actions: [
                     const ConnectDeviceButton(),
+                    const Gap(10),
+                    IconButton.ghost(
+                      icon: const Icon(SangeetIcons.user, size: 20),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => const ProfileDialog(),
+                        );
+                      },
+                    ),
                     const Gap(10),
                     IconButton.ghost(
                       icon: const Icon(SangeetIcons.settings, size: 20),
@@ -67,19 +88,37 @@ class HomePage extends HookConsumerWidget {
               else if (kIsMacOS)
                 const SliverGap(10),
               const SliverGap(10),
-              SliverList.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return switch (index) {
-                    // 0 => const HomeGenresSection(),
-                    0 => const HomeRecentlyPlayedSection(),
-                    1 => const HomeFeaturedSection(),
-                    // 3 => const HomePageFriendsSection(),
-                    _ => const HomeNewReleasesSection()
-                  };
-                },
-              ),
-              const SliverSafeArea(sliver: HomePageBrowseSection()),
+              switch (tracksAsync) {
+                AsyncData(value: final tracks) => SliverList.builder(
+                    itemCount: tracks.length,
+                    itemBuilder: (context, index) {
+                      final track = tracks[index];
+                      return TrackTile(
+                        index: index + 1,
+                        track: track,
+                        playlist: playlist,
+                        onTap: () async {
+                          await ref
+                              .read(audioPlayerProvider.notifier)
+                              .load(tracks, initialIndex: index, autoPlay: true);
+                        },
+                      );
+                    },
+                  ),
+                AsyncError(error: final error) => SliverFillRemaining(
+                    child: Center(
+                      child: ErrorBox(
+                        error: error,
+                        onRetry: () {
+                          ref.invalidate(homeTracksProvider);
+                        },
+                      ),
+                    ),
+                  ),
+                _ => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+              },
             ],
           ),
         ));

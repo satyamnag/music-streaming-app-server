@@ -31,9 +31,12 @@ class AboutSangeetPage extends HookConsumerWidget {
               children: [
                 const SizedBox(height: 40),
                 Center(
-                  child: Assets.branding.sangeetLogoPng.image(
-                    height: 200,
-                    width: 200,
+                  child: ClipOval(
+                    child: Assets.branding.sangeetLogoPng.image(
+                      height: 200,
+                      width: 200,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
