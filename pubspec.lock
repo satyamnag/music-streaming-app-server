@@ -547,15 +547,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
-  disable_battery_optimization:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: aa77a61946849fff495091fc13dcc390948cc60b
-      url: "https://github.com/KRTirtho/Disable-Battery-Optimizations.git"
-    source: git
-    version: "1.1.1"
   draggable_scrollbar:
     dependency: "direct main"
     description:

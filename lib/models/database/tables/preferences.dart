@@ -60,7 +60,7 @@ class PreferencesTable extends Table {
   TextColumn get closeBehavior => textEnum<CloseBehavior>()
       .withDefault(Constant(CloseBehavior.close.name))();
   TextColumn get accentColorScheme => text()
-      .withDefault(const Constant("Slate:0xff64748b"))
+      .withDefault(const Constant("maroon:0xff520101"))
       .map(const SangeetColorConverter())();
   TextColumn get layoutMode =>
       textEnum<LayoutMode>().withDefault(Constant(LayoutMode.adaptive.name))();

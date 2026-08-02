@@ -47,7 +47,7 @@ final serverProvider = FutureProvider(
       for (var attempt = 0; attempt < _portAttempts; attempt++) {
         final port = basePort + attempt;
         try {
-          server = await HttpServer.bind(address, port);
+          server = await HttpServer.bind(address, port, shared: true);
           SangeetMedia.setPort(port);
           break;
         } on SocketException catch (e) {

@@ -24,7 +24,7 @@ import 'package:sangeet/collections/intents.dart';
 import 'package:sangeet/collections/routes.dart';
 import 'package:sangeet/hooks/configurators/use_close_behavior.dart';
 import 'package:sangeet/hooks/configurators/use_deep_linking.dart';
-import 'package:sangeet/hooks/configurators/use_disable_battery_optimizations.dart';
+
 import 'package:sangeet/hooks/configurators/use_fix_window_stretching.dart';
 import 'package:sangeet/hooks/configurators/use_get_storage_perms.dart';
 import 'package:sangeet/hooks/configurators/use_has_touch.dart';
@@ -180,7 +180,6 @@ class Sangeet extends HookConsumerWidget {
     ref.listen(audioSourcePluginUpdateCheckerProvider, (_, __) {});
 
     useFixWindowStretching();
-    useDisableBatteryOptimizations();
     useDeepLinking(ref, router);
     useCloseBehavior(ref);
     useGetStoragePermissions(ref);
