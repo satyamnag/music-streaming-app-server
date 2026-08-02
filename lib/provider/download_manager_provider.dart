@@ -4,18 +4,19 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:metadata_god/metadata_god.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide join;
 import 'package:sangeet/collections/routes.dart';
 import 'package:sangeet/components/dialogs/replace_downloaded_dialog.dart';
 import 'package:sangeet/extensions/dio.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
+import 'package:sangeet/provider/downloads/downloads_provider.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
-import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/audio_encryption/audio_encryption.dart';
+import 'package:sangeet/services/downloads_index/downloads_index.dart';
 import 'package:sangeet/services/logger/logger.dart';
-import 'package:sangeet/utils/service_utils.dart';
 
 enum DownloadStatus {
   queued,
@@ -186,12 +187,11 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
       final track = await ref.read(sourcedTrackProvider(task.track).future);
       if (task.cancelToken.isCancelled) {
         _setStatus(task.track, DownloadStatus.canceled);
+        return;
       }
       final presets = ref.read(audioSourcePresetsProvider);
       final container =
           presets.presets[presets.selectedDownloadingContainerIndex];
-      final downloadLocation = ref.read(
-          userPreferencesProvider.select((value) => value.downloadLocation));
 
       final url = track.getUrlOfQuality(
         container,
@@ -202,30 +202,28 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
         throw Exception("No download URL found for selected codec");
       }
 
-      final savePath = join(
-        downloadLocation,
-        ServiceUtils.sanitizeFilename(
-          "${track.query.name} - ${track.query.artists.map((e) => e.name).join(", ")}.${container.getFileExtension()}",
-        ),
-      );
-
-      final savePathFile = File(savePath);
-      if (await savePathFile.exists()) {
-        // dio automatically replaces the file if it exists so no deletion required
+      if (await AudioEncryptionService.hasEncryptedFile(task.track.id)) {
         if (!await _shouldReplaceFileOnExist(task)) {
-          _setStatus(track.query, DownloadStatus.completed);
+          _setStatus(task.track, DownloadStatus.completed);
           return;
         }
       }
 
+      final tempDir = await getTemporaryDirectory();
+      final tempDownloadDir = Directory(join(tempDir.path, 'downloads'));
+      if (!await tempDownloadDir.exists()) {
+        await tempDownloadDir.create(recursive: true);
+      }
+      final rawPath = join(tempDownloadDir.path, '${task.track.id}.raw');
+
       final response = await dio.chunkDownload(
         url,
-        savePath,
+        rawPath,
         cancelToken: task.cancelToken,
         onReceiveProgress: (count, total) {
           if (task.totalSizeBytes == null) {
             state = state.map((e) {
-              if (e.track.id == track.query.id) {
+              if (e.track.id == task.track.id) {
                 return e.copyWith(totalSizeBytes: total);
               }
               return e;
@@ -236,28 +234,36 @@ class DownloadManagerNotifier extends Notifier<List<DownloadTask>> {
         deleteOnError: true,
         fileAccessMode: FileAccessMode.write,
       );
-      if (response.statusCode != null && response.statusCode! < 400) {
-        _setStatus(track.query, DownloadStatus.completed);
-      } else {
-        _setStatus(track.query, DownloadStatus.failed);
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        _setStatus(task.track, DownloadStatus.failed);
         return;
       }
 
-      if (container.getFileExtension() == "weba") return;
+      await AudioEncryptionService.encryptFile(
+        File(rawPath),
+        task.track.id,
+      );
 
-      final imageBytes = await ServiceUtils.downloadImage(
-        (task.track.album.images).asUrlString(
-          placeholder: ImagePlaceholder.albumArt,
-          index: 1,
-        ),
-      );
-      await MetadataGod.writeMetadata(
-        file: savePath,
-        metadata: task.track.toMetadata(
-          fileLength: await savePathFile.length(),
-          imageBytes: imageBytes,
-        ),
-      );
+      await ref.read(downloadedTracksProvider.notifier).addOrUpdate(
+            DownloadedTrack(
+              trackId: task.track.id,
+              name: task.track.name,
+              artists: task.track.artists.map((e) => e.name).toList(),
+              albumName: task.track.album.name,
+              albumImageUrl: task.track.album.images.asUrlString(
+                placeholder: ImagePlaceholder.albumArt,
+              ),
+              durationMs: task.track.durationMs,
+              downloadedAt: DateTime.now(),
+            ),
+          );
+
+      if (task.cancelToken.isCancelled) {
+        _setStatus(task.track, DownloadStatus.canceled);
+        return;
+      }
+
+      _setStatus(task.track, DownloadStatus.completed);
     } catch (e, stack) {
       if (e is! DioException || e.type != DioExceptionType.cancel) {
         _setStatus(task.track, DownloadStatus.failed);

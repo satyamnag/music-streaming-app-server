@@ -15,6 +15,7 @@ import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_encryption/audio_encryption.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/sourced_track/sourced_track.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -35,6 +36,27 @@ String? get _randomUserAgent => _deviceClients
       Random().nextInt(_deviceClients.length),
     )
     .payload["context"]["client"]["userAgent"];
+
+/// Detects the codec container of decrypted audio bytes.
+String _sniffContentType(Uint8List bytes) {
+  if (bytes.length >= 4 &&
+      bytes[0] == 0x4F && // 'O'
+      bytes[1] == 0x67 && // 'g'
+      bytes[2] == 0x67 && // 'g'
+      bytes[3] == 0x53) {
+    return 'audio/ogg';
+  }
+  if (bytes.length >= 3 &&
+      bytes[0] == 0x49 && // 'I'
+      bytes[1] == 0x44 && // 'D'
+      bytes[2] == 0x33) {
+    return 'audio/mpeg';
+  }
+  if (bytes.isNotEmpty && bytes[0] == 0xFF) {
+    return 'audio/mpeg';
+  }
+  return 'audio/ogg';
+}
 
 class ServerPlaybackRoutes {
   final Ref ref;
@@ -271,6 +293,16 @@ class ServerPlaybackRoutes {
   /// @head('/stream/<trackId>')
   Future<Response> headStreamTrackId(Request request, String trackId) async {
     try {
+      if (await AudioEncryptionService.hasEncryptedFile(trackId)) {
+        return Response(
+          200,
+          headers: {
+            'content-type': 'audio/ogg',
+            'accept-ranges': 'bytes',
+          },
+        );
+      }
+
       final sourcedTrack = await _getSourcedTrack(request, trackId);
 
       if (sourcedTrack == null) {
@@ -295,6 +327,18 @@ class ServerPlaybackRoutes {
   /// @get('/stream/<trackId>')
   Future<Response> getStreamTrackId(Request request, String trackId) async {
     try {
+      if (await AudioEncryptionService.hasEncryptedFile(trackId)) {
+        final bytes = await AudioEncryptionService.decryptFile(trackId);
+        return Response(
+          200,
+          body: bytes,
+          headers: {
+            'content-type': _sniffContentType(bytes),
+            'accept-ranges': 'bytes',
+          },
+        );
+      }
+
       final sourcedTrack = await _getSourcedTrack(request, trackId);
 
       if (sourcedTrack == null) {
