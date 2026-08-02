@@ -9,6 +9,7 @@ import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/connect/connect_device.dart';
+import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/pages/auth/login_page.dart';
@@ -88,6 +89,7 @@ class HomePage extends HookConsumerWidget {
               else if (kIsMacOS)
                 const SliverGap(10),
               const SliverGap(10),
+              const HomeRecentlyPlayedTracksSection(),
               switch (tracksAsync) {
                 AsyncData(value: final tracks) => SliverList.builder(
                     itemCount: tracks.length,
