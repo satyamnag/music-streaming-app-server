@@ -10,10 +10,8 @@ import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:sangeet/provider/download_manager_provider.dart';
 import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
@@ -28,9 +26,8 @@ enum TrackOptionValue {
   addToPlaylist,
   addToQueue,
   removeFromPlaylist,
-  removeFromQueue,
-  blacklist,
-  delete,
+removeFromQueue,
+    delete,
   playNext,
   favorite,
   details,
@@ -51,7 +48,6 @@ class TrackOptionsActions {
       ref.read(metadataPluginSavedPlaylistsProvider.notifier);
   DownloadManagerNotifier get downloadManager =>
       ref.read(downloadManagerProvider.notifier);
-  BlackListNotifier get blacklist => ref.read(blacklistProvider.notifier);
 
   void actionShare(BuildContext context) {
     Clipboard.setData(ClipboardData(text: track.externalUri)).then((_) {
@@ -218,20 +214,6 @@ class TrackOptionsActions {
       case TrackOptionValue.removeFromPlaylist:
         favoritePlaylistsNotifier.removeTracks(playlistId ?? "", [track.id]);
         break;
-      case TrackOptionValue.blacklist:
-        final isBlacklisted = blacklist.contains(track);
-        if (isBlacklisted == true) {
-          await ref.read(blacklistProvider.notifier).remove(track.id);
-        } else {
-          await ref.read(blacklistProvider.notifier).add(
-                BlacklistTableCompanion.insert(
-                  name: track.name,
-                  elementId: track.id,
-                  elementType: BlacklistedType.track,
-                ),
-              );
-        }
-        break;
       case TrackOptionValue.share:
         actionShare(context);
         break;
@@ -258,7 +240,6 @@ class TrackOptionsActions {
 
 typedef TrackOptionFlags = ({
   bool isInQueue,
-  bool isBlacklisted,
   bool isInDownloadQueue,
   bool isActiveTrack,
   bool isAuthenticated,
@@ -274,13 +255,10 @@ final trackOptionActionsProvider =
 final trackOptionsStateProvider =
     Provider.family<TrackOptionFlags, SangeetTrackObject>((ref, track) {
   ref.watch(downloadManagerProvider);
-  ref.watch(blacklistProvider);
 
   final playlist = ref.watch(audioPlayerProvider);
   final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
   final downloadManager = ref.watch(downloadManagerProvider.notifier);
-  final blacklist = ref.watch(blacklistProvider.notifier);
-  final isBlacklisted = blacklist.contains(track);
   final isSavedTrack = ref.watch(metadataPluginIsSavedTrackProvider(track.id));
 
   final downloadTask = playlist.activeTrack?.id == null
@@ -296,7 +274,6 @@ final trackOptionsStateProvider =
 
   return (
     isInQueue: playlist.containsTrack(track),
-    isBlacklisted: isBlacklisted,
     isInDownloadQueue: isInDownloadQueue,
     isActiveTrack: playlist.activeTrack?.id == track.id,
     isAuthenticated: authenticated.asData?.value ?? false,

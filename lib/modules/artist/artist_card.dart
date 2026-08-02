@@ -9,8 +9,6 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 
-import 'package:sangeet/provider/blacklist_provider.dart';
-
 class ArtistCard extends HookConsumerWidget {
   final SangeetFullArtistObject artist;
   const ArtistCard(this.artist, {super.key});
@@ -21,13 +19,6 @@ class ArtistCard extends HookConsumerWidget {
     final backgroundImage = UniversalImage.imageProvider(
       artist.images.asUrlString(
         placeholder: ImagePlaceholder.artist,
-      ),
-    );
-    final isBlackListed = ref.watch(
-      blacklistProvider.select(
-        (blacklist) => blacklist.asData?.value.any(
-          (element) => element.elementId == artist.id,
-        ),
       ),
     );
 
@@ -56,12 +47,6 @@ class ArtistCard extends HookConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                if (isBlackListed == true) ...[
-                  DestructiveBadge(
-                    child: Text(context.l10n.blacklisted.toUpperCase()),
-                  ),
-                  const Gap(5),
-                ],
                 SecondaryBadge(
                   child: Text(context.l10n.artist.toUpperCase()),
                 )

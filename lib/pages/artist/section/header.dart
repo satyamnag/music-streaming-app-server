@@ -8,9 +8,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/artist/artist.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/metadata_plugin/library/artists.dart';
@@ -29,11 +27,8 @@ class ArtistPageHeader extends HookConsumerWidget {
     final ThemeData(:typography) = theme;
 
     final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
-    ref.watch(blacklistProvider);
-    final blacklistNotifier = ref.watch(blacklistProvider.notifier);
-    final isBlackListed = blacklistNotifier.containsArtist(artist.id);
 
-    final image = artist.images.asUrlString(
+final image = artist.images.asUrlString(
       placeholder: ImagePlaceholder.artist,
     );
 
@@ -80,33 +75,6 @@ class ArtistPageHeader extends HookConsumerWidget {
               },
             ),
           const SizedBox(width: 5),
-          Tooltip(
-            tooltip: TooltipContainer(
-              child: Text(context.l10n.add_artist_to_blacklist),
-            ).call,
-            child: IconButton(
-              icon: Icon(
-                SangeetIcons.userRemove,
-                color: !isBlackListed ? Colors.red[400] : null,
-              ),
-              variance: isBlackListed
-                  ? ButtonVariance.destructive
-                  : ButtonVariance.ghost,
-              onPressed: () async {
-                if (isBlackListed) {
-                  await ref.read(blacklistProvider.notifier).remove(artist.id);
-                } else {
-                  await ref.read(blacklistProvider.notifier).add(
-                        BlacklistTableCompanion.insert(
-                          name: artist.name,
-                          elementId: artist.id,
-                          elementType: BlacklistedType.artist,
-                        ),
-                      );
-                }
-              },
-            ),
-          ),
           IconButton.ghost(
             icon: const Icon(SangeetIcons.share),
             onPressed: () async {
@@ -171,12 +139,6 @@ class ArtistPageHeader extends HookConsumerWidget {
                                 child:
                                     Text(context.l10n.artist).small().muted(),
                               ),
-                              if (isBlackListed) ...[
-                                const Gap(5),
-                                DestructiveBadge(
-                                  child: Text(context.l10n.blacklisted).small(),
-                                ),
-                              ]
                             ],
                           ),
                           const Gap(10),

@@ -78,10 +78,6 @@ class AppRouter extends RootStackRouter {
               path: "settings/metadata-provider/metadata-form",
               page: SettingsMetadataProviderFormRoute.page,
             ),
-            AutoRoute(
-              path: "settings/blacklist",
-              page: BlackListRoute.page,
-            ),
             if (!kIsWeb)
               AutoRoute(
                 path: "settings/logs",

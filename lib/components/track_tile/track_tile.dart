@@ -20,17 +20,7 @@ import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
-import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:sangeet/utils/platform.dart';
-
-final isBlacklistedProvider =
-    Provider.autoDispose.family<bool, SangeetTrackObject>(
-  (ref, track) {
-    ref.watch(blacklistProvider);
-    final blacklist = ref.read(blacklistProvider.notifier);
-    return blacklist.contains(track);
-  },
-);
 
 final _overlay = ValueNotifier<OverlayCompleter<dynamic>?>(null);
 
@@ -67,8 +57,6 @@ class TrackTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
-
-    final isBlackListed = ref.watch(isBlacklistedProvider(track));
 
     final isLoading = useState(false);
 
@@ -110,7 +98,6 @@ class TrackTile extends HookConsumerWidget {
           builder: (context, isHovering) => ButtonTile(
             selected: isSelected,
             onPressed: () async {
-              if (isBlackListed) return;
               try {
                 isLoading.value = true;
                 await onTap?.call();
@@ -121,10 +108,7 @@ class TrackTile extends HookConsumerWidget {
               }
             },
             onLongPress: onLongPress,
-            style: (isBlackListed
-                    ? ButtonVariance.destructive
-                    : ButtonVariance.ghost)
-                .copyWith(
+            style: ButtonVariance.ghost.copyWith(
               padding: (context, states, value) =>
                   const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
             ),

@@ -8,7 +8,6 @@ import 'package:sangeet/extensions/list.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
-import 'package:sangeet/provider/blacklist_provider.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/discord_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -20,8 +19,6 @@ void _log(String msg) {
 }
 
 class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
-  BlackListNotifier get _blacklist => ref.read(blacklistProvider.notifier);
-
   void _assertAllowedTracks(Iterable<SangeetTrackObject> tracks) {
     assert(
       tracks.every(
@@ -230,8 +227,7 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       return addTracks(tracks);
     }
 
-    final addableTracks = _blacklist
-        .filter(tracks)
+    final addableTracks = tracks
         .where(
           (track) =>
               allowDuplicates ||
@@ -263,7 +259,6 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   Future<void> addTrack(SangeetTrackObject track) async {
     _assertAllowedTrack(track);
 
-    if (_blacklist.contains(track)) return;
     if (state.tracks.any((element) => _compareTracks(element, track))) return;
 
     state = state.copyWith(
@@ -283,7 +278,6 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   Future<void> addTracks(Iterable<SangeetTrackObject> tracks) async {
     _assertAllowedTracks(tracks);
 
-    tracks = _blacklist.filter(tracks).toList();
     state = state.copyWith(
       tracks: [...state.tracks, ...tracks],
     );
@@ -366,8 +360,7 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     await SangeetMedia.ensurePortReady();
     _log('load(): port ready=${SangeetMedia.serverPort}');
 
-    final medias = _blacklist
-        .filter(tracks)
+    final medias = tracks
         .toList()
         .asMediaList()
         .unique((a, b) => a.uri == b.uri);

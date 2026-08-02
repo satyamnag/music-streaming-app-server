@@ -1,9 +1,6 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show ListTile;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/adaptive/adaptive_select_tile.dart';
 import 'package:sangeet/modules/settings/playback/edit_connect_port_dialog.dart';
@@ -11,7 +8,6 @@ import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/metadata_plugin/audio_source/quality_presets.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
-import 'package:sangeet/utils/platform.dart';
 
 class SettingsPlaybackSection extends HookConsumerWidget {
   const SettingsPlaybackSection({super.key});
@@ -89,15 +85,6 @@ class SettingsPlaybackSection extends HookConsumerWidget {
             },
           ),
         ],
-        ListTile(
-          leading: const Icon(SangeetIcons.playlistRemove),
-          title: Text(context.l10n.blacklist),
-          subtitle: Text(context.l10n.blacklist_description),
-          onTap: () {
-            context.navigateTo(const BlackListRoute());
-          },
-          trailing: const Icon(SangeetIcons.angleRight),
-        ),
         ListTile(
           leading: const Icon(SangeetIcons.normalize),
           title: Text(context.l10n.normalize_audio),

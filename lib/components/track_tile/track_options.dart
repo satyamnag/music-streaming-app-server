@@ -36,7 +36,6 @@ class TrackOptions extends HookConsumerWidget {
 
     final trackOptionActions = ref.watch(trackOptionActionsProvider(track));
     final (
-      :isBlacklisted,
       :isInDownloadQueue,
       :isInQueue,
       :isActiveTrack,
@@ -224,30 +223,6 @@ class TrackOptions extends HookConsumerWidget {
                   )
                 : const Icon(SangeetIcons.download),
             title: Text(context.l10n.download_track),
-          ),
-        if (!isLocalTrack)
-          ButtonTile(
-            style: ButtonVariance.menu,
-            onPressed: () async {
-              await trackOptionActions.action(
-                rootNavigatorKey.currentContext!,
-                TrackOptionValue.blacklist,
-                playlistId,
-              );
-              onTapItem?.call();
-            },
-            leading: Icon(
-              SangeetIcons.playlistRemove,
-              color: isBlacklisted != true ? Colors.red[400] : null,
-            ),
-            title: Text(
-              isBlacklisted == true
-                  ? context.l10n.remove_from_blacklist
-                  : context.l10n.add_to_blacklist,
-              style: TextStyle(
-                color: isBlacklisted != true ? Colors.red[400] : null,
-              ),
-            ),
           ),
         if (!isLocalTrack)
           ButtonTile(
