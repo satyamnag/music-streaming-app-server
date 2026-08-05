@@ -1,6 +1,8 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -20,9 +22,45 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
     final tracks = history.asData?.value ?? const <SangeetTrackObject>[];
 
     if (history.isLoading) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Skeletonizer(
+                enabled: true,
+                child: Text(
+                  context.l10n.recently_played,
+                  style: Theme.of(context).typography.h4,
+                ),
+              ),
+              const Gap(8),
+              Skeletonizer(
+                enabled: true,
+                child: SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 4,
+                    separatorBuilder: (_, __) => const Gap(12),
+                    itemBuilder: (context, index) => _RecentTrackCard(
+                      track: FakeData.track,
+                      imageUrl: '',
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (tracks.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
-    if (tracks.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
     final theme = Theme.of(context);
     final scale = theme.scaling;
@@ -53,8 +91,8 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                 separatorBuilder: (_, __) => Gap(12 * scale),
                 itemBuilder: (context, index) {
                   final track = tracks[index];
-                  final imageUrl = track.album.images
-                          .smallest(ImagePlaceholder.albumArt);
+                  final imageUrl =
+                      track.album.images.smallest(ImagePlaceholder.albumArt);
 
                   return _RecentTrackCard(
                     track: track,

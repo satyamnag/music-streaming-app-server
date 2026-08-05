@@ -1,4 +1,3 @@
-import 'package:flutter_undraw/flutter_undraw.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
@@ -23,20 +22,8 @@ class SearchPlaceholder extends HookConsumerWidget {
     final searchTerm = ref.watch(searchTermStateProvider);
 
     return switch ((searchTerm.isEmpty, snapshot.isLoading)) {
-      (true, false) => Column(
-          children: [
-            SizedBox(
-              height: mediaQuery.height * 0.2,
-            ),
-            Undraw(
-              illustration: UndrawIllustration.explore,
-              color: theme.colorScheme.primary,
-              height: 200 * theme.scaling,
-            ),
-            const SizedBox(height: 20),
-            Text(context.l10n.search_to_get_results).large(),
-          ],
-        ),
+      // Empty query still returns the full catalog from the server, so show
+      // the results (all songs) instead of a "type to search" placeholder.
       (false, true) => Container(
           constraints: BoxConstraints(
             maxWidth:

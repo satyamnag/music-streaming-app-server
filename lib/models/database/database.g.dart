@@ -3,279 +3,6 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $AuthenticationTableTable extends AuthenticationTable
-    with TableInfo<$AuthenticationTableTable, AuthenticationTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $AuthenticationTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  @override
-  late final GeneratedColumnWithTypeConverter<DecryptedText, String> cookie =
-      GeneratedColumn<String>('cookie', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<DecryptedText>(
-              $AuthenticationTableTable.$convertercookie);
-  @override
-  late final GeneratedColumnWithTypeConverter<DecryptedText, String>
-      accessToken = GeneratedColumn<String>('access_token', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<DecryptedText>(
-              $AuthenticationTableTable.$converteraccessToken);
-  static const VerificationMeta _expirationMeta =
-      const VerificationMeta('expiration');
-  @override
-  late final GeneratedColumn<DateTime> expiration = GeneratedColumn<DateTime>(
-      'expiration', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, cookie, accessToken, expiration];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'authentication_table';
-  @override
-  VerificationContext validateIntegrity(
-      Insertable<AuthenticationTableData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('expiration')) {
-      context.handle(
-          _expirationMeta,
-          expiration.isAcceptableOrUnknown(
-              data['expiration']!, _expirationMeta));
-    } else if (isInserting) {
-      context.missing(_expirationMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  AuthenticationTableData map(Map<String, dynamic> data,
-      {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return AuthenticationTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      cookie: $AuthenticationTableTable.$convertercookie.fromSql(
-          attachedDatabase.typeMapping
-              .read(DriftSqlType.string, data['${effectivePrefix}cookie'])!),
-      accessToken: $AuthenticationTableTable.$converteraccessToken.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}access_token'])!),
-      expiration: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}expiration'])!,
-    );
-  }
-
-  @override
-  $AuthenticationTableTable createAlias(String alias) {
-    return $AuthenticationTableTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DecryptedText, String> $convertercookie =
-      EncryptedTextConverter();
-  static TypeConverter<DecryptedText, String> $converteraccessToken =
-      EncryptedTextConverter();
-}
-
-class AuthenticationTableData extends DataClass
-    implements Insertable<AuthenticationTableData> {
-  final int id;
-  final DecryptedText cookie;
-  final DecryptedText accessToken;
-  final DateTime expiration;
-  const AuthenticationTableData(
-      {required this.id,
-      required this.cookie,
-      required this.accessToken,
-      required this.expiration});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    {
-      map['cookie'] = Variable<String>(
-          $AuthenticationTableTable.$convertercookie.toSql(cookie));
-    }
-    {
-      map['access_token'] = Variable<String>(
-          $AuthenticationTableTable.$converteraccessToken.toSql(accessToken));
-    }
-    map['expiration'] = Variable<DateTime>(expiration);
-    return map;
-  }
-
-  AuthenticationTableCompanion toCompanion(bool nullToAbsent) {
-    return AuthenticationTableCompanion(
-      id: Value(id),
-      cookie: Value(cookie),
-      accessToken: Value(accessToken),
-      expiration: Value(expiration),
-    );
-  }
-
-  factory AuthenticationTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AuthenticationTableData(
-      id: serializer.fromJson<int>(json['id']),
-      cookie: serializer.fromJson<DecryptedText>(json['cookie']),
-      accessToken: serializer.fromJson<DecryptedText>(json['accessToken']),
-      expiration: serializer.fromJson<DateTime>(json['expiration']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'cookie': serializer.toJson<DecryptedText>(cookie),
-      'accessToken': serializer.toJson<DecryptedText>(accessToken),
-      'expiration': serializer.toJson<DateTime>(expiration),
-    };
-  }
-
-  AuthenticationTableData copyWith(
-          {int? id,
-          DecryptedText? cookie,
-          DecryptedText? accessToken,
-          DateTime? expiration}) =>
-      AuthenticationTableData(
-        id: id ?? this.id,
-        cookie: cookie ?? this.cookie,
-        accessToken: accessToken ?? this.accessToken,
-        expiration: expiration ?? this.expiration,
-      );
-  AuthenticationTableData copyWithCompanion(AuthenticationTableCompanion data) {
-    return AuthenticationTableData(
-      id: data.id.present ? data.id.value : this.id,
-      cookie: data.cookie.present ? data.cookie.value : this.cookie,
-      accessToken:
-          data.accessToken.present ? data.accessToken.value : this.accessToken,
-      expiration:
-          data.expiration.present ? data.expiration.value : this.expiration,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AuthenticationTableData(')
-          ..write('id: $id, ')
-          ..write('cookie: $cookie, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('expiration: $expiration')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, cookie, accessToken, expiration);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is AuthenticationTableData &&
-          other.id == this.id &&
-          other.cookie == this.cookie &&
-          other.accessToken == this.accessToken &&
-          other.expiration == this.expiration);
-}
-
-class AuthenticationTableCompanion
-    extends UpdateCompanion<AuthenticationTableData> {
-  final Value<int> id;
-  final Value<DecryptedText> cookie;
-  final Value<DecryptedText> accessToken;
-  final Value<DateTime> expiration;
-  const AuthenticationTableCompanion({
-    this.id = const Value.absent(),
-    this.cookie = const Value.absent(),
-    this.accessToken = const Value.absent(),
-    this.expiration = const Value.absent(),
-  });
-  AuthenticationTableCompanion.insert({
-    this.id = const Value.absent(),
-    required DecryptedText cookie,
-    required DecryptedText accessToken,
-    required DateTime expiration,
-  })  : cookie = Value(cookie),
-        accessToken = Value(accessToken),
-        expiration = Value(expiration);
-  static Insertable<AuthenticationTableData> custom({
-    Expression<int>? id,
-    Expression<String>? cookie,
-    Expression<String>? accessToken,
-    Expression<DateTime>? expiration,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (cookie != null) 'cookie': cookie,
-      if (accessToken != null) 'access_token': accessToken,
-      if (expiration != null) 'expiration': expiration,
-    });
-  }
-
-  AuthenticationTableCompanion copyWith(
-      {Value<int>? id,
-      Value<DecryptedText>? cookie,
-      Value<DecryptedText>? accessToken,
-      Value<DateTime>? expiration}) {
-    return AuthenticationTableCompanion(
-      id: id ?? this.id,
-      cookie: cookie ?? this.cookie,
-      accessToken: accessToken ?? this.accessToken,
-      expiration: expiration ?? this.expiration,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (cookie.present) {
-      map['cookie'] = Variable<String>(
-          $AuthenticationTableTable.$convertercookie.toSql(cookie.value));
-    }
-    if (accessToken.present) {
-      map['access_token'] = Variable<String>($AuthenticationTableTable
-          .$converteraccessToken
-          .toSql(accessToken.value));
-    }
-    if (expiration.present) {
-      map['expiration'] = Variable<DateTime>(expiration.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AuthenticationTableCompanion(')
-          ..write('id: $id, ')
-          ..write('cookie: $cookie, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('expiration: $expiration')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $PreferencesTableTable extends PreferencesTable
     with TableInfo<$PreferencesTableTable, PreferencesTableData> {
   @override
@@ -400,7 +127,7 @@ class $PreferencesTableTable extends PreferencesTable
       GeneratedColumn<String>('market', aliasedName, false,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
-              defaultValue: Constant(Market.US.name))
+              defaultValue: Constant(Market.IN.name))
           .withConverter<Market>($PreferencesTableTable.$convertermarket);
   @override
   late final GeneratedColumnWithTypeConverter<SearchMode, String> searchMode =
@@ -1449,273 +1176,6 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesTableData> {
           ..write('enableConnect: $enableConnect, ')
           ..write('connectPort: $connectPort, ')
           ..write('cacheMusic: $cacheMusic')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $ScrobblerTableTable extends ScrobblerTable
-    with TableInfo<$ScrobblerTableTable, ScrobblerTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ScrobblerTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  static const VerificationMeta _usernameMeta =
-      const VerificationMeta('username');
-  @override
-  late final GeneratedColumn<String> username = GeneratedColumn<String>(
-      'username', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  late final GeneratedColumnWithTypeConverter<DecryptedText, String>
-      passwordHash = GeneratedColumn<String>(
-              'password_hash', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<DecryptedText>(
-              $ScrobblerTableTable.$converterpasswordHash);
-  @override
-  List<GeneratedColumn> get $columns => [id, createdAt, username, passwordHash];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'scrobbler_table';
-  @override
-  VerificationContext validateIntegrity(Insertable<ScrobblerTableData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    }
-    if (data.containsKey('username')) {
-      context.handle(_usernameMeta,
-          username.isAcceptableOrUnknown(data['username']!, _usernameMeta));
-    } else if (isInserting) {
-      context.missing(_usernameMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  ScrobblerTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ScrobblerTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      username: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}username'])!,
-      passwordHash: $ScrobblerTableTable.$converterpasswordHash.fromSql(
-          attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}password_hash'])!),
-    );
-  }
-
-  @override
-  $ScrobblerTableTable createAlias(String alias) {
-    return $ScrobblerTableTable(attachedDatabase, alias);
-  }
-
-  static TypeConverter<DecryptedText, String> $converterpasswordHash =
-      EncryptedTextConverter();
-}
-
-class ScrobblerTableData extends DataClass
-    implements Insertable<ScrobblerTableData> {
-  final int id;
-  final DateTime createdAt;
-  final String username;
-  final DecryptedText passwordHash;
-  const ScrobblerTableData(
-      {required this.id,
-      required this.createdAt,
-      required this.username,
-      required this.passwordHash});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['username'] = Variable<String>(username);
-    {
-      map['password_hash'] = Variable<String>(
-          $ScrobblerTableTable.$converterpasswordHash.toSql(passwordHash));
-    }
-    return map;
-  }
-
-  ScrobblerTableCompanion toCompanion(bool nullToAbsent) {
-    return ScrobblerTableCompanion(
-      id: Value(id),
-      createdAt: Value(createdAt),
-      username: Value(username),
-      passwordHash: Value(passwordHash),
-    );
-  }
-
-  factory ScrobblerTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ScrobblerTableData(
-      id: serializer.fromJson<int>(json['id']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      username: serializer.fromJson<String>(json['username']),
-      passwordHash: serializer.fromJson<DecryptedText>(json['passwordHash']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'username': serializer.toJson<String>(username),
-      'passwordHash': serializer.toJson<DecryptedText>(passwordHash),
-    };
-  }
-
-  ScrobblerTableData copyWith(
-          {int? id,
-          DateTime? createdAt,
-          String? username,
-          DecryptedText? passwordHash}) =>
-      ScrobblerTableData(
-        id: id ?? this.id,
-        createdAt: createdAt ?? this.createdAt,
-        username: username ?? this.username,
-        passwordHash: passwordHash ?? this.passwordHash,
-      );
-  ScrobblerTableData copyWithCompanion(ScrobblerTableCompanion data) {
-    return ScrobblerTableData(
-      id: data.id.present ? data.id.value : this.id,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      username: data.username.present ? data.username.value : this.username,
-      passwordHash: data.passwordHash.present
-          ? data.passwordHash.value
-          : this.passwordHash,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ScrobblerTableData(')
-          ..write('id: $id, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('username: $username, ')
-          ..write('passwordHash: $passwordHash')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, createdAt, username, passwordHash);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ScrobblerTableData &&
-          other.id == this.id &&
-          other.createdAt == this.createdAt &&
-          other.username == this.username &&
-          other.passwordHash == this.passwordHash);
-}
-
-class ScrobblerTableCompanion extends UpdateCompanion<ScrobblerTableData> {
-  final Value<int> id;
-  final Value<DateTime> createdAt;
-  final Value<String> username;
-  final Value<DecryptedText> passwordHash;
-  const ScrobblerTableCompanion({
-    this.id = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.username = const Value.absent(),
-    this.passwordHash = const Value.absent(),
-  });
-  ScrobblerTableCompanion.insert({
-    this.id = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    required String username,
-    required DecryptedText passwordHash,
-  })  : username = Value(username),
-        passwordHash = Value(passwordHash);
-  static Insertable<ScrobblerTableData> custom({
-    Expression<int>? id,
-    Expression<DateTime>? createdAt,
-    Expression<String>? username,
-    Expression<String>? passwordHash,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (createdAt != null) 'created_at': createdAt,
-      if (username != null) 'username': username,
-      if (passwordHash != null) 'password_hash': passwordHash,
-    });
-  }
-
-  ScrobblerTableCompanion copyWith(
-      {Value<int>? id,
-      Value<DateTime>? createdAt,
-      Value<String>? username,
-      Value<DecryptedText>? passwordHash}) {
-    return ScrobblerTableCompanion(
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      username: username ?? this.username,
-      passwordHash: passwordHash ?? this.passwordHash,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (username.present) {
-      map['username'] = Variable<String>(username.value);
-    }
-    if (passwordHash.present) {
-      map['password_hash'] = Variable<String>($ScrobblerTableTable
-          .$converterpasswordHash
-          .toSql(passwordHash.value));
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ScrobblerTableCompanion(')
-          ..write('id: $id, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('username: $username, ')
-          ..write('passwordHash: $passwordHash')
           ..write(')'))
         .toString();
   }
@@ -3856,14 +3316,554 @@ class PluginsTableCompanion extends UpdateCompanion<PluginsTableData> {
   }
 }
 
+class $LocalPlaylistsTableTable extends LocalPlaylistsTable
+    with TableInfo<$LocalPlaylistsTableTable, LocalPlaylistsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalPlaylistsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlists_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalPlaylistsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  LocalPlaylistsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $LocalPlaylistsTableTable createAlias(String alias) {
+    return $LocalPlaylistsTableTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistsTableData extends DataClass
+    implements Insertable<LocalPlaylistsTableData> {
+  final String id;
+  final String name;
+  final String description;
+  final DateTime createdAt;
+  const LocalPlaylistsTableData(
+      {required this.id,
+      required this.name,
+      required this.description,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['description'] = Variable<String>(description);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  LocalPlaylistsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: Value(description),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalPlaylistsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  LocalPlaylistsTableData copyWith(
+          {String? id,
+          String? name,
+          String? description,
+          DateTime? createdAt}) =>
+      LocalPlaylistsTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  LocalPlaylistsTableData copyWithCompanion(LocalPlaylistsTableCompanion data) {
+    return LocalPlaylistsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalPlaylistsTableCompanion
+    extends UpdateCompanion<LocalPlaylistsTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> description;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const LocalPlaylistsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalPlaylistsTableCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name);
+  static Insertable<LocalPlaylistsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalPlaylistsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? description,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return LocalPlaylistsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalPlaylistSongsTableTable extends LocalPlaylistSongsTable
+    with TableInfo<$LocalPlaylistSongsTableTable, LocalPlaylistSongsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalPlaylistSongsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _playlistIdMeta =
+      const VerificationMeta('playlistId');
+  @override
+  late final GeneratedColumn<String> playlistId = GeneratedColumn<String>(
+      'playlist_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_playlists_table (id)'));
+  static const VerificationMeta _trackIdMeta =
+      const VerificationMeta('trackId');
+  @override
+  late final GeneratedColumn<String> trackId = GeneratedColumn<String>(
+      'track_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [id, playlistId, trackId, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlist_songs_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<LocalPlaylistSongsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('playlist_id')) {
+      context.handle(
+          _playlistIdMeta,
+          playlistId.isAcceptableOrUnknown(
+              data['playlist_id']!, _playlistIdMeta));
+    } else if (isInserting) {
+      context.missing(_playlistIdMeta);
+    }
+    if (data.containsKey('track_id')) {
+      context.handle(_trackIdMeta,
+          trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta));
+    } else if (isInserting) {
+      context.missing(_trackIdMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalPlaylistSongsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistSongsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      playlistId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}playlist_id'])!,
+      trackId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}track_id'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+    );
+  }
+
+  @override
+  $LocalPlaylistSongsTableTable createAlias(String alias) {
+    return $LocalPlaylistSongsTableTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistSongsTableData extends DataClass
+    implements Insertable<LocalPlaylistSongsTableData> {
+  final int id;
+  final String playlistId;
+  final String trackId;
+  final int position;
+  const LocalPlaylistSongsTableData(
+      {required this.id,
+      required this.playlistId,
+      required this.trackId,
+      required this.position});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['playlist_id'] = Variable<String>(playlistId);
+    map['track_id'] = Variable<String>(trackId);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  LocalPlaylistSongsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistSongsTableCompanion(
+      id: Value(id),
+      playlistId: Value(playlistId),
+      trackId: Value(trackId),
+      position: Value(position),
+    );
+  }
+
+  factory LocalPlaylistSongsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistSongsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      playlistId: serializer.fromJson<String>(json['playlistId']),
+      trackId: serializer.fromJson<String>(json['trackId']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'playlistId': serializer.toJson<String>(playlistId),
+      'trackId': serializer.toJson<String>(trackId),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  LocalPlaylistSongsTableData copyWith(
+          {int? id, String? playlistId, String? trackId, int? position}) =>
+      LocalPlaylistSongsTableData(
+        id: id ?? this.id,
+        playlistId: playlistId ?? this.playlistId,
+        trackId: trackId ?? this.trackId,
+        position: position ?? this.position,
+      );
+  LocalPlaylistSongsTableData copyWithCompanion(
+      LocalPlaylistSongsTableCompanion data) {
+    return LocalPlaylistSongsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      playlistId:
+          data.playlistId.present ? data.playlistId.value : this.playlistId,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistSongsTableData(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, playlistId, trackId, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistSongsTableData &&
+          other.id == this.id &&
+          other.playlistId == this.playlistId &&
+          other.trackId == this.trackId &&
+          other.position == this.position);
+}
+
+class LocalPlaylistSongsTableCompanion
+    extends UpdateCompanion<LocalPlaylistSongsTableData> {
+  final Value<int> id;
+  final Value<String> playlistId;
+  final Value<String> trackId;
+  final Value<int> position;
+  const LocalPlaylistSongsTableCompanion({
+    this.id = const Value.absent(),
+    this.playlistId = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  LocalPlaylistSongsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String playlistId,
+    required String trackId,
+    this.position = const Value.absent(),
+  })  : playlistId = Value(playlistId),
+        trackId = Value(trackId);
+  static Insertable<LocalPlaylistSongsTableData> custom({
+    Expression<int>? id,
+    Expression<String>? playlistId,
+    Expression<String>? trackId,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (playlistId != null) 'playlist_id': playlistId,
+      if (trackId != null) 'track_id': trackId,
+      if (position != null) 'position': position,
+    });
+  }
+
+  LocalPlaylistSongsTableCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? playlistId,
+      Value<String>? trackId,
+      Value<int>? position}) {
+    return LocalPlaylistSongsTableCompanion(
+      id: id ?? this.id,
+      playlistId: playlistId ?? this.playlistId,
+      trackId: trackId ?? this.trackId,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (playlistId.present) {
+      map['playlist_id'] = Variable<String>(playlistId.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<String>(trackId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistSongsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $AuthenticationTableTable authenticationTable =
-      $AuthenticationTableTable(this);
   late final $PreferencesTableTable preferencesTable =
       $PreferencesTableTable(this);
-  late final $ScrobblerTableTable scrobblerTable = $ScrobblerTableTable(this);
   late final $SkipSegmentTableTable skipSegmentTable =
       $SkipSegmentTableTable(this);
   late final $SourceMatchTableTable sourceMatchTable =
@@ -3873,185 +3873,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HistoryTableTable historyTable = $HistoryTableTable(this);
   late final $LyricsTableTable lyricsTable = $LyricsTableTable(this);
   late final $PluginsTableTable pluginsTable = $PluginsTableTable(this);
+  late final $LocalPlaylistsTableTable localPlaylistsTable =
+      $LocalPlaylistsTableTable(this);
+  late final $LocalPlaylistSongsTableTable localPlaylistSongsTable =
+      $LocalPlaylistSongsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        authenticationTable,
         preferencesTable,
-        scrobblerTable,
         skipSegmentTable,
         sourceMatchTable,
         audioPlayerStateTable,
         historyTable,
         lyricsTable,
-        pluginsTable
+        pluginsTable,
+        localPlaylistsTable,
+        localPlaylistSongsTable
       ];
 }
 
-typedef $$AuthenticationTableTableCreateCompanionBuilder
-    = AuthenticationTableCompanion Function({
-  Value<int> id,
-  required DecryptedText cookie,
-  required DecryptedText accessToken,
-  required DateTime expiration,
-});
-typedef $$AuthenticationTableTableUpdateCompanionBuilder
-    = AuthenticationTableCompanion Function({
-  Value<int> id,
-  Value<DecryptedText> cookie,
-  Value<DecryptedText> accessToken,
-  Value<DateTime> expiration,
-});
-
-class $$AuthenticationTableTableFilterComposer
-    extends Composer<_$AppDatabase, $AuthenticationTableTable> {
-  $$AuthenticationTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnWithTypeConverterFilters<DecryptedText, DecryptedText, String>
-      get cookie => $composableBuilder(
-          column: $table.cookie,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnWithTypeConverterFilters<DecryptedText, DecryptedText, String>
-      get accessToken => $composableBuilder(
-          column: $table.accessToken,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-
-  ColumnFilters<DateTime> get expiration => $composableBuilder(
-      column: $table.expiration, builder: (column) => ColumnFilters(column));
-}
-
-class $$AuthenticationTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $AuthenticationTableTable> {
-  $$AuthenticationTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get cookie => $composableBuilder(
-      column: $table.cookie, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get accessToken => $composableBuilder(
-      column: $table.accessToken, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get expiration => $composableBuilder(
-      column: $table.expiration, builder: (column) => ColumnOrderings(column));
-}
-
-class $$AuthenticationTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $AuthenticationTableTable> {
-  $$AuthenticationTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<DecryptedText, String> get cookie =>
-      $composableBuilder(column: $table.cookie, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<DecryptedText, String> get accessToken =>
-      $composableBuilder(
-          column: $table.accessToken, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get expiration => $composableBuilder(
-      column: $table.expiration, builder: (column) => column);
-}
-
-class $$AuthenticationTableTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $AuthenticationTableTable,
-    AuthenticationTableData,
-    $$AuthenticationTableTableFilterComposer,
-    $$AuthenticationTableTableOrderingComposer,
-    $$AuthenticationTableTableAnnotationComposer,
-    $$AuthenticationTableTableCreateCompanionBuilder,
-    $$AuthenticationTableTableUpdateCompanionBuilder,
-    (
-      AuthenticationTableData,
-      BaseReferences<_$AppDatabase, $AuthenticationTableTable,
-          AuthenticationTableData>
-    ),
-    AuthenticationTableData,
-    PrefetchHooks Function()> {
-  $$AuthenticationTableTableTableManager(
-      _$AppDatabase db, $AuthenticationTableTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$AuthenticationTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$AuthenticationTableTableOrderingComposer(
-                  $db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$AuthenticationTableTableAnnotationComposer(
-                  $db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<DecryptedText> cookie = const Value.absent(),
-            Value<DecryptedText> accessToken = const Value.absent(),
-            Value<DateTime> expiration = const Value.absent(),
-          }) =>
-              AuthenticationTableCompanion(
-            id: id,
-            cookie: cookie,
-            accessToken: accessToken,
-            expiration: expiration,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required DecryptedText cookie,
-            required DecryptedText accessToken,
-            required DateTime expiration,
-          }) =>
-              AuthenticationTableCompanion.insert(
-            id: id,
-            cookie: cookie,
-            accessToken: accessToken,
-            expiration: expiration,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ));
-}
-
-typedef $$AuthenticationTableTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $AuthenticationTableTable,
-    AuthenticationTableData,
-    $$AuthenticationTableTableFilterComposer,
-    $$AuthenticationTableTableOrderingComposer,
-    $$AuthenticationTableTableAnnotationComposer,
-    $$AuthenticationTableTableCreateCompanionBuilder,
-    $$AuthenticationTableTableUpdateCompanionBuilder,
-    (
-      AuthenticationTableData,
-      BaseReferences<_$AppDatabase, $AuthenticationTableTable,
-          AuthenticationTableData>
-    ),
-    AuthenticationTableData,
-    PrefetchHooks Function()>;
 typedef $$PreferencesTableTableCreateCompanionBuilder
     = PreferencesTableCompanion Function({
   Value<int> id,
@@ -4556,163 +4398,6 @@ typedef $$PreferencesTableTableProcessedTableManager = ProcessedTableManager<
           PreferencesTableData>
     ),
     PreferencesTableData,
-    PrefetchHooks Function()>;
-typedef $$ScrobblerTableTableCreateCompanionBuilder = ScrobblerTableCompanion
-    Function({
-  Value<int> id,
-  Value<DateTime> createdAt,
-  required String username,
-  required DecryptedText passwordHash,
-});
-typedef $$ScrobblerTableTableUpdateCompanionBuilder = ScrobblerTableCompanion
-    Function({
-  Value<int> id,
-  Value<DateTime> createdAt,
-  Value<String> username,
-  Value<DecryptedText> passwordHash,
-});
-
-class $$ScrobblerTableTableFilterComposer
-    extends Composer<_$AppDatabase, $ScrobblerTableTable> {
-  $$ScrobblerTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get username => $composableBuilder(
-      column: $table.username, builder: (column) => ColumnFilters(column));
-
-  ColumnWithTypeConverterFilters<DecryptedText, DecryptedText, String>
-      get passwordHash => $composableBuilder(
-          column: $table.passwordHash,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
-}
-
-class $$ScrobblerTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $ScrobblerTableTable> {
-  $$ScrobblerTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get username => $composableBuilder(
-      column: $table.username, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get passwordHash => $composableBuilder(
-      column: $table.passwordHash,
-      builder: (column) => ColumnOrderings(column));
-}
-
-class $$ScrobblerTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ScrobblerTableTable> {
-  $$ScrobblerTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<String> get username =>
-      $composableBuilder(column: $table.username, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<DecryptedText, String> get passwordHash =>
-      $composableBuilder(
-          column: $table.passwordHash, builder: (column) => column);
-}
-
-class $$ScrobblerTableTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $ScrobblerTableTable,
-    ScrobblerTableData,
-    $$ScrobblerTableTableFilterComposer,
-    $$ScrobblerTableTableOrderingComposer,
-    $$ScrobblerTableTableAnnotationComposer,
-    $$ScrobblerTableTableCreateCompanionBuilder,
-    $$ScrobblerTableTableUpdateCompanionBuilder,
-    (
-      ScrobblerTableData,
-      BaseReferences<_$AppDatabase, $ScrobblerTableTable, ScrobblerTableData>
-    ),
-    ScrobblerTableData,
-    PrefetchHooks Function()> {
-  $$ScrobblerTableTableTableManager(
-      _$AppDatabase db, $ScrobblerTableTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$ScrobblerTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ScrobblerTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ScrobblerTableTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<String> username = const Value.absent(),
-            Value<DecryptedText> passwordHash = const Value.absent(),
-          }) =>
-              ScrobblerTableCompanion(
-            id: id,
-            createdAt: createdAt,
-            username: username,
-            passwordHash: passwordHash,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            required String username,
-            required DecryptedText passwordHash,
-          }) =>
-              ScrobblerTableCompanion.insert(
-            id: id,
-            createdAt: createdAt,
-            username: username,
-            passwordHash: passwordHash,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ));
-}
-
-typedef $$ScrobblerTableTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $ScrobblerTableTable,
-    ScrobblerTableData,
-    $$ScrobblerTableTableFilterComposer,
-    $$ScrobblerTableTableOrderingComposer,
-    $$ScrobblerTableTableAnnotationComposer,
-    $$ScrobblerTableTableCreateCompanionBuilder,
-    $$ScrobblerTableTableUpdateCompanionBuilder,
-    (
-      ScrobblerTableData,
-      BaseReferences<_$AppDatabase, $ScrobblerTableTable, ScrobblerTableData>
-    ),
-    ScrobblerTableData,
     PrefetchHooks Function()>;
 typedef $$SkipSegmentTableTableCreateCompanionBuilder
     = SkipSegmentTableCompanion Function({
@@ -5861,16 +5546,532 @@ typedef $$PluginsTableTableProcessedTableManager = ProcessedTableManager<
     ),
     PluginsTableData,
     PrefetchHooks Function()>;
+typedef $$LocalPlaylistsTableTableCreateCompanionBuilder
+    = LocalPlaylistsTableCompanion Function({
+  required String id,
+  required String name,
+  Value<String> description,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+typedef $$LocalPlaylistsTableTableUpdateCompanionBuilder
+    = LocalPlaylistsTableCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> description,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$LocalPlaylistsTableTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalPlaylistsTableTable, LocalPlaylistsTableData> {
+  $$LocalPlaylistsTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$LocalPlaylistSongsTableTable,
+      List<LocalPlaylistSongsTableData>> _localPlaylistSongsTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.localPlaylistSongsTable,
+          aliasName: $_aliasNameGenerator(db.localPlaylistsTable.id,
+              db.localPlaylistSongsTable.playlistId));
+
+  $$LocalPlaylistSongsTableTableProcessedTableManager
+      get localPlaylistSongsTableRefs {
+    final manager = $$LocalPlaylistSongsTableTableTableManager(
+            $_db, $_db.localPlaylistSongsTable)
+        .filter((f) => f.playlistId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_localPlaylistSongsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$LocalPlaylistsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistsTableTable> {
+  $$LocalPlaylistsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> localPlaylistSongsTableRefs(
+      Expression<bool> Function($$LocalPlaylistSongsTableTableFilterComposer f)
+          f) {
+    final $$LocalPlaylistSongsTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.localPlaylistSongsTable,
+            getReferencedColumn: (t) => t.playlistId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalPlaylistSongsTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.localPlaylistSongsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LocalPlaylistsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistsTableTable> {
+  $$LocalPlaylistsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$LocalPlaylistsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistsTableTable> {
+  $$LocalPlaylistsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> localPlaylistSongsTableRefs<T extends Object>(
+      Expression<T> Function($$LocalPlaylistSongsTableTableAnnotationComposer a)
+          f) {
+    final $$LocalPlaylistSongsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.localPlaylistSongsTable,
+            getReferencedColumn: (t) => t.playlistId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalPlaylistSongsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localPlaylistSongsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$LocalPlaylistsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalPlaylistsTableTable,
+    LocalPlaylistsTableData,
+    $$LocalPlaylistsTableTableFilterComposer,
+    $$LocalPlaylistsTableTableOrderingComposer,
+    $$LocalPlaylistsTableTableAnnotationComposer,
+    $$LocalPlaylistsTableTableCreateCompanionBuilder,
+    $$LocalPlaylistsTableTableUpdateCompanionBuilder,
+    (LocalPlaylistsTableData, $$LocalPlaylistsTableTableReferences),
+    LocalPlaylistsTableData,
+    PrefetchHooks Function({bool localPlaylistSongsTableRefs})> {
+  $$LocalPlaylistsTableTableTableManager(
+      _$AppDatabase db, $LocalPlaylistsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalPlaylistsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalPlaylistsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalPlaylistsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalPlaylistsTableCompanion(
+            id: id,
+            name: name,
+            description: description,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<String> description = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              LocalPlaylistsTableCompanion.insert(
+            id: id,
+            name: name,
+            description: description,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalPlaylistsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({localPlaylistSongsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (localPlaylistSongsTableRefs) db.localPlaylistSongsTable
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (localPlaylistSongsTableRefs)
+                    await $_getPrefetchedData<
+                            LocalPlaylistsTableData,
+                            $LocalPlaylistsTableTable,
+                            LocalPlaylistSongsTableData>(
+                        currentTable: table,
+                        referencedTable: $$LocalPlaylistsTableTableReferences
+                            ._localPlaylistSongsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$LocalPlaylistsTableTableReferences(db, table, p0)
+                                .localPlaylistSongsTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.playlistId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalPlaylistsTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $LocalPlaylistsTableTable,
+    LocalPlaylistsTableData,
+    $$LocalPlaylistsTableTableFilterComposer,
+    $$LocalPlaylistsTableTableOrderingComposer,
+    $$LocalPlaylistsTableTableAnnotationComposer,
+    $$LocalPlaylistsTableTableCreateCompanionBuilder,
+    $$LocalPlaylistsTableTableUpdateCompanionBuilder,
+    (LocalPlaylistsTableData, $$LocalPlaylistsTableTableReferences),
+    LocalPlaylistsTableData,
+    PrefetchHooks Function({bool localPlaylistSongsTableRefs})>;
+typedef $$LocalPlaylistSongsTableTableCreateCompanionBuilder
+    = LocalPlaylistSongsTableCompanion Function({
+  Value<int> id,
+  required String playlistId,
+  required String trackId,
+  Value<int> position,
+});
+typedef $$LocalPlaylistSongsTableTableUpdateCompanionBuilder
+    = LocalPlaylistSongsTableCompanion Function({
+  Value<int> id,
+  Value<String> playlistId,
+  Value<String> trackId,
+  Value<int> position,
+});
+
+final class $$LocalPlaylistSongsTableTableReferences extends BaseReferences<
+    _$AppDatabase, $LocalPlaylistSongsTableTable, LocalPlaylistSongsTableData> {
+  $$LocalPlaylistSongsTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocalPlaylistsTableTable _playlistIdTable(_$AppDatabase db) =>
+      db.localPlaylistsTable.createAlias($_aliasNameGenerator(
+          db.localPlaylistSongsTable.playlistId, db.localPlaylistsTable.id));
+
+  $$LocalPlaylistsTableTableProcessedTableManager get playlistId {
+    final $_column = $_itemColumn<String>('playlist_id')!;
+
+    final manager =
+        $$LocalPlaylistsTableTableTableManager($_db, $_db.localPlaylistsTable)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_playlistIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$LocalPlaylistSongsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistSongsTableTable> {
+  $$LocalPlaylistSongsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get trackId => $composableBuilder(
+      column: $table.trackId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
+
+  $$LocalPlaylistsTableTableFilterComposer get playlistId {
+    final $$LocalPlaylistsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.playlistId,
+        referencedTable: $db.localPlaylistsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$LocalPlaylistsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.localPlaylistsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$LocalPlaylistSongsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistSongsTableTable> {
+  $$LocalPlaylistSongsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get trackId => $composableBuilder(
+      column: $table.trackId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
+
+  $$LocalPlaylistsTableTableOrderingComposer get playlistId {
+    final $$LocalPlaylistsTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.playlistId,
+            referencedTable: $db.localPlaylistsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalPlaylistsTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.localPlaylistsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalPlaylistSongsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistSongsTableTable> {
+  $$LocalPlaylistSongsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get trackId =>
+      $composableBuilder(column: $table.trackId, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  $$LocalPlaylistsTableTableAnnotationComposer get playlistId {
+    final $$LocalPlaylistsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.playlistId,
+            referencedTable: $db.localPlaylistsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$LocalPlaylistsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.localPlaylistsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$LocalPlaylistSongsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $LocalPlaylistSongsTableTable,
+    LocalPlaylistSongsTableData,
+    $$LocalPlaylistSongsTableTableFilterComposer,
+    $$LocalPlaylistSongsTableTableOrderingComposer,
+    $$LocalPlaylistSongsTableTableAnnotationComposer,
+    $$LocalPlaylistSongsTableTableCreateCompanionBuilder,
+    $$LocalPlaylistSongsTableTableUpdateCompanionBuilder,
+    (LocalPlaylistSongsTableData, $$LocalPlaylistSongsTableTableReferences),
+    LocalPlaylistSongsTableData,
+    PrefetchHooks Function({bool playlistId})> {
+  $$LocalPlaylistSongsTableTableTableManager(
+      _$AppDatabase db, $LocalPlaylistSongsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalPlaylistSongsTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalPlaylistSongsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalPlaylistSongsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> playlistId = const Value.absent(),
+            Value<String> trackId = const Value.absent(),
+            Value<int> position = const Value.absent(),
+          }) =>
+              LocalPlaylistSongsTableCompanion(
+            id: id,
+            playlistId: playlistId,
+            trackId: trackId,
+            position: position,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String playlistId,
+            required String trackId,
+            Value<int> position = const Value.absent(),
+          }) =>
+              LocalPlaylistSongsTableCompanion.insert(
+            id: id,
+            playlistId: playlistId,
+            trackId: trackId,
+            position: position,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$LocalPlaylistSongsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({playlistId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (playlistId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.playlistId,
+                    referencedTable: $$LocalPlaylistSongsTableTableReferences
+                        ._playlistIdTable(db),
+                    referencedColumn: $$LocalPlaylistSongsTableTableReferences
+                        ._playlistIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$LocalPlaylistSongsTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $LocalPlaylistSongsTableTable,
+        LocalPlaylistSongsTableData,
+        $$LocalPlaylistSongsTableTableFilterComposer,
+        $$LocalPlaylistSongsTableTableOrderingComposer,
+        $$LocalPlaylistSongsTableTableAnnotationComposer,
+        $$LocalPlaylistSongsTableTableCreateCompanionBuilder,
+        $$LocalPlaylistSongsTableTableUpdateCompanionBuilder,
+        (LocalPlaylistSongsTableData, $$LocalPlaylistSongsTableTableReferences),
+        LocalPlaylistSongsTableData,
+        PrefetchHooks Function({bool playlistId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$AuthenticationTableTableTableManager get authenticationTable =>
-      $$AuthenticationTableTableTableManager(_db, _db.authenticationTable);
   $$PreferencesTableTableTableManager get preferencesTable =>
       $$PreferencesTableTableTableManager(_db, _db.preferencesTable);
-  $$ScrobblerTableTableTableManager get scrobblerTable =>
-      $$ScrobblerTableTableTableManager(_db, _db.scrobblerTable);
   $$SkipSegmentTableTableTableManager get skipSegmentTable =>
       $$SkipSegmentTableTableTableManager(_db, _db.skipSegmentTable);
   $$SourceMatchTableTableTableManager get sourceMatchTable =>
@@ -5883,4 +6084,9 @@ class $AppDatabaseManager {
       $$LyricsTableTableTableManager(_db, _db.lyricsTable);
   $$PluginsTableTableTableManager get pluginsTable =>
       $$PluginsTableTableTableManager(_db, _db.pluginsTable);
+  $$LocalPlaylistsTableTableTableManager get localPlaylistsTable =>
+      $$LocalPlaylistsTableTableTableManager(_db, _db.localPlaylistsTable);
+  $$LocalPlaylistSongsTableTableTableManager get localPlaylistSongsTable =>
+      $$LocalPlaylistSongsTableTableTableManager(
+          _db, _db.localPlaylistSongsTable);
 }

@@ -1018,14 +1018,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
-  flutter_sharing_intent:
-    dependency: "direct main"
-    description:
-      name: flutter_sharing_intent
-      sha256: "785ffc391822641457f930eb477c91c2f598a888f50b8fbb40d481ee01c7e719"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
   flutter_svg:
     dependency: "direct overridden"
     description:
@@ -1116,14 +1108,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
-  get_it:
-    dependency: "direct main"
-    description:
-      name: get_it
-      sha256: ae78de7c3f2304b8d81f2bb6e320833e5e81de942188542328f074978cc0efa9
-      url: "https://pub.dev"
-    source: hosted
-    version: "8.3.0"
   glob:
     dependency: transitive
     description:
@@ -2038,15 +2022,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
-  scrobblenaut:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: dart-3-support
-      resolved-ref: d90cb75d71737f3cfa2de4469d48080c0f3eedc2
-      url: "https://github.com/KRTirtho/scrobblenaut.git"
-    source: git
-    version: "3.0.0"
   scroll_to_index:
     dependency: "direct main"
     description:

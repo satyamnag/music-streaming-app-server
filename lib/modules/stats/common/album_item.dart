@@ -1,10 +1,7 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/modules/album/album_card.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 
 class StatsAlbumItem extends StatelessWidget {
@@ -35,16 +32,12 @@ class StatsAlbumItem extends StatelessWidget {
             child: ArtistLink(
               artists: album.artists,
               mainAxisAlignment: WrapAlignment.start,
-              onOverflowArtistClick: () =>
-                  context.navigateTo(AlbumRoute(id: album.id, album: album)),
             ),
           ),
         ],
       ),
       trailing: info,
-      onPressed: () {
-        context.navigateTo(AlbumRoute(id: album.id, album: album));
-      },
+      onPressed: () {},
     );
   }
 }

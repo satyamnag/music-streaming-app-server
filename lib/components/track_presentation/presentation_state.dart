@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/pages/library/user_local_tracks/user_local_tracks.dart';
+import 'package:sangeet/collections/sort_by.dart';
 import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/album.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/playlist.dart';

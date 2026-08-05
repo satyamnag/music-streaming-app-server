@@ -27,6 +27,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get settings => 'सेटिंग्स';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => 'श्रेणियों या जानरों को फिल्टर करें...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get songs => 'गाने';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get create_a_playlist => 'एक प्लेलिस्ट बनाएं';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => 'प्लेलिस्ट का नाम';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => 'प्लेलिस्ट अपडेट करें';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get update => 'अपडेट करें';
-
-  @override
-  String get playlist_name => 'प्लेलिस्ट का नाम';
 
   @override
   String get name_of_playlist => 'प्लेलिस्ट का नाम';
@@ -225,11 +241,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get more_actions => 'अधिक कार्रवाई';
 
   @override
-  String download_count(Object count) {
-    return 'डाउनलोड ($count)';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return '($count) को प्लेलिस्ट में जोड़ें';
   }
@@ -345,9 +356,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get alternative_track_sources => 'वैकल्पिक ट्रैक स्रोत';
 
   @override
-  String get download_track => 'ट्रैक डाउनलोड करें';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks ट्रैक कतार में हैं';
   }
@@ -363,9 +371,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get exit_mini_player => 'मिनी प्लेयर से बाहर निकलें';
-
-  @override
-  String get download_location => 'डाउनलोड स्थान';
 
   @override
   String get local_library => 'स्थानीय पुस्तकालय';
@@ -608,16 +613,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String track_exists(Object track) {
     return 'ट्रैक $track पहले से मौजूद है';
   }
-
-  @override
-  String get replace_downloaded_tracks => 'सभी डाउनलोड किए गए ट्रैक्स को बदलें';
-
-  @override
-  String get skip_download_tracks => 'सभी डाउनलोड किए गए ट्रैक्स को छोड़ें';
-
-  @override
-  String get do_you_want_to_replace =>
-      'क्या आप मौजूदा ट्रैक को बदलना चाहते हैं?';
 
   @override
   String get replace => 'बदलें';
@@ -873,25 +868,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get restore_defaults => 'डिफ़ॉल्ट सेटिंग्स को बहाल करें';
 
   @override
-  String get download_music_format => 'संगीत डाउनलोड प्रारूप';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => 'संगीत स्ट्रीमिंग प्रारूप';
 
   @override
-  String get download_music_quality => 'संगीत डाउनलोड गुणवत्ता';
-
-  @override
   String get streaming_music_quality => 'संगीत स्ट्रीमिंग गुणवत्ता';
 
   @override
-  String get login_with_lastfm => 'Last.fm से लॉगिन करें';
-
-  @override
   String get connect => 'कनेक्ट करें';
-
-  @override
-  String get disconnect_lastfm => 'Last.fm से डिस्कनेक्ट करें';
 
   @override
   String get disconnect => 'डिस्कनेक्ट करें';
@@ -906,10 +893,39 @@ class AppLocalizationsHi extends AppLocalizations {
   String get login => 'लॉग इन करें';
 
   @override
-  String get login_with_your_lastfm => 'अपने Last.fm अकाउंट से लॉगिन करें';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Last.fm पर स्क्रॉबल करें';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => 'एल्बम पर जाएं';
@@ -1154,6 +1170,29 @@ class AppLocalizationsHi extends AppLocalizations {
   String get email => 'ईमेल';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => 'अनुयायी';
 
   @override
@@ -1254,6 +1293,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get summary_were_on_repeat => 'दोहराया गया';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return 'कुल $money';
   }
@@ -1305,9 +1355,6 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get undo => 'पूर्ववत करें';
-
-  @override
-  String get download_all => 'सभी डाउनलोड करें';
 
   @override
   String get add_all_to_playlist => 'सभी को प्लेलिस्ट में जोड़ें';
@@ -1555,12 +1602,6 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get configure_plugins =>
       'अपने स्वयं के मेटाडेटा प्रदाता और ऑडियो स्रोत प्लगइन्स कॉन्फ़िगर करें';
-
-  @override
-  String get audio_scrobblers => 'ऑडियो स्क्रॉबलर्स';
-
-  @override
-  String get scrobbling => 'स्क्रॉबलिंग';
 
   @override
   String get source => 'स्रोत: ';

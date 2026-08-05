@@ -27,6 +27,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settings => 'Cài đặt';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => 'Lọc theo thể loại nhạc...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get songs => 'Bài hát';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsVi extends AppLocalizations {
   String get create_a_playlist => 'Tạo danh sách phát';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => 'Tên danh sách phát';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => 'Cập nhật danh sách phát';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get update => 'Cập nhật';
-
-  @override
-  String get playlist_name => 'Tên danh sách phát';
 
   @override
   String get name_of_playlist => 'Tên của danh sách phát';
@@ -225,11 +241,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get more_actions => 'Thao tác khác';
 
   @override
-  String download_count(Object count) {
-    return 'Tải xuống ($count)';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return 'Thêm ($count) vào danh sách phát';
   }
@@ -345,9 +356,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get alternative_track_sources => 'Đổi nguồn bài hát';
 
   @override
-  String get download_track => 'Tải xuống';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks bài hát trong hàng đợi';
   }
@@ -364,9 +372,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get exit_mini_player => 'Thoát khỏi trình phát thu nhỏ';
-
-  @override
-  String get download_location => 'Vị trí tải xuống';
 
   @override
   String get local_library => 'Thư viện địa phương';
@@ -607,17 +612,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String track_exists(Object track) {
     return 'Bài hát $track đã tồn tại';
   }
-
-  @override
-  String get replace_downloaded_tracks => 'Thay thế tất cả các bài hát đã tải';
-
-  @override
-  String get skip_download_tracks =>
-      'Bỏ qua tải xuống tất cả các bài hát đã tải';
-
-  @override
-  String get do_you_want_to_replace =>
-      'Bạn có muốn thay thế bài hát hiện có không?';
 
   @override
   String get replace => 'Thay thế';
@@ -875,25 +869,17 @@ class AppLocalizationsVi extends AppLocalizations {
   String get restore_defaults => 'Khôi phục mặc định';
 
   @override
-  String get download_music_format => 'Định dạng nhạc tải về';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => 'Định dạng nhạc phát trực tuyến';
 
   @override
-  String get download_music_quality => 'Chất lượng nhạc tải về';
-
-  @override
   String get streaming_music_quality => 'Chất lượng nhạc phát trực tuyến';
 
   @override
-  String get login_with_lastfm => 'Đăng nhập bằng tài khoản Last.fm';
-
-  @override
   String get connect => 'Liên kết';
-
-  @override
-  String get disconnect_lastfm => 'Dừng liên kết Last.fm';
 
   @override
   String get disconnect => 'Ngắt kết nối';
@@ -908,11 +894,39 @@ class AppLocalizationsVi extends AppLocalizations {
   String get login => 'Đăng nhập';
 
   @override
-  String get login_with_your_lastfm =>
-      'Đăng nhập bằng tài khoản Last.fm của bạn';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Scrobble đến Last.fm';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => 'Đi đến Album';
@@ -1158,6 +1172,29 @@ class AppLocalizationsVi extends AppLocalizations {
   String get email => 'Email';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => 'Người theo dõi';
 
   @override
@@ -1258,6 +1295,17 @@ class AppLocalizationsVi extends AppLocalizations {
   String get summary_were_on_repeat => 'Đã được phát lại';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return 'Tổng cộng $money';
   }
@@ -1308,9 +1356,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get undo => 'Hoàn tác';
-
-  @override
-  String get download_all => 'Tải xuống tất cả';
 
   @override
   String get add_all_to_playlist => 'Thêm tất cả vào danh sách phát';
@@ -1558,12 +1603,6 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get configure_plugins =>
       'Cấu hình nhà cung cấp siêu dữ liệu và tiện ích nguồn âm thanh riêng';
-
-  @override
-  String get audio_scrobblers => 'Bộ scrobbler âm thanh';
-
-  @override
-  String get scrobbling => 'Scrobbling';
 
   @override
   String get source => 'Nguồn: ';

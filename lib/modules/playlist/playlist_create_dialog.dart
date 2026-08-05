@@ -17,6 +17,7 @@ import 'package:sangeet/components/form/text_form_field.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
 import 'package:sangeet/provider/metadata_plugin/playlist/playlist.dart';
 
@@ -301,7 +302,13 @@ class PlaylistCreateDialogButton extends HookConsumerWidget {
     return Button.secondary(
       leading: const Icon(SangeetIcons.addFilled),
       child: Text(context.l10n.playlist),
-      onPressed: () => showPlaylistDialog(context),
+      onPressed: () async {
+        // After the create dialog closes, refresh the on-device user playlists
+        // so the new playlist appears in the library immediately.
+        showPlaylistDialog(context);
+        await Future.delayed(const Duration(milliseconds: 100));
+        ref.invalidate(userPlaylistsProvider);
+      },
     );
   }
 }

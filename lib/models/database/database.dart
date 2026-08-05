@@ -9,7 +9,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:media_kit/media_kit.dart' hide Track;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' show ThemeMode, Colors;
+import 'package:shadcn_flutter/shadcn_flutter.dart' show ThemeMode;
 import 'package:sangeet/models/database/database.steps.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/models/metadata/market.dart';
@@ -29,15 +29,14 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 part 'database.g.dart';
 
-part 'tables/authentication.dart';
 part 'tables/preferences.dart';
-part 'tables/scrobbler.dart';
 part 'tables/skip_segment.dart';
 part 'tables/source_match.dart';
 part 'tables/audio_player_state.dart';
 part 'tables/history.dart';
 part 'tables/lyrics.dart';
 part 'tables/metadata_plugins.dart';
+part 'tables/local_playlists.dart';
 
 part 'typeconverters/color.dart';
 part 'typeconverters/locale.dart';
@@ -49,22 +48,22 @@ part 'typeconverters/subtitle.dart';
 
 @DriftDatabase(
   tables: [
-    AuthenticationTable,
     PreferencesTable,
-    ScrobblerTable,
     SkipSegmentTable,
     SourceMatchTable,
     AudioPlayerStateTable,
     HistoryTable,
     LyricsTable,
     PluginsTable,
+    LocalPlaylistsTable,
+    LocalPlaylistSongsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -234,6 +233,12 @@ class AppDatabase extends _$AppDatabase {
           await m
               .dropColumn(schema.sourceMatchTable, "source_id")
               .catchError((e, stack) => AppLogger.reportError(e, stack));
+        },
+        from10To11: (m, schema) async {
+          // Local user-made playlists (Supabase RLS blocks anonymous writes,
+          // so user playlists are stored on-device).
+          await m.createTable(schema.localPlaylistsTable);
+          await m.createTable(schema.localPlaylistSongsTable);
         },
       ),
     );

@@ -27,6 +27,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settings => 'ตั้งค่า';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => 'กรองประเภทหรือแนวเพลง...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get songs => 'เพลง';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsTh extends AppLocalizations {
   String get create_a_playlist => 'สร้างเพลย์ลิสต์';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => 'ชื่อเพลย์ลิสต์';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => 'อัพเดทเพลย์ลิสต์';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get update => 'อัพเดท';
-
-  @override
-  String get playlist_name => 'ชื่อเพลย์ลิสต์';
 
   @override
   String get name_of_playlist => 'ชื่อของเพลย์ลิสต์';
@@ -225,11 +241,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get more_actions => 'เพิ่มเติม';
 
   @override
-  String download_count(Object count) {
-    return 'ดาวน์โหลด ($count)';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return 'เพิ่ม ($count) ลงในเพลย์ลิสต์';
   }
@@ -345,9 +356,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get alternative_track_sources => 'แหล่งแทร็กอื่น';
 
   @override
-  String get download_track => 'ดาวน์โหลดแทร็ก';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks แทร็กในคิว';
   }
@@ -363,9 +371,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get exit_mini_player => 'ออกจากมินิเพลย์เยอร์';
-
-  @override
-  String get download_location => 'ตำแหน่งดาวน์โหลด';
 
   @override
   String get local_library => 'ห้องสมุดท้องถิ่น';
@@ -607,15 +612,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String track_exists(Object track) {
     return 'แทร็ก $track มีอยู่แล้ว';
   }
-
-  @override
-  String get replace_downloaded_tracks => 'แทนที่แทร็กที่ดาวน์โหลดทั้งหมด';
-
-  @override
-  String get skip_download_tracks => 'ข้ามการดาวน์โหลดแทร็กที่ดาวน์โหลดทั้งหมด';
-
-  @override
-  String get do_you_want_to_replace => 'คุณต้องการแทนที่แทร็กที่มีอยู่หรือไม่';
 
   @override
   String get replace => 'แทนที่';
@@ -872,25 +868,17 @@ class AppLocalizationsTh extends AppLocalizations {
   String get restore_defaults => 'คืนค่าเริ่มต้น';
 
   @override
-  String get download_music_format => 'รูปแบบการดาวน์โหลดเพลง';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => 'รูปแบบการสตรีมเพลง';
 
   @override
-  String get download_music_quality => 'คุณภาพการดาวน์โหลด';
-
-  @override
   String get streaming_music_quality => 'คุณภาพการสตรีม';
 
   @override
-  String get login_with_lastfm => 'เข้าสู่ระบบด้วย Last.fm';
-
-  @override
   String get connect => 'เชื่อมต่อ';
-
-  @override
-  String get disconnect_lastfm => 'ตัดการเชื่อมต่อ Last.fm';
 
   @override
   String get disconnect => 'ตัดการเชื่อมต่อ';
@@ -905,10 +893,39 @@ class AppLocalizationsTh extends AppLocalizations {
   String get login => 'เข้าสู่ระบบ';
 
   @override
-  String get login_with_your_lastfm => 'เข้าสู่ระบบด้วย Last.fm';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Scrobble ไปเป็น Last.fm';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => 'ไปที่อัลบั้ม';
@@ -1149,6 +1166,29 @@ class AppLocalizationsTh extends AppLocalizations {
   String get email => 'อีเมล';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => 'ผู้ติดตาม';
 
   @override
@@ -1249,6 +1289,17 @@ class AppLocalizationsTh extends AppLocalizations {
   String get summary_were_on_repeat => 'อยู่ในโหมดซ้ำ';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return 'รวม $money';
   }
@@ -1299,9 +1350,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get undo => 'ย้อนกลับ';
-
-  @override
-  String get download_all => 'ดาวน์โหลดทั้งหมด';
 
   @override
   String get add_all_to_playlist => 'เพิ่มทั้งหมดในเพลย์ลิสต์';
@@ -1546,12 +1594,6 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get configure_plugins =>
       'กำหนดค่าปลั๊กอินผู้ให้บริการเมตาดาต้าและแหล่งเสียงของคุณเอง';
-
-  @override
-  String get audio_scrobblers => 'เครื่อง scrobbler เสียง';
-
-  @override
-  String get scrobbling => 'Scrobbling';
 
   @override
   String get source => 'แหล่งที่มา: ';

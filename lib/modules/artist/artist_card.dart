@@ -48,7 +48,11 @@ class ArtistCard extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 SecondaryBadge(
-                  child: Text(context.l10n.artist.toUpperCase()),
+                  child: Text(
+                    artist.songCount != null
+                        ? '${artist.songCount} ${context.l10n.songs}'
+                        : context.l10n.artist.toUpperCase(),
+                  ),
                 )
               ],
             )

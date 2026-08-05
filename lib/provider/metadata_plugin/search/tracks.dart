@@ -11,16 +11,8 @@ class MetadataPluginSearchTracksNotifier
 
   @override
   fetch(offset, limit) async {
-    if (arg.isEmpty) {
-      return SangeetPaginationResponseObject<SangeetFullTrackObject>(
-        limit: limit,
-        nextOffset: null,
-        total: 0,
-        items: [],
-        hasMore: false,
-      );
-    }
-
+    // An empty query returns the full catalog (the server lists all songs),
+    // so the search screen always shows every song until the user types.
     final tracks = await (await metadataPlugin).search.tracks(
           arg,
           offset: offset,

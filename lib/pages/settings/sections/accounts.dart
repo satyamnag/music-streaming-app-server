@@ -1,6 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/extensions/context.dart';
 

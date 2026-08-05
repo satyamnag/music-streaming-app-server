@@ -15,7 +15,6 @@ import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
-import 'package:sangeet/services/audio_encryption/audio_encryption.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/sourced_track/sourced_track.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -23,6 +22,14 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 void _log(String msg) {
   print('[SANGEET] $msg');
 }
+
+/// In-memory cache for resolved sourced tracks. Keyed by trackId, maps to
+/// the resolved [SourcedTrack]. This prevents mpv's HEAD + GET + retry
+/// requests from hitting Supabase 3-4× per track (saving ~2-3 seconds per
+/// track switch). The cache is cleared when the playlist changes.
+final Map<String, SourcedTrack> _sourcedTrackCache = {};
+
+void clearSourcedTrackCache() => _sourcedTrackCache.clear();
 
 final _deviceClients = Set.unmodifiable({
   YoutubeApiClient.ios,
@@ -37,27 +44,6 @@ String? get _randomUserAgent => _deviceClients
     )
     .payload["context"]["client"]["userAgent"];
 
-/// Detects the codec container of decrypted audio bytes.
-String _sniffContentType(Uint8List bytes) {
-  if (bytes.length >= 4 &&
-      bytes[0] == 0x4F && // 'O'
-      bytes[1] == 0x67 && // 'g'
-      bytes[2] == 0x67 && // 'g'
-      bytes[3] == 0x53) {
-    return 'audio/ogg';
-  }
-  if (bytes.length >= 3 &&
-      bytes[0] == 0x49 && // 'I'
-      bytes[1] == 0x44 && // 'D'
-      bytes[2] == 0x33) {
-    return 'audio/mpeg';
-  }
-  if (bytes.isNotEmpty && bytes[0] == 0xFF) {
-    return 'audio/mpeg';
-  }
-  return 'audio/ogg';
-}
-
 class ServerPlaybackRoutes {
   final Ref ref;
   AudioPlayerState get playlist => ref.read(audioPlayerProvider);
@@ -69,7 +55,29 @@ class ServerPlaybackRoutes {
     Request request,
     String trackId,
   ) async {
+    // Return cached result if available — mpv sends HEAD, GET, and retries,
+    // so without caching we hit Supabase 3-4× per track (~2-3s wasted each).
+    final cached = _sourcedTrackCache[trackId];
+    if (cached != null) {
+      _log('_getSourcedTrack: cache hit for $trackId');
+      return cached;
+    }
+
     _log('_getSourcedTrack: trackId=$trackId, playlist.tracks=${playlist.tracks.length}');
+
+    // Fast path: resolve the stream URL directly from Supabase. This avoids
+    // the metadata-plugin bytecode interpreter entirely, which keeps playback
+    // fast and immune to plugin/bytecode incompatibilities.
+    try {
+      final direct = await _resolveStreamFromSupabase(trackId);
+      if (direct != null) {
+        _log('_getSourcedTrack: resolved directly from Supabase');
+        _sourcedTrackCache[trackId] = direct;
+        return direct;
+      }
+    } catch (e) {
+      _log('_getSourcedTrack: direct Supabase resolve failed: $e');
+    }
 
     try {
       // firstWhere throws StateError if no match (Dart docs), use firstWhereOrNull
@@ -78,7 +86,9 @@ class ServerPlaybackRoutes {
       );
       if (track == null) {
         _log('_getSourcedTrack: track $trackId NOT in playlist state, resolving from Supabase');
-        return _resolveFromSupabase(trackId);
+        final result = await _resolveFromSupabase(trackId);
+        if (result != null) _sourcedTrackCache[trackId] = result;
+        return result;
       }
       _log('_getSourcedTrack: found track ${track.name} in playlist state');
 
@@ -114,6 +124,7 @@ class ServerPlaybackRoutes {
         }
       }
       _log('_getSourcedTrack: sourcedTrack url=${sourcedTrack?.url}');
+      if (sourcedTrack != null) _sourcedTrackCache[trackId] = sourcedTrack;
       return sourcedTrack;
     } catch (e, stack) {
       _log('_getSourcedTrack ERROR: $e');
@@ -121,6 +132,97 @@ class ServerPlaybackRoutes {
       AppLogger.reportError(e, stack);
       return null;
     }
+  }
+
+  /// Resolves a playable stream URL directly from Supabase for the given
+  /// track, bypassing the metadata-plugin bytecode interpreter.
+  ///
+  /// This is the fastest and most reliable path: it reads the track's storage
+  /// path, generates a signed URL from the `music` bucket, and builds a
+  /// [SourcedTrack] whose stream points straight at that URL.
+  Future<SourcedTrack?> _resolveStreamFromSupabase(String trackId) async {
+    final supabase = ref.read(supabaseClientProvider);
+
+    final row = await supabase
+        .from('tracks')
+        .select('id,title,artist_names,duration,thumbnail,storage_path')
+        .eq('id', trackId)
+        .maybeSingle();
+
+    if (row == null || row['storage_path'] == null) {
+      _log('_resolveStreamFromSupabase: no storage_path for $trackId');
+      return null;
+    }
+
+    final storagePath = row['storage_path'].toString();
+    final ext = storagePath.split('.').last.toLowerCase();
+    final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
+
+    final signedUrl = await supabase.storage
+        .from('music')
+        .createSignedUrl(storagePath, 3600);
+
+    final rawArtists = row['artist_names'] as List<dynamic>?;
+    final artists = rawArtists
+            ?.map((name) => SangeetSimpleArtistObject(
+                  id: name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
+                  name: name.toString(),
+                  externalUri: '',
+                ))
+            .toList() ??
+        [];
+
+    final fullTrack = SangeetFullTrackObject(
+      id: row['id'].toString(),
+      name: row['title']?.toString() ?? 'Unknown',
+      externalUri: '',
+      artists: artists,
+      album: SangeetSimpleAlbumObject(
+        id: 'album-${row['id']}',
+        name: row['title']?.toString() ?? 'Unknown',
+        externalUri: '',
+        artists: artists,
+        albumType: SangeetAlbumType.single,
+        images: row['thumbnail'] != null
+            ? [
+                SangeetImageObject(
+                  url: row['thumbnail'].toString(),
+                  width: 300,
+                  height: 300,
+                ),
+              ]
+            : [],
+      ),
+      durationMs: ((row['duration'] ?? 0) * 1000).toInt(),
+      isrc: '',
+      explicit: false,
+    );
+
+    final match = SangeetAudioSourceMatchObject(
+      id: row['id'].toString(),
+      title: fullTrack.name,
+      artists: artists.map((a) => a.name).toList(),
+      duration: Duration(milliseconds: fullTrack.durationMs),
+      thumbnail: row['thumbnail']?.toString(),
+      externalUri: '',
+    );
+
+    final stream = SangeetAudioSourceStreamObject(
+      url: signedUrl,
+      container: fmt,
+      type: SangeetMediaCompressionType.lossy,
+      codec: fmt == 'opus' ? 'opus' : fmt == 'mp3' ? 'mp3' : fmt,
+      bitrate: fmt == 'opus' ? 96000 : 128000,
+    );
+
+    return SourcedTrack(
+      ref: ref,
+      query: fullTrack,
+      info: match,
+      source: 'supabase',
+      sources: [stream],
+      siblings: [],
+    );
   }
 
   /// Resolves a stream source for a track that is not in the current player
@@ -229,15 +331,17 @@ class ServerPlaybackRoutes {
             .swapWithNextSibling()
             .then((track) => track.url!);
 
-    // Forward only safe headers — omit Range/Accept-Encoding that could
-    // cause truncated responses or decoding issues on the device
+    // Forward only safe headers — omit Accept-Encoding that could cause
+    // truncated responses or decoding issues on the device. The Range header
+    // IS forwarded so the audio player can seek/scrub efficiently (byte-range
+    // requests from Supabase signed URLs return 206 with content-range).
     final safeHeaders = <String, dynamic>{
       "user-agent": _randomUserAgent,
       "Cache-Control": "max-age=3600",
       "Connection": "keep-alive",
       "host": Uri.parse(url).host,
     };
-    for (final key in ['if-range', 'if-modified-since', 'if-none-match']) {
+    for (final key in ['range', 'if-range', 'if-modified-since', 'if-none-match']) {
       if (headers[key] != null) safeHeaders[key] = headers[key];
     }
 
@@ -293,16 +397,6 @@ class ServerPlaybackRoutes {
   /// @head('/stream/<trackId>')
   Future<Response> headStreamTrackId(Request request, String trackId) async {
     try {
-      if (await AudioEncryptionService.hasEncryptedFile(trackId)) {
-        return Response(
-          200,
-          headers: {
-            'content-type': 'audio/ogg',
-            'accept-ranges': 'bytes',
-          },
-        );
-      }
-
       final sourcedTrack = await _getSourcedTrack(request, trackId);
 
       if (sourcedTrack == null) {
@@ -327,18 +421,6 @@ class ServerPlaybackRoutes {
   /// @get('/stream/<trackId>')
   Future<Response> getStreamTrackId(Request request, String trackId) async {
     try {
-      if (await AudioEncryptionService.hasEncryptedFile(trackId)) {
-        final bytes = await AudioEncryptionService.decryptFile(trackId);
-        return Response(
-          200,
-          body: bytes,
-          headers: {
-            'content-type': _sniffContentType(bytes),
-            'accept-ranges': 'bytes',
-          },
-        );
-      }
-
       final sourcedTrack = await _getSourcedTrack(request, trackId);
 
       if (sourcedTrack == null) {
@@ -352,15 +434,27 @@ class ServerPlaybackRoutes {
       );
 
       // Build clean streaming headers. We intentionally do NOT forward the
-      // upstream content-length or connection headers: shelf streams the body
-      // with chunked transfer encoding, and forwarding a stale content-length
-      // (or upstream connection/set-cookie headers) makes mpv stall after the
-      // first buffered chunk.
+      // upstream content-length or connection headers for full (200) bodies:
+      // shelf streams with chunked transfer encoding, and a stale
+      // content-length (or upstream connection/set-cookie headers) makes mpv
+      // stall after the first buffered chunk.
+      //
+      // For partial (206) responses we MUST pass through content-range and
+      // content-length so the audio player can seek/scrub: the upstream signed
+      // URL returns `content-range: bytes start-end/total`, and without it the
+      // player cannot map a byte offset to a time position.
       final contentType = res.headers.value('content-type') ?? 'audio/ogg';
       final streamHeaders = <String, String>{
         'content-type': contentType,
         'accept-ranges': 'bytes',
       };
+
+      if (res.statusCode == 206) {
+        final contentRange = res.headers.value('content-range');
+        final contentLength = res.headers.value('content-length');
+        if (contentRange != null) streamHeaders['content-range'] = contentRange;
+        if (contentLength != null) streamHeaders['content-length'] = contentLength;
+      }
 
       if (res.data is ResponseBody) {
         return Response(

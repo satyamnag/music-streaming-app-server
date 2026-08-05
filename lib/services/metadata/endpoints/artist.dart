@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginArtistEndpoint {
   final Hetu hetu;
@@ -11,11 +12,13 @@ class MetadataPluginArtistEndpoint {
           as HTInstance;
 
   Future<SangeetFullArtistObject> getArtist(String id) async {
-    final raw = await hetuMetadataArtist
-        .invoke("getArtist", positionalArgs: [id]) as Map;
+    final raw = await hetuMetadataArtist.invoke(
+      "getArtist",
+      positionalArgs: [id],
+    );
 
     return SangeetFullArtistObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 
@@ -31,10 +34,10 @@ class MetadataPluginArtistEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) => SangeetFullTrackObject.fromJson(
         json.cast<String, dynamic>(),
       ),
@@ -53,10 +56,10 @@ class MetadataPluginArtistEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) => SangeetSimpleAlbumObject.fromJson(
         json.cast<String, dynamic>(),
       ),
@@ -89,10 +92,10 @@ class MetadataPluginArtistEndpoint {
         "offset": offset,
         "limit": limit ?? 20,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullArtistObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) => SangeetFullArtistObject.fromJson(
         json.cast<String, dynamic>(),
       ),

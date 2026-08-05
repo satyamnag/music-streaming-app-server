@@ -27,6 +27,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings => 'Einstellungen';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => 'Filtere Kategorien oder Genres...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get songs => 'Songs';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get create_a_playlist => 'Erstelle eine Playlist';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => 'Playlist-Name';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => 'Wiedergabeliste aktualisieren';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get update => 'Aktualisieren';
-
-  @override
-  String get playlist_name => 'Playlist-Name';
 
   @override
   String get name_of_playlist => 'Name der Playlist';
@@ -226,11 +242,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get more_actions => 'Weitere Aktionen';
 
   @override
-  String download_count(Object count) {
-    return 'Download ($count)';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return 'Zu Playlist hinzufügen ($count)';
   }
@@ -346,9 +357,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get alternative_track_sources => 'Alternative Track-Quellen';
 
   @override
-  String get download_track => 'Track herunterladen';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks Tracks in der Warteschlange';
   }
@@ -364,9 +372,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exit_mini_player => 'Mini-Player verlassen';
-
-  @override
-  String get download_location => 'Download-Speicherort';
 
   @override
   String get local_library => 'Lokale Bibliothek';
@@ -610,18 +615,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String track_exists(Object track) {
     return 'Track $track existiert bereits';
   }
-
-  @override
-  String get replace_downloaded_tracks =>
-      'Alle heruntergeladenen Titel ersetzen';
-
-  @override
-  String get skip_download_tracks =>
-      'Das Herunterladen aller heruntergeladenen Titel überspringen';
-
-  @override
-  String get do_you_want_to_replace =>
-      'Möchtest du den vorhandenen Track ersetzen?';
 
   @override
   String get replace => 'Ersetzen';
@@ -879,25 +872,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get restore_defaults => 'Standardeinstellungen wiederherstellen';
 
   @override
-  String get download_music_format => 'Musik-Downloadformat';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => 'Musik-Streamingformat';
 
   @override
-  String get download_music_quality => 'Musik-Downloadqualität';
-
-  @override
   String get streaming_music_quality => 'Musik-Streamingqualität';
 
   @override
-  String get login_with_lastfm => 'Mit Last.fm anmelden';
-
-  @override
   String get connect => 'Verbinden';
-
-  @override
-  String get disconnect_lastfm => 'Last.fm trennen';
 
   @override
   String get disconnect => 'Trennen';
@@ -912,10 +897,39 @@ class AppLocalizationsDe extends AppLocalizations {
   String get login => 'Anmelden';
 
   @override
-  String get login_with_your_lastfm => 'Mit Ihrem Last.fm-Konto anmelden';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Auf Last.fm scrobbeln';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => 'Zum Album gehen';
@@ -1161,6 +1175,29 @@ class AppLocalizationsDe extends AppLocalizations {
   String get email => 'Email';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => 'Follower';
 
   @override
@@ -1261,6 +1298,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get summary_were_on_repeat => 'Wurden wiederholt';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return 'Gesamt $money';
   }
@@ -1312,9 +1360,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get undo => 'Rückgängig';
-
-  @override
-  String get download_all => 'Alle herunterladen';
 
   @override
   String get add_all_to_playlist => 'Alle zur Playlist hinzufügen';
@@ -1563,12 +1608,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get configure_plugins =>
       'Richte deine eigenen Metadatenanbieter- und Audioquellen-Plugins ein';
-
-  @override
-  String get audio_scrobblers => 'Audio-Scrobbler';
-
-  @override
-  String get scrobbling => 'Scrobbling';
 
   @override
   String get source => 'Quelle: ';

@@ -18,7 +18,8 @@ import 'package:sangeet/components/fallbacks/anonymous_fallback.dart';
 import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
-import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
@@ -33,11 +34,15 @@ class UserPlaylistsPage extends HookConsumerWidget {
     final searchText = useState('');
 
     final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
+    final clerkAuth = ref.watch(clerkAuthProvider);
+    final isClerkSignedIn = clerkAuth.value?.signedIn == true;
 
     final me = ref.watch(metadataPluginUserProvider);
-    final playlistsQuery = ref.watch(metadataPluginSavedPlaylistsProvider);
-    final playlistsQueryNotifier =
-        ref.watch(metadataPluginSavedPlaylistsProvider.notifier);
+
+    // Owner-made playlists (developer/owner curated) and user-made playlists
+    // (created on this device) are served by the local server directly.
+    final ownerPlaylistsQuery = ref.watch(ownerPlaylistsProvider);
+    final userPlaylistsQuery = ref.watch(userPlaylistsProvider);
 
     final likedTracksPlaylist = useMemoized(
       () => me.asData?.value == null
@@ -58,30 +63,29 @@ class UserPlaylistsPage extends HookConsumerWidget {
       [context.l10n, me.asData?.value],
     );
 
-    final playlists = useMemoized(
-      () {
-        if (searchText.value.isEmpty) {
-          return [
-            if (likedTracksPlaylist != null) likedTracksPlaylist,
-            ...?playlistsQuery.asData?.value.items,
-          ];
-        }
-        return [
-          if (likedTracksPlaylist != null) likedTracksPlaylist,
-          ...?playlistsQuery.asData?.value.items,
-        ]
-            .map((e) => (weightedRatio(e.name, searchText.value), e))
-            .sorted((a, b) => b.$1.compareTo(a.$1))
-            .where((e) => e.$1 > 50)
-            .map((e) => e.$2)
-            .toList();
-      },
-      [playlistsQuery, searchText.value],
+    List<SangeetSimplePlaylistObject> filter(
+        List<SangeetSimplePlaylistObject> items) {
+      if (searchText.value.isEmpty) return items;
+      return items
+          .map((e) => (weightedRatio(e.name, searchText.value), e))
+          .sorted((a, b) => b.$1.compareTo(a.$1))
+          .where((e) => e.$1 > 50)
+          .map((e) => e.$2)
+          .toList();
+    }
+
+    final ownerPlaylists = useMemoized(
+      () => filter(ownerPlaylistsQuery.asData?.value ?? []),
+      [ownerPlaylistsQuery, searchText.value],
+    );
+    final userPlaylists = useMemoized(
+      () => filter(userPlaylistsQuery.asData?.value ?? []),
+      [userPlaylistsQuery, searchText.value],
     );
 
     final controller = useScrollController();
 
-    if (playlistsQuery.error
+    if (userPlaylistsQuery.error
         case MetadataPluginException(
           errorCode: MetadataPluginErrorCode.noDefaultMetadataPlugin,
           message: _,
@@ -89,22 +93,26 @@ class UserPlaylistsPage extends HookConsumerWidget {
       return const Center(child: NoDefaultMetadataPlugin());
     }
 
-    if (authenticated.asData?.value != true) {
+    if (authenticated.asData?.value != true && !isClerkSignedIn) {
       return const AnonymousFallback();
     }
 
-    if (playlistsQuery.hasError) {
+    final hasError =
+        ownerPlaylistsQuery.hasError || userPlaylistsQuery.hasError;
+    if (hasError) {
       return ErrorBox(
-        error: playlistsQuery.error!,
+        error: ownerPlaylistsQuery.error ?? userPlaylistsQuery.error!,
         onRetry: () {
-          ref.invalidate(metadataPluginSavedPlaylistsProvider);
+          ref.invalidate(ownerPlaylistsProvider);
+          ref.invalidate(userPlaylistsProvider);
         },
       );
     }
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
-        ref.invalidate(metadataPluginSavedPlaylistsProvider);
+        ref.invalidate(ownerPlaylistsProvider);
+        ref.invalidate(userPlaylistsProvider);
       },
       child: SafeArea(
         bottom: false,
@@ -130,6 +138,35 @@ class UserPlaylistsPage extends HookConsumerWidget {
                 ),
               ),
               const SliverGap(10),
+              if (likedTracksPlaylist != null) ...[
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      context.l10n.liked_tracks,
+                      style: context.theme.typography.h4,
+                    ),
+                  ),
+                ),
+                const SliverGap(8),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: PlaylistCard.tile(likedTracksPlaylist),
+                  ),
+                ),
+              ],
+              const SliverGap(16),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    context.l10n.playlists,
+                    style: context.theme.typography.h4,
+                  ),
+                ),
+              ),
+              const SliverGap(8),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 sliver: PlaybuttonView(
@@ -137,28 +174,28 @@ class UserPlaylistsPage extends HookConsumerWidget {
                     child: Row(
                       children: [
                         PlaylistCreateDialogButton(),
-                        // const Gap(10),
-                        // Button.primary(
-                        //   leading: const Icon(SangeetIcons.magic),
-                        //   child: Text(context.l10n.generate),
-                        //   onPressed: () {
-                        //     context.navigateTo(const PlaylistGeneratorRoute());
-                        //   },
-                        // ),
-                        // const Gap(10),
                       ],
                     ),
                   ),
                   controller: controller,
-                  hasMore: playlistsQuery.asData?.value.hasMore == true,
-                  isLoading: playlistsQuery.isLoading,
-                  onRequestMore: playlistsQueryNotifier.fetchMore,
-                  itemCount: playlists.length,
+                  hasMore: false,
+                  isLoading: ownerPlaylistsQuery.isLoading ||
+                      userPlaylistsQuery.isLoading,
+                  onRequestMore: () {},
+                  itemCount: ownerPlaylists.length + userPlaylists.length,
                   gridItemBuilder: (context, index) {
-                    return PlaylistCard(playlists[index]);
+                    if (index < ownerPlaylists.length) {
+                      return PlaylistCard(ownerPlaylists[index]);
+                    }
+                    return PlaylistCard(
+                        userPlaylists[index - ownerPlaylists.length]);
                   },
                   listItemBuilder: (context, index) {
-                    return PlaylistCard.tile(playlists[index]);
+                    if (index < ownerPlaylists.length) {
+                      return PlaylistCard.tile(ownerPlaylists[index]);
+                    }
+                    return PlaylistCard.tile(
+                        userPlaylists[index - ownerPlaylists.length]);
                   },
                 ),
               ),

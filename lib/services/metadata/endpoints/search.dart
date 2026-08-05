@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginSearchEndpoint {
   final Hetu hetu;
@@ -15,21 +16,14 @@ class MetadataPluginSearchEndpoint {
   }
 
   Future<SangeetSearchResponseObject> all(String query) async {
-    if (query.isEmpty) {
-      return SangeetSearchResponseObject(
-        albums: [],
-        artists: [],
-        playlists: [],
-        tracks: [],
-      );
-    }
-
+    // An empty query returns the full catalog (all songs) — the server lists
+    // every track when no search term is given.
     final raw = await hetuMetadataSearch.invoke(
       "all",
       positionalArgs: [query],
-    ) as Map;
+    );
 
-    return SangeetSearchResponseObject.fromJson(raw.cast<String, dynamic>());
+    return SangeetSearchResponseObject.fromJson(hetuToMap(raw));
   }
 
   Future<SangeetPaginationResponseObject<SangeetSimpleAlbumObject>> albums(
@@ -54,10 +48,10 @@ class MetadataPluginSearchEndpoint {
         "limit": limit,
         "offset": offset,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (json) => SangeetSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
     );
   }
@@ -84,10 +78,10 @@ class MetadataPluginSearchEndpoint {
         "limit": limit,
         "offset": offset,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullArtistObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (json) => SangeetFullArtistObject.fromJson(
         json.cast<String, dynamic>(),
       ),
@@ -117,11 +111,11 @@ class MetadataPluginSearchEndpoint {
         "limit": limit,
         "offset": offset,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<
         SangeetSimplePlaylistObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (json) => SangeetSimplePlaylistObject.fromJson(
         json.cast<String, dynamic>(),
       ),
@@ -133,16 +127,8 @@ class MetadataPluginSearchEndpoint {
     int? limit,
     int? offset,
   }) async {
-    if (query.isEmpty) {
-      return SangeetPaginationResponseObject<SangeetFullTrackObject>(
-        items: [],
-        total: 0,
-        limit: limit ?? 20,
-        hasMore: false,
-        nextOffset: null,
-      );
-    }
-
+    // An empty query returns the full catalog (all songs) — the server lists
+    // every track when no search term is given.
     final raw = await hetuMetadataSearch.invoke(
       "tracks",
       positionalArgs: [query],
@@ -150,10 +136,10 @@ class MetadataPluginSearchEndpoint {
         "limit": limit,
         "offset": offset,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (json) => SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
   }

@@ -17,7 +17,7 @@
   </queries>
 
   <application
-    android:name="${applicationName}"
+    android:name="com.sangeet.app.SoulfulBhaktiApp"
     android:allowBackup="false"
     android:fullBackupContent="false"
     android:icon="@mipmap/ic_launcher"
@@ -30,7 +30,7 @@
       android:value="false" /> -->
 
     <activity
-      android:name="com.ryanheise.audioservice.AudioServiceActivity"
+      android:name="com.sangeet.app.MainActivity"
       android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
       android:exported="true"
       android:hardwareAccelerated="true"

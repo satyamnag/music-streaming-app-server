@@ -6,6 +6,10 @@ enum SangeetAlbumType {
   compilation,
 }
 
+extension FormattedAlbumType on SangeetAlbumType {
+  String get formatted => name.replaceFirst(name[0], name[0].toUpperCase());
+}
+
 @freezed
 class SangeetFullAlbumObject with _$SangeetFullAlbumObject {
   factory SangeetFullAlbumObject({

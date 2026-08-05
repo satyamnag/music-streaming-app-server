@@ -16,11 +16,11 @@ import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
-import 'package:sangeet/components/waypoint.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
-import 'package:sangeet/provider/metadata_plugin/library/artists.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
@@ -32,15 +32,15 @@ class UserArtistsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
+    final clerkAuth = ref.watch(clerkAuthProvider);
+    final isClerkSignedIn = clerkAuth.value?.signedIn == true;
 
-    final artistQuery = ref.watch(metadataPluginSavedArtistsProvider);
-    final artistQueryNotifier =
-        ref.watch(metadataPluginSavedArtistsProvider.notifier);
+    final artistQuery = ref.watch(libraryArtistsProvider);
 
     final searchText = useState('');
 
     final filteredArtists = useMemoized(() {
-      final artists = artistQuery.asData?.value.items ?? [];
+      final artists = artistQuery.asData?.value ?? [];
 
       if (searchText.value.isEmpty) {
         return artists.toList();
@@ -54,7 +54,7 @@ class UserArtistsPage extends HookConsumerWidget {
           .where((e) => e.$1 > 50)
           .map((e) => e.$2)
           .toList();
-    }, [artistQuery.asData?.value.items, searchText.value]);
+    }, [artistQuery.asData?.value, searchText.value]);
 
     final controller = useScrollController();
 
@@ -66,7 +66,7 @@ class UserArtistsPage extends HookConsumerWidget {
       return const Center(child: NoDefaultMetadataPlugin());
     }
 
-    if (authenticated.asData?.value != true) {
+    if (authenticated.asData?.value != true && !isClerkSignedIn) {
       return const AnonymousFallback();
     }
 
@@ -74,7 +74,7 @@ class UserArtistsPage extends HookConsumerWidget {
       return ErrorBox(
         error: artistQuery.error!,
         onRetry: () {
-          ref.invalidate(metadataPluginSavedArtistsProvider);
+          ref.invalidate(libraryArtistsProvider);
         },
       );
     }
@@ -84,7 +84,7 @@ class UserArtistsPage extends HookConsumerWidget {
       child: Scaffold(
         child: material.RefreshIndicator.adaptive(
           onRefresh: () async {
-            ref.invalidate(metadataPluginSavedArtistsProvider);
+            ref.invalidate(libraryArtistsProvider);
           },
           child: InterScrollbar(
             controller: controller,
@@ -112,7 +112,7 @@ class UserArtistsPage extends HookConsumerWidget {
                   if (filteredArtists.isNotEmpty || artistQuery.isLoading)
                     SliverLayoutBuilder(builder: (context, constrains) {
                       return SliverGrid.builder(
-                        itemCount: filteredArtists.length + 1,
+                        itemCount: filteredArtists.length,
                         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 200,
                           mainAxisExtent: constrains.smAndDown ? 225 : 250,
@@ -120,23 +120,6 @@ class UserArtistsPage extends HookConsumerWidget {
                           mainAxisSpacing: 8,
                         ),
                         itemBuilder: (context, index) {
-                          if (filteredArtists.isNotEmpty &&
-                              index == filteredArtists.length) {
-                            if (artistQuery.asData?.value.hasMore != true) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return Waypoint(
-                              controller: controller,
-                              isGrid: true,
-                              onTouchEdge: artistQueryNotifier.fetchMore,
-                              child: Skeletonizer(
-                                enabled: true,
-                                child: ArtistCard(FakeData.artist),
-                              ),
-                            );
-                          }
-
                           return Skeletonizer(
                             enabled: artistQuery.isLoading,
                             child: ArtistCard(

@@ -102,3 +102,20 @@ CREATE POLICY "Anyone can view play counts" ON public.song_plays
     FOR SELECT USING (true);
 CREATE POLICY "Authenticated users can insert plays" ON public.song_plays
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Record a play for a track. SECURITY DEFINER so anonymous users (via the
+-- anon publishable key) can record plays without needing a session; the
+-- function only inserts the track_id and a timestamp.
+CREATE OR REPLACE FUNCTION public.record_play(track_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    INSERT INTO public.song_plays (track_id, user_id)
+    VALUES (track_id, auth.uid());
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.record_play(uuid) TO anon, authenticated;

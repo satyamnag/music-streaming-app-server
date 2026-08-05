@@ -12,7 +12,6 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/hover_builder.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/links/artist_link.dart';
-import 'package:sangeet/components/links/link_text.dart';
 import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -20,6 +19,7 @@ import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
+import 'package:sangeet/services/audio_preload/track_byte_prefetcher.dart';
 import 'package:sangeet/utils/platform.dart';
 
 final _overlay = ValueNotifier<OverlayCompleter<dynamic>?>(null);
@@ -63,6 +63,19 @@ class TrackTile extends HookConsumerWidget {
     final isPlaying = playlist.activeTrack?.id == track.id;
 
     final isSelected = isPlaying || isLoading.value;
+
+    // Warm-up prefetch: as soon as this track is built/visible on any screen
+    // (home, playlists, search, ...), request ~20% of its audio bytes in the
+    // background so a tap-to-play starts in a fraction of a second. Sliver
+    // lists only build tiles near the viewport, so this effectively fires for
+    // tracks that are actually on screen. Idempotent and concurrency-bounded
+    // inside the prefetcher.
+    useEffect(() {
+      if (!isPlaying) {
+        TrackBytePrefetcher.instance.prefetch(track, ref);
+      }
+      return null;
+    }, [track.id]);
 
     final imageProvider = useMemoized(
       () => UniversalImage.imageProvider(
@@ -261,13 +274,9 @@ class TrackTile extends HookConsumerWidget {
                         ),
                       _ => Align(
                           alignment: Alignment.centerLeft,
-                          child: LinkText(
+                          child: Text(
                             track.album.name,
-                            AlbumRoute(
-                              album: track.album,
-                              id: track.album.id,
-                            ),
-                            push: true,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         )

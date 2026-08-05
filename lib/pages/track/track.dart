@@ -4,12 +4,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/heart_button/heart_button.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/links/artist_link.dart';
-import 'package:sangeet/components/links/link_text.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -143,13 +141,9 @@ class TrackPage extends HookConsumerWidget {
                                     const Icon(SangeetIcons.album),
                                     const Gap(5),
                                     Flexible(
-                                      child: LinkText(
+                                      child: Text(
                                         track.album.name,
-                                        AlbumRoute(
-                                          id: track.album.id,
-                                          album: track.album,
-                                        ),
-                                        push: true,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],

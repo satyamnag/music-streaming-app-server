@@ -8,6 +8,7 @@ import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/market.dart';
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
 import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/provider/device_kind/device_kind_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/utils/platform.dart';
@@ -21,45 +22,69 @@ class UserPreferencesNotifier extends Notifier<PreferencesTableData> {
   build() {
     final db = ref.watch(databaseProvider);
 
-    (db.select(db.preferencesTable)..where((tbl) => tbl.id.equals(0)))
-        .getSingleOrNull()
-        .then((result) async {
-      if (result == null) {
-        await db.into(db.preferencesTable).insert(
-              PreferencesTableCompanion.insert(
-                id: const Value(0),
-                downloadLocation: Value(await _getDefaultDownloadDirectory()),
-              ),
-            );
-      }
-
-      state = await (db.select(db.preferencesTable)
-            ..where((tbl) => tbl.id.equals(0)))
-          .getSingle();
-
-      final subscription = (db.select(db.preferencesTable)
-            ..where((tbl) => tbl.id.equals(0)))
-          .watchSingle()
-          .listen((event) async {
-        try {
-          state = event;
-
-          if (kIsDesktop) {
-            await windowManager.setTitleBarStyle(
-              state.systemTitleBar
-                  ? TitleBarStyle.normal
-                  : TitleBarStyle.hidden,
-            );
-          }
-
-          await audioPlayer.setAudioNormalization(state.normalizeAudio);
-        } catch (e, stack) {
-          AppLogger.reportError(e, stack);
+    ref.read(deviceKindProvider.future).then((deviceKind) async {
+      (db.select(db.preferencesTable)..where((tbl) => tbl.id.equals(0)))
+          .getSingleOrNull()
+          .then((result) async {
+        if (result == null) {
+          await db.into(db.preferencesTable).insert(
+                PreferencesTableCompanion.insert(
+                  id: const Value(0),
+                  layoutMode: Value(deviceKind.defaultLayoutMode),
+                  market: Value(Market.IN),
+                  downloadLocation: Value(await _getDefaultDownloadDirectory()),
+                ),
+              );
         }
-      });
 
-      ref.onDispose(() {
-        subscription.cancel();
+        state = await (db.select(db.preferencesTable)
+              ..where((tbl) => tbl.id.equals(0)))
+            .getSingle();
+
+        // If the stored layout is not offered on this device (e.g. a TV that
+        // was previously set to "Compact" or once-created rows), fall back to
+        // the device default so the selectable tile always
+        // displays a supported value.
+        if (!deviceKind.allowedLayoutModes.contains(state.layoutMode)) {
+          await setData(
+            PreferencesTableCompanion(
+                layoutMode: Value(
+              deviceKind.defaultLayoutMode,
+            )),
+          );
+        }
+
+        // Apply the default recommendation market. India (IN) is the app's
+        // default country; existing rows that still carry the legacy US
+        // default are migrated once so the setting matches the new default.
+        if (state.market == Market.US) {
+          await setData(PreferencesTableCompanion(market: Value(Market.IN)));
+        }
+
+        final subscription = (db.select(db.preferencesTable)
+              ..where((tbl) => tbl.id.equals(0)))
+            .watchSingle()
+            .listen((event) async {
+          try {
+            state = event;
+
+            if (kIsDesktop) {
+              await windowManager.setTitleBarStyle(
+                state.systemTitleBar
+                    ? TitleBarStyle.normal
+                    : TitleBarStyle.hidden,
+              );
+            }
+
+            await audioPlayer.setAudioNormalization(state.normalizeAudio);
+          } catch (e, stack) {
+            AppLogger.reportError(e, stack);
+          }
+        });
+
+        ref.onDispose(() {
+          subscription.cancel();
+        });
       });
     });
 

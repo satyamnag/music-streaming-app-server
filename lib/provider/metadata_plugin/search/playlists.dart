@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
@@ -12,11 +13,16 @@ class MetadataPluginSearchPlaylistsNotifier
   @override
   fetch(offset, limit) async {
     if (arg.isEmpty) {
+      // Empty search: show the developer-curated default playlists (the whole
+      // catalog, artist playlists and month playlists) so the playlists tab is
+      // never empty.
+      final ownerPlaylists =
+          await ref.read(ownerPlaylistsProvider.future);
       return SangeetPaginationResponseObject<SangeetSimplePlaylistObject>(
         limit: limit,
         nextOffset: null,
-        total: 0,
-        items: [],
+        total: ownerPlaylists.length,
+        items: ownerPlaylists,
         hasMore: false,
       );
     }

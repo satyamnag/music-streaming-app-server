@@ -16,23 +16,23 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:smtc_windows/smtc_windows.dart';
-import 'dart:convert';
 
 import 'package:sangeet/collections/env.dart';
 import 'package:sangeet/collections/http-override.dart';
 import 'package:sangeet/collections/intents.dart';
 import 'package:sangeet/collections/routes.dart';
 import 'package:sangeet/hooks/configurators/use_close_behavior.dart';
-import 'package:sangeet/hooks/configurators/use_deep_linking.dart';
 
 import 'package:sangeet/hooks/configurators/use_fix_window_stretching.dart';
 import 'package:sangeet/hooks/configurators/use_get_storage_perms.dart';
 import 'package:sangeet/hooks/configurators/use_has_touch.dart';
 import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
 import 'package:sangeet/modules/settings/bhakti_color_scheme.dart';
 import 'package:sangeet/modules/splash/splash_screen.dart';
 import 'package:sangeet/provider/audio_player/audio_player_streams.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/glance/glance.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
@@ -41,6 +41,7 @@ import 'package:sangeet/provider/server/bonsoir.dart';
 import 'package:sangeet/provider/server/server.dart';
 import 'package:sangeet/provider/tray_manager/tray_manager.dart';
 import 'package:sangeet/l10n/l10n.dart';
+import 'package:sangeet/l10n/app_localizations_fallback_delegate.dart';
 import 'package:sangeet/provider/connect/clients.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -94,23 +95,6 @@ Future<void> main(List<String> rawArgs) async {
     }
 
     await KVStoreService.initialize();
-
-    if (Env.listenbrainzToken.isNotEmpty) {
-      final credKey =
-          "spotube_plugin.musicbrainz-and-listenbrainz.lb_creds";
-      final existing = KVStoreService.sharedPreferences.getString(credKey);
-      if (existing == null || existing.isEmpty) {
-        KVStoreService.sharedPreferences.setString(
-          credKey,
-          jsonEncode({
-            "token": Env.listenbrainzToken,
-            "username": "SATYAM NAG",
-            "lb_url": "https://api.listenbrainz.org/1",
-            "mb_url": "https://musicbrainz.org/ws/2",
-          }),
-        );
-      }
-    }
 
     if (kIsDesktop) {
       await windowManager.setPreventClose(true);
@@ -180,7 +164,6 @@ class Sangeet extends HookConsumerWidget {
     ref.listen(audioSourcePluginUpdateCheckerProvider, (_, __) {});
 
     useFixWindowStretching();
-    useDeepLinking(ref, router);
     useCloseBehavior(ref);
     useGetStoragePermissions(ref);
 
@@ -200,7 +183,7 @@ class Sangeet extends HookConsumerWidget {
       supportedLocales: L10n.all,
       locale: locale.languageCode == "system" ? null : locale,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        AppLocalizationsFallbackDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -239,6 +222,24 @@ class Sangeet extends HookConsumerWidget {
         );
         if (pluginLoading || serverLoading) {
           child = const SplashScreen();
+        }
+
+        // On Android, gate the app behind Clerk auth: signed-out users see
+        // the sign-in view as a modal popup over the app until they
+        // authenticate.
+        if (!kIsAndroid || child is! SplashScreen) {
+          final clerkAuth = ref.watch(clerkAuthProvider);
+          final clerkState = clerkAuth.value ?? const ClerkAuthState();
+          if (!clerkAuth.isLoading &&
+              clerkState.initialized &&
+              !clerkState.signedIn) {
+            child = Stack(
+              children: [
+                child,
+                const ClerkAuthView(),
+              ],
+            );
+          }
         }
 
         return child;
@@ -312,21 +313,6 @@ class Sangeet extends HookConsumerWidget {
           LogicalKeyboardKey.control,
           LogicalKeyboardKey.shift,
         ): HomeTabIntent(router, tab: HomeTabs.userArtists),
-        LogicalKeySet(
-          LogicalKeyboardKey.digit6,
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.shift,
-        ): HomeTabIntent(router, tab: HomeTabs.userAlbums),
-        LogicalKeySet(
-          LogicalKeyboardKey.digit7,
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.shift,
-        ): HomeTabIntent(router, tab: HomeTabs.userLocalLibrary),
-        LogicalKeySet(
-          LogicalKeyboardKey.digit8,
-          LogicalKeyboardKey.control,
-          LogicalKeyboardKey.shift,
-        ): HomeTabIntent(router, tab: HomeTabs.userDownloads),
         LogicalKeySet(
           LogicalKeyboardKey.keyW,
           LogicalKeyboardKey.control,

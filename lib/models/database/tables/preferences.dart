@@ -70,7 +70,7 @@ class PreferencesTable extends Table {
       )
       .map(const LocaleConverter())();
   TextColumn get market =>
-      textEnum<Market>().withDefault(Constant(Market.US.name))();
+      textEnum<Market>().withDefault(Constant(Market.IN.name))();
   TextColumn get searchMode =>
       textEnum<SearchMode>().withDefault(Constant(SearchMode.youtube.name))();
   TextColumn get downloadLocation => text().withDefault(const Constant(""))();

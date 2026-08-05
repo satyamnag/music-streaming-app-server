@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginBrowseEndpoint {
   final Hetu hetu;
@@ -21,11 +22,11 @@ class MetadataPluginBrowseEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<
         SangeetBrowseSectionObject<Object>>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) => SangeetBrowseSectionObject<Object>.fromJson(
         json.cast<String, dynamic>(),
         (json) {
@@ -61,10 +62,10 @@ class MetadataPluginBrowseEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<Object>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (json) {
         final isPlaylist = json["owner"] != null;
         final isAlbum = json["artists"] != null;

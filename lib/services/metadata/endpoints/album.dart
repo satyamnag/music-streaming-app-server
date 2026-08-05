@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginAlbumEndpoint {
   final Hetu hetu;
@@ -11,11 +12,10 @@ class MetadataPluginAlbumEndpoint {
           as HTInstance;
 
   Future<SangeetFullAlbumObject> getAlbum(String id) async {
-    final raw =
-        await hetuMetadataAlbum.invoke("getAlbum", positionalArgs: [id]) as Map;
+    final raw = await hetuMetadataAlbum.invoke("getAlbum", positionalArgs: [id]);
 
     return SangeetFullAlbumObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 
@@ -31,10 +31,10 @@ class MetadataPluginAlbumEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
@@ -50,10 +50,10 @@ class MetadataPluginAlbumEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
     );

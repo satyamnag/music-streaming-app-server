@@ -1,18 +1,15 @@
 import 'dart:io';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/download_manager_provider.dart';
 import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
@@ -21,7 +18,6 @@ import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
 enum TrackOptionValue {
-  album,
   share,
   addToPlaylist,
   addToQueue,
@@ -31,7 +27,6 @@ removeFromQueue,
   playNext,
   favorite,
   details,
-  download,
   startRadio,
 }
 
@@ -46,8 +41,6 @@ class TrackOptionsActions {
       ref.read(metadataPluginSavedTracksProvider.notifier);
   MetadataPluginSavedPlaylistsNotifier get favoritePlaylistsNotifier =>
       ref.read(metadataPluginSavedPlaylistsProvider.notifier);
-  DownloadManagerNotifier get downloadManager =>
-      ref.read(downloadManagerProvider.notifier);
 
   void actionShare(BuildContext context) {
     Clipboard.setData(ClipboardData(text: track.externalUri)).then((_) {
@@ -133,11 +126,6 @@ class TrackOptionsActions {
     String? playlistId,
   ) async {
     switch (value) {
-      case TrackOptionValue.album:
-        await context.navigateTo(
-          AlbumRoute(id: track.album.id, album: track.album),
-        );
-        break;
       case TrackOptionValue.delete:
         await File((track as SangeetLocalTrackObject).path).delete();
         ref.invalidate(localTracksProvider);
@@ -227,10 +215,6 @@ class TrackOptionsActions {
           ),
         );
         break;
-      case TrackOptionValue.download:
-        if (track is SangeetLocalTrackObject) break;
-        downloadManager.addToQueue(track as SangeetFullTrackObject);
-        break;
       case TrackOptionValue.startRadio:
         actionStartRadio(context);
         break;
@@ -240,11 +224,9 @@ class TrackOptionsActions {
 
 typedef TrackOptionFlags = ({
   bool isInQueue,
-  bool isInDownloadQueue,
   bool isActiveTrack,
   bool isAuthenticated,
   bool isLiked,
-  DownloadTask? downloadTask,
 });
 
 final trackOptionActionsProvider =
@@ -254,30 +236,14 @@ final trackOptionActionsProvider =
 
 final trackOptionsStateProvider =
     Provider.family<TrackOptionFlags, SangeetTrackObject>((ref, track) {
-  ref.watch(downloadManagerProvider);
-
   final playlist = ref.watch(audioPlayerProvider);
   final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
-  final downloadManager = ref.watch(downloadManagerProvider.notifier);
   final isSavedTrack = ref.watch(metadataPluginIsSavedTrackProvider(track.id));
-
-  final downloadTask = playlist.activeTrack?.id == null
-      ? null
-      : downloadManager.getTaskByTrackId(playlist.activeTrack!.id);
-  final isInDownloadQueue = playlist.activeTrack == null ||
-          playlist.activeTrack! is SangeetLocalTrackObject
-      ? false
-      : const [
-          DownloadStatus.queued,
-          DownloadStatus.downloading,
-        ].contains(downloadTask?.status);
 
   return (
     isInQueue: playlist.containsTrack(track),
-    isInDownloadQueue: isInDownloadQueue,
     isActiveTrack: playlist.activeTrack?.id == track.id,
     isAuthenticated: authenticated.asData?.value ?? false,
     isLiked: isSavedTrack.asData?.value ?? false,
-    downloadTask: downloadTask,
   );
 });

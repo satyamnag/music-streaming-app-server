@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginTrackEndpoint {
   final Hetu hetu;
@@ -11,11 +12,13 @@ class MetadataPluginTrackEndpoint {
           as HTInstance;
 
   Future<SangeetFullTrackObject> getTrack(String id) async {
-    final raw =
-        await hetuMetadataTrack.invoke("getTrack", positionalArgs: [id]) as Map;
+    final raw = await hetuMetadataTrack.invoke(
+      "getTrack",
+      positionalArgs: [id],
+    );
 
     return SangeetFullTrackObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 
@@ -33,10 +36,10 @@ class MetadataPluginTrackEndpoint {
       positionalArgs: [id],
     );
 
-    return (result as List)
+    return hetuToList(result)
         .map(
           (e) => SangeetFullTrackObject.fromJson(
-            (e as Map).cast<String, dynamic>(),
+            hetuToMap(e),
           ),
         )
         .toList();

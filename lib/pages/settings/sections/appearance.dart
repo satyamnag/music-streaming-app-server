@@ -9,6 +9,7 @@ import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/components/adaptive/adaptive_select_tile.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/provider/device_kind/device_kind_provider.dart';
 
 class SettingsAppearanceSection extends HookConsumerWidget {
   final bool isGettingStarted;
@@ -28,31 +29,41 @@ class SettingsAppearanceSection extends HookConsumerWidget {
             return const ColorSchemePickerDialog();
           });
     }, []);
+    final deviceKind = ref.watch(deviceKindProvider).requireValue;
+
+    final layoutModeOptions = [
+      for (final mode in deviceKind.allowedLayoutModes)
+        switch (mode) {
+          LayoutMode.adaptive => SelectItemButton(
+              value: LayoutMode.adaptive,
+              child: Text(context.l10n.adaptive),
+            ),
+          LayoutMode.compact => SelectItemButton(
+              value: LayoutMode.compact,
+              child: Text(context.l10n.compact),
+            ),
+          LayoutMode.extended => SelectItemButton(
+              value: LayoutMode.extended,
+              child: Text(context.l10n.extended),
+            ),
+        },
+    ];
+    final layoutModeValue =
+        deviceKind.allowedLayoutModes.contains(preferences.layoutMode)
+            ? preferences.layoutMode
+            : deviceKind.defaultLayoutMode;
 
     final children = [
       AdaptiveSelectTile<LayoutMode>(
         secondary: const Icon(SangeetIcons.dashboard),
         title: const Text('Layout'),
-        value: preferences.layoutMode,
+        value: layoutModeValue,
         onChanged: (value) {
           if (value != null) {
             preferencesNotifier.setLayoutMode(value);
           }
         },
-        options: [
-          SelectItemButton(
-            value: LayoutMode.adaptive,
-            child: Text(context.l10n.adaptive),
-          ),
-          SelectItemButton(
-            value: LayoutMode.compact,
-            child: Text(context.l10n.compact),
-          ),
-          SelectItemButton(
-            value: LayoutMode.extended,
-            child: Text(context.l10n.extended),
-          ),
-        ],
+        options: layoutModeOptions,
       ),
       AdaptiveSelectTile<ThemeMode>(
         secondary: const Icon(SangeetIcons.darkMode),

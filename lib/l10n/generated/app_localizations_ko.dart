@@ -27,6 +27,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings => '설정';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => '카테고리 혹은 장르별로 불러오기';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get songs => '노래';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get create_a_playlist => '플레이리스트를 생성';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => '플레이리스트명';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => '플레이리스트를 업데이트';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get update => '업데이트';
-
-  @override
-  String get playlist_name => '플레이리스트명';
 
   @override
   String get name_of_playlist => '플레이리스트의 이름';
@@ -225,11 +241,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get more_actions => '다른 작업';
 
   @override
-  String download_count(Object count) {
-    return '($count) 곡 다운로드';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return '플레이리스트에 ($count) 곡을 추가';
   }
@@ -345,9 +356,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get alternative_track_sources => '대체가능한 음악 서버';
 
   @override
-  String get download_track => '곡 다운로드';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '대기열에 $tracks 곡이 있음';
   }
@@ -363,9 +371,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get exit_mini_player => '미니 플레이어 닫기';
-
-  @override
-  String get download_location => '다운로드 경로';
 
   @override
   String get local_library => '로컬 도서관';
@@ -600,15 +605,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String track_exists(Object track) {
     return '곡 $track 은 이미 리스트에 있습니다';
   }
-
-  @override
-  String get replace_downloaded_tracks => '다운로드한 모든 곡을 교체';
-
-  @override
-  String get skip_download_tracks => '다운로드가 끝난 곡을 모두 건너뛰기';
-
-  @override
-  String get do_you_want_to_replace => '현재 곡을 교체하시겠습니까?';
 
   @override
   String get replace => '교체';
@@ -862,25 +858,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get restore_defaults => '기본값으로 복원';
 
   @override
-  String get download_music_format => '다운로드 음악 포맷';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => '스트리밍 음악 포맷';
 
   @override
-  String get download_music_quality => '다운로드 음질';
-
-  @override
   String get streaming_music_quality => '스트리밍 음질';
 
   @override
-  String get login_with_lastfm => 'Last.fm에 로그인';
-
-  @override
   String get connect => '연결';
-
-  @override
-  String get disconnect_lastfm => 'Last.fm에서 연결 해제';
 
   @override
   String get disconnect => '연결 해제';
@@ -895,10 +883,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get login => '로그인';
 
   @override
-  String get login_with_your_lastfm => '내 Last.fm 계정으로로그인';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Scrobble to Last.fm';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => '앨범으로 이동';
@@ -1135,6 +1152,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get email => '이메일';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => '팔로워';
 
   @override
@@ -1235,6 +1275,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get summary_were_on_repeat => '반복 재생됨';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return '총 $money';
   }
@@ -1285,9 +1336,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get undo => '실행 취소';
-
-  @override
-  String get download_all => '모두 다운로드';
 
   @override
   String get add_all_to_playlist => '모두 재생 목록에 추가';
@@ -1522,12 +1570,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get configure_plugins => '직접 메타데이터 제공자와 오디오 소스 플러그인을 구성하세요';
-
-  @override
-  String get audio_scrobblers => '오디오 스크로블러';
-
-  @override
-  String get scrobbling => '스크로블링';
 
   @override
   String get source => '출처: ';

@@ -10,12 +10,6 @@ enum ReleaseChannel {
 
 @Envied(obfuscate: true, requireEnvFile: true, path: ".env")
 abstract class Env {
-  @EnviedField(varName: 'LASTFM_API_KEY')
-  static final String lastFmApiKey = _Env.lastFmApiKey;
-
-  @EnviedField(varName: 'LASTFM_API_SECRET')
-  static final String lastFmApiSecret = _Env.lastFmApiSecret;
-
   @EnviedField(varName: 'HIDE_DONATIONS', defaultValue: "0")
   static final int _hideDonations = _Env._hideDonations;
 
@@ -31,14 +25,14 @@ abstract class Env {
       ? ReleaseChannel.stable
       : ReleaseChannel.nightly;
 
-  @EnviedField(varName: 'LISTENBRAINZ_TOKEN')
-  static final String listenbrainzToken = _Env.listenbrainzToken;
-
   @EnviedField(varName: 'SUPABASE_URL')
   static final String supabaseUrl = _Env.supabaseUrl;
 
-  @EnviedField(varName: 'SUPABASE_SERVICE_KEY')
-  static final String supabaseServiceKey = _Env.supabaseServiceKey;
+  @EnviedField(varName: 'SUPABASE_ANON_KEY')
+  static final String supabaseAnonKey = _Env.supabaseAnonKey;
+
+  @EnviedField(varName: 'CLERK_PUBLISHABLE_KEY')
+  static final String clerkPublishableKey = _Env.clerkPublishableKey;
 
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";

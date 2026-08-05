@@ -1,11 +1,9 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/routes.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
-import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/track_options/track_options_provider.dart';
@@ -32,16 +30,12 @@ class TrackOptions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final mediaQuery = MediaQuery.of(context);
-
     final trackOptionActions = ref.watch(trackOptionActionsProvider(track));
     final (
-      :isInDownloadQueue,
       :isInQueue,
       :isActiveTrack,
       :isAuthenticated,
       :isLiked,
-      :downloadTask
     ) = ref.watch(trackOptionsStateProvider(track));
     final isLocalTrack = track is SangeetLocalTrackObject;
 
@@ -63,30 +57,6 @@ class TrackOptions extends HookConsumerWidget {
             },
             leading: const Icon(SangeetIcons.trash),
             title: Text(context.l10n.delete),
-          ),
-        if (mediaQuery.smAndDown && !isLocalTrack)
-          ButtonTile(
-            style: ButtonVariance.menu,
-            onPressed: () async {
-              await trackOptionActions.action(
-                rootNavigatorKey.currentContext!,
-                TrackOptionValue.album,
-                playlistId,
-              );
-              onTapItem?.call();
-            },
-            leading: const Icon(SangeetIcons.album),
-            title: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.l10n.go_to_album),
-                Text(
-                  track.album.name,
-                  style: context.theme.typography.xSmall,
-                ),
-              ],
-            ),
           ),
         if (!isInQueue) ...[
           ButtonTile(
@@ -194,35 +164,6 @@ class TrackOptions extends HookConsumerWidget {
             },
             leading: const Icon(SangeetIcons.removeFilled),
             title: Text(context.l10n.remove_from_playlist),
-          ),
-        if (!isLocalTrack)
-          ButtonTile(
-            style: ButtonVariance.menu,
-            onPressed: () async {
-              await trackOptionActions.action(
-                rootNavigatorKey.currentContext!,
-                TrackOptionValue.download,
-                playlistId,
-              );
-              onTapItem?.call();
-            },
-            enabled: !isInDownloadQueue,
-            leading: isInDownloadQueue
-                ? StreamBuilder(
-                    stream: downloadTask?.downloadedBytesStream,
-                    builder: (context, snapshot) {
-                      final progress = downloadTask?.totalSizeBytes == null ||
-                              downloadTask?.totalSizeBytes == 0
-                          ? 0
-                          : (snapshot.data ?? 0) /
-                              downloadTask!.totalSizeBytes!;
-                      return CircularProgressIndicator(
-                        value: progress.toDouble(),
-                      );
-                    },
-                  )
-                : const Icon(SangeetIcons.download),
-            title: Text(context.l10n.download_track),
           ),
         if (!isLocalTrack)
           ButtonTile(

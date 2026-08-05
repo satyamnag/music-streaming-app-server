@@ -105,7 +105,6 @@ abstract class SangeetIcons {
   static const amoled = FeatherIcons.sunset;
   static const file = FeatherIcons.file;
   static const stream = Icons.stream_rounded;
-  static const lastFm = SimpleIcons.lastdotfm;
   static const eye = FeatherIcons.eye;
   static const noEye = FeatherIcons.eyeOff;
   static const normalize = FeatherIcons.barChart2;

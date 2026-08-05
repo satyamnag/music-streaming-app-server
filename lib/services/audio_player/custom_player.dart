@@ -30,11 +30,24 @@ class CustomPlayer extends Player {
       : _playerStateStream = StreamController.broadcast() {
     nativePlayer.setProperty("network-timeout", "120");
     nativePlayer.setProperty("cache", "yes");
-    nativePlayer.setProperty("cache-secs", "60");
-    nativePlayer.setProperty("demuxer-max-bytes", "100M");
-    nativePlayer.setProperty("demuxer-max-back-bytes", "50M");
+    // Sixty-minute network cache lookahead: mpv keeps up to this much decoded
+    // audio buffered ahead of the playhead, so buffering pauses are avoided as
+    // long as the network can keep up. (Official mpv manual: "How many seconds
+    // of audio/video to prefetch if the cache is active.")
+    nativePlayer.setProperty("cache-secs", "3600");
+    // Byte caps large enough to hold 60 minutes at high bitrates: 60 min at
+    // 320 kbps is ~144 MB, at lossless ~630 MB — 512M comfortably covers the
+    // catalog while still bounding memory.
+    nativePlayer.setProperty("demuxer-max-bytes", "512M");
+    nativePlayer.setProperty("demuxer-max-back-bytes", "256M");
     nativePlayer.setProperty("gapless-audio", "yes");
     nativePlayer.setProperty("audio-pitch-correction", "no");
+    // Never auto-advance to the next track: mpv must stop at the end of the
+    // current track (or on an error) instead of skipping ahead. Only an
+    // explicit user action (next / previous / selecting another song) should
+    // change the playing track. This prevents the "skips through songs
+    // without playing" behaviour.
+    nativePlayer.setProperty("keep-open", "always");
 
     _subscriptions = [
       stream.buffering.listen((event) {
@@ -69,13 +82,20 @@ class CustomPlayer extends Player {
       }),
       stream.error.listen((event) {
         AppLogger.reportError('[MediaKitError] \n$event', StackTrace.current);
+        // On error, pause and stay on the current track rather than letting
+        // mpv advance. If the stream URL is stale/expired, refresh it and
+        // retry the same track a limited number of times.
         if (_errorRetryCount < _maxErrorRetries && state.playlist.index >= 0) {
           _errorRetryCount++;
           final idx = state.playlist.index;
           final medias = state.playlist.medias;
           if (idx < medias.length) {
+            pause();
             Future.delayed(Duration(seconds: _errorRetryCount), () {
-              jump(idx);
+              // Re-open the same media (not the next one) so playback resumes
+              // on the current track. With keep-open=always, mpv will not
+              // advance past it.
+              open(Playlist(medias, index: idx), play: true);
             });
           }
         }

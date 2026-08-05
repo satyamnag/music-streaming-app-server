@@ -2206,6 +2206,7 @@ mixin _$SangeetFullArtistObject {
   List<SangeetImageObject> get images => throw _privateConstructorUsedError;
   List<String>? get genres => throw _privateConstructorUsedError;
   int? get followers => throw _privateConstructorUsedError;
+  int? get songCount => throw _privateConstructorUsedError;
 
   /// Serializes this SangeetFullArtistObject to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -2229,7 +2230,8 @@ abstract class $SangeetFullArtistObjectCopyWith<$Res> {
       String externalUri,
       List<SangeetImageObject> images,
       List<String>? genres,
-      int? followers});
+      int? followers,
+      int? songCount});
 }
 
 /// @nodoc
@@ -2254,6 +2256,7 @@ class _$SangeetFullArtistObjectCopyWithImpl<$Res,
     Object? images = null,
     Object? genres = freezed,
     Object? followers = freezed,
+    Object? songCount = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -2280,6 +2283,10 @@ class _$SangeetFullArtistObjectCopyWithImpl<$Res,
           ? _value.followers
           : followers // ignore: cast_nullable_to_non_nullable
               as int?,
+      songCount: freezed == songCount
+          ? _value.songCount
+          : songCount // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -2299,7 +2306,8 @@ abstract class _$$SangeetFullArtistObjectImplCopyWith<$Res>
       String externalUri,
       List<SangeetImageObject> images,
       List<String>? genres,
-      int? followers});
+      int? followers,
+      int? songCount});
 }
 
 /// @nodoc
@@ -2323,6 +2331,7 @@ class __$$SangeetFullArtistObjectImplCopyWithImpl<$Res>
     Object? images = null,
     Object? genres = freezed,
     Object? followers = freezed,
+    Object? songCount = freezed,
   }) {
     return _then(_$SangeetFullArtistObjectImpl(
       id: null == id
@@ -2349,6 +2358,10 @@ class __$$SangeetFullArtistObjectImplCopyWithImpl<$Res>
           ? _value.followers
           : followers // ignore: cast_nullable_to_non_nullable
               as int?,
+      songCount: freezed == songCount
+          ? _value.songCount
+          : songCount // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -2362,7 +2375,8 @@ class _$SangeetFullArtistObjectImpl implements _SangeetFullArtistObject {
       required this.externalUri,
       final List<SangeetImageObject> images = const [],
       final List<String>? genres,
-      this.followers})
+      this.followers,
+      this.songCount})
       : _images = images,
         _genres = genres;
 
@@ -2396,10 +2410,12 @@ class _$SangeetFullArtistObjectImpl implements _SangeetFullArtistObject {
 
   @override
   final int? followers;
+  @override
+  final int? songCount;
 
   @override
   String toString() {
-    return 'SangeetFullArtistObject(id: $id, name: $name, externalUri: $externalUri, images: $images, genres: $genres, followers: $followers)';
+    return 'SangeetFullArtistObject(id: $id, name: $name, externalUri: $externalUri, images: $images, genres: $genres, followers: $followers, songCount: $songCount)';
   }
 
   @override
@@ -2414,7 +2430,9 @@ class _$SangeetFullArtistObjectImpl implements _SangeetFullArtistObject {
             const DeepCollectionEquality().equals(other._images, _images) &&
             const DeepCollectionEquality().equals(other._genres, _genres) &&
             (identical(other.followers, followers) ||
-                other.followers == followers));
+                other.followers == followers) &&
+            (identical(other.songCount, songCount) ||
+                other.songCount == songCount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2426,7 +2444,8 @@ class _$SangeetFullArtistObjectImpl implements _SangeetFullArtistObject {
       externalUri,
       const DeepCollectionEquality().hash(_images),
       const DeepCollectionEquality().hash(_genres),
-      followers);
+      followers,
+      songCount);
 
   /// Create a copy of SangeetFullArtistObject
   /// with the given fields replaced by the non-null parameter values.
@@ -2452,7 +2471,8 @@ abstract class _SangeetFullArtistObject implements SangeetFullArtistObject {
       required final String externalUri,
       final List<SangeetImageObject> images,
       final List<String>? genres,
-      final int? followers}) = _$SangeetFullArtistObjectImpl;
+      final int? followers,
+      final int? songCount}) = _$SangeetFullArtistObjectImpl;
 
   factory _SangeetFullArtistObject.fromJson(Map<String, dynamic> json) =
       _$SangeetFullArtistObjectImpl.fromJson;
@@ -2469,6 +2489,8 @@ abstract class _SangeetFullArtistObject implements SangeetFullArtistObject {
   List<String>? get genres;
   @override
   int? get followers;
+  @override
+  int? get songCount;
 
   /// Create a copy of SangeetFullArtistObject
   /// with the given fields replaced by the non-null parameter values.

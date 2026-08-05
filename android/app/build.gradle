@@ -40,12 +40,12 @@ android {
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -54,10 +54,7 @@ android {
 
     buildFeatures {
         compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "$composeVersion" // Correlates with org.jetbrains.kotlin.android plugin in settings.gradle
+        buildConfig true
     }
 
     defaultConfig {
@@ -71,6 +68,13 @@ android {
             abiFilters.clear()
             abiFilters.addAll(["armeabi-v7a", "arm64-v8a"])
         }
+
+        // Clerk publishable key for Application.onCreate() initialization.
+        // Publishable keys are public (meant for client apps) — safe to embed here.
+        // Flutter's Gradle plugin doesn't pass custom gradle.properties via project.findProperty,
+        // so we reference the property directly. Keep in sync with .env CLERK_PUBLISHABLE_KEY.
+        def clerkKey = project.hasProperty('CLERK_PUBLISHABLE_KEY') ? project.property('CLERK_PUBLISHABLE_KEY') : 'pk_test_cG9wdWxhci10aWNrLTgxLmNsZXJrLmFjY291bnRzLmRldiQ'
+        buildConfigField "String", "CLERK_PUBLISHABLE_KEY", "\"${clerkKey}\""
     }
 
     signingConfigs {
@@ -115,10 +119,15 @@ android {
         }
     }
 
-    packagingOptions {
-        resources.excludes += "DebugProbesKt.bin"
-        exclude '**/lib/x86/**'
-        exclude '**/lib/x86_64/**'
+    packaging {
+        resources {
+            excludes += "DebugProbesKt.bin"
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+        jniLibs {
+            excludes += "**/lib/x86/**"
+            excludes += "**/lib/x86_64/**"
+        }
     }
 }
 
@@ -133,6 +142,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     // other deps so just ignore
     implementation 'com.android.support:multidex:2.0.1'
+
+    // Clerk Android SDK (Native API)
+    implementation 'com.clerk:clerk-android-api:1.0.39'
 
     implementation "androidx.glance:glance-appwidget:$glanceVersion"
     implementation "androidx.glance:glance-appwidget-preview:$glanceVersion"

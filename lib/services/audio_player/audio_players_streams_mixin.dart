@@ -30,7 +30,7 @@ mixin SangeetAudioPlayersStreams on AudioPlayerInterface {
     // }
   }
 
-  Stream<void> get completedStream {
+  Stream<bool> get completedStream {
     // if (mkSupportedPlatform) {
     return _mkPlayer.stream.completed;
     // } else {

@@ -27,6 +27,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settings => 'Налаштування';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => 'Фільтрувати категорії або жанри...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get songs => 'Пісні';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsUk extends AppLocalizations {
   String get create_a_playlist => 'Створити плейлист';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => 'Назва плейлиста';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => 'Оновити плейлист';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get update => 'Оновити';
-
-  @override
-  String get playlist_name => 'Назва плейлиста';
 
   @override
   String get name_of_playlist => 'Назва плейлиста';
@@ -225,11 +241,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String get more_actions => 'Більше дій';
 
   @override
-  String download_count(Object count) {
-    return 'Завантажено ($count)';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return 'Додати ($count) до плейлиста';
   }
@@ -347,9 +358,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String get alternative_track_sources => 'Альтернативні джерела треків';
 
   @override
-  String get download_track => 'Завантажити трек';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks треків у черзі';
   }
@@ -366,9 +374,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get exit_mini_player => 'Вийти з міні-плеєра';
-
-  @override
-  String get download_location => 'Шлях завантаження';
 
   @override
   String get local_library => 'Місцева бібліотека';
@@ -610,16 +615,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String track_exists(Object track) {
     return 'Трек $track вже існує';
   }
-
-  @override
-  String get replace_downloaded_tracks => 'Замінити всі завантажені треки';
-
-  @override
-  String get skip_download_tracks =>
-      'Пропустити завантаження всіх завантажених треків';
-
-  @override
-  String get do_you_want_to_replace => 'Ви хочете замінити існуючий трек?';
 
   @override
   String get replace => 'Замінити';
@@ -875,25 +870,17 @@ class AppLocalizationsUk extends AppLocalizations {
   String get restore_defaults => 'Відновити налаштування за замовчуванням';
 
   @override
-  String get download_music_format => 'Формат завантаження музики';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => 'Формат потокової музики';
 
   @override
-  String get download_music_quality => 'Якість завантаженої музики';
-
-  @override
   String get streaming_music_quality => 'Якість потокової музики';
 
   @override
-  String get login_with_lastfm => 'Увійти з Last.fm';
-
-  @override
   String get connect => 'Підключити';
-
-  @override
-  String get disconnect_lastfm => 'Відключитися від Last.fm';
 
   @override
   String get disconnect => 'Відключити';
@@ -908,10 +895,39 @@ class AppLocalizationsUk extends AppLocalizations {
   String get login => 'Увійти';
 
   @override
-  String get login_with_your_lastfm => 'Увійти в свій обліковий запис Last.fm';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => 'Скробблінг на Last.fm';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => 'Перейти до альбому';
@@ -1156,6 +1172,29 @@ class AppLocalizationsUk extends AppLocalizations {
   String get email => 'Електронна пошта';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => 'Підписники';
 
   @override
@@ -1256,6 +1295,17 @@ class AppLocalizationsUk extends AppLocalizations {
   String get summary_were_on_repeat => 'Були на повторі';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return 'Загалом $money';
   }
@@ -1306,9 +1356,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get undo => 'Скасувати';
-
-  @override
-  String get download_all => 'Завантажити все';
 
   @override
   String get add_all_to_playlist => 'Додати все до плейлиста';
@@ -1555,12 +1602,6 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get configure_plugins =>
       'Налаштуйте власні плагіни метаданих і аудіоджерела';
-
-  @override
-  String get audio_scrobblers => 'Аудіо скробблери';
-
-  @override
-  String get scrobbling => 'Скроблінг';
 
   @override
   String get source => 'Джерело: ';

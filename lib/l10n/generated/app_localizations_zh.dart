@@ -27,6 +27,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '设置';
 
   @override
+  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+
+  @override
   String get genre_categories_filter => '筛选类别...';
 
   @override
@@ -43,6 +46,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get songs => '歌曲';
+
+  @override
+  String get newest_arrivals => 'Newest Arrivals';
+
+  @override
+  String get top_trending => 'Top Trending';
 
   @override
   String playing_track(Object track) {
@@ -88,6 +97,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get create_a_playlist => '创建一个歌单';
 
   @override
+  String get new_playlist => 'New playlist';
+
+  @override
+  String get playlist_name => '歌单名称';
+
+  @override
+  String get no_playlists_yet =>
+      'No playlists yet. Create one from the selected songs.';
+
+  @override
   String get update_playlist => '更新播放列表';
 
   @override
@@ -98,9 +117,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get update => '更新';
-
-  @override
-  String get playlist_name => '歌单名称';
 
   @override
   String get name_of_playlist => '歌单的名称';
@@ -225,11 +241,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get more_actions => '更多操作';
 
   @override
-  String download_count(Object count) {
-    return '下载 ($count) 首歌曲';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return '添加 ($count) 首歌曲到歌单中';
   }
@@ -345,9 +356,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get alternative_track_sources => '其它音源';
 
   @override
-  String get download_track => '下载歌曲';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks 首歌曲在播放队列中';
   }
@@ -363,9 +371,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get exit_mini_player => '退出小窗模式';
-
-  @override
-  String get download_location => '下载路径';
 
   @override
   String get local_library => '本地图书馆';
@@ -599,15 +604,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String track_exists(Object track) {
     return '歌曲 $track 已存在';
   }
-
-  @override
-  String get replace_downloaded_tracks => '替换已下载的歌曲';
-
-  @override
-  String get skip_download_tracks => '下载时跳过已下载的歌曲';
-
-  @override
-  String get do_you_want_to_replace => '你确定要替换已下载的歌曲吗？？';
 
   @override
   String get replace => '替换';
@@ -860,25 +856,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get restore_defaults => '恢复默认值';
 
   @override
-  String get download_music_format => '下载音乐格式';
+  String get restore_defaults_confirmation =>
+      'This will reset all your settings back to their default values. This action cannot be undone.';
 
   @override
   String get streaming_music_format => '流媒体音乐格式';
 
   @override
-  String get download_music_quality => '下载音乐质量';
-
-  @override
   String get streaming_music_quality => '流媒体音乐质量';
 
   @override
-  String get login_with_lastfm => '使用 Last.fm 登录';
-
-  @override
   String get connect => '连接';
-
-  @override
-  String get disconnect_lastfm => '断开 Last.fm 连接';
 
   @override
   String get disconnect => '断开连接';
@@ -893,10 +881,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get login => '登录';
 
   @override
-  String get login_with_your_lastfm => '使用您的 Last.fm 帐户登录';
+  String get sign_in => 'Sign in';
 
   @override
-  String get scrobble_to_lastfm => '在 Last.fm 上记录播放';
+  String get sign_up => 'Sign up';
+
+  @override
+  String get sign_out => 'Sign out';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get create_account => 'Create your account';
+
+  @override
+  String get already_have_account => 'Already have an account? Sign in';
+
+  @override
+  String get dont_have_account => 'Don\'t have an account? Sign up';
+
+  @override
+  String signed_in_as(Object userId) {
+    return 'Signed in as $userId';
+  }
+
+  @override
+  String get verification_code => 'Verification code';
+
+  @override
+  String get verification_code_hint => 'Enter the code sent to your email';
+
+  @override
+  String get verify_email_code => 'We sent a verification code to your email';
 
   @override
   String get go_to_album => '前往专辑';
@@ -1131,6 +1148,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get email => '电子邮件';
 
   @override
+  String get send_code => 'Send code';
+
+  @override
+  String get change_identifier => 'Use a different email';
+
+  @override
+  String get sign_in_with_otp => 'Sign in with a one-time code';
+
+  @override
+  String get enter_otp_sent => 'Enter the code we sent you';
+
+  @override
+  String get verify_email_reminder =>
+      'Please verify your email address to secure your account';
+
+  @override
+  String get verify_now => 'Verify now';
+
+  @override
+  String get enter_email_to_verify =>
+      'Enter your email address to receive a verification code';
+
+  @override
   String get profile_followers => '关注者';
 
   @override
@@ -1231,6 +1271,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get summary_were_on_repeat => '已重复播放';
 
   @override
+  String get summary_listening_share => 'Listening share';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return 'Distribution of the top $tracks_length tracks you played the most';
+  }
+
+  @override
+  String get summary_plays => 'plays';
+
+  @override
   String total_money(Object money) {
     return '总计 $money';
   }
@@ -1281,9 +1332,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get undo => '撤销';
-
-  @override
-  String get download_all => '下载全部';
 
   @override
   String get add_all_to_playlist => '将全部添加到播放列表';
@@ -1516,12 +1564,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get configure_plugins => '配置您自己的元数据提供者和音频源插件';
 
   @override
-  String get audio_scrobblers => '音频 Scrobblers';
-
-  @override
-  String get scrobbling => 'Scrobbling';
-
-  @override
   String get source => '来源：';
 
   @override
@@ -1616,6 +1658,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get create_a_playlist => '建立一個歌單';
 
   @override
+  String get playlist_name => '歌單名稱';
+
+  @override
   String get update_playlist => '更新播放清單';
 
   @override
@@ -1626,9 +1671,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get update => '更新';
-
-  @override
-  String get playlist_name => '歌單名稱';
 
   @override
   String get name_of_playlist => '歌單的名稱';
@@ -1753,11 +1795,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get more_actions => '更多動作';
 
   @override
-  String download_count(Object count) {
-    return '下載 ($count) 首歌曲';
-  }
-
-  @override
   String add_count_to_playlist(Object count) {
     return '將 ($count) 首歌曲新增到歌單中';
   }
@@ -1873,9 +1910,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get alternative_track_sources => '其它音源';
 
   @override
-  String get download_track => '下載歌曲';
-
-  @override
   String tracks_in_queue(Object tracks) {
     return '$tracks 首歌曲在播放清單中';
   }
@@ -1891,9 +1925,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get exit_mini_player => '退出小窗模式';
-
-  @override
-  String get download_location => '下載路徑';
 
   @override
   String get local_library => '本地媒體庫';
@@ -2127,15 +2158,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String track_exists(Object track) {
     return '曲目 $track 已存在';
   }
-
-  @override
-  String get replace_downloaded_tracks => '替換已下載的歌曲';
-
-  @override
-  String get skip_download_tracks => '下載時跳過已下載的歌曲';
-
-  @override
-  String get do_you_want_to_replace => '你確定要取代已下載的歌曲嗎？？';
 
   @override
   String get replace => '取代';
@@ -2388,25 +2410,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get restore_defaults => '恢復預設值';
 
   @override
-  String get download_music_format => '下載音樂格式';
-
-  @override
   String get streaming_music_format => '串流音樂格式';
-
-  @override
-  String get download_music_quality => '下載音樂品質';
 
   @override
   String get streaming_music_quality => '串流音樂品質';
 
   @override
-  String get login_with_lastfm => '使用 Last.fm 登入';
-
-  @override
   String get connect => '連線';
-
-  @override
-  String get disconnect_lastfm => '切斷 Last.fm 連線';
 
   @override
   String get disconnect => '斷開連線';
@@ -2419,12 +2429,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get login => '登入';
-
-  @override
-  String get login_with_your_lastfm => '使用您的 Last.fm 帳號登入';
-
-  @override
-  String get scrobble_to_lastfm => '在 Last.fm 上記錄你的播放';
 
   @override
   String get go_to_album => '前往專輯';
@@ -2808,9 +2812,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get undo => '取消';
 
   @override
-  String get download_all => '下載全部';
-
-  @override
   String get add_all_to_playlist => '全部加入到播放清單';
 
   @override
@@ -3039,12 +3040,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get configure_plugins => '配置您自己的中繼資料提供者和音訊來源外掛程式';
-
-  @override
-  String get audio_scrobblers => '音訊 Scrobblers';
-
-  @override
-  String get scrobbling => 'Scrobbling';
 
   @override
   String get source => '來源：';

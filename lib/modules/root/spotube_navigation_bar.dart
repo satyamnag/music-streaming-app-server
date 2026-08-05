@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart' show Badge;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -11,7 +10,6 @@ import 'package:sangeet/collections/side_bar_tiles.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/database/database.dart';
-import 'package:sangeet/provider/download_manager_provider.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
 final navigationPanelHeight = StateProvider<double>((ref) => 50);
@@ -25,12 +23,6 @@ class SangeetNavigationBar extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final mediaQuery = MediaQuery.of(context);
 
-    final downloadCount = ref
-        .watch(downloadManagerProvider)
-        .where((e) =>
-            e.status == DownloadStatus.downloading ||
-            e.status == DownloadStatus.queued)
-        .length;
     final layoutMode =
         ref.watch(userPreferencesProvider.select((s) => s.layoutMode));
 
@@ -72,11 +64,7 @@ class SangeetNavigationBar extends HookConsumerWidget {
                     style: navbarTileList[selectedIndex] == tile
                         ? const ButtonStyle.fixed(density: ButtonDensity.icon)
                         : const ButtonStyle.muted(density: ButtonDensity.icon),
-                    child: Badge(
-                      isLabelVisible: tile.id == "library" && downloadCount > 0,
-                      label: Text(downloadCount.toString()),
-                      child: Icon(tile.icon),
-                    ),
+                    child: Icon(tile.icon),
                     onPressed: () {
                       context.navigateTo(tile.route);
                     },

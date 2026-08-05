@@ -41,11 +41,18 @@ class AboutSangeetPage extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 Center(
-                  child: const Text(
-                    "Soulful Bhakti is a devotional music streaming platform",
-                  )
-                      .semiBold()
-                      .large(),
+                  child: Text(
+                    "Welcome to Soulful Bhakti - a new era of devotional music.\n\n"
+                    "We blend the serenity of traditional ragas with modern "
+                    "instrumentation to create soulful devotional songs that "
+                    "bring peace, devotion and spiritual comfort.\n\n"
+                    "Created for listeners of all ages, from children to elders, "
+                    "our music is ideal for morning prayers, meditation, quiet "
+                    "reflection or as a peaceful companion throughout the day.\n\n"
+                    "Experience gentle, meaningful visuals that reflect the "
+                    "divine presence in everyday life.",
+                    textAlign: TextAlign.center,
+                  ).semiBold().large(),
                 ),
               ],
             ),

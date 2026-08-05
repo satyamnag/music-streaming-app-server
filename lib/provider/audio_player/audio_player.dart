@@ -11,6 +11,7 @@ import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/discord_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/provider/server/routes/playback.dart' show clearSourcedTrackCache;
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -355,6 +356,10 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   }) async {
     _log('load() called: ${tracks.length} tracks, port=${SangeetMedia.serverPort}');
     _assertAllowedTracks(tracks);
+
+    // Clear cached sourced tracks from previous playlist so stale URLs
+    // (which expire after 1 hour) are not reused for a new playlist.
+    clearSourcedTrackCache();
 
     _log('load(): ensuring port ready...');
     await SangeetMedia.ensurePortReady();

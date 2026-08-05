@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginCore {
   final Hetu hetu;
@@ -22,7 +23,7 @@ class MetadataPluginCore {
     return result == null
         ? null
         : PluginUpdateAvailable.fromJson(
-            (result as Map).cast<String, dynamic>(),
+            hetuToMap(result),
           );
   }
 

@@ -211,6 +211,7 @@ _$SangeetFullArtistObjectImpl _$$SangeetFullArtistObjectImplFromJson(
       genres:
           (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
       followers: (json['followers'] as num?)?.toInt(),
+      songCount: (json['songCount'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$SangeetFullArtistObjectImplToJson(
@@ -222,6 +223,7 @@ Map<String, dynamic> _$$SangeetFullArtistObjectImplToJson(
       'images': instance.images.map((e) => e.toJson()).toList(),
       'genres': instance.genres,
       'followers': instance.followers,
+      'songCount': instance.songCount,
     };
 
 _$SangeetSimpleArtistObjectImpl _$$SangeetSimpleArtistObjectImplFromJson(

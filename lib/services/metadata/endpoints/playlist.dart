@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginPlaylistEndpoint {
   final Hetu hetu;
@@ -11,11 +12,13 @@ class MetadataPluginPlaylistEndpoint {
           as HTInstance;
 
   Future<SangeetFullPlaylistObject> getPlaylist(String id) async {
-    final raw = await hetuMetadataPlaylist
-        .invoke("getPlaylist", positionalArgs: [id]) as Map;
+    final raw = await hetuMetadataPlaylist.invoke(
+      "getPlaylist",
+      positionalArgs: [id],
+    );
 
     return SangeetFullPlaylistObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 
@@ -31,10 +34,10 @@ class MetadataPluginPlaylistEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
@@ -56,12 +59,12 @@ class MetadataPluginPlaylistEndpoint {
         "public": public,
         "collaborative": collaborative,
       }..removeWhere((key, value) => value == null),
-    ) as Map?;
+    );
 
     if (raw == null) return null;
 
     return SangeetFullPlaylistObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 

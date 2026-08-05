@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart' show Badge;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -7,10 +6,8 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/constrains.dart';
-import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/connect/connect_device.dart';
-import 'package:sangeet/provider/download_manager_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 
@@ -22,14 +19,7 @@ class SidebarFooter extends HookConsumerWidget implements NavigationBarItem {
   @override
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
-    final router = AutoRouter.of(context, watch: true);
     final mediaQuery = MediaQuery.of(context);
-    final downloadCount = ref
-        .watch(downloadManagerProvider)
-        .where((e) =>
-            e.status == DownloadStatus.downloading ||
-            e.status == DownloadStatus.queued)
-        .length;
     final userSnapshot = ref.watch(metadataPluginUserProvider);
     final data = userSnapshot.asData?.value;
 
@@ -45,17 +35,6 @@ class SidebarFooter extends HookConsumerWidget implements NavigationBarItem {
         mainAxisSize: MainAxisSize.min,
         spacing: 10,
         children: [
-          Badge(
-            isLabelVisible: downloadCount > 0,
-            label: Text(downloadCount.toString()),
-            child: IconButton(
-              variance: router.topRoute.name == UserDownloadsRoute.name
-                  ? ButtonVariance.secondary
-                  : ButtonVariance.ghost,
-              icon: const Icon(SangeetIcons.download),
-              onPressed: () => context.navigateTo(const UserDownloadsRoute()),
-            ),
-          ),
           const ConnectDeviceButton.sidebar(),
           IconButton(
             variance: ButtonVariance.ghost,
@@ -73,24 +52,6 @@ class SidebarFooter extends HookConsumerWidget implements NavigationBarItem {
         mainAxisSize: MainAxisSize.min,
         spacing: 10,
         children: [
-          SizedBox(
-            width: double.infinity,
-            child: Button(
-              style: router.topRoute.name == UserDownloadsRoute.name
-                  ? ButtonVariance.secondary
-                  : ButtonVariance.outline,
-              onPressed: () {
-                context.navigateTo(const UserDownloadsRoute());
-              },
-              leading: const Icon(SangeetIcons.download),
-              trailing: downloadCount > 0
-                  ? PrimaryBadge(
-                      child: Text(downloadCount.toString()),
-                    )
-                  : null,
-              child: Text(context.l10n.downloads),
-            ),
-          ),
           const ConnectDeviceButton.sidebar(),
           Row(
             mainAxisSize: MainAxisSize.min,

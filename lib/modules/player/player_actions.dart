@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -15,9 +14,7 @@ import 'package:sangeet/components/adaptive/adaptive_pop_sheet_list.dart';
 import 'package:sangeet/components/heart_button/heart_button.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
-import 'package:sangeet/provider/download_manager_provider.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/sleep_timer_provider.dart';
 
@@ -39,36 +36,10 @@ class PlayerActions extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final playlist = ref.watch(audioPlayerProvider);
     final isLocalTrack = playlist.activeTrack is SangeetLocalTrackObject;
-    ref.watch(downloadManagerProvider);
-    final downloader = ref.watch(downloadManagerProvider.notifier);
-    final isInQueue = useMemoized(() {
-      if (playlist.activeTrack is! SangeetFullTrackObject) return false;
-      final downloadTask =
-          downloader.getTaskByTrackId(playlist.activeTrack!.id);
-      return const [
-        DownloadStatus.queued,
-        DownloadStatus.downloading,
-      ].contains(downloadTask?.status);
-    }, [
-      playlist.activeTrack,
-      downloader,
-    ]);
 
-    final localTracks = ref.watch(localTracksProvider).value;
     final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
     final sleepTimer = ref.watch(sleepTimerProvider);
     final sleepTimerNotifier = ref.watch(sleepTimerProvider.notifier);
-
-    final isDownloaded = useMemoized(() {
-      return localTracks?.values.expand((e) => e).any(
-                (element) =>
-                    element.name == playlist.activeTrack?.name &&
-                    element.album.name == playlist.activeTrack?.album.name &&
-                    element.artists.asString() ==
-                        playlist.activeTrack?.artists.asString(),
-              ) ==
-          true;
-    }, [localTracks, playlist.activeTrack]);
 
     final sleepTimerEntries = useMemoized(
       () => {
@@ -154,30 +125,6 @@ class PlayerActions extends HookConsumerWidget {
               },
             ),
           ),
-        if (!kIsWeb && !isLocalTrack)
-          if (isInQueue)
-            const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                size: 2,
-              ),
-            )
-          else
-            Tooltip(
-              tooltip:
-                  TooltipContainer(child: Text(context.l10n.download_track))
-                      .call,
-              child: IconButton.ghost(
-                icon: Icon(
-                  isDownloaded ? SangeetIcons.done : SangeetIcons.download,
-                ),
-                onPressed: playlist.activeTrack != null
-                    ? () => downloader.addToQueue(
-                        playlist.activeTrack! as SangeetFullTrackObject)
-                    : null,
-              ),
-            ),
         if (playlist.activeTrack != null &&
             !isLocalTrack &&
             authenticated.asData?.value == true)

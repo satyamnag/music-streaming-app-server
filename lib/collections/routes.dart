@@ -44,23 +44,7 @@ class AppRouter extends RootStackRouter {
                   path: "artists",
                   page: UserArtistsRoute.page,
                 ),
-                AutoRoute(
-                  path: "albums",
-                  page: UserAlbumsRoute.page,
-                ),
-                AutoRoute(
-                  path: "local",
-                  page: UserLocalLibraryRoute.page,
-                ),
-                AutoRoute(
-                  path: "downloads",
-                  page: UserDownloadsRoute.page,
-                ),
               ],
-            ),
-            AutoRoute(
-              path: "local/folder",
-              page: LocalLibraryRoute.page,
             ),
             AutoRoute(
               path: "lyrics",
@@ -86,14 +70,6 @@ class AppRouter extends RootStackRouter {
             AutoRoute(
               path: "settings/about",
               page: AboutSangeetRoute.page,
-            ),
-            AutoRoute(
-              path: "settings/scrobbling",
-              page: SettingsScrobblingRoute.page,
-            ),
-            AutoRoute(
-              path: "album/:id",
-              page: AlbumRoute.page,
             ),
             AutoRoute(
               path: "artist/:id",
@@ -157,10 +133,6 @@ class AppRouter extends RootStackRouter {
               page: StatsArtistsRoute.page,
             ),
             AutoRoute(
-              path: "stats/albums",
-              page: StatsAlbumsRoute.page,
-            ),
-            AutoRoute(
               path: "stats/playlists",
               page: StatsPlaylistsRoute.page,
             ),
@@ -190,10 +162,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           path: "/mini-player",
           page: MiniLyricsRoute.page,
-        ),
-        AutoRoute(
-          path: "/lastfm-login",
-          page: LastFMLoginRoute.page,
         ),
       ];
 }

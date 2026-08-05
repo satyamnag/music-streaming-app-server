@@ -13,42 +13,57 @@ class SectionCardWithHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTileTheme(
-      data: ListTileThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: context.theme.borderRadiusLg,
-          side: BorderSide(
-            color: context.theme.colorScheme.border,
-            width: .5,
-          ),
-        ),
-        textColor: context.theme.colorScheme.foreground,
-        iconColor: context.theme.colorScheme.foreground,
-        selectedColor: context.theme.colorScheme.accent,
-        subtitleTextStyle: context.theme.typography.xSmall,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              heading,
-              style: context.theme.typography.large.copyWith(
-                color: context.theme.colorScheme.foreground,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 700),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Center(
+                child: Text(
+                  heading,
+                  textAlign: TextAlign.center,
+                  style: context.theme.typography.large.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.theme.colorScheme.foreground,
+                  ),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children,
-            ).gap(8.0),
-          ),
-        ],
+            ListTileTheme(
+              data: ListTileThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: context.theme.borderRadiusLg,
+                  side: BorderSide(
+                    color: context.theme.colorScheme.border,
+                    width: .5,
+                  ),
+                ),
+                textColor: context.theme.colorScheme.foreground,
+                iconColor: context.theme.colorScheme.foreground,
+                selectedColor: context.theme.colorScheme.accent,
+                subtitleTextStyle: context.theme.typography.xSmall,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: context.theme.borderRadiusLg,
+                  color: context.theme.colorScheme.muted.withValues(alpha: 0.35),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: children,
+                  ).gap(8.0),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

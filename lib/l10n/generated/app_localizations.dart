@@ -189,6 +189,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @settings_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Soulful Bhakti to your liking'**
+  String get settings_subtitle;
+
   /// No description provided for @genre_categories_filter.
   ///
   /// In en, this message translates to:
@@ -224,6 +230,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Songs'**
   String get songs;
+
+  /// No description provided for @newest_arrivals.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest Arrivals'**
+  String get newest_arrivals;
+
+  /// No description provided for @top_trending.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Trending'**
+  String get top_trending;
 
   /// No description provided for @playing_track.
   ///
@@ -303,6 +321,24 @@ abstract class AppLocalizations {
   /// **'Create a playlist'**
   String get create_a_playlist;
 
+  /// No description provided for @new_playlist.
+  ///
+  /// In en, this message translates to:
+  /// **'New playlist'**
+  String get new_playlist;
+
+  /// No description provided for @playlist_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist Name'**
+  String get playlist_name;
+
+  /// No description provided for @no_playlists_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet. Create one from the selected songs.'**
+  String get no_playlists_yet;
+
   /// No description provided for @update_playlist.
   ///
   /// In en, this message translates to:
@@ -326,12 +362,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update'**
   String get update;
-
-  /// No description provided for @playlist_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Playlist Name'**
-  String get playlist_name;
 
   /// No description provided for @name_of_playlist.
   ///
@@ -561,12 +591,6 @@ abstract class AppLocalizations {
   /// **'More actions'**
   String get more_actions;
 
-  /// No description provided for @download_count.
-  ///
-  /// In en, this message translates to:
-  /// **'Download ({count})'**
-  String download_count(Object count);
-
   /// No description provided for @add_count_to_playlist.
   ///
   /// In en, this message translates to:
@@ -765,12 +789,6 @@ abstract class AppLocalizations {
   /// **'Alternative track sources'**
   String get alternative_track_sources;
 
-  /// No description provided for @download_track.
-  ///
-  /// In en, this message translates to:
-  /// **'Download track'**
-  String get download_track;
-
   /// No description provided for @tracks_in_queue.
   ///
   /// In en, this message translates to:
@@ -800,12 +818,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exit Mini player'**
   String get exit_mini_player;
-
-  /// No description provided for @download_location.
-  ///
-  /// In en, this message translates to:
-  /// **'Download location'**
-  String get download_location;
 
   /// No description provided for @local_library.
   ///
@@ -1256,24 +1268,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Track {track} already exists'**
   String track_exists(Object track);
-
-  /// No description provided for @replace_downloaded_tracks.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace all downloaded tracks'**
-  String get replace_downloaded_tracks;
-
-  /// No description provided for @skip_download_tracks.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip downloading all downloaded tracks'**
-  String get skip_download_tracks;
-
-  /// No description provided for @do_you_want_to_replace.
-  ///
-  /// In en, this message translates to:
-  /// **'Do you want to replace the existing track??'**
-  String get do_you_want_to_replace;
 
   /// No description provided for @replace.
   ///
@@ -1743,11 +1737,11 @@ abstract class AppLocalizations {
   /// **'Restore defaults'**
   String get restore_defaults;
 
-  /// No description provided for @download_music_format.
+  /// No description provided for @restore_defaults_confirmation.
   ///
   /// In en, this message translates to:
-  /// **'Download music format'**
-  String get download_music_format;
+  /// **'This will reset all your settings back to their default values. This action cannot be undone.'**
+  String get restore_defaults_confirmation;
 
   /// No description provided for @streaming_music_format.
   ///
@@ -1755,35 +1749,17 @@ abstract class AppLocalizations {
   /// **'Streaming music format'**
   String get streaming_music_format;
 
-  /// No description provided for @download_music_quality.
-  ///
-  /// In en, this message translates to:
-  /// **'Download music quality'**
-  String get download_music_quality;
-
   /// No description provided for @streaming_music_quality.
   ///
   /// In en, this message translates to:
   /// **'Streaming music quality'**
   String get streaming_music_quality;
 
-  /// No description provided for @login_with_lastfm.
-  ///
-  /// In en, this message translates to:
-  /// **'Login with Last.fm'**
-  String get login_with_lastfm;
-
   /// No description provided for @connect.
   ///
   /// In en, this message translates to:
   /// **'Connect'**
   String get connect;
-
-  /// No description provided for @disconnect_lastfm.
-  ///
-  /// In en, this message translates to:
-  /// **'Disconnect Last.fm'**
-  String get disconnect_lastfm;
 
   /// No description provided for @disconnect.
   ///
@@ -1809,17 +1785,71 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get login;
 
-  /// No description provided for @login_with_your_lastfm.
+  /// No description provided for @sign_in.
   ///
   /// In en, this message translates to:
-  /// **'Login with your Last.fm account'**
-  String get login_with_your_lastfm;
+  /// **'Sign in'**
+  String get sign_in;
 
-  /// No description provided for @scrobble_to_lastfm.
+  /// No description provided for @sign_up.
   ///
   /// In en, this message translates to:
-  /// **'Scrobble to Last.fm'**
-  String get scrobble_to_lastfm;
+  /// **'Sign up'**
+  String get sign_up;
+
+  /// No description provided for @sign_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get sign_out;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @create_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get create_account;
+
+  /// No description provided for @already_have_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get already_have_account;
+
+  /// No description provided for @dont_have_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? Sign up'**
+  String get dont_have_account;
+
+  /// No description provided for @signed_in_as.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {userId}'**
+  String signed_in_as(Object userId);
+
+  /// No description provided for @verification_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get verification_code;
+
+  /// No description provided for @verification_code_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code sent to your email'**
+  String get verification_code_hint;
+
+  /// No description provided for @verify_email_code.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a verification code to your email'**
+  String get verify_email_code;
 
   /// No description provided for @go_to_album.
   ///
@@ -2253,6 +2283,48 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get email;
 
+  /// No description provided for @send_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get send_code;
+
+  /// No description provided for @change_identifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get change_identifier;
+
+  /// No description provided for @sign_in_with_otp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with a one-time code'**
+  String get sign_in_with_otp;
+
+  /// No description provided for @enter_otp_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code we sent you'**
+  String get enter_otp_sent;
+
+  /// No description provided for @verify_email_reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Please verify your email address to secure your account'**
+  String get verify_email_reminder;
+
+  /// No description provided for @verify_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify now'**
+  String get verify_now;
+
+  /// No description provided for @enter_email_to_verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address to receive a verification code'**
+  String get enter_email_to_verify;
+
   /// No description provided for @profile_followers.
   ///
   /// In en, this message translates to:
@@ -2433,6 +2505,24 @@ abstract class AppLocalizations {
   /// **'Were on repeat'**
   String get summary_were_on_repeat;
 
+  /// No description provided for @summary_listening_share.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening share'**
+  String get summary_listening_share;
+
+  /// No description provided for @summary_listening_share_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution of the top {tracks_length} tracks you played the most'**
+  String summary_listening_share_description(Object tracks_length);
+
+  /// No description provided for @summary_plays.
+  ///
+  /// In en, this message translates to:
+  /// **'plays'**
+  String get summary_plays;
+
   /// No description provided for @total_money.
   ///
   /// In en, this message translates to:
@@ -2522,12 +2612,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Undo'**
   String get undo;
-
-  /// No description provided for @download_all.
-  ///
-  /// In en, this message translates to:
-  /// **'Download all'**
-  String get download_all;
 
   /// No description provided for @add_all_to_playlist.
   ///
@@ -2954,18 +3038,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure your own metadata provider and audio source plugins'**
   String get configure_plugins;
-
-  /// No description provided for @audio_scrobblers.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio Scrobblers'**
-  String get audio_scrobblers;
-
-  /// No description provided for @scrobbling.
-  ///
-  /// In en, this message translates to:
-  /// **'Scrobbling'**
-  String get scrobbling;
 
   /// No description provided for @source.
   ///

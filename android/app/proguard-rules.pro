@@ -30,6 +30,9 @@
 -dontwarn com.google.re2j.**
 -dontwarn org.mozilla.javascript.tools.**
 
+## Rules for Clerk Android SDK (Apache Tika dependency)
+-dontwarn javax.xml.stream.XMLStreamException
+
 -dontwarn javax.script.AbstractScriptEngine
 -dontwarn javax.script.Bindings
 -dontwarn javax.script.Compilable

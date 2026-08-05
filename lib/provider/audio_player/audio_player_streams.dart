@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
@@ -12,10 +14,10 @@ import 'package:sangeet/provider/metadata_plugin/core/scrobble.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/provider/skip_segments/skip_segments.dart';
-import 'package:sangeet/provider/scrobbler/scrobbler.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_services/audio_services.dart';
+import 'package:sangeet/services/dio/dio.dart';
 import 'package:sangeet/services/logger/logger.dart';
 
 class AudioPlayerStreamListeners {
@@ -32,6 +34,7 @@ class AudioPlayerStreamListeners {
       subscribeToScrobbleChanged(),
       subscribeToPosition(),
       subscribeToPlayerError(),
+      subscribeToCompleted(),
     ];
 
     ref.onDispose(() {
@@ -41,7 +44,6 @@ class AudioPlayerStreamListeners {
     });
   }
 
-  ScrobblerNotifier get scrobbler => ref.read(scrobblerProvider.notifier);
   UserPreferences get preferences => ref.read(userPreferencesProvider);
   DiscordNotifier get discord => ref.read(discordProvider.notifier);
   AudioPlayerState get audioPlayerState => ref.read(audioPlayerProvider);
@@ -91,9 +93,8 @@ class AudioPlayerStreamListeners {
             ? (audioPlayerState.activeTrack as SangeetLocalTrackObject).path
             : audioPlayerState.activeTrack?.id;
 
-        /// According to Listenbrainz and Last.fm, a scrobble should be sent
-        /// after 4 minutes of listening or 50% of the track duration,
-        /// whichever is less.
+        /// A scrobble should be sent after 4 minutes of listening or 50% of
+        /// the track duration, whichever is less.
         final minimumListenTime = min(audioPlayer.duration.inSeconds ~/ 2, 240);
 
         if (audioPlayerState.activeTrack == null ||
@@ -104,12 +105,10 @@ class AudioPlayerStreamListeners {
           return;
         }
 
-        scrobbler.scrobble(audioPlayerState.activeTrack!);
         ref
             .read(metadataPluginScrobbleProvider.notifier)
             .scrobble(audioPlayerState.activeTrack!);
         lastScrobbled = uid;
-
         /// The [Track] from Playlist.getTracks doesn't contain artist images
         /// so we need to fetch them from the API
         var activeTrack = audioPlayerState.activeTrack!;
@@ -127,6 +126,15 @@ class AudioPlayerStreamListeners {
         }
 
         await history.addTrack(activeTrack);
+
+        // Record the play globally so "Top Trending" reflects listening across
+        // all users. Fire-and-forget: analytics must never block or fail
+        // playback.
+        if (activeTrack is SangeetFullTrackObject) {
+          unawaited(
+            _recordGlobalPlay(activeTrack.id),
+          );
+        }
       } catch (e, stack) {
         AppLogger.reportError(e, stack);
       }
@@ -186,6 +194,82 @@ class AudioPlayerStreamListeners {
 
   StreamSubscription subscribeToPlayerError() {
     return audioPlayer.errorStream.listen((event) {});
+  }
+
+  /// Advances to the next track **only** when the current song finishes
+  /// successfully (a genuine natural completion — the song played all the way
+  /// through to its end).
+  ///
+  /// Guarantees:
+  ///  - mpv `keep-open=always` means the player NEVER advances on its own,
+  ///    either at EOF or on an error. This handler is the ONLY thing that moves
+  ///    to the next track, and it reacts exclusively to a `completed=true`
+  ///    event, which mpv only fires after the media reaches its true end.
+  ///  - Mid-track it can never skip: errors pause + retry the same track, and
+  ///    no other code path changes the index.
+  ///  - User-initiated skips (next / previous / selecting another song) go
+  ///    directly through the player API and always win.
+  ///
+  /// We use [SangeetAudioPlayer.jumpTo] (an explicit playlist-pos write) rather
+  /// than [SangeetAudioPlayer.skipToNext]: media_kit's `next()` first calls
+  /// `play()`, and when `state.completed` is true (right after EOF) `play()`
+  /// resets the playlist position to 0 — which would corrupt the target index.
+  /// `jump()` always ends with the requested index, so it is reliable after a
+  /// natural completion.
+  StreamSubscription subscribeToCompleted() {
+    // The stream emits `true` on EOF and `false` whenever playback is reset
+    // (open/seek/stop) — only a `true` event means the song finished naturally.
+    return audioPlayer.completedStream.where((completed) => completed).listen(
+          (_) async {
+            try {
+              final state = audioPlayerState;
+              if (state.tracks.isEmpty || state.currentIndex < 0) return;
+              final currentIndex = state.currentIndex;
+
+              int? targetIndex;
+              switch (audioPlayer.loopMode) {
+                case PlaylistMode.loop:
+                  // Repeat-all: wrap to the first track after the last one.
+                  targetIndex = currentIndex >= state.tracks.length - 1
+                      ? 0
+                      : currentIndex + 1;
+                case PlaylistMode.single:
+                  // Repeat-one: replay the same track.
+                  targetIndex = currentIndex;
+                case PlaylistMode.none:
+                  // Normal queue: advance unless we are on the last track.
+                  if (currentIndex < state.tracks.length - 1) {
+                    targetIndex = currentIndex + 1;
+                  }
+              }
+
+              if (targetIndex == null || targetIndex == currentIndex) {
+                return;
+              }
+              await audioPlayer.jumpTo(targetIndex);
+            } catch (e, stack) {
+              AppLogger.reportError(e, stack);
+            }
+          },
+        );
+  }
+
+  /// POSTs a play to the local server which records it in the global
+  /// `song_plays` table (via the SECURITY DEFINER `record_play` RPC). Failures
+  /// are swallowed so analytics never interrupts playback.
+  Future<void> _recordGlobalPlay(String trackId) async {
+    try {
+      await SangeetMedia.ensurePortReady();
+      await globalDio.post(
+        'http://127.0.0.1:${SangeetMedia.serverPort}/supabase/plays',
+        data: {'track_id': trackId},
+        options: Options(
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+    } catch (_) {
+      // Analytics must never affect playback.
+    }
   }
 }
 

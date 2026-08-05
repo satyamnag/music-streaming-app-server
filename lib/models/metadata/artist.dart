@@ -9,6 +9,7 @@ class SangeetFullArtistObject with _$SangeetFullArtistObject {
     @Default([]) List<SangeetImageObject> images,
     List<String>? genres,
     int? followers,
+    int? songCount,
   }) = _SangeetFullArtistObject;
 
   factory SangeetFullArtistObject.fromJson(Map<String, dynamic> json) =>

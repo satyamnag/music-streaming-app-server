@@ -1,6 +1,7 @@
 import 'package:hetu_script/hetu_script.dart';
 import 'package:hetu_script/values.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/metadata/endpoints/hetu_converter.dart';
 
 class MetadataPluginUserEndpoint {
   final Hetu hetu;
@@ -11,10 +12,10 @@ class MetadataPluginUserEndpoint {
           as HTInstance;
 
   Future<SangeetUserObject> me() async {
-    final raw = await hetuMetadataUser.invoke("me") as Map;
+    final raw = await hetuMetadataUser.invoke("me");
 
     return SangeetUserObject.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
     );
   }
 
@@ -28,10 +29,10 @@ class MetadataPluginUserEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullTrackObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetFullTrackObject.fromJson(json.cast<String, dynamic>()),
     );
@@ -48,11 +49,11 @@ class MetadataPluginUserEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<
         SangeetSimplePlaylistObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetSimplePlaylistObject.fromJson(json.cast<String, dynamic>()),
     );
@@ -69,10 +70,10 @@ class MetadataPluginUserEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetSimpleAlbumObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetSimpleAlbumObject.fromJson(json.cast<String, dynamic>()),
     );
@@ -89,10 +90,10 @@ class MetadataPluginUserEndpoint {
         "offset": offset,
         "limit": limit,
       }..removeWhere((key, value) => value == null),
-    ) as Map;
+    );
 
     return SangeetPaginationResponseObject<SangeetFullArtistObject>.fromJson(
-      raw.cast<String, dynamic>(),
+      hetuToMap(raw),
       (Map json) =>
           SangeetFullArtistObject.fromJson(json.cast<String, dynamic>()),
     );

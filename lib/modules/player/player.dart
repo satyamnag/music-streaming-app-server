@@ -21,7 +21,6 @@ import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/metadata_plugin/audio_source/quality_label.dart';
 import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/volume_provider.dart';
 
@@ -43,7 +42,6 @@ class PlayerView extends HookConsumerWidget {
     final currentActiveTrackSource = sourcedCurrentTrack.asData?.value?.source;
     final isLocalTrack = currentActiveTrack is SangeetLocalTrackObject;
     final mediaQuery = MediaQuery.sizeOf(context);
-    final qualityLabel = ref.watch(audioSourceQualityLabelProvider);
 
     final shouldHide = useState(true);
 
@@ -251,19 +249,6 @@ class PlayerView extends HookConsumerWidget {
                     }),
                   ),
                   const Gap(25),
-                  OutlineBadge(
-                    style: const ButtonStyle.outline(
-                      size: ButtonSize.normal,
-                      density: ButtonDensity.dense,
-                      shape: ButtonShape.rectangle,
-                    ).copyWith(
-                      textStyle: (context, states, value) {
-                        return value.copyWith(fontWeight: FontWeight.w500);
-                      },
-                    ),
-                    leading: const Icon(SangeetIcons.lightningOutlined),
-                    child: Text(qualityLabel),
-                  )
                 ],
               ),
             ),

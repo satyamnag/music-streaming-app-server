@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
@@ -39,7 +41,16 @@ class SearchTracksSection extends HookConsumerWidget {
             ),
           ),
         if (search.isLoading)
-          const CircularProgressIndicator()
+          Skeletonizer(
+            enabled: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: TrackTile(
+                track: FakeData.track,
+                playlist: playlist,
+              ),
+            ),
+          )
         else
           ...tracks.mapIndexed((i, track) {
             return TrackTile(

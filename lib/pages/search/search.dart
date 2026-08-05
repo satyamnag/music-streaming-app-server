@@ -1,4 +1,5 @@
-import 'package:collection/collection.dart';
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -14,7 +15,6 @@ import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/string.dart';
 import 'package:sangeet/hooks/controllers/use_shadcn_text_editing_controller.dart';
-import 'package:sangeet/pages/search/tabs/albums.dart';
 import 'package:sangeet/pages/search/tabs/all.dart';
 import 'package:sangeet/pages/search/tabs/artists.dart';
 import 'package:sangeet/pages/search/tabs/playlists.dart';
@@ -40,17 +40,15 @@ class SearchPage extends HookConsumerWidget {
     final focusNode = useFocusNode();
 
     final searchTerm = ref.watch(searchTermStateProvider);
+    // The Supabase plugin is bundled and always available; we still watch its
+    // chips provider so a plugin-load failure surfaces as an error state.
     final searchChipSnapshot = ref.watch(metadataPluginSearchChipsProvider);
-    final selectedChip = useState<String?>(
-      searchChipSnapshot.asData?.value.firstOrNull ?? "all",
-    );
-
-    ref.listen(
-      metadataPluginSearchChipsProvider,
-      (previous, next) {
-        selectedChip.value = next.asData?.value.firstOrNull ?? "all";
-      },
-    );
+    // Filter chips shown on the search screen. The Supabase plugin reports no
+    // chips (its catalog is track-only), so we define the filters here: "all"
+    // (everything) and "songs" (the full song list). Both list all songs when
+    // the search box is empty; typing narrows the results.
+    const filterChips = ["all", "songs"];
+    final selectedChip = useState<String?>(filterChips.first);
 
     useEffect(() {
       controller.text = searchTerm;
@@ -58,7 +56,32 @@ class SearchPage extends HookConsumerWidget {
       return null;
     }, []);
 
+    // Debounced live search: fire the search ~450ms after the user stops
+    // typing, so results update progressively without a network request per
+    // keystroke. Explicit submit still triggers immediately and persists the
+    // query in the recent-searches store.
+    final debounce = useRef<Timer?>(null);
+    useEffect(
+      () {
+        return () => debounce.value?.cancel();
+      },
+      [debounce],
+    );
+
+    void scheduleSearch(String value) {
+      debounce.value?.cancel();
+      debounce.value = Timer(
+        const Duration(milliseconds: 450),
+        () {
+          // Empty input clears the search (returns to the full catalog);
+          // non-empty input triggers the live search.
+          ref.read(searchTermStateProvider.notifier).state = value.trim();
+        },
+      );
+    }
+
     void onSubmitted(String value) {
+      debounce.value?.cancel();
       ref.read(searchTermStateProvider.notifier).state = value;
       focusNode.unfocus();
       if (value.trim().isEmpty) {
@@ -130,13 +153,7 @@ class SearchPage extends HookConsumerWidget {
                                       .toList();
 
                               return AutoComplete(
-                                suggestions: suggestions.length <= 2
-                                    ? [
-                                        ...suggestions,
-                                        "Twenty One Pilots",
-                                        "Linkin Park",
-                                      ]
-                                    : suggestions,
+                                suggestions: suggestions,
                                 completer: (suggestion) => suggestion,
                                 mode: AutoCompleteMode.replaceAll,
                                 child: TextField(
@@ -169,6 +186,7 @@ class SearchPage extends HookConsumerWidget {
                                   ],
                                   textInputAction: TextInputAction.search,
                                   placeholder: Text(context.l10n.search),
+                                  onChanged: scheduleSearch,
                                   onSubmitted: onSubmitted,
                                 ),
                               );
@@ -181,43 +199,41 @@ class SearchPage extends HookConsumerWidget {
                   spacing: 8,
                   children: [
                     const Gap(12),
-                    if (searchChipSnapshot.asData?.value != null)
-                      for (final chip in searchChipSnapshot.asData!.value)
-                        Chip(
-                          style: selectedChip.value == chip
-                              ? ButtonVariance.primary.copyWith(
-                                  decoration: (context, states, value) {
-                                    return ButtonVariance.primary
-                                        .decoration(context, states)
-                                        .copyWithIfBoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                        );
-                                  },
-                                )
-                              : ButtonVariance.secondary.copyWith(
-                                  decoration: (context, states, value) {
-                                    return ButtonVariance.secondary
-                                        .decoration(context, states)
-                                        .copyWithIfBoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                        );
-                                  },
-                                ),
-                          child: Text(chip.capitalize()),
-                          onPressed: () {
-                            selectedChip.value = chip;
-                          },
-                        ),
+                    for (final chip in filterChips)
+                      Chip(
+                        style: selectedChip.value == chip
+                            ? ButtonVariance.primary.copyWith(
+                                decoration: (context, states, value) {
+                                  return ButtonVariance.primary
+                                      .decoration(context, states)
+                                      .copyWithIfBoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      );
+                                },
+                              )
+                            : ButtonVariance.secondary.copyWith(
+                                decoration: (context, states, value) {
+                                  return ButtonVariance.secondary
+                                      .decoration(context, states)
+                                      .copyWithIfBoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      );
+                                },
+                              ),
+                        child: Text(chip.capitalize()),
+                        onPressed: () {
+                          selectedChip.value = chip;
+                        },
+                      ),
                   ],
                 ),
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: switch (selectedChip.value) {
-                      "tracks" => const SearchPageTracksTab(),
-                      "albums" => const SearchPageAlbumsTab(),
+                      "songs" || "tracks" => const SearchPageTracksTab(),
                       "artists" => const SearchPageArtistsTab(),
                       "playlists" => const SearchPagePlaylistsTab(),
                       _ => const SearchPageAllTab(),

@@ -66,20 +66,6 @@ List<SideBarTiles> getSidebarLibraryTileList(AppLocalizations l10n) => [
         route: const UserArtistsRoute(),
         icon: SangeetIcons.artist,
       ),
-      SideBarTiles(
-        id: "albums",
-        pathPrefix: "/library/albums",
-        title: l10n.albums,
-        route: const UserAlbumsRoute(),
-        icon: SangeetIcons.album,
-      ),
-      SideBarTiles(
-        id: "local_library",
-        pathPrefix: "/library/local",
-        title: l10n.local_library,
-        route: const UserLocalLibraryRoute(),
-        icon: SangeetIcons.device,
-      ),
     ];
 
 List<SideBarTiles> getNavbarTileList(AppLocalizations l10n) => [

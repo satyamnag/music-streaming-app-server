@@ -9,6 +9,8 @@ import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 
+const soulfulBhaktiUrl = "https://www.youtube.com/@SoulfulBhaktiTelugu";
+
 class TrackDetailsDialog extends HookConsumerWidget {
   final SangeetFullTrackObject track;
   const TrackDetailsDialog({
@@ -48,17 +50,17 @@ class TrackDetailsDialog extends HookConsumerWidget {
     final ytTracksDetailsMap = sourceInfo == null
         ? {}
         : {
-            context.l10n.youtube: Hyperlink(
-              "https://piped.video/watch?v=${sourceInfo.id}",
-              "https://piped.video/watch?v=${sourceInfo.id}",
+            context.l10n.youtube: const Hyperlink(
+              soulfulBhaktiUrl,
+              soulfulBhaktiUrl,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            context.l10n.channel: Text(sourceInfo.artists.join(", ")),
+            context.l10n.channel: const Text("Soulful Bhakti Telugu"),
             if (sourcedTrack.asData?.value.url != null)
-              context.l10n.streamUrl: Hyperlink(
-                sourcedTrack.asData!.value.url ?? "",
-                sourcedTrack.asData!.value.url ?? "",
+              context.l10n.streamUrl: const Hyperlink(
+                soulfulBhaktiUrl,
+                soulfulBhaktiUrl,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
