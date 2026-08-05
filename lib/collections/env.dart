@@ -38,6 +38,10 @@ abstract class Env {
   @EnviedField(varName: 'SUPERWALL_API_KEY', defaultValue: "")
   static final String superwallApiKey = _Env.superwallApiKey;
 
+  /// OneSignal App ID (push notifications & in-app messages). Public by design.
+  @EnviedField(varName: 'ONESIGNAL_APP_ID', defaultValue: "")
+  static final String oneSignalAppId = _Env.oneSignalAppId;
+
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";
 

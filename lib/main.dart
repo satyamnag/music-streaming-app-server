@@ -15,6 +15,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifier/local_notifier.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import 'package:sangeet/collections/env.dart';
@@ -133,6 +134,17 @@ Future<void> main(List<String> rawArgs) async {
         Env.superwallApiKey,
         options: superwallOptions,
       );
+    }
+
+    // OneSignal push notifications & in-app messages. The App ID is public by
+    // design; configure only when present so the app runs without a key.
+    // Notification permission is requested after the first frame (Android 13+).
+    if (kIsAndroid || kIsIOS) {
+      if (Env.oneSignalAppId.isNotEmpty) {
+        OneSignal.initialize(Env.oneSignalAppId);
+        OneSignal.User.pushSubscription.optIn();
+        OneSignal.Notifications.requestPermission(false);
+      }
     }
 
     runApp(
