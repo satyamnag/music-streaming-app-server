@@ -34,6 +34,10 @@ abstract class Env {
   @EnviedField(varName: 'CLERK_PUBLISHABLE_KEY')
   static final String clerkPublishableKey = _Env.clerkPublishableKey;
 
+  /// Superwall publishable API key (paywall/monetization). Public by design.
+  @EnviedField(varName: 'SUPERWALL_API_KEY', defaultValue: "")
+  static final String superwallApiKey = _Env.superwallApiKey;
+
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";
 

@@ -56,6 +56,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:window_manager/window_manager.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import 'package:yt_dlp_dart/yt_dlp_dart.dart';
 import 'package:flutter_new_pipe_extractor/flutter_new_pipe_extractor.dart';
 
@@ -122,6 +123,18 @@ Future<void> main(List<String> rawArgs) async {
 
     if (kIsIOS) {
       HomeWidget.setAppGroupId("group.sangeet_home_player_widget");
+    }
+
+    // Superwall paywall/monetization SDK. The publishable key is public by
+    // design; configure only when present so the app runs without a key.
+    if (Env.superwallApiKey.isNotEmpty) {
+      final superwallOptions = SuperwallOptions();
+      superwallOptions.paywalls.shouldPreload = true;
+      superwallOptions.logging.level = LogLevel.error;
+      Superwall.configure(
+        Env.superwallApiKey,
+        options: superwallOptions,
+      );
     }
 
     runApp(

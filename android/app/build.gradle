@@ -59,7 +59,7 @@ android {
 
     defaultConfig {
         applicationId "com.soulfulbhakti.app"
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -145,6 +145,12 @@ dependencies {
 
     // Clerk Android SDK (Native API)
     implementation 'com.clerk:clerk-android-api:1.0.39'
+
+    // Google Play Billing Library (in-app purchases & subscriptions)
+    // NOTE: keep at 8.0.0 — Superwall's native Android SDK (superwall-android)
+    // is compiled against billing 8.0.0 and references SkuDetails /
+    // QueryPurchaseHistoryParams which were REMOVED in billing 9.x.
+    implementation 'com.android.billingclient:billing:8.0.0'
 
     implementation "androidx.glance:glance-appwidget:$glanceVersion"
     implementation "androidx.glance:glance-appwidget-preview:$glanceVersion"
