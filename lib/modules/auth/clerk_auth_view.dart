@@ -95,25 +95,50 @@ class ClerkAuthView extends HookConsumerWidget {
       }
     }
 
-    return AlertDialog(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            SangeetIcons.music,
-            size: 22,
-            color: Color(0xFF9C4D5B),
-          ),
-          const Gap(10),
-          Text(
-            'Soulful Bhakti',
-            style: theme.typography.h3.copyWith(
-              color: theme.colorScheme.foreground,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: ModalContainer(
+          filled: true,
+          fillColor: theme.colorScheme.popover,
+          borderRadius: theme.borderRadiusXxl,
+          borderWidth: 1,
+          borderColor: theme.colorScheme.muted,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 40,
+              offset: const Offset(0, 12),
             ),
+          ],
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    SangeetIcons.music,
+                    size: 22,
+                    color: Color(0xFF9C4D5B),
+                  ),
+                  const Gap(10),
+                  Text(
+                    'Soulful Bhakti',
+                    style: theme.typography.h3.copyWith(
+                      color: theme.colorScheme.foreground,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(16),
+              body,
+            ],
           ),
-        ],
+        ),
       ),
-      content: body,
     );
   }
 }
@@ -285,6 +310,10 @@ class _OtpSignInView extends HookConsumerWidget {
           error.value = failure;
         } else {
           ref.invalidate(clerkAuthProvider);
+          // Signed in successfully — close the login popup smoothly.
+          if (context.mounted) {
+            Navigator.of(context).maybePop();
+          }
         }
       } catch (_) {
         if (context.mounted) error.value = 'Something went wrong. Please try again.';
