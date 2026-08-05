@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/hooks/configurators/use_check_yt_dlp_installed.dart';
+import 'package:sangeet/modules/notifications/onesignal_verification_dialog.dart';
 import 'package:sangeet/modules/root/bottom_player.dart';
 import 'package:sangeet/modules/root/sidebar/sidebar.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
@@ -63,6 +64,13 @@ class RootAppPage extends HookConsumerWidget {
       ),
     );
 
-    return scaffold;
+    // OneSignal push-subscription observer: shows the "integration complete"
+    // dialog once a real subscription ID is assigned (per the OneSignal guide).
+    return Stack(
+      children: [
+        scaffold,
+        const OneSignalVerificationDialog(),
+      ],
+    );
   }
 }
