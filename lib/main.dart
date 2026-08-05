@@ -27,12 +27,10 @@ import 'package:sangeet/hooks/configurators/use_fix_window_stretching.dart';
 import 'package:sangeet/hooks/configurators/use_get_storage_perms.dart';
 import 'package:sangeet/hooks/configurators/use_has_touch.dart';
 import 'package:sangeet/models/database/database.dart';
-import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
 import 'package:sangeet/modules/settings/bhakti_color_scheme.dart';
 import 'package:sangeet/modules/splash/splash_screen.dart';
 import 'package:sangeet/provider/audio_player/audio_player_streams.dart';
-import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/glance/glance.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
@@ -237,23 +235,10 @@ class Sangeet extends HookConsumerWidget {
           child = const SplashScreen();
         }
 
-        // On Android, gate the app behind Clerk auth: signed-out users see
-        // the sign-in view as a modal popup over the app until they
-        // authenticate.
-        if (!kIsAndroid || child is! SplashScreen) {
-          final clerkAuth = ref.watch(clerkAuthProvider);
-          final clerkState = clerkAuth.value ?? const ClerkAuthState();
-          if (!clerkAuth.isLoading &&
-              clerkState.initialized &&
-              !clerkState.signedIn) {
-            child = Stack(
-              children: [
-                child,
-                const ClerkAuthView(),
-              ],
-            );
-          }
-        }
+        // Free users do NOT need to log in: the app opens to the home screen
+        // without any auth gate. Email-OTP sign-in is available on demand via
+        // the profile dialog ("Sign In") and is required only when a user is
+        // paying for a plan or is a returning paid customer.
 
         return child;
       },

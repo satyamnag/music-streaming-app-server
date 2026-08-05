@@ -11,15 +11,12 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/fallbacks/anonymous_fallback.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
-import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
@@ -31,10 +28,6 @@ class UserArtistsPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
-    final clerkAuth = ref.watch(clerkAuthProvider);
-    final isClerkSignedIn = clerkAuth.value?.signedIn == true;
-
     final artistQuery = ref.watch(libraryArtistsProvider);
 
     final searchText = useState('');
@@ -64,10 +57,6 @@ class UserArtistsPage extends HookConsumerWidget {
           message: _,
         )) {
       return const Center(child: NoDefaultMetadataPlugin());
-    }
-
-    if (authenticated.asData?.value != true && !isClerkSignedIn) {
-      return const AnonymousFallback();
     }
 
     if (artistQuery.hasError) {

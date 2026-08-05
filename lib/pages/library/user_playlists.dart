@@ -14,11 +14,8 @@ import 'package:sangeet/components/playbutton_view/playbutton_view.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
-import 'package:sangeet/components/fallbacks/anonymous_fallback.dart';
 import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
-import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 import 'package:auto_route/auto_route.dart';
@@ -32,10 +29,6 @@ class UserPlaylistsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final searchText = useState('');
-
-    final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
-    final clerkAuth = ref.watch(clerkAuthProvider);
-    final isClerkSignedIn = clerkAuth.value?.signedIn == true;
 
     final me = ref.watch(metadataPluginUserProvider);
 
@@ -91,10 +84,6 @@ class UserPlaylistsPage extends HookConsumerWidget {
           message: _,
         )) {
       return const Center(child: NoDefaultMetadataPlugin());
-    }
-
-    if (authenticated.asData?.value != true && !isClerkSignedIn) {
-      return const AnonymousFallback();
     }
 
     final hasError =
