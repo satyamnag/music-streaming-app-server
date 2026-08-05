@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math' show max;
 
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -35,12 +36,20 @@ class TrackBytePrefetcher {
 
   static const int _maxConcurrent = 2;
 
-  /// Fraction of the track's expected size to prefetch.
+  /// Fraction of the track's expected size to prefetch (for tracks long enough
+  /// that 20% already covers the minimum of 10 seconds).
   static const double _prefetchFraction = 0.20;
+
+  /// Minimum number of seconds of audio to prefetch for every visible track.
+  /// Short tracks would otherwise prefetch less than 10 seconds (e.g. 20% of a
+  /// 30-second track is only 6 seconds), which is not enough for a reliably
+  /// instant tap-to-play. The effective prefetch is always at least this many
+  /// seconds (capped by [_maxRangeBytes]).
+  static const int _minPrefetchSeconds = 10;
 
   /// Assumed peak bitrate (bytes/sec) used to estimate file size from the
   /// known duration. Opus is ~12 KB/s, MP3 ~16 KB/s — 16 KB/s is a safe upper
-  /// bound, so we never under-fetch 20% for opus.
+  /// bound, so we never under-fetch for opus.
   static const int _bytesPerSecond = 16 * 1024;
 
   /// Upper bound for a single prefetch range. This must be large enough that
@@ -113,12 +122,17 @@ class TrackBytePrefetcher {
           .createSignedUrl(storagePath, 3600);
       if (url.isEmpty) return;
 
-      // Estimate the file size from the known duration, then request the
-      // first ~20% of it (capped to bound the background download).
+      // Estimate the file size from the known duration, then request the first
+      // ~20% of it (capped to bound the background download) — but never less
+      // than the minimum of 10 seconds of audio, so every visible track is
+      // guaranteed at least 10 seconds of preloaded bytes.
       final durationMs = _durationMsById[trackId] ?? 0;
       final expectedBytes = (durationMs ~/ 1000) * _bytesPerSecond;
-      final rangeEnd =
+      final twentyPercent =
           (expectedBytes * _prefetchFraction).toInt().clamp(0, _maxRangeBytes);
+      final minTenSeconds =
+          (_minPrefetchSeconds * _bytesPerSecond).clamp(0, _maxRangeBytes);
+      final rangeEnd = max(twentyPercent, minTenSeconds);
 
       // A tiny range (e.g. very short tracks) still warms the connection.
       if (rangeEnd <= 0) return;
