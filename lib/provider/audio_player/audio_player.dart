@@ -74,6 +74,10 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
         ),
       );
     } else if (tracks.isNotEmpty) {
+      // Ensure the local playback server has bound a port before building the
+      // stream URLs. Otherwise restored tracks get http://127.0.0.1:0/... and
+      // mpv fails with "Port missing in uri" (matches load()'s pattern).
+      await SangeetMedia.ensurePortReady();
       state = state.copyWith(
         tracks: tracks,
         currentIndex: currentIndex,
@@ -243,6 +247,7 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     for (int i = 0; i < addableTracks.length; i++) {
       final track = addableTracks.elementAt(i);
 
+      await SangeetMedia.ensurePortReady();
       await audioPlayer.addTrackAt(
         SangeetMedia(track),
         max(state.currentIndex, 0) + i + 1,
@@ -266,6 +271,7 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       tracks: [...state.tracks, track],
     );
 
+    await SangeetMedia.ensurePortReady();
     await audioPlayer.addTrack(SangeetMedia(track));
 
     await _updatePlayerState(
@@ -284,6 +290,7 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     );
 
     for (final track in tracks) {
+      await SangeetMedia.ensurePortReady();
       await audioPlayer.addTrack(SangeetMedia(track));
     }
 
