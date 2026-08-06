@@ -169,4 +169,9 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
     implementation 'com.google.code.gson:gson:2.11.0'
+
+    // Firebase BoM + Analytics (explicit per official setup; matches the
+    // FlutterFire-managed BOM version 34.17.0, so Gradle deduplicates).
+    implementation platform('com.google.firebase:firebase-bom:34.17.0')
+    implementation 'com.google.firebase:firebase-analytics'
 }
