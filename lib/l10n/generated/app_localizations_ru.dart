@@ -27,7 +27,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings => 'Настройки';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Настройте Soulful Bhakti по своему вкусу';
 
   @override
   String get genre_categories_filter => 'Фильтр по категориям или жанрам...';
@@ -48,13 +48,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get songs => 'Треки';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Новинки';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'В тренде';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Показать больше';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get create_a_playlist => 'Создать плейлист';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Новый плейлист';
 
   @override
   String get playlist_name => 'Назвать плейлист';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Плейлистов пока нет. Создайте один из выбранных треков.';
 
   @override
   String get update_playlist => 'Обновить плейлист';
@@ -873,7 +873,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Это сбросит все ваши настройки к значениям по умолчанию. Это действие нельзя отменить.';
 
   @override
   String get streaming_music_format => 'Формат потоковой музыки';
@@ -897,39 +897,41 @@ class AppLocalizationsRu extends AppLocalizations {
   String get login => 'Войти';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Войти';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Зарегистрироваться';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Выйти';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Подтвердить';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Создать аккаунт';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Уже есть аккаунт? Войти';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Нет аккаунта? Зарегистрироваться';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Вы вошли как $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Код подтверждения';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint =>
+      'Введите код, отправленный на вашу почту';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Мы отправили код подтверждения на вашу почту';
 
   @override
   String get go_to_album => 'Перейти к альбому';
@@ -1174,27 +1176,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get email => 'Электронная почта';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Отправить код';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Использовать другой email';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Войти с одноразовым кодом';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Введите код, который мы вам отправили';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Пожалуйста, подтвердите свой адрес электронной почты, чтобы защитить аккаунт';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Подтвердить сейчас';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Введите свой адрес электронной почты, чтобы получить код подтверждения';
 
   @override
   String get profile_followers => 'Подписчики';
@@ -1276,7 +1278,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get summary_owed_to_artists => 'К выплате артистам\nв этом месяце';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Лучший артист\nза этот период';
 
   @override
   String get summary_artists => 'артиста';
@@ -1297,15 +1299,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get summary_were_on_repeat => 'Были на повторе';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Доля прослушивания';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Распределение $tracks_length треков, которые вы слушали чаще всего';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'воспроизведений';
 
   @override
   String total_money(Object money) {

@@ -27,7 +27,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get settings => 'تنظیمات';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle =>
+      'Soulful Bhakti را مطابق سلیقه خود سفارشی کنید';
 
   @override
   String get genre_categories_filter => 'دسته ها یا ژانر ها را فیلتر کنید';
@@ -48,13 +49,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get songs => 'آهنگ ها';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'جدیدترین ها';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'در حال ترند';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'مشاهده بیشتر';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +101,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get create_a_playlist => 'ساخت لیست پخش';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'لیست پخش جدید';
 
   @override
   String get playlist_name => 'نام لیست پخش';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'هنوز لیست پخشی وجود ندارد. از آهنگ‌های انتخاب شده یک لیست بسازید.';
 
   @override
   String get update_playlist => 'بروز کردن لیست پخش';
@@ -868,7 +869,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'این کار همه تنظیمات شما را به مقادیر پیش‌فرض بازنشانی می‌کند. این عمل قابل بازگشت نیست.';
 
   @override
   String get streaming_music_format => 'فرمت پخش آنلاین موسیقی';
@@ -892,39 +893,39 @@ class AppLocalizationsFa extends AppLocalizations {
   String get login => 'ورود';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'ورود';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'ثبت نام';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'خروج';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'تأیید';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'حساب خود را بسازید';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'از قبل حساب دارید؟ وارد شوید';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'حساب ندارید؟ ثبت نام کنید';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'وارد شده به عنوان $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'کد تأیید';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'کد ارسال شده به ایمیل خود را وارد کنید';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => 'یک کد تأیید به ایمیل شما ارسال کردیم';
 
   @override
   String get go_to_album => 'رفتن به آلبوم';
@@ -1167,27 +1168,27 @@ class AppLocalizationsFa extends AppLocalizations {
   String get email => 'ایمیل';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'ارسال کد';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'استفاده از ایمیل دیگری';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'ورود با کد یک‌بار مصرف';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'کدی را که برایتان ارسال کردیم وارد کنید';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'لطفاً برای امنیت حساب خود آدرس ایمیل خود را تأیید کنید';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'همین حالا تأیید کنید';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'برای دریافت کد تأیید، آدرس ایمیل خود را وارد کنید';
 
   @override
   String get profile_followers => 'دنبال‌کنندگان';
@@ -1268,7 +1269,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get summary_owed_to_artists => 'به هنرمندان بدهکار است\nاین ماه';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'هنرمند برتر\nاین دوره';
 
   @override
   String get summary_artists => 'هنرمندان';
@@ -1289,15 +1290,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get summary_were_on_repeat => 'در تکرار بودند';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'سهم شنیدن';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'توزیع $tracks_length آهنگ برتری که بیشتر گوش داده‌اید';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'پخش';
 
   @override
   String total_money(Object money) {

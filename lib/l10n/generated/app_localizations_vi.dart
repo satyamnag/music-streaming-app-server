@@ -27,7 +27,8 @@ class AppLocalizationsVi extends AppLocalizations {
   String get settings => 'Cài đặt';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle =>
+      'Tùy chỉnh Soulful Bhakti theo ý thích của bạn';
 
   @override
   String get genre_categories_filter => 'Lọc theo thể loại nhạc...';
@@ -48,13 +49,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get songs => 'Bài hát';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Mới nhất';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Thịnh hành';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Xem thêm';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +101,14 @@ class AppLocalizationsVi extends AppLocalizations {
   String get create_a_playlist => 'Tạo danh sách phát';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Danh sách phát mới';
 
   @override
   String get playlist_name => 'Tên danh sách phát';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Chưa có danh sách phát nào. Tạo một danh sách từ các bài hát đã chọn.';
 
   @override
   String get update_playlist => 'Cập nhật danh sách phát';
@@ -873,7 +874,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Thao tác này sẽ đặt lại tất cả cài đặt của bạn về giá trị mặc định. Hành động này không thể hoàn tác.';
 
   @override
   String get streaming_music_format => 'Định dạng nhạc phát trực tuyến';
@@ -897,39 +898,40 @@ class AppLocalizationsVi extends AppLocalizations {
   String get login => 'Đăng nhập';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Đăng nhập';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Đăng ký';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Đăng xuất';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Xác minh';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Tạo tài khoản của bạn';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Đã có tài khoản? Đăng nhập';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Chưa có tài khoản? Đăng ký';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Đã đăng nhập với tên $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Mã xác minh';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'Nhập mã đã gửi đến email của bạn';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Chúng tôi đã gửi mã xác minh đến email của bạn';
 
   @override
   String get go_to_album => 'Đi đến Album';
@@ -1175,27 +1177,27 @@ class AppLocalizationsVi extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Gửi mã';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Dùng email khác';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Đăng nhập bằng mã dùng một lần';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Nhập mã chúng tôi đã gửi cho bạn';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Vui lòng xác minh địa chỉ email của bạn để bảo mật tài khoản';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Xác minh ngay';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Nhập địa chỉ email của bạn để nhận mã xác minh';
 
   @override
   String get profile_followers => 'Người theo dõi';
@@ -1277,7 +1279,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get summary_owed_to_artists => 'Nợ nghệ sĩ\ntrong tháng này';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Nghệ sĩ hàng đầu\nkỳ này';
 
   @override
   String get summary_artists => 'nghệ sĩ';
@@ -1298,15 +1300,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get summary_were_on_repeat => 'Đã được phát lại';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Thị phần nghe';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Phân bố $tracks_length bài hát hàng đầu bạn đã nghe nhiều nhất';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'lượt phát';
 
   @override
   String total_money(Object money) {

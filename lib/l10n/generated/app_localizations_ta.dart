@@ -27,7 +27,8 @@ class AppLocalizationsTa extends AppLocalizations {
   String get settings => 'அமைப்புகள்';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle =>
+      'Soulful Bhakti-யை உங்கள் விருப்பப்படி தனிப்பயனாக்குங்கள்';
 
   @override
   String get genre_categories_filter => 'வகைகள் அல்லது பாணிகளை வடிகட்டுக...';
@@ -48,13 +49,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get songs => 'பாடல்கள்';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'புதிய சேர்ப்புகள்';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'டாப் ட்ரெண்டிங்';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'மேலும் காண்க';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +101,14 @@ class AppLocalizationsTa extends AppLocalizations {
   String get create_a_playlist => 'பாடல் பட்டியலை உருவாக்குக';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'புதிய பாடல் பட்டியல்';
 
   @override
   String get playlist_name => 'பாடல் பட்டியல் பெயர்';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'இன்னும் பாடல் பட்டியல்கள் இல்லை. தேர்ந்தெடுத்த பாடல்களில் இருந்து ஒன்றை உருவாக்கவும்.';
 
   @override
   String get update_playlist => 'பாடல் பட்டியலைப் புதுப்பிக்க';
@@ -876,7 +877,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'இது உங்கள் எல்லா அமைப்புகளையும் இயல்புநிலை மதிப்புகளுக்கு மீட்டமைக்கும். இந்தச் செயலைச் செயல்தவிர்க்க முடியாது.';
 
   @override
   String get streaming_music_format => 'இசை ஸ்ட்ரீமிங் வடிவம்';
@@ -900,39 +901,41 @@ class AppLocalizationsTa extends AppLocalizations {
   String get login => 'உள்நுழைக';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'உள்நுழை';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'பதிவு செய்யவும்';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'வெளியேறு';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'சரிபார்';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'உங்கள் கணக்கை உருவாக்கவும்';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'ஏற்கனவே கணக்கு உள்ளதா? உள்நுழைக';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'கணக்கு இல்லையா? பதிவு செய்யவும்';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return '$userId ஆக உள்நுழைந்துள்ளீர்கள்';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'சரிபார்ப்புக் குறியீடு';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint =>
+      'உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்ட குறியீட்டை உள்ளிடவும்';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'உங்கள் மின்னஞ்சலுக்கு ஒரு சரிபார்ப்புக் குறியீட்டை அனுப்பியுள்ளோம்';
 
   @override
   String get go_to_album => 'ஆல்பத்திற்குச் செல்';
@@ -1179,27 +1182,27 @@ class AppLocalizationsTa extends AppLocalizations {
   String get email => 'மின்னஞ்சல்';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'குறியீட்டை அனுப்பு';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'வேறு மின்னஞ்சலைப் பயன்படுத்தவும்';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'ஒரு முறை குறியீடு மூலம் உள்நுழைக';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'நாங்கள் அனுப்பிய குறியீட்டை உள்ளிடவும்';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் மின்னஞ்சல் முகவரியை சரிபார்க்கவும்';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'இப்போதே சரிபார்';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'சரிபார்ப்புக் குறியீட்டைப் பெற உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்';
 
   @override
   String get profile_followers => 'பின்தொடர்பவர்கள்';
@@ -1280,7 +1283,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get summary_owed_to_artists => 'கலைஞர்களுக்கு\nஇந்த மாதம் சொந்தமானது';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'சிறந்த கலைஞர்\nஇந்த காலகட்டம்';
 
   @override
   String get summary_artists => 'கலைஞர்கள்';
@@ -1301,15 +1304,15 @@ class AppLocalizationsTa extends AppLocalizations {
   String get summary_were_on_repeat => 'மீண்டும் மீண்டும் இருந்தன';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'கேட்கும் பங்கு';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'நீங்கள் அதிகமாக இயக்கிய முதல் $tracks_length பாடல்களின் விநியோகம்';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'இயக்கங்கள்';
 
   @override
   String total_money(Object money) {

@@ -27,7 +27,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings => '設定';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Soulful Bhakti をお好みに合わせてカスタマイズ';
 
   @override
   String get genre_categories_filter => 'カテゴリーやジャンルを絞り込み...';
@@ -48,13 +48,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get songs => '曲';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => '最新の追加';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => '急上昇';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'もっと見る';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get create_a_playlist => '再生リストの作成';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => '新しいプレイリスト';
 
   @override
   String get playlist_name => '再生リスト名';
 
   @override
-  String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+  String get no_playlists_yet => 'まだプレイリストがありません。選択した曲から作成してください。';
 
   @override
   String get update_playlist => '再生リストを更新';
@@ -861,7 +860,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'すべての設定がデフォルト値にリセットされます。この操作は元に戻せません。';
 
   @override
   String get streaming_music_format => '音楽ストリーミング形式';
@@ -885,39 +884,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String get login => 'ログイン';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'ログイン';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'サインアップ';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'ログアウト';
 
   @override
-  String get verify => 'Verify';
+  String get verify => '確認';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'アカウントを作成';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'すでにアカウントをお持ちですか？ログイン';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'アカウントをお持ちでないですか？サインアップ';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return '$userId としてログイン中';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => '確認コード';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'メールに送信されたコードを入力してください';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => '確認コードをメールに送信しました';
 
   @override
   String get go_to_album => 'アルバムに移動';
@@ -1152,27 +1151,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get email => 'メール';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'コードを送信';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => '別のメールアドレスを使用';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'ワンタイムコードでログイン';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'お送りしたコードを入力してください';
 
   @override
-  String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+  String get verify_email_reminder => 'アカウントを保護するため、メールアドレスを確認してください';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => '今すぐ確認';
 
   @override
-  String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+  String get enter_email_to_verify => '確認コードを受け取るにはメールアドレスを入力してください';
 
   @override
   String get profile_followers => 'フォロワー';
@@ -1253,7 +1250,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get summary_owed_to_artists => '今月アーティストに払う\nべき額';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'トップアーティスト\nこの期間';
 
   @override
   String get summary_artists => 'アーティスト';
@@ -1274,15 +1271,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get summary_were_on_repeat => 'をリピートしました';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => '再生シェア';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return '最も多く再生した上位$tracks_length曲の分布';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => '回再生';
 
   @override
   String total_money(Object money) {

@@ -27,7 +27,7 @@ class AppLocalizationsEu extends AppLocalizations {
   String get settings => 'Ezarpenak';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Pertsonalizatu Soulful Bhakti zure gustura';
 
   @override
   String get genre_categories_filter => 'Kategoria edo generoak filtratu...';
@@ -48,13 +48,13 @@ class AppLocalizationsEu extends AppLocalizations {
   String get songs => 'Abestiak';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Azken berriak';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Joera nagusiak';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Ikusi gehiago';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsEu extends AppLocalizations {
   String get create_a_playlist => 'Sortu zerrenda bat';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Zerrenda berria';
 
   @override
   String get playlist_name => 'Zerrenda Izena';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Oraindik ez dago zerrendarik. Sortu bat hautatutako abestietatik.';
 
   @override
   String get update_playlist => 'Eguneratu zerrenda';
@@ -874,7 +874,7 @@ class AppLocalizationsEu extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Honek zure ezarpen guztiak balio lehenetsietara itzuliko ditu. Ekintza hau ezin da desegin.';
 
   @override
   String get streaming_music_format => 'Musika streaming bidezko formatua';
@@ -898,39 +898,41 @@ class AppLocalizationsEu extends AppLocalizations {
   String get login => 'Hasi saioa';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Hasi saioa';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Izena eman';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Amaitu saioa';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Egiaztatu';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Sortu zure kontua';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Dagoeneko kontu bat duzu? Hasi saioa';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Ez duzu konturik? Sortu kontua';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Saioa hasita: $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Egiaztapen-kodea';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint =>
+      'Sartu zure helbide elektronikora bidalitako kodea';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Egiaztapen-kode bat bidali dugu zure helbide elektronikora';
 
   @override
   String get go_to_album => 'Albumera joan';
@@ -1174,27 +1176,27 @@ class AppLocalizationsEu extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Bidali kodea';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Erabili beste helbide elektroniko bat';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Hasi saioa behin-behineko kode batekin';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Sartu bidali dizugun kodea';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Mesedez, egiaztatu zure helbide elektronikoa zure kontua ziurtatzeko';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Egiaztatu orain';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Sartu zure helbide elektronikoa egiaztapen-kode bat jasotzeko';
 
   @override
   String get profile_followers => 'Jarraitzaileak';
@@ -1276,7 +1278,7 @@ class AppLocalizationsEu extends AppLocalizations {
   String get summary_owed_to_artists => 'Hilabete honetan\nartistei zor zaiena';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Artista nagusia\naldi honetan';
 
   @override
   String get summary_artists => 'artisten';
@@ -1297,15 +1299,15 @@ class AppLocalizationsEu extends AppLocalizations {
   String get summary_were_on_repeat => 'Dituzu errepikatze moduan';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Entzunaldi-kuota';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Gehien entzun dituzun $tracks_length abestien banaketa';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'erreprodukzio';
 
   @override
   String total_money(Object money) {

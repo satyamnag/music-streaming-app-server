@@ -27,7 +27,8 @@ class AppLocalizationsCs extends AppLocalizations {
   String get settings => 'Nastavení';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle =>
+      'Přizpůsobte si Soulful Bhakti podle svých představ';
 
   @override
   String get genre_categories_filter => 'Filtrovat kategorie nebo žánry...';
@@ -48,13 +49,13 @@ class AppLocalizationsCs extends AppLocalizations {
   String get songs => 'Skladby';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Nejnovější přírůstky';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Nejvíce trendující';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Zobrazit více';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +101,14 @@ class AppLocalizationsCs extends AppLocalizations {
   String get create_a_playlist => 'Vytvořit playlist';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Nový playlist';
 
   @override
   String get playlist_name => 'Název playlistu';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Zatím žádné playlisty. Vytvořte jeden z vybraných skladeb.';
 
   @override
   String get update_playlist => 'Aktualizovat playlist';
@@ -868,7 +869,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Tím se všechna vaše nastavení vrátí na výchozí hodnoty. Tuto akci nelze vrátit zpět.';
 
   @override
   String get streaming_music_format => 'Formát streamování hudby';
@@ -892,39 +893,39 @@ class AppLocalizationsCs extends AppLocalizations {
   String get login => 'Přihlásit se';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Přihlásit se';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Zaregistrovat se';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Odhlásit se';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Ověřit';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Vytvořte si účet';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Už máte účet? Přihlaste se';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Nemáte účet? Zaregistrujte se';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Přihlášen jako $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Ověřovací kód';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'Zadejte kód zaslaný na váš e-mail';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => 'Poslali jsme ověřovací kód na váš e-mail';
 
   @override
   String get go_to_album => 'Přejít na album';
@@ -1167,27 +1168,27 @@ class AppLocalizationsCs extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Odeslat kód';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Použít jiný e-mail';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Přihlásit se jednorázovým kódem';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Zadejte kód, který jsme vám poslali';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Pro zabezpečení svého účtu ověřte prosím svou e-mailovou adresu';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Ověřit nyní';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Zadejte svou e-mailovou adresu pro obdržení ověřovacího kódu';
 
   @override
   String get profile_followers => 'Sledující';
@@ -1269,7 +1270,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get summary_owed_to_artists => 'Dluženo umělcům\nTento měsíc';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Nejlepší umělec\ntoto období';
 
   @override
   String get summary_artists => 'umělců';
@@ -1290,15 +1291,15 @@ class AppLocalizationsCs extends AppLocalizations {
   String get summary_were_on_repeat => 'Byly na opakování';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Podíl poslechu';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Rozložení nejposlouchanějších $tracks_length skladeb';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'přehrání';
 
   @override
   String total_money(Object money) {

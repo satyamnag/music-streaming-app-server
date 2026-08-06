@@ -27,7 +27,8 @@ class AppLocalizationsTl extends AppLocalizations {
   String get settings => 'Mga Setting';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle =>
+      'I-customize ang Soulful Bhakti ayon sa iyong gusto';
 
   @override
   String get genre_categories_filter => 'I-filter ang mga kategorya o genre...';
@@ -48,13 +49,13 @@ class AppLocalizationsTl extends AppLocalizations {
   String get songs => 'Mga Kanta';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Mga Bagong Dumarating';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Nangunguna sa Trending';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Tingnan Pa';
 
   @override
   String playing_track(Object track) {
@@ -101,14 +102,14 @@ class AppLocalizationsTl extends AppLocalizations {
   String get create_a_playlist => 'Gumawa ng playlist';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Bagong playlist';
 
   @override
   String get playlist_name => 'Pangalan ng Playlist';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Wala pang playlist. Gumawa ng isa mula sa mga napiling kanta.';
 
   @override
   String get update_playlist => 'I-update ang playlist';
@@ -875,7 +876,7 @@ class AppLocalizationsTl extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Ire-reset nito ang lahat ng iyong setting sa kanilang default na halaga. Hindi maaaring i-undo ang pagkilos na ito.';
 
   @override
   String get streaming_music_format => 'Format ng streaming ng musika';
@@ -899,39 +900,41 @@ class AppLocalizationsTl extends AppLocalizations {
   String get login => 'Mag-login';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Mag-sign in';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Mag-sign up';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Mag-sign out';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'I-verify';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Gawin ang iyong account';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'May account ka na ba? Mag-sign in';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Wala pang account? Mag-sign up';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Naka-sign in bilang $userId';
   }
 
   @override
   String get verification_code => 'Verification code';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint =>
+      'Ilagay ang code na ipinadala sa iyong email';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Nagpadala kami ng verification code sa iyong email';
 
   @override
   String get go_to_album => 'Pumunta sa Album';
@@ -1176,27 +1179,27 @@ class AppLocalizationsTl extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Ipadala ang code';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Gumamit ng ibang email';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Mag-sign in gamit ang isang beses na code';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Ilagay ang code na ipinadala namin sa iyo';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Mangyaring i-verify ang iyong email address para ma-secure ang iyong account';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'I-verify ngayon';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Ilagay ang iyong email address para makatanggap ng verification code';
 
   @override
   String get profile_followers => 'Mga Tagasunod';
@@ -1278,7 +1281,7 @@ class AppLocalizationsTl extends AppLocalizations {
   String get summary_owed_to_artists => 'Utang sa mga artista\nngayong buwan';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Nangungunang artista\nngayong panahon';
 
   @override
   String get summary_artists => 'artista';
@@ -1299,15 +1302,15 @@ class AppLocalizationsTl extends AppLocalizations {
   String get summary_were_on_repeat => 'Pinu-playlst muli';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Bahagi sa pakikinig';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Pamamahagi ng nangungunang $tracks_length na track na pinatugtog mo nang higit';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'pag-play';
 
   @override
   String total_money(Object money) {

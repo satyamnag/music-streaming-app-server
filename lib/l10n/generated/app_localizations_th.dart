@@ -27,7 +27,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get settings => 'ตั้งค่า';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'ปรับแต่ง Soulful Bhakti ตามที่คุณต้องการ';
 
   @override
   String get genre_categories_filter => 'กรองประเภทหรือแนวเพลง...';
@@ -48,13 +48,13 @@ class AppLocalizationsTh extends AppLocalizations {
   String get songs => 'เพลง';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'มาใหม่';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'กำลังมาแรง';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'ดูเพิ่มเติม';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsTh extends AppLocalizations {
   String get create_a_playlist => 'สร้างเพลย์ลิสต์';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'เพลย์ลิสต์ใหม่';
 
   @override
   String get playlist_name => 'ชื่อเพลย์ลิสต์';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'ยังไม่มีเพลย์ลิสต์ สร้างหนึ่งรายการจากเพลงที่เลือก';
 
   @override
   String get update_playlist => 'อัพเดทเพลย์ลิสต์';
@@ -872,7 +872,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'การดำเนินการนี้จะรีเซ็ตการตั้งค่าทั้งหมดของคุณกลับเป็นค่าเริ่มต้น การดำเนินการนี้ไม่สามารถยกเลิกได้';
 
   @override
   String get streaming_music_format => 'รูปแบบการสตรีมเพลง';
@@ -896,39 +896,39 @@ class AppLocalizationsTh extends AppLocalizations {
   String get login => 'เข้าสู่ระบบ';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'ลงชื่อเข้าใช้';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'ลงทะเบียน';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'ออกจากระบบ';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'ยืนยัน';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'สร้างบัญชีของคุณ';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'มีบัญชีอยู่แล้ว? ลงชื่อเข้าใช้';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'ยังไม่มีบัญชี? ลงทะเบียน';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'ลงชื่อเข้าใช้ในฐานะ $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'รหัสยืนยัน';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'ป้อนรหัสที่ส่งไปยังอีเมลของคุณ';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => 'เราได้ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว';
 
   @override
   String get go_to_album => 'ไปที่อัลบั้ม';
@@ -1169,27 +1169,27 @@ class AppLocalizationsTh extends AppLocalizations {
   String get email => 'อีเมล';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'ส่งรหัส';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'ใช้อีเมลอื่น';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'ลงชื่อเข้าใช้ด้วยรหัสแบบใช้ครั้งเดียว';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'ป้อนรหัสที่เราส่งให้คุณ';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'โปรดยืนยันที่อยู่อีเมลของคุณเพื่อความปลอดภัยของบัญชี';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'ยืนยันตอนนี้';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'กรอกที่อยู่อีเมลของคุณเพื่อรับรหัสยืนยัน';
 
   @override
   String get profile_followers => 'ผู้ติดตาม';
@@ -1271,7 +1271,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get summary_owed_to_artists => 'ค้างชำระให้ศิลปิน\nในเดือนนี้';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'ศิลปินอันดับต้น\nช่วงเวลานี้';
 
   @override
   String get summary_artists => 'ศิลปิน';
@@ -1292,15 +1292,15 @@ class AppLocalizationsTh extends AppLocalizations {
   String get summary_were_on_repeat => 'อยู่ในโหมดซ้ำ';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'ส่วนแบ่งการฟัง';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'การกระจายของ $tracks_length เพลงอันดับต้นๆ ที่คุณเล่นมากที่สุด';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'ครั้งที่เล่น';
 
   @override
   String total_money(Object money) {

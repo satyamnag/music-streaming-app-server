@@ -27,7 +27,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get settings => 'Налаштування';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Налаштуйте Soulful Bhakti на свій смак';
 
   @override
   String get genre_categories_filter => 'Фільтрувати категорії або жанри...';
@@ -48,13 +48,13 @@ class AppLocalizationsUk extends AppLocalizations {
   String get songs => 'Пісні';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Новинки';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'У тренді';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Показати більше';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsUk extends AppLocalizations {
   String get create_a_playlist => 'Створити плейлист';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Новий плейлист';
 
   @override
   String get playlist_name => 'Назва плейлиста';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Плейлистів поки немає. Створіть один із вибраних пісень.';
 
   @override
   String get update_playlist => 'Оновити плейлист';
@@ -874,7 +874,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Це скине всі ваші налаштування до значень за замовчуванням. Цю дію неможливо скасувати.';
 
   @override
   String get streaming_music_format => 'Формат потокової музики';
@@ -898,39 +898,40 @@ class AppLocalizationsUk extends AppLocalizations {
   String get login => 'Увійти';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Увійти';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Зареєструватись';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Вийти';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Підтвердити';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Створіть свій акаунт';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Вже маєте акаунт? Увійдіть';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Немає акаунта? Зареєструйтесь';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Ви увійшли як $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Код підтвердження';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'Введіть код, надісланий на вашу пошту';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Ми надіслали код підтвердження на вашу пошту';
 
   @override
   String get go_to_album => 'Перейти до альбому';
@@ -1175,27 +1176,27 @@ class AppLocalizationsUk extends AppLocalizations {
   String get email => 'Електронна пошта';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Надіслати код';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Використати інший email';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Увійти з одноразовим кодом';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Введіть код, який ми вам надіслали';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Будь ласка, підтвердьте свою електронну пошту, щоб захистити акаунт';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Підтвердити зараз';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Введіть свою електронну пошту, щоб отримати код підтвердження';
 
   @override
   String get profile_followers => 'Підписники';
@@ -1277,7 +1278,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get summary_owed_to_artists => 'Заборгованість артистам\nцього місяця';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Кращий артист\nза цей період';
 
   @override
   String get summary_artists => 'артистів';
@@ -1298,15 +1299,15 @@ class AppLocalizationsUk extends AppLocalizations {
   String get summary_were_on_repeat => 'Були на повторі';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Частка прослуховування';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Розподіл $tracks_length треків, які ви слухали найчастіше';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'відтворень';
 
   @override
   String total_money(Object money) {

@@ -27,7 +27,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '设置';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => '按照您的喜好自定义 Soulful Bhakti';
 
   @override
   String get genre_categories_filter => '筛选类别...';
@@ -48,13 +48,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get songs => '歌曲';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => '最新上架';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => '热门趋势';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => '查看更多';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get create_a_playlist => '创建一个歌单';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => '新建歌单';
 
   @override
   String get playlist_name => '歌单名称';
 
   @override
-  String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+  String get no_playlists_yet => '暂无歌单。从所选歌曲创建一个。';
 
   @override
   String get update_playlist => '更新播放列表';
@@ -859,8 +858,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get restore_defaults => '恢复默认值';
 
   @override
-  String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+  String get restore_defaults_confirmation => '这会将您的所有设置重置为默认值。此操作无法撤销。';
 
   @override
   String get streaming_music_format => '流媒体音乐格式';
@@ -884,39 +882,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get login => '登录';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => '登录';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => '注册';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => '退出登录';
 
   @override
-  String get verify => 'Verify';
+  String get verify => '验证';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => '创建您的账户';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => '已有账户？登录';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => '没有账户？注册';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return '已以 $userId 身份登录';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => '验证码';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => '输入发送到您电子邮件的验证码';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => '我们已向您的电子邮件发送了验证码';
 
   @override
   String get go_to_album => '前往专辑';
@@ -1151,27 +1149,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get email => '电子邮件';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => '发送验证码';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => '使用其他电子邮件';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => '使用一次性验证码登录';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => '输入我们发送给您的验证码';
 
   @override
-  String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+  String get verify_email_reminder => '请验证您的电子邮件地址以保护您的账户';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => '立即验证';
 
   @override
-  String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+  String get enter_email_to_verify => '输入您的电子邮件地址以接收验证码';
 
   @override
   String get profile_followers => '关注者';
@@ -1253,7 +1249,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get summary_owed_to_artists => '本月欠艺术家的';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => '热门艺术家\n本时期';
 
   @override
   String get summary_artists => '艺术家的';
@@ -1274,15 +1270,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get summary_were_on_repeat => '已重复播放';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => '收听份额';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return '您播放最多的前 $tracks_length 首歌曲的分布';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => '次播放';
 
   @override
   String total_money(Object money) {
@@ -1600,6 +1596,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings => '設定';
 
   @override
+  String get settings_subtitle => '依照您的喜好自訂 Soulful Bhakti';
+
+  @override
   String get genre_categories_filter => '過濾分類...';
 
   @override
@@ -1616,6 +1615,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get songs => '歌曲';
+
+  @override
+  String get newest_arrivals => '最新上架';
+
+  @override
+  String get top_trending => '熱門趨勢';
+
+  @override
+  String get see_more => '查看更多';
 
   @override
   String playing_track(Object track) {
@@ -1661,7 +1669,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get create_a_playlist => '建立一個歌單';
 
   @override
+  String get new_playlist => '建立新歌單';
+
+  @override
   String get playlist_name => '歌單名稱';
+
+  @override
+  String get no_playlists_yet => '尚無歌單。從所選歌曲建立一個。';
 
   @override
   String get update_playlist => '更新播放清單';
@@ -2413,6 +2427,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get restore_defaults => '恢復預設值';
 
   @override
+  String get restore_defaults_confirmation => '這會將您的所有設定重設為預設值。此操作無法復原。';
+
+  @override
   String get streaming_music_format => '串流音樂格式';
 
   @override
@@ -2432,6 +2449,41 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get login => '登入';
+
+  @override
+  String get sign_in => '登入';
+
+  @override
+  String get sign_up => '註冊';
+
+  @override
+  String get sign_out => '登出';
+
+  @override
+  String get verify => '驗證';
+
+  @override
+  String get create_account => '建立您的帳戶';
+
+  @override
+  String get already_have_account => '已有帳戶？登入';
+
+  @override
+  String get dont_have_account => '沒有帳戶？註冊';
+
+  @override
+  String signed_in_as(Object userId) {
+    return '已以 $userId 身分登入';
+  }
+
+  @override
+  String get verification_code => '驗證碼';
+
+  @override
+  String get verification_code_hint => '輸入傳送到您電子郵件的驗證碼';
+
+  @override
+  String get verify_email_code => '我們已將驗證碼傳送到您的電子郵件';
 
   @override
   String get go_to_album => '前往專輯';
@@ -2666,6 +2718,27 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get email => '電子郵件';
 
   @override
+  String get send_code => '傳送驗證碼';
+
+  @override
+  String get change_identifier => '使用其他電子郵件';
+
+  @override
+  String get sign_in_with_otp => '使用一次性驗證碼登入';
+
+  @override
+  String get enter_otp_sent => '輸入我們寄給您的驗證碼';
+
+  @override
+  String get verify_email_reminder => '請驗證您的電子郵件地址以保護您的帳戶';
+
+  @override
+  String get verify_now => '立即驗證';
+
+  @override
+  String get enter_email_to_verify => '輸入您的電子郵件地址以接收驗證碼';
+
+  @override
   String get profile_followers => '追蹤者';
 
   @override
@@ -2745,6 +2818,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get summary_owed_to_artists => '本月欠藝術家的';
 
   @override
+  String get summary_top_artist => '熱門藝人\n本時期';
+
+  @override
   String get summary_artists => '藝術家的';
 
   @override
@@ -2761,6 +2837,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get summary_were_on_repeat => '已經重複播放';
+
+  @override
+  String get summary_listening_share => '收聽佔比';
+
+  @override
+  String summary_listening_share_description(Object tracks_length) {
+    return '您播放最多的前 $tracks_length 首歌曲的分布';
+  }
+
+  @override
+  String get summary_plays => '次播放';
 
   @override
   String total_money(Object money) {

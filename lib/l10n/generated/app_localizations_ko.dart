@@ -27,7 +27,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings => '설정';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Soulful Bhakti를 원하는 대로 맞춤 설정하세요';
 
   @override
   String get genre_categories_filter => '카테고리 혹은 장르별로 불러오기';
@@ -48,13 +48,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get songs => '노래';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => '최신 추가';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => '인기 급상승';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => '더 보기';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get create_a_playlist => '플레이리스트를 생성';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => '새 플레이리스트';
 
   @override
   String get playlist_name => '플레이리스트명';
 
   @override
-  String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+  String get no_playlists_yet => '아직 플레이리스트가 없습니다. 선택한 노래로 하나를 만드세요.';
 
   @override
   String get update_playlist => '플레이리스트를 업데이트';
@@ -862,7 +861,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      '모든 설정이 기본값으로 재설정됩니다. 이 작업은 취소할 수 없습니다.';
 
   @override
   String get streaming_music_format => '스트리밍 음악 포맷';
@@ -886,39 +885,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get login => '로그인';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => '로그인';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => '가입하기';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => '로그아웃';
 
   @override
-  String get verify => 'Verify';
+  String get verify => '확인';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => '계정 만들기';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => '이미 계정이 있으신가요? 로그인';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => '계정이 없으신가요? 가입하기';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return '$userId(으)로 로그인됨';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => '인증 코드';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => '이메일로 전송된 코드를 입력하세요';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => '이메일로 인증 코드를 보냈습니다';
 
   @override
   String get go_to_album => '앨범으로 이동';
@@ -1155,27 +1154,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get email => '이메일';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => '코드 보내기';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => '다른 이메일 사용';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => '일회용 코드로 로그인';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => '보내드린 코드를 입력하세요';
 
   @override
-  String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+  String get verify_email_reminder => '계정을 안전하게 보호하려면 이메일 주소를 인증하세요';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => '지금 인증하기';
 
   @override
-  String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+  String get enter_email_to_verify => '인증 코드를 받으려면 이메일 주소를 입력하세요';
 
   @override
   String get profile_followers => '팔로워';
@@ -1257,7 +1254,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get summary_owed_to_artists => '이번 달 아티스트에게 지급해야 할 금액';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => '최고 아티스트\n이 기간';
 
   @override
   String get summary_artists => '아티스트의';
@@ -1278,15 +1275,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get summary_were_on_repeat => '반복 재생됨';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => '청취 점유율';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return '가장 많이 재생한 상위 $tracks_length개 트랙의 분포';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => '재생';
 
   @override
   String total_money(Object money) {

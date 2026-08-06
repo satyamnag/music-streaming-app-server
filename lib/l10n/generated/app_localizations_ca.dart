@@ -27,7 +27,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get settings => 'Configuració';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Personalitza Soulful Bhakti al teu gust';
 
   @override
   String get genre_categories_filter => 'Filtrar categories o gèneres...';
@@ -48,13 +48,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get songs => 'Cançons';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Nous arribats';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Tendències';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Veure més';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsCa extends AppLocalizations {
   String get create_a_playlist => 'Crear una llista de reproducció';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Nova llista de reproducció';
 
   @override
   String get playlist_name => 'Nom de la llista';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Encara no hi ha llistes de reproducció. Crea una a partir de les cançons seleccionades.';
 
   @override
   String get update_playlist => 'Actualitzar la llista de reproducció';
@@ -874,7 +874,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Això restablirà tots els teus paràmetres als valors per defecte. Aquesta acció no es pot desfer.';
 
   @override
   String get streaming_music_format =>
@@ -900,39 +900,41 @@ class AppLocalizationsCa extends AppLocalizations {
   String get login => 'Inicia la sessió';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Inicia la sessió';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Registra\'t';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Tanca la sessió';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Verifica';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Crea el teu compte';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Ja tens un compte? Inicia la sessió';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'No tens un compte? Dona-te\'n d\'alta';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Sessió iniciada com a $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Codi de verificació';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint =>
+      'Introdueix el codi enviat al teu correu electrònic';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code =>
+      'Hem enviat un codi de verificació al teu correu electrònic';
 
   @override
   String get go_to_album => 'Anar a l\'àlbum';
@@ -1177,27 +1179,27 @@ class AppLocalizationsCa extends AppLocalizations {
   String get email => 'Correu electrònic';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Enviar codi';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Utilitza un altre correu electrònic';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Inicia la sessió amb un codi d\'un sol ús';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Introdueix el codi que t\'hem enviat';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Verifica la teva adreça de correu electrònic per assegurar el teu compte';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Verifica ara';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Introdueix la teva adreça de correu electrònic per rebre un codi de verificació';
 
   @override
   String get profile_followers => 'Seguidors';
@@ -1279,7 +1281,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get summary_owed_to_artists => 'degut als artistes\nAquest mes';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Artista principal\naquest període';
 
   @override
   String get summary_artists => 'artistes';
@@ -1300,15 +1302,15 @@ class AppLocalizationsCa extends AppLocalizations {
   String get summary_were_on_repeat => 'estaven en repetició';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Quota d\'escolta';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Distribució de les $tracks_length cançons principals que més has escoltat';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'reproduccions';
 
   @override
   String total_money(Object money) {

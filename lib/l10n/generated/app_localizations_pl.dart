@@ -27,7 +27,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settings => 'Ustawienia';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Dostosuj Soulful Bhakti do swoich upodobań';
 
   @override
   String get genre_categories_filter => 'Filtruj kategorie lub gatunki...';
@@ -48,13 +48,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get songs => 'Utwory';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Najnowsze';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Popularne';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Zobacz więcej';
 
   @override
   String playing_track(Object track) {
@@ -100,14 +100,14 @@ class AppLocalizationsPl extends AppLocalizations {
   String get create_a_playlist => 'Utwórz playlistę';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Nowa playlista';
 
   @override
   String get playlist_name => 'Nazwa playlisty';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Brak playlist. Utwórz jedną z wybranych utworów.';
 
   @override
   String get update_playlist => 'Zaktualizuj playlistę';
@@ -872,7 +872,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'To spowoduje przywrócenie wszystkich ustawień do wartości domyślnych. Tej operacji nie można cofnąć.';
 
   @override
   String get streaming_music_format => 'Format strumieniowania muzyki';
@@ -896,39 +896,39 @@ class AppLocalizationsPl extends AppLocalizations {
   String get login => 'Zaloguj';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Zaloguj się';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Zarejestruj się';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Wyloguj się';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Weryfikuj';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Utwórz swoje konto';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Masz już konto? Zaloguj się';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Nie masz konta? Zarejestruj się';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return 'Zalogowano jako $userId';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Kod weryfikacyjny';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'Wpisz kod wysłany na Twój e-mail';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => 'Wysłaliśmy kod weryfikacyjny na Twój e-mail';
 
   @override
   String get go_to_album => 'Przejdź do albumu';
@@ -1172,27 +1172,27 @@ class AppLocalizationsPl extends AppLocalizations {
   String get email => 'E-mail';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Wyślij kod';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Użyj innego adresu e-mail';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Zaloguj się kodem jednorazowym';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Wpisz kod, który Ci wysłaliśmy';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Zweryfikuj swój adres e-mail, aby zabezpieczyć swoje konto';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Weryfikuj teraz';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Wpisz swój adres e-mail, aby otrzymać kod weryfikacyjny';
 
   @override
   String get profile_followers => 'Obserwujący';
@@ -1274,7 +1274,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get summary_owed_to_artists => 'Do zapłaty artystom\nw tym miesiącu';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'Najlepszy artysta\nw tym okresie';
 
   @override
   String get summary_artists => 'artystów';
@@ -1295,15 +1295,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get summary_were_on_repeat => 'Były na powtarzaniu';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Udział w słuchaniu';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'Rozkład $tracks_length utworów, których słuchałeś najczęściej';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'odtworzeń';
 
   @override
   String total_money(Object money) {

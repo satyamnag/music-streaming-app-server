@@ -27,7 +27,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settings => 'Ayarlar';
 
   @override
-  String get settings_subtitle => 'Customize Soulful Bhakti to your liking';
+  String get settings_subtitle => 'Soulful Bhakti\'yi zevkine göre özelleştir';
 
   @override
   String get genre_categories_filter =>
@@ -49,13 +49,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get songs => 'Şarkılar';
 
   @override
-  String get newest_arrivals => 'Newest Arrivals';
+  String get newest_arrivals => 'Yeni Eklenenler';
 
   @override
-  String get top_trending => 'Top Trending';
+  String get top_trending => 'Gündemdekiler';
 
   @override
-  String get see_more => 'See More';
+  String get see_more => 'Daha Fazla Gör';
 
   @override
   String playing_track(Object track) {
@@ -101,14 +101,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get create_a_playlist => 'Bir oynatma listesi oluştur';
 
   @override
-  String get new_playlist => 'New playlist';
+  String get new_playlist => 'Yeni çalma listesi';
 
   @override
   String get playlist_name => 'Oynatma listesi adı';
 
   @override
   String get no_playlists_yet =>
-      'No playlists yet. Create one from the selected songs.';
+      'Henüz çalma listesi yok. Seçilen şarkılardan bir tane oluştur.';
 
   @override
   String get update_playlist => 'Oynatma listesini güncelle';
@@ -874,7 +874,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'This will reset all your settings back to their default values. This action cannot be undone.';
+      'Bu, tüm ayarlarını varsayılan değerlerine sıfırlayacak. Bu işlem geri alınamaz.';
 
   @override
   String get streaming_music_format => 'Müzik akış formatı';
@@ -898,39 +898,39 @@ class AppLocalizationsTr extends AppLocalizations {
   String get login => 'Giriş yap';
 
   @override
-  String get sign_in => 'Sign in';
+  String get sign_in => 'Giriş yap';
 
   @override
-  String get sign_up => 'Sign up';
+  String get sign_up => 'Kayıt ol';
 
   @override
-  String get sign_out => 'Sign out';
+  String get sign_out => 'Çıkış yap';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Doğrula';
 
   @override
-  String get create_account => 'Create your account';
+  String get create_account => 'Hesabını oluştur';
 
   @override
-  String get already_have_account => 'Already have an account? Sign in';
+  String get already_have_account => 'Zaten hesabın var mı? Giriş yap';
 
   @override
-  String get dont_have_account => 'Don\'t have an account? Sign up';
+  String get dont_have_account => 'Hesabın yok mu? Kayıt ol';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Signed in as $userId';
+    return '$userId olarak giriş yapıldı';
   }
 
   @override
-  String get verification_code => 'Verification code';
+  String get verification_code => 'Doğrulama kodu';
 
   @override
-  String get verification_code_hint => 'Enter the code sent to your email';
+  String get verification_code_hint => 'E-postana gönderilen kodu gir';
 
   @override
-  String get verify_email_code => 'We sent a verification code to your email';
+  String get verify_email_code => 'E-postana bir doğrulama kodu gönderdik';
 
   @override
   String get go_to_album => 'Albüme git';
@@ -1173,27 +1173,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get email => 'E-posta';
 
   @override
-  String get send_code => 'Send code';
+  String get send_code => 'Kod gönder';
 
   @override
-  String get change_identifier => 'Use a different email';
+  String get change_identifier => 'Farklı bir e-posta kullan';
 
   @override
-  String get sign_in_with_otp => 'Sign in with a one-time code';
+  String get sign_in_with_otp => 'Tek kullanımlık kodla giriş yap';
 
   @override
-  String get enter_otp_sent => 'Enter the code we sent you';
+  String get enter_otp_sent => 'Sana gönderdiğimiz kodu gir';
 
   @override
   String get verify_email_reminder =>
-      'Please verify your email address to secure your account';
+      'Hesabını güvence altına almak için lütfen e-posta adresini doğrula';
 
   @override
-  String get verify_now => 'Verify now';
+  String get verify_now => 'Şimdi doğrula';
 
   @override
   String get enter_email_to_verify =>
-      'Enter your email address to receive a verification code';
+      'Doğrulama kodu almak için e-posta adresini gir';
 
   @override
   String get profile_followers => 'Takipçiler';
@@ -1275,7 +1275,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get summary_owed_to_artists => 'Sanatçılara borç\nbu ay';
 
   @override
-  String get summary_top_artist => 'Top artist\nthis period';
+  String get summary_top_artist => 'En iyi sanatçı\nbu dönem';
 
   @override
   String get summary_artists => 'sanatçının';
@@ -1296,15 +1296,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get summary_were_on_repeat => 'Tekrarda vardı';
 
   @override
-  String get summary_listening_share => 'Listening share';
+  String get summary_listening_share => 'Dinleme payı';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribution of the top $tracks_length tracks you played the most';
+    return 'En çok çaldığın ilk $tracks_length parçanın dağılımı';
   }
 
   @override
-  String get summary_plays => 'plays';
+  String get summary_plays => 'çalma';
 
   @override
   String total_money(Object money) {
