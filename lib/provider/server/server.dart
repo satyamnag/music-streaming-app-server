@@ -21,6 +21,12 @@ final serverProvider = FutureProvider(
     }
     print('[SANGEET] server startup begin');
     try {
+      // Wait for the persisted preferences to finish loading before reading
+      // "Enable Connect". Without this, the provider reads the synchronous
+      // default (Connect off) and the server binds to loopback even when the
+      // user has enabled remote connect. Awaited once; the server still binds
+      // exactly one time (see the _serverInstance singleton guard below).
+      await ref.read(userPreferencesProvider.notifier).loaded;
       // Read preferences once (not watch) so the provider does NOT re-run and
       // kill the live server when the database finishes loading (connectPort
       // default -1 -> stored value).

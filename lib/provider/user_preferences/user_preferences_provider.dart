@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,14 +20,27 @@ import 'package:open_file/open_file.dart';
 typedef UserPreferences = PreferencesTableData;
 
 class UserPreferencesNotifier extends Notifier<PreferencesTableData> {
+  /// Completes once the initial preferences row has been loaded from the
+  /// database. Consumers that need the persisted values (e.g. the local
+  /// playback server, which must know whether "Enable Connect" is on before
+  /// binding) can await this before reading [state].
+  final Completer<void> _initialLoadCompleter = Completer<void>();
+
+  /// Resolves after the persisted preferences have been read from the
+  /// database. Awaited by [serverProvider] so the bind address reflects the
+  /// stored "Enable Connect" value instead of the synchronous default.
+  Future<void> get loaded => _initialLoadCompleter.future;
+
   @override
   build() {
     final db = ref.watch(databaseProvider);
 
     ref.read(deviceKindProvider.future).then((deviceKind) async {
-      (db.select(db.preferencesTable)..where((tbl) => tbl.id.equals(0)))
-          .getSingleOrNull()
-          .then((result) async {
+      try {
+        final result = await (db.select(db.preferencesTable)
+              ..where((tbl) => tbl.id.equals(0)))
+            .getSingleOrNull();
+
         if (result == null) {
           await db.into(db.preferencesTable).insert(
                 PreferencesTableCompanion.insert(
@@ -85,7 +100,13 @@ class UserPreferencesNotifier extends Notifier<PreferencesTableData> {
         ref.onDispose(() {
           subscription.cancel();
         });
-      });
+      } finally {
+        // Always release waiters (e.g. serverProvider) even if the initial
+        // load fails, so they never hang on a never-completing future.
+        if (!_initialLoadCompleter.isCompleted) {
+          _initialLoadCompleter.complete();
+        }
+      }
     });
 
     return PreferencesTable.defaults();
