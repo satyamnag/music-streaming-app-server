@@ -4,7 +4,9 @@ import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
 
+import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -51,8 +53,56 @@ class AboutSangeetPage extends HookConsumerWidget {
                     "reflection or as a peaceful companion throughout the day.\n\n"
                     "Experience gentle, meaningful visuals that reflect the "
                     "divine presence in everyday life.",
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.justify,
                   ).semiBold().large(),
+                ),
+                const SizedBox(height: 32),
+                const Divider(),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Credits",
+                    style: Theme.of(context).typography.h3,
+                  ).bold(),
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Poetry: Late Sri Chakalakonda Chenchuramayya\n"
+                    "Lyrics: Dr. Sri Ramakantha Rao Chakalakonda\n"
+                    "Music Producer: Karthik Chandan Palepu\n"
+                    "Animation: Mannem Venkat Reddy",
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Subscribe to ",
+                        ),
+                        TextSpan(
+                          text: "@SoulfulBhaktiTelugu",
+                          style: TextStyle(
+                            color: Colors.sky[400],
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.sky[400],
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              launchUrlString(
+                                "https://www.youtube.com/@SoulfulBhaktiTelugu",
+                              );
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
