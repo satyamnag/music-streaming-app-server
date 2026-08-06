@@ -3,7 +3,7 @@ description: Open source extensible music streaming platform and app, based on B
 
 publish_to: "none"
 
-version: 1.0.0+46
+version: 1.0.0+48
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
@@ -147,6 +147,9 @@ dependencies:
   base32: ^2.2.0
   superwallkit_flutter: ^2.4.9
   onesignal_flutter: 5.5.2
+  firebase_core: ^4.13.0
+  firebase_crashlytics: ^5.2.7
+  firebase_analytics: ^12.4.6
 
 dev_dependencies:
   build_runner: ^2.4.13

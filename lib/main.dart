@@ -16,6 +16,7 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/onesignal_service.dart';
+import 'package:sangeet/services/superwall_service.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import 'package:sangeet/collections/env.dart';
@@ -55,7 +56,6 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:window_manager/window_manager.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import 'package:yt_dlp_dart/yt_dlp_dart.dart';
 import 'package:flutter_new_pipe_extractor/flutter_new_pipe_extractor.dart';
 
@@ -79,6 +79,20 @@ Future<void> main(List<String> rawArgs) async {
     tz.initializeTimeZones();
 
     MediaKit.ensureInitialized();
+
+    // Firebase (Crashlytics + Analytics) — DISABLED until google-services.json
+    // is added to android/app/. Re-enable this block once the file exists.
+    // if (kIsAndroid || kIsIOS) {
+    //   await Firebase.initializeApp();
+    //   FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+    //   FlutterError.onError = (errorDetails) {
+    //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    //   };
+    //   PlatformDispatcher.instance.onError = (error, stack) {
+    //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    //     return true;
+    //   };
+    // }
 
     await migrateMacOsFromSandboxToNoSandbox();
 
@@ -124,16 +138,10 @@ Future<void> main(List<String> rawArgs) async {
       HomeWidget.setAppGroupId("group.sangeet_home_player_widget");
     }
 
-    // Superwall paywall/monetization SDK. The publishable key is public by
-    // design; configure only when present so the app runs without a key.
+    // Superwall paywall/monetization SDK, via the centralized service wrapper.
+    // The public API key is public by design; configure only when present.
     if (Env.superwallApiKey.isNotEmpty) {
-      final superwallOptions = SuperwallOptions();
-      superwallOptions.paywalls.shouldPreload = true;
-      superwallOptions.logging.level = LogLevel.error;
-      Superwall.configure(
-        Env.superwallApiKey,
-        options: superwallOptions,
-      );
+      SuperwallService.instance.configure(Env.superwallApiKey);
     }
 
     // OneSignal push notifications & in-app messages, via the centralized

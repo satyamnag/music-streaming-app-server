@@ -3,6 +3,10 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "org.jetbrains.kotlin.plugin.compose"
+    // Firebase (Crashlytics + Analytics) — DISABLED until google-services.json
+    // is added to android/app/. Re-enable these two lines once the file exists.
+    // id "com.google.gms.google-services"
+    // id "com.google.firebase.crashlytics"
 }
 
 def localProperties = new Properties()
@@ -73,7 +77,7 @@ android {
         // Publishable keys are public (meant for client apps) — safe to embed here.
         // Flutter's Gradle plugin doesn't pass custom gradle.properties via project.findProperty,
         // so we reference the property directly. Keep in sync with .env CLERK_PUBLISHABLE_KEY.
-        def clerkKey = project.hasProperty('CLERK_PUBLISHABLE_KEY') ? project.property('CLERK_PUBLISHABLE_KEY') : 'pk_test_cG9wdWxhci10aWNrLTgxLmNsZXJrLmFjY291bnRzLmRldiQ'
+        def clerkKey = project.hasProperty('CLERK_PUBLISHABLE_KEY') ? project.property('CLERK_PUBLISHABLE_KEY') : 'pk_live_Y2xlcmsuZmFtZXJlbGF5LmNvbSQ'
         buildConfigField "String", "CLERK_PUBLISHABLE_KEY", "\"${clerkKey}\""
     }
 
@@ -89,6 +93,11 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            // Crashlytics native symbol upload — DISABLED until google-services.json
+            // is added (re-enable together with the Firebase plugins).
+            // firebaseCrashlytics {
+            //     nativeSymbolUploadEnabled true
+            // }
         }
         debug {
             signingConfig signingConfigs.release

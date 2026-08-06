@@ -1,8 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -12,14 +15,19 @@ import 'package:sangeet/provider/history/recent_tracks.dart';
 /// A horizontal "Recently played" row of track cards shown on the home screen.
 /// Devotional & calm mood: rounded corners, soft shadow, maroon accent.
 /// Tapping a card plays the full recently-played list from that track.
-/// Hidden when there is no listening history yet.
+/// Shows the first [pageSize] cards plus a "See More" card that reveals the
+/// next [pageSize] on each tap. Hidden when there is no listening history yet.
 class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
+  /// Number of cards revealed per page.
+  static const int pageSize = 5;
+
   const HomeRecentlyPlayedTracksSection({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
     final history = ref.watch(recentlyPlayedTracksProvider);
     final tracks = history.asData?.value ?? const <SangeetTrackObject>[];
+    final visibleCount = useState(HomeRecentlyPlayedTracksSection.pageSize);
 
     if (history.isLoading) {
       return SliverToBoxAdapter(
@@ -64,6 +72,8 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
 
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final shown = tracks.take(visibleCount.value).toList();
+    final hasMore = tracks.length > visibleCount.value;
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -74,11 +84,29 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-              child: DefaultTextStyle(
-                style: theme.typography.h4.copyWith(
-                  color: theme.colorScheme.foreground,
-                ),
-                child: Text(context.l10n.recently_played),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: theme.typography.h4.copyWith(
+                        color: theme.colorScheme.foreground,
+                      ),
+                      child: Text(context.l10n.recently_played),
+                    ),
+                  ),
+                  Tooltip(
+                    tooltip: TooltipContainer(
+                      child: Text(context.l10n.recently_played),
+                    ).call,
+                    child: IconButton.ghost(
+                      size: ButtonSize.small,
+                      icon: const Icon(SangeetIcons.clock, size: 18),
+                      onPressed: () {
+                        context.navigateTo(const RecentlyPlayedRoute());
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Gap(8 * scale),
@@ -87,10 +115,18 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
-                itemCount: tracks.length,
+                itemCount: shown.length + (hasMore ? 1 : 0),
                 separatorBuilder: (_, __) => Gap(12 * scale),
                 itemBuilder: (context, index) {
-                  final track = tracks[index];
+                  if (hasMore && index == shown.length) {
+                    return _SeeMoreCard(
+                      onTap: () {
+                        visibleCount.value +=
+                            HomeRecentlyPlayedTracksSection.pageSize;
+                      },
+                    );
+                  }
+                  final track = shown[index];
                   final imageUrl =
                       track.album.images.smallest(ImagePlaceholder.albumArt);
 
@@ -178,6 +214,56 @@ class _RecentTrackCard extends HookWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.small.copyWith(
                   color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A "See More" card shown after the visible recent-played cards. Tapping it
+/// reveals the next page of cards.
+class _SeeMoreCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SeeMoreCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      width: 140 * scale,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                SangeetIcons.angleDown,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+              Gap(8 * scale),
+              Text(
+                context.l10n.see_more,
+                style: theme.typography.base.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

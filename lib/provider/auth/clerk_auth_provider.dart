@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/services/superwall_service.dart';
 
 /// Flutter-side bridge to the Clerk Android SDK (Native API).
 ///
@@ -91,6 +92,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
         .map((event) => ClerkAuthState.fromMap(event as Map))
         .listen((newState) {
       state = AsyncData(newState);
+      _syncSuperwallIdentity(newState);
     });
 
     ref.onDispose(() => _subscription?.cancel());
@@ -104,7 +106,25 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
 
     final current =
         await _methodChannel.invokeMethod<Map<Object?, Object?>>('getState');
-    return ClerkAuthState.fromMap(current ?? const {});
+    final initialState = ClerkAuthState.fromMap(current ?? const {});
+    _syncSuperwallIdentity(initialState);
+    return initialState;
+  }
+
+  /// Syncs the Clerk identity to Superwall: identifies the user on sign-in
+  /// (using the stable Clerk user id) and resets on sign-out. Also records a
+  /// few user attributes for audience targeting.
+  void _syncSuperwallIdentity(ClerkAuthState authState) {
+    final sw = SuperwallService.instance;
+    if (authState.signedIn && authState.userId != null) {
+      sw.identify(authState.userId!);
+      sw.setUserAttributes({
+        'email': authState.email ?? '',
+        'username': authState.username ?? '',
+      });
+    } else if (!authState.signedIn) {
+      sw.reset();
+    }
   }
 
   /// Refreshes the email verification status of the signed-in user.

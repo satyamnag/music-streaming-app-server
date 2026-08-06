@@ -243,6 +243,12 @@ abstract class AppLocalizations {
   /// **'Top Trending'**
   String get top_trending;
 
+  /// No description provided for @see_more.
+  ///
+  /// In en, this message translates to:
+  /// **'See More'**
+  String get see_more;
+
   /// No description provided for @playing_track.
   ///
   /// In en, this message translates to:

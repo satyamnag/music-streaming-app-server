@@ -51,6 +51,10 @@ class AppRouter extends RootStackRouter {
               page: LyricsRoute.page,
             ),
             AutoRoute(
+              path: "recently-played",
+              page: RecentlyPlayedRoute.page,
+            ),
+            AutoRoute(
               path: "settings",
               page: SettingsRoute.page,
             ),

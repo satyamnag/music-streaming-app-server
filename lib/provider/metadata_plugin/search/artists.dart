@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
@@ -12,11 +13,14 @@ class MetadataPluginSearchArtistsNotifier
   @override
   fetch(offset, limit) async {
     if (arg.isEmpty) {
+      // Empty search: show every artist in the catalog so the Artists tab is
+      // never empty (tapping an artist opens their full profile + songs).
+      final artists = await ref.read(libraryArtistsProvider.future);
       return SangeetPaginationResponseObject<SangeetFullArtistObject>(
         limit: limit,
         nextOffset: null,
-        total: 0,
-        items: [],
+        total: artists.length,
+        items: artists,
         hasMore: false,
       );
     }

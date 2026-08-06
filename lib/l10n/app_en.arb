@@ -14,6 +14,7 @@
   "songs": "Songs",
   "newest_arrivals": "Newest Arrivals",
   "top_trending": "Top Trending",
+  "see_more": "See More",
   "playing_track": "Playing {track}",
   "queue_clear_alert": "This will clear the current queue. {track_length} tracks will be removed\nDo you want to continue?",
   "load_more": "Load more",

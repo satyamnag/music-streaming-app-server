@@ -54,6 +54,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get top_trending => 'Top Trending';
 
   @override
+  String get see_more => 'See More';
+
+  @override
   String playing_track(Object track) {
     return '播放 $track';
   }

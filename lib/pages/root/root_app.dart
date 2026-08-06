@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/hooks/configurators/use_check_yt_dlp_installed.dart';
+import 'package:sangeet/hooks/configurators/use_superwall_deep_links.dart';
+import 'package:sangeet/hooks/configurators/use_superwall_subscription_status.dart';
 import 'package:sangeet/modules/notifications/onesignal_verification_dialog.dart';
 import 'package:sangeet/modules/root/bottom_player.dart';
 import 'package:sangeet/modules/root/sidebar/sidebar.dart';
@@ -27,6 +29,13 @@ class RootAppPage extends HookConsumerWidget {
     useGlobalSubscriptions(ref);
     useEndlessPlayback(ref);
     useCheckYtDlpInstalled(ref);
+    // Listen to the Superwall subscription status so the UI can react to
+    // plan changes (premium feature access). Result is consumed by widgets
+    // via the same hook; calling it here keeps the stream subscribed.
+    useSuperwallSubscriptionStatus();
+    // Forward incoming deep links to Superwall (paywall previews, web
+    // checkout redemption).
+    useSuperwallDeepLinks();
 
     useEffect(() {
       SystemChrome.setSystemUIOverlayStyle(
