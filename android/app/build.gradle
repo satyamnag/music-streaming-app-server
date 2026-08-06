@@ -3,10 +3,9 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "org.jetbrains.kotlin.plugin.compose"
-    // Firebase (Crashlytics + Analytics) — DISABLED until google-services.json
-    // is added to android/app/. Re-enable these two lines once the file exists.
-    // id "com.google.gms.google-services"
-    // id "com.google.firebase.crashlytics"
+    // Firebase (Crashlytics + Analytics)
+    id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
 }
 
 def localProperties = new Properties()
@@ -93,11 +92,11 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            // Crashlytics native symbol upload — DISABLED until google-services.json
-            // is added (re-enable together with the Firebase plugins).
-            // firebaseCrashlytics {
-            //     nativeSymbolUploadEnabled true
-            // }
+            // Enable Crashlytics native symbol upload so native stack traces
+            // are symbolicated in the Crashlytics dashboard.
+            firebaseCrashlytics {
+                nativeSymbolUploadEnabled true
+            }
         }
         debug {
             signingConfig signingConfigs.release

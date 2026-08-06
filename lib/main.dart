@@ -13,6 +13,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifier/local_notifier.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/onesignal_service.dart';
@@ -80,19 +83,20 @@ Future<void> main(List<String> rawArgs) async {
 
     MediaKit.ensureInitialized();
 
-    // Firebase (Crashlytics + Analytics) — DISABLED until google-services.json
-    // is added to android/app/. Re-enable this block once the file exists.
-    // if (kIsAndroid || kIsIOS) {
-    //   await Firebase.initializeApp();
-    //   FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-    //   FlutterError.onError = (errorDetails) {
-    //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    //   };
-    //   PlatformDispatcher.instance.onError = (error, stack) {
-    //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    //     return true;
-    //   };
-    // }
+    // Firebase (Crashlytics + Analytics). Initialize once at startup and wire
+    // the Crashlytics error handlers so all uncaught Flutter fatal errors and
+    // uncaught async errors are recorded.
+    if (kIsAndroid || kIsIOS) {
+      await Firebase.initializeApp();
+      FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+      FlutterError.onError = (errorDetails) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
 
     await migrateMacOsFromSandboxToNoSandbox();
 
