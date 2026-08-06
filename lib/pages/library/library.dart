@@ -14,13 +14,9 @@ class LibraryPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final router = context.watchRouter;
     final sidebarLibraryTileList = useMemoized(
       () => getSidebarLibraryTileList(context.l10n),
       [context.l10n],
-    );
-    final index = sidebarLibraryTileList.indexWhere(
-      (e) => router.currentPath.startsWith(e.pathPrefix),
     );
 
     return PopScope(
@@ -36,24 +32,11 @@ class LibraryPage extends HookConsumerWidget {
               if (constraints.smAndDown)
                 TitleBar(
                   automaticallyImplyLeading: false,
-                  child: TabContainer(
-                    selected: index,
-                    onSelect: (index) {
-                      context.navigateTo(sidebarLibraryTileList[index].route);
-                    },
-                    builder: (context, children) => Row(
-                      children: [
-                        for (final child in children) Expanded(child: child),
-                      ],
+                  title: Center(
+                    child: Text(
+                      sidebarLibraryTileList.first.title,
+                      style: Theme.of(context).typography.h4,
                     ),
-                    children: [
-                      for (final tile in sidebarLibraryTileList)
-                        TabItem(
-                          child: Center(
-                            child: Text(tile.title),
-                          ),
-                        ),
-                    ],
                   ),
                 )
               else

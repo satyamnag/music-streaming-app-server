@@ -24,6 +24,25 @@ const _defaultUser = {
   'externalUri': '',
 };
 
+/// Artist whose auto-generated per-artist playlist is not shown. It is the
+/// studio/artist behind every track, so a dedicated playlist adds no value.
+const _hiddenArtistName = 'Dr. Sri Ramakantha Rao Chakalakonda';
+
+const _monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+/// Formats a "YYYY-MM" key as "Month, YY" (e.g. "2026-08" -> "August, 26").
+String _monthPlaylistName(String key) {
+  final parts = key.split('-');
+  if (parts.length != 2) return key;
+  final month = int.tryParse(parts[1]) ?? 0;
+  if (month < 1 || month > 12) return key;
+  final year = parts[0];
+  return '${_monthNames[month - 1]}, ${year.length >= 2 ? year.substring(year.length - 2) : year}';
+}
+
 /// Returns a "YYYY-MM" key derived from an ISO `created_at` string.
 String monthsKey(String iso) {
   return iso.length >= 7 ? iso.substring(0, 7) : iso;
@@ -304,7 +323,7 @@ class ServerSupabaseDataRoutes {
       final items = [
         {
           'id': 'supabase-all-tracks',
-          'name': 'Songs',
+          'name': 'All Songs',
           'description': '${tracks.length} tracks',
           'externalUri': '',
           'owner': _defaultUser,
@@ -373,6 +392,10 @@ class ServerSupabaseDataRoutes {
           ? id.substring('artist-'.length).replaceAll('-', ' ')
           : null;
       final artistName = rawArtistName?.toLowerCase();
+      if (rawArtistName != null &&
+          rawArtistName.toLowerCase() == _hiddenArtistName.toLowerCase()) {
+        return Response.notFound('{"error":"Not found"}');
+      }
       final isMonthPlaylist = id.startsWith('month-');
       final monthKey = isMonthPlaylist
           ? id.substring('month-'.length)
@@ -380,19 +403,11 @@ class ServerSupabaseDataRoutes {
 
       List<Map<String, dynamic>> filtered;
       if (monthKey != null) {
-        const monthNames = [
-          'January', 'February', 'March', 'April', 'May', 'June',
-          'July', 'August', 'September', 'October', 'November', 'December',
-        ];
-        final parts = monthKey.split('-');
-        final monthName = parts.length == 2
-            ? monthNames[(int.parse(parts[1]) - 1).clamp(0, 11)]
-            : monthKey;
         filtered = tracks.where((t) {
           final created = t['created_at']?.toString();
           return created != null && monthsKey(created) == monthKey;
         }).toList();
-        final name = monthName;
+        final name = _monthPlaylistName(monthKey);
         return Response.ok(
           jsonEncode({
             'id': id,
@@ -420,8 +435,8 @@ class ServerSupabaseDataRoutes {
       }
 
       final name = id == 'supabase-all-tracks'
-          ? 'Songs'
-          : (rawArtistName ?? 'Songs');
+          ? 'All Songs'
+          : (rawArtistName ?? 'All Songs');
       return Response.ok(
         jsonEncode({
           'id': id,
@@ -474,6 +489,10 @@ class ServerSupabaseDataRoutes {
           ? id.substring('artist-'.length).replaceAll('-', ' ')
           : null;
       final artistName = rawArtistName?.toLowerCase();
+      if (rawArtistName != null &&
+          rawArtistName.toLowerCase() == _hiddenArtistName.toLowerCase()) {
+        return Response.notFound('{"error":"Not found"}');
+      }
       final isMonthPlaylist = id.startsWith('month-');
       final monthKey = isMonthPlaylist
           ? id.substring('month-'.length)
@@ -622,7 +641,7 @@ class ServerSupabaseDataRoutes {
   /// GET /supabase/owner-playlists
   ///
   /// Returns the playlists made by the developer/owner: the full catalog
-  /// ("Songs") plus one playlist per artist ("<Artist> — all songs"). Each
+  /// ("All Songs") plus one playlist per artist ("<Artist> — all songs"). Each
   /// playlist shows the artist name and the number of songs it contains.
   Future<Response> getOwnerPlaylists(Request request) async {
     try {
@@ -639,9 +658,9 @@ class ServerSupabaseDataRoutes {
   }
 
   /// Builds the developer-curated "default" playlists from the track catalog:
-  ///  - "Songs": the whole catalog.
+  ///  - "All Songs": the whole catalog.
   ///  - One playlist per artist ("By <Artist>"), with the artist's songs.
-  ///  - One playlist per upload month ("August", "September", ...).
+  ///  - One playlist per upload month ("August, 26", "September, 26", ...).
   Future<List<Map<String, dynamic>>> _buildOwnerPlaylists(
     List<Map<String, dynamic>> tracks,
   ) async {
@@ -649,7 +668,7 @@ class ServerSupabaseDataRoutes {
 
     items.add({
       'id': 'supabase-all-tracks',
-      'name': 'Songs',
+      'name': 'All Songs',
       'description': '${tracks.length} tracks',
       'externalUri': '',
       'owner': _defaultUser,
@@ -667,6 +686,7 @@ class ServerSupabaseDataRoutes {
       }
     }
     for (final name in artistNames) {
+      if (name == _hiddenArtistName) continue;
       final slug = name.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
       final count = tracks.where((t) {
         final names = (t['artist_names'] as List<dynamic>?)
@@ -696,11 +716,7 @@ class ServerSupabaseDataRoutes {
     }
 
     // Month playlists: segregate songs by the month they were uploaded,
-    // e.g. "September", "October", "November", "December", "January"...
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
+    // e.g. "August, 26", "September, 26", "October, 26"...
     final months = <String, List<Map<String, dynamic>>>{};
     for (final t in tracks) {
       final created = t['created_at']?.toString();
@@ -711,12 +727,10 @@ class ServerSupabaseDataRoutes {
       months.putIfAbsent(key, () => []).add(t);
     }
     for (final entry in months.entries) {
-      final parts = entry.key.split('-'); // "2026-09"
-      final monthName = monthNames[int.parse(parts[1]) - 1];
       final first = entry.value.first;
       items.add({
         'id': 'month-${entry.key}',
-        'name': monthName,
+        'name': _monthPlaylistName(entry.key),
         'description': '${entry.value.length} songs',
         'externalUri': '',
         'owner': _defaultUser,

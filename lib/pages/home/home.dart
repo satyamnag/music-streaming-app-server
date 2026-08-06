@@ -9,6 +9,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
+import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
@@ -104,6 +105,7 @@ class HomePage extends HookConsumerWidget {
                     const SliverGap(10),
                   const SliverGap(10),
                   const HomeRecentlyPlayedTracksSection(),
+                  const HomePlaylistsSection(),
                   ...switch (sectionsAsync) {
                     AsyncData(value: final sections) => [
                         HomeTrackSection(

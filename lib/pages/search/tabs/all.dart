@@ -4,7 +4,6 @@ import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
-import 'package:sangeet/modules/search/sections/artists.dart';
 import 'package:sangeet/modules/search/sections/playlists.dart';
 import 'package:sangeet/modules/search/sections/tracks.dart';
 import 'package:sangeet/provider/metadata_plugin/search/all.dart';
@@ -42,8 +41,6 @@ class SearchPageAllTab extends HookConsumerWidget {
                 children: [
                   SearchTracksSection(),
                   SearchPlaylistsSection(),
-                  Gap(20),
-                  SearchArtistsSection(),
                   Gap(20),
                 ],
               ),

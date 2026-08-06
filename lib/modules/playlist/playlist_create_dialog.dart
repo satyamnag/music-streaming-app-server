@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -20,6 +18,7 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
 import 'package:sangeet/provider/metadata_plugin/playlist/playlist.dart';
+import 'package:sangeet/services/logger/logger.dart';
 
 class PlaylistCreateDialog extends HookConsumerWidget {
   /// Track ids to add to the playlist
@@ -92,53 +91,53 @@ class PlaylistCreateDialog extends HookConsumerWidget {
     Future<void> onCreate() async {
       if (!formKey.currentState!.saveAndValidate()) return;
 
+      var succeeded = false;
       try {
         isSubmitting.value = true;
         final values = formKey.currentState!.value;
 
-        final payload = (
-          playlistName: values['playlistName'],
-          collaborative: values['collaborative'],
-          public: values['public'],
-          description: values['description'],
-          base64Image: (values['image'] as XFile?)?.path != null
-              ? await (values['image'] as XFile)
-                  .readAsBytes()
-                  .then((bytes) => base64Encode(bytes))
-              : null,
-        );
+        final playlistName =
+            (values['playlistName'] ?? '').toString().trim();
+        final description =
+            (values['description'] ?? '').toString().trim();
 
+        // Create via the on-device local playlist API. The metadata-plugin
+        // bytecode path is unavailable in this build (its compiled bytecode is
+        // not readable by the bundled hetu_script), so we persist playlists
+        // directly through the local server, matching playlist_add_track_dialog.
         if (isUpdatingPlaylist) {
+          // Local playlists have no update endpoint; recreate is not supported
+          // here, so keep the existing plugin-driven modify for completeness.
           await playlistNotifier.modify(
-            name: payload.playlistName,
-            description: payload.description,
-            public: payload.public,
-            collaborative: payload.collaborative,
+            name: playlistName,
+            description: description,
+            public: values['public'] ?? false,
+            collaborative: values['collaborative'] ?? false,
             onError: onError,
           );
+          succeeded = true;
         } else {
-          await playlistNotifier.create(
-            name: payload.playlistName,
-            description: payload.description,
-            public: payload.public,
-            collaborative: payload.collaborative,
-            onError: onError,
+          await createUserPlaylist(
+            name: playlistName,
+            description: description,
           );
+          ref.invalidate(userPlaylistsProvider);
+          final playlists = await ref.read(userPlaylistsProvider.future);
+          final created =
+              playlists.isEmpty ? null : playlists.last;
+          if (created != null && trackIds.isNotEmpty) {
+            for (final trackId in trackIds) {
+              await addTrackToUserPlaylist(created.id, trackId);
+            }
+          }
+          succeeded = true;
         }
-
-        if (trackIds.isNotEmpty) {
-          await playlistNotifier.addTracks(trackIds, onError);
-        }
+      } catch (e, stack) {
+        AppLogger.reportError(e, stack);
       } finally {
         isSubmitting.value = false;
-        if (context.mounted &&
-            !ref
-                .read(metadataPluginPlaylistProvider(playlistId ?? ""))
-                .hasError) {
-          context.router.maybePop<SangeetFullPlaylistObject>(
-            await ref
-                .read(metadataPluginPlaylistProvider(playlistId ?? "").future),
-          );
+        if (context.mounted && succeeded) {
+          Navigator.pop(context);
         }
       }
     }
