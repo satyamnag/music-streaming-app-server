@@ -25,9 +25,14 @@ create policy "Allow public read"
   on tracks for select
   using (true);
 
--- Storage bucket for audio files
+-- Storage bucket for audio files (private; streamed via signed URLs)
 insert into storage.buckets (id, name, public)
 values ('music', 'music', false)
+on conflict (id) do nothing;
+
+-- Storage bucket for public thumbnail images
+insert into storage.buckets (id, name, public)
+values ('thumbnails', 'thumbnails', true)
 on conflict (id) do nothing;
 
 -- Allow service role (used by Express server) full access to the bucket
