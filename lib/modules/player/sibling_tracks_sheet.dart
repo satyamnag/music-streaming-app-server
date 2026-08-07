@@ -114,11 +114,7 @@ class SiblingTracksSheet extends HookConsumerWidget {
                             : null,
                         trailing:
                             Text(sourceInfo.duration.toHumanReadableString()),
-                        subtitle: Text(
-                          sourceInfo.artists.join(", "),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        subtitle: const SizedBox.shrink(),
                         enabled: !sourcedTrack.isLoading,
                         selected: !sourcedTrack.isLoading &&
                             sourceInfo.id == sourcedTrack.asData?.value.info.id,

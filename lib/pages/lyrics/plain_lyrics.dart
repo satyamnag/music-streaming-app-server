@@ -5,7 +5,6 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -50,15 +49,6 @@ class PlainLyrics extends HookConsumerWidget {
                         ),
                 ),
               ),
-              Center(
-                child: Text(
-                  playlist.activeTrack?.artists.asString() ?? "",
-                  style: (mediaQuery.mdAndUp ? typography.h4 : typography.large)
-                      .copyWith(
-                    color: palette.bodyTextColor,
-                  ),
-                ),
-              )
             ],
             Expanded(
               child: SingleChildScrollView(

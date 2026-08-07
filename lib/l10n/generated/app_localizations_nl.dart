@@ -1616,4 +1616,7 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Voor audiofielen. Biedt hoge kwaliteit/lossless audiostreams. Nauwkeurige trackmatching op basis van ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

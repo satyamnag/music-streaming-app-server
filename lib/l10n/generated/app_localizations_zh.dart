@@ -1571,6 +1571,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       '适合发烧友。提供高质量/无损音频流。基于 ISRC 的精确曲目匹配。';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

@@ -12,8 +12,8 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/history/history.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/playlist.dart';
 import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -52,8 +52,8 @@ class PlaylistCard extends HookConsumerWidget {
 
     final fetchInitialTracks = useCallback(() async {
       if (playlist.id == 'user-liked-tracks') {
-        final tracks = await ref.read(metadataPluginSavedTracksProvider.future);
-        return tracks.items;
+        final tracks = await ref.read(likedSongsProvider.future);
+        return tracks;
       }
 
       final result = await ref
@@ -66,7 +66,7 @@ class PlaylistCard extends HookConsumerWidget {
       await fetchInitialTracks();
 
       if (playlist.id == 'user-liked-tracks') {
-        return ref.read(metadataPluginSavedTracksProvider.notifier).fetchAll();
+        return ref.read(likedSongsProvider.future);
       }
 
       return ref

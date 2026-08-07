@@ -13,7 +13,6 @@ import 'package:sangeet/modules/player/player_queue.dart';
 import 'package:sangeet/modules/player/volume_slider.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/links/anchor_button.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -145,15 +144,8 @@ class ConnectControlPage extends HookConsumerWidget {
                               },
                             ),
                           ),
-                          SliverToBoxAdapter(
-                            child: ArtistLink(
-                              artists: playlist.activeTrack?.artists ?? [],
-                              textStyle: typography.normal,
-                              mainAxisAlignment: WrapAlignment.start,
-                              onOverflowArtistClick: () => context.navigateTo(
-                                TrackRoute(trackId: playlist.activeTrack!.id),
-                              ),
-                            ),
+                          const SliverToBoxAdapter(
+                            child: SizedBox.shrink(),
                           ),
                         ],
                       ),

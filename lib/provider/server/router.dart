@@ -44,6 +44,8 @@ final serverRouterProvider = Provider((ref) {
   router.get("/supabase/artists/<id>/top-tracks", supabaseRoutes.getArtistTopTracks);
   router.get("/supabase/users/me", supabaseRoutes.getUserMe);
   router.get("/supabase/liked-songs/supabase", supabaseRoutes.getLikedSongs);
+  router.post("/supabase/liked-songs", supabaseRoutes.addLikedSong);
+  router.delete("/supabase/liked-songs/<trackId>", supabaseRoutes.removeLikedSong);
 
   // Global play tracking (Top Trending)
   router.post("/supabase/plays", supabaseRoutes.recordPlay);

@@ -26,11 +26,7 @@ class StatsPageSummarySection extends HookConsumerWidget {
       historyTopTracksProvider(HistoryDuration.allTime),
     );
     final topTracksList = topTracks.asData?.value.items ?? const [];
-    final topArtistName = topTracksList
-            .expand((e) => e.track.artists)
-            .map((a) => a.name)
-            .firstOrNull ??
-        "—";
+    final topTrackName = topTracksList.firstOrNull?.track.name ?? "—";
 
     // Listening-share donut for the top 5 tracks (by play count).
     final chartSegments = topTracksList
@@ -141,12 +137,12 @@ class StatsPageSummarySection extends HookConsumerWidget {
                     },
                   ),
                   SummaryCard.unformatted(
-                    title: topArtistName,
+                    title: topTrackName,
                     unit: "",
-                    description: context.l10n.summary_top_artist,
+                    description: context.l10n.summary_top_track,
                     color: Colors.green,
                     onTap: () {
-                      context.navigateTo(const StatsArtistsRoute());
+                      context.navigateTo(const StatsStreamsRoute());
                     },
                   ),
                   SummaryCard(

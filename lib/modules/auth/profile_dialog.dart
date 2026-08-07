@@ -97,7 +97,7 @@ class ProfileDialog extends ConsumerWidget {
                   Navigator.of(context).pop();
                   showDialog<void>(
                     context: context,
-                    barrierDismissible: false,
+                    barrierDismissible: true,
                     builder: (_) => const ClerkAuthView(),
                   );
                 },

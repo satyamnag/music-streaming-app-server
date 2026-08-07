@@ -1,12 +1,9 @@
-import 'package:auto_route/auto_route.dart';
-
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:sangeet/collections/assets.gen.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/links/link_text.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -54,11 +51,6 @@ class PlayerTrackDetails extends HookConsumerWidget {
                     color: color,
                   ),
                 ),
-                Text(
-                  playback.activeTrack?.artists.asString() ?? "",
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.typography.small.copyWith(color: color),
-                )
               ],
             ),
           ),
@@ -74,14 +66,6 @@ class PlayerTrackDetails extends HookConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.bold, color: color),
                 ),
-                ArtistLink(
-                  artists: playback.activeTrack?.artists ?? [],
-                  onRouteChange: (route) {
-                    context.router.navigateNamed(route);
-                  },
-                  onOverflowArtistClick: () =>
-                      context.navigateTo(TrackRoute(trackId: track!.id)),
-                )
               ],
             ),
           ),

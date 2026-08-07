@@ -1,7 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/links/hyper_link.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -26,12 +25,6 @@ class TrackDetailsDialog extends HookConsumerWidget {
 
     final detailsMap = {
       context.l10n.title: track.name,
-      context.l10n.artist: ArtistLink(
-        artists: track.artists,
-        mainAxisAlignment: WrapAlignment.start,
-        textStyle: const TextStyle(color: Colors.blue),
-        hideOverflowArtist: false,
-      ),
       // context.l10n.album: LinkText(
       //   track.album!.name!,
       //   AlbumRoute(album: track.album!, id: track.album!.id!),

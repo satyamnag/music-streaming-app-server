@@ -1622,4 +1622,7 @@ class AppLocalizationsNe extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'अडियोप्रेमीहरूका लागि। उच्च गुणस्तर/लसलेस अडियो स्ट्रिमहरू उपलब्ध गराउँछ। ISRC-मा आधारित सटीक ट्र्याक मिलान।';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

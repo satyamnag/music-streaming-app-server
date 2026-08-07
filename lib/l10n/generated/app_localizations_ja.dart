@@ -1577,4 +1577,7 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'オーディオファイル向け。高品質/ロスレスオーディオストリームを提供。正確なISRCベースのトラックマッチング。';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

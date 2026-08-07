@@ -11,11 +11,10 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_queue.dart';
 import 'package:sangeet/modules/player/sibling_tracks_sheet.dart';
 import 'package:sangeet/components/adaptive/adaptive_pop_sheet_list.dart';
-import 'package:sangeet/components/heart_button/heart_button.dart';
+import 'package:sangeet/components/heart_button/local_heart_button.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/sleep_timer_provider.dart';
 
 class PlayerActions extends HookConsumerWidget {
@@ -37,7 +36,6 @@ class PlayerActions extends HookConsumerWidget {
     final playlist = ref.watch(audioPlayerProvider);
     final isLocalTrack = playlist.activeTrack is SangeetLocalTrackObject;
 
-    final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
     final sleepTimer = ref.watch(sleepTimerProvider);
     final sleepTimerNotifier = ref.watch(sleepTimerProvider.notifier);
 
@@ -125,10 +123,8 @@ class PlayerActions extends HookConsumerWidget {
               },
             ),
           ),
-        if (playlist.activeTrack != null &&
-            !isLocalTrack &&
-            authenticated.asData?.value == true)
-          TrackHeartButton(track: playlist.activeTrack!),
+        if (playlist.activeTrack != null && !isLocalTrack)
+          LocalTrackHeartButton(track: playlist.activeTrack!),
         AdaptivePopSheetList<Duration>(
           tooltip: context.l10n.sleep_timer,
           offset: Offset(0, -50 * (sleepTimerEntries.values.length + 2)),

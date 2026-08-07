@@ -10,7 +10,6 @@ import 'package:path/path.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/form/checkbox_form_field.dart';
 import 'package:sangeet/components/form/text_form_field.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -61,8 +60,6 @@ class PlaylistCreateDialog extends HookConsumerWidget {
         formKey.currentState?.patchValue({
           'playlistName': playlist.asData!.value.name,
           'description': playlist.asData!.value.description,
-          'public': playlist.asData!.value.public,
-          'collaborative': playlist.asData!.value.collaborative,
         });
       }
 
@@ -105,14 +102,13 @@ class PlaylistCreateDialog extends HookConsumerWidget {
         // bytecode path is unavailable in this build (its compiled bytecode is
         // not readable by the bundled hetu_script), so we persist playlists
         // directly through the local server, matching playlist_add_track_dialog.
+        // Playlists are local-only (no public/collaborative options).
         if (isUpdatingPlaylist) {
           // Local playlists have no update endpoint; recreate is not supported
           // here, so keep the existing plugin-driven modify for completeness.
           await playlistNotifier.modify(
             name: playlistName,
             description: description,
-            public: values['public'] ?? false,
-            collaborative: values['collaborative'] ?? false,
             onError: onError,
           );
           succeeded = true;
@@ -171,8 +167,6 @@ class PlaylistCreateDialog extends HookConsumerWidget {
           initialValue: {
             'playlistName': updatingPlaylist?.name,
             'description': updatingPlaylist?.description,
-            'public': playlist.asData?.value.public ?? false,
-            'collaborative': playlist.asData?.value.collaborative ?? false,
           },
           child: ListView(
             shrinkWrap: true,
@@ -264,16 +258,6 @@ class PlaylistCreateDialog extends HookConsumerWidget {
                 placeholder: Text(context.l10n.description),
                 keyboardType: TextInputType.multiline,
                 maxLines: 5,
-              ),
-              const Gap(20),
-              CheckboxFormBuilderField(
-                name: 'public',
-                trailing: Text(context.l10n.public),
-              ),
-              const Gap(10),
-              CheckboxFormBuilderField(
-                name: 'collaborative',
-                trailing: Text(context.l10n.collaborative),
               ),
             ],
           ),

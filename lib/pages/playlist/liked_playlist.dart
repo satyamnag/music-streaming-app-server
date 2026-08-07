@@ -6,9 +6,8 @@ import 'package:sangeet/components/track_presentation/presentation_props.dart';
 import 'package:sangeet/components/track_presentation/track_presentation.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/pages/playlist/playlist.dart';
-import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
 
 @RoutePage()
 class LikedPlaylistPage extends HookConsumerWidget {
@@ -22,30 +21,27 @@ class LikedPlaylistPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final likedTracks = ref.watch(metadataPluginSavedTracksProvider);
-    final likedTracksNotifier =
-        ref.watch(metadataPluginSavedTracksProvider.notifier);
-    final tracks = likedTracks.asData?.value.items ?? [];
+    final likedTracks = ref.watch(likedSongsProvider);
+    final tracks =
+        (likedTracks.asData?.value ?? const <SangeetTrackObject>[])
+            .whereType<SangeetFullTrackObject>()
+            .toList();
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
-        ref.invalidate(metadataPluginSavedTracksProvider);
+        ref.invalidate(likedSongsProvider);
       },
       child: TrackPresentation(
         options: TrackPresentationOptions(
           collection: playlist,
           image: Assets.images.likedTracks.path,
           pagination: PaginationProps(
-            hasNextPage: likedTracks.asData?.value.hasMore ?? false,
-            isLoading: likedTracks.isLoadingNextPage && !likedTracks.isLoading,
-            onFetchMore: () async {
-              await likedTracksNotifier.fetchMore();
-            },
-            onFetchAll: () async {
-              return await likedTracksNotifier.fetchAll();
-            },
+            hasNextPage: false,
+            isLoading: likedTracks.isLoading,
+            onFetchMore: () async {},
+            onFetchAll: () async => tracks,
             onRefresh: () async {
-              ref.invalidate(metadataPluginSavedTracksProvider);
+              ref.invalidate(likedSongsProvider);
             },
           ),
           title: playlist.name,

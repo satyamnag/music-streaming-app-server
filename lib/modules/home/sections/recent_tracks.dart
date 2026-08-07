@@ -208,14 +208,7 @@ class _RecentTrackCard extends HookWidget {
                 ),
               ),
               Gap(2 * scale),
-              Text(
-                track.artists.asString(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.typography.small.copyWith(
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
+              const SizedBox.shrink(),
             ],
           ),
         ),

@@ -1620,4 +1620,7 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'აუდიოფილებისთვის. უზრუნველყოფს მაღალი ხარისხის/უკომპრესო აუდიო სტრიმებს. ზუსტი შესაბამისობა ISRC-ის მიხედვით.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

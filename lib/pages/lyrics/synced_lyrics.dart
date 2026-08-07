@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -112,13 +111,9 @@ class SyncedLyrics extends HookConsumerWidget {
                   playlist.activeTrack?.name ?? context.l10n.not_playing,
                   style: headlineTextStyle,
                 ),
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(40),
-                  child: Text(
-                    playlist.activeTrack?.artists.asString() ?? "",
-                    style:
-                        mediaQuery.mdAndUp ? typography.h4 : typography.x2Large,
-                  ),
+                bottom: const PreferredSize(
+                  preferredSize: Size.fromHeight(0),
+                  child: SizedBox.shrink(),
                 ),
               ),
             if (lyricValue != null &&

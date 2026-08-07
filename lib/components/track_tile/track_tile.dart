@@ -9,12 +9,14 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
+import 'package:sangeet/components/heart_button/local_heart_button.dart';
 import 'package:sangeet/components/hover_builder.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
@@ -285,31 +287,7 @@ class TrackTile extends HookConsumerWidget {
                 ],
               ],
             ),
-            subtitle: Align(
-              alignment: Alignment.centerLeft,
-                    child: track is SangeetLocalTrackObject
-                  ? Text(
-                      track.artists.asString(),
-                    )
-                  : ClipRect(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 40),
-                          child: AbsorbPointer(
-                          absorbing: effectiveSelection,
-                          child: ArtistLink(
-                            artists: track.artists,
-                            onOverflowArtistClick: effectiveSelection
-                                ? () {}
-                                : () {
-                                    context.navigateTo(
-                                      TrackRoute(trackId: track.id),
-                                    );
-                                  },
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
+            subtitle: const SizedBox.shrink(),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -319,6 +297,31 @@ class TrackTile extends HookConsumerWidget {
                       .toHumanReadableString(padZero: false),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 8),
+                LocalTrackHeartButton(track: track),
+                const SizedBox(width: 4),
+                Builder(
+                  builder: (context) {
+                    return Tooltip(
+                      tooltip: TooltipContainer(
+                        child: Text(context.l10n.add_to_playlist),
+                      ).call,
+                      child: IconButton.ghost(
+                        size: ButtonSize.small,
+                        icon: const Icon(SangeetIcons.playlistAdd),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => PlaylistAddTrackDialog(
+                              tracks: [track],
+                              openFromPlaylist: playlistId,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 Builder(
                   builder: (context) {

@@ -1628,4 +1628,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Pour les audiophiles. Fournit des flux audio de haute qualité/sans perte. Correspondance précise des pistes basée sur ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

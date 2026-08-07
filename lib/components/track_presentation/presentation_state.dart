@@ -3,7 +3,7 @@ import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/collections/sort_by.dart';
-import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/album.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/playlist.dart';
 import 'package:sangeet/utils/service_utils.dart';
@@ -39,12 +39,12 @@ class PresentationStateNotifier
     if (arg case SangeetSimplePlaylistObject() || SangeetSimpleAlbumObject()) {
       if (isSavedTrackPlaylist) {
         ref.listen(
-          metadataPluginSavedTracksProvider,
+          likedSongsProvider,
           (previous, next) {
             next.whenData((value) {
               state = state.copyWith(
                 presentationTracks: ServiceUtils.sortTracks(
-                  value.items,
+                  value,
                   state.sortBy,
                 ),
               );
@@ -93,7 +93,7 @@ class PresentationStateNotifier
 
     final tracks = switch ((isPlaylist, isSavedTrackPlaylist)) {
           (true, true) =>
-            ref.read(metadataPluginSavedTracksProvider).asData?.value.items,
+            ref.read(likedSongsProvider).asData?.value,
           (true, false) => ref
               .read(metadataPluginPlaylistTracksProvider(
                   (arg as SangeetSimplePlaylistObject).id))

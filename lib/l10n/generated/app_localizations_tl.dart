@@ -1625,4 +1625,7 @@ class AppLocalizationsTl extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Para sa mga audiophile. Nagbibigay ng de-kalidad/walang loss na audio streams. Tumpak na pagtutugma ng track batay sa ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

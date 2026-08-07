@@ -1580,4 +1580,7 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       '오디오파일을 위한 소스입니다. 고음질/무손실 오디오 스트림을 제공하며 ISRC 기반으로 정확한 트랙 매칭을 지원합니다.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

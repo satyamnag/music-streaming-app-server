@@ -14,7 +14,6 @@ import 'package:sangeet/modules/player/player_actions.dart';
 import 'package:sangeet/modules/player/player_controls.dart';
 import 'package:sangeet/modules/player/volume_slider.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -35,7 +34,6 @@ class PlayerView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final theme = Theme.of(context);
     final sourcedCurrentTrack = ref.watch(activeTrackSourcesProvider);
     final currentActiveTrack =
         ref.watch(audioPlayerProvider.select((s) => s.activeTrack));
@@ -177,26 +175,9 @@ class PlayerView extends HookConsumerWidget {
                           textAlign: TextAlign.start,
                         ),
                         if (isLocalTrack)
-                          Text(
-                            currentActiveTrack.artists.asString(),
-                            style: theme.typography.normal
-                                .copyWith(fontWeight: FontWeight.bold),
-                          )
+                          const SizedBox.shrink()
                         else
-                          ArtistLink(
-                            artists: currentActiveTrack?.artists ?? [],
-                            textStyle: theme.typography.normal
-                                .copyWith(fontWeight: FontWeight.bold),
-                            onRouteChange: (route) {
-                              panelController.close();
-                              context.router.navigateNamed(route);
-                            },
-                            onOverflowArtistClick: () => context.navigateTo(
-                              TrackRoute(
-                                trackId: currentActiveTrack!.id,
-                              ),
-                            ),
-                          ),
+                          const SizedBox.shrink(),
                       ],
                     ),
                   ),

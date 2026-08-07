@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 
@@ -30,13 +29,7 @@ class StatsTrackItem extends StatelessWidget {
         ),
       ),
       title: Text(track.name),
-      subtitle: ArtistLink(
-        artists: track.artists,
-        mainAxisAlignment: WrapAlignment.start,
-        onOverflowArtistClick: () {
-          context.navigateTo(TrackRoute(trackId: track.id));
-        },
-      ),
+      subtitle: const SizedBox.shrink(),
       trailing: info,
       onPressed: () {
         context.navigateTo(TrackRoute(trackId: track.id));

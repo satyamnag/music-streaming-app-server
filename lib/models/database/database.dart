@@ -37,6 +37,7 @@ part 'tables/history.dart';
 part 'tables/lyrics.dart';
 part 'tables/metadata_plugins.dart';
 part 'tables/local_playlists.dart';
+part 'tables/local_liked_songs.dart';
 
 part 'typeconverters/color.dart';
 part 'typeconverters/locale.dart';
@@ -57,25 +58,31 @@ part 'typeconverters/subtitle.dart';
     PluginsTable,
     LocalPlaylistsTable,
     LocalPlaylistSongsTable,
+    LocalLikedSongsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
-      onUpgrade: stepByStep(
-        from1To2: (m, schema) async {
-          // Add invidiousInstance column to preferences table
-          await m.addColumn(
-            schema.preferencesTable,
-            schema.preferencesTable.invidiousInstance,
-          );
-        },
+      onUpgrade: (m, from, to) async {
+        // Run the existing step-by-step chain (up to v11). This must be capped
+        // at 11 because the generated database.steps.dart does not yet carry a
+        // from11To12 step; the v11 -> v12 change is applied below.
+        if (from < 12) {
+          final stepUpgrade = stepByStep(
+            from1To2: (m, schema) async {
+              // Add invidiousInstance column to preferences table
+              await m.addColumn(
+                schema.preferencesTable,
+                schema.preferencesTable.invidiousInstance,
+              );
+            },
         from2To3: (m, schema) async {
           await m.addColumn(
             schema.preferencesTable,
@@ -240,7 +247,14 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(schema.localPlaylistsTable);
           await m.createTable(schema.localPlaylistSongsTable);
         },
-      ),
+          );
+          await stepUpgrade(m, from, to > 11 ? 11 : to);
+        }
+        // v11 -> v12: local liked songs (device-local, no Supabase account).
+        if (to >= 12 && from < 12) {
+          await m.createTable(localLikedSongsTable);
+        }
+      },
     );
   }
 }

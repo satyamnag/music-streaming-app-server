@@ -1,12 +1,9 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/track_tile/track_options.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -121,15 +118,7 @@ class TrackOptionsButton extends HookConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ).semiBold(),
-                      subtitle: Align(
-                        alignment: Alignment.centerLeft,
-                        child: ArtistLink(
-                          artists: track.artists,
-                          onOverflowArtistClick: () => context.navigateTo(
-                            TrackRoute(trackId: track.id),
-                          ),
-                        ),
-                      ),
+                      subtitle: const SizedBox.shrink(),
                     ),
                     const Divider(),
                     TrackOptions(

@@ -1619,4 +1619,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Для аудиофилов. Предоставляет высококачественные/lossless аудиопотоки. Точное совпадение треков по ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

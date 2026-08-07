@@ -1609,4 +1609,7 @@ class AppLocalizationsFi extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Audiofiileille. Tarjoaa korkealaatuisia/häviöttömiä äänivirtoja. Tarkka ISRC-pohjainen kappaleiden tunnistus.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

@@ -7,7 +7,6 @@ import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/heart_button/heart_button.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/links/artist_link.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -149,19 +148,7 @@ class TrackPage extends HookConsumerWidget {
                                   ],
                                 ),
                                 const Gap(10),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(SangeetIcons.artist),
-                                    const Gap(5),
-                                    Flexible(
-                                      child: ArtistLink(
-                                        artists: track.artists,
-                                        hideOverflowArtist: false,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                const SizedBox.shrink(),
                                 const Gap(10),
                                 ConstrainedBox(
                                   constraints:

@@ -125,3 +125,46 @@ Future<void> deleteUserPlaylist(String playlistId) async {
     options: Options(validateStatus: (status) => status != null && status < 500),
   );
 }
+
+/// Tracks the user liked on this device (served from the local drift DB).
+final likedSongsProvider =
+    FutureProvider<List<SangeetTrackObject>>((ref) async {
+  final data = await _getJson(ref, '/supabase/liked-songs/supabase');
+  final items = (data as List<dynamic>? ?? [])
+      .map((e) => SangeetTrackObject.fromJson(
+          Map<String, dynamic>.from(e as Map)))
+      .toList();
+  return items;
+});
+
+/// Whether the given track id is in the user's local liked songs.
+final isLikedSongProvider = FutureProvider.autoDispose.family<bool, String>(
+  (ref, trackId) async {
+    final liked = await ref.watch(likedSongsProvider.future);
+    return liked.any((t) => t.id == trackId);
+  },
+);
+
+/// Adds a track to the local liked songs. Callers invalidate [likedSongsProvider].
+Future<void> likeTrack(String trackId) async {
+  await SangeetMedia.ensurePortReady();
+  final port = SangeetMedia.serverPort;
+  await globalDio.post(
+    'http://127.0.0.1:$port/supabase/liked-songs',
+    data: {'track_id': trackId},
+    options: Options(
+      validateStatus: (status) => status != null && status < 500,
+      headers: {'content-type': 'application/json'},
+    ),
+  );
+}
+
+/// Removes a track from the local liked songs. Callers invalidate [likedSongsProvider].
+Future<void> unlikeTrack(String trackId) async {
+  await SangeetMedia.ensurePortReady();
+  final port = SangeetMedia.serverPort;
+  await globalDio.delete(
+    'http://127.0.0.1:$port/supabase/liked-songs/$trackId',
+    options: Options(validateStatus: (status) => status != null && status < 500),
+  );
+}

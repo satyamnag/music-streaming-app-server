@@ -1617,4 +1617,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Audiophile\'ler için. Yüksek kaliteli/kayıpsız ses akışları sağlar. Doğru ISRC tabanlı parça eşleştirme.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

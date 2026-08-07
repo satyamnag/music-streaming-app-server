@@ -14,6 +14,7 @@ import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
 import 'package:sangeet/provider/metadata_plugin/library/playlists.dart';
 import 'package:sangeet/provider/metadata_plugin/library/tracks.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/metadata_plugin_provider.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
@@ -187,14 +188,15 @@ class TrackOptionsActions {
         break;
       case TrackOptionValue.favorite:
         final isLikedTrack = await ref.read(
-          metadataPluginIsSavedTrackProvider(track.id).future,
+          isLikedSongProvider(track.id).future,
         );
 
         if (isLikedTrack) {
-          await favoriteTracks.removeFavorite([track]);
+          await unlikeTrack(track.id);
         } else {
-          await favoriteTracks.addFavorite([track]);
+          await likeTrack(track.id);
         }
+        ref.invalidate(likedSongsProvider);
         break;
       case TrackOptionValue.addToPlaylist:
         actionAddToPlaylist(context, playlistId);
@@ -238,7 +240,7 @@ final trackOptionsStateProvider =
     Provider.family<TrackOptionFlags, SangeetTrackObject>((ref, track) {
   final playlist = ref.watch(audioPlayerProvider);
   final authenticated = ref.watch(metadataPluginAuthenticatedProvider);
-  final isSavedTrack = ref.watch(metadataPluginIsSavedTrackProvider(track.id));
+  final isSavedTrack = ref.watch(isLikedSongProvider(track.id));
 
   return (
     isInQueue: playlist.containsTrack(track),

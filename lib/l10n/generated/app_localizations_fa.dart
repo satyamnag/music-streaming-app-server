@@ -1609,4 +1609,7 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'مخصوص علاقه‌مندان صدا. ارائه‌دهنده استریم‌های باکیفیت/بدون افت. تطبیق دقیق آهنگ بر اساس ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

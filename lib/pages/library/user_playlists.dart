@@ -17,7 +17,6 @@ import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
 import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
-import 'package:sangeet/provider/metadata_plugin/core/user.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
@@ -30,30 +29,30 @@ class UserPlaylistsPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final searchText = useState('');
 
-    final me = ref.watch(metadataPluginUserProvider);
-
     // Owner-made playlists (developer/owner curated) and user-made playlists
     // (created on this device) are served by the local server directly.
     final ownerPlaylistsQuery = ref.watch(ownerPlaylistsProvider);
     final userPlaylistsQuery = ref.watch(userPlaylistsProvider);
 
     final likedTracksPlaylist = useMemoized(
-      () => me.asData?.value == null
-          ? null
-          : SangeetSimplePlaylistObject(
-              id: "user-liked-tracks",
-              name: context.l10n.liked_tracks,
-              description: context.l10n.liked_tracks_description,
-              externalUri: "",
-              owner: me.asData!.value!,
-              images: [
-                  SangeetImageObject(
-                    url: Assets.images.likedTracks.path,
-                    width: 300,
-                    height: 300,
-                  )
-                ]),
-      [context.l10n, me.asData?.value],
+      () => SangeetSimplePlaylistObject(
+        id: "user-liked-tracks",
+        name: context.l10n.liked_tracks,
+        description: context.l10n.liked_tracks_description,
+        externalUri: "",
+        owner: SangeetUserObject(
+          id: "local",
+          name: "You",
+          externalUri: "",
+        ),
+        images: [
+          SangeetImageObject(
+            url: Assets.images.likedTracks.path,
+            width: 300,
+            height: 300,
+          )
+        ]),
+      [context.l10n],
     );
 
     List<SangeetSimplePlaylistObject> filter(
@@ -127,24 +126,22 @@ class UserPlaylistsPage extends HookConsumerWidget {
                 ),
               ),
               const SliverGap(10),
-              if (likedTracksPlaylist != null) ...[
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      context.l10n.liked_tracks,
-                      style: context.theme.typography.h4,
-                    ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    context.l10n.liked_tracks,
+                    style: context.theme.typography.h4,
                   ),
                 ),
-                const SliverGap(8),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: SliverToBoxAdapter(
-                    child: PlaylistCard.tile(likedTracksPlaylist),
-                  ),
+              ),
+              const SliverGap(8),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: SliverToBoxAdapter(
+                  child: PlaylistCard.tile(likedTracksPlaylist),
                 ),
-              ],
+              ),
               const SliverGap(16),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -629,10 +629,75 @@ class ServerSupabaseDataRoutes {
   }
 
   /// GET /supabase/liked-songs/supabase
+  ///
+  /// Returns the tracks the user liked on this device (stored in the local
+  /// drift DB). The app works without a Supabase account, so likes are kept
+  /// on-device and served through the local stream server.
   Future<Response> getLikedSongs(Request request) async {
     try {
-      final tracks = await _fetchAllTracks(limit: 100);
-      return Response.ok(jsonEncode(tracks), headers: {'content-type': 'application/json'});
+      final db = ref.read(databaseProvider);
+      final rows = await (db.select(db.localLikedSongsTable)
+            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+          .get();
+      if (rows.isEmpty) {
+        return Response.ok(jsonEncode(const []),
+            headers: {'content-type': 'application/json'});
+      }
+      final tracks = await _fetchAllTracks(limit: 500);
+      final items = <Map<String, dynamic>>[];
+      for (final row in rows) {
+        final track = tracks.where((t) => t['id'].toString() == row.trackId).firstOrNull;
+        if (track != null) items.add(_trackToJson(track));
+      }
+      return Response.ok(
+        jsonEncode(items),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// POST /supabase/liked-songs
+  ///
+  /// Records a liked track locally. Body: `{track_id}`.
+  Future<Response> addLikedSong(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = body.isEmpty ? const <String, dynamic>{} : jsonDecode(body) as Map<String, dynamic>;
+      final trackId = (data['track_id'] ?? data['trackId'] ?? '').toString().trim();
+      if (trackId.isEmpty) {
+        return Response.badRequest(body: '{"error":"track_id required"}');
+      }
+      final db = ref.read(databaseProvider);
+      final existing = await (db.select(db.localLikedSongsTable)
+            ..where((t) => t.trackId.equals(trackId)))
+          .getSingleOrNull();
+      if (existing == null) {
+        await db.into(db.localLikedSongsTable).insert(
+          LocalLikedSongsTableCompanion.insert(trackId: trackId),
+        );
+      }
+      return Response.ok(
+        jsonEncode({'success': true}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// DELETE /supabase/liked-songs/<trackId>
+  Future<Response> removeLikedSong(Request request, String trackId) async {
+    try {
+      final db = ref.read(databaseProvider);
+      await (db.delete(db.localLikedSongsTable)
+            ..where((t) => t.trackId.equals(trackId)))
+          .go();
+      return Response.ok(
+        jsonEncode({'success': true}),
+        headers: {'content-type': 'application/json'},
+      );
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }

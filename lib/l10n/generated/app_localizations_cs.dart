@@ -1610,4 +1610,7 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Pro audiofily. Poskytuje vysoce kvalitní/bezztrátové zvukové toky. Přesná shoda skladeb na základě ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }

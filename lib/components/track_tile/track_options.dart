@@ -6,6 +6,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/track_options/track_options_provider.dart';
 
 /// [track] must be a [SangeetFullTrackObject] or [SangeetLocalTrackObject]
@@ -100,15 +101,16 @@ class TrackOptions extends HookConsumerWidget {
             leading: const Icon(SangeetIcons.queueRemove),
             title: Text(context.l10n.remove_from_queue),
           ),
-        if (isAuthenticated && !isLocalTrack)
+        if (!isLocalTrack)
           ButtonTile(
             style: ButtonVariance.menu,
             onPressed: () async {
-              await trackOptionActions.action(
-                rootNavigatorKey.currentContext!,
-                TrackOptionValue.favorite,
-                playlistId,
-              );
+              if (isLiked) {
+                await unlikeTrack(track.id);
+              } else {
+                await likeTrack(track.id);
+              }
+              ref.invalidate(likedSongsProvider);
               onTapItem?.call();
             },
             leading: isLiked

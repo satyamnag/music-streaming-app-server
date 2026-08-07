@@ -29,14 +29,12 @@
   "playlist": "Playlist",
   "create_a_playlist": "Create a playlist",
   "new_playlist": "New playlist",
-  "playlist_name": "Playlist name",
+  "playlist_name": "Playlist Name",
   "no_playlists_yet": "No playlists yet. Create one from the selected songs.",
-
   "update_playlist": "Update playlist",
   "create": "Create",
   "cancel": "Cancel",
   "update": "Update",
-  "playlist_name": "Playlist Name",
   "name_of_playlist": "Name of the playlist",
   "description": "Description",
   "public": "Public",
@@ -485,5 +483,6 @@
   "configure_plugins": "Configure your own metadata provider and audio source plugins",
   "source": "Source: ",
   "uncompressed": "Uncompressed",
-  "dab_music_source_description": "For audiophiles. Provides high-quality/lossless audio streams. Accurate ISRC based track matching."
+  "dab_music_source_description": "For audiophiles. Provides high-quality/lossless audio streams. Accurate ISRC based track matching.",
+  "summary_top_track": "Top track\nthis period"
 }

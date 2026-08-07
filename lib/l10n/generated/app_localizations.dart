@@ -3062,6 +3062,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For audiophiles. Provides high-quality/lossless audio streams. Accurate ISRC based track matching.'**
   String get dab_music_source_description;
+
+  /// No description provided for @summary_top_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Top track\nthis period'**
+  String get summary_top_track;
 }
 
 class _AppLocalizationsDelegate

@@ -1616,4 +1616,7 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get dab_music_source_description =>
       'Dla audiofilów. Oferuje strumienie audio wysokiej jakości/lossless. Precyzyjne dopasowanie utworów na podstawie ISRC.';
+
+  @override
+  String get summary_top_track => 'Top track\nthis period';
 }
