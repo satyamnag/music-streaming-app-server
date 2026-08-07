@@ -19,7 +19,7 @@ final supabaseClientProvider = Provider((ref) {
 
 const _defaultUser = {
   'id': 'supabase',
-  'name': 'Supabase',
+  'name': 'Songs',
   'images': [],
   'externalUri': '',
 };

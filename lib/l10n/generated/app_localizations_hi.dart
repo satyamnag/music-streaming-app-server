@@ -1619,5 +1619,8 @@ class AppLocalizationsHi extends AppLocalizations {
       'ऑडियोफाइलों के लिए। उच्च-गुणवत्ता/बिना हानि वाले ऑडियो स्ट्रीम प्रदान करता है। सटीक ISRC आधारित ट्रैक मिलान।';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'शीर्ष ट्रैक\nइस अवधि में';
+
+  @override
+  String get local => 'स्थानीय';
 }

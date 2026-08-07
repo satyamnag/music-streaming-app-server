@@ -519,5 +519,7 @@
   "verify": "Vahvista",
   "verify_email_code": "Lähetimme vahvistuskoodin sähköpostiisi",
   "verify_email_reminder": "Vahvista sähköpostiosoitteesi suojataksesi tilisi",
-  "verify_now": "Vahvista nyt"
+  "verify_now": "Vahvista nyt",
+  "summary_top_track": "Paras kappale\ntällä kaudella",
+  "local": "Paikallinen"
 }

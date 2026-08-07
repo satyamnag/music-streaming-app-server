@@ -517,5 +517,7 @@
   "verify": "I-verify",
   "verify_email_code": "Nagpadala kami ng verification code sa iyong email",
   "verify_email_reminder": "Mangyaring i-verify ang iyong email address para ma-secure ang iyong account",
-  "verify_now": "I-verify ngayon"
+  "verify_now": "I-verify ngayon",
+  "summary_top_track": "Nangungunang track\nngayong panahon",
+  "local": "Lokal"
 }

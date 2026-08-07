@@ -1621,5 +1621,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Для аудиофилов. Предоставляет высококачественные/lossless аудиопотоки. Точное совпадение треков по ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Лучший трек\nза этот период';
+
+  @override
+  String get local => 'Локальный';
 }

@@ -1619,5 +1619,8 @@ class AppLocalizationsIt extends AppLocalizations {
       'Per audiophile. Fornisce flussi audio di alta qualità/senza perdita. Abbinamento traccia accurato basato su ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Miglior brano\nquesto periodo';
+
+  @override
+  String get local => 'Locale';
 }

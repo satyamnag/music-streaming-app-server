@@ -519,5 +519,7 @@
   "verify": "Egiaztatu",
   "verify_email_code": "Egiaztapen-kode bat bidali dugu zure helbide elektronikora",
   "verify_email_reminder": "Mesedez, egiaztatu zure helbide elektronikoa zure kontua ziurtatzeko",
-  "verify_now": "Egiaztatu orain"
+  "verify_now": "Egiaztatu orain",
+  "summary_top_track": "Abesti nagusia\naldi honetan",
+  "local": "Tokikoa"
 }

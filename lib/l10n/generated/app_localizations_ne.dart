@@ -1624,5 +1624,8 @@ class AppLocalizationsNe extends AppLocalizations {
       'अडियोप्रेमीहरूका लागि। उच्च गुणस्तर/लसलेस अडियो स्ट्रिमहरू उपलब्ध गराउँछ। ISRC-मा आधारित सटीक ट्र्याक मिलान।';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'शीर्ष ट्र्याक\nयस अवधिमा';
+
+  @override
+  String get local => 'स्थानीय';
 }

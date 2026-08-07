@@ -519,5 +519,7 @@
   "verify": "Verificar",
   "verify_email_code": "Enviámos um código de verificação para o seu e-mail",
   "verify_email_reminder": "Verifique o seu endereço de e-mail para proteger a sua conta",
-  "verify_now": "Verificar agora"
+  "verify_now": "Verificar agora",
+  "summary_top_track": "Melhor faixa\nneste período",
+  "local": "Local"
 }

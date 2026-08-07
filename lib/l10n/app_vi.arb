@@ -519,5 +519,7 @@
   "verify": "Xác minh",
   "verify_email_code": "Chúng tôi đã gửi mã xác minh đến email của bạn",
   "verify_email_reminder": "Vui lòng xác minh địa chỉ email của bạn để bảo mật tài khoản",
-  "verify_now": "Xác minh ngay"
+  "verify_now": "Xác minh ngay",
+  "summary_top_track": "Bài hát hàng đầu\nkỳ này",
+  "local": "Cục bộ"
 }

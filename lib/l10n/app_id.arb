@@ -519,5 +519,7 @@
   "verify": "Verifikasi",
   "verify_email_code": "Kami mengirim kode verifikasi ke email Anda",
   "verify_email_reminder": "Verifikasi alamat email Anda untuk mengamankan akun Anda",
-  "verify_now": "Verifikasi sekarang"
+  "verify_now": "Verifikasi sekarang",
+  "summary_top_track": "Lagu teratas\nperiode ini",
+  "local": "Lokal"
 }

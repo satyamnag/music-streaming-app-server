@@ -1624,5 +1624,8 @@ class AppLocalizationsEu extends AppLocalizations {
       'Audiozaleentzat. Kalitate handiko/galerarik gabeko audio-streamak eskaintzen ditu. ISRC oinarritutako pistaren parekatze zehatza.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Abesti nagusia\naldi honetan';
+
+  @override
+  String get local => 'Tokikoa';
 }

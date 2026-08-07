@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Consumer;
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
@@ -78,26 +78,8 @@ final image = artist.images.asUrlString(
           IconButton.ghost(
             icon: const Icon(SangeetIcons.share),
             onPressed: () async {
-              await Clipboard.setData(
-                ClipboardData(
-                  text: artist.externalUri,
-                ),
-              );
-
-              if (!context.mounted) return;
-
-              showToast(
-                context: context,
-                location: ToastLocation.topRight,
-                dismissible: true,
-                builder: (context, overlay) {
-                  return SurfaceCard(
-                    child: Text(
-                      context.l10n.artist_url_copied,
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                },
+              await SharePlus.instance.share(
+                ShareParams(text: artist.externalUri),
               );
             },
           )

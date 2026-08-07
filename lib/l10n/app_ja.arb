@@ -518,5 +518,7 @@
   "verify": "確認",
   "verify_email_code": "確認コードをメールに送信しました",
   "verify_email_reminder": "アカウントを保護するため、メールアドレスを確認してください",
-  "verify_now": "今すぐ確認"
+  "verify_now": "今すぐ確認",
+  "summary_top_track": "トップ曲\nこの期間",
+  "local": "ローカル"
 }

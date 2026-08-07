@@ -519,5 +519,7 @@
   "verify": "Ověřit",
   "verify_email_code": "Poslali jsme ověřovací kód na váš e-mail",
   "verify_email_reminder": "Pro zabezpečení svého účtu ověřte prosím svou e-mailovou adresu",
-  "verify_now": "Ověřit nyní"
+  "verify_now": "Ověřit nyní",
+  "summary_top_track": "Nejlepší skladba\ntoto období",
+  "local": "Místní"
 }

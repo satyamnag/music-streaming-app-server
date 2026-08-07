@@ -1625,5 +1625,8 @@ class AppLocalizationsCa extends AppLocalizations {
       'Per als audiòfils. Ofereix fluxos d\'àudio d\'alta qualitat/sense pèrdua. Coincidència precisa de pistes basada en ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Cançó principal\naquest període';
+
+  @override
+  String get local => 'Local';
 }

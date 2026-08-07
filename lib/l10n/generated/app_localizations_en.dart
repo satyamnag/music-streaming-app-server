@@ -1612,4 +1612,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get summary_top_track => 'Top track\nthis period';
+
+  @override
+  String get local => 'Local';
 }

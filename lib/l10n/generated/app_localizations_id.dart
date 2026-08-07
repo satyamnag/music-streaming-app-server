@@ -1619,5 +1619,8 @@ class AppLocalizationsId extends AppLocalizations {
       'Untuk audiophile. Menyediakan aliran audio berkualitas tinggi/tanpa kehilangan. Pencocokkan trek yang akurat berdasarkan ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Lagu teratas\nperiode ini';
+
+  @override
+  String get local => 'Lokal';
 }

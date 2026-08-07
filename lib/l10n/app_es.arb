@@ -519,5 +519,7 @@
   "verify": "Verificar",
   "verify_email_code": "Enviamos un código de verificación a tu correo electrónico",
   "verify_email_reminder": "Verifica tu dirección de correo electrónico para asegurar tu cuenta",
-  "verify_now": "Verificar ahora"
+  "verify_now": "Verificar ahora",
+  "summary_top_track": "Mejor canción\neste período",
+  "local": "Local"
 }

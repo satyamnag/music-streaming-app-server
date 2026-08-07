@@ -484,5 +484,6 @@
   "source": "Source: ",
   "uncompressed": "Uncompressed",
   "dab_music_source_description": "For audiophiles. Provides high-quality/lossless audio streams. Accurate ISRC based track matching.",
-  "summary_top_track": "Top track\nthis period"
+  "summary_top_track": "Top track\nthis period",
+  "local": "Local"
 }

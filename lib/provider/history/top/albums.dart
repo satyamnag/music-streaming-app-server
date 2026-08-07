@@ -92,7 +92,7 @@ class HistoryTopAlbumsNotifier extends FamilyPaginatedAsyncNotifier<
       subscription.cancel();
     });
 
-    return await fetch(0, 20);
+    return await fetch(0, 10);
   }
 
   List<PlaybackHistoryAlbum> getAlbumsWithCount(

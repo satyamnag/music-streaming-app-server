@@ -1609,5 +1609,8 @@ class AppLocalizationsTh extends AppLocalizations {
       'สำหรับคนรักเสียงเพลง ให้สตรีมเสียงคุณภาพสูง/ไร้การสูญเสียการบีบอัด การจับคู่แทร็กแม่นยำตาม ISRC';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'เพลงอันดับต้น\nช่วงเวลานี้';
+
+  @override
+  String get local => 'ในเครื่อง';
 }

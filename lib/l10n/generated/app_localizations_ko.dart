@@ -1582,5 +1582,8 @@ class AppLocalizationsKo extends AppLocalizations {
       '오디오파일을 위한 소스입니다. 고음질/무손실 오디오 스트림을 제공하며 ISRC 기반으로 정확한 트랙 매칭을 지원합니다.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => '최고 트랙\n이 기간';
+
+  @override
+  String get local => '로컬';
 }

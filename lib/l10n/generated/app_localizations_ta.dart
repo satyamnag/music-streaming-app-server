@@ -1627,5 +1627,8 @@ class AppLocalizationsTa extends AppLocalizations {
       'ஆடியோஃபைல்களுக்காக. உயர்தர/லாஸ்லெஸ் ஆடியோ ஸ்ட்ரீம்களை வழங்குகிறது. ISRC அடிப்படையில் துல்லியமான பாடல் பொருத்தம்.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'சிறந்த பாடல்\nஇந்த காலகட்டம்';
+
+  @override
+  String get local => 'உள்ளூர்';
 }

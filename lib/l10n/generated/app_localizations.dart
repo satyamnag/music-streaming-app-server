@@ -3068,6 +3068,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Top track\nthis period'**
   String get summary_top_track;
+
+  /// No description provided for @local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get local;
 }
 
 class _AppLocalizationsDelegate

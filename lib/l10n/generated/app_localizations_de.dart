@@ -1626,5 +1626,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Für Audiophile. Bietet hochwertige/verlustfreie Audiostreams. Präzises ISRC-basiertes Track-Matching.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Bester Titel\ndiesen Zeitraum';
+
+  @override
+  String get local => 'Lokal';
 }

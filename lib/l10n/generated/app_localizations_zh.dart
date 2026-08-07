@@ -1573,7 +1573,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '适合发烧友。提供高质量/无损音频流。基于 ISRC 的精确曲目匹配。';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => '最佳曲目\n本时期';
+
+  @override
+  String get local => '本地';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -3143,4 +3146,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get dab_music_source_description =>
       '適合音響發燒友。提供高品質/無損音訊串流。精確的 ISRC 曲目比對。';
+
+  @override
+  String get summary_top_track => '最佳曲目\n本時期';
+
+  @override
+  String get local => '本機';
 }

@@ -1620,5 +1620,8 @@ class AppLocalizationsVi extends AppLocalizations {
       'Dành cho người yêu âm nhạc chất lượng cao. Cung cấp luồng âm thanh chất lượng cao/không nén. Phù hợp bài hát dựa trên ISRC chính xác.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Bài hát hàng đầu\nkỳ này';
+
+  @override
+  String get local => 'Cục bộ';
 }

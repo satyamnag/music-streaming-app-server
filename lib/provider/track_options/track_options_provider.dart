@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.dart';
 import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
@@ -44,22 +43,12 @@ class TrackOptionsActions {
       ref.read(metadataPluginSavedPlaylistsProvider.notifier);
 
   void actionShare(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: track.externalUri)).then((_) {
-      if (context.mounted) {
-        showToast(
-          context: rootNavigatorKey.currentContext!,
-          location: ToastLocation.topRight,
-          builder: (context, overlay) {
-            return SurfaceCard(
-              child: Text(
-                context.l10n.copied_to_clipboard(track.externalUri),
-                textAlign: TextAlign.center,
-              ),
-            );
-          },
-        );
-      }
-    });
+    // Share the song via the platform's native share sheet (ACTION_SEND on
+    // Android), so the user can send it to WhatsApp, Facebook, SMS, etc.
+    final shareText = track.name.isNotEmpty
+        ? track.name
+        : (track.externalUri.isNotEmpty ? track.externalUri : 'Soulful Bhakti');
+    SharePlus.instance.share(ShareParams(text: shareText));
   }
 
   Future<void> actionAddToPlaylist(

@@ -520,5 +520,7 @@
   "verify": "Verifiëren",
   "verify_email_code": "We hebben een verificatiecode naar je e-mail gestuurd",
   "verify_email_reminder": "Verifieer je e-mailadres om je account te beveiligen",
-  "verify_now": "Nu verifiëren"
+  "verify_now": "Nu verifiëren",
+  "summary_top_track": "Beste nummer\ndeze periode",
+  "local": "Lokaal"
 }

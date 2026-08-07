@@ -1579,5 +1579,8 @@ class AppLocalizationsJa extends AppLocalizations {
       'オーディオファイル向け。高品質/ロスレスオーディオストリームを提供。正確なISRCベースのトラックマッチング。';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'トップ曲\nこの期間';
+
+  @override
+  String get local => 'ローカル';
 }

@@ -1627,5 +1627,8 @@ class AppLocalizationsTl extends AppLocalizations {
       'Para sa mga audiophile. Nagbibigay ng de-kalidad/walang loss na audio streams. Tumpak na pagtutugma ng track batay sa ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Nangungunang track\nngayong panahon';
+
+  @override
+  String get local => 'Lokal';
 }

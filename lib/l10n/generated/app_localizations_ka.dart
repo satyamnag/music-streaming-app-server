@@ -1622,5 +1622,8 @@ class AppLocalizationsKa extends AppLocalizations {
       'აუდიოფილებისთვის. უზრუნველყოფს მაღალი ხარისხის/უკომპრესო აუდიო სტრიმებს. ზუსტი შესაბამისობა ISRC-ის მიხედვით.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'ტოპ სიმღერა\nამ პერიოდში';
+
+  @override
+  String get local => 'ლოკალური';
 }

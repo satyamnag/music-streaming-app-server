@@ -1611,5 +1611,8 @@ class AppLocalizationsFi extends AppLocalizations {
       'Audiofiileille. Tarjoaa korkealaatuisia/häviöttömiä äänivirtoja. Tarkka ISRC-pohjainen kappaleiden tunnistus.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Paras kappale\ntällä kaudella';
+
+  @override
+  String get local => 'Paikallinen';
 }

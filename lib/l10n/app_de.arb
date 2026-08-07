@@ -519,5 +519,7 @@
   "verify": "Verifizieren",
   "verify_email_code": "Wir haben einen Verifizierungscode an deine E-Mail gesendet",
   "verify_email_reminder": "Bitte verifiziere deine E-Mail-Adresse, um dein Konto zu sichern",
-  "verify_now": "Jetzt verifizieren"
+  "verify_now": "Jetzt verifizieren",
+  "summary_top_track": "Bester Titel\ndiesen Zeitraum",
+  "local": "Lokal"
 }

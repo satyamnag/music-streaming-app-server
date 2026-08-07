@@ -1618,5 +1618,8 @@ class AppLocalizationsNl extends AppLocalizations {
       'Voor audiofielen. Biedt hoge kwaliteit/lossless audiostreams. Nauwkeurige trackmatching op basis van ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Beste nummer\ndeze periode';
+
+  @override
+  String get local => 'Lokaal';
 }

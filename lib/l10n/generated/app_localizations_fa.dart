@@ -1611,5 +1611,8 @@ class AppLocalizationsFa extends AppLocalizations {
       'مخصوص علاقه‌مندان صدا. ارائه‌دهنده استریم‌های باکیفیت/بدون افت. تطبیق دقیق آهنگ بر اساس ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'بهترین آهنگ\nاین دوره';
+
+  @override
+  String get local => 'محلی';
 }

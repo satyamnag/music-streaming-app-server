@@ -519,5 +519,7 @@
   "verify": "Verifica",
   "verify_email_code": "Hem enviat un codi de verificació al teu correu electrònic",
   "verify_email_reminder": "Verifica la teva adreça de correu electrònic per assegurar el teu compte",
-  "verify_now": "Verifica ara"
+  "verify_now": "Verifica ara",
+  "summary_top_track": "Cançó principal\naquest període",
+  "local": "Local"
 }

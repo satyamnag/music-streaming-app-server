@@ -1610,5 +1610,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'لمحبي الصوتيات. يوفر تدفقات صوتية عالية الجودة/بدون فقدان. مطابقة دقيقة للمسارات بناءً على ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'أفضل أغنية\nهذه الفترة';
+
+  @override
+  String get local => 'محلي';
 }

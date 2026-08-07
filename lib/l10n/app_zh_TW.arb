@@ -519,5 +519,7 @@
   "verify": "驗證",
   "verify_email_code": "我們已將驗證碼傳送到您的電子郵件",
   "verify_email_reminder": "請驗證您的電子郵件地址以保護您的帳戶",
-  "verify_now": "立即驗證"
+  "verify_now": "立即驗證",
+  "summary_top_track": "最佳曲目\n本時期",
+  "local": "本機"
 }

@@ -1,6 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
@@ -113,23 +113,8 @@ class TrackPresentationTopSection extends HookConsumerWidget {
               icon: const Icon(SangeetIcons.share),
               size: ButtonSize.small,
               onPressed: () async {
-                await Clipboard.setData(
-                  ClipboardData(text: options.shareUrl!),
-                );
-
-                if (!context.mounted) return;
-
-                showToast(
-                  context: context,
-                  location: ToastLocation.topRight,
-                  builder: (context, overlay) {
-                    return SurfaceCard(
-                      child: Text(
-                        context.l10n
-                            .copied_shareurl_to_clipboard(options.shareUrl!),
-                      ).small(),
-                    );
-                  },
+                await SharePlus.instance.share(
+                  ShareParams(text: options.shareUrl!),
                 );
               },
             ),

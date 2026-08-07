@@ -1618,5 +1618,8 @@ class AppLocalizationsUk extends AppLocalizations {
       'Для аудіофілів. Забезпечує високоякісні/без втрат аудіопотоки. Точна відповідність треків на основі ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Кращий трек\nза цей період';
+
+  @override
+  String get local => 'Локальний';
 }

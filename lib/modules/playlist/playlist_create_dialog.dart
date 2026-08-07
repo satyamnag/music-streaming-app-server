@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/form/checkbox_form_field.dart';
 import 'package:sangeet/components/form/text_form_field.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -167,6 +168,7 @@ class PlaylistCreateDialog extends HookConsumerWidget {
           initialValue: {
             'playlistName': updatingPlaylist?.name,
             'description': updatingPlaylist?.description,
+            'local': true,
           },
           child: ListView(
             shrinkWrap: true,
@@ -254,10 +256,22 @@ class PlaylistCreateDialog extends HookConsumerWidget {
               TextFormBuilderField(
                 name: 'description',
                 label: Text(context.l10n.description),
-                validator: FormBuilderValidators.required(),
                 placeholder: Text(context.l10n.description),
                 keyboardType: TextInputType.multiline,
                 maxLines: 5,
+              ),
+              const Gap(20),
+              // Playlists are always local-only (kept on this device). The
+              // "Local" tick is required and pre-checked so it is always on.
+              CheckboxFormBuilderField(
+                name: 'local',
+                trailing: Text(context.l10n.local),
+                validator: (value) {
+                  if (value != true) {
+                    return 'Playlists must be local';
+                  }
+                  return null;
+                },
               ),
             ],
           ),

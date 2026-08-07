@@ -1612,5 +1612,8 @@ class AppLocalizationsCs extends AppLocalizations {
       'Pro audiofily. Poskytuje vysoce kvalitní/bezztrátové zvukové toky. Přesná shoda skladeb na základě ISRC.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'Nejlepší skladba\ntoto období';
+
+  @override
+  String get local => 'Místní';
 }

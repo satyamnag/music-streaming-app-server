@@ -520,5 +520,7 @@
   "verify": "Vérifier",
   "verify_email_code": "Nous avons envoyé un code de vérification à votre e-mail",
   "verify_email_reminder": "Veuillez vérifier votre adresse e-mail pour sécuriser votre compte",
-  "verify_now": "Vérifier maintenant"
+  "verify_now": "Vérifier maintenant",
+  "summary_top_track": "Meilleur titre\ncette période",
+  "local": "Local"
 }

@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/extensions/constrains.dart';
+import 'package:sangeet/modules/stats/top/albums.dart';
 import 'package:sangeet/modules/stats/top/tracks.dart';
 import 'package:sangeet/extensions/context.dart';
 
@@ -74,6 +75,9 @@ class StatsPageTopSection extends HookConsumerWidget {
                       TabItem(
                         child: Text(context.l10n.top_tracks),
                       ),
+                      TabItem(
+                        child: Text(context.l10n.top_albums),
+                      ),
                     ],
                   ),
                   if (constraints.mdAndUp) ...[
@@ -91,7 +95,10 @@ class StatsPageTopSection extends HookConsumerWidget {
                 child: dropdown,
               ),
             ),
-          const TopTracks(),
+          switch (selectedIndex.value) {
+            1 => const TopAlbums(),
+            _ => const TopTracks(),
+          },
         ],
       );
     });

@@ -4,6 +4,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/formatters.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/modules/stats/common/album_item.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/history/top.dart';
@@ -22,45 +23,68 @@ class TopAlbums extends HookConsumerWidget {
         ref.watch(historyTopAlbumsProvider(historyDuration).notifier);
 
     final albumsData = topAlbums.asData?.value.items ?? [];
+    final hasMore = topAlbums.asData?.value.hasMore ?? false;
 
     return Skeletonizer.sliver(
       enabled: topAlbums.isLoading && !topAlbums.isLoadingNextPage,
-      child: SliverInfiniteList(
-        onFetchData: () async {
-          await topAlbumsNotifier.fetchMore();
-        },
-        hasError: topAlbums.hasError,
-        isLoading: topAlbums.isLoading && !topAlbums.isLoadingNextPage,
-        hasReachedMax: topAlbums.asData?.value.hasMore ?? true,
-        itemCount: albumsData.length,
-        emptyBuilder: (context) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Gap(50),
-              Undraw(
-                illustration: UndrawIllustration.happyMusic,
-                color: context.theme.colorScheme.primary,
-                height: 200 * context.theme.scaling,
+      child: SliverMainAxisGroup(
+        slivers: [
+          SliverInfiniteList(
+            onFetchData: () async {
+              await topAlbumsNotifier.fetchMore();
+            },
+            hasError: topAlbums.hasError,
+            isLoading: topAlbums.isLoading && !topAlbums.isLoadingNextPage,
+            hasReachedMax: topAlbums.asData?.value.hasMore ?? true,
+            itemCount: albumsData.length,
+            emptyBuilder: (context) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Gap(50),
+                  Undraw(
+                    illustration: UndrawIllustration.happyMusic,
+                    color: context.theme.colorScheme.primary,
+                    height: 200 * context.theme.scaling,
+                  ),
+                  Text(
+                    context.l10n.no_tracks_listened_yet,
+                    textAlign: TextAlign.center,
+                  ).muted().small(),
+                ],
               ),
-              Text(
-                context.l10n.no_tracks_listened_yet,
-                textAlign: TextAlign.center,
-              ).muted().small(),
-            ],
-          ),
-        ),
-        itemBuilder: (context, index) {
-          final album = albumsData[index];
-          return StatsAlbumItem(
-            album: album.album,
-            info: Text(
-              context.l10n
-                  .count_plays(compactNumberFormatter.format(album.count)),
             ),
-          );
-        },
+            itemBuilder: (context, index) {
+              final album = albumsData[index];
+              return StatsAlbumItem(
+                album: album.album,
+                info: Text(
+                  context.l10n
+                      .count_plays(compactNumberFormatter.format(album.count)),
+                ),
+              );
+            },
+          ),
+          if (hasMore)
+            SliverToBoxAdapter(
+              child: Center(
+                child: Button.text(
+                  onPressed: () async {
+                    await topAlbumsNotifier.fetchMore();
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(SangeetIcons.angleDown, size: 16),
+                      const Gap(6),
+                      Text(context.l10n.see_more),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

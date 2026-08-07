@@ -1619,5 +1619,8 @@ class AppLocalizationsTr extends AppLocalizations {
       'Audiophile\'ler için. Yüksek kaliteli/kayıpsız ses akışları sağlar. Doğru ISRC tabanlı parça eşleştirme.';
 
   @override
-  String get summary_top_track => 'Top track\nthis period';
+  String get summary_top_track => 'En iyi parça\nbu dönem';
+
+  @override
+  String get local => 'Yerel';
 }

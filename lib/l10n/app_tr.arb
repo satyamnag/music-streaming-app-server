@@ -519,5 +519,7 @@
   "verify": "Doğrula",
   "verify_email_code": "E-postana bir doğrulama kodu gönderdik",
   "verify_email_reminder": "Hesabını güvence altına almak için lütfen e-posta adresini doğrula",
-  "verify_now": "Şimdi doğrula"
+  "verify_now": "Şimdi doğrula",
+  "summary_top_track": "En iyi parça\nbu dönem",
+  "local": "Yerel"
 }
