@@ -71,12 +71,12 @@ class ServerPlaybackRoutes {
     try {
       final direct = await _resolveStreamFromSupabase(trackId);
       if (direct != null) {
-        _log('_getSourcedTrack: resolved directly from Supabase');
+        _log('_getSourcedTrack: resolved directly from the music source');
         _sourcedTrackCache[trackId] = direct;
         return direct;
       }
     } catch (e) {
-      _log('_getSourcedTrack: direct Supabase resolve failed: $e');
+      _log('_getSourcedTrack: direct music source resolve failed: $e');
     }
 
     try {
@@ -85,7 +85,7 @@ class ServerPlaybackRoutes {
         (element) => element.id == trackId,
       );
       if (track == null) {
-        _log('_getSourcedTrack: track $trackId NOT in playlist state, resolving from Supabase');
+        _log('_getSourcedTrack: track $trackId NOT in playlist state, resolving from the music source');
         final result = await _resolveFromSupabase(trackId);
         if (result != null) _sourcedTrackCache[trackId] = result;
         return result;
@@ -150,7 +150,7 @@ class ServerPlaybackRoutes {
         .maybeSingle();
 
     if (row == null || row['storage_path'] == null) {
-      _log('_resolveStreamFromSupabase: no storage_path for $trackId');
+      _log('_resolveStreamFromMusicSource: no storage_path for $trackId');
       return null;
     }
 
@@ -277,10 +277,10 @@ class ServerPlaybackRoutes {
         query: fullTrack,
         ref: ref,
       );
-      _log('_resolveFromSupabase: url=${sourcedTrack.url}');
+      _log('_resolveFromMusicSource: url=${sourcedTrack.url}');
       return sourcedTrack;
     } catch (e) {
-      _log('_resolveFromSupabase ERROR: $e');
+      _log('_resolveFromMusicSource ERROR: $e');
       return null;
     }
   }
