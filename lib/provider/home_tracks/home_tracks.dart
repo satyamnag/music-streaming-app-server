@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/server.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
@@ -49,6 +50,8 @@ final prewarmHomeStreamsProvider =
   final results = <bool>[];
   for (final track in tracks) {
     if (track is! SangeetFullTrackObject) continue;
+    // Do not pre-warm paid tracks for free users (they are locked).
+    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(ref)) continue;
     final stream = await resolveDirectSupabaseStream(ref, track);
     results.add(stream != null);
   }

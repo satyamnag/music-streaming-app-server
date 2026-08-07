@@ -22,6 +22,9 @@ function trackToJson(t, req) {
     name: t.title,
     externalUri: `${req.protocol}://${req.get('host')}/stream/${t.id}`,
     artists,
+    status: t.status || 'free',
+    lyrics: t.lyrics || null,
+    synced_lyrics: t.synced_lyrics || null,
     album: {
       id: `album-${t.id}`,
       name: t.title,
@@ -434,7 +437,7 @@ app.get('/api/admin/tracks', async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path } = req.body
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
     if (!title || !storage_path) return res.status(400).json({ error: 'title and storage_path required' })
     const { data, error } = await supabase.from('tracks').insert({
       title,
@@ -444,6 +447,9 @@ app.post('/api/admin/tracks', async (req, res, next) => {
       duration: duration || 0,
       thumbnail: thumbnail || null,
       storage_path,
+      status: status === 'paid' ? 'paid' : 'free',
+      lyrics: lyrics || null,
+      synced_lyrics: synced_lyrics || null,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data)
@@ -453,7 +459,7 @@ app.post('/api/admin/tracks', async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path } = req.body
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
     const updates = {}
     if (title !== undefined) updates.title = title
     if (artist_names !== undefined) { updates.artist_names = artist_names; updates.artist_names_text = artist_names.join(', ') }
@@ -461,6 +467,9 @@ app.put('/api/admin/tracks/:id', async (req, res, next) => {
     if (duration !== undefined) updates.duration = duration
     if (thumbnail !== undefined) updates.thumbnail = thumbnail
     if (storage_path !== undefined) updates.storage_path = storage_path
+    if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
+    if (lyrics !== undefined) updates.lyrics = lyrics
+    if (synced_lyrics !== undefined) updates.synced_lyrics = synced_lyrics
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.json(data)

@@ -65,6 +65,11 @@ class SuperwallService {
   /// Returns the entitlements the current user is entitled to.
   Future<Entitlements> getEntitlements() => Superwall.shared.getEntitlements();
 
+  /// Returns the latest customer information, including active subscriptions
+  /// and entitlements (used to show plan name, duration, start/end dates).
+  Future<CustomerInfo> getCustomerInfo() =>
+      Superwall.shared.getCustomerInfo();
+
   /// Passes an incoming deep link to Superwall so the `deepLink_open`
   /// standard placement fires with the URL's components as parameters.
   /// Campaign rules on the dashboard decide which paywall to show — no app

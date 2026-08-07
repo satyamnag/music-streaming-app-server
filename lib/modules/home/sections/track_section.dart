@@ -7,7 +7,6 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/modules/monetization/superwall_gate.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// A titled vertical list of tracks used for the home screen sections
@@ -58,16 +57,11 @@ class HomeTrackSection extends HookConsumerWidget {
             track: shown[index],
             playlist: playlist,
             onTap: () async {
-              await gateFeature(
-                placement: SuperwallPlacements.premiumPlayback,
-                feature: () async {
-                  await ref.read(audioPlayerProvider.notifier).load(
-                        tracks,
-                        initialIndex: index,
-                        autoPlay: true,
-                      );
-                },
-              );
+              await ref.read(audioPlayerProvider.notifier).load(
+                    tracks,
+                    initialIndex: index,
+                    autoPlay: true,
+                  );
             },
           ),
       ];

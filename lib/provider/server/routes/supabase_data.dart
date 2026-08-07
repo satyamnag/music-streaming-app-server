@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:supabase/supabase.dart';
 import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/provider/database/database.dart';
 
@@ -63,6 +64,7 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = 
     'name': t['title'],
     'externalUri': '',
     'artists': artists,
+    'status': t['status'] ?? 'free',
     'album': {
       'id': 'album-${t['id']}',
       'name': t['title'],
@@ -116,6 +118,35 @@ class ServerSupabaseDataRoutes {
         jsonEncode({
           'items': items, 'limit': 100, 'nextOffset': null,
           'total': items.length, 'hasMore': false,
+        }),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// GET /supabase/lyrics/<id>
+  ///
+  /// Returns the plain lyrics and synced (LRC) lyrics stored for a track in the
+  /// tracks table: `{lyrics: string|null, synced_lyrics: string|null}`.
+  /// The lyrics provider prefers these server-provided lyrics and falls back
+  /// to LRCLib only when they are absent.
+  Future<Response> getLyrics(Request request, String id) async {
+    try {
+      final sb = await _supabase;
+      final raw = await sb
+          .from('tracks')
+          .select('lyrics,synced_lyrics')
+          .eq('id', id)
+          .maybeSingle();
+      if (raw == null) {
+        return Response.notFound('{"error":"Track not found"}');
+      }
+      return Response.ok(
+        jsonEncode({
+          'lyrics': raw['lyrics'] as String?,
+          'synced_lyrics': raw['synced_lyrics'] as String?,
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -212,6 +243,7 @@ class ServerSupabaseDataRoutes {
             'artists': t['artist_names'],
             'duration': (t['duration'] ?? 0) * 1000000,
             'thumbnail': t['thumbnail'],
+            'status': t['status'] ?? 'free',
             'externalUri': '',
           }).toList();
 
@@ -249,9 +281,15 @@ class ServerSupabaseDataRoutes {
       final sb = await _supabase;
       final raw = await sb
           .from('tracks')
-          .select('storage_path')
+          .select('storage_path,status')
           .eq('id', id)
           .single();
+      // Paid tracks are locked for free users — refuse to hand out a stream
+      // URL even if a client bypasses the UI.
+      if (raw['status'] == 'paid' &&
+          !PremiumAccess.isPremiumUser(ref)) {
+        return Response.forbidden('{"error":"This track requires a premium subscription"}');
+      }
       final storagePath = raw['storage_path'] as String;
       final ext = storagePath.split('.').last.toLowerCase();
       final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;

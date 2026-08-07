@@ -45,7 +45,7 @@ tr:hover { background: #f0f7ff; }
   <span id="count" style="font-size:14px;color:#666;"></span>
 </div>
 <table><thead><tr>
-  <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Thumbnail</th><th>Storage</th><th>Actions</th>
+  <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Thumbnail</th><th>Storage</th><th>Status</th><th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
 
 <div id="modal" class="modal">
@@ -56,6 +56,15 @@ tr:hover { background: #f0f7ff; }
 <label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
 <label>Album</label><input id="fAlbum" placeholder="Album name">
 <label>Duration (seconds)</label><input id="fDuration" type="number" placeholder="e.g. 240">
+<label>Status</label>
+<select id="fStatus">
+  <option value="free">Free</option>
+  <option value="paid">Paid (Premium)</option>
+</select>
+<label>Lyrics (plain text, one line per lyric)</label>
+<textarea id="fLyrics" rows="6" placeholder="Paste plain lyrics here..."></textarea>
+<label>Synced Lyrics (LRC format, e.g. [00:05.80]lyric line)</label>
+<textarea id="fSyncedLyrics" rows="6" placeholder="[00:05.80]Lyric line&#10;[00:09.70]Next line..."></textarea>
 <label>Thumbnail (300×300 recommended, 1:1 square)</label>
 <div class="upload-row">
   <input id="fThumbnail" placeholder="URL or upload an image">
@@ -95,6 +104,7 @@ async function loadTracks() {
       <td>${pl(t.duration)}s</td>
       <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
       <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
+      <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
       <td class="actions">
         <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.id}')">Del</button>
@@ -110,7 +120,8 @@ function pl(v) { return v || 0; }
 function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
-  ['fTitle','fArtist','fAlbum','fDuration','fThumbnail','fStorage'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fArtist','fAlbum','fDuration','fThumbnail','fStorage','fLyrics','fSyncedLyrics'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fStatus').value = 'free';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
@@ -128,6 +139,9 @@ function showEdit(id) {
   document.getElementById('fDuration').value = t.duration || '';
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
+  document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
+  document.getElementById('fLyrics').value = t.lyrics || '';
+  document.getElementById('fSyncedLyrics').value = t.synced_lyrics || '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
@@ -147,7 +161,10 @@ async function saveTrack() {
   if (!title) { toast('Title is required'); return; }
   if (!storage_path) { toast('Audio file path is required'); return; }
   const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
-  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path };
+  const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
+  const lyrics = document.getElementById('fLyrics').value.trim() || null;
+  const synced_lyrics = document.getElementById('fSyncedLyrics').value.trim() || null;
+  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path, status, lyrics, synced_lyrics };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';

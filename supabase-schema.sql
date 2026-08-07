@@ -13,6 +13,9 @@ create table tracks (
   duration integer not null default 0,
   thumbnail text,
   storage_path text not null,
+  status text not null default 'free' check (status in ('free', 'paid')),
+  lyrics text,
+  synced_lyrics text,
   created_at timestamptz not null default now()
 );
 
@@ -41,3 +44,29 @@ create policy "Service role full access to music bucket"
   to service_role
   using (bucket_id = 'music')
   with check (bucket_id = 'music');
+
+-- ============================================================
+-- MIGRATION: track premium status (run once on existing DBs)
+-- Adds `status` to distinguish free tracks from paid (premium)
+-- tracks. Paid tracks are locked for free users and unlocked for
+-- signed-in subscribers. Run this in the Supabase SQL Editor.
+-- ============================================================
+alter table tracks
+  add column if not exists status text not null default 'free'
+  check (status in ('free', 'paid'));
+
+-- Mark the two premium tracks as paid. Update this list as the
+-- catalog grows. Free users cannot play these without a subscription.
+update tracks set status = 'paid'
+where title in ('Sati Neku Yevaru', 'Edu Varike Vintha Vinta');
+
+-- ============================================================
+-- MIGRATION: Lyrics (plain) + synced lyrics (LRC) columns
+-- Run this in the Supabase SQL Editor on existing DBs.
+-- `lyrics` holds the plain lyric text (line-separated).
+-- `synced_lyrics` holds the timestamped LRC format.
+-- ============================================================
+alter table tracks
+  add column if not exists lyrics text;
+alter table tracks
+  add column if not exists synced_lyrics text;

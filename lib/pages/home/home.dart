@@ -9,6 +9,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
+import 'package:sangeet/modules/home/sections/go_for_paid_plan_banner.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
@@ -103,6 +104,7 @@ class HomePage extends HookConsumerWidget {
                     )
                   else if (kIsMacOS)
                     const SliverGap(10),
+                  const GoForPaidPlanBanner(),
                   const SliverGap(10),
                   const HomeRecentlyPlayedTracksSection(),
                   const HomePlaylistsSection(),

@@ -20,6 +20,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import 'package:sangeet/collections/env.dart';
@@ -146,6 +147,9 @@ Future<void> main(List<String> rawArgs) async {
     // The public API key is public by design; configure only when present.
     if (Env.superwallApiKey.isNotEmpty) {
       SuperwallService.instance.configure(Env.superwallApiKey);
+      // Keep the subscription status cached so non-widget code (stream
+      // handlers, prefetchers, TrackTile) can check premium access.
+      PremiumAccess.subscribeToStatus();
     }
 
     // OneSignal push notifications & in-app messages, via the centralized

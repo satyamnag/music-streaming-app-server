@@ -21,6 +21,7 @@ class SangeetTrackObject with _$SangeetTrackObject {
     required int durationMs,
     required String isrc,
     required bool explicit,
+    @Default('free') String status,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(

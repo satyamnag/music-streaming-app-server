@@ -498,6 +498,7 @@ _$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
       durationMs: (json['durationMs'] as num).toInt(),
       isrc: json['isrc'] as String,
       explicit: json['explicit'] as bool,
+      status: json['status'] as String? ?? 'free',
       $type: json['runtimeType'] as String?,
     );
 
@@ -512,6 +513,7 @@ Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
       'durationMs': instance.durationMs,
       'isrc': instance.isrc,
       'explicit': instance.explicit,
+      'status': instance.status,
       'runtimeType': instance.$type,
     };
 

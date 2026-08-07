@@ -3,6 +3,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
+import 'package:sangeet/modules/auth/profile_plan_status.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
 /// Shows the signed-in user's Clerk profile (avatar, username, email) with a
@@ -71,6 +72,10 @@ class ProfileDialog extends ConsumerWidget {
                     color: theme.colorScheme.mutedForeground,
                   ),
                 ),
+              const Gap(16),
+              // Show the paid plan status (plan name, duration, start/end
+              // dates) for signed-in users, read from Superwall CustomerInfo.
+              const ProfilePlanStatus(),
               const Gap(16),
               Button.destructive(
                 onPressed: () async {

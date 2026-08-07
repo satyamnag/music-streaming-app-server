@@ -9,6 +9,11 @@ abstract class SuperwallPlacements {
   /// can be configured to present a paywall for free users and allow access for
   /// subscribers (gated mode).
   static const String premiumPlayback = 'premium_playback';
+
+  /// Gates playback of an individual paid (premium) track. Configure this
+  /// placement in the Superwall Dashboard (Gated) to present the paywall with
+  /// the monthly (₹99) and yearly (₹999) plans to free users.
+  static const String premiumTrackPlay = 'paid_track_play';
 }
 
 /// Gates a premium feature behind a Superwall placement.

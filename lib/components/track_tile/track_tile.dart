@@ -19,6 +19,7 @@ import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/services/audio_preload/track_byte_prefetcher.dart';
@@ -115,7 +116,20 @@ class TrackTile extends HookConsumerWidget {
             onPressed: () async {
               try {
                 isLoading.value = true;
-                await onTap?.call();
+                // In selection mode, taps toggle checkboxes — never gate those.
+                if (onChanged != null) {
+                  await onTap?.call();
+                  return;
+                }
+                // Paid tracks are locked for free users: intercept the tap,
+                // prompt sign-in if needed and present the paywall before the
+                // caller's onTap (which starts playback) is allowed to run.
+                await PremiumAccess.gateTrackPlay(
+                  context: context,
+                  ref: ref,
+                  track: track,
+                  feature: onTap ?? () async {},
+                );
               } finally {
                 if (context.mounted) {
                   isLoading.value = false;
@@ -299,7 +313,31 @@ class TrackTile extends HookConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(width: 8),
-                LocalTrackHeartButton(track: track),
+                // Paid (locked) tracks show a lock icon in place of the heart
+                // outline so users immediately see the song is premium-only.
+                // Tapping the lock still routes through the same tap gate
+                // (sign-in -> paywall) before playback can start.
+                if (PremiumAccess.isTrackLocked(track, ref))
+                  IconButton(
+                    variance: ButtonVariance.ghost,
+                    size: ButtonSize.small,
+                    icon: const Icon(Icons.lock_outline, size: 18),
+                    onPressed: () async {
+                      isLoading.value = true;
+                      try {
+                        await PremiumAccess.gateTrackPlay(
+                          context: context,
+                          ref: ref,
+                          track: track,
+                          feature: onTap ?? () async {},
+                        );
+                      } finally {
+                        if (context.mounted) isLoading.value = false;
+                      }
+                    },
+                  )
+                else
+                  LocalTrackHeartButton(track: track),
                 const SizedBox(width: 4),
                 Builder(
                   builder: (context) {

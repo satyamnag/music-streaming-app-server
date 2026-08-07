@@ -7,6 +7,7 @@ import 'package:dio/dio.dart' as dio_lib;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shelf/shelf.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 
@@ -145,7 +146,7 @@ class ServerPlaybackRoutes {
 
     final row = await supabase
         .from('tracks')
-        .select('id,title,artist_names,duration,thumbnail,storage_path')
+        .select('id,title,artist_names,duration,thumbnail,storage_path,status')
         .eq('id', trackId)
         .maybeSingle();
 
@@ -196,6 +197,7 @@ class ServerPlaybackRoutes {
       durationMs: ((row['duration'] ?? 0) * 1000).toInt(),
       isrc: '',
       explicit: false,
+      status: (row['status'] ?? 'free').toString(),
     );
 
     final match = SangeetAudioSourceMatchObject(
@@ -271,6 +273,7 @@ class ServerPlaybackRoutes {
         durationMs: ((data['duration'] ?? 0) * 1000).toInt(),
         isrc: '',
         explicit: false,
+        status: (data['status'] ?? 'free').toString(),
       );
 
       final sourcedTrack = await SourcedTrack.fetchFromTrack(
@@ -403,6 +406,13 @@ class ServerPlaybackRoutes {
         return Response.notFound("Track not found in the current queue");
       }
 
+      // Paid tracks are locked for free users — refuse to stream even if a
+      // client bypasses the UI and hits the local stream endpoint directly.
+      final status = sourcedTrack.query.status;
+      if (status == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
+        return Response.forbidden("This track requires a premium subscription");
+      }
+
       final res = await streamTrackInformation(
         request,
         sourcedTrack,
@@ -425,6 +435,13 @@ class ServerPlaybackRoutes {
 
       if (sourcedTrack == null) {
         return Response.notFound("Track not found in the current queue");
+      }
+
+      // Paid tracks are locked for free users — refuse to stream even if a
+      // client bypasses the UI and hits the local stream endpoint directly.
+      final status = sourcedTrack.query.status;
+      if (status == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
+        return Response.forbidden("This track requires a premium subscription");
       }
 
       final res = await streamTrack(

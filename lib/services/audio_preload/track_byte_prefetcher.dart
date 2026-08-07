@@ -5,6 +5,7 @@ import 'dart:math' show max;
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
@@ -68,6 +69,8 @@ class TrackBytePrefetcher {
   void prefetch(SangeetTrackObject track, WidgetRef ref) {
     if (track is! SangeetFullTrackObject) return;
     final id = track.id;
+    // Do not prefetch paid tracks for free users (they are locked).
+    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(ref)) return;
     if (_prefetched.contains(id) || _inFlight.contains(id)) return;
     if (currentActiveTrackId == id) return;
 
@@ -112,10 +115,12 @@ class TrackBytePrefetcher {
       final supabase = ref.read(supabaseClientProvider);
       final row = await supabase
           .from('tracks')
-          .select('storage_path')
+          .select('storage_path,status')
           .eq('id', trackId)
           .maybeSingle();
       if (row == null || row['storage_path'] == null) return;
+      // Defense in depth: never prefetch paid audio for a free user.
+      if (row['status'] == 'paid' && !PremiumAccess.isPremiumUser(ref)) return;
       final storagePath = row['storage_path'].toString();
       final url = await supabase.storage
           .from('music')

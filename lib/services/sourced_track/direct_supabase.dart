@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
 
 /// Resolves a playable stream URL directly from Supabase, bypassing the
@@ -15,6 +16,11 @@ Future<SangeetAudioSourceStreamObject?> resolveDirectSupabaseStream(
   SangeetFullTrackObject track,
 ) async {
   try {
+    // Paid tracks are locked for free users — refuse to sign a stream URL.
+    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
+      return null;
+    }
+
     final supabase = ref.read(supabaseClientProvider);
 
     final row = await supabase
