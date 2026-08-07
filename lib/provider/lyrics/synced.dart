@@ -9,6 +9,7 @@ import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
 import 'package:sangeet/services/logger/logger.dart';
 
@@ -16,6 +17,74 @@ class SyncedLyricsNotifier
     extends FamilyAsyncNotifier<SubtitleSimple, SangeetTrackObject?> {
   SangeetTrackObject get _track => arg!;
 
+  /// Fetches lyrics stored server-side for the track from the local stream
+  /// server (`/supabase/lyrics/<trackId>`), which reads the `lyrics` and
+  /// `synced_lyrics` columns of the Supabase tracks table. Returns a
+  /// [SubtitleSimple] with synced lines when an LRC block is present, or plain
+  /// (time 0) lines when only plain lyrics exist. Returns null when the server
+  /// has no lyrics for the track (caller falls back to LRCLib).
+  Future<SubtitleSimple?> getServerLyrics() async {
+    try {
+      await SangeetMedia.ensurePortReady();
+      final res = await globalDio.get(
+        'http://127.0.0.1:${SangeetMedia.serverPort}/supabase/lyrics/${_track.id}',
+        options: Options(
+          responseType: ResponseType.json,
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+
+      if (res.statusCode != 200) return null;
+
+      final data = res.data as Map<String, dynamic>? ?? const {};
+      final syncedRaw = data['synced_lyrics'] as String?;
+      final plainRaw = data['lyrics'] as String?;
+
+      if ((syncedRaw == null || syncedRaw.trim().isEmpty) &&
+          (plainRaw == null || plainRaw.trim().isEmpty)) {
+        return null;
+      }
+
+      if (syncedRaw != null && syncedRaw.trim().isNotEmpty) {
+        final parsed = Lrc.parse(syncedRaw);
+        final slices = parsed.lyrics
+            .map(LyricSlice.fromLrcLine)
+            .where((s) => s.text.trim().isNotEmpty)
+            .toList();
+        if (slices.isNotEmpty) {
+          return SubtitleSimple(
+            lyrics: slices,
+            name: _track.name,
+            uri: Uri.parse('server://${_track.id}'),
+            rating: 100,
+            provider: "Server",
+          );
+        }
+      }
+
+      if (plainRaw != null && plainRaw.trim().isNotEmpty) {
+        final lines = plainRaw
+            .split("\n")
+            .map((line) => LyricSlice(text: line.trim(), time: Duration.zero))
+            .where((s) => s.text.isNotEmpty)
+            .toList();
+        if (lines.isNotEmpty) {
+          return SubtitleSimple(
+            lyrics: lines,
+            name: _track.name,
+            uri: Uri.parse('server://${_track.id}'),
+            rating: 0,
+            provider: "Server",
+          );
+        }
+      }
+
+      return null;
+    } catch (e) {
+      AppLogger.reportError(e);
+      return null;
+    }
+  }
   /// Lyrics credits: [lrclib.net](https://lrclib.net) and their contributors
   /// Thanks for their generous public API
   Future<SubtitleSimple> getLRCLibLyrics() async {
@@ -106,7 +175,12 @@ class SyncedLyricsNotifier
       if (lyrics == null ||
           lyrics.lyrics.isEmpty ||
           lyrics.lyrics.length <= 5) {
-        lyrics = await getLRCLibLyrics();
+        // Prefer lyrics stored server-side (added via the admin web app), and
+        // only fall back to LRCLib when the server has none for this track.
+        lyrics = await getServerLyrics();
+        if (lyrics == null || lyrics.lyrics.isEmpty) {
+          lyrics = await getLRCLibLyrics();
+        }
       }
 
       if (lyrics.lyrics.isEmpty) {

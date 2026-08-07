@@ -12,6 +12,7 @@ import 'package:sangeet/components/framework/app_pop_scope.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_actions.dart';
 import 'package:sangeet/modules/player/player_controls.dart';
+import 'package:sangeet/modules/player/player_synced_lyrics.dart';
 import 'package:sangeet/modules/player/volume_slider.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
@@ -181,6 +182,8 @@ class PlayerView extends HookConsumerWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  const PlayerSyncedLyrics(),
                   const SizedBox(height: 10),
                   const PlayerControls(),
                   const SizedBox(height: 25),

@@ -25,6 +25,7 @@ final serverRouterProvider = Provider((ref) {
   // Supabase data endpoints
   router.get("/supabase/tracks", supabaseRoutes.getTracks);
   router.get("/supabase/tracks/<id>", supabaseRoutes.getTrack);
+  router.get("/supabase/lyrics/<id>", supabaseRoutes.getLyrics);
   router.get("/supabase/search", supabaseRoutes.search);
   router.get("/supabase/stream/<id>", supabaseRoutes.getStreamUrl);
   router.get("/supabase/browse/sections", supabaseRoutes.getBrowseSections);
