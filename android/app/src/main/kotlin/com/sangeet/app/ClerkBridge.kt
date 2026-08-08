@@ -190,9 +190,16 @@ class ClerkBridge(
                     return
                 }
                 scope.launch {
+                    // Derive first/last name from the email so sign-up can reach
+                    // COMPLETE even when the Clerk instance requires these profile
+                    // attributes (the app's flow only collects an email).
+                    val derivedFirstName = identifier.substringBefore("@")
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
                     Clerk.auth
                         .signUp {
                             email = identifier
+                            firstName = derivedFirstName
+                            lastName = "User"
                         }
                         .onSuccess { signUp ->
                             signUp.sendCode {
