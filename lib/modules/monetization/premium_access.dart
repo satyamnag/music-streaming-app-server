@@ -97,7 +97,7 @@ class PremiumAccess {
 
     // Present the paywall (Gated mode: feature runs only after purchase).
     var unlocked = false;
-    await gateFeature(
+    final result = await gateFeature(
       placement: SuperwallPlacements.premiumTrackPlay,
       params: {'track_id': track.id},
       feature: () async {
@@ -105,6 +105,10 @@ class PremiumAccess {
         await feature();
       },
     );
+
+    if (result == GateResult.failed && context.mounted) {
+      showPaywallError(context);
+    }
     return unlocked;
   }
 
@@ -124,14 +128,40 @@ class PremiumAccess {
     }
 
     var purchased = false;
-    await gateFeature(
+    final result = await gateFeature(
       placement: SuperwallPlacements.premiumTrackPlay,
       params: {'source': 'go_for_paid_plan'},
       feature: () async {
         purchased = true;
       },
     );
+
+    if (result == GateResult.failed && context.mounted) {
+      showPaywallError(context);
+    }
     return purchased;
+  }
+
+  /// Shows a friendly message when the paywall could not be presented
+  /// (e.g. Google Play Billing unavailable or the plans are not yet live).
+  static void showPaywallError(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Plans are not available yet'),
+        content: const Text(
+          'We could not load the subscription plans. Please make sure you are '
+          'signed in to your Google account and try again in a moment.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Shows the Clerk email-OTP sign-in dialog and waits until the user is

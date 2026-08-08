@@ -1,4 +1,5 @@
 import 'package:sangeet/services/superwall_service.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
 /// Placement names used for feature gating in the app.
 ///
@@ -16,20 +17,55 @@ abstract class SuperwallPlacements {
   static const String premiumTrackPlay = 'paid_track_play';
 }
 
+/// Result of a gated feature attempt.
+enum GateResult {
+  /// The feature ran (user is subscribed, or the paywall was successfully
+  /// presented and completed).
+  success,
+
+  /// The user declined / dismissed the paywall without purchasing.
+  declined,
+
+  /// The paywall could not be presented (e.g. billing unavailable, products
+  /// not configured, no campaign). The user should be shown a message instead
+  /// of an endless spinner.
+  failed,
+}
+
 /// Gates a premium feature behind a Superwall placement.
 ///
 /// Superwall remotely decides whether a paywall is shown. If the user is
 /// entitled (e.g. active subscription), [feature] runs immediately. If a
 /// paywall is required, it is presented first and [feature] runs only after a
 /// successful purchase (gated mode) — or not at all if the user declines.
-Future<void> gateFeature({
+///
+/// If the paywall cannot be presented (billing unavailable, missing products,
+/// campaign not configured), the SDK reports an error and this returns
+/// [GateResult.failed] so callers can show a clear message instead of letting
+/// a loading spinner run forever.
+Future<GateResult> gateFeature({
   required String placement,
   Map<String, Object>? params,
   required Future<void> Function() feature,
-}) {
-  return SuperwallService.instance.registerPlacement(
+}) async {
+  var error = false;
+  var featureRan = false;
+  final handler = PaywallPresentationHandler()
+    ..onError((_) {
+      error = true;
+    });
+
+  await SuperwallService.instance.registerPlacement(
     placement,
     params: params,
-    feature: feature,
+    handler: handler,
+    feature: () async {
+      featureRan = true;
+      await feature();
+    },
   );
+
+  if (featureRan) return GateResult.success;
+  if (error) return GateResult.failed;
+  return GateResult.declined;
 }

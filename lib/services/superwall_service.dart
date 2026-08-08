@@ -45,11 +45,13 @@ class SuperwallService {
   Future<void> registerPlacement(
     String placement, {
     Map<String, Object>? params,
+    PaywallPresentationHandler? handler,
     Future<void> Function()? feature,
   }) {
     return Superwall.shared.registerPlacement(
       placement,
       params: params,
+      handler: handler,
       feature: feature,
     );
   }
