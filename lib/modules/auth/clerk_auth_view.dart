@@ -233,8 +233,12 @@ class _OtpSignInView extends HookConsumerWidget {
     final error = useState<String?>(null);
 
     final identifier = useTextEditingController();
+    final firstName = useTextEditingController();
+    final lastName = useTextEditingController();
     final code = useTextEditingController();
     useValueListenable(identifier);
+    useValueListenable(firstName);
+    useValueListenable(lastName);
     useValueListenable(code);
 
     final emailFocus = useFocusNode();
@@ -278,6 +282,8 @@ class _OtpSignInView extends HookConsumerWidget {
       try {
         final failure = await ref.read(clerkAuthProvider.notifier).sendOtp(
               identifier: identifier.text.trim(),
+              firstName: firstName.text.trim(),
+              lastName: lastName.text.trim(),
             );
         if (!context.mounted) return;
         if (failure != null) {
@@ -418,6 +424,8 @@ class _OtpSignInView extends HookConsumerWidget {
                   theme: theme,
                   l10n: l10n,
                   controller: identifier,
+                  firstNameController: firstName,
+                  lastNameController: lastName,
                   focusNode: emailFocus,
                   submitting: submitting.value,
                   error: error.value,
@@ -434,6 +442,8 @@ class _OtpSignInView extends HookConsumerWidget {
     required ThemeData theme,
     required AppLocalizations l10n,
     required TextEditingController controller,
+    required TextEditingController firstNameController,
+    required TextEditingController lastNameController,
     required FocusNode focusNode,
     required bool submitting,
     required String? error,
@@ -466,6 +476,39 @@ class _OtpSignInView extends HookConsumerWidget {
           ],
         ),
         const Gap(16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: FormField<dynamic>(
+                key: const FormKey<dynamic>('otp-first-name'),
+                label: Text('First name'),
+                child: TextField(
+                  controller: firstNameController,
+                  placeholder: const Text('First name'),
+                  textInputAction: TextInputAction.next,
+                  autocorrect: false,
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+            const Gap(8),
+            Expanded(
+              child: FormField<dynamic>(
+                key: const FormKey<dynamic>('otp-last-name'),
+                label: Text('Last name'),
+                child: TextField(
+                  controller: lastNameController,
+                  placeholder: const Text('Last name'),
+                  textInputAction: TextInputAction.next,
+                  autocorrect: false,
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Gap(12),
         FormField<dynamic>(
           key: const FormKey<dynamic>('otp-identifier'),
           label: Text(l10n.email),

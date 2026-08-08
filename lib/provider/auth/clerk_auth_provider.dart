@@ -167,10 +167,18 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   }
 
   /// Sends a one-time code to the given email address.
-  Future<String?> sendOtp({required String identifier}) async {
+  Future<String?> sendOtp({
+    required String identifier,
+    String? firstName,
+    String? lastName,
+  }) async {
     final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
       'sendOtp',
-      {'identifier': identifier},
+      {
+        'identifier': identifier,
+        if (firstName != null && firstName.isNotEmpty) 'firstName': firstName,
+        if (lastName != null && lastName.isNotEmpty) 'lastName': lastName,
+      },
     );
     final status = result?['status'] as String?;
     if (status == 'error') return result?['error'] as String?;

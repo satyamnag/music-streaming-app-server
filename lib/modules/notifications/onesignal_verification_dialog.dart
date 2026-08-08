@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart'
+    hide showDialog, AlertDialog, TextButton;
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 
-/// Shows the OneSignal "integration complete" dialog exactly once when the
-/// device receives a real, server-assigned push subscription ID.
+/// Shows a one-time welcome dialog when the device receives a real,
+/// server-assigned push subscription ID.
+///
+/// For **free users** it is framed as a premium upsell that encourages opting
+/// into the paid plan ("Go for Paid Plan" opens the sign-in → Superwall paywall
+/// flow). Push permission is still requested from the primary button.
 ///
 /// Per the OneSignal integration guide:
 ///  - Only a real ID (non-empty, not `local-`) counts as "registered".
 ///  - The dialog appears at most once per app session.
-///  - Push permission is requested ONLY from the "Got it" button — never at
-///    app launch.
-class OneSignalVerificationDialog extends StatefulWidget {
+///  - Push permission is requested ONLY from the button — never at app launch.
+class OneSignalVerificationDialog extends ConsumerStatefulWidget {
   const OneSignalVerificationDialog({super.key});
 
   @override
-  State<OneSignalVerificationDialog> createState() =>
+  ConsumerState<OneSignalVerificationDialog> createState() =>
       _OneSignalVerificationDialogState();
 }
 
-class _OneSignalVerificationDialogState extends State<OneSignalVerificationDialog> {
+class _OneSignalVerificationDialogState
+    extends ConsumerState<OneSignalVerificationDialog> {
   bool _shown = false;
 
   @override
@@ -49,14 +57,21 @@ class _OneSignalVerificationDialogState extends State<OneSignalVerificationDialo
   }
 
   Future<void> _showDialog() async {
+    final isPremium = PremiumAccess.isPremiumUser(ref);
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Your OneSignal SDK integration is complete!'),
-        content: const Text(
-          'You can now send Push Notifications & In-App Messages through '
-          'OneSignal. Tap below to enable push notifications.',
+        title: Text(isPremium
+            ? 'Welcome to Soulful Bhakti Premium!'
+            : 'Unlock Every Song'),
+        content: Text(
+          isPremium
+              ? 'Thank you for subscribing! Enjoy every devotional song, '
+                  'uninterrupted.'
+              : 'Upgrade to Soulful Bhakti Premium for unlimited access to '
+                  'every song, lyrics, and an uninterrupted listening '
+                  'experience — monthly ₹99 or yearly ₹999.',
         ),
         actions: [
           TextButton(
@@ -65,8 +80,17 @@ class _OneSignalVerificationDialogState extends State<OneSignalVerificationDialo
               // Permission is requested here — the only place per the guide.
               OneSignalService.instance.requestPermission();
             },
-            child: const Text('Got it'),
+            child: Text(isPremium ? 'Got it' : 'Not now'),
           ),
+          if (!isPremium)
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                OneSignalService.instance.requestPermission();
+                await PremiumAccess.promptForPaidPlan(dialogContext, ref);
+              },
+              child: const Text('Go for Paid Plan'),
+            ),
         ],
       ),
     );

@@ -185,6 +185,8 @@ class ClerkBridge(
             // parameter strategy".
             "sendOtp" -> {
                 val identifier = call.argument<String>("identifier") ?: ""
+                val providedFirstName = call.argument<String>("firstName")
+                val providedLastName = call.argument<String>("lastName")
                 if (identifier.isBlank()) {
                     result.success(mapOf("status" to "error", "error" to "Empty identifier"))
                     return
@@ -192,14 +194,17 @@ class ClerkBridge(
                 scope.launch {
                     // Derive first/last name from the email so sign-up can reach
                     // COMPLETE even when the Clerk instance requires these profile
-                    // attributes (the app's flow only collects an email).
+                    // attributes (the app's flow only collects an email). If the
+                    // user typed their names in the sign-in dialog, use those.
                     val derivedFirstName = identifier.substringBefore("@")
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                    val useFirstName = providedFirstName?.takeIf { it.isNotBlank() } ?: derivedFirstName
+                    val useLastName = providedLastName?.takeIf { it.isNotBlank() } ?: "User"
                     Clerk.auth
                         .signUp {
                             email = identifier
-                            firstName = derivedFirstName
-                            lastName = "User"
+                            firstName = useFirstName
+                            lastName = useLastName
                         }
                         .onSuccess { signUp ->
                             signUp.sendCode {
