@@ -863,7 +863,7 @@ class ServerSupabaseDataRoutes {
         items.add({
           'id': 'local-${row.id}',
           'name': row.name,
-          'description': row.description,
+          'description': '${songs.length} songs',
           'externalUri': '',
           'owner': _defaultUser,
           'images': const [],

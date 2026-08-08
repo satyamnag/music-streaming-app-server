@@ -33,12 +33,15 @@ class UserPlaylistsPage extends HookConsumerWidget {
     // (created on this device) are served by the local server directly.
     final ownerPlaylistsQuery = ref.watch(ownerPlaylistsProvider);
     final userPlaylistsQuery = ref.watch(userPlaylistsProvider);
+    final likedSongsQuery = ref.watch(likedSongsProvider);
 
     final likedTracksPlaylist = useMemoized(
       () => SangeetSimplePlaylistObject(
         id: "user-liked-tracks",
         name: context.l10n.liked_tracks,
-        description: context.l10n.liked_tracks_description,
+        description: likedSongsQuery.asData?.value.length != null
+            ? "${likedSongsQuery.asData!.value.length} tracks"
+            : context.l10n.liked_tracks_description,
         externalUri: "",
         owner: SangeetUserObject(
           id: "local",
@@ -52,7 +55,7 @@ class UserPlaylistsPage extends HookConsumerWidget {
             height: 300,
           )
         ]),
-      [context.l10n],
+      [context.l10n, likedSongsQuery],
     );
 
     List<SangeetSimplePlaylistObject> filter(

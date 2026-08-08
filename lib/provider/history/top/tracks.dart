@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/database/database.dart';
@@ -7,6 +8,8 @@ import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/history/top.dart';
 import 'package:sangeet/provider/metadata_plugin/artist/artist.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/family_paginated.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/dio/dio.dart';
 
 typedef PlaybackHistoryTrack = ({int count, SangeetTrackObject track});
 typedef PlaybackHistoryArtist = ({int count, SangeetSimpleArtistObject artist});
@@ -14,6 +17,52 @@ typedef PlaybackHistoryArtist = ({int count, SangeetSimpleArtistObject artist});
 class HistoryTopTracksNotifier extends FamilyPaginatedAsyncNotifier<
     PlaybackHistoryTrack, HistoryDuration> {
   HistoryTopTracksNotifier() : super();
+
+  /// Enriches the album image of each top track with the CURRENT thumbnail
+  /// from the live catalog. History snapshots store the cover as it was when
+  /// the song was last played, so after a cover is updated in the DB the
+  /// analytics list would otherwise keep showing a stale (or empty) image.
+  /// Only the image is replaced; the rest of the snapshot data is preserved.
+  Future<List<PlaybackHistoryTrack>> enrichWithLiveImages(
+    List<PlaybackHistoryTrack> items,
+  ) async {
+    try {
+      await SangeetMedia.ensurePortReady();
+      final port = SangeetMedia.serverPort;
+      final result = <PlaybackHistoryTrack>[];
+      for (final item in items) {
+        var track = item.track;
+        if (track is SangeetFullTrackObject) {
+          try {
+            final res = await globalDio.get(
+              'http://127.0.0.1:$port/supabase/tracks/${track.id}',
+              options: Options(
+                responseType: ResponseType.json,
+                validateStatus: (status) => status != null && status < 500,
+              ),
+            );
+            if (res.statusCode == 200) {
+              final current = SangeetTrackObject.fromJson(
+                Map<String, dynamic>.from(res.data as Map),
+              );
+              if (current is SangeetFullTrackObject &&
+                  current.album.images.isNotEmpty) {
+                track = track.copyWith(
+                  album: track.album.copyWith(images: current.album.images),
+                );
+              }
+            }
+          } catch (_) {
+            // Keep the historical image if the live lookup fails.
+          }
+        }
+        result.add((count: item.count, track: track));
+      }
+      return result;
+    } catch (_) {
+      return items;
+    }
+  }
 
   SimpleSelectStatement<$HistoryTableTable, HistoryTableData>
       createTracksQuery() {
@@ -107,7 +156,7 @@ class HistoryTopTracksNotifier extends FamilyPaginatedAsyncNotifier<
 
     final entries = await tracksQuery.get();
 
-    final items = getTracksWithCount(entries);
+    final items = await enrichWithLiveImages(getTracksWithCount(entries));
 
     return SangeetPaginationResponseObject<PlaybackHistoryTrack>(
       items: items,

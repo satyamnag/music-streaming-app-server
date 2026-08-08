@@ -38,7 +38,7 @@ class HomePlaylistsSection extends HookConsumerWidget {
     final likedSongsPlaylist = SangeetSimplePlaylistObject(
       id: "user-liked-tracks",
       name: context.l10n.liked_tracks,
-      description: context.l10n.liked_tracks_description,
+      description: "$likedCount tracks",
       externalUri: "",
       owner: SangeetUserObject(id: "local", name: "You", externalUri: ""),
     );
