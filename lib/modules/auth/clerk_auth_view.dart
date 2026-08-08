@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart'
     show Icons, TextInputAction, ValueChanged, Color, EdgeInsets;
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -32,6 +34,22 @@ class ClerkAuthView extends HookConsumerWidget {
     final theme = Theme.of(context);
     final auth = ref.watch(clerkAuthProvider);
 
+    // If Clerk does not initialize within a reasonable window (e.g. the Clerk
+    // Native API is disabled in the dashboard, or the SDK cannot reach its
+    // servers), stop showing an endless loading spinner and surface a clear,
+    // actionable error instead.
+    final timedOut = useState(false);
+    useEffect(() {
+      if (auth.isLoading || (auth.value?.initialized ?? false)) {
+        timedOut.value = false;
+        return null;
+      }
+      final timer = Timer(const Duration(seconds: 8), () {
+        timedOut.value = true;
+      });
+      return timer.cancel;
+    }, [auth.isLoading, auth.value?.initialized]);
+
     Widget body;
     if (auth.isLoading) {
       body = _StatusBox(
@@ -39,9 +57,52 @@ class ClerkAuthView extends HookConsumerWidget {
       );
     } else {
       final state = auth.value ?? const ClerkAuthState();
-      if (!state.initialized) {
+      if (!state.initialized && !timedOut.value) {
         body = _StatusBox(
           child: CircularProgressIndicator(color: theme.colorScheme.primary),
+        );
+      } else if (!state.initialized) {
+        // Clerk failed to initialize — explain the issue instead of spinning.
+        body = SizedBox(
+          width: 320,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 40,
+                color: Color(0xFF9C4D5B),
+              ),
+              const Gap(12),
+              Text(
+                'Sign-in is temporarily unavailable.',
+                textAlign: TextAlign.center,
+                style: theme.typography.base.copyWith(
+                  color: theme.colorScheme.foreground,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Gap(6),
+              Text(
+                'Please make sure Clerk Native API is enabled and try again.',
+                textAlign: TextAlign.center,
+                style: theme.typography.small.copyWith(
+                  color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+              const Gap(16),
+              SizedBox(
+                width: double.infinity,
+                child: Button.primary(
+                  onPressed: () {
+                    timedOut.value = false;
+                    ref.invalidate(clerkAuthProvider);
+                  },
+                  child: const Text('Try again'),
+                ),
+              ),
+            ],
+          ),
         );
       } else if (state.signedIn) {
         body = SizedBox(
