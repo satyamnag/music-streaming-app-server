@@ -3,7 +3,7 @@ description: Open source extensible music streaming platform and app, based on B
 
 publish_to: "none"
 
-version: 1.0.0+49
+version: 1.0.0+50
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
