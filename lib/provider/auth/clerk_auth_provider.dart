@@ -196,6 +196,22 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     return null;
   }
 
+  /// Signs in (or signs up) with Google.
+  ///
+  /// Delegates to the native Clerk SDK's redirect-based OAuth flow: Google's
+  /// account chooser is presented, the user picks an account, and on success
+  /// the session is set active natively. The updated auth state is streamed
+  /// back through the EventChannel, so callers should invalidate
+  /// [clerkAuthProvider] afterwards to reflect the new session.
+  Future<String?> signInWithGoogle() async {
+    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
+      'signInWithGoogle',
+    );
+    final status = result?['status'] as String?;
+    if (status == 'error') return result?['error'] as String?;
+    return null;
+  }
+
   Future<String?> signOut() async {
     final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
       'signOut',

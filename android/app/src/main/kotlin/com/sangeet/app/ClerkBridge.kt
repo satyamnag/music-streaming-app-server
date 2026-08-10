@@ -16,6 +16,7 @@ import com.clerk.api.signin.verifyCode
 import com.clerk.api.signup.SignUp
 import com.clerk.api.signup.sendCode
 import com.clerk.api.signup.verifyCode
+import com.clerk.api.sso.OAuthProvider
 import com.clerk.api.user.User
 import com.clerk.api.user.createEmailAddress
 import io.flutter.plugin.common.EventChannel
@@ -299,6 +300,28 @@ class ClerkBridge(
                         }
                         .onFailure {
                             android.util.Log.i("ClerkBridge", "verifyOtp failure: ${it.errorMessage}")
+                            result.success(mapOf("status" to "error", "error" to it.errorMessage))
+                        }
+                }
+            }
+
+            // Sign in with Google via the redirect-based OAuth flow. The Clerk
+            // SDK opens a Chrome Custom Tab with Google's account chooser, waits
+            // for the user to pick an account and complete the flow, then returns
+            // here. New users are signed up automatically (Clerk's internal
+            // sign-in -> sign-up transfer), existing users are signed in — either
+            // way the active session is set by the SDK and the user state is
+            // streamed back to Flutter over the EventChannel.
+            "signInWithGoogle" -> {
+                scope.launch {
+                    Clerk.auth
+                        .signInWithOAuth(OAuthProvider.GOOGLE)
+                        .onSuccess {
+                            android.util.Log.i("ClerkBridge", "signInWithGoogle success")
+                            result.success(mapOf("status" to "success"))
+                        }
+                        .onFailure {
+                            android.util.Log.i("ClerkBridge", "signInWithGoogle failure: ${it.errorMessage}")
                             result.success(mapOf("status" to "error", "error" to it.errorMessage))
                         }
                 }

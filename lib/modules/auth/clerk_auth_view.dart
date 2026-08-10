@@ -1,30 +1,24 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart'
-    show Icons, TextInputAction, ValueChanged, Color, EdgeInsets;
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/l10n/l10n.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
-/// Passwordless **email OTP** auth view, rendered as a polished modal popup
-/// dialog that overlays the app.
+/// Google sign-in auth view, rendered as a polished modal popup dialog that
+/// overlays the app.
 ///
 /// Flow:
-///  1. enter the email address
-///  2. tap "Send code" -> an OTP is sent
-///  3. enter the OTP -> tap "Verify" -> signed in
+///  1. tap "Continue with Google"
+///  2. the native Clerk SDK opens Google's account chooser
+///  3. pick an account -> signed in (new users are signed up automatically)
 ///
 /// UX highlights:
-///  - inline email validation (required + format)
 ///  - inline error feedback with destructive styling
-///  - loading spinners on action buttons while a request is in flight
-///  - auto-focus on the active input field
-///  - keyboard "submit" action triggers the primary action
-///  - animated transition between the email and OTP steps
+///  - loading spinner on the button while the request is in flight
 ///  - safe against double-submits and unmounted-context use
 class ClerkAuthView extends HookConsumerWidget {
   const ClerkAuthView({super.key});
@@ -152,7 +146,7 @@ class ClerkAuthView extends HookConsumerWidget {
           ),
         );
       } else {
-        body = const _OtpSignInView();
+        body = const _GoogleSignInView();
       }
     }
 
@@ -221,157 +215,31 @@ class _StatusBox extends StatelessWidget {
   }
 }
 
-class _OtpSignInView extends HookConsumerWidget {
-  const _OtpSignInView();
+/// Google-only sign-in view: a single "Continue with Google" button that
+/// launches the native Clerk OAuth flow (Google account chooser). No email,
+/// name or OTP is ever collected — picking an account is all that is needed.
+class _GoogleSignInView extends HookConsumerWidget {
+  const _GoogleSignInView();
 
   @override
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final otpSent = useState(false);
     final submitting = useState(false);
     final error = useState<String?>(null);
-
-    final identifier = useTextEditingController();
-    final firstName = useTextEditingController();
-    final lastName = useTextEditingController();
-    final code = useTextEditingController();
-    useValueListenable(identifier);
-    useValueListenable(firstName);
-    useValueListenable(lastName);
-    useValueListenable(code);
-
-    final emailFocus = useFocusNode();
-    final codeFocus = useFocusNode();
     var requestInFlight = false;
 
     void clearError() {
       if (error.value != null) error.value = null;
     }
 
-    String? validateEmail(String value) {
-      final trimmed = value.trim();
-      if (trimmed.isEmpty) {
-        return 'Please enter your email address';
-      }
-      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-      if (!emailRegex.hasMatch(trimmed)) {
-        return 'Please enter a valid email address';
-      }
-      return null;
-    }
-
-    String? validateCode(String value) {
-      if (value.trim().length < 4) {
-        return 'Please enter the code sent to your email';
-      }
-      return null;
-    }
-
-    Future<void> sendCode() async {
-      final emailError = validateEmail(identifier.text);
-      if (emailError != null) {
-        error.value = emailError;
-        emailFocus.requestFocus();
-        return;
-      }
+    Future<void> continueWithGoogle() async {
       if (requestInFlight) return;
       requestInFlight = true;
-      clearError();
       submitting.value = true;
-      try {
-        final failure = await ref.read(clerkAuthProvider.notifier).sendOtp(
-              identifier: identifier.text.trim(),
-              firstName: firstName.text.trim(),
-              lastName: lastName.text.trim(),
-            );
-        if (!context.mounted) return;
-        if (failure != null) {
-          error.value = failure;
-        } else {
-          otpSent.value = true;
-          codeFocus.requestFocus();
-          showToast(
-            context: context,
-            location: ToastLocation.bottomCenter,
-            dismissible: true,
-            builder: (context, overlay) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.popover,
-                borderRadius: theme.borderRadiusLg,
-                border: Border.all(color: theme.colorScheme.muted),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x33000000),
-                    blurRadius: 16,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.check_circle,
-                    color: Color(0xFF2E7D32),
-                    size: 20,
-                  ),
-                  const Gap(10),
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Code sent',
-                          style: theme.typography.base.copyWith(
-                            color: theme.colorScheme.foreground,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          'Check your email for the one-time code.',
-                          style: theme.typography.small.copyWith(
-                            color: theme.colorScheme.mutedForeground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(8),
-                  Button.text(
-                    onPressed: overlay.close,
-                    child: const Icon(Icons.close, size: 16),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-      } catch (_) {
-        if (context.mounted) error.value = 'Something went wrong. Please try again.';
-      } finally {
-        submitting.value = false;
-        requestInFlight = false;
-      }
-    }
-
-    Future<void> verifyCode() async {
-      final codeError = validateCode(code.text);
-      if (codeError != null) {
-        error.value = codeError;
-        codeFocus.requestFocus();
-        return;
-      }
-      if (requestInFlight) return;
-      requestInFlight = true;
       clearError();
-      submitting.value = true;
       try {
-        final failure = await ref.read(clerkAuthProvider.notifier).verifyOtp(
-              code: code.text.trim(),
-            );
+        final failure =
+            await ref.read(clerkAuthProvider.notifier).signInWithGoogle();
         if (!context.mounted) return;
         if (failure != null) {
           error.value = failure;
@@ -390,235 +258,62 @@ class _OtpSignInView extends HookConsumerWidget {
       }
     }
 
-    void goBackToEmail() {
-      otpSent.value = false;
-      clearError();
-      emailFocus.requestFocus();
-    }
-
     return SizedBox(
       width: 340,
-      child: SingleChildScrollView(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-          child: otpSent.value
-              ? _buildOtpStep(
-                  theme: theme,
-                  l10n: l10n,
-                  controller: code,
-                  focusNode: codeFocus,
-                  submitting: submitting.value,
-                  error: error.value,
-                  onChanged: (_) => clearError(),
-                  onSubmit: verifyCode,
-                  onVerify: verifyCode,
-                  onBack: goBackToEmail,
-                )
-              : _buildEmailStep(
-                  theme: theme,
-                  l10n: l10n,
-                  controller: identifier,
-                  firstNameController: firstName,
-                  lastNameController: lastName,
-                  focusNode: emailFocus,
-                  submitting: submitting.value,
-                  error: error.value,
-                  onChanged: (_) => clearError(),
-                  onSubmit: sendCode,
-                  onSend: sendCode,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                SangeetIcons.login,
+                size: 16,
+                color: Color(0xFF9C4D5B),
+              ),
+              const Gap(8),
+              Expanded(
+                child: Text(
+                  'Sign in with your Google account to get started.',
+                  textAlign: TextAlign.left,
+                  style: theme.typography.small.copyWith(
+                    color: theme.colorScheme.mutedForeground,
+                  ),
                 ),
-        ),
+              ),
+            ],
+          ),
+          const Gap(16),
+          SizedBox(
+            width: double.infinity,
+            child: Button.outline(
+              onPressed: submitting.value ? null : continueWithGoogle,
+              child: submitting.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/logos/google-g.svg',
+                          width: 20,
+                          height: 20,
+                        ),
+                        const Gap(12),
+                        const Text('Continue with Google'),
+                      ],
+                    ),
+            ),
+          ),
+          if (error.value != null) ...[
+            const Gap(10),
+            _InlineError(text: error.value!),
+          ],
+        ],
       ),
-    );
-  }
-
-  Widget _buildEmailStep({
-    required ThemeData theme,
-    required AppLocalizations l10n,
-    required TextEditingController controller,
-    required TextEditingController firstNameController,
-    required TextEditingController lastNameController,
-    required FocusNode focusNode,
-    required bool submitting,
-    required String? error,
-    required ValueChanged<String> onChanged,
-    required VoidCallback onSubmit,
-    required VoidCallback onSend,
-  }) {
-    return Column(
-      key: const ValueKey('otp-email-step'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              SangeetIcons.login,
-              size: 16,
-              color: Color(0xFF9C4D5B),
-            ),
-            const Gap(8),
-            Expanded(
-              child: Text(
-                l10n.sign_in_with_otp,
-                textAlign: TextAlign.left,
-                style: theme.typography.small.copyWith(
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Gap(16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: FormField<dynamic>(
-                key: const FormKey<dynamic>('otp-first-name'),
-                label: Text('First name'),
-                child: TextField(
-                  controller: firstNameController,
-                  placeholder: const Text('First name'),
-                  textInputAction: TextInputAction.next,
-                  autocorrect: false,
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-            const Gap(8),
-            Expanded(
-              child: FormField<dynamic>(
-                key: const FormKey<dynamic>('otp-last-name'),
-                label: Text('Last name'),
-                child: TextField(
-                  controller: lastNameController,
-                  placeholder: const Text('Last name'),
-                  textInputAction: TextInputAction.next,
-                  autocorrect: false,
-                  onChanged: onChanged,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Gap(12),
-        FormField<dynamic>(
-          key: const FormKey<dynamic>('otp-identifier'),
-          label: Text(l10n.email),
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            autofocus: true,
-            placeholder: const Text('you@example.com'),
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.done,
-            autocorrect: false,
-            enableSuggestions: false,
-            onChanged: onChanged,
-            onSubmitted: (_) => onSubmit(),
-          ),
-        ),
-        if (error != null) ...[
-          const Gap(10),
-          _InlineError(text: error),
-        ],
-        const Gap(16),
-        Button.primary(
-          enabled: !submitting && controller.text.trim().isNotEmpty,
-          onPressed: onSend,
-          child: submitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.send_code),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOtpStep({
-    required ThemeData theme,
-    required AppLocalizations l10n,
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required bool submitting,
-    required String? error,
-    required ValueChanged<String> onChanged,
-    required VoidCallback onSubmit,
-    required VoidCallback onVerify,
-    required VoidCallback onBack,
-  }) {
-    return Column(
-      key: const ValueKey('otp-code-step'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.shield_outlined,
-              size: 16,
-              color: Color(0xFF9C4D5B),
-            ),
-            const Gap(8),
-            Expanded(
-              child: Text(
-                l10n.enter_otp_sent,
-                textAlign: TextAlign.left,
-                style: theme.typography.small.copyWith(
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Gap(16),
-        FormField<dynamic>(
-          key: const FormKey<dynamic>('otp-code'),
-          label: Text(l10n.verification_code),
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            autofocus: true,
-            placeholder: Text(l10n.verification_code_hint),
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.done,
-            maxLength: 6,
-            onChanged: onChanged,
-            onSubmitted: (_) => onSubmit(),
-          ),
-        ),
-        if (error != null) ...[
-          const Gap(10),
-          _InlineError(text: error),
-        ],
-        const Gap(16),
-        Button.primary(
-          enabled: !submitting && controller.text.trim().isNotEmpty,
-          onPressed: onVerify,
-          child: submitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.verify),
-        ),
-        const Gap(4),
-        Button.text(
-          onPressed: submitting ? null : onBack,
-          child: Text(l10n.change_identifier),
-        ),
-      ],
     );
   }
 }
