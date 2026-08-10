@@ -484,16 +484,16 @@ app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
     const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext)
     const isAudio = ext === 'opus'
     if (!isImage && !isAudio) return res.status(400).json({ error: 'Allowed: .opus for audio, .png/.jpg/.jpeg/.webp for thumbnails' })
-    const folder = isImage ? 'thumbnails' : ''
-    const fileName = folder ? `${folder}/${Date.now()}-${req.file.originalname}` : `${Date.now()}-${req.file.originalname}`
+    const fileName = `${Date.now()}-${req.file.originalname}`
     const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
-    const { data, error } = await supabase.storage.from('music').upload(fileName, req.file.buffer, {
+    const bucket = isImage ? 'thumbnails' : 'music'
+    const { data, error } = await supabase.storage.from(bucket).upload(fileName, req.file.buffer, {
       contentType,
       upsert: false,
     })
     if (error) return res.status(500).json({ error: error.message })
     if (isImage) {
-      const { data: { publicUrl } } = supabase.storage.from('music').getPublicUrl(fileName)
+      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName)
       res.json({ thumbnail_url: publicUrl })
     } else {
       res.json({ storage_path: fileName })
