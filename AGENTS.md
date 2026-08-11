@@ -1,57 +1,77 @@
 # AGENTS.md
 
-# Enterprise Autonomous Engineering Excellence Policy
+# Enterprise Autonomous Engineering Excellence & Zero-Assumption Development Policy
 
-## Version: 4.0
+## Version: 5.0
 
-## Enforcement Level: ABSOLUTE / MANDATORY / NON-NEGOTIABLE
+## Enforcement Level
 
-## Core Commandment
+ABSOLUTE / MANDATORY / NON-NEGOTIABLE / ZERO EXCEPTIONS
 
-NEVER GUESS. NEVER ASSUME. NEVER IMPLEMENT FROM MEMORY.
+------------------------------------------------------------------------
 
-Every engineering action must follow:
+# Supreme Engineering Commandment
 
-Evidence → Verification → Planning → Small Execution → Validation →
-Commit → Review → Continue
+## NEVER GUESS.
 
-Priority order:
+## NEVER ASSUME.
+
+## NEVER IMPLEMENT FROM MEMORY.
+
+## NEVER TRUST UNVERIFIED INFORMATION.
+
+Every engineering action MUST follow:
+
+Evidence → Official Documentation Verification → System Understanding →
+Risk Analysis → Planning → Small Atomic Implementation → Testing →
+Security Validation → Review → Documentation → Commit → Continue
+
+No step may be skipped.
+
+------------------------------------------------------------------------
+
+# Engineering Priority Hierarchy
 
 1.  Correctness
 2.  Security
 3.  Reliability
 4.  Maintainability
 5.  Compatibility
-6.  Performance
-7.  Speed
+6.  Scalability
+7.  Performance
+8.  Developer Experience
+9.  Speed
+
+Fast but unsafe solutions are forbidden.
 
 ------------------------------------------------------------------------
 
-# Official Documentation First Rule
-
-Official documentation is the only source of truth.
+# Official Documentation Is The Absolute Source Of Truth
 
 Before ANY:
 
 -   Code change
--   Configuration change
+-   Debugging
+-   Bug fix
 -   Dependency change
+-   Configuration change
 -   API usage
 -   SDK usage
--   Migration
--   Debugging fix
--   Architecture change
+-   Database change
+-   Cloud change
+-   Infrastructure change
 -   Security change
+-   Architecture change
+-   Migration
+-   Deployment change
 
-The agent MUST verify official documentation.
-
-No implementation without verification.
+The agent MUST verify official documentation first.
 
 ------------------------------------------------------------------------
 
-# Approved MCP Documentation Sources
+# Approved Official Documentation MCP Sources
 
-The agent MUST use official documentation through:
+The agent MUST use appropriate official documentation MCP sources:
 
 -   context7
 -   ref
@@ -83,13 +103,43 @@ The agent MUST use official documentation through:
 
 ------------------------------------------------------------------------
 
-# Universal Problem Decomposition Rule
+# MCP Verification Enforcement
 
-Every large problem MUST be broken into smaller problems.
+Before ANY implementation:
 
-Never solve massive tasks as one operation.
+1.  Identify technologies involved.
+2.  Locate official documentation.
+3.  Verify versions.
+4.  Verify APIs.
+5.  Verify security recommendations.
+6.  Verify compatibility.
+7.  Verify migration notes and breaking changes.
 
-Structure:
+Only after verification may implementation begin.
+
+------------------------------------------------------------------------
+
+# Anti-Hallucination Rule
+
+The agent MUST NEVER fabricate:
+
+-   APIs
+-   Commands
+-   Versions
+-   Libraries
+-   Configuration
+-   Features
+-   Compatibility claims
+
+If uncertain:
+
+"I need official documentation verification before proceeding."
+
+------------------------------------------------------------------------
+
+# Universal Problem Decomposition
+
+Every problem MUST be divided:
 
 Mission → Phase → Milestone → Task → Atomic Change
 
@@ -100,12 +150,11 @@ Every atomic change must be:
 -   Testable
 -   Reversible
 -   Documented
+-   Secure
 
 ------------------------------------------------------------------------
 
 # Mandatory Engineering Workflow
-
-Every task:
 
 ## Phase 1: Understand
 
@@ -117,8 +166,6 @@ Identify:
 -   Constraints
 -   Acceptance criteria
 -   Risks
-
-------------------------------------------------------------------------
 
 ## Phase 2: Inspect
 
@@ -136,11 +183,9 @@ Inspect:
 
 Never modify unfamiliar code.
 
-------------------------------------------------------------------------
-
 ## Phase 3: Version Discovery
 
-Verify exact:
+Verify:
 
 -   Language versions
 -   Framework versions
@@ -149,10 +194,6 @@ Verify exact:
 -   Compilers
 -   Platforms
 -   Toolchains
-
-Never assume latest versions.
-
-------------------------------------------------------------------------
 
 ## Phase 4: Documentation Verification
 
@@ -166,46 +207,30 @@ Verify:
 6.  Release notes
 7.  Migration guides
 
-Unofficial sources may only provide hints.
-
 ------------------------------------------------------------------------
 
-# Verification Gate Before Any Change
+# Verification Report Before Changes
 
-Before:
+Before editing:
 
--   Editing files
--   Creating files
--   Deleting files
--   Moving files
--   Installing packages
--   Updating dependencies
--   Changing permissions
--   Running destructive commands
+## Technology Inventory
 
-The agent MUST produce:
+Technology: Version: Official Source: Verification Result:
 
-## Verification Report
+## Documentation Evidence
 
-Including:
+Source: Reference: Finding: Compatibility: Security Notes:
 
-### Technology Inventory
-
-Technology: Version: Source:
-
-### Documentation Evidence
-
-Source: Reference: Finding:
-
-### Implementation Justification
+## Implementation Justification
 
 Explain:
 
--   Why this solution is correct
+-   Why solution is correct
 -   Why alternatives were rejected
--   Compatibility confirmation
+-   Security reasoning
+-   Compatibility reasoning
 
-### Impact Analysis
+## Impact Analysis
 
 Analyze:
 
@@ -215,43 +240,52 @@ Analyze:
 -   Security
 -   Performance
 -   Compatibility
--   Testing
+-   Rollback strategy
+-   Testing strategy
 
 ------------------------------------------------------------------------
 
-# Atomic Execution Loop
+# Safe Implementation Rules
 
-For every small task:
+Every change MUST:
 
-1.  Discover
-2.  Verify
-3.  Plan
-4.  Implement
-5.  Test
-6.  Review
-7.  Commit
-8.  Push
-9.  Document
-
-Only then continue.
+-   Follow existing architecture
+-   Minimize changes
+-   Preserve compatibility
+-   Use secure defaults
+-   Include validation
 
 ------------------------------------------------------------------------
 
-# Git Discipline
+# Dependency Security
 
-Every successful atomic change MUST:
+Before adding dependencies verify:
 
--   Have a meaningful commit message
--   Explain what changed
--   Explain why it changed
--   Reference validation performed
+-   Official package source
+-   Authenticity
+-   Security advisories
+-   License
+-   Maintenance status
+-   Compatibility
 
-Example:
+Never install unknown packages.
 
-git commit -m "fix(auth): handle token refresh failure after
-verification"
+------------------------------------------------------------------------
 
-Push incremental successes to the appropriate GitHub repository.
+# Secret Protection
+
+Always:
+
+-   Protect credentials
+-   Use secret managers
+-   Apply least privilege
+-   Validate permissions
+
+Never:
+
+-   Hardcode secrets
+-   Commit tokens
+-   Disable security controls
 
 ------------------------------------------------------------------------
 
@@ -267,67 +301,65 @@ Verify:
 -   UI tests
 -   Static analysis
 -   Lint checks
+-   Security checks
 -   Regression safety
 
 ------------------------------------------------------------------------
 
-# Security Rules
+# Atomic Execution Loop
 
-Always:
-
--   Protect credentials
--   Validate input
--   Sanitize output
--   Use secure defaults
--   Apply least privilege
--   Protect user data
-
-Never:
-
--   Hardcode secrets
--   Disable protections
--   Ignore warnings
--   Expose sensitive data
+1.  Discover
+2.  Verify official documentation
+3.  Plan
+4.  Implement
+5.  Test
+6.  Review
+7.  Document
+8.  Commit
+9.  Push
+10. Monitor
 
 ------------------------------------------------------------------------
 
-# Anti-Hallucination Rule
+# Git Discipline
 
-The agent MUST NOT fabricate:
+Every atomic change requires:
 
--   APIs
--   Commands
--   Versions
--   Libraries
--   Features
--   Configuration
--   Compatibility claims
+-   Meaningful commit message
+-   Explanation of change
+-   Reason for change
+-   Validation performed
 
-If uncertain:
+Example:
 
-STOP.
-
-Required statement:
-
-"I need official documentation verification before proceeding."
+fix(auth): handle token refresh failure after official documentation
+verification
 
 ------------------------------------------------------------------------
 
-# Final Engineering Standard
+# Production Readiness Standard
 
 Every delivered change must be:
 
-Correct Secure Maintainable Compatible Tested Documented Production
-Ready
+Correct\
+Secure\
+Reliable\
+Maintainable\
+Compatible\
+Tested\
+Documented\
+Auditable\
+Reversible\
+Production Ready
 
 ------------------------------------------------------------------------
 
 # FINAL COMMANDMENT
 
-No implementation without official documentation verification.
+NO IMPLEMENTATION WITHOUT OFFICIAL DOCUMENTATION VERIFICATION.
 
-No assumption without evidence.
+NO ASSUMPTION WITHOUT EVIDENCE.
 
-No modification without understanding.
+NO MODIFICATION WITHOUT UNDERSTANDING.
 
-No completion without validation.
+NO COMPLETION WITHOUT VALIDATION.
