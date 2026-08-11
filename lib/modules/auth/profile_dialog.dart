@@ -10,10 +10,10 @@ import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 /// sign-out action, or a sign-in prompt when the user is logged out.
 ///
 ///  - Logged in: avatar photo (when available), email, username and a
-///    working "Sign Out" button that signs the user out of Clerk.
+///    working "Sign Out" button. Sign-out asks for confirmation first; if the
+///    native call fails, the dialog stays open and an inline error is shown.
 ///  - Logged out: a generic avatar icon and a "Sign In" button. Tapping it
-///    closes this dialog; the app's auth gate (main.dart) then shows the
-///    email-OTP sign-in view automatically.
+///    opens the Google-only [ClerkAuthView] dialog.
 class ProfileDialog extends ConsumerWidget {
   const ProfileDialog({super.key});
 
@@ -23,6 +23,48 @@ class ProfileDialog extends ConsumerWidget {
     final clerkAuth = ref.watch(clerkAuthProvider);
     final state = clerkAuth.value ?? const ClerkAuthState();
     final isSignedIn = state.signedIn;
+
+    // Holds the sign-out error (if any) so the dialog stays open on failure.
+    final signOutError = ValueNotifier<String?>(null);
+
+    Future<void> signOut() async {
+      // Confirmation step — the user must explicitly confirm before the
+      // native session is destroyed.
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Sign out?'),
+          content: const Text(
+            'You will be signed out of Soulful Bhakti. Signed-in '
+            'features (like your paid plan) will be locked until you sign in '
+            'again.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            Button.destructive(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Sign Out'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+
+      signOutError.value = null;
+      final failure =
+          await ref.read(clerkAuthProvider.notifier).signOut();
+      if (!context.mounted) return;
+      if (failure != null) {
+        // Keep the dialog open and surface the error inline.
+        signOutError.value = failure;
+        return;
+      }
+      ref.invalidate(clerkAuthProvider);
+      if (context.mounted) Navigator.pop(context);
+    }
 
     return AlertDialog(
       title: const Text('Profile'),
@@ -77,13 +119,42 @@ class ProfileDialog extends ConsumerWidget {
               // dates) for signed-in users, read from Superwall CustomerInfo.
               const ProfilePlanStatus(),
               const Gap(16),
-              Button.destructive(
-                onPressed: () async {
-                  await ref.read(clerkAuthProvider.notifier).signOut();
-                  ref.invalidate(clerkAuthProvider);
-                  if (context.mounted) Navigator.pop(context);
-                },
-                child: const Text('Sign Out'),
+              ValueListenableBuilder<String?>(
+                valueListenable: signOutError,
+                builder: (context, error, _) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (error != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.destructive
+                              .withValues(alpha: 0.08),
+                          borderRadius: theme.borderRadiusMd,
+                          border: Border.all(
+                            color: theme.colorScheme.destructive
+                                .withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Text(
+                          error,
+                          style: theme.typography.small.copyWith(
+                            color: theme.colorScheme.destructive,
+                          ),
+                        ),
+                      ),
+                      const Gap(12),
+                    ],
+                    Button.destructive(
+                      onPressed: signOut,
+                      child: const Text('Sign Out'),
+                    ),
+                  ],
+                ),
               ),
             ] else ...[
               Text(
@@ -97,7 +168,7 @@ class ProfileDialog extends ConsumerWidget {
               const Gap(16),
               Button.primary(
                 onPressed: () {
-                  // Show the email-OTP sign-in as a modal popup dialog
+                  // Show the Google-only sign-in as a modal popup dialog
                   // instead of a full-screen route.
                   Navigator.of(context).pop();
                   showDialog<void>(

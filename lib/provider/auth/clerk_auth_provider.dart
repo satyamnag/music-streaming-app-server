@@ -3,13 +3,15 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 
 /// Flutter-side bridge to the Clerk Android SDK (Native API).
 ///
 /// Mirrors the native auth state by listening to the EventChannel emitted from
-/// [ClerkBridge] (Kotlin), and exposes the passwordless **email OTP** flow plus
-/// in-account email verification via the MethodChannel.
+/// [ClerkBridge] (Kotlin). Auth is Google-only: sign-in delegates to the native
+/// Clerk OAuth flow, and on success the updated state (including the signed-in
+/// email and its verification status) is streamed back here.
 class ClerkAuthState {
   final bool initialized;
   final bool signedIn;
@@ -49,33 +51,6 @@ class ClerkAuthState {
       emailVerified: map['emailVerified'] == true,
     );
   }
-
-  /// True when the email is present and verified (or the user has no email).
-  bool get allContactsVerified {
-    if (!signedIn) return true;
-    if (email == null) return true;
-    return emailVerified;
-  }
-
-  ClerkAuthState copyWith({
-    bool? initialized,
-    bool? signedIn,
-    String? userId,
-    String? email,
-    String? username,
-    String? imageUrl,
-    bool? emailVerified,
-  }) {
-    return ClerkAuthState(
-      initialized: initialized ?? this.initialized,
-      signedIn: signedIn ?? this.signedIn,
-      userId: userId ?? this.userId,
-      email: email ?? this.email,
-      username: username ?? this.username,
-      imageUrl: imageUrl ?? this.imageUrl,
-      emailVerified: emailVerified ?? this.emailVerified,
-    );
-  }
 }
 
 class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
@@ -92,7 +67,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
         .map((event) => ClerkAuthState.fromMap(event as Map))
         .listen((newState) {
       state = AsyncData(newState);
-      _syncSuperwallIdentity(newState);
+      _syncThirdPartyIdentity(newState);
     });
 
     ref.onDispose(() => _subscription?.cancel());
@@ -107,93 +82,38 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     final current =
         await _methodChannel.invokeMethod<Map<Object?, Object?>>('getState');
     final initialState = ClerkAuthState.fromMap(current ?? const {});
-    _syncSuperwallIdentity(initialState);
+    _syncThirdPartyIdentity(initialState);
     return initialState;
   }
 
-  /// Syncs the Clerk identity to Superwall: identifies the user on sign-in
-  /// (using the stable Clerk user id) and resets on sign-out. Also records a
-  /// few user attributes for audience targeting.
-  void _syncSuperwallIdentity(ClerkAuthState authState) {
+  /// Syncs the Clerk identity to third-party services:
+  ///
+  ///  - **Superwall**: `identify` on sign-in (stable Clerk user id), `reset` on
+  ///    sign-out, plus a few user attributes for audience targeting.
+  ///  - **OneSignal**: `login` on sign-in (transfers the device's push
+  ///    subscription to the identified user, per the official guide),
+  ///    `logout` on sign-out (reverts to a device-scoped user). The signed-in
+  ///    email is attached to the identified user via `addEmail` **after**
+  ///    `login`, so it lands on the identified user (per the guide, operations
+  ///    done under the device-scoped user are lost on login).
+  void _syncThirdPartyIdentity(ClerkAuthState authState) {
     final sw = SuperwallService.instance;
+    final os = OneSignalService.instance;
     if (authState.signedIn && authState.userId != null) {
       sw.identify(authState.userId!);
       sw.setUserAttributes({
         'email': authState.email ?? '',
         'username': authState.username ?? '',
       });
+      os.login(authState.userId!);
+      final email = authState.email;
+      if (email != null && email.isNotEmpty) {
+        os.setEmail(email);
+      }
     } else if (!authState.signedIn) {
       sw.reset();
+      os.logout();
     }
-  }
-
-  /// Refreshes the email verification status of the signed-in user.
-  Future<ClerkAuthState?> refreshVerificationStatus() async {
-    final result =
-        await _methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'getVerificationStatus',
-    );
-    if (result?['status'] == 'error') return null;
-    final current = state.value ?? const ClerkAuthState();
-    final rawEmail = result?['email'] as String?;
-    final updated = current.copyWith(
-      email: (rawEmail?.isNotEmpty ?? false) ? rawEmail : null,
-      emailVerified: result?['emailVerified'] == true,
-    );
-    state = AsyncData(updated);
-    return updated;
-  }
-
-  /// Sends a one-time code to the signed-in user's email.
-  Future<String?> sendContactOtp({required String identifier}) async {
-    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'sendContactOtp',
-      {'identifier': identifier},
-    );
-    final status = result?['status'] as String?;
-    if (status == 'error') return result?['error'] as String?;
-    return null;
-  }
-
-  /// Verifies the one-time code for the signed-in user's email.
-  Future<String?> verifyContactOtp({required String code}) async {
-    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'verifyContactOtp',
-      {'code': code},
-    );
-    final status = result?['status'] as String?;
-    if (status == 'error') return result?['error'] as String?;
-    return null;
-  }
-
-  /// Sends a one-time code to the given email address.
-  Future<String?> sendOtp({
-    required String identifier,
-    String? firstName,
-    String? lastName,
-  }) async {
-    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'sendOtp',
-      {
-        'identifier': identifier,
-        if (firstName != null && firstName.isNotEmpty) 'firstName': firstName,
-        if (lastName != null && lastName.isNotEmpty) 'lastName': lastName,
-      },
-    );
-    final status = result?['status'] as String?;
-    if (status == 'error') return result?['error'] as String?;
-    return null;
-  }
-
-  /// Verifies the one-time [code] received on the email address.
-  Future<String?> verifyOtp({required String code}) async {
-    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
-      'verifyOtp',
-      {'code': code},
-    );
-    final status = result?['status'] as String?;
-    if (status == 'error') return result?['error'] as String?;
-    return null;
   }
 
   /// Signs in (or signs up) with Google.
@@ -203,13 +123,22 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   /// the session is set active natively. The updated auth state is streamed
   /// back through the EventChannel, so callers should invalidate
   /// [clerkAuthProvider] afterwards to reflect the new session.
-  Future<String?> signInWithGoogle() async {
+  ///
+  /// Returns an [AuthResult]:
+  ///  - `success` — the user is signed in.
+  ///  - `cancelled` — the user dismissed the Google flow (BACK / closed the
+  ///    Custom Tab); no error to show, the dialog should just close.
+  ///  - `failure(message)` — a real error occurred; surface `message`.
+  Future<AuthResult> signInWithGoogle() async {
     final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
       'signInWithGoogle',
     );
     final status = result?['status'] as String?;
-    if (status == 'error') return result?['error'] as String?;
-    return null;
+    if (status == 'cancelled') return const AuthResult.cancelled();
+    if (status == 'error') {
+      return AuthResult.failure(result?['error'] as String? ?? 'Unknown error');
+    }
+    return const AuthResult.success();
   }
 
   Future<String?> signOut() async {
@@ -220,6 +149,34 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     if (status == 'error') return result?['error'] as String?;
     return null;
   }
+}
+
+/// Outcome of a native Google sign-in attempt.
+///
+/// `cancelled` is distinct from a real failure: it means the user dismissed
+/// the Google flow themselves, so no error message should be shown.
+sealed class AuthResult {
+  const AuthResult();
+
+  const factory AuthResult.success() = AuthResultSuccess;
+
+  const factory AuthResult.cancelled() = AuthResultCancelled;
+
+  const factory AuthResult.failure(String message) = AuthResultFailure;
+}
+
+final class AuthResultSuccess extends AuthResult {
+  const AuthResultSuccess();
+}
+
+final class AuthResultCancelled extends AuthResult {
+  const AuthResultCancelled();
+}
+
+final class AuthResultFailure extends AuthResult {
+  const AuthResultFailure(this.message);
+
+  final String message;
 }
 
 final clerkAuthProvider =

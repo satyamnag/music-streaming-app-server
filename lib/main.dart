@@ -263,7 +263,7 @@ class Sangeet extends HookConsumerWidget {
         }
 
         // Free users do NOT need to log in: the app opens to the home screen
-        // without any auth gate. Email-OTP sign-in is available on demand via
+        // without any auth gate. Google sign-in is available on demand via
         // the profile dialog ("Sign In") and is required only when a user is
         // paying for a plan or is a returning paid customer.
 

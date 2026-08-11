@@ -164,7 +164,7 @@ class PremiumAccess {
     );
   }
 
-  /// Shows the Clerk email-OTP sign-in dialog and waits until the user is
+  /// Shows the Clerk Google-only sign-in dialog and waits until the user is
   /// signed in (or the dialog is dismissed). Returns true if signed in.
   static Future<bool> promptSignIn(
     BuildContext context,

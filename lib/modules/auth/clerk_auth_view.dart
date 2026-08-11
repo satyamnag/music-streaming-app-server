@@ -17,7 +17,9 @@ import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 ///  3. pick an account -> signed in (new users are signed up automatically)
 ///
 /// UX highlights:
-///  - inline error feedback with destructive styling
+///  - inline error feedback with destructive styling (real failures only)
+///  - canceling the Google flow (BACK / closing the Custom Tab) closes the
+///    dialog cleanly with no error message
 ///  - loading spinner on the button while the request is in flight
 ///  - safe against double-submits and unmounted-context use
 class ClerkAuthView extends HookConsumerWidget {
@@ -125,7 +127,11 @@ class ClerkAuthView extends HookConsumerWidget {
               ),
               const Gap(16),
               Text(
-                context.l10n.signed_in_as(state.userId ?? ''),
+                context.l10n.signed_in_as(
+                  (state.email?.isNotEmpty ?? false)
+                      ? state.email!
+                      : (state.userId ?? ''),
+                ),
                 textAlign: TextAlign.center,
                 style: theme.typography.large.copyWith(
                   color: theme.colorScheme.foreground,
@@ -238,17 +244,24 @@ class _GoogleSignInView extends HookConsumerWidget {
       submitting.value = true;
       clearError();
       try {
-        final failure =
+        final outcome =
             await ref.read(clerkAuthProvider.notifier).signInWithGoogle();
         if (!context.mounted) return;
-        if (failure != null) {
-          error.value = failure;
-        } else {
-          ref.invalidate(clerkAuthProvider);
-          // Signed in successfully — close the login popup smoothly.
-          if (context.mounted) {
-            Navigator.of(context).maybePop();
-          }
+        switch (outcome) {
+          case AuthResultSuccess():
+            ref.invalidate(clerkAuthProvider);
+            // Signed in successfully — close the login popup smoothly.
+            if (context.mounted) {
+              Navigator.of(context).maybePop();
+            }
+          case AuthResultCancelled():
+            // The user dismissed the Google flow (BACK / closed the Custom
+            // Tab) — no error to show, just close the dialog cleanly.
+            if (context.mounted) {
+              Navigator.of(context).maybePop();
+            }
+          case AuthResultFailure(:final message):
+            error.value = message;
         }
       } catch (_) {
         if (context.mounted) error.value = 'Something went wrong. Please try again.';
