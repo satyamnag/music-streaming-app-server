@@ -39,6 +39,7 @@ final serverRouterProvider = Provider((ref) {
   router.delete("/supabase/api/playlists/<id>", supabaseRoutes.deleteUserPlaylist);
   router.delete("/supabase/api/playlists/<playlistId>/songs/<trackId>", supabaseRoutes.removeUserPlaylistSong);
   router.get("/supabase/artists", supabaseRoutes.getArtists);
+  router.get("/supabase/albums", supabaseRoutes.getAlbums);
   router.get("/supabase/albums/<id>", supabaseRoutes.getAlbum);
   router.get("/supabase/albums/<id>/tracks", supabaseRoutes.getAlbumTracks);
   router.get("/supabase/artists/<id>", supabaseRoutes.getArtist);

@@ -49,6 +49,19 @@ String monthsKey(String iso) {
   return iso.length >= 7 ? iso.substring(0, 7) : iso;
 }
 
+/// Stable, URL-safe album identifier derived from the album name so every
+/// track that belongs to the same album shares the same id (this is what lets
+/// the home "Albums" section group songs by album).
+String _albumId(String albumName) {
+  final trimmed = albumName.trim();
+  if (trimmed.isEmpty) return 'album-unknown';
+  final slug = trimmed
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+  return slug.isEmpty ? 'album-unknown' : 'album-$slug';
+}
+
 Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = t['artist_names'] as List<dynamic>?;
   final artists = rawArtists
           ?.map((name) => {
@@ -59,6 +72,8 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = 
               })
           .toList() ?? [];
   final releaseDate = t['created_at']?.toString();
+  final albumRaw = t['album']?.toString().trim() ?? '';
+  final albumName = albumRaw.isNotEmpty ? albumRaw : (t['title'] ?? '').toString();
   return {
     'id': t['id'],
     'name': t['title'],
@@ -66,14 +81,14 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = 
     'artists': artists,
     'status': t['status'] ?? 'free',
     'album': {
-      'id': 'album-${t['id']}',
-      'name': t['title'],
+      'id': _albumId(albumName),
+      'name': albumName,
       'externalUri': '',
       'artists': artists,
       'images': t['thumbnail'] != null
           ? [{'url': t['thumbnail'], 'width': 300, 'height': 300}]
           : [],
-      'albumType': 'single',
+      'albumType': 'album',
       'releaseDate': releaseDate,
     },
     'durationMs': (t['duration'] ?? 0) * 1000,
@@ -97,6 +112,47 @@ class ServerSupabaseDataRoutes {
         headers: {'X-Client-Info': 'sangeet-dart-server@1.0.0'},
       );
     }
+  }
+
+  /// Global per-track play counts from the shared `song_plays` table.
+  /// Returns an empty map when the table isn't reachable so the UI always
+  /// degrades gracefully (covers fall back to the first available track).
+  Future<Map<String, int>> _playCounts() async {
+    try {
+      final sb = await _supabase;
+      final rows = await sb.from('song_plays').select('track_id');
+      final counts = <String, int>{};
+      for (final row in rows) {
+        final id = row['track_id']?.toString();
+        if (id == null || id.isEmpty) continue;
+        counts[id] = (counts[id] ?? 0) + 1;
+      }
+      return counts;
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  /// Returns a cover image for a playlist/album: the thumbnail of its most
+  /// played track (per [playCounts]). Falls back to the first track that has
+  /// a thumbnail, or null when no track has one.
+  List<Map<String, dynamic>> _coverImagesFor(
+    List<Map<String, dynamic>> tracks,
+    Map<String, int> playCounts,
+  ) {
+    if (tracks.isEmpty) return const [];
+    final withThumb = tracks.where((t) => t['thumbnail'] != null).toList();
+    if (withThumb.isEmpty) return const [];
+    withThumb.sort((a, b) {
+      final cmp = (playCounts[b['id']?.toString()] ?? 0)
+          .compareTo(playCounts[a['id']?.toString()] ?? 0);
+      if (cmp != 0) return cmp;
+      return a['title'].toString().compareTo(b['title'].toString());
+    });
+    final best = withThumb.first;
+    return [
+      {'url': best['thumbnail'], 'width': 300, 'height': 300},
+    ];
   }
 
   Future<List<Map<String, dynamic>>> _fetchAllTracks({int limit = 100}) async {
@@ -182,16 +238,7 @@ class ServerSupabaseDataRoutes {
   /// Returns the global play count for every track: `{counts: {track_id: n}}`.
   Future<Response> getPlayCounts(Request request) async {
     try {
-      final sb = await _supabase;
-      final rows = await sb
-          .from('song_plays')
-          .select('track_id');
-      final counts = <String, int>{};
-      for (final row in rows) {
-        final id = row['track_id']?.toString();
-        if (id == null || id.isEmpty) continue;
-        counts[id] = (counts[id] ?? 0) + 1;
-      }
+      final counts = await _playCounts();
       return Response.ok(
         jsonEncode({'counts': counts}),
         headers: {'content-type': 'application/json'},
@@ -411,6 +458,10 @@ class ServerSupabaseDataRoutes {
         final songRows = await (db.select(db.localPlaylistSongsTable)
               ..where((t) => t.playlistId.equals(row.id)))
             .get();
+        final songTracks = tracks
+            .where((t) => songRows.any((s) => s.trackId == t['id'].toString()))
+            .toList();
+        final playCounts = await _playCounts();
         return Response.ok(
           jsonEncode({
             'id': id,
@@ -418,7 +469,7 @@ class ServerSupabaseDataRoutes {
             'description': row.description,
             'externalUri': '',
             'owner': _defaultUser,
-            'images': [],
+            'images': _coverImagesFor(songTracks, playCounts),
             'totalTracks': songRows.length,
           }),
           headers: {'content-type': 'application/json'},
@@ -446,6 +497,7 @@ class ServerSupabaseDataRoutes {
           return created != null && monthsKey(created) == monthKey;
         }).toList();
         final name = _monthPlaylistName(monthKey);
+        final playCounts = await _playCounts();
         return Response.ok(
           jsonEncode({
             'id': id,
@@ -453,9 +505,7 @@ class ServerSupabaseDataRoutes {
             'description': '${filtered.length} tracks',
             'externalUri': '',
             'owner': _defaultUser,
-            'images': filtered.isNotEmpty && filtered.first['thumbnail'] != null
-                ? [{'url': filtered.first['thumbnail'], 'width': 300, 'height': 300}]
-                : [],
+            'images': _coverImagesFor(filtered, playCounts),
             'totalTracks': filtered.length,
           }),
           headers: {'content-type': 'application/json'},
@@ -475,6 +525,7 @@ class ServerSupabaseDataRoutes {
       final name = id == 'supabase-all-tracks'
           ? 'All Songs'
           : (rawArtistName ?? 'All Songs');
+      final playCounts = await _playCounts();
       return Response.ok(
         jsonEncode({
           'id': id,
@@ -482,9 +533,7 @@ class ServerSupabaseDataRoutes {
           'description': '${filtered.length} tracks',
           'externalUri': '',
           'owner': _defaultUser,
-          'images': filtered.isNotEmpty && filtered.first['thumbnail'] != null
-              ? [{'url': filtered.first['thumbnail'], 'width': 300, 'height': 300}]
-              : [],
+          'images': _coverImagesFor(filtered, playCounts),
           'totalTracks': filtered.length,
         }),
         headers: {'content-type': 'application/json'},
@@ -561,26 +610,45 @@ class ServerSupabaseDataRoutes {
   }
 
   /// GET /supabase/albums/<id>
+  ///
+  /// Returns a single album grouped by album name, with the cover taken from
+  /// its most played track. `id` is the album slug (e.g. `album-madhava-manohara`).
   Future<Response> getAlbum(Request request, String id) async {
     try {
-      final tracks = await _fetchAllTracks(limit: 1);
-      if (tracks.isEmpty) return Response.notFound('{"error":"Not found"}');
-      final t = tracks.first;
-      final rawArtists = t['artist_names'] as List<dynamic>?;
+      final tracks = await _fetchAllTracks(limit: 500);
+      final albumTracks = tracks.where((t) {
+        final name = t['album']?.toString().trim();
+        final albumName = name != null && name.isNotEmpty
+            ? name
+            : (t['title']?.toString() ?? '');
+        return albumName.isNotEmpty && _albumId(albumName) == id;
+      }).toList();
+      if (albumTracks.isEmpty) {
+        return Response.notFound('{"error":"Album not found"}');
+      }
+      final first = albumTracks.first;
+      final rawArtists = first['artist_names'] as List<dynamic>?;
       final artists = rawArtists
               ?.map((name) => {
                     'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
                     'name': name, 'externalUri': '', 'images': null,
                   })
               .toList() ?? [];
+      final playCounts = await _playCounts();
       return Response.ok(
         jsonEncode({
-          'id': id, 'name': id, 'artists': artists,
-          'images': t['thumbnail'] != null
-              ? [{'url': t['thumbnail'], 'width': 300, 'height': 300}]
-              : [],
-          'releaseDate': null, 'externalUri': '', 'totalTracks': 0,
-          'albumType': 'album', 'recordLabel': null, 'genres': [],
+          'id': id,
+          'name': first['album']?.toString().trim().isNotEmpty == true
+              ? first['album']
+              : first['title'],
+          'artists': artists,
+          'images': _coverImagesFor(albumTracks, playCounts),
+          'releaseDate': null,
+          'externalUri': '',
+          'totalTracks': albumTracks.length,
+          'albumType': 'album',
+          'recordLabel': null,
+          'genres': [],
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -590,12 +658,90 @@ class ServerSupabaseDataRoutes {
   }
 
   /// GET /supabase/albums/<id>/tracks
+  ///
+  /// Returns the tracks that belong to the given album (grouped by album name).
   Future<Response> getAlbumTracks(Request request, String id) async {
     try {
-      final tracks = await _fetchAllTracks(limit: 100);
-      final items = tracks.map(_trackToJson).toList();
+      final tracks = await _fetchAllTracks(limit: 500);
+      final items = tracks
+          .where((t) {
+            final name = t['album']?.toString().trim();
+            final albumName = name != null && name.isNotEmpty
+                ? name
+                : (t['title']?.toString() ?? '');
+            return albumName.isNotEmpty && _albumId(albumName) == id;
+          })
+          .map(_trackToJson)
+          .toList();
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 100, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// GET /supabase/albums
+  ///
+  /// Returns the catalog grouped into albums (by album name). Each album's
+  /// cover is the thumbnail of its most played track, so the home "Albums"
+  /// section shows the art users actually listen to. Sorted by play count
+  /// (most played first), then name.
+  Future<Response> getAlbums(Request request) async {
+    try {
+      final tracks = await _fetchAllTracks(limit: 500);
+      final playCounts = await _playCounts();
+
+      final byAlbum = <String, List<Map<String, dynamic>>>{};
+      for (final t in tracks) {
+        final name = t['album']?.toString().trim().isNotEmpty == true
+            ? t['album'].toString().trim()
+            : t['title'].toString();
+        byAlbum.putIfAbsent(name, () => []).add(t);
+      }
+
+      final albums = byAlbum.entries.map((entry) {
+        final albumTracks = entry.value;
+        final first = albumTracks.first;
+        final rawArtists = first['artist_names'] as List<dynamic>?;
+        final artists = rawArtists
+                ?.map((name) => {
+                      'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
+                      'name': name,
+                      'externalUri': '',
+                      'images': null,
+                    })
+                .toList() ??
+            [];
+        final totalPlays = albumTracks.fold<int>(
+          0,
+          (sum, t) => sum + (playCounts[t['id']?.toString()] ?? 0),
+        );
+        return {
+          'id': _albumId(entry.key),
+          'name': entry.key,
+          'externalUri': '',
+          'artists': artists,
+          'images': _coverImagesFor(albumTracks, playCounts),
+          'albumType': 'album',
+          'releaseDate': null,
+          'totalTracks': albumTracks.length,
+          'totalPlays': totalPlays,
+        };
+      }).toList();
+
+      albums.sort((a, b) {
+        final cmp = (b['totalPlays'] as int).compareTo(a['totalPlays'] as int);
+        if (cmp != 0) return cmp;
+        return a['name'].toString().compareTo(b['name'].toString());
+      });
+
+      return Response.ok(
+        jsonEncode({
+          'items': albums, 'limit': 500, 'nextOffset': null,
+          'total': albums.length, 'hasMore': false,
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -764,9 +910,14 @@ class ServerSupabaseDataRoutes {
   ///  - "All Songs": the whole catalog.
   ///  - One playlist per artist ("By <Artist>"), with the artist's songs.
   ///  - One playlist per upload month ("August, 26", "September, 26", ...).
+  ///
+  /// Every playlist cover is the thumbnail of the most played song inside it
+  /// (per the shared `song_plays` table), so the home row shows the actual
+  /// album art users are listening to most.
   Future<List<Map<String, dynamic>>> _buildOwnerPlaylists(
     List<Map<String, dynamic>> tracks,
   ) async {
+    final playCounts = await _playCounts();
     final items = <Map<String, dynamic>>[];
 
     items.add({
@@ -775,9 +926,7 @@ class ServerSupabaseDataRoutes {
       'description': '${tracks.length} tracks',
       'externalUri': '',
       'owner': _defaultUser,
-      'images': tracks.isNotEmpty && tracks.first['thumbnail'] != null
-          ? [{'url': tracks.first['thumbnail'], 'width': 300, 'height': 300}]
-          : [],
+      'images': _coverImagesFor(tracks, playCounts),
       'totalTracks': tracks.length,
     });
 
@@ -791,30 +940,21 @@ class ServerSupabaseDataRoutes {
     for (final name in artistNames) {
       if (name == _hiddenArtistName) continue;
       final slug = name.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
-      final count = tracks.where((t) {
+      final artistTracks = tracks.where((t) {
         final names = (t['artist_names'] as List<dynamic>?)
                 ?.map((e) => e.toString())
                 .toList() ??
             const <String>[];
         return names.contains(name);
-      }).length;
-      final first = tracks.firstWhereOrNull((t) {
-        final names = (t['artist_names'] as List<dynamic>?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            const <String>[];
-        return names.contains(name);
-      });
+      }).toList();
       items.add({
         'id': 'artist-$slug',
         'name': name,
-        'description': '$count songs',
+        'description': '${artistTracks.length} songs',
         'externalUri': '',
         'owner': _defaultUser,
-        'images': first != null && first['thumbnail'] != null
-            ? [{'url': first['thumbnail'], 'width': 300, 'height': 300}]
-            : [],
-        'totalTracks': count,
+        'images': _coverImagesFor(artistTracks, playCounts),
+        'totalTracks': artistTracks.length,
       });
     }
 
@@ -830,16 +970,13 @@ class ServerSupabaseDataRoutes {
       months.putIfAbsent(key, () => []).add(t);
     }
     for (final entry in months.entries) {
-      final first = entry.value.first;
       items.add({
         'id': 'month-${entry.key}',
         'name': _monthPlaylistName(entry.key),
         'description': '${entry.value.length} songs',
         'externalUri': '',
         'owner': _defaultUser,
-        'images': first['thumbnail'] != null
-            ? [{'url': first['thumbnail'], 'width': 300, 'height': 300}]
-            : [],
+        'images': _coverImagesFor(entry.value, playCounts),
         'totalTracks': entry.value.length,
       });
     }
@@ -850,23 +987,28 @@ class ServerSupabaseDataRoutes {
   /// GET /supabase/user-playlists
   ///
   /// Returns the playlists created by the user on this device (stored in the
-  /// local drift DB).
+  /// local drift DB). Each playlist's cover is the most played song inside it.
   Future<Response> getUserPlaylists(Request request) async {
     try {
       final db = ref.read(databaseProvider);
       final rows = await db.select(db.localPlaylistsTable).get();
+      final tracks = await _fetchAllTracks(limit: 500);
+      final playCounts = await _playCounts();
       final items = <Map<String, dynamic>>[];
       for (final row in rows) {
         final songs = await (db.select(db.localPlaylistSongsTable)
               ..where((t) => t.playlistId.equals(row.id)))
             .get();
+        final songTracks = tracks
+            .where((t) => songs.any((s) => s.trackId == t['id'].toString()))
+            .toList();
         items.add({
           'id': 'local-${row.id}',
           'name': row.name,
           'description': '${songs.length} songs',
           'externalUri': '',
           'owner': _defaultUser,
-          'images': const [],
+          'images': _coverImagesFor(songTracks, playCounts),
           'totalTracks': songs.length,
         });
       }

@@ -1,8 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/horizontal_playbutton_card_view/horizontal_playbutton_card_view.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 
 /// A horizontal "Playlists" row shown on the home screen between "Recently
@@ -22,7 +24,9 @@ class HomePlaylistsSection extends HookConsumerWidget {
         const <SangeetSimplePlaylistObject>[];
     final userPlaylists = userPlaylistsQuery.asData?.value ??
         const <SangeetSimplePlaylistObject>[];
-    final likedCount = likedSongsQuery.asData?.value.length ?? 0;
+    final likedTracks = likedSongsQuery.asData?.value ??
+        const <SangeetTrackObject>[];
+    final likedCount = likedTracks.length;
 
     final isLoading = ownerPlaylistsQuery.isLoading ||
         userPlaylistsQuery.isLoading ||
@@ -35,12 +39,32 @@ class HomePlaylistsSection extends HookConsumerWidget {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
+    // The liked-songs playlist has no server image; give it the cover of the
+    // most played liked song (falling back to the first liked song with art).
+    final playCounts = ref.watch(globalPlayCountsProvider).asData?.value ?? {};
+    final sortedLiked = [...likedTracks]..sort((a, b) {
+        final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
+        if (cmp != 0) return cmp;
+        return a.name.compareTo(b.name);
+      });
+    final coverTrack = sortedLiked.firstWhereOrNull(
+      (t) => t.album.images.isNotEmpty,
+    );
+
     final likedSongsPlaylist = SangeetSimplePlaylistObject(
       id: "user-liked-tracks",
       name: context.l10n.liked_tracks,
       description: "$likedCount tracks",
       externalUri: "",
       owner: SangeetUserObject(id: "local", name: "You", externalUri: ""),
+      images: [
+        if (coverTrack != null)
+          SangeetImageObject(
+            url: coverTrack.album.images.smallest(ImagePlaceholder.albumArt),
+            width: 300,
+            height: 300,
+          ),
+      ],
     );
 
     return SliverToBoxAdapter(

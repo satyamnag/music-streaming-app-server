@@ -4,16 +4,17 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/track_tile/track_tile.dart';
+import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
-/// A titled vertical list of tracks used for the home screen sections
-/// ("Newest Arrivals", "Top Trending").
+/// A titled horizontal row of track cards used for the home screen sections
+/// ("Newest Arrivals", "Top Trending"). Keeps the same card layout as the
+/// "Recently played" row so every home section scrolls horizontally.
 ///
 /// Shows the section title, then the first [pageSize] tracks. A "See More"
-/// button reveals the next [pageSize] tracks on each tap until all tracks are
+/// card reveals the next [pageSize] tracks on each tap until all tracks are
 /// visible. Tapping a track starts playback of the whole section from that
 /// track. Shows a compact skeleton while the tracks are loading.
 class HomeTrackSection extends HookConsumerWidget {
@@ -34,100 +35,242 @@ class HomeTrackSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
-    final playlist = ref.watch(audioPlayerProvider);
+    final scale = theme.scaling;
     final visibleCount = useState(pageSize);
 
-    final List<Widget> tiles;
     if (isLoading) {
-      tiles = List.generate(pageSize, (index) {
-        return Skeletonizer(
-          enabled: true,
-          child: TrackTile(
-            track: FakeData.track,
-            playlist: playlist,
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Skeletonizer(
+                enabled: true,
+                child: Text(
+                  title,
+                  style: theme.typography.h4,
+                ),
+              ),
+              const Gap(8),
+              Skeletonizer(
+                enabled: true,
+                child: SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 4,
+                    separatorBuilder: (_, __) => const Gap(12),
+                    itemBuilder: (context, index) => _TrackCard(
+                      track: FakeData.track,
+                      imageUrl: '',
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      });
-    } else {
-      final shown = tracks.take(visibleCount.value).toList();
-      tiles = [
-        for (var index = 0; index < shown.length; index++)
-          TrackTile(
-            index: index,
-            track: shown[index],
-            playlist: playlist,
-            onTap: () async {
-              await ref.read(audioPlayerProvider.notifier).load(
-                    tracks,
-                    initialIndex: index,
-                    autoPlay: true,
-                  );
-            },
-          ),
-      ];
+        ),
+      );
     }
 
+    if (tracks.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final shown = tracks.take(visibleCount.value).toList();
     final hasMore = tracks.length > visibleCount.value;
 
     return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 16.0 * theme.scaling,
-            ),
-            child: Row(
-              children: [
-                DefaultTextStyle(
-                  style: theme.typography.h4.copyWith(
-                    color: theme.colorScheme.foreground,
-                  ),
-                  child: Text(title),
-                ),
-                const Spacer(),
-                if (isLoading)
-                  Text(
-                    context.l10n.loading,
-                    style: theme.typography.small.copyWith(
-                      color: theme.colorScheme.mutedForeground,
-                    ),
-                  )
-                else if (tracks.isNotEmpty)
-                  Text(
-                    '${tracks.length}',
-                    style: theme.typography.small.copyWith(
-                      color: theme.colorScheme.mutedForeground,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const Gap(4),
-          ...tiles,
-          if (!isLoading && hasMore) ...[
-            const Gap(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16.0 * theme.scaling,
+              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: theme.typography.h4.copyWith(
+                        color: theme.colorScheme.foreground,
+                      ),
+                      child: Text(title),
+                    ),
+                  ),
+                  if (tracks.isNotEmpty)
+                    Text(
+                      '${tracks.length}',
+                      style: theme.typography.small.copyWith(
+                        color: theme.colorScheme.mutedForeground,
+                      ),
+                    ),
+                ],
               ),
-              child: Button.text(
-                onPressed: () {
-                  visibleCount.value += pageSize;
+            ),
+            Gap(8 * scale),
+            SizedBox(
+              height: 200,
+              child: ListView.separated(
+                padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
+                scrollDirection: Axis.horizontal,
+                itemCount: shown.length + (hasMore ? 1 : 0),
+                separatorBuilder: (_, __) => Gap(12 * scale),
+                itemBuilder: (context, index) {
+                  if (hasMore && index == shown.length) {
+                    return _SeeMoreCard(
+                      onTap: () {
+                        visibleCount.value += HomeTrackSection.pageSize;
+                      },
+                    );
+                  }
+                  final track = shown[index];
+                  final imageUrl =
+                      track.album.images.smallest(ImagePlaceholder.albumArt);
+
+                  return _TrackCard(
+                    track: track,
+                    imageUrl: imageUrl,
+                    onTap: () async {
+                      await ref
+                          .read(audioPlayerProvider.notifier)
+                          .load(tracks, initialIndex: index, autoPlay: true);
+                    },
+                  );
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(SangeetIcons.angleDown, size: 16),
-                    const Gap(6),
-                    Text(context.l10n.see_more),
-                  ],
-                ),
               ),
             ),
           ],
-          const Gap(8),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackCard extends HookWidget {
+  final SangeetTrackObject track;
+  final String imageUrl;
+  final VoidCallback onTap;
+
+  const _TrackCard({
+    required this.track,
+    required this.imageUrl,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      width: 140 * scale,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: EdgeInsets.all(10 * scale),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8 * scale),
+                child: UniversalImage(
+                  path: imageUrl,
+                  height: 120 * scale,
+                  width: 120 * scale,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Gap(8 * scale),
+              Text(
+                track.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.typography.small.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.foreground,
+                ),
+              ),
+              Gap(2 * scale),
+              Text(
+                track.album.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.typography.xSmall.copyWith(
+                  color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A "See More" card shown after the visible track cards. Tapping it reveals
+/// the next page of cards.
+class _SeeMoreCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SeeMoreCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      width: 140 * scale,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                SangeetIcons.angleDown,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+              Gap(8 * scale),
+              Text(
+                context.l10n.see_more,
+                style: theme.typography.base.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

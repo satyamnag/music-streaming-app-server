@@ -9,6 +9,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
+import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/go_for_paid_plan_banner.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
@@ -110,6 +111,7 @@ class HomePage extends HookConsumerWidget {
                   const HomePlaylistsSection(),
                   ...switch (sectionsAsync) {
                     AsyncData(value: final sections) => [
+                        HomeAlbumsSection(albums: sections.albums),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: sections.newestArrivals,
@@ -120,6 +122,7 @@ class HomePage extends HookConsumerWidget {
                         ),
                       ],
                     AsyncLoading() => [
+                        const HomeAlbumsSection(albums: []),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: const [],
@@ -143,6 +146,7 @@ class HomePage extends HookConsumerWidget {
                         ),
                       ],
                     _ => [
+                        const HomeAlbumsSection(albums: []),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: const [],

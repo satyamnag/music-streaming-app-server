@@ -6,6 +6,7 @@ import 'package:sangeet/provider/server/server.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
 import 'package:sangeet/services/sourced_track/direct_supabase.dart';
+
 /// Fetches all tracks from the Supabase `tracks` table via the local server
 /// so the home screen always shows every song regardless of player state.
 ///
@@ -58,29 +59,51 @@ final prewarmHomeStreamsProvider =
   return results;
 });
 
+/// An album on the home screen: the album object plus the tracks grouped under
+/// it (by album name), so tapping the card can play exactly that album.
+typedef HomeAlbum = ({SangeetSimpleAlbumObject album, List<SangeetTrackObject> tracks});
+
 /// The two home screen track sections:
 ///  - [newestArrivals]: every track, newest first (by album release date).
 ///  - [topTrending]: tracks ranked by how often they've been played on this
 ///    device (listening history), newest plays first as a tie-breaker.
+///  - [albums]: the catalog grouped into albums (by album name), each album's
+///    cover taken from its most played song.
 class HomeSections {
   final List<SangeetTrackObject> newestArrivals;
   final List<SangeetTrackObject> topTrending;
+  final List<HomeAlbum> albums;
 
   const HomeSections({
     required this.newestArrivals,
     required this.topTrending,
+    required this.albums,
   });
 }
 
-/// Builds the "Newest Arrivals" and "Top Trending" track lists shown on the
-/// home screen. Both are derived from the same full catalog ([homeTracksProvider]):
+/// Global per-track play counts from the local server (`song_plays` table).
+/// Shared by the home sections (Top Trending ordering, album covers) and the
+/// playlists row (most played song's cover). Empty map on failure.
+final globalPlayCountsProvider =
+    FutureProvider<Map<String, int>>((ref) async {
+  return _fetchGlobalPlayCounts(ref);
+});
+
+/// Builds the "Newest Arrivals", "Top Trending" and "Albums" lists shown on
+/// the home screen. All three are derived from the same full catalog
+/// ([homeTracksProvider]):
 ///  - Newest Arrivals is the catalog sorted by release date, newest first.
 ///  - Top Trending is the catalog ordered by global play counts (every user's
 ///    plays recorded in the shared `song_plays` table), newest plays first as
 ///    a tie-breaker.
+///  - Albums is the catalog grouped by album name (so songs that share an
+///    album name land in the same album, named after that album), sorted by
+///    total play count (most played first). Each album's cover image is the
+///    thumbnail of its most played song.
 final homeSectionsProvider =
     FutureProvider<HomeSections>((ref) async {
   final tracks = await ref.watch(homeTracksProvider.future);
+  final playCounts = await ref.watch(globalPlayCountsProvider.future);
 
   final newestArrivals = [...tracks]..sort((a, b) {
       final aDate = DateTime.tryParse(a.album.releaseDate ?? '');
@@ -91,20 +114,86 @@ final homeSectionsProvider =
       return a.name.compareTo(b.name);
     });
 
-  final playCounts = await _fetchGlobalPlayCounts(ref);
-
   final topTrending = [...tracks]..sort((a, b) {
       final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
       if (cmp != 0) return cmp;
       return a.name.compareTo(b.name);
     });
 
+  final albums = _buildAlbums(tracks, playCounts);
+
   ref.keepAlive();
   return HomeSections(
     newestArrivals: newestArrivals,
     topTrending: topTrending,
+    albums: albums,
   );
 });
+
+/// Groups [tracks] into albums by album name. For each album:
+///  - the album object is named after the album name,
+///  - the cover image is the thumbnail of the most played song in it,
+///  - albums are sorted by total play count (most played first), then name.
+List<HomeAlbum> _buildAlbums(
+  List<SangeetTrackObject> tracks,
+  Map<String, int> playCounts,
+) {
+  final byName = <String, List<SangeetTrackObject>>{};
+  for (final track in tracks) {
+    final albumName = track.album.name.trim().isNotEmpty
+        ? track.album.name
+        : track.name;
+    byName.putIfAbsent(albumName, () => []).add(track);
+  }
+
+  final albums = byName.entries.map((entry) {
+    final albumTracks = entry.value;
+    final totalPlays = albumTracks.fold<int>(
+      0,
+      (sum, t) => sum + (playCounts[t.id] ?? 0),
+    );
+
+    // Pick the most played track to source the cover (thumbnails are stored
+    // per-track; the album art shown is the art of its most played song).
+    final sortedByPlays = [...albumTracks]..sort((a, b) {
+        final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
+        if (cmp != 0) return cmp;
+        return a.name.compareTo(b.name);
+      });
+    final coverTrack = sortedByPlays.first;
+
+    final artists = <String, SangeetSimpleArtistObject>{};
+    for (final t in albumTracks) {
+      for (final artist in t.artists) {
+        artists[artist.id] = artist;
+      }
+    }
+
+    return (
+      totalPlays: totalPlays,
+      album: SangeetSimpleAlbumObject(
+        id: coverTrack.album.id,
+        name: entry.key,
+        externalUri: coverTrack.album.externalUri,
+        artists: artists.values.toList(),
+        images: coverTrack.album.images,
+        albumType: SangeetAlbumType.album,
+        releaseDate: coverTrack.album.releaseDate,
+      ),
+      tracks: albumTracks,
+    );
+  }).toList();
+
+  albums.sort((a, b) {
+    final cmp = b.totalPlays.compareTo(a.totalPlays);
+    if (cmp != 0) return cmp;
+    return a.album.name.compareTo(b.album.name);
+  });
+
+  return albums
+      .map((e) => (album: e.album, tracks: e.tracks))
+      .toList();
+}
 
 /// Fetches the global per-track play counts from the local server, which reads
 /// the shared `song_plays` table. Returns an empty map if the backend isn't

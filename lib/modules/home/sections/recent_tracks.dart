@@ -11,6 +11,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/history/recent_tracks.dart';
+import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A horizontal "Recently played" row of track cards shown on the home screen.
 /// Devotional & calm mood: rounded corners, soft shadow, maroon accent.
@@ -28,6 +29,12 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
     final history = ref.watch(recentlyPlayedTracksProvider);
     final tracks = history.asData?.value ?? const <SangeetTrackObject>[];
     final visibleCount = useState(HomeRecentlyPlayedTracksSection.pageSize);
+
+    // History snapshots may predate cover art (thumbnails uploaded later).
+    // Resolve any missing album images from the live catalog by track id so
+    // recently-played cards always show their cover photo.
+    final catalog = ref.watch(homeTracksProvider).asData?.value ?? const [];
+    final catalogByTrackId = {for (final t in catalog) t.id: t};
 
     if (history.isLoading) {
       return SliverToBoxAdapter(
@@ -127,8 +134,12 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                     );
                   }
                   final track = shown[index];
+                  final historyTrack = catalogByTrackId[track.id];
+                  final images = track.album.images.isNotEmpty
+                      ? track.album.images
+                      : (historyTrack?.album.images ?? const []);
                   final imageUrl =
-                      track.album.images.smallest(ImagePlaceholder.albumArt);
+                      images.smallest(ImagePlaceholder.albumArt);
 
                   return _RecentTrackCard(
                     track: track,
