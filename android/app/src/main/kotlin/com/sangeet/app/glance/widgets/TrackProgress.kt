@@ -36,11 +36,11 @@ fun Duration.format(): String {
 fun TrackProgress(prefs: SharedPreferences) {
   val size = LocalSize.current
   val position = prefs.getInt("position", 0).seconds
-  var duration = prefs.getInt("duration", 0).seconds
+  val duration = prefs.getInt("duration", 0).seconds
 
-  var progress = position.inWholeSeconds.toFloat() / max(duration.inWholeSeconds.toFloat(), 1.0f)
+  val progress = position.inWholeSeconds.toFloat() / max(duration.inWholeSeconds.toFloat(), 1.0f)
 
-  var textStyle =
+  val textStyle =
           TextStyle(
                   color = GlanceTheme.colors.onBackground,
           )

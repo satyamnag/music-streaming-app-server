@@ -35,17 +35,18 @@ fun TrackDetailsView(activeTrack: Track?) {
     val imgLocalPath = activeTrack?.album?.images?.get(0)?.path;
     val title = activeTrack?.name ?: "<No Track>"
 
-    
+    val fallbackIcon =
+        BitmapFactory.decodeResource(
+            context.resources,
+            android.R.drawable.ic_delete
+        )
+
     Image(
         provider =
         if (imgLocalPath == null)
-            ImageProvider(
-                BitmapFactory.decodeResource(
-                    context.resources,
-                    android.R.drawable.ic_delete
-                )
-            )
-        else ImageProvider(BitmapFactory.decodeFile(imgLocalPath)),
+            ImageProvider(fallbackIcon)
+        else
+            ImageProvider(BitmapFactory.decodeFile(imgLocalPath) ?: fallbackIcon),
         contentDescription = "Album Art",
         modifier = GlanceModifier.cornerRadius(8.dp)
             .size(

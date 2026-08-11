@@ -164,7 +164,7 @@ class HomePlayerWidget : GlanceAppWidget() {
                         Spacer(modifier = GlanceModifier.size(6.dp))
                         CircleIconButton(
                             imageProvider = ImageProvider(nextIcon),
-                            contentDescription = "Previous",
+                            contentDescription = "Next",
                             onClick = actionRunCallback<NextAction>(
                                 parameters = actionParametersOf(
                                     serverAddressKey to playbackServerAddress
@@ -193,7 +193,7 @@ abstract class InteractiveAction(val command: String) : ActionCallback {
 
         Log.d("HomePlayerWidget", "Sending command $command to $serverAddress")
 
-        if (serverAddress == null || serverAddress.isEmpty()) {
+        if (serverAddress.isEmpty()) {
             return
         }
 
