@@ -13,6 +13,11 @@ import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 class ProfilePlanStatus extends HookConsumerWidget {
   const ProfilePlanStatus({super.key});
 
+  /// Exact Google Play Console product ids for the two subscription plans.
+  /// Matched first so plan names never depend on the keyword heuristic below.
+  static const String monthlyProductId = 'soulful_monthly';
+  static const String yearlyProductId = 'soulful_yearly';
+
   String _fmtDate(DateTime? d) {
     if (d == null) return '-';
     final y = d.year.toString().padLeft(4, '0');
@@ -21,23 +26,31 @@ class ProfilePlanStatus extends HookConsumerWidget {
     return '$y-$m-$day';
   }
 
+  bool _isYearly(String productId) =>
+      productId == yearlyProductId ||
+      productId.toLowerCase().contains('year') ||
+      productId.toLowerCase().contains('annual') ||
+      productId.toLowerCase().contains('12');
+
+  bool _isMonthly(String productId) =>
+      productId == monthlyProductId ||
+      productId.toLowerCase().contains('month');
+
   String _planName(String productId) {
-    final lower = productId.toLowerCase();
-    if (lower.contains('year') || lower.contains('annual') || lower.contains('12')) {
+    if (_isYearly(productId)) {
       return 'Yearly Plan (₹999/yr)';
     }
-    if (lower.contains('month')) {
+    if (_isMonthly(productId)) {
       return 'Monthly Plan (₹99/mo)';
     }
     return productId;
   }
 
   String _durationLabel(String productId) {
-    final lower = productId.toLowerCase();
-    if (lower.contains('year') || lower.contains('annual') || lower.contains('12')) {
+    if (_isYearly(productId)) {
       return '1 year';
     }
-    if (lower.contains('month')) {
+    if (_isMonthly(productId)) {
       return '1 month';
     }
     return '-';
