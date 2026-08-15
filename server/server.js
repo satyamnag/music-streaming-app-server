@@ -912,6 +912,156 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
   } catch (err) { next(err) }
 })
 
+// ----- Affiliate & Coupon Admin -----
+//
+// Affiliate marketing rules (enforced server-side):
+//  - Coupons are attribution-only codes issued to external marketers.
+//  - Affiliate commission applies ONLY to the yearly plan (soulful_yearly)
+//    and is a FLAT ₹100 per successful yearly sale (see migration 007).
+//  - Commission is credited exclusively from verified Superwall webhooks.
+
+// List affiliates (with their coupon count)
+app.get('/api/admin/affiliates', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('affiliates')
+      .select('*, coupons:coupons(id)')
+      .order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
+// Create an affiliate (external marketer) with an admin-decided commission
+// amount per yearly sale.
+app.post('/api/admin/affiliates', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, contact_email, commission_amount } = req.body || {}
+    if (!name || !name.trim()) return res.status(400).json({ error: 'name required' })
+    const amount =
+      commission_amount != null && Number(commission_amount) >= 0
+        ? Number(commission_amount)
+        : 0
+    const { data, error } = await supabase
+      .from('affiliates')
+      .insert({
+        name: name.trim(),
+        contact_email: contact_email || null,
+        commission_amount: amount,
+      })
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+// Update an affiliate (name, contact, commission amount)
+app.put('/api/admin/affiliates/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, contact_email, commission_amount } = req.body || {}
+    const updates = {}
+    if (name !== undefined) updates.name = String(name).trim()
+    if (contact_email !== undefined) updates.contact_email = contact_email || null
+    if (commission_amount !== undefined && Number(commission_amount) >= 0) {
+      updates.commission_amount = Number(commission_amount)
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'nothing to update' })
+    }
+    const { data, error } = await supabase
+      .from('affiliates')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Delete an affiliate (cascades to coupons + attributions; commission rows
+// are preserved for the ledger).
+app.delete('/api/admin/affiliates/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { error } = await supabase
+      .from('affiliates')
+      .delete()
+      .eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// List coupons (with affiliate name)
+app.get('/api/admin/coupons', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('coupons')
+      .select('*, affiliate:affiliates(name)')
+      .order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
+// Create a coupon code assigned to an affiliate marketer.
+// Body: { code, affiliate_id, max_redemptions?, expires_at? }
+app.post('/api/admin/coupons', requireAdmin, async (req, res, next) => {
+  try {
+    const { code, affiliate_id, max_redemptions, expires_at } = req.body || {}
+    if (!code || !code.trim()) return res.status(400).json({ error: 'code required' })
+    if (!affiliate_id) return res.status(400).json({ error: 'affiliate_id required' })
+    const normalized = code.trim().toUpperCase()
+    const { data, error } = await supabase
+      .from('coupons')
+      .insert({
+        code: normalized,
+        affiliate_id,
+        max_redemptions:
+          max_redemptions != null && Number(max_redemptions) > 0
+            ? Number(max_redemptions)
+            : null,
+        expires_at: expires_at || null,
+      })
+      .select('*, affiliate:affiliates(name)')
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+// Pause/resume a coupon (status: active|paused)
+app.put('/api/admin/coupons/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { status } = req.body || {}
+    if (status !== 'active' && status !== 'paused') {
+      return res.status(400).json({ error: "status must be 'active' or 'paused'" })
+    }
+    const { data, error } = await supabase
+      .from('coupons')
+      .update({ status })
+      .eq('id', req.params.id)
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// List affiliate commissions (earnings ledger)
+app.get('/api/admin/commissions', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('affiliate_commissions')
+      .select('*, affiliate:affiliates(name)')
+      .order('created_at', { ascending: false })
+      .limit(500)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
 // ----- Playlist Routes -----
 app.get('/api/playlists', async (req, res, next) => {
   try {

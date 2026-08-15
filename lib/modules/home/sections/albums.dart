@@ -1,17 +1,18 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A horizontal "Albums" row shown on the home screen. Songs that share the
 /// same album name are grouped into a single album (named after that album),
 /// and each album's cover is the thumbnail of its most played song. Tapping a
-/// card plays the whole album from the first track.
+/// card opens the album screen with its full song list (like playlists).
 class HomeAlbumsSection extends HookConsumerWidget {
   final List<HomeAlbum> albums;
 
@@ -72,11 +73,9 @@ class HomeAlbumsSection extends HookConsumerWidget {
                     album: album,
                     trackCount: tracks.length,
                     imageUrl: imageUrl,
-                    onTap: () async {
-                      if (tracks.isEmpty) return;
-                      await ref
-                          .read(audioPlayerProvider.notifier)
-                          .load(tracks, initialIndex: 0, autoPlay: true);
+                    onTap: () {
+                      // Open the album screen with its full song list.
+                      context.navigateTo(AlbumRoute(id: album.id, album: album));
                     },
                   );
                 },

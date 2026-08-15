@@ -1,6 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
@@ -65,26 +67,10 @@ class AlbumCard extends HookConsumerWidget {
         (isPlaylistPlaying && isFetchingActiveTrack) || updating.value;
     final description = "${album.albumType.name} • ${album.artists.asString()}";
 
-    final onTap = useCallback(() async {
-      // Album screen removed: tapping the card plays the album instead.
-      if (isPlaylistPlaying) {
-        return playing ? audioPlayer.pause() : audioPlayer.resume();
-      }
-      final fetchedTracks = await fetchAllTrack();
-      if (fetchedTracks.isEmpty || !context.mounted) return;
-      await playlistNotifier.load(fetchedTracks, autoPlay: true);
-      playlistNotifier.addCollection(album.id);
-      historyNotifier.addAlbums([album]);
-    }, [
-      isPlaylistPlaying,
-      playing,
-      audioPlayer,
-      fetchAllTrack,
-      context,
-      playlistNotifier,
-      album,
-      historyNotifier,
-    ]);
+    final onTap = useCallback(() {
+      // Open the album screen (list of its songs) instead of playing directly.
+      context.navigateTo(AlbumRoute(id: album.id, album: album));
+    }, [context, album]);
 
     final onPlaybuttonPressed = useCallback(() async {
       updating.value = true;

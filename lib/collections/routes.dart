@@ -105,6 +105,10 @@ class AppRouter extends RootStackRouter {
               page: TrackRoute.page,
             ),
             AutoRoute(
+              path: "album/:id",
+              page: AlbumRoute.page,
+            ),
+            AutoRoute(
               path: "connect",
               page: ConnectRoute.page,
             ),

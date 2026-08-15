@@ -56,12 +56,50 @@ tr:hover { background: #f0f7ff; }
 </h1>
 <div class="toolbar">
   <button class="btn btn-primary" onclick="showAdd()">+ Add Track</button>
-  <button class="btn btn-secondary" onclick="loadTracks()">Refresh</button>
+  <button class="btn btn-secondary" onclick="loadTracks()">Refresh Tracks</button>
+  <button class="btn btn-secondary" onclick="toggleAffiliates()">Affiliates &amp; Coupons</button>
   <span id="count" style="font-size:14px;color:#666;"></span>
 </div>
 <table><thead><tr>
   <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Language</th><th>Thumbnail</th><th>Storage</th><th>Status</th><th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
+
+<div id="affiliatesPanel" style="display:none; margin-top:24px;">
+  <h2 style="margin-bottom:12px;">Affiliate Marketing</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Affiliate commission applies to the <b>yearly plan only</b>, with an
+    admin-decided flat amount per affiliate per yearly sale. Create an
+    affiliate, set their commission amount, then issue a coupon code in
+    their name. Commissions are credited only from verified Superwall
+    webhooks.
+  </p>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">New Affiliate</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label>Name *</label><input id="afName" placeholder="e.g. My YouTube Channel"></div>
+      <div><label>Contact email</label><input id="afEmail" placeholder="channel@example.com"></div>
+      <div><label>Commission per yearly sale (₹)</label><input id="afAmount" type="number" min="0" placeholder="e.g. 100"></div>
+      <button class="btn btn-success" onclick="createAffiliate()">Create Affiliate</button>
+    </div>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">Issue Coupon to an Affiliate</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label>Affiliate *</label><select id="cpAffiliate"></select></div>
+      <div><label>Coupon code *</label><input id="cpCode" placeholder="e.g. BHAKTI25"></div>
+      <div><label>Max redemptions (blank = unlimited)</label><input id="cpMax" type="number" min="1" placeholder="e.g. 100"></div>
+      <div><label>Expires (optional)</label><input id="cpExpires" type="date"></div>
+      <button class="btn btn-success" onclick="createCoupon()">Issue Coupon</button>
+    </div>
+  </div>
+  <table><thead><tr>
+    <th>Affiliate</th><th>Coupon Code</th><th>Commission/Yearly Sale (₹)</th><th>Redemptions</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody id="affTbody"></tbody></table>
+  <h3 style="margin:20px 0 8px;">Commission Ledger (credited from webhooks)</h3>
+  <table><thead><tr>
+    <th>Date</th><th>Affiliate</th><th>Customer</th><th>Plan</th><th>Amount (₹)</th><th>Status</th>
+  </tr></thead><tbody id="commTbody"></tbody></table>
+</div>
 
 <div id="modal" class="modal">
 <div class="modal-content">
@@ -343,6 +381,144 @@ async function handleThumbUpload(input) {
     document.getElementById('thumbStatus').textContent = 'Uploaded';
   } catch (e) { document.getElementById('thumbStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
+}
+
+function toggleAffiliates() {
+  const panel = document.getElementById('affiliatesPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    loadAffiliates();
+    loadCommissions();
+  }
+}
+
+async function loadAffiliates() {
+  try {
+    const res = await authedFetch('/api/admin/affiliates', { credentials: 'same-origin' });
+    const data = await res.json();
+    // Populate the coupon-affiliate dropdown
+    const sel = document.getElementById('cpAffiliate');
+    sel.innerHTML = data.map(a => `<option value="${a.id}">${esc(a.name)}${a.commission_amount ? ' (₹' + a.commission_amount + '/sale)' : ''}</option>`).join('');
+
+    const couponsRes = await authedFetch('/api/admin/coupons', { credentials: 'same-origin' });
+    const coupons = await couponsRes.json();
+    const couponByAff = {};
+    coupons.forEach(c => { couponByAff[c.affiliate_id] = couponByAff[c.affiliate_id] || []; couponByAff[c.affiliate_id].push(c); });
+
+    const tbody = document.getElementById('affTbody');
+    const rows = [];
+    data.forEach(a => {
+      const ac = couponByAff[a.id] || [];
+      if (ac.length === 0) {
+        rows.push(`<tr>
+          <td>${esc(a.name)}</td>
+          <td style="color:#aaa;">— no coupon yet —</td>
+          <td>₹${a.commission_amount || 0}</td>
+          <td>-</td>
+          <td>-</td>
+          <td class="actions">
+            <button class="btn btn-danger btn-sm" onclick="deleteAffiliate('${a.id}')">Del</button>
+          </td>
+        </tr>`);
+      } else {
+        ac.forEach(c => rows.push(`<tr>
+          <td>${esc(a.name)}</td>
+          <td><b>${esc(c.code)}</b></td>
+          <td>₹${a.commission_amount || 0}</td>
+          <td>${c.redemption_count || 0}${c.max_redemptions ? ' / ' + c.max_redemptions : ''}</td>
+          <td>${c.status === 'active' ? '<span style="color:#22c55e;">active</span>' : '<span style="color:#ef4444;">paused</span>'}</td>
+          <td class="actions">
+            <button class="btn btn-secondary btn-sm" onclick="toggleCoupon('${c.id}', '${c.status === 'active' ? 'paused' : 'active'}')">${c.status === 'active' ? 'Pause' : 'Resume'}</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteAffiliate('${a.id}')">Del</button>
+          </td>
+        </tr>`));
+      }
+    });
+    tbody.innerHTML = rows.join('');
+  } catch (e) { toast('Failed to load affiliates: ' + e.message); }
+}
+
+async function loadCommissions() {
+  try {
+    const res = await authedFetch('/api/admin/commissions', { credentials: 'same-origin' });
+    const data = await res.json();
+    const tbody = document.getElementById('commTbody');
+    tbody.innerHTML = data.length === 0
+      ? '<tr><td colspan="6" style="color:#999;">No commissions yet — they appear after verified yearly purchases.</td></tr>'
+      : data.map(c => `<tr>
+          <td>${c.created_at ? new Date(c.created_at).toLocaleString() : ''}</td>
+          <td>${esc(c.affiliate?.name || c.affiliate_id)}</td>
+          <td>${esc(c.purchaser_user_id)}</td>
+          <td>${esc(c.product_id)}</td>
+          <td><b>₹${c.commission_amount || 0}</b></td>
+          <td>${esc(c.status)}</td>
+        </tr>`).join('');
+  } catch (e) { toast('Failed to load commissions: ' + e.message); }
+}
+
+async function createAffiliate() {
+  const name = document.getElementById('afName').value.trim();
+  const contact_email = document.getElementById('afEmail').value.trim() || null;
+  const commission_amount = parseInt(document.getElementById('afAmount').value) || 0;
+  if (!name) { toast('Affiliate name is required'); return; }
+  try {
+    const res = await authedFetch('/api/admin/affiliates', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, contact_email, commission_amount }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Create failed'); }
+    toast('Affiliate created');
+    document.getElementById('afName').value = '';
+    document.getElementById('afEmail').value = '';
+    document.getElementById('afAmount').value = '';
+    loadAffiliates();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+}
+
+async function createCoupon() {
+  const affiliate_id = document.getElementById('cpAffiliate').value;
+  const code = document.getElementById('cpCode').value.trim();
+  const max_redemptions = parseInt(document.getElementById('cpMax').value) || null;
+  const expires_at = document.getElementById('cpExpires').value || null;
+  if (!affiliate_id) { toast('Select an affiliate'); return; }
+  if (!code) { toast('Coupon code is required'); return; }
+  try {
+    const res = await authedFetch('/api/admin/coupons', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, affiliate_id, max_redemptions, expires_at }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Create failed'); }
+    toast('Coupon issued: ' + code.toUpperCase());
+    document.getElementById('cpCode').value = '';
+    document.getElementById('cpMax').value = '';
+    document.getElementById('cpExpires').value = '';
+    loadAffiliates();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+}
+
+async function toggleCoupon(id, status) {
+  try {
+    const res = await authedFetch(`/api/admin/coupons/${id}`, {
+      method: 'PUT', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Update failed'); }
+    toast('Coupon ' + status);
+    loadAffiliates();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+}
+
+async function deleteAffiliate(id) {
+  if (!confirm('Delete this affiliate and its coupons?')) return;
+  try {
+    const res = await authedFetch(`/api/admin/affiliates/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }
+    toast('Affiliate deleted');
+    loadAffiliates();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
 checkSession();
