@@ -2,7 +2,86 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/modules/auth/clerk_auth_view.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/coupon/coupon_provider.dart';
+
+/// Persistent (non-popup) entry point for applying an affiliate coupon code.
+///
+/// Shown in the profile dialog while the user has not yet applied a coupon.
+/// Tapping it opens the same [CouponEntry] popup. Once a coupon is
+/// successfully applied it shows the applied state instead (immutable).
+class CouponStatusTile extends ConsumerWidget {
+  const CouponStatusTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final coupon = ref.watch(couponProvider);
+    final state = coupon.value ?? const CouponState();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.muted.withValues(alpha: 0.4),
+        borderRadius: theme.borderRadiusMd,
+        border: Border.all(color: theme.colorScheme.muted),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(
+                state.redeemed
+                    ? SangeetIcons.done
+                    : SangeetIcons.couponTag,
+                size: 16,
+                color: theme.colorScheme.primary,
+              ),
+              const Gap(8),
+              Text(
+                state.redeemed ? 'Coupon applied' : 'Have a coupon code?',
+                style: theme.typography.small.copyWith(
+                  color: theme.colorScheme.foreground,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const Gap(6),
+          if (state.redeemed)
+            Text(
+              state.affiliateName != null
+                  ? 'You are supporting ${state.affiliateName}.'
+                  : 'Your coupon has been applied.',
+              style: theme.typography.xSmall.copyWith(
+                color: theme.colorScheme.mutedForeground,
+              ),
+            )
+          else
+            Text(
+              'Enter a code you received from a creator to support them '
+              'when you subscribe. It does not change the plan price.',
+              style: theme.typography.xSmall.copyWith(
+                color: theme.colorScheme.mutedForeground,
+              ),
+            ),
+          if (!state.redeemed) ...[
+            const Gap(8),
+            Button.primary(
+              onPressed: () => CouponEntry.prompt(context, ref),
+              child: const Text('Enter code'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 /// Minimal affiliate coupon entry — a small "Have a coupon code?" affordance
 /// shown to free users in the premium gating flow.
@@ -133,6 +212,25 @@ class CouponEntry extends HookConsumerWidget {
       error.value = 'Please enter a coupon code.';
       return;
     }
+
+    // Applying a coupon records attribution against the signed-in Clerk user,
+    // so a sign-in is required. If the user is not signed in, prompt them
+    // first (same Google-only dialog used everywhere in the app).
+    var auth = ref.read(clerkAuthProvider).valueOrNull;
+    if (auth?.signedIn != true) {
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => const ClerkAuthView(),
+      );
+      auth = ref.read(clerkAuthProvider).valueOrNull;
+      if (auth?.signedIn != true) {
+        error.value = 'Please sign in to apply a coupon.';
+        return;
+      }
+    }
+
     busy.value = true;
     try {
       final message = await ref.read(couponProvider.notifier).redeem(code);

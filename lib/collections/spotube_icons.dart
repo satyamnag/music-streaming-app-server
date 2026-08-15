@@ -30,6 +30,7 @@ abstract class SangeetIcons {
   static const queueRemove = Icons.remove_outlined;
   static const download = FeatherIcons.download;
   static const done = FeatherIcons.checkCircle;
+  static const couponTag = FeatherIcons.tag;
   static const alternativeRoute = Icons.alt_route_rounded;
   static const sort = Icons.sort_rounded;
   static const moreVertical = FeatherIcons.moreVertical;

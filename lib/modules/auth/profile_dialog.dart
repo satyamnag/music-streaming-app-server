@@ -4,6 +4,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/auth/profile_plan_status.dart';
+import 'package:sangeet/modules/monetization/coupon_entry.dart';
 import 'package:sangeet/modules/referral/share_and_earn.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
@@ -123,6 +124,10 @@ class ProfileDialog extends ConsumerWidget {
                 // Referral / affiliate program: personal code, share link and
                 // tracked commission (server-side, track-first).
                 const ShareAndEarn(),
+                const Gap(12),
+                // Affiliate coupon entry: persistent (non-popup) way to apply
+                // a coupon code received from a creator. Shown until applied.
+                const CouponStatusTile(),
                 const Gap(16),
                 ValueListenableBuilder<String?>(
                   valueListenable: signOutError,
