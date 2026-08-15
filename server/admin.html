@@ -38,7 +38,22 @@ tr:hover { background: #f0f7ff; }
 </style>
 </head>
 <body>
-<h1>Music Library Admin</h1>
+<div id="login" style="display:none; max-width:360px; margin:80px auto; text-align:center;">
+  <h1>Music Library Admin</h1>
+  <p style="color:#666; font-size:14px; margin-bottom:16px;">Enter the admin token to continue.</p>
+  <input id="loginToken" type="password" placeholder="Admin token" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+  <div style="margin-top:12px;">
+    <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
+  </div>
+  <div id="loginError" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;"></div>
+</div>
+
+<div id="app" style="display:none;">
+<h1>Music Library Admin
+  <span style="font-size:13px; font-weight:400; float:right;">
+    <button class="btn btn-secondary btn-sm" onclick="doLogout()">Logout</button>
+  </span>
+</h1>
 <div class="toolbar">
   <button class="btn btn-primary" onclick="showAdd()">+ Add Track</button>
   <button class="btn btn-secondary" onclick="loadTracks()">Refresh</button>
@@ -85,6 +100,7 @@ tr:hover { background: #f0f7ff; }
   <button class="btn btn-success" onclick="saveTrack()">Save</button>
 </div>
 </div></div>
+</div>
 
 <div id="toast" class="toast"></div>
 <script>
@@ -92,9 +108,85 @@ let tracks = [];
 
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
+// --- Auth gate ---
+async function checkSession() {
+  try {
+    const res = await fetch('/api/admin/session', { credentials: 'same-origin' });
+    const data = await res.json();
+    if (res.status === 503) {
+      // ADMIN_TOKEN not configured server-side — fail closed.
+      const errBox = document.getElementById('loginError');
+      document.getElementById('login').style.display = 'block';
+      document.getElementById('app').style.display = 'none';
+      errBox.textContent = 'Admin is not configured on the server (ADMIN_TOKEN is missing).';
+      errBox.style.display = 'block';
+      document.getElementById('loginToken').disabled = true;
+      return;
+    }
+    if (data.authenticated) {
+      showApp();
+    } else {
+      showLogin();
+    }
+  } catch (e) {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('login').style.display = 'block';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadTracks();
+}
+
+async function doLogin() {
+  const token = document.getElementById('loginToken').value.trim();
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  if (!token) { errBox.textContent = 'Please enter the admin token.'; errBox.style.display = 'block'; return; }
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (res.ok && data.authenticated) {
+      document.getElementById('loginToken').value = '';
+      showApp();
+    } else {
+      errBox.textContent = 'Incorrect token.';
+      errBox.style.display = 'block';
+    }
+  } catch (e) {
+    errBox.textContent = 'Could not reach the server.';
+    errBox.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  try {
+    await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+  } catch (e) { /* ignore */ }
+  showLogin();
+}
+
+// If any admin API call returns 401 (session expired), return to login.
+async function authedFetch(url, options) {
+  const res = await fetch(url, options);
+  if (res.status === 401) { showLogin(); throw new Error('Session expired — sign in again.'); }
+  return res;
+}
+
 async function loadTracks() {
   try {
-    const res = await fetch('/api/admin/tracks');
+    const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
     tracks = await res.json();
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = tracks.map(t => `<tr>
@@ -111,7 +203,7 @@ async function loadTracks() {
       </td>
     </tr>`).join('');
     document.getElementById('count').textContent = `${tracks.length} track(s)`;
-  } catch (e) { toast('Failed: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message); }
 }
 
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -168,22 +260,22 @@ async function saveTrack() {
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await authedFetch(url, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
     toast(id ? 'Updated' : 'Created');
     closeModal();
     loadTracks();
-  } catch (e) { toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
 async function deleteTrack(id) {
   if (!confirm('Delete this track?')) return;
   try {
-    const res = await fetch(`/api/admin/tracks/${id}`, { method: 'DELETE' });
+    const res = await authedFetch(`/api/admin/tracks/${id}`, { method: 'DELETE', credentials: 'same-origin' });
     if (!res.ok) throw new Error('Delete failed');
     toast('Deleted');
     loadTracks();
-  } catch (e) { toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
 async function handleAudioUpload(input) {
@@ -192,7 +284,7 @@ async function handleAudioUpload(input) {
   document.getElementById('audioStatus').textContent = 'Uploading...';
   const form = new FormData(); form.append('file', file);
   try {
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fStorage').value = data.storage_path;
@@ -207,7 +299,7 @@ async function handleThumbUpload(input) {
   document.getElementById('thumbStatus').textContent = 'Uploading...';
   const form = new FormData(); form.append('file', file);
   try {
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fThumbnail').value = data.thumbnail_url;
@@ -217,7 +309,7 @@ async function handleThumbUpload(input) {
   input.value = '';
 }
 
-loadTracks();
+checkSession();
 </script>
 </body>
 </html>

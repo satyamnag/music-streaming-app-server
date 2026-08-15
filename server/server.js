@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 dotenv.config()
 
@@ -610,11 +611,111 @@ app.get('/users/me', (req, res) => {
   res.json(DEFAULT_USER)
 })
 
+// ----- Admin authentication (ADMIN_TOKEN) -----
+//
+// The admin surface (/admin page + /api/admin/*) is protected by a shared
+// secret in ADMIN_TOKEN. The browser authenticates once via
+// POST /api/admin/login (timing-safe comparison), which sets a short-lived,
+// HttpOnly, SameSite=Strict session cookie whose value is HMAC-SHA256 signed
+// with the same secret (so it cannot be forged without the token).
+//
+// Fail-closed: if ADMIN_TOKEN is not configured, admin endpoints return 503
+// and the /admin page shows a "not configured" message — never an open admin.
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''
+const ADMIN_COOKIE_NAME = 'sangeet_admin_session'
+const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60 // 8 hours
+const ADMIN_COOKIE_MAX_AGE = 1000 * ADMIN_SESSION_TTL_SECONDS
+
+function signAdminSession() {
+  const exp = Date.now() + ADMIN_COOKIE_MAX_AGE
+  const payload = `${exp}`
+  const sig = crypto
+    .createHmac('sha256', ADMIN_TOKEN)
+    .update(payload)
+    .digest('base64url')
+  return `${payload}.${sig}`
+}
+
+function verifyAdminSession(value) {
+  if (!value) return false
+  const [expStr, sig] = value.split('.')
+  const exp = Number(expStr)
+  if (!Number.isFinite(exp) || exp <= Date.now()) return false
+  if (!sig) return false
+  const expected = crypto
+    .createHmac('sha256', ADMIN_TOKEN)
+    .update(expStr)
+    .digest('base64url')
+  try {
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+  } catch {
+    return false
+  }
+}
+
+function adminSessionCookieValue(req) {
+  const header = req.headers.cookie || ''
+  for (const part of header.split(';')) {
+    const idx = part.indexOf('=')
+    if (idx === -1) continue
+    const name = part.slice(0, idx).trim()
+    if (name === ADMIN_COOKIE_NAME) return part.slice(idx + 1).trim()
+  }
+  return ''
+}
+
+// Middleware protecting /api/admin/*. The cookie must be present, valid, and
+// unexpired. On failure a 401 is returned (the SPA shows the login form).
+function requireAdmin(req, res, next) {
+  if (!ADMIN_TOKEN) {
+    return res.status(503).json({ error: 'admin not configured' })
+  }
+  if (!verifyAdminSession(adminSessionCookieValue(req))) {
+    return res.status(401).json({ error: 'unauthorized' })
+  }
+  next()
+}
+
+// Cloudflare R2 (S3-compatible) client for music uploads. Configured via
+// R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY. When unset, the
+// admin upload falls back to Supabase Storage (the previous behaviour).
+const R2_ENDPOINT = process.env.R2_ACCOUNT_ID
+  ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+  : ''
+const R2_BUCKET = process.env.R2_BUCKET_NAME || 'soulful-bhakti-music'
+const r2Enabled = Boolean(
+  R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY
+)
+const r2 = r2Enabled
+  ? new S3Client({
+      region: 'auto',
+      endpoint: R2_ENDPOINT,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      },
+    })
+  : null
+
+async function uploadAudioToR2(key, body, contentType) {
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    })
+  )
+  return key
+}
+
 // ----- Admin CRUD -----
 import multer from 'multer'
 const upload = multer({ storage: multer.memoryStorage() })
 
-// Serve admin HTML
+// Serve admin HTML. The page itself gates on the session (checks
+// /api/admin/session on load and shows a login form when unauthenticated).
+// All data is protected server-side by requireAdmin regardless.
 app.get('/admin', (req, res) => {
   const htmlPath = path.join(__dirname, 'admin.html')
   if (fs.existsSync(htmlPath)) {
@@ -624,8 +725,46 @@ app.get('/admin', (req, res) => {
   }
 })
 
+// Login: verifies the ADMIN_TOKEN (timing-safe) and sets a signed HttpOnly
+// session cookie. The browser sends `{ token }` in the JSON body.
+app.post('/api/admin/login', (req, res) => {
+  if (!ADMIN_TOKEN) {
+    return res.status(503).json({ error: 'admin not configured' })
+  }
+  const { token } = req.body || {}
+  if (typeof token !== 'string' || token.length === 0) {
+    return res.status(401).json({ error: 'unauthorized' })
+  }
+  const a = Buffer.from(token)
+  const b = Buffer.from(ADMIN_TOKEN)
+  const ok = a.length === b.length && crypto.timingSafeEqual(a, b)
+  if (!ok) return res.status(401).json({ error: 'unauthorized' })
+
+  res.setHeader(
+    'Set-Cookie',
+    `${ADMIN_COOKIE_NAME}=${signAdminSession()}; HttpOnly; Path=/; SameSite=Strict; Max-Age=${ADMIN_SESSION_TTL_SECONDS}`
+  )
+  res.json({ authenticated: true })
+})
+
+// Logout: clears the session cookie.
+app.post('/api/admin/logout', (req, res) => {
+  res.setHeader(
+    'Set-Cookie',
+    `${ADMIN_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`
+  )
+  res.json({ authenticated: false })
+})
+
+// Check current admin session state (used by the SPA on load).
+app.get('/api/admin/session', (req, res) => {
+  const authenticated =
+    Boolean(ADMIN_TOKEN) && verifyAdminSession(adminSessionCookieValue(req))
+  res.json({ authenticated })
+})
+
 // List all tracks
-app.get('/api/admin/tracks', async (req, res, next) => {
+app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
     const { data, error } = await supabase.from('tracks').select('*').order('created_at', { ascending: false })
     if (error) return res.status(500).json({ error: error.message })
@@ -634,7 +773,7 @@ app.get('/api/admin/tracks', async (req, res, next) => {
 })
 
 // Create track
-app.post('/api/admin/tracks', async (req, res, next) => {
+app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
     const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
     if (!title || !storage_path) return res.status(400).json({ error: 'title and storage_path required' })
@@ -656,7 +795,7 @@ app.post('/api/admin/tracks', async (req, res, next) => {
 })
 
 // Update track
-app.put('/api/admin/tracks/:id', async (req, res, next) => {
+app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
     const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
     const updates = {}
@@ -676,7 +815,7 @@ app.put('/api/admin/tracks/:id', async (req, res, next) => {
 })
 
 // Delete track
-app.delete('/api/admin/tracks/:id', async (req, res, next) => {
+app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
     const { error } = await supabase.from('tracks').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
@@ -684,8 +823,9 @@ app.delete('/api/admin/tracks/:id', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Upload file to Supabase storage (opus or image)
-app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
+// Upload file (audio -> Cloudflare R2 when configured, else Supabase Storage;
+// images -> Supabase Storage thumbnails bucket).
+app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
     const ext = req.file.originalname.split('.').pop().toLowerCase()
@@ -694,6 +834,13 @@ app.post('/api/admin/upload', upload.single('file'), async (req, res, next) => {
     if (!isImage && !isAudio) return res.status(400).json({ error: 'Allowed: .opus for audio, .png/.jpg/.jpeg/.webp for thumbnails' })
     const fileName = `${Date.now()}-${req.file.originalname}`
     const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
+
+    if (isAudio && r2Enabled) {
+      // Stream to Cloudflare R2 so new songs are served from the CDN.
+      const key = await uploadAudioToR2(fileName, req.file.buffer, contentType)
+      return res.json({ storage_path: key })
+    }
+
     const bucket = isImage ? 'thumbnails' : 'music'
     const { data, error } = await supabase.storage.from(bucket).upload(fileName, req.file.buffer, {
       contentType,
