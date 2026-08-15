@@ -3,6 +3,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
+import 'package:sangeet/modules/monetization/coupon_entry.dart';
 import 'package:sangeet/modules/monetization/superwall_gate.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/services/superwall_service.dart';
@@ -125,6 +126,13 @@ class PremiumAccess {
     if (auth?.signedIn != true) {
       final signedIn = await promptSignIn(context, ref);
       if (!signedIn) return false;
+    }
+
+    // Offer the (optional) affiliate coupon entry before the paywall so the
+    // attribution is recorded before any purchase. Attribution-only — the
+    // price is unchanged. Redemption is immutable (one code per user).
+    if (context.mounted) {
+      await CouponEntry.prompt(context, ref);
     }
 
     var purchased = false;

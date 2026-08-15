@@ -35,6 +35,7 @@ import 'package:sangeet/hooks/configurators/use_has_touch.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
 import 'package:sangeet/modules/settings/bhakti_color_scheme.dart';
+import 'package:sangeet/modules/splash/splash_gate.dart';
 import 'package:sangeet/modules/splash/splash_screen.dart';
 import 'package:sangeet/provider/audio_player/audio_player_streams.dart';
 import 'package:sangeet/provider/database/database.dart';
@@ -251,16 +252,23 @@ class Sangeet extends HookConsumerWidget {
         }
 
         // Show the splash screen until the metadata plugin and local playback
-        // server have finished initializing, then transition to the app.
-        final pluginLoading = ref.watch(
-          metadataPluginProvider.select((s) => s.isLoading),
+        // server have finished initializing, then cross-fade to the app.
+        // The splash gate enforces a minimum display time (no jarring flash)
+        // and a hard timeout (the splash can never hang the app forever).
+        final splashGate = ref.watch(splashGateProvider);
+        final showSplash = splashGate.isLoading;
+        final reduceMotion = MediaQuery.disableAnimationsOf(context);
+        child = material.AnimatedSwitcher(
+          duration: Duration(milliseconds: reduceMotion ? 0 : 400),
+          switchInCurve: Curves.easeIn,
+          switchOutCurve: Curves.easeOut,
+          child: showSplash
+              ? const SplashScreen()
+              : material.KeyedSubtree(
+                  key: const material.ValueKey('app-content'),
+                  child: child,
+                ),
         );
-        final serverLoading = ref.watch(
-          serverProvider.select((s) => s.isLoading),
-        );
-        if (pluginLoading || serverLoading) {
-          child = const SplashScreen();
-        }
 
         // Free users do NOT need to log in: the app opens to the home screen
         // without any auth gate. Google sign-in is available on demand via

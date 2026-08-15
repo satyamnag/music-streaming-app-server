@@ -75,7 +75,7 @@ class TrackTile extends HookConsumerWidget {
     // inside the prefetcher.
     useEffect(() {
       if (!isPlaying) {
-        TrackBytePrefetcher.instance.prefetch(track, ref);
+        TrackBytePrefetcher.instance.prefetch(track, ref.read);
       }
       return null;
     }, [track.id]);

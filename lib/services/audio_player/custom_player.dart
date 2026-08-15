@@ -26,6 +26,16 @@ class CustomPlayer extends Player {
   int _lastSavedPosition = 0;
   int _lastSaveTime = 0;
 
+  // Buffering stall recovery (mirrors the web player's waiting/stalled watchdog):
+  // when playback enters buffering with no position advance, wait up to
+  // [_stallTimeout] then retry the SAME track (re-open at the current position).
+  // Bounded by [_maxStallRetries]; reset whenever playback successfully advances.
+  Timer? _stallTimer;
+  int _stallRetryCount = 0;
+  static const Duration _stallTimeout = Duration(seconds: 5);
+  static const int _maxStallRetries = 3;
+  Duration _positionAtStallStart = Duration.zero;
+
   CustomPlayer({super.configuration})
       : _playerStateStream = StreamController.broadcast() {
     nativePlayer.setProperty("network-timeout", "120");
@@ -52,10 +62,38 @@ class CustomPlayer extends Player {
     _subscriptions = [
       stream.buffering.listen((event) {
         _playerStateStream.add(AudioPlaybackState.buffering);
+        if (event) {
+          // Buffering started: note the current position and arm the stall
+          // watchdog. If the player is still stuck without advancing after
+          // [_stallTimeout], we retry the same track (bounded).
+          _positionAtStallStart = state.position;
+          _stallTimer?.cancel();
+          _stallTimer = Timer(_stallTimeout, () {
+            if (!state.buffering) return;
+            final now = state.position;
+            final advanced = now > _positionAtStallStart;
+            if (advanced) return; // still making progress — keep waiting
+            if (_stallRetryCount >= _maxStallRetries) return;
+            _stallRetryCount++;
+            final idx = state.playlist.index;
+            final medias = state.playlist.medias;
+            if (idx < 0 || idx >= medias.length) return;
+            final resumePos = _positionAtStallStart;
+            // Re-open the same media (never advance to the next track) and
+            // restore the playhead so the stall recovers in place.
+            open(Playlist(medias, index: idx), play: true).then((_) {
+              return seek(resumePos);
+            });
+          });
+        } else {
+          _stallTimer?.cancel();
+          _stallTimer = null;
+        }
       }),
       stream.playing.listen((playing) {
         if (playing) {
           _errorRetryCount = 0;
+          _stallRetryCount = 0;
           _playerStateStream.add(AudioPlaybackState.playing);
         } else {
           _playerStateStream.add(AudioPlaybackState.paused);
@@ -64,6 +102,7 @@ class CustomPlayer extends Player {
       stream.completed.listen((isCompleted) async {
         if (!isCompleted) return;
         _errorRetryCount = 0;
+        _stallRetryCount = 0;
         _lastSavedPosition = 0;
         _playerStateStream.add(AudioPlaybackState.completed);
       }),
@@ -73,6 +112,11 @@ class CustomPlayer extends Player {
         }
       }),
       stream.position.listen((pos) {
+        // Any forward position movement means playback is progressing, so a
+        // buffering stall is not stuck — reset the watchdog.
+        if (pos > _positionAtStallStart) {
+          _stallRetryCount = 0;
+        }
         final now = DateTime.now().millisecondsSinceEpoch;
         final posMs = pos.inMilliseconds;
         if (posMs > 0 && posMs != _lastSavedPosition && now - _lastSaveTime > 10000) {
@@ -205,6 +249,8 @@ class CustomPlayer extends Player {
 
   @override
   Future<void> dispose() async {
+    _stallTimer?.cancel();
+    _stallTimer = null;
     for (var element in _subscriptions) {
       element.cancel();
     }

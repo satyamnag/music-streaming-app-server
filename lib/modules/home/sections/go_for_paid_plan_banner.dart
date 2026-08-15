@@ -8,7 +8,7 @@ import 'package:sangeet/modules/monetization/premium_access.dart';
 /// "Go for Paid Plan".
 ///
 /// Tapping it guides the user through the sign-in (if not signed in) and then
-/// presents the Superwall paywall with the monthly (₹99) and yearly (₹999)
+/// presents the Superwall paywall with the monthly (₹120) and yearly (₹1,200)
 /// plans. Hidden for users who already have an active subscription.
 class GoForPaidPlanBanner extends HookConsumerWidget {
   const GoForPaidPlanBanner({super.key});
@@ -72,7 +72,7 @@ class GoForPaidPlanBanner extends HookConsumerWidget {
                         ),
                       ),
                       Text(
-                        'Unlock every song — monthly ₹99 / yearly ₹999',
+                        'Unlock every song — monthly ₹120 / yearly ₹1,200',
                         style: theme.typography.small.copyWith(
                           color: Colors.white.withValues(alpha: 0.85),
                         ),

@@ -38,10 +38,10 @@ class ProfilePlanStatus extends HookConsumerWidget {
 
   String _planName(String productId) {
     if (_isYearly(productId)) {
-      return 'Yearly Plan (₹999/yr)';
+      return 'Yearly Plan (₹1,200/yr)';
     }
     if (_isMonthly(productId)) {
-      return 'Monthly Plan (₹99/mo)';
+      return 'Monthly Plan (₹120/mo)';
     }
     return productId;
   }

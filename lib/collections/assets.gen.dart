@@ -86,6 +86,9 @@ class $AssetsImagesLogosGen {
   AssetGenImage get dabMusic =>
       const AssetGenImage('assets/images/logos/dab-music.png');
 
+  /// File path: assets/images/logos/google-g.svg
+  String get googleG => 'assets/images/logos/google-g.svg';
+
   /// File path: assets/images/logos/invidious.jpg
   AssetGenImage get invidious =>
       const AssetGenImage('assets/images/logos/invidious.jpg');
@@ -95,7 +98,7 @@ class $AssetsImagesLogosGen {
       const AssetGenImage('assets/images/logos/jiosaavn.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [dabMusic, invidious, jiosaavn];
+  List<dynamic> get values => [dabMusic, googleG, invidious, jiosaavn];
 }
 
 class $AssetsPluginsSangeetSupabaseAudioGen {

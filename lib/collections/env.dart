@@ -31,6 +31,12 @@ abstract class Env {
   @EnviedField(varName: 'SUPABASE_ANON_KEY')
   static final String supabaseAnonKey = _Env.supabaseAnonKey;
 
+  /// Cloudflare R2 public CDN base URL for the music bucket. Audio files are
+  /// streamed from here (no Supabase egress), e.g. `https://music.domain.com`.
+  /// Public by design — objects are served from a public R2 bucket + CDN.
+  @EnviedField(varName: 'R2_BASE_URL', defaultValue: "")
+  static final String r2BaseUrl = _Env.r2BaseUrl;
+
   @EnviedField(varName: 'CLERK_PUBLISHABLE_KEY')
   static final String clerkPublishableKey = _Env.clerkPublishableKey;
 

@@ -13,7 +13,7 @@ abstract class SuperwallPlacements {
 
   /// Gates playback of an individual paid (premium) track. Configure this
   /// placement in the Superwall Dashboard (Gated) to present the paywall with
-  /// the monthly (₹99) and yearly (₹999) plans to free users.
+  /// the monthly (₹120) and yearly (₹1,200) plans to free users.
   static const String premiumTrackPlay = 'paid_track_play';
 }
 

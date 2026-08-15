@@ -71,7 +71,7 @@ class _OneSignalVerificationDialogState
                   'uninterrupted.'
               : 'Upgrade to Soulful Bhakti Premium for unlimited access to '
                   'every song, lyrics, and an uninterrupted listening '
-                  'experience — monthly ₹99 or yearly ₹999.',
+                  'experience — monthly ₹120 or yearly ₹1,200.',
         ),
         actions: [
           TextButton(

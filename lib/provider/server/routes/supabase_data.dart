@@ -9,6 +9,7 @@ import 'package:sangeet/collections/env.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/services/sourced_track/r2_url.dart';
 
 final supabaseClientProvider = Provider((ref) {
   return SupabaseClient(
@@ -30,8 +31,18 @@ const _defaultUser = {
 const _hiddenArtistName = 'Dr. Sri Ramakantha Rao Chakalakonda';
 
 const _monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 /// Formats a "YYYY-MM" key as "Month, YY" (e.g. "2026-08" -> "August, 26").
@@ -62,18 +73,24 @@ String _albumId(String albumName) {
   return slug.isEmpty ? 'album-unknown' : 'album-$slug';
 }
 
-Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = t['artist_names'] as List<dynamic>?;
+Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
+  final rawArtists = t['artist_names'] as List<dynamic>?;
   final artists = rawArtists
           ?.map((name) => {
-                'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
+                'id': name
+                    .toString()
+                    .toLowerCase()
+                    .replaceAll(RegExp(r'\s+'), '-'),
                 'name': name,
                 'externalUri': '',
                 'images': null,
               })
-          .toList() ?? [];
+          .toList() ??
+      [];
   final releaseDate = t['created_at']?.toString();
   final albumRaw = t['album']?.toString().trim() ?? '';
-  final albumName = albumRaw.isNotEmpty ? albumRaw : (t['title'] ?? '').toString();
+  final albumName =
+      albumRaw.isNotEmpty ? albumRaw : (t['title'] ?? '').toString();
   return {
     'id': t['id'],
     'name': t['title'],
@@ -86,7 +103,9 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {  final rawArtists = 
       'externalUri': '',
       'artists': artists,
       'images': t['thumbnail'] != null
-          ? [{'url': t['thumbnail'], 'width': 300, 'height': 300}]
+          ? [
+              {'url': t['thumbnail'], 'width': 300, 'height': 300}
+            ]
           : [],
       'albumType': 'album',
       'releaseDate': releaseDate,
@@ -172,8 +191,11 @@ class ServerSupabaseDataRoutes {
       final items = tracks.map(_trackToJson).toList();
       return Response.ok(
         jsonEncode({
-          'items': items, 'limit': 100, 'nextOffset': null,
-          'total': items.length, 'hasMore': false,
+          'items': items,
+          'limit': 100,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false,
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -219,8 +241,11 @@ class ServerSupabaseDataRoutes {
   Future<Response> recordPlay(Request request) async {
     try {
       final body = await request.readAsString();
-      final data = body.isEmpty ? const <String, dynamic>{} : jsonDecode(body) as Map<String, dynamic>;
-      final trackId = (data['track_id'] ?? data['trackId'] ?? '').toString().trim();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final trackId =
+          (data['track_id'] ?? data['trackId'] ?? '').toString().trim();
       if (trackId.isEmpty) {
         return Response.badRequest(body: '{"error":"track_id required"}');
       }
@@ -284,15 +309,17 @@ class ServerSupabaseDataRoutes {
       }
       final data = raw.cast<Map<String, dynamic>>();
 
-      final matchItems = data.map((t) => {
-            'id': t['id'],
-            'title': t['title'],
-            'artists': t['artist_names'],
-            'duration': (t['duration'] ?? 0) * 1000000,
-            'thumbnail': t['thumbnail'],
-            'status': t['status'] ?? 'free',
-            'externalUri': '',
-          }).toList();
+      final matchItems = data
+          .map((t) => {
+                'id': t['id'],
+                'title': t['title'],
+                'artists': t['artist_names'],
+                'duration': (t['duration'] ?? 0) * 1000000,
+                'thumbnail': t['thumbnail'],
+                'status': t['status'] ?? 'free',
+                'externalUri': '',
+              })
+          .toList();
 
       final fullTracks = data.map(_trackToJson).toList();
 
@@ -316,7 +343,8 @@ class ServerSupabaseDataRoutes {
           headers: {'content-type': 'application/json'},
         );
       }
-      return Response.ok(jsonEncode(matchItems), headers: {'content-type': 'application/json'});
+      return Response.ok(jsonEncode(matchItems),
+          headers: {'content-type': 'application/json'});
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
@@ -333,21 +361,33 @@ class ServerSupabaseDataRoutes {
           .single();
       // Paid tracks are locked for free users — refuse to hand out a stream
       // URL even if a client bypasses the UI.
-      if (raw['status'] == 'paid' &&
-          !PremiumAccess.isPremiumUser(ref)) {
-        return Response.forbidden('{"error":"This track requires a premium subscription"}');
+      if (raw['status'] == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
+        return Response.forbidden(
+            '{"error":"This track requires a premium subscription"}');
       }
       final storagePath = raw['storage_path'] as String;
       final ext = storagePath.split('.').last.toLowerCase();
-      final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
+      final fmt = ext == 'm4a'
+          ? 'mp4'
+          : ext == 'weba'
+              ? 'webm'
+              : ext;
 
-      final signedUrl = await sb.storage.from('music').createSignedUrl(storagePath, 3600);
+      // Stream from the Cloudflare R2 public CDN (zero egress). Fall back to a
+      // Supabase signed URL only when R2 is not configured.
+      final r2 = r2StreamUrl(storagePath);
+      final url = r2 ??
+          await sb.storage.from('music').createSignedUrl(storagePath, 3600);
       return Response.ok(
         jsonEncode({
-          'url': signedUrl,
+          'url': url,
           'container': fmt,
           'type': 'lossy',
-          'codec': fmt == 'opus' ? 'opus' : fmt == 'mp3' ? 'mp3' : fmt,
+          'codec': fmt == 'opus'
+              ? 'opus'
+              : fmt == 'mp3'
+                  ? 'mp3'
+                  : fmt,
           'bitrate': fmt == 'opus' ? 96000 : 128000,
         }),
         headers: {'content-type': 'application/json'},
@@ -365,10 +405,16 @@ class ServerSupabaseDataRoutes {
         final rawArtists = t['artist_names'] as List<dynamic>?;
         final artists = rawArtists
                 ?.map((name) => {
-                      'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
-                      'name': name, 'externalUri': '', 'images': null,
+                      'id': name
+                          .toString()
+                          .toLowerCase()
+                          .replaceAll(RegExp(r'\s+'), '-'),
+                      'name': name,
+                      'externalUri': '',
+                      'images': null,
                     })
-                .toList() ?? [];
+                .toList() ??
+            [];
         return {
           'id': 'section-${t['id']}',
           'title': t['title'],
@@ -381,7 +427,9 @@ class ServerSupabaseDataRoutes {
               'externalUri': '',
               'artists': artists,
               'images': t['thumbnail'] != null
-                  ? [{'url': t['thumbnail'], 'width': 300, 'height': 300}]
+                  ? [
+                      {'url': t['thumbnail'], 'width': 300, 'height': 300}
+                    ]
                   : [],
               'albumType': 'single',
               'releaseDate': null,
@@ -391,8 +439,11 @@ class ServerSupabaseDataRoutes {
       }).toList();
       return Response.ok(
         jsonEncode({
-          'items': sections, 'limit': 100, 'nextOffset': null,
-          'total': sections.length, 'hasMore': false,
+          'items': sections,
+          'limit': 100,
+          'nextOffset': null,
+          'total': sections.length,
+          'hasMore': false,
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -413,12 +464,24 @@ class ServerSupabaseDataRoutes {
           'externalUri': '',
           'owner': _defaultUser,
           'images': tracks.isNotEmpty && tracks.first['thumbnail'] != null
-              ? [{'url': tracks.first['thumbnail'], 'width': 300, 'height': 300}]
+              ? [
+                  {
+                    'url': tracks.first['thumbnail'],
+                    'width': 300,
+                    'height': 300
+                  }
+                ]
               : [],
         }
       ];
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 50, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 50,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -486,9 +549,7 @@ class ServerSupabaseDataRoutes {
         return Response.notFound('{"error":"Not found"}');
       }
       final isMonthPlaylist = id.startsWith('month-');
-      final monthKey = isMonthPlaylist
-          ? id.substring('month-'.length)
-          : null;
+      final monthKey = isMonthPlaylist ? id.substring('month-'.length) : null;
 
       List<Map<String, dynamic>> filtered;
       if (monthKey != null) {
@@ -566,7 +627,13 @@ class ServerSupabaseDataRoutes {
           if (track != null) items.add(_trackToJson(track));
         }
         return Response.ok(
-          jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+          jsonEncode({
+            'items': items,
+            'limit': 500,
+            'nextOffset': null,
+            'total': items.length,
+            'hasMore': false
+          }),
           headers: {'content-type': 'application/json'},
         );
       }
@@ -581,9 +648,7 @@ class ServerSupabaseDataRoutes {
         return Response.notFound('{"error":"Not found"}');
       }
       final isMonthPlaylist = id.startsWith('month-');
-      final monthKey = isMonthPlaylist
-          ? id.substring('month-'.length)
-          : null;
+      final monthKey = isMonthPlaylist ? id.substring('month-'.length) : null;
 
       final filtered = monthKey != null
           ? tracks.where((t) {
@@ -601,7 +666,13 @@ class ServerSupabaseDataRoutes {
                 }).toList());
       final items = filtered.map(_trackToJson).toList();
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -630,10 +701,16 @@ class ServerSupabaseDataRoutes {
       final rawArtists = first['artist_names'] as List<dynamic>?;
       final artists = rawArtists
               ?.map((name) => {
-                    'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
-                    'name': name, 'externalUri': '', 'images': null,
+                    'id': name
+                        .toString()
+                        .toLowerCase()
+                        .replaceAll(RegExp(r'\s+'), '-'),
+                    'name': name,
+                    'externalUri': '',
+                    'images': null,
                   })
-              .toList() ?? [];
+              .toList() ??
+          [];
       final playCounts = await _playCounts();
       return Response.ok(
         jsonEncode({
@@ -674,7 +751,13 @@ class ServerSupabaseDataRoutes {
           .map(_trackToJson)
           .toList();
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -707,7 +790,10 @@ class ServerSupabaseDataRoutes {
         final rawArtists = first['artist_names'] as List<dynamic>?;
         final artists = rawArtists
                 ?.map((name) => {
-                      'id': name.toString().toLowerCase().replaceAll(RegExp(r'\s+'), '-'),
+                      'id': name
+                          .toString()
+                          .toLowerCase()
+                          .replaceAll(RegExp(r'\s+'), '-'),
                       'name': name,
                       'externalUri': '',
                       'images': null,
@@ -739,8 +825,11 @@ class ServerSupabaseDataRoutes {
 
       return Response.ok(
         jsonEncode({
-          'items': albums, 'limit': 500, 'nextOffset': null,
-          'total': albums.length, 'hasMore': false,
+          'items': albums,
+          'limit': 500,
+          'nextOffset': null,
+          'total': albums.length,
+          'hasMore': false,
         }),
         headers: {'content-type': 'application/json'},
       );
@@ -772,7 +861,9 @@ class ServerSupabaseDataRoutes {
               : name,
           'externalUri': '',
           'images': first?['thumbnail'] != null
-              ? [{'url': first!['thumbnail'], 'width': 300, 'height': 300}]
+              ? [
+                  {'url': first!['thumbnail'], 'width': 300, 'height': 300}
+                ]
               : [],
           'genres': null,
           'followers': null,
@@ -799,7 +890,13 @@ class ServerSupabaseDataRoutes {
       }).toList();
       final items = matched.map(_trackToJson).toList();
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -809,7 +906,8 @@ class ServerSupabaseDataRoutes {
 
   /// GET /supabase/users/me
   Future<Response> getUserMe(Request request) async {
-    return Response.ok(jsonEncode(_defaultUser), headers: {'content-type': 'application/json'});
+    return Response.ok(jsonEncode(_defaultUser),
+        headers: {'content-type': 'application/json'});
   }
 
   /// GET /supabase/liked-songs/supabase
@@ -830,7 +928,8 @@ class ServerSupabaseDataRoutes {
       final tracks = await _fetchAllTracks(limit: 500);
       final items = <Map<String, dynamic>>[];
       for (final row in rows) {
-        final track = tracks.where((t) => t['id'].toString() == row.trackId).firstOrNull;
+        final track =
+            tracks.where((t) => t['id'].toString() == row.trackId).firstOrNull;
         if (track != null) items.add(_trackToJson(track));
       }
       return Response.ok(
@@ -848,8 +947,11 @@ class ServerSupabaseDataRoutes {
   Future<Response> addLikedSong(Request request) async {
     try {
       final body = await request.readAsString();
-      final data = body.isEmpty ? const <String, dynamic>{} : jsonDecode(body) as Map<String, dynamic>;
-      final trackId = (data['track_id'] ?? data['trackId'] ?? '').toString().trim();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final trackId =
+          (data['track_id'] ?? data['trackId'] ?? '').toString().trim();
       if (trackId.isEmpty) {
         return Response.badRequest(body: '{"error":"track_id required"}');
       }
@@ -859,8 +961,8 @@ class ServerSupabaseDataRoutes {
           .getSingleOrNull();
       if (existing == null) {
         await db.into(db.localLikedSongsTable).insert(
-          LocalLikedSongsTableCompanion.insert(trackId: trackId),
-        );
+              LocalLikedSongsTableCompanion.insert(trackId: trackId),
+            );
       }
       return Response.ok(
         jsonEncode({'success': true}),
@@ -898,7 +1000,13 @@ class ServerSupabaseDataRoutes {
       final items = await _buildOwnerPlaylists(tracks);
 
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -1013,7 +1121,13 @@ class ServerSupabaseDataRoutes {
         });
       }
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -1027,7 +1141,9 @@ class ServerSupabaseDataRoutes {
   Future<Response> createUserPlaylist(Request request) async {
     try {
       final body = await request.readAsString();
-      final data = body.isEmpty ? const <String, dynamic>{} : jsonDecode(body) as Map<String, dynamic>;
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
       final name = (data['name'] ?? data['title'] ?? '').toString().trim();
       if (name.isEmpty) {
         return Response.badRequest(body: '{"error":"name required"}');
@@ -1035,12 +1151,12 @@ class ServerSupabaseDataRoutes {
       final id = DateTime.now().microsecondsSinceEpoch.toString();
       final db = ref.read(databaseProvider);
       await db.into(db.localPlaylistsTable).insert(
-        LocalPlaylistsTableCompanion.insert(
-          id: id,
-          name: name,
-          description: Value((data['description'] ?? '').toString()),
-        ),
-      );
+            LocalPlaylistsTableCompanion.insert(
+              id: id,
+              name: name,
+              description: Value((data['description'] ?? '').toString()),
+            ),
+          );
       return Response(
         201,
         body: jsonEncode({
@@ -1064,7 +1180,9 @@ class ServerSupabaseDataRoutes {
   Future<Response> addUserPlaylistSong(Request request, String id) async {
     try {
       final body = await request.readAsString();
-      final data = body.isEmpty ? const <String, dynamic>{} : jsonDecode(body) as Map<String, dynamic>;
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
       final trackId = (data['track_id'] ?? '').toString();
       if (trackId.isEmpty) {
         return Response.badRequest(body: '{"error":"track_id required"}');
@@ -1080,14 +1198,16 @@ class ServerSupabaseDataRoutes {
               ..where((t) => t.playlistId.equals(playlistId)))
             .get();
         await db.into(db.localPlaylistSongsTable).insert(
-          LocalPlaylistSongsTableCompanion.insert(
-            playlistId: playlistId,
-            trackId: trackId,
-            position: Value(count.length),
-          ),
-        );
+              LocalPlaylistSongsTableCompanion.insert(
+                playlistId: playlistId,
+                trackId: trackId,
+                position: Value(count.length),
+              ),
+            );
       }
-      return Response(201, body: '{"success":true}', headers: {'content-type': 'application/json'});
+      return Response(201,
+          body: '{"success":true}',
+          headers: {'content-type': 'application/json'});
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
@@ -1104,7 +1224,8 @@ class ServerSupabaseDataRoutes {
       await (db.delete(db.localPlaylistsTable)
             ..where((t) => t.id.equals(playlistId)))
           .go();
-      return Response.ok('{"success":true}', headers: {'content-type': 'application/json'});
+      return Response.ok('{"success":true}',
+          headers: {'content-type': 'application/json'});
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
@@ -1119,10 +1240,11 @@ class ServerSupabaseDataRoutes {
           : playlistId;
       final db = ref.read(databaseProvider);
       await (db.delete(db.localPlaylistSongsTable)
-            ..where((t) =>
-                t.playlistId.equals(pid) & t.trackId.equals(trackId)))
+            ..where(
+                (t) => t.playlistId.equals(pid) & t.trackId.equals(trackId)))
           .go();
-      return Response.ok('{"success":true}', headers: {'content-type': 'application/json'});
+      return Response.ok('{"success":true}',
+          headers: {'content-type': 'application/json'});
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
@@ -1149,7 +1271,9 @@ class ServerSupabaseDataRoutes {
           'name': e.key,
           'externalUri': '',
           'images': images[e.key] != null
-              ? [{'url': images[e.key], 'width': 300, 'height': 300}]
+              ? [
+                  {'url': images[e.key], 'width': 300, 'height': 300}
+                ]
               : [],
           'genres': null,
           'followers': null,
@@ -1157,7 +1281,183 @@ class ServerSupabaseDataRoutes {
         };
       }).toList();
       return Response.ok(
-        jsonEncode({'items': items, 'limit': 500, 'nextOffset': null, 'total': items.length, 'hasMore': false}),
+        jsonEncode({
+          'items': items,
+          'limit': 500,
+          'nextOffset': null,
+          'total': items.length,
+          'hasMore': false
+        }),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// GET /supabase/referrals/<userId>/code
+  ///
+  /// Creates (on first use) and returns the signed-in user's referral code.
+  /// The code is generated server-side by a SECURITY DEFINER RPC and is
+  /// un-guessable; the same code is always returned for the same user.
+  Future<Response> getReferralCode(Request request, String userId) async {
+    try {
+      final sb = await _supabase;
+      final res = await sb
+          .rpc('get_or_create_referral_code', params: {'p_user_id': userId});
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      return Response.ok(
+        jsonEncode({'code': res.data}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// POST /supabase/referrals/attribute
+  ///
+  /// Records that the (newly signed-in) user opened the app via a referral
+  /// code. Body: `{code, referred_user_id}`. The RPC validates the code and
+  /// rejects self-referral; a user can be attributed at most once.
+  Future<Response> recordReferralAttribution(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final code = (data['code'] ?? '').toString().trim();
+      final referredUserId =
+          (data['referred_user_id'] ?? data['referredUserId'] ?? '')
+              .toString()
+              .trim();
+      if (code.isEmpty || referredUserId.isEmpty) {
+        return Response.badRequest(
+            body: '{"error":"code and referred_user_id required"}');
+      }
+      final sb = await _supabase;
+      final res = await sb.rpc(
+        'record_referral_attribution',
+        params: {'p_code': code, 'p_referred_user_id': referredUserId},
+      );
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      return Response.ok(
+        jsonEncode({'success': res.data}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// GET /supabase/referrals/<userId>/summary
+  ///
+  /// Returns the signed-in user's referral earnings summary: their code,
+  /// number of referred sign-ups, and pending/credited/total commission.
+  Future<Response> getReferralSummary(Request request, String userId) async {
+    try {
+      final sb = await _supabase;
+      final res =
+          await sb.rpc('get_referral_summary', params: {'p_user_id': userId});
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      final rows = (res.data as List<dynamic>? ?? const []);
+      final row =
+          rows.isNotEmpty ? (rows.first as Map) : const <String, dynamic>{};
+      return Response.ok(
+        jsonEncode({
+          'code': row['code'],
+          'referralCount': row['referral_count'] ?? 0,
+          'pendingAmount': row['pending_amount'] ?? 0,
+          'creditedAmount': row['credited_amount'] ?? 0,
+          'totalAmount': row['total_amount'] ?? 0,
+        }),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// POST /supabase/coupons/validate
+  ///
+  /// Validates an affiliate coupon code (attribution-only, no side effects).
+  /// Body: `{code}`. Returns `{valid, affiliateName}`. The affiliate name is
+  /// public display info only — never contact or payout details.
+  Future<Response> validateCoupon(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final code = (data['code'] ?? '').toString().trim();
+      if (code.isEmpty) {
+        return Response.badRequest(body: '{"error":"code required"}');
+      }
+      final sb = await _supabase;
+      final res = await sb.rpc(
+        'validate_coupon',
+        params: {'p_code': code},
+      );
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      final rows = (res.data as List<dynamic>? ?? const []);
+      final row =
+          rows.isNotEmpty ? (rows.first as Map) : const <String, dynamic>{};
+      return Response.ok(
+        jsonEncode({
+          'valid': row['valid'] ?? false,
+          'affiliateName': row['affiliate_name'],
+        }),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// POST /supabase/coupons/redeem
+  ///
+  /// Redeems an affiliate coupon code for a signed-in user. Body:
+  /// `{code, user_id}`. The RPC validates the code atomically (status,
+  /// expiry, redemption limit), increments the redemption count, and records
+  /// the attribution ONCE per user. Returns `{status}` where status is one of:
+  /// redeemed, already_redeemed, invalid, inactive, expired, limit_reached.
+  Future<Response> redeemCoupon(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final code = (data['code'] ?? '').toString().trim();
+      final userId = (data['user_id'] ?? data['userId'] ?? '')
+          .toString()
+          .trim();
+      if (code.isEmpty || userId.isEmpty) {
+        return Response.badRequest(
+            body: '{"error":"code and user_id required"}');
+      }
+      final sb = await _supabase;
+      final res = await sb.rpc(
+        'redeem_coupon',
+        params: {'p_code': code, 'p_user_id': userId},
+      );
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      return Response.ok(
+        jsonEncode({'status': res.data}),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {

@@ -17,6 +17,7 @@ import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/logger/logger.dart';
+import 'package:sangeet/services/sourced_track/r2_url.dart';
 import 'package:sangeet/services/sourced_track/sourced_track.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -159,9 +160,13 @@ class ServerPlaybackRoutes {
     final ext = storagePath.split('.').last.toLowerCase();
     final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
 
-    final signedUrl = await supabase.storage
-        .from('music')
-        .createSignedUrl(storagePath, 3600);
+    // Stream from the Cloudflare R2 public CDN (zero egress). Fall back to a
+    // Supabase signed URL only when R2 is not configured.
+    final r2 = r2StreamUrl(storagePath);
+    final signedUrl = r2 ??
+        await supabase.storage
+            .from('music')
+            .createSignedUrl(storagePath, 3600);
 
     final rawArtists = row['artist_names'] as List<dynamic>?;
     final artists = rawArtists
@@ -297,11 +302,30 @@ class ServerPlaybackRoutes {
       "Headers: ${request.headers}",
     );
 
-    String url = track.url ??
-        await ref
+    String url = track.url ?? '';
+    if (url.isEmpty) {
+      final direct = await _resolveStreamFromSupabase(track.query.id);
+      if (direct != null && direct.url != null) {
+        url = direct.url!;
+        _sourcedTrackCache[track.query.id] = direct;
+      }
+    }
+    if (url.isEmpty) {
+      try {
+        final swapped = await ref
             .read(sourcedTrackProvider(track.query).notifier)
-            .swapWithNextSibling()
-            .then((track) => track.url!);
+            .swapWithNextSibling();
+        if (swapped.url != null && swapped.url!.isNotEmpty) {
+          url = swapped.url!;
+        }
+      } catch (e, stack) {
+        _log('streamTrackInformation: sibling resolution failed: $e');
+        AppLogger.reportError(e, stack);
+      }
+    }
+    if (url.isEmpty) {
+      throw StateError('No playable URL for track ${track.query.id}');
+    }
 
     final options = Options(
       headers: {
@@ -328,11 +352,35 @@ class ServerPlaybackRoutes {
       "Headers: ${request.headers}",
     );
 
-    String url = track.url ??
-        await ref
+    // Resolve the playable URL. The track's own `url` getter can be null when
+    // the audio-source plugin produced no sources for the user's quality
+    // preset; in that case fall back to the direct Supabase signed URL, which
+    // always works against the music bucket. Never crash on a null URL — that
+    // would make the song skip/fail to play.
+    String url = track.url ?? '';
+    if (url.isEmpty) {
+      final direct = await _resolveStreamFromSupabase(track.query.id);
+      if (direct != null && direct.url != null) {
+        url = direct.url!;
+        _sourcedTrackCache[track.query.id] = direct;
+      }
+    }
+    if (url.isEmpty) {
+      try {
+        final swapped = await ref
             .read(sourcedTrackProvider(track.query).notifier)
-            .swapWithNextSibling()
-            .then((track) => track.url!);
+            .swapWithNextSibling();
+        if (swapped.url != null && swapped.url!.isNotEmpty) {
+          url = swapped.url!;
+        }
+      } catch (e, stack) {
+        _log('streamTrack: sibling resolution failed: $e');
+        AppLogger.reportError(e, stack);
+      }
+    }
+    if (url.isEmpty) {
+      throw StateError('No playable URL for track ${track.query.id}');
+    }
 
     // Forward only safe headers — omit Accept-Encoding that could cause
     // truncated responses or decoding issues on the device. The Range header
@@ -366,7 +414,15 @@ class ServerPlaybackRoutes {
           .read(sourcedTrackProvider(track.query).notifier)
           .refreshStreamingUrl();
 
-      url = sourcedTrack.url!;
+      if (sourcedTrack.url != null && sourcedTrack.url!.isNotEmpty) {
+        url = sourcedTrack.url!;
+      } else {
+        final direct = await _resolveStreamFromSupabase(track.query.id);
+        if (direct != null && direct.url != null) {
+          url = direct.url!;
+          _sourcedTrackCache[track.query.id] = direct;
+        }
+      }
 
       return dio.head(url, options: options);
     });

@@ -90,3 +90,6 @@ server/node_modules/
 .git-rewrite
 node_modules/
 
+
+# Local machine npm config (contains machine-specific paths)
+.npmrc

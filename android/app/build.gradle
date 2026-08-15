@@ -67,10 +67,6 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
-        ndk {
-            abiFilters.clear()
-            abiFilters.addAll(["armeabi-v7a", "arm64-v8a"])
-        }
 
         // Clerk publishable key for Application.onCreate() initialization.
         // Publishable keys are public (meant for client apps) — safe to embed here.
@@ -97,9 +93,25 @@ android {
             firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
             }
+            // Release stays slim: ARM-only ABIs (as before).
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(["armeabi-v7a", "arm64-v8a"])
+            }
+            packaging {
+                jniLibs {
+                    excludes += "**/lib/x86/**"
+                    excludes += "**/lib/x86_64/**"
+                }
+            }
         }
         debug {
             signingConfig signingConfigs.release
+            // Debug includes all ABIs so x86_64 emulators can install and run.
+            ndk {
+                abiFilters.clear()
+                abiFilters.addAll(["armeabi-v7a", "arm64-v8a", "x86_64"])
+            }
         }
     }
 
@@ -131,10 +143,6 @@ android {
         resources {
             excludes += "DebugProbesKt.bin"
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
-        }
-        jniLibs {
-            excludes += "**/lib/x86/**"
-            excludes += "**/lib/x86_64/**"
         }
     }
 }

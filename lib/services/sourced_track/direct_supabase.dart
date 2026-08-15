@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
+import 'package:sangeet/services/sourced_track/r2_url.dart';
 
 /// Resolves a playable stream URL directly from Supabase, bypassing the
 /// metadata-plugin bytecode interpreter.
@@ -37,12 +38,14 @@ Future<SangeetAudioSourceStreamObject?> resolveDirectSupabaseStream(
     final ext = storagePath.split('.').last.toLowerCase();
     final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
 
-    final signedUrl = await supabase.storage
-        .from('music')
-        .createSignedUrl(storagePath, 3600);
+    // Stream from the Cloudflare R2 public CDN (zero egress). Fall back to a
+    // Supabase signed URL only when R2 is not configured.
+    final r2 = r2StreamUrl(storagePath);
+    final url = r2 ??
+        await supabase.storage.from('music').createSignedUrl(storagePath, 3600);
 
     return SangeetAudioSourceStreamObject(
-      url: signedUrl,
+      url: url,
       container: fmt,
       type: SangeetMediaCompressionType.lossy,
       codec: fmt == 'opus' ? 'opus' : fmt == 'mp3' ? 'mp3' : fmt,

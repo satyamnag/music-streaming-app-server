@@ -4,6 +4,7 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
+import crypto from 'crypto'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -62,6 +63,197 @@ const supabase = createClient(
 const app = express()
 app.set('trust proxy', 1)
 app.use(cors())
+
+// ------------------------------------------------------------------
+// Referral / Affiliate program
+// ------------------------------------------------------------------
+//
+// Trust model (see migrations/003_referrals.sql):
+//  - Referral codes and attribution are created by the app via the local
+//    Dart server calling SECURITY DEFINER RPCs (get_or_create_referral_code,
+//    record_referral_attribution, get_referral_summary). Those RPCs only
+//    allow a user to create/read their OWN code and to record the
+//    "new user signed up with this code" attribution once.
+//  - Commission is credited EXCLUSIVELY here, from Superwall webhooks that
+//    have passed Svix HMAC verification. The app can never self-credit.
+//
+// Commission percentages are read from the `commission_rates` table so the
+// business model can change without a release. Payouts are tracked as
+// `status = 'pending'` (track-first); no money moves in this server.
+
+// --- Superwall webhook (raw body required for Svix verification) ---
+// Must be parsed as raw BEFORE the global express.json() so the HMAC
+// signature is computed over the exact bytes Superwall sent.
+app.post('/api/superwall/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const payload = req.body
+  const headers = {
+    'svix-id': req.headers['svix-id'],
+    'svix-timestamp': req.headers['svix-timestamp'],
+    'svix-signature': req.headers['svix-signature'],
+  }
+  const secret = process.env.SUPERWALL_WEBHOOK_SECRET
+
+  try {
+    if (!secret) {
+      console.error('[webhook] SUPERWALL_WEBHOOK_SECRET not configured')
+      return res.status(503).json({ error: 'webhook not configured' })
+    }
+    if (!payload || !headers['svix-id'] || !headers['svix-timestamp'] || !headers['svix-signature']) {
+      return res.status(400).json({ error: 'missing webhook headers or body' })
+    }
+    if (!verifySvixWebhook(payload, headers, secret)) {
+      return res.status(400).json({ error: 'webhook verification failed' })
+    }
+
+    const event = JSON.parse(payload.toString())
+    await handleSuperwallEvent(event)
+    res.json({ status: 'ok' })
+  } catch (err) {
+    console.error('[webhook] error:', err)
+    res.status(400).json({ error: 'webhook processing failed' })
+  }
+})
+
+// --- Referral code + summary (for the admin/referrer view) ---
+app.get('/api/referrals/:userId/code', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.rpc('get_or_create_referral_code', { p_user_id: req.params.userId })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ code: data })
+  } catch (err) { next(err) }
+})
+
+app.get('/api/referrals/:userId/summary', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.rpc('get_referral_summary', { p_user_id: req.params.userId })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(Array.isArray(data) && data.length ? data[0] : { code: null, referral_count: 0, pending_amount: 0, credited_amount: 0, total_amount: 0 })
+  } catch (err) { next(err) }
+})
+
+// The app's local server uses the RPC endpoints directly; expose a small
+// HTTP alias so non-Dart clients can attribute too (optional).
+app.post('/api/referrals/attribute', async (req, res, next) => {
+  try {
+    const { code, referredUserId } = req.body || {}
+    if (!code || !referredUserId) return res.status(400).json({ error: 'code and referredUserId required' })
+    const { data, error } = await supabase.rpc('record_referral_attribution', {
+      p_code: code,
+      p_referred_user_id: referredUserId,
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: data })
+  } catch (err) { next(err) }
+})
+
+// Verifies a Superwall (Svix-delivered) webhook using the signing secret.
+// Implements the official manual verification algorithm (Superwall docs:
+// "Verify Webhook Requests"): HMAC-SHA256 over `${svix-id}.${timestamp}.${body}`.
+function verifySvixWebhook(payload, headers, secret) {
+  const msgId = headers['svix-id']
+  const msgTimestamp = headers['svix-timestamp']
+  const msgSignature = headers['svix-signature']
+
+  const timestamp = parseInt(msgTimestamp, 10)
+  const now = Math.floor(Date.now() / 1000)
+  if (Number.isNaN(timestamp) || now - timestamp > 300) {
+    return false // reject replay / stale events (>5 min)
+  }
+
+  const signedContent = `${msgId}.${msgTimestamp}.${payload.toString()}`
+  const secretBytes = Buffer.from(secret.split('_')[1] || secret, 'base64')
+  const signature = crypto
+    .createHmac('sha256', secretBytes)
+    .update(signedContent)
+    .digest('base64')
+
+  const expected = `v1,${signature}`
+  const passed = (msgSignature || '').split(' ')
+  return passed.some((sig) => {
+    try {
+      return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+    } catch {
+      return false
+    }
+  })
+}
+
+// Handles a verified Superwall subscription event and credits a commission
+// when a referred user (coupon affiliate first, then in-app referral)
+// makes a qualifying purchase.
+async function handleSuperwallEvent(event) {
+  const data = event?.data
+  if (!data) return
+
+  const name = data.name
+  const store = data.store
+  const environment = data.environment
+
+  // Only production Google Play purchases count. Never credit trials, intro
+  // offers, cancellations, refunds (negative price) or billing issues.
+  if (environment === 'SANDBOX') return
+  if (store !== 'PLAY_STORE' && store !== 'STRIPE') return
+  if (name !== 'initial_purchase' && name !== 'renewal' && name !== 'non_renewing_purchase') return
+  if (data.price === undefined || Number(data.price) <= 0) return
+  if (data.periodType === 'TRIAL' || data.periodType === 'INTRO') return
+
+  const referredUserId = data.originalAppUserId || data.appUserId
+  const productId = data.productId
+  const sourceEventId = data.id
+  if (!referredUserId || !productId || !sourceEventId) return
+
+  // Look up the commission rate for this plan (server-side, authoritative).
+  const { data: rateRows, error: rateError } = await supabase
+    .from('commission_rates')
+    .select('rate_percent')
+    .eq('product_id', productId)
+    .maybeSingle()
+  if (rateError || !rateRows) {
+    console.log(`[webhook] no commission rate for product ${productId} — skipping`)
+    return
+  }
+
+  // Amount in INR as billed. Webhook `price` is USD-normalized; the store
+  // price in the user's currency is the source of truth for a ₹-priced app.
+  const planPrice = Number(data.priceInPurchasedCurrency ?? data.price)
+
+  // 1) Try the coupon affiliate program first. If the purchaser redeemed an
+  //    affiliate coupon code in-app, the affiliate earns the commission.
+  //    `credit_affiliate_commission` returns false when there is no coupon
+  //    attribution for this user, in which case we fall back to the in-app
+  //    referral program below.
+  const { data: affiliateOk, error: affiliateError } = await supabase.rpc(
+    'credit_affiliate_commission',
+    {
+      p_purchaser_user_id: referredUserId,
+      p_product_id: productId,
+      p_plan_price: planPrice,
+      p_rate_percent: Number(rateRows.rate_percent),
+      p_source_event_id: sourceEventId,
+    }
+  )
+  if (affiliateError) {
+    console.error('[webhook] credit_affiliate_commission failed:', affiliateError.message)
+  } else if (affiliateOk) {
+    console.log(`[webhook] affiliate commission credited for ${referredUserId} (${productId}): ok=${affiliateOk}`)
+    return
+  }
+
+  // 2) Fall back to the in-app referral program.
+  const { data: ok, error } = await supabase.rpc('credit_referral_commission', {
+    p_referred_user_id: referredUserId,
+    p_product_id: productId,
+    p_plan_price: planPrice,
+    p_rate_percent: Number(rateRows.rate_percent),
+    p_source_event_id: sourceEventId,
+  })
+  if (error) {
+    console.error('[webhook] credit_referral_commission failed:', error.message)
+  } else {
+    console.log(`[webhook] commission credited for ${referredUserId} (${productId}): ok=${ok}`)
+  }
+}
+
 app.use(express.json())
 
 function escapePostgrestValue(value) {

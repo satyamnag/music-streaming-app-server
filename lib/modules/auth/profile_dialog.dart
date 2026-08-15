@@ -4,6 +4,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/auth/profile_plan_status.dart';
+import 'package:sangeet/modules/referral/share_and_earn.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
 /// Shows the signed-in user's Clerk profile (avatar, username, email) with a
@@ -54,8 +55,7 @@ class ProfileDialog extends ConsumerWidget {
       if (confirmed != true) return;
 
       signOutError.value = null;
-      final failure =
-          await ref.read(clerkAuthProvider.notifier).signOut();
+      final failure = await ref.read(clerkAuthProvider.notifier).signOut();
       if (!context.mounted) return;
       if (failure != null) {
         // Keep the dialog open and surface the error inline.
@@ -70,117 +70,123 @@ class ProfileDialog extends ConsumerWidget {
       title: const Text('Profile'),
       content: SizedBox(
         width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: (isSignedIn && state.imageUrl != null)
+                    ? UniversalImage(
+                        path: state.imageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                    : Icon(
+                        SangeetIcons.user,
+                        size: 32,
+                        color: theme.colorScheme.primary,
+                      ),
               ),
-              child: (isSignedIn && state.imageUrl != null)
-                  ? UniversalImage(
-                      path: state.imageUrl!,
-                      fit: BoxFit.cover,
-                    )
-                  : Icon(
-                      SangeetIcons.user,
-                      size: 32,
-                      color: theme.colorScheme.primary,
+              const Gap(12),
+              if (isSignedIn) ...[
+                if (state.username != null && state.username!.isNotEmpty) ...[
+                  Text(
+                    state.username!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-            ),
-            const Gap(12),
-            if (isSignedIn) ...[
-              if (state.username != null && state.username!.isNotEmpty) ...[
-                Text(
-                  state.username!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  ),
+                  const Gap(4),
+                ],
+                if (state.email != null)
+                  Text(
+                    state.email!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.mutedForeground,
+                    ),
+                  ),
+                const Gap(16),
+                // Show the paid plan status (plan name, duration, start/end
+                // dates) for signed-in users, read from Superwall CustomerInfo.
+                const ProfilePlanStatus(),
+                const Gap(12),
+                // Referral / affiliate program: personal code, share link and
+                // tracked commission (server-side, track-first).
+                const ShareAndEarn(),
+                const Gap(16),
+                ValueListenableBuilder<String?>(
+                  valueListenable: signOutError,
+                  builder: (context, error, _) => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (error != null) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.destructive
+                                .withValues(alpha: 0.08),
+                            borderRadius: theme.borderRadiusMd,
+                            border: Border.all(
+                              color: theme.colorScheme.destructive
+                                  .withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Text(
+                            error,
+                            style: theme.typography.small.copyWith(
+                              color: theme.colorScheme.destructive,
+                            ),
+                          ),
+                        ),
+                        const Gap(12),
+                      ],
+                      Button.destructive(
+                        onPressed: signOut,
+                        child: const Text('Sign Out'),
+                      ),
+                    ],
                   ),
                 ),
-                const Gap(4),
-              ],
-              if (state.email != null)
+              ] else ...[
                 Text(
-                  state.email!,
+                  'Sign in to access your account',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.colorScheme.mutedForeground,
                   ),
                 ),
-              const Gap(16),
-              // Show the paid plan status (plan name, duration, start/end
-              // dates) for signed-in users, read from Superwall CustomerInfo.
-              const ProfilePlanStatus(),
-              const Gap(16),
-              ValueListenableBuilder<String?>(
-                valueListenable: signOutError,
-                builder: (context, error, _) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (error != null) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.destructive
-                              .withValues(alpha: 0.08),
-                          borderRadius: theme.borderRadiusMd,
-                          border: Border.all(
-                            color: theme.colorScheme.destructive
-                                .withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Text(
-                          error,
-                          style: theme.typography.small.copyWith(
-                            color: theme.colorScheme.destructive,
-                          ),
-                        ),
-                      ),
-                      const Gap(12),
-                    ],
-                    Button.destructive(
-                      onPressed: signOut,
-                      child: const Text('Sign Out'),
-                    ),
-                  ],
+                const Gap(16),
+                Button.primary(
+                  onPressed: () {
+                    // Show the Google-only sign-in as a modal popup dialog
+                    // instead of a full-screen route.
+                    Navigator.of(context).pop();
+                    showDialog<void>(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => const ClerkAuthView(),
+                    );
+                  },
+                  child: const Text('Sign In'),
                 ),
-              ),
-            ] else ...[
-              Text(
-                'Sign in to access your account',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
-              const Gap(16),
-              Button.primary(
-                onPressed: () {
-                  // Show the Google-only sign-in as a modal popup dialog
-                  // instead of a full-screen route.
-                  Navigator.of(context).pop();
-                  showDialog<void>(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (_) => const ClerkAuthView(),
-                  );
-                },
-                child: const Text('Sign In'),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

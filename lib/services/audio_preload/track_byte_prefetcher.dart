@@ -9,6 +9,13 @@ import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
+import 'package:sangeet/services/sourced_track/r2_url.dart';
+
+/// A minimal read-only provider accessor. Both Riverpod's [Ref] (used in
+/// providers/services) and [WidgetRef] (used in widgets) expose a `read<T>`
+/// method with this exact signature, so passing either as a tear-off keeps the
+/// prefetcher decoupled from a concrete Riverpod type.
+typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
 
 /// Preloads the first ~20% of a track's audio bytes the moment it becomes
 /// visible on any screen (home, playlist, search, ...).
@@ -66,18 +73,18 @@ class TrackBytePrefetcher {
   int _active = 0;
 
   /// Requests a warm-up prefetch for [track] if it is eligible.
-  void prefetch(SangeetTrackObject track, WidgetRef ref) {
+  void prefetch(SangeetTrackObject track, ProviderReader reader) {
     if (track is! SangeetFullTrackObject) return;
     final id = track.id;
     // Do not prefetch paid tracks for free users (they are locked).
-    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(ref)) return;
+    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(reader)) return;
     if (_prefetched.contains(id) || _inFlight.contains(id)) return;
     if (currentActiveTrackId == id) return;
 
     _durationMsById[id] = track.durationMs;
     _prefetched.add(id);
     _pending.add(id);
-    _drain(ref);
+    _drain(reader);
   }
 
   /// Id of the currently loaded/active track (from the player's current media
@@ -95,24 +102,38 @@ class TrackBytePrefetcher {
     }
   }
 
-  void _drain(WidgetRef ref) {
+  /// Gapless next-track preload (mirrors the web player: preload the next
+  /// track's signed URL at ~80% of the current track so the transition is
+  /// seamless). Warmups the next track's leading bytes regardless of whether
+  /// it was already visible-prefetched, since the URL is re-signed per track
+  /// load and the CDN edge should be warm right before the switch.
+  void prefetchNext(SangeetTrackObject track, ProviderReader reader) {
+    if (track is! SangeetFullTrackObject) return;
+    if (track.status == 'paid' && !PremiumAccess.isPremiumUser(reader)) return;
+    if (_inFlight.contains(track.id)) return;
+    _durationMsById[track.id] = track.durationMs;
+    _pending.addLast(track.id);
+    _drain(reader);
+  }
+
+  void _drain(ProviderReader reader) {
     while (_active < _maxConcurrent && _pending.isNotEmpty) {
       final id = _pending.removeFirst();
       _active++;
-      unawaited(_fetch(id, ref).whenComplete(() {
+      unawaited(_fetch(id, reader).whenComplete(() {
         _active--;
         _inFlight.remove(id);
-        _drain(ref);
+        _drain(reader);
       }));
     }
   }
 
-  Future<void> _fetch(String trackId, WidgetRef ref) async {
+  Future<void> _fetch(String trackId, ProviderReader reader) async {
     _inFlight.add(trackId);
     try {
-      // Resolve the signed URL directly from Supabase so the range request is
-      // always honored.
-      final supabase = ref.read(supabaseClientProvider);
+      // Resolve the stream URL. R2 public CDN is preferred (zero egress);
+      // the Supabase DB still holds storage_path/status metadata.
+      final supabase = reader(supabaseClientProvider);
       final row = await supabase
           .from('tracks')
           .select('storage_path,status')
@@ -120,11 +141,12 @@ class TrackBytePrefetcher {
           .maybeSingle();
       if (row == null || row['storage_path'] == null) return;
       // Defense in depth: never prefetch paid audio for a free user.
-      if (row['status'] == 'paid' && !PremiumAccess.isPremiumUser(ref)) return;
+      if (row['status'] == 'paid' && !PremiumAccess.isPremiumUser(reader)) return;
       final storagePath = row['storage_path'].toString();
-      final url = await supabase.storage
-          .from('music')
-          .createSignedUrl(storagePath, 3600);
+      final url = r2StreamUrl(storagePath) ??
+          await supabase.storage
+              .from('music')
+              .createSignedUrl(storagePath, 3600);
       if (url.isEmpty) return;
 
       // Estimate the file size from the known duration, then request the first

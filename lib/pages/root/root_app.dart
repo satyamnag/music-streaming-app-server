@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/hooks/configurators/use_check_yt_dlp_installed.dart';
+import 'package:sangeet/hooks/configurators/use_referral_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_subscription_status.dart';
 import 'package:sangeet/modules/notifications/onesignal_verification_dialog.dart';
@@ -36,6 +37,8 @@ class RootAppPage extends HookConsumerWidget {
     // Forward incoming deep links to Superwall (paywall previews, web
     // checkout redemption).
     useSuperwallDeepLinks();
+    // Capture referral codes from shared links and attribute them on sign-in.
+    useReferralDeepLinks();
 
     useEffect(() {
       SystemChrome.setSystemUIOverlayStyle(

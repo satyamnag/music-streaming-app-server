@@ -16,6 +16,7 @@ import 'package:sangeet/provider/server/sourced_track_provider.dart';
 import 'package:sangeet/provider/skip_segments/skip_segments.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_preload/track_byte_prefetcher.dart';
 import 'package:sangeet/services/audio_services/audio_services.dart';
 import 'package:sangeet/services/dio/dio.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -180,9 +181,13 @@ class AudioPlayerStreamListeners {
         }
 
         try {
+          // Preload the next track's signed URL (direct Supabase warm-up) so
+          // the transition at the end of this track is gapless — the web
+          // player does the same by preloading the next <audio> at 80%.
           await ref.read(
             sourcedTrackProvider(nextTrack as SangeetFullTrackObject).future,
           );
+          TrackBytePrefetcher.instance.prefetchNext(nextTrack, ref.read);
         } finally {
           lastTrack = nextTrack.id;
         }
