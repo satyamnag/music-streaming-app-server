@@ -61,6 +61,54 @@ const supabase = createClient(
   }
 )
 
+// ------------------------------------------------------------------
+// Secrets from Supabase Vault (encrypted at rest).
+//
+// SUPABASE_URL and SUPABASE_SERVICE_KEY are the BOOTSTRAP credentials and
+// must stay in the deployment env (they are what connects to the vault).
+// Every other risky credential (R2 keys, ADMIN_TOKEN, webhook secrets) is
+// loaded from vault.secrets via the public.get_secret RPC (service_role
+// only — the anon/app key cannot decrypt them).
+//
+// Each value falls back to process.env so local dev without a vault entry
+// keeps working, and a vault value always wins once present.
+// ------------------------------------------------------------------
+const secrets = {
+  admin_token: process.env.ADMIN_TOKEN || '',
+  r2_account_id: process.env.R2_ACCOUNT_ID || '',
+  r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
+  r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
+  superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
+}
+
+const VAULT_SECRET_KEYS = [
+  'admin_token',
+  'r2_account_id',
+  'r2_access_key_id',
+  'r2_secret_access_key',
+  'superwall_webhook_secret',
+]
+
+// Loads each secret from the vault (overriding the env fallback when a
+// vault value exists). Runs once at startup before the server listens.
+async function loadSecretsFromVault() {
+  for (const key of VAULT_SECRET_KEYS) {
+    try {
+      const { data, error } = await supabase.rpc('get_secret', { p_name: key })
+      if (error) {
+        console.warn(`[secrets] vault read failed for ${key}: ${error.message}`)
+        continue
+      }
+      if (data) {
+        secrets[key] = data
+        console.log(`[secrets] ${key} loaded from vault`)
+      }
+    } catch (err) {
+      console.warn(`[secrets] vault error for ${key}: ${err.message}`)
+    }
+  }
+}
+
 const app = express()
 app.set('trust proxy', 1)
 app.use(cors())
@@ -92,7 +140,7 @@ app.post('/api/superwall/webhook', express.raw({ type: 'application/json' }), as
     'svix-timestamp': req.headers['svix-timestamp'],
     'svix-signature': req.headers['svix-signature'],
   }
-  const secret = process.env.SUPERWALL_WEBHOOK_SECRET
+  const secret = secrets.superwall_webhook_secret
 
   try {
     if (!secret) {
@@ -621,7 +669,7 @@ app.get('/users/me', (req, res) => {
 //
 // Fail-closed: if ADMIN_TOKEN is not configured, admin endpoints return 503
 // and the /admin page shows a "not configured" message — never an open admin.
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || ''
+// Read live from `secrets` (populated from the vault at startup).
 const ADMIN_COOKIE_NAME = 'sangeet_admin_session'
 const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60 // 8 hours
 const ADMIN_COOKIE_MAX_AGE = 1000 * ADMIN_SESSION_TTL_SECONDS
@@ -630,7 +678,7 @@ function signAdminSession() {
   const exp = Date.now() + ADMIN_COOKIE_MAX_AGE
   const payload = `${exp}`
   const sig = crypto
-    .createHmac('sha256', ADMIN_TOKEN)
+    .createHmac('sha256', secrets.admin_token)
     .update(payload)
     .digest('base64url')
   return `${payload}.${sig}`
@@ -643,7 +691,7 @@ function verifyAdminSession(value) {
   if (!Number.isFinite(exp) || exp <= Date.now()) return false
   if (!sig) return false
   const expected = crypto
-    .createHmac('sha256', ADMIN_TOKEN)
+    .createHmac('sha256', secrets.admin_token)
     .update(expStr)
     .digest('base64url')
   try {
@@ -667,7 +715,7 @@ function adminSessionCookieValue(req) {
 // Middleware protecting /api/admin/*. The cookie must be present, valid, and
 // unexpired. On failure a 401 is returned (the SPA shows the login form).
 function requireAdmin(req, res, next) {
-  if (!ADMIN_TOKEN) {
+  if (!secrets.admin_token) {
     return res.status(503).json({ error: 'admin not configured' })
   }
   if (!verifyAdminSession(adminSessionCookieValue(req))) {
@@ -676,26 +724,31 @@ function requireAdmin(req, res, next) {
   next()
 }
 
-// Cloudflare R2 (S3-compatible) client for music uploads. Configured via
-// R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY. When unset, the
-// admin upload falls back to Supabase Storage (the previous behaviour).
-const R2_ENDPOINT = process.env.R2_ACCOUNT_ID
-  ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
-  : ''
+// Cloudflare R2 (S3-compatible) client for music uploads. Credentials come
+// from the vault (secrets.*). When unset, the admin upload falls back to
+// Supabase Storage (the previous behaviour).
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'soulful-bhakti-music'
-const r2Enabled = Boolean(
-  R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY
-)
-const r2 = r2Enabled
-  ? new S3Client({
-      region: 'auto',
-      endpoint: R2_ENDPOINT,
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-      },
-    })
-  : null
+let r2Enabled = false
+let r2 = null
+
+function initR2Client() {
+  const endpoint = secrets.r2_account_id
+    ? `https://${secrets.r2_account_id}.r2.cloudflarestorage.com`
+    : ''
+  r2Enabled = Boolean(
+    endpoint && secrets.r2_access_key_id && secrets.r2_secret_access_key
+  )
+  r2 = r2Enabled
+    ? new S3Client({
+        region: 'auto',
+        endpoint,
+        credentials: {
+          accessKeyId: secrets.r2_access_key_id,
+          secretAccessKey: secrets.r2_secret_access_key,
+        },
+      })
+    : null
+}
 
 async function uploadAudioToR2(key, body, contentType) {
   await r2.send(
@@ -728,7 +781,7 @@ app.get('/admin', (req, res) => {
 // Login: verifies the ADMIN_TOKEN (timing-safe) and sets a signed HttpOnly
 // session cookie. The browser sends `{ token }` in the JSON body.
 app.post('/api/admin/login', (req, res) => {
-  if (!ADMIN_TOKEN) {
+  if (!secrets.admin_token) {
     return res.status(503).json({ error: 'admin not configured' })
   }
   const { token } = req.body || {}
@@ -736,7 +789,7 @@ app.post('/api/admin/login', (req, res) => {
     return res.status(401).json({ error: 'unauthorized' })
   }
   const a = Buffer.from(token)
-  const b = Buffer.from(ADMIN_TOKEN)
+  const b = Buffer.from(secrets.admin_token)
   const ok = a.length === b.length && crypto.timingSafeEqual(a, b)
   if (!ok) return res.status(401).json({ error: 'unauthorized' })
 
@@ -759,7 +812,7 @@ app.post('/api/admin/logout', (req, res) => {
 // Check current admin session state (used by the SPA on load).
 app.get('/api/admin/session', (req, res) => {
   const authenticated =
-    Boolean(ADMIN_TOKEN) && verifyAdminSession(adminSessionCookieValue(req))
+    Boolean(secrets.admin_token) && verifyAdminSession(adminSessionCookieValue(req))
   res.json({ authenticated })
 })
 
@@ -1005,6 +1058,16 @@ app.use((err, req, res, next) => {
 })
 
 const port = process.env.PORT || 3000
-app.listen(port, () => {
-  console.log(`Sangeet Supabase server running on port ${port} - v2`)
+
+async function start() {
+  await loadSecretsFromVault()
+  initR2Client()
+  app.listen(port, () => {
+    console.log(`Sangeet Supabase server running on port ${port} - v3`)
+  })
+}
+
+start().catch((err) => {
+  console.error('[startup] failed:', err)
+  process.exit(1)
 })

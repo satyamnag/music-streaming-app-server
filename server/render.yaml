@@ -6,10 +6,14 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
+      # Bootstrap: required to connect to Supabase and read the vault.
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_KEY
         sync: false
+      # The remaining secrets are loaded from Supabase Vault at startup
+      # (public.get_secret RPC). These env vars are optional FALLBACKS only —
+      # a vault value always wins. Prefer storing them in Vault instead.
       - key: ADMIN_TOKEN
         sync: false
       - key: R2_ACCOUNT_ID
@@ -18,6 +22,9 @@ services:
         sync: false
       - key: R2_SECRET_ACCESS_KEY
         sync: false
+      - key: SUPERWALL_WEBHOOK_SECRET
+        sync: false
+      # Public / non-secret config:
       - key: R2_BUCKET_NAME
         value: soulful-bhakti-music
       - key: R2_BASE_URL
