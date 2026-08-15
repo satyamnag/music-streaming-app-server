@@ -283,6 +283,10 @@ $$;
 
 -- Executable only by the service role (webhook handler). NOT granted to
 -- anon/authenticated so clients can never self-credit commissions.
+-- REVOKE FROM PUBLIC is required: Postgres grants EXECUTE to PUBLIC by
+-- default, which would let the anon key (extractable from the app) credit
+-- itself. Both lines are mandatory.
+revoke execute on function public.credit_affiliate_commission(text, text, numeric, numeric, text) from public;
 grant execute on function public.credit_affiliate_commission(text, text, numeric, numeric, text)
   to service_role;
 

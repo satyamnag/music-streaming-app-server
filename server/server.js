@@ -25,6 +25,7 @@ function trackToJson(t, req) {
     externalUri: `${req.protocol}://${req.get('host')}/stream/${t.id}`,
     artists,
     status: t.status || 'free',
+    language: t.language || null,
     lyrics: t.lyrics || null,
     synced_lyrics: t.synced_lyrics || null,
     album: {
@@ -828,7 +829,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body
     if (!title || !storage_path) return res.status(400).json({ error: 'title and storage_path required' })
     const { data, error } = await supabase.from('tracks').insert({
       title,
@@ -841,6 +842,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       status: status === 'paid' ? 'paid' : 'free',
       lyrics: lyrics || null,
       synced_lyrics: synced_lyrics || null,
+      language: language || null,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data)
@@ -850,7 +852,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics } = req.body
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body
     const updates = {}
     if (title !== undefined) updates.title = title
     if (artist_names !== undefined) { updates.artist_names = artist_names; updates.artist_names_text = artist_names.join(', ') }
@@ -861,6 +863,7 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
     if (lyrics !== undefined) updates.lyrics = lyrics
     if (synced_lyrics !== undefined) updates.synced_lyrics = synced_lyrics
+    if (language !== undefined) updates.language = language || null
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.json(data)

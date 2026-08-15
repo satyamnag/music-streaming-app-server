@@ -22,6 +22,7 @@ class SangeetTrackObject with _$SangeetTrackObject {
     required String isrc,
     required bool explicit,
     @Default('free') String status,
+    String? language,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(

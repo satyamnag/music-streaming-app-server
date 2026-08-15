@@ -97,6 +97,7 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'externalUri': '',
     'artists': artists,
     'status': t['status'] ?? 'free',
+    'language': t['language'],
     'album': {
       'id': _albumId(albumName),
       'name': albumName,
@@ -682,11 +683,60 @@ class ServerSupabaseDataRoutes {
 
   /// GET /supabase/albums/<id>
   ///
-  /// Returns a single album grouped by album name, with the cover taken from
-  /// its most played track. `id` is the album slug (e.g. `album-madhava-manohara`).
+  /// Returns a single album grouped by album name (or by language for the
+  /// auto-generated "All <Language> Songs" albums), with the cover taken from
+  /// its most played track. `id` is the album slug (e.g.
+  /// `album-madhava-manohara` or `album-language-telugu`).
   Future<Response> getAlbum(Request request, String id) async {
     try {
       final tracks = await _fetchAllTracks(limit: 500);
+
+      // Language albums: id `album-language-<lang>` -> all tracks of that lang.
+      if (id.startsWith('album-language-')) {
+        final lang = id
+            .substring('album-language-'.length)
+            .replaceAll('-', ' ')
+            .trim();
+        final langTracks = tracks
+            .where((t) =>
+                (t['language']?.toString().trim() ?? '').toLowerCase() ==
+                lang.toLowerCase())
+            .toList();
+        if (langTracks.isEmpty) {
+          return Response.notFound('{"error":"Album not found"}');
+        }
+        final first = langTracks.first;
+        final rawArtists = first['artist_names'] as List<dynamic>?;
+        final artists = rawArtists
+                ?.map((name) => {
+                      'id': name
+                          .toString()
+                          .toLowerCase()
+                          .replaceAll(RegExp(r'\s+'), '-'),
+                      'name': name,
+                      'externalUri': '',
+                      'images': null,
+                    })
+                .toList() ??
+            [];
+        final playCounts = await _playCounts();
+        return Response.ok(
+          jsonEncode({
+            'id': id,
+            'name': 'All ${first['language']} Songs',
+            'artists': artists,
+            'images': _coverImagesFor(langTracks, playCounts),
+            'releaseDate': null,
+            'externalUri': '',
+            'totalTracks': langTracks.length,
+            'albumType': 'album',
+            'recordLabel': null,
+            'genres': [],
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+      }
+
       final albumTracks = tracks.where((t) {
         final name = t['album']?.toString().trim();
         final albumName = name != null && name.isNotEmpty
@@ -736,10 +786,36 @@ class ServerSupabaseDataRoutes {
 
   /// GET /supabase/albums/<id>/tracks
   ///
-  /// Returns the tracks that belong to the given album (grouped by album name).
+  /// Returns the tracks that belong to the given album (grouped by album name,
+  /// or by language for the auto-generated "All <Language> Songs" albums).
   Future<Response> getAlbumTracks(Request request, String id) async {
     try {
       final tracks = await _fetchAllTracks(limit: 500);
+
+      // Language albums: id `album-language-<lang>` -> all tracks of that lang.
+      if (id.startsWith('album-language-')) {
+        final lang = id
+            .substring('album-language-'.length)
+            .replaceAll('-', ' ')
+            .trim();
+        final items = tracks
+            .where((t) =>
+                (t['language']?.toString().trim() ?? '').toLowerCase() ==
+                lang.toLowerCase())
+            .map(_trackToJson)
+            .toList();
+        return Response.ok(
+          jsonEncode({
+            'items': items,
+            'limit': 500,
+            'nextOffset': null,
+            'total': items.length,
+            'hasMore': false
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+      }
+
       final items = tracks
           .where((t) {
             final name = t['album']?.toString().trim();
@@ -816,6 +892,49 @@ class ServerSupabaseDataRoutes {
           'totalPlays': totalPlays,
         };
       }).toList();
+
+      // Language albums: "All Telugu Songs", "All Kannada Songs", ... Each
+      // groups every track tagged with that language (untagged tracks are
+      // skipped). Cover is the most played track of that language.
+      final byLanguage = <String, List<Map<String, dynamic>>>{};
+      for (final t in tracks) {
+        final lang = t['language']?.toString().trim();
+        if (lang == null || lang.isEmpty) continue;
+        byLanguage.putIfAbsent(lang, () => []).add(t);
+      }
+      for (final entry in byLanguage.entries) {
+        final langTracks = entry.value;
+        final first = langTracks.first;
+        final rawArtists = first['artist_names'] as List<dynamic>?;
+        final artists = rawArtists
+                ?.map((name) => {
+                      'id': name
+                          .toString()
+                          .toLowerCase()
+                          .replaceAll(RegExp(r'\s+'), '-'),
+                      'name': name,
+                      'externalUri': '',
+                      'images': null,
+                    })
+                .toList() ??
+            [];
+        final totalPlays = langTracks.fold<int>(
+          0,
+          (sum, t) => sum + (playCounts[t['id']?.toString()] ?? 0),
+        );
+        final langKey = entry.key.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
+        albums.add({
+          'id': 'album-language-$langKey',
+          'name': 'All ${entry.key} Songs',
+          'externalUri': '',
+          'artists': artists,
+          'images': _coverImagesFor(langTracks, playCounts),
+          'albumType': 'album',
+          'releaseDate': null,
+          'totalTracks': langTracks.length,
+          'totalPlays': totalPlays,
+        });
+      }
 
       albums.sort((a, b) {
         final cmp = (b['totalPlays'] as int).compareTo(a['totalPlays'] as int);

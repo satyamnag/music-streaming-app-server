@@ -60,7 +60,7 @@ tr:hover { background: #f0f7ff; }
   <span id="count" style="font-size:14px;color:#666;"></span>
 </div>
 <table><thead><tr>
-  <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Thumbnail</th><th>Storage</th><th>Status</th><th>Actions</th>
+  <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Language</th><th>Thumbnail</th><th>Storage</th><th>Status</th><th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
 
 <div id="modal" class="modal">
@@ -75,6 +75,21 @@ tr:hover { background: #f0f7ff; }
 <select id="fStatus">
   <option value="free">Free</option>
   <option value="paid">Paid (Premium)</option>
+</select>
+<label>Language</label>
+<select id="fLanguage">
+  <option value="">-- Select language --</option>
+  <option value="Telugu">Telugu</option>
+  <option value="Kannada">Kannada</option>
+  <option value="Hindi">Hindi</option>
+  <option value="Tamil">Tamil</option>
+  <option value="Malayalam">Malayalam</option>
+  <option value="Sanskrit">Sanskrit</option>
+  <option value="Odia">Odia</option>
+  <option value="Bengali">Bengali</option>
+  <option value="Marathi">Marathi</option>
+  <option value="English">English</option>
+  <option value="Other">Other</option>
 </select>
 <label>Lyrics (plain text, one line per lyric)</label>
 <textarea id="fLyrics" rows="6" placeholder="Paste plain lyrics here..."></textarea>
@@ -194,6 +209,7 @@ async function loadTracks() {
       <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
       <td>${esc(t.album || '')}</td>
       <td>${pl(t.duration)}s</td>
+      <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
       <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
       <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
       <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
@@ -214,6 +230,7 @@ function showAdd() {
   document.getElementById('editId').value = '';
   ['fTitle','fArtist','fAlbum','fDuration','fThumbnail','fStorage','fLyrics','fSyncedLyrics'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fStatus').value = 'free';
+  document.getElementById('fLanguage').value = '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
@@ -232,6 +249,7 @@ function showEdit(id) {
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
   document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
+  document.getElementById('fLanguage').value = t.language || '';
   document.getElementById('fLyrics').value = t.lyrics || '';
   document.getElementById('fSyncedLyrics').value = t.synced_lyrics || '';
   document.getElementById('thumbStatus').textContent = '';
@@ -254,9 +272,10 @@ async function saveTrack() {
   if (!storage_path) { toast('Audio file path is required'); return; }
   const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
   const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
+  const language = document.getElementById('fLanguage').value || null;
   const lyrics = document.getElementById('fLyrics').value.trim() || null;
   const synced_lyrics = document.getElementById('fSyncedLyrics').value.trim() || null;
-  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path, status, lyrics, synced_lyrics };
+  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path, status, language, lyrics, synced_lyrics };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';

@@ -9,7 +9,6 @@ import 'package:sangeet/hooks/configurators/use_coupon_first_run_prompt.dart';
 import 'package:sangeet/hooks/configurators/use_referral_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_subscription_status.dart';
-import 'package:sangeet/modules/notifications/onesignal_verification_dialog.dart';
 import 'package:sangeet/modules/root/bottom_player.dart';
 import 'package:sangeet/modules/root/sidebar/sidebar.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
@@ -80,13 +79,6 @@ class RootAppPage extends HookConsumerWidget {
       ),
     );
 
-    // OneSignal push-subscription observer: shows the "integration complete"
-    // dialog once a real subscription ID is assigned (per the OneSignal guide).
-    return Stack(
-      children: [
-        scaffold,
-        const OneSignalVerificationDialog(),
-      ],
-    );
+    return scaffold;
   }
 }

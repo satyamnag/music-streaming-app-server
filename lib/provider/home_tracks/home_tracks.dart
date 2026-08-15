@@ -184,6 +184,13 @@ List<HomeAlbum> _buildAlbums(
     );
   }).toList();
 
+  // Language albums: "All Telugu Songs", "All Kannada Songs", ... grouping
+  // every track that carries a `language`. Only languages with at least one
+  // tagged track produce an album; untagged tracks are skipped.
+  final languageAlbums = _buildLanguageAlbums(tracks, playCounts);
+
+  albums.addAll(languageAlbums);
+
   albums.sort((a, b) {
     final cmp = b.totalPlays.compareTo(a.totalPlays);
     if (cmp != 0) return cmp;
@@ -193,6 +200,61 @@ List<HomeAlbum> _buildAlbums(
   return albums
       .map((e) => (album: e.album, tracks: e.tracks))
       .toList();
+}
+
+/// Groups [tracks] into one album per language, named "All <Language> Songs"
+/// (e.g. "All Telugu Songs"). Covers come from the most played track of that
+/// language; tracks without a `language` are ignored. Sort is by total play
+/// count (most played first), then name.
+List<({SangeetSimpleAlbumObject album, int totalPlays, List<SangeetTrackObject> tracks})>
+    _buildLanguageAlbums(
+  List<SangeetTrackObject> tracks,
+  Map<String, int> playCounts,
+) {
+  final byLanguage = <String, List<SangeetTrackObject>>{};
+  for (final track in tracks) {
+    final lang = track is SangeetFullTrackObject
+        ? track.language?.trim()
+        : null;
+    if (lang == null || lang.isEmpty) continue;
+    byLanguage.putIfAbsent(lang, () => []).add(track);
+  }
+
+  return byLanguage.entries.map((entry) {
+    final langTracks = entry.value;
+    final totalPlays = langTracks.fold<int>(
+      0,
+      (sum, t) => sum + (playCounts[t.id] ?? 0),
+    );
+    final sortedByPlays = [...langTracks]..sort((a, b) {
+        final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
+        if (cmp != 0) return cmp;
+        return a.name.compareTo(b.name);
+      });
+    final coverTrack = sortedByPlays.first;
+
+    final artists = <String, SangeetSimpleArtistObject>{};
+    for (final t in langTracks) {
+      for (final artist in t.artists) {
+        artists[artist.id] = artist;
+      }
+    }
+
+    final albumName = 'All ${entry.key} Songs';
+    return (
+      totalPlays: totalPlays,
+      album: SangeetSimpleAlbumObject(
+        id: 'album-language-${entry.key.toLowerCase().replaceAll(' ', '-')}',
+        name: albumName,
+        externalUri: coverTrack.album.externalUri,
+        artists: artists.values.toList(),
+        images: coverTrack.album.images,
+        albumType: SangeetAlbumType.album,
+        releaseDate: coverTrack.album.releaseDate,
+      ),
+      tracks: langTracks,
+    );
+  }).toList();
 }
 
 /// Fetches the global per-track play counts from the local server, which reads
