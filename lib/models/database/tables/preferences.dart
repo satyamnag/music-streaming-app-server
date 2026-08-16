@@ -115,7 +115,7 @@ class PreferencesTable extends Table {
           ? YoutubeClientEngine.youtubeExplode
           : YoutubeClientEngine.newPipe,
       discordPresence: true,
-      endlessPlayback: true,
+      endlessPlayback: false,
       enableConnect: false,
       cacheMusic: true,
       connectPort: -1,

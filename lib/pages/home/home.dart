@@ -7,8 +7,10 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
+import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/go_for_paid_plan_banner.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
@@ -37,6 +39,8 @@ class HomePage extends HookConsumerWidget {
     final sectionsAsync = ref.watch(homeSectionsProvider);
     // Fire-and-forget: pre-warm stream URLs so tapping a song starts instantly.
     ref.watch(prewarmHomeStreamsProvider);
+    final clerkAuth = ref.watch(clerkAuthProvider);
+    final clerkState = clerkAuth.valueOrNull ?? const ClerkAuthState();
 
     return SafeArea(
         bottom: false,
@@ -84,8 +88,19 @@ class HomePage extends HookConsumerWidget {
                       backgroundColor: theme.colorScheme.background,
                       foregroundColor: theme.colorScheme.foreground,
                       actions: [
+                        // Signed-in users see their account avatar (same as the
+                        // Google account); signed-out users see the user icon.
                         IconButton.ghost(
-                          icon: const Icon(SangeetIcons.user, size: 20),
+                          icon: (clerkState.signedIn && clerkState.imageUrl != null)
+                              ? ClipOval(
+                                  child: UniversalImage(
+                                    path: clerkState.imageUrl!,
+                                    height: 26,
+                                    width: 26,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Icon(SangeetIcons.user, size: 20),
                           onPressed: () {
                             showDialog(
                               context: context,

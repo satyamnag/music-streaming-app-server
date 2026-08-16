@@ -64,7 +64,7 @@ class CouponStatusTile extends ConsumerWidget {
             )
           else
             Text(
-              'Enter a code you received from a creator to support them '
+              'Enter a code you received from an affiliate to support them '
               'when you subscribe.',
               style: theme.typography.xSmall.copyWith(
                 color: theme.colorScheme.mutedForeground,
@@ -95,10 +95,14 @@ class CouponEntry extends HookConsumerWidget {
   const CouponEntry({super.key});
 
   /// Shows the coupon entry dialog. Returns true if a coupon was applied.
+  ///
+  /// Aligned slightly above center so the dialog never hides behind the
+  /// on-screen keyboard while the user types a code.
   static Future<bool> prompt(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
+      alignment: const Alignment(0, -0.25),
       builder: (_) => const CouponEntry(),
     );
     return result == true;
@@ -127,8 +131,8 @@ class CouponEntry extends HookConsumerWidget {
                       ? 'You are already supporting '
                           '${state.affiliateName}. Thank you!'
                       : 'You have already applied a coupon.')
-                  : 'Enter the code you received from a creator or '
-                      'affiliate. Applying it supports them when you '
+                  : 'Enter the code you received from an affiliate. '
+                      'Applying it supports them when you '
                       'subscribe.',
               style: theme.typography.small.copyWith(
                 color: theme.colorScheme.mutedForeground,

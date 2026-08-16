@@ -34,7 +34,18 @@ tr:hover { background: #f0f7ff; }
 .upload-row { display: flex; gap: 8px; align-items: center; }
 .upload-row input { flex: 1; }
 .preview-img { max-width: 120px; max-height: 120px; border-radius: 4px; margin-top: 4px; border: 1px solid #ddd; }
-@media (max-width: 768px) { th, td { font-size: 12px; padding: 6px; } }
+.search-row { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
+.search-row input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; max-width: 340px; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: #f0f0f0; }
+th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; }
+.loading-overlay.show { display: flex; }
+.spinner { width: 36px; height: 36px; border: 4px solid #ddd; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; color: #999; padding: 24px; }
+@media (max-width: 768px) { th, td { font-size: 12px; padding: 6px; } .toolbar { flex-wrap: wrap; } }
 </style>
 </head>
 <body>
@@ -60,8 +71,18 @@ tr:hover { background: #f0f7ff; }
   <button class="btn btn-secondary" onclick="toggleAffiliates()">Affiliates &amp; Coupons</button>
   <span id="count" style="font-size:14px;color:#666;"></span>
 </div>
+<div class="search-row">
+  <input id="searchInput" type="text" placeholder="Search by title, artist or album..." oninput="renderTracks()">
+</div>
 <table><thead><tr>
-  <th>Title</th><th>Artist</th><th>Album</th><th>Duration</th><th>Language</th><th>Thumbnail</th><th>Storage</th><th>Status</th><th>Actions</th>
+  <th class="sortable" onclick="sortTracks('title')">Title<span id="arrow-title" class="sort-arrow"></span></th>
+  <th class="sortable" onclick="sortTracks('artist_names_text')">Artist<span id="arrow-artist_names_text" class="sort-arrow"></span></th>
+  <th class="sortable" onclick="sortTracks('album')">Album<span id="arrow-album" class="sort-arrow"></span></th>
+  <th class="sortable" onclick="sortTracks('duration')">Duration<span id="arrow-duration" class="sort-arrow"></span></th>
+  <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
+  <th>Thumbnail</th><th>Storage</th>
+  <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
+  <th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
 
 <div id="affiliatesPanel" style="display:none; margin-top:24px;">
@@ -173,8 +194,72 @@ tr:hover { background: #f0f7ff; }
 </div>
 
 <div id="toast" class="toast"></div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content" style="max-width:400px;">
+    <h2 id="confirmTitle">Confirm</h2>
+    <p id="confirmMessage" style="color:#555;font-size:14px;"></p>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn" onclick="confirmAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div></div>
 <script>
 let tracks = [];
+let trackSearch = '';
+let trackSortKey = null;
+let trackSortDir = 1;
+let pendingConfirm = null;
+
+function showLoading(on) { document.getElementById('loadingOverlay').classList.toggle('show', !!on); }
+
+function openConfirm(title, message, action) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  pendingConfirm = action;
+  document.getElementById('confirmModal').style.display = 'block';
+}
+
+function closeConfirm() { pendingConfirm = null; document.getElementById('confirmModal').style.display = 'none'; }
+
+function confirmAction() {
+  closeConfirm();
+  if (pendingConfirm) pendingConfirm();
+}
+
+function sortTracks(key) {
+  if (trackSortKey === key) { trackSortDir *= -1; } else { trackSortKey = key; trackSortDir = 1; }
+  document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
+  const arrow = document.getElementById('arrow-' + key);
+  if (arrow) arrow.textContent = trackSortDir === 1 ? '▲' : '▼';
+  renderTracks();
+}
+
+function filteredTracks() {
+  let list = tracks;
+  if (trackSearch) {
+    const q = trackSearch.toLowerCase();
+    list = list.filter(t =>
+      (t.title || '').toLowerCase().includes(q) ||
+      (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q) ||
+      (t.album || '').toLowerCase().includes(q)
+    );
+  }
+  if (trackSortKey) {
+    list = [...list].sort((a, b) => {
+      let va = a[trackSortKey], vb = b[trackSortKey];
+      if (trackSortKey === 'duration') { va = Number(va) || 0; vb = Number(vb) || 0; }
+      else { va = (va == null ? '' : String(va)).toLowerCase(); vb = (vb == null ? '' : String(vb)).toLowerCase(); }
+      if (va < vb) return -1 * trackSortDir;
+      if (va > vb) return 1 * trackSortDir;
+      return 0;
+    });
+  }
+  return list;
+}
 
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 
@@ -256,25 +341,46 @@ async function authedFetch(url, options) {
 
 async function loadTracks() {
   try {
+    showLoading(true);
     const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
     tracks = await res.json();
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = tracks.map(t => `<tr>
-      <td>${esc(t.title)}</td>
-      <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
-      <td>${esc(t.album || '')}</td>
-      <td>${pl(t.duration)}s</td>
-      <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
-      <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
-      <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
-      <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
-      <td class="actions">
-        <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteTrack('${t.id}')">Del</button>
-      </td>
-    </tr>`).join('');
-    document.getElementById('count').textContent = `${tracks.length} track(s)`;
-  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message); }
+    renderTracks();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function renderTracks() {
+  trackSearch = document.getElementById('searchInput').value.trim();
+  const list = filteredTracks();
+  const tbody = document.getElementById('tbody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search.') + '</td></tr>';
+    document.getElementById('count').textContent = tracks.length + ' track(s)';
+    return;
+  }
+  tbody.innerHTML = list.map(t => `<tr>
+    <td>${esc(t.title)}</td>
+    <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
+    <td>${esc(t.album || '')}</td>
+    <td>${pl(t.duration)}s</td>
+    <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
+    <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
+    <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
+    <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
+    <td class="actions">
+      <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrack('${t.id}')">Del</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('count').textContent = `${tracks.length} track(s) (showing ${list.length})`;
+}
+
+function confirmDeleteTrack(id) {
+  const t = tracks.find(x => x.id === id);
+  openConfirm('Delete track?', `Delete "${t ? t.title : 'this track'}"? This cannot be undone.`, () => deleteTrack(id));
 }
 
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -343,13 +449,14 @@ async function saveTrack() {
 }
 
 async function deleteTrack(id) {
-  if (!confirm('Delete this track?')) return;
   try {
+    showLoading(true);
     const res = await authedFetch(`/api/admin/tracks/${id}`, { method: 'DELETE', credentials: 'same-origin' });
     if (!res.ok) throw new Error('Delete failed');
     toast('Deleted');
     loadTracks();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); }
 }
 
 async function handleAudioUpload(input) {
@@ -394,11 +501,14 @@ function toggleAffiliates() {
 
 async function loadAffiliates() {
   try {
+    showLoading(true);
     const res = await authedFetch('/api/admin/affiliates', { credentials: 'same-origin' });
     const data = await res.json();
     // Populate the coupon-affiliate dropdown
     const sel = document.getElementById('cpAffiliate');
-    sel.innerHTML = data.map(a => `<option value="${a.id}">${esc(a.name)}${a.commission_amount ? ' (₹' + a.commission_amount + '/sale)' : ''}</option>`).join('');
+    sel.innerHTML = data.length === 0
+      ? '<option value="">— no affiliates yet —</option>'
+      : data.map(a => `<option value="${a.id}">${esc(a.name)}${a.commission_amount ? ' (₹' + a.commission_amount + '/sale)' : ''}</option>`).join('');
 
     const couponsRes = await authedFetch('/api/admin/coupons', { credentials: 'same-origin' });
     const coupons = await couponsRes.json();
@@ -406,6 +516,10 @@ async function loadAffiliates() {
     coupons.forEach(c => { couponByAff[c.affiliate_id] = couponByAff[c.affiliate_id] || []; couponByAff[c.affiliate_id].push(c); });
 
     const tbody = document.getElementById('affTbody');
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No affiliates yet — create one above.</td></tr>';
+      return;
+    }
     const rows = [];
     data.forEach(a => {
       const ac = couponByAff[a.id] || [];
@@ -417,7 +531,7 @@ async function loadAffiliates() {
           <td>-</td>
           <td>-</td>
           <td class="actions">
-            <button class="btn btn-danger btn-sm" onclick="deleteAffiliate('${a.id}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}')">Del</button>
           </td>
         </tr>`);
       } else {
@@ -429,13 +543,14 @@ async function loadAffiliates() {
           <td>${c.status === 'active' ? '<span style="color:#22c55e;">active</span>' : '<span style="color:#ef4444;">paused</span>'}</td>
           <td class="actions">
             <button class="btn btn-secondary btn-sm" onclick="toggleCoupon('${c.id}', '${c.status === 'active' ? 'paused' : 'active'}')">${c.status === 'active' ? 'Pause' : 'Resume'}</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteAffiliate('${a.id}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}')">Del</button>
           </td>
         </tr>`));
       }
     });
     tbody.innerHTML = rows.join('');
   } catch (e) { toast('Failed to load affiliates: ' + e.message); }
+  finally { showLoading(false); }
 }
 
 async function loadCommissions() {
@@ -444,7 +559,7 @@ async function loadCommissions() {
     const data = await res.json();
     const tbody = document.getElementById('commTbody');
     tbody.innerHTML = data.length === 0
-      ? '<tr><td colspan="6" style="color:#999;">No commissions yet — they appear after verified yearly purchases.</td></tr>'
+      ? '<tr><td colspan="6" class="empty-state">No commissions yet — they appear after verified yearly purchases.</td></tr>'
       : data.map(c => `<tr>
           <td>${c.created_at ? new Date(c.created_at).toLocaleString() : ''}</td>
           <td>${esc(c.affiliate?.name || c.affiliate_id)}</td>
@@ -461,7 +576,9 @@ async function createAffiliate() {
   const contact_email = document.getElementById('afEmail').value.trim() || null;
   const commission_amount = parseInt(document.getElementById('afAmount').value) || 0;
   if (!name) { toast('Affiliate name is required'); return; }
+  if (commission_amount < 0 || !Number.isFinite(commission_amount)) { toast('Commission must be a valid amount'); return; }
   try {
+    showLoading(true);
     const res = await authedFetch('/api/admin/affiliates', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
@@ -474,28 +591,33 @@ async function createAffiliate() {
     document.getElementById('afAmount').value = '';
     loadAffiliates();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); }
 }
 
 async function createCoupon() {
   const affiliate_id = document.getElementById('cpAffiliate').value;
-  const code = document.getElementById('cpCode').value.trim();
+  const code = document.getElementById('cpCode').value.trim().toUpperCase();
   const max_redemptions = parseInt(document.getElementById('cpMax').value) || null;
   const expires_at = document.getElementById('cpExpires').value || null;
   if (!affiliate_id) { toast('Select an affiliate'); return; }
   if (!code) { toast('Coupon code is required'); return; }
+  if (!/^[A-Z0-9][A-Z0-9-]*$/.test(code)) { toast('Code must be letters, numbers or hyphens'); return; }
+  if (max_redemptions !== null && (!Number.isInteger(max_redemptions) || max_redemptions <= 0)) { toast('Max redemptions must be a positive integer'); return; }
   try {
+    showLoading(true);
     const res = await authedFetch('/api/admin/coupons', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, affiliate_id, max_redemptions, expires_at }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Create failed'); }
-    toast('Coupon issued: ' + code.toUpperCase());
+    toast('Coupon issued: ' + code);
     document.getElementById('cpCode').value = '';
     document.getElementById('cpMax').value = '';
     document.getElementById('cpExpires').value = '';
     loadAffiliates();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); }
 }
 
 async function toggleCoupon(id, status) {
@@ -511,14 +633,20 @@ async function toggleCoupon(id, status) {
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
+function confirmDeleteAffiliate(id) {
+  const t = tracks.length ? null : null; // affiliate name not tracked here
+  openConfirm('Delete affiliate?', 'Delete this affiliate and its coupons? Commission ledger rows are preserved.', () => deleteAffiliate(id));
+}
+
 async function deleteAffiliate(id) {
-  if (!confirm('Delete this affiliate and its coupons?')) return;
   try {
+    showLoading(true);
     const res = await authedFetch(`/api/admin/affiliates/${id}`, { method: 'DELETE', credentials: 'same-origin' });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }
     toast('Affiliate deleted');
     loadAffiliates();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); }
 }
 
 checkSession();

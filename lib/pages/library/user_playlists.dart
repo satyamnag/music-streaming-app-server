@@ -146,49 +146,67 @@ class UserPlaylistsPage extends HookConsumerWidget {
                 ),
               ),
               const SliverGap(16),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    context.l10n.playlists,
-                    style: context.theme.typography.h4,
-                  ),
-                ),
-              ),
-              const SliverGap(8),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                sliver: PlaybuttonView(
-                  leading: const Expanded(
-                    child: Row(
-                      children: [
-                        PlaylistCreateDialogButton(),
-                      ],
+              if (ownerPlaylists.isNotEmpty) ...[
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      'Playlists by Soulful Bhakti',
+                      style: context.theme.typography.h4,
                     ),
                   ),
-                  controller: controller,
-                  hasMore: false,
-                  isLoading: ownerPlaylistsQuery.isLoading ||
-                      userPlaylistsQuery.isLoading,
-                  onRequestMore: () {},
-                  itemCount: ownerPlaylists.length + userPlaylists.length,
-                  gridItemBuilder: (context, index) {
-                    if (index < ownerPlaylists.length) {
-                      return PlaylistCard(ownerPlaylists[index]);
-                    }
-                    return PlaylistCard(
-                        userPlaylists[index - ownerPlaylists.length]);
-                  },
-                  listItemBuilder: (context, index) {
-                    if (index < ownerPlaylists.length) {
-                      return PlaylistCard.tile(ownerPlaylists[index]);
-                    }
-                    return PlaylistCard.tile(
-                        userPlaylists[index - ownerPlaylists.length]);
-                  },
                 ),
-              ),
-              const SliverSafeArea(sliver: SliverGap(10)),
+                const SliverGap(8),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: PlaybuttonView(
+                    controller: controller,
+                    hasMore: false,
+                    isLoading: ownerPlaylistsQuery.isLoading,
+                    onRequestMore: () {},
+                    itemCount: ownerPlaylists.length,
+                    gridItemBuilder: (context, index) =>
+                        PlaylistCard(ownerPlaylists[index]),
+                    listItemBuilder: (context, index) =>
+                        PlaylistCard.tile(ownerPlaylists[index]),
+                  ),
+                ),
+                const SliverGap(16),
+              ],
+              if (userPlaylists.isNotEmpty) ...[
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      'Your Playlists',
+                      style: context.theme.typography.h4,
+                    ),
+                  ),
+                ),
+                const SliverGap(8),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: PlaybuttonView(
+                    leading: const Expanded(
+                      child: Row(
+                        children: [
+                          PlaylistCreateDialogButton(),
+                        ],
+                      ),
+                    ),
+                    controller: controller,
+                    hasMore: false,
+                    isLoading: userPlaylistsQuery.isLoading,
+                    onRequestMore: () {},
+                    itemCount: userPlaylists.length,
+                    gridItemBuilder: (context, index) =>
+                        PlaylistCard(userPlaylists[index]),
+                    listItemBuilder: (context, index) =>
+                        PlaylistCard.tile(userPlaylists[index]),
+                  ),
+                ),
+                const SliverSafeArea(sliver: SliverGap(10)),
+              ],
             ],
           ),
         ),

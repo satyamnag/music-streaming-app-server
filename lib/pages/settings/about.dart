@@ -4,9 +4,7 @@ import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
 
-import 'package:flutter/gestures.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -63,7 +61,7 @@ class AboutSangeetPage extends HookConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Credits",
+                    "Copyright & Rights Notice",
                     style: Theme.of(context).typography.h3,
                   ).bold(),
                 ),
@@ -71,38 +69,14 @@ class AboutSangeetPage extends HookConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "Poetry: Late Sri Chakalakonda Chenchuramayya\n"
-                    "Lyrics: Dr. Sri Ramakantha Rao Chakalakonda\n"
-                    "Music Producer: Karthik Chandan Palepu\n"
-                    "Animation: Mannem Venkat Reddy",
+                    "All rights, title, and interest in and to all tracks released "
+                    "by Soulful Bhakti are owned and/or controlled by Soulful Bhakti, "
+                    "to the extent applicable. Unauthorized copying, reproduction, "
+                    "duplication, distribution, modification, or other use of any "
+                    "track, in whole or in part, is strictly prohibited without prior "
+                    "written authorization from the applicable rights holder.\n\n"
+                    "Soulful Bhakti is a part of FAMERELAY.",
                     textAlign: TextAlign.left,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Subscribe to ",
-                        ),
-                        TextSpan(
-                          text: "@SoulfulBhaktiTelugu",
-                          style: TextStyle(
-                            color: Colors.sky[400],
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.sky[400],
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              launchUrlString(
-                                "https://www.youtube.com/@SoulfulBhaktiTelugu",
-                              );
-                            },
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ],

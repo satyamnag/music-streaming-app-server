@@ -765,7 +765,12 @@ async function uploadAudioToR2(key, body, contentType) {
 
 // ----- Admin CRUD -----
 import multer from 'multer'
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  // Bounds memory usage per upload: 110 MB covers the largest opus files
+  // with headroom; oversized uploads are rejected with a 413.
+  limits: { fileSize: 110 * 1024 * 1024 },
+})
 
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).
@@ -829,20 +834,27 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body
-    if (!title || !storage_path) return res.status(400).json({ error: 'title and storage_path required' })
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
+    if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
+    if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
+    const cleanTitle = title.trim()
+    const cleanArtists = Array.isArray(artist_names) && artist_names.length
+      ? artist_names.map((a) => String(a).trim()).filter(Boolean)
+      : ['Unknown Artist']
+    const cleanDuration = Number.isFinite(Number(duration)) && Number(duration) >= 0 ? Math.floor(Number(duration)) : 0
+    const cleanStatus = status === 'paid' ? 'paid' : 'free'
     const { data, error } = await supabase.from('tracks').insert({
-      title,
-      artist_names: artist_names || ['Unknown Artist'],
-      artist_names_text: (artist_names || ['Unknown Artist']).join(', '),
-      album: album || title,
-      duration: duration || 0,
-      thumbnail: thumbnail || null,
-      storage_path,
-      status: status === 'paid' ? 'paid' : 'free',
-      lyrics: lyrics || null,
-      synced_lyrics: synced_lyrics || null,
-      language: language || null,
+      title: cleanTitle,
+      artist_names: cleanArtists,
+      artist_names_text: cleanArtists.join(', '),
+      album: typeof album === 'string' && album.trim() ? album.trim() : cleanTitle,
+      duration: cleanDuration,
+      thumbnail: typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null,
+      storage_path: storage_path.trim(),
+      status: cleanStatus,
+      lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
+      synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
+      language: typeof language === 'string' && language.trim() ? language.trim() : null,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data)
@@ -852,18 +864,33 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body
+    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
     const updates = {}
-    if (title !== undefined) updates.title = title
-    if (artist_names !== undefined) { updates.artist_names = artist_names; updates.artist_names_text = artist_names.join(', ') }
-    if (album !== undefined) updates.album = album
-    if (duration !== undefined) updates.duration = duration
-    if (thumbnail !== undefined) updates.thumbnail = thumbnail
-    if (storage_path !== undefined) updates.storage_path = storage_path
+    if (title !== undefined) {
+      if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
+      updates.title = title.trim()
+    }
+    if (artist_names !== undefined) {
+      if (!Array.isArray(artist_names)) return res.status(400).json({ error: 'artist_names must be an array' })
+      const clean = artist_names.map((a) => String(a).trim()).filter(Boolean)
+      updates.artist_names = clean
+      updates.artist_names_text = clean.join(', ')
+    }
+    if (album !== undefined) updates.album = typeof album === 'string' && album.trim() ? album.trim() : null
+    if (duration !== undefined) {
+      if (!Number.isFinite(Number(duration)) || Number(duration) < 0) return res.status(400).json({ error: 'duration must be a non-negative number' })
+      updates.duration = Math.floor(Number(duration))
+    }
+    if (thumbnail !== undefined) updates.thumbnail = typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null
+    if (storage_path !== undefined) {
+      if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path must be a non-empty string' })
+      updates.storage_path = storage_path.trim()
+    }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
-    if (lyrics !== undefined) updates.lyrics = lyrics
-    if (synced_lyrics !== undefined) updates.synced_lyrics = synced_lyrics
-    if (language !== undefined) updates.language = language || null
+    if (lyrics !== undefined) updates.lyrics = typeof lyrics === 'string' && lyrics.trim() ? lyrics : null
+    if (synced_lyrics !== undefined) updates.synced_lyrics = typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null
+    if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.json(data)
@@ -1010,18 +1037,24 @@ app.get('/api/admin/coupons', requireAdmin, async (req, res, next) => {
 app.post('/api/admin/coupons', requireAdmin, async (req, res, next) => {
   try {
     const { code, affiliate_id, max_redemptions, expires_at } = req.body || {}
-    if (!code || !code.trim()) return res.status(400).json({ error: 'code required' })
-    if (!affiliate_id) return res.status(400).json({ error: 'affiliate_id required' })
+    if (typeof code !== 'string' || !code.trim()) return res.status(400).json({ error: 'code required' })
+    if (typeof affiliate_id !== 'string' || !affiliate_id.trim()) return res.status(400).json({ error: 'affiliate_id required' })
     const normalized = code.trim().toUpperCase()
+    if (!/^[A-Z0-9][A-Z0-9-]*$/.test(normalized)) {
+      return res.status(400).json({ error: 'code must be letters, numbers or hyphens' })
+    }
+    let cleanMax = null
+    if (max_redemptions !== undefined && max_redemptions !== null && max_redemptions !== '') {
+      const n = Number(max_redemptions)
+      if (!Number.isInteger(n) || n <= 0) return res.status(400).json({ error: 'max_redemptions must be a positive integer' })
+      cleanMax = n
+    }
     const { data, error } = await supabase
       .from('coupons')
       .insert({
         code: normalized,
         affiliate_id,
-        max_redemptions:
-          max_redemptions != null && Number(max_redemptions) > 0
-            ? Number(max_redemptions)
-            : null,
+        max_redemptions: cleanMax,
         expires_at: expires_at || null,
       })
       .select('*, affiliate:affiliates(name)')

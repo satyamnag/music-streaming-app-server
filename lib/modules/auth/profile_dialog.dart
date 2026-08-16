@@ -5,7 +5,6 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/auth/profile_plan_status.dart';
 import 'package:sangeet/modules/monetization/coupon_entry.dart';
-import 'package:sangeet/modules/referral/share_and_earn.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
 /// Shows the signed-in user's Clerk profile (avatar, username, email) with a
@@ -120,10 +119,6 @@ class ProfileDialog extends ConsumerWidget {
                 // Show the paid plan status (plan name, duration, start/end
                 // dates) for signed-in users, read from Superwall CustomerInfo.
                 const ProfilePlanStatus(),
-                const Gap(12),
-                // Referral / affiliate program: personal code, share link and
-                // tracked commission (server-side, track-first).
-                const ShareAndEarn(),
                 const Gap(12),
                 // Affiliate coupon entry: persistent (non-popup) way to apply
                 // a coupon code received from a creator. Shown until applied.
