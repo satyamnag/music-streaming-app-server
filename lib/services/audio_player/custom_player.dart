@@ -45,6 +45,14 @@ class CustomPlayer extends Player {
     // long as the network can keep up. (Official mpv manual: "How many seconds
     // of audio/video to prefetch if the cache is active.")
     nativePlayer.setProperty("cache-secs", "3600");
+    // Low-connectivity smooth start: enter "buffering" mode before playback and
+    // wait until ~5s of audio is buffered, so playback does not start then
+    // immediately underrun on a slow network. (Official mpv manual:
+    // cache-pause-initial "can be used to ensure playback starts smoothly, in
+    // exchange for waiting some time to prefetch network data".) The stall
+    // watchdog below still re-opens the track if buffering gets stuck.
+    nativePlayer.setProperty("cache-pause-initial", "yes");
+    nativePlayer.setProperty("cache-pause-wait", "5");
     // Byte caps large enough to hold 60 minutes at high bitrates: 60 min at
     // 320 kbps is ~144 MB, at lossless ~630 MB — 512M comfortably covers the
     // catalog while still bounding memory.
