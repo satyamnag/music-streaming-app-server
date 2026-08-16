@@ -115,7 +115,9 @@ class TrackTile extends HookConsumerWidget {
         },
         child: HoverBuilder(
           permanentState: isSelected || constrains.smAndDown ? true : null,
-          builder: (context, isHovering) => ButtonTile(
+          builder: (context, isHovering) => Stack(
+            children: [
+              ButtonTile(
             selected: isSelected,
             onPressed: () async {
               try {
@@ -125,9 +127,9 @@ class TrackTile extends HookConsumerWidget {
                   await onTap?.call();
                   return;
                 }
-                // Paid tracks are locked for free users: intercept the tap,
-                // prompt sign-in if needed and present the paywall before the
-                // caller's onTap (which starts playback) is allowed to run.
+                // Locked (paid) tracks: never play for non-premium users.
+                // Present the Superwall paywall — playback runs only after a
+                // successful purchase.
                 await PremiumAccess.gateTrackPlay(
                   context: context,
                   ref: ref,
@@ -214,28 +216,20 @@ class TrackTile extends HookConsumerWidget {
                                   isFetchingActiveTrack,
                                   isPlaying,
                                   isHovering,
-                                  isLoading.value,
-                                  isLocked
+                                  isLoading.value
                                 )) {
-                                  // Locked tracks never get a play/pause
-                                  // affordance — only a lock badge.
-                                  (_, _, _, _, _, true) => const Icon(
-                                      Icons.lock,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  (true, true, _, _, _, _) ||
-                                  (_, _, _, _, true, _) =>
+                                  (true, true, _, _, _) ||
+                                  (_, _, _, _, true) =>
                                     const SizedBox(
                                       width: 26,
                                       height: 26,
                                       child: CircularProgressIndicator(),
                                     ),
-                                  (_, _, true, _, _, _) => Icon(
+                                  (_, _, true, _, _) => Icon(
                                       SangeetIcons.pause,
                                       color: theme.colorScheme.primary,
                                     ),
-                                  (_, _, _, true, _, _) => const Icon(
+                                  (_, _, _, true, _) => const Icon(
                                       SangeetIcons.play,
                                       color: Colors.white,
                                     ),
@@ -325,31 +319,10 @@ class TrackTile extends HookConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(width: 8),
-                // Paid (locked) tracks show a lock icon in place of the heart
-                // outline so users immediately see the song is premium-only.
-                // Tapping the lock still routes through the same tap gate
-                // (sign-in -> paywall) before playback can start.
-                if (PremiumAccess.isTrackLocked(track, ref))
-                  IconButton(
-                    variance: ButtonVariance.ghost,
-                    size: ButtonSize.small,
-                    icon: const Icon(Icons.lock_outline, size: 18),
-                    onPressed: () async {
-                      isLoading.value = true;
-                      try {
-                        await PremiumAccess.gateTrackPlay(
-                          context: context,
-                          ref: ref,
-                          track: track,
-                          feature: onTap ?? () async {},
-                        );
-                      } finally {
-                        if (context.mounted) isLoading.value = false;
-                      }
-                    },
-                  )
-                else
-                  LocalTrackHeartButton(track: track),
+                // Locked (paid) tracks are covered by the gray overlay above,
+                // so the trailing row keeps the normal heart button (which is
+                // inert under the overlay's IgnorePointer).
+                LocalTrackHeartButton(track: track),
                 const SizedBox(width: 4),
                 Builder(
                   builder: (context) {
@@ -385,6 +358,52 @@ class TrackTile extends HookConsumerWidget {
                 if (kIsDesktop) const Gap(10),
               ],
             ),
+          ),
+              // Locked (paid) tracks are visually unavailable for non-premium
+              // users: a gray translucent cover with a lock icon over the
+              // whole row. Tapping shows the Superwall paywall — playback
+              // never starts unless the user purchases.
+              if (isLocked)
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () async {
+                      isLoading.value = true;
+                      try {
+                        await PremiumAccess.gateTrackPlay(
+                          context: context,
+                          ref: ref,
+                          track: track,
+                          feature: onTap ?? () async {},
+                        );
+                      } finally {
+                        if (context.mounted) isLoading.value = false;
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.muted
+                            .withValues(alpha: 0.55),
+                        borderRadius: theme.borderRadiusMd,
+                      ),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.lock,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       );
