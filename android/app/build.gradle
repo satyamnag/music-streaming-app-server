@@ -72,7 +72,7 @@ android {
         // Publishable keys are public (meant for client apps) — safe to embed here.
         // Flutter's Gradle plugin doesn't pass custom gradle.properties via project.findProperty,
         // so we reference the property directly. Keep in sync with .env CLERK_PUBLISHABLE_KEY.
-        def clerkKey = project.hasProperty('CLERK_PUBLISHABLE_KEY') ? project.property('CLERK_PUBLISHABLE_KEY') : 'pk_live_Y2xlcmsuZmFtZXJlbGF5LmNvbSQ'
+        def clerkKey = project.hasProperty('CLERK_PUBLISHABLE_KEY') ? project.property('CLERK_PUBLISHABLE_KEY') : 'pk_live_Y2xlcmsuc291bGZ1bGJoYWt0aS5jb20k'
         buildConfigField "String", "CLERK_PUBLISHABLE_KEY", "\"${clerkKey}\""
     }
 
