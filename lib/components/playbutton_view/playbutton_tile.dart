@@ -70,15 +70,17 @@ class PlaybuttonTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Tooltip(
-            tooltip: TooltipContainer(child: Text(context.l10n.add_to_queue)).call,
-            child: IconButton.outline(
-              icon: const Icon(SangeetIcons.queueAdd),
-              onPressed: onAddToQueuePressed,
-              enabled: !isLoading,
+          if (onAddToQueuePressed != null) ...[
+            Tooltip(
+              tooltip: TooltipContainer(child: Text(context.l10n.add_to_queue)).call,
+              child: IconButton.outline(
+                icon: const Icon(SangeetIcons.queueAdd),
+                onPressed: onAddToQueuePressed,
+                enabled: !isLoading,
+              ),
             ),
-          ),
-          const Gap(8),
+            const Gap(8),
+          ],
           Tooltip(
             tooltip: TooltipContainer(child: Text(context.l10n.play)).call,
             child: IconButton.secondary(

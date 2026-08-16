@@ -77,29 +77,31 @@ class PlaybuttonCard extends StatelessWidget {
                   bottom: 8,
                   child: Column(
                     children: [
-                      AnimatedScale(
-                        curve: Curves.easeOutBack,
-                        duration: const Duration(milliseconds: 300),
-                        scale: (states.contains(WidgetState.hovered) ||
-                                    kIsMobile) &&
-                                !isLoading
-                            ? 1
-                            : 0.7,
-                        child: AnimatedOpacity(
+                      if (onAddToQueuePressed != null) ...[
+                        AnimatedScale(
+                          curve: Curves.easeOutBack,
                           duration: const Duration(milliseconds: 300),
-                          opacity: (states.contains(WidgetState.hovered) ||
+                          scale: (states.contains(WidgetState.hovered) ||
                                       kIsMobile) &&
                                   !isLoading
                               ? 1
-                              : 0,
-                          child: IconButton.secondary(
-                            icon: const Icon(SangeetIcons.queueAdd),
-                            onPressed: onAddToQueuePressed,
-                            size: ButtonSize.small,
+                              : 0.7,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 300),
+                            opacity: (states.contains(WidgetState.hovered) ||
+                                        kIsMobile) &&
+                                    !isLoading
+                                ? 1
+                                : 0,
+                            child: IconButton.secondary(
+                              icon: const Icon(SangeetIcons.queueAdd),
+                              onPressed: onAddToQueuePressed,
+                              size: ButtonSize.small,
+                            ),
                           ),
                         ),
-                      ),
-                      const Gap(5),
+                        const Gap(5),
+                      ],
                       AnimatedScale(
                         curve: Curves.easeOutBack,
                         duration: const Duration(milliseconds: 150),
