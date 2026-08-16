@@ -65,7 +65,7 @@ class CouponStatusTile extends ConsumerWidget {
           else
             Text(
               'Enter a code you received from a creator to support them '
-              'when you subscribe. It does not change the plan price.',
+              'when you subscribe.',
               style: theme.typography.xSmall.copyWith(
                 color: theme.colorScheme.mutedForeground,
               ),
@@ -129,7 +129,7 @@ class CouponEntry extends HookConsumerWidget {
                       : 'You have already applied a coupon.')
                   : 'Enter the code you received from a creator or '
                       'affiliate. Applying it supports them when you '
-                      'subscribe — it does not change the plan price.',
+                      'subscribe.',
               style: theme.typography.small.copyWith(
                 color: theme.colorScheme.mutedForeground,
               ),

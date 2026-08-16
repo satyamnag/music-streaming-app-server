@@ -63,7 +63,11 @@ class TrackTile extends HookConsumerWidget {
 
     final isLoading = useState(false);
 
-    final isPlaying = playlist.activeTrack?.id == track.id;
+    // A paid (locked) track is never "playing" for a free user: the play/pause
+    // overlay must not appear (only the lock badge does), and the row must not
+    // light up as the active track. Paid users are unaffected.
+    final isLocked = PremiumAccess.isTrackLocked(track, ref);
+    final isPlaying = !isLocked && playlist.activeTrack?.id == track.id;
 
     final isSelected = isPlaying || isLoading.value;
 
@@ -210,20 +214,28 @@ class TrackTile extends HookConsumerWidget {
                                   isFetchingActiveTrack,
                                   isPlaying,
                                   isHovering,
-                                  isLoading.value
+                                  isLoading.value,
+                                  isLocked
                                 )) {
-                                  (true, true, _, _, _) ||
-                                  (_, _, _, _, true) =>
+                                  // Locked tracks never get a play/pause
+                                  // affordance — only a lock badge.
+                                  (_, _, _, _, _, true) => const Icon(
+                                      Icons.lock,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  (true, true, _, _, _, _) ||
+                                  (_, _, _, _, true, _) =>
                                     const SizedBox(
                                       width: 26,
                                       height: 26,
                                       child: CircularProgressIndicator(),
                                     ),
-                                  (_, _, true, _, _) => Icon(
+                                  (_, _, true, _, _, _) => Icon(
                                       SangeetIcons.pause,
                                       color: theme.colorScheme.primary,
                                     ),
-                                  (_, _, _, true, _) => const Icon(
+                                  (_, _, _, true, _, _) => const Icon(
                                       SangeetIcons.play,
                                       color: Colors.white,
                                     ),
