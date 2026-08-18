@@ -173,40 +173,38 @@ class UserPlaylistsPage extends HookConsumerWidget {
                 ),
                 const SliverGap(16),
               ],
-              if (userPlaylists.isNotEmpty) ...[
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      'Your Playlists',
-                      style: context.theme.typography.h4,
-                    ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Your Playlists',
+                    style: context.theme.typography.h4,
                   ),
                 ),
-                const SliverGap(8),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: PlaybuttonView(
-                    leading: const Expanded(
-                      child: Row(
-                        children: [
-                          PlaylistCreateDialogButton(),
-                        ],
-                      ),
+              ),
+              const SliverGap(8),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: PlaybuttonView(
+                  leading: const Expanded(
+                    child: Row(
+                      children: [
+                        PlaylistCreateDialogButton(),
+                      ],
                     ),
-                    controller: controller,
-                    hasMore: false,
-                    isLoading: userPlaylistsQuery.isLoading,
-                    onRequestMore: () {},
-                    itemCount: userPlaylists.length,
-                    gridItemBuilder: (context, index) =>
-                        PlaylistCard(userPlaylists[index]),
-                    listItemBuilder: (context, index) =>
-                        PlaylistCard.tile(userPlaylists[index]),
                   ),
+                  controller: controller,
+                  hasMore: false,
+                  isLoading: userPlaylistsQuery.isLoading,
+                  onRequestMore: () {},
+                  itemCount: userPlaylists.length,
+                  gridItemBuilder: (context, index) =>
+                      PlaylistCard(userPlaylists[index]),
+                  listItemBuilder: (context, index) =>
+                      PlaylistCard.tile(userPlaylists[index]),
                 ),
-                const SliverSafeArea(sliver: SliverGap(10)),
-              ],
+              ),
+              const SliverSafeArea(sliver: SliverGap(10)),
             ],
           ),
         ),

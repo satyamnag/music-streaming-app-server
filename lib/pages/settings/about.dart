@@ -76,7 +76,7 @@ class AboutSangeetPage extends HookConsumerWidget {
                     "track, in whole or in part, is strictly prohibited without prior "
                     "written authorization from the applicable rights holder.\n\n"
                     "Soulful Bhakti is a part of FAMERELAY.",
-                    textAlign: TextAlign.left,
+                    textAlign: TextAlign.justify,
                   ),
                 ),
               ],
