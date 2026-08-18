@@ -8,34 +8,26 @@ import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 
 /// A horizontal "Playlists" row shown on the home screen between "Recently
-/// played" and "Newest arrivals". It shows the developer-curated default
-/// playlists plus the user's "Liked Songs" and any playlists the user created
-/// on this device.
+/// played" and "Newest arrivals". It shows the user's "Liked Songs" and any
+/// playlists the user created on this device.
 class HomePlaylistsSection extends HookConsumerWidget {
   const HomePlaylistsSection({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    final ownerPlaylistsQuery = ref.watch(ownerPlaylistsProvider);
     final userPlaylistsQuery = ref.watch(userPlaylistsProvider);
     final likedSongsQuery = ref.watch(likedSongsProvider);
 
-    final ownerPlaylists = ownerPlaylistsQuery.asData?.value ??
-        const <SangeetSimplePlaylistObject>[];
     final userPlaylists = userPlaylistsQuery.asData?.value ??
         const <SangeetSimplePlaylistObject>[];
     final likedTracks = likedSongsQuery.asData?.value ??
         const <SangeetTrackObject>[];
     final likedCount = likedTracks.length;
 
-    final isLoading = ownerPlaylistsQuery.isLoading ||
-        userPlaylistsQuery.isLoading ||
-        likedSongsQuery.isLoading;
+    final isLoading =
+        userPlaylistsQuery.isLoading || likedSongsQuery.isLoading;
 
-    if (!isLoading &&
-        ownerPlaylists.isEmpty &&
-        userPlaylists.isEmpty &&
-        likedCount == 0) {
+    if (!isLoading && userPlaylists.isEmpty && likedCount == 0) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -72,7 +64,6 @@ class HomePlaylistsSection extends HookConsumerWidget {
         title: Text(context.l10n.playlists),
         items: [
           likedSongsPlaylist,
-          ...ownerPlaylists,
           ...userPlaylists,
         ],
         hasNextPage: false,
