@@ -13,6 +13,7 @@ import 'package:sangeet/modules/auth/profile_dialog.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/go_for_paid_plan_banner.dart';
+import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
@@ -127,6 +128,7 @@ class HomePage extends HookConsumerWidget {
                   ...switch (sectionsAsync) {
                     AsyncData(value: final sections) => [
                         HomeAlbumsSection(albums: sections.albums),
+                        HomeLanguageSongsSection(languages: sections.languages),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: sections.newestArrivals,
@@ -138,6 +140,7 @@ class HomePage extends HookConsumerWidget {
                       ],
                     AsyncLoading() => [
                         const HomeAlbumsSection(albums: []),
+                        const HomeLanguageSongsSection(languages: []),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: const [],
@@ -162,6 +165,7 @@ class HomePage extends HookConsumerWidget {
                       ],
                     _ => [
                         const HomeAlbumsSection(albums: []),
+                        const HomeLanguageSongsSection(languages: []),
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: const [],
