@@ -1001,10 +1001,10 @@ app.post('/api/admin/affiliates', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Update an affiliate (name, contact, commission amount)
+// Update an affiliate (name, contact, commission amount, referrer code)
 app.put('/api/admin/affiliates/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, contact_email, commission_amount } = req.body || {}
+    const { name, contact_email, commission_amount, referrer_code } = req.body || {}
     const updates = {}
     if (name !== undefined) updates.name = String(name).trim()
     if (contact_email !== undefined) updates.contact_email = contact_email || null
