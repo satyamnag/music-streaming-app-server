@@ -103,6 +103,28 @@ The agent MUST use appropriate official documentation MCP sources:
 
 ------------------------------------------------------------------------
 
+# Project-Specific Official Documentation (Mandatory Sources Of Truth)
+
+For ANY operation involving the technologies below, the agent MUST verify
+against these official sources FIRST, before any implementation, debugging,
+bug fix, configuration change, API/SDK usage, or architecture change:
+
+## Media Playback & Streaming
+
+-   **media_kit (Flutter media library):** https://github.com/media-kit/media-kit
+-   **media_kit official docs:** https://media-kit.dev/
+-   **mpv manual (libmpv native engine):** https://mpv.io/manual/master/
+-   **Opus codec (Xiph.Org):** https://opus-codec.org/
+-   **Opus codec specification (IETF RFC 6716):** https://datatracker.ietf.org/doc/html/rfc6716
+-   **FFmpeg (demuxer/decoder used by libmpv):** https://ffmpeg.org/
+
+These links are the authoritative source for: supported audio formats, codecs,
+containers, streaming/network options, caching/buffering behavior, and codec
+efficiency claims. No media/streaming decision may be made without consulting
+them.
+
+------------------------------------------------------------------------
+
 # MCP Verification Enforcement
 
 Before ANY implementation:
