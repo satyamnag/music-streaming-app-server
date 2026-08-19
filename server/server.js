@@ -8,6 +8,7 @@ import crypto from 'crypto'
 import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
+import { rateLimit } from 'express-rate-limit'
 
 dotenv.config()
 
@@ -676,6 +677,17 @@ const ADMIN_COOKIE_NAME = 'sangeet_admin_session'
 const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60 // 8 hours
 const ADMIN_COOKIE_MAX_AGE = 1000 * ADMIN_SESSION_TTL_SECONDS
 
+// Brute-force protection: limit login attempts per IP. After 10 failed/any
+// attempts within 15 minutes, the IP is throttled with a 429. This prevents
+// automated token guessing against the admin login endpoint.
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 10, // max attempts per window
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Try again later.' },
+})
+
 function signAdminSession() {
   const exp = Date.now() + ADMIN_COOKIE_MAX_AGE
   const payload = `${exp}`
@@ -786,8 +798,10 @@ app.get('/admin', (req, res) => {
 })
 
 // Login: verifies the ADMIN_TOKEN (timing-safe) and sets a signed HttpOnly
-// session cookie. The browser sends `{ token }` in the JSON body.
-app.post('/api/admin/login', (req, res) => {
+// session cookie. Rate-limited per IP to prevent brute-force guessing. The
+// browser sends `{ token }` in the JSON body. The cookie is Secure (HTTPS
+// only), HttpOnly, SameSite=Strict.
+app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
   if (!secrets.admin_token) {
     return res.status(503).json({ error: 'admin not configured' })
   }
@@ -802,7 +816,7 @@ app.post('/api/admin/login', (req, res) => {
 
   res.setHeader(
     'Set-Cookie',
-    `${ADMIN_COOKIE_NAME}=${signAdminSession()}; HttpOnly; Path=/; SameSite=Strict; Max-Age=${ADMIN_SESSION_TTL_SECONDS}`
+    `${ADMIN_COOKIE_NAME}=${signAdminSession()}; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=${ADMIN_SESSION_TTL_SECONDS}`
   )
   res.json({ authenticated: true })
 })
@@ -811,7 +825,7 @@ app.post('/api/admin/login', (req, res) => {
 app.post('/api/admin/logout', (req, res) => {
   res.setHeader(
     'Set-Cookie',
-    `${ADMIN_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`
+    `${ADMIN_COOKIE_NAME}=; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=0`
   )
   res.json({ authenticated: false })
 })
