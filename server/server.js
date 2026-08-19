@@ -7,6 +7,7 @@ import fs from 'fs'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import QRCode from 'qrcode'
 
 dotenv.config()
 
@@ -960,25 +961,42 @@ app.get('/api/admin/affiliates', requireAdmin, async (req, res, next) => {
 })
 
 // Create an affiliate (external marketer) with an admin-decided commission
-// amount per yearly sale.
+// amount per yearly sale and a QR referrer code.
 app.post('/api/admin/affiliates', requireAdmin, async (req, res, next) => {
   try {
-    const { name, contact_email, commission_amount } = req.body || {}
+    const { name, contact_email, commission_amount, referrer_code } = req.body || {}
     if (!name || !name.trim()) return res.status(400).json({ error: 'name required' })
     const amount =
       commission_amount != null && Number(commission_amount) >= 0
         ? Number(commission_amount)
         : 0
+    // Referrer code: admin-supplied (upper-cased) or auto-generated.
+    let code = null
+    if (referrer_code && String(referrer_code).trim()) {
+      const clean = String(referrer_code).trim().toUpperCase()
+      if (!/^[A-Z0-9][A-Z0-9-]{2,31}$/.test(clean)) {
+        return res.status(400).json({ error: 'referrer code must be 3-32 letters, numbers or hyphens' })
+      }
+      code = clean
+    } else {
+      code = `AFF-${crypto.randomBytes(4).toString('hex').toUpperCase()}`
+    }
     const { data, error } = await supabase
       .from('affiliates')
       .insert({
         name: name.trim(),
         contact_email: contact_email || null,
         commission_amount: amount,
+        referrer_code: code,
       })
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'that referrer code is already in use' })
+      }
+      return res.status(500).json({ error: error.message })
+    }
     res.status(201).json(data)
   } catch (err) { next(err) }
 })
@@ -993,6 +1011,13 @@ app.put('/api/admin/affiliates/:id', requireAdmin, async (req, res, next) => {
     if (commission_amount !== undefined && Number(commission_amount) >= 0) {
       updates.commission_amount = Number(commission_amount)
     }
+    if (referrer_code !== undefined) {
+      const clean = String(referrer_code).trim().toUpperCase()
+      if (!/^[A-Z0-9][A-Z0-9-]{2,31}$/.test(clean)) {
+        return res.status(400).json({ error: 'referrer code must be 3-32 letters, numbers or hyphens' })
+      }
+      updates.referrer_code = clean
+    }
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: 'nothing to update' })
     }
@@ -1002,8 +1027,45 @@ app.put('/api/admin/affiliates/:id', requireAdmin, async (req, res, next) => {
       .eq('id', req.params.id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'that referrer code is already in use' })
+      }
+      return res.status(500).json({ error: error.message })
+    }
     res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Generate (or return) the QR code image for an affiliate's install deep
+// link. The QR encodes the Google Play Store listing URL with an
+// install-referrer carrying the affiliate's referrer code:
+//   https://play.google.com/store/apps/details?id=com.soulfulbhakti.app&referrer=utm_source=<referrer_code>
+// Scanned by a customer -> opens Play Store -> installs -> on first launch
+// the app reads the referrer (Install Referrer API) to attribute the user.
+// Returns a PNG image (application/png). Requires an admin session.
+app.get('/api/admin/affiliates/:id/qr.png', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('affiliates')
+      .select('id, name, referrer_code')
+      .eq('id', req.params.id)
+      .maybeSingle()
+    if (error) return res.status(500).json({ error: error.message })
+    if (!data || !data.referrer_code) {
+      return res.status(404).json({ error: 'affiliate has no referrer code' })
+    }
+    const installUrl =
+      'https://play.google.com/store/apps/details?id=com.soulfulbhakti.app' +
+      '&referrer=utm_source=' + encodeURIComponent(data.referrer_code)
+    const png = await QRCode.toBuffer(installUrl, {
+      width: 320,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+    })
+    res.set('Content-Type', 'image/png')
+    res.set('Cache-Control', 'no-store')
+    res.send(png)
   } catch (err) { next(err) }
 })
 
