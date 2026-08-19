@@ -5,6 +5,7 @@ import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/dio/dio.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
+import 'package:sangeet/services/superwall_service.dart';
 
 /// Google Play Install Referrer channel name (must match MainActivity).
 const kInstallReferrerChannel = 'com.soulfulbhakti.app/install_referrer';
@@ -14,6 +15,10 @@ const kReferrerCodeKey = 'affiliateReferrerCode';
 
 /// Key tracking whether the referrer code has already been bound to a user.
 const kReferrerBoundKey = 'affiliateReferrerBound';
+
+/// Key tracking whether this user is QR-affiliate-attributed (server-confirmed).
+/// Persisted so the Superwall discount attribute survives app restarts.
+const kIsQRAttributedKey = 'isQRAttributed';
 
 /// Google Play Install Referrer -> affiliate attribution.
 ///
@@ -88,12 +93,50 @@ class ReferrerService {
         ),
       );
       if (response.statusCode == 200) {
-        // Mark bound regardless of the specific RPC status (bound /
-        // already_bound / invalid) so we never retry for this install.
-        await KVStoreService.sharedPreferences.setBool(kReferrerBoundKey, true);
+        final status =
+            (response.data as Map<String, dynamic>?)?['status'] as String?;
+        // A user is QR-attributed when the server confirms a binding: `bound`
+        // (fresh) or `already_bound` (from a prior session). Only `invalid`
+        // means no affiliate attribution.
+        final attributed =
+            status == 'bound' || status == 'already_bound';
+        await KVStoreService.sharedPreferences.setBool(
+            kReferrerBoundKey, true);
+        if (attributed) {
+          await _markQRAttributed();
+        }
       }
     } catch (_) {
       // Never disrupt sign-in over a best-effort referral attribution.
+    }
+  }
+
+  /// Persists the QR-attribution flag and tells Superwall the user is
+  /// affiliate-attributed so its dashboard audience can present the discounted
+  /// yearly offer. Best-effort; never throws.
+  Future<void> _markQRAttributed() async {
+    await KVStoreService.sharedPreferences.setBool(kIsQRAttributedKey, true);
+    try {
+      await SuperwallService.instance
+          .setUserAttributes({'has_affiliate_discount': true});
+    } catch (_) {
+      // Ignore: Superwall may not be configured yet (e.g. key absent).
+    }
+  }
+
+  /// True when this user has a server-confirmed QR-affiliate attribution.
+  bool get isQRAttributed =>
+      KVStoreService.sharedPreferences.getBool(kIsQRAttributedKey) ?? false;
+
+  /// Re-syncs the Superwall discount attribute for a user who was QR-attributed
+  /// in a prior session (e.g. after re-login / app restart). Best-effort.
+  Future<void> syncAffiliateAttribute() async {
+    if (!isQRAttributed) return;
+    try {
+      await SuperwallService.instance
+          .setUserAttributes({'has_affiliate_discount': true});
+    } catch (_) {
+      // Ignore: Superwall not configured.
     }
   }
 
@@ -104,6 +147,9 @@ class ReferrerService {
     if (auth != null && auth.signedIn && auth.userId != null) {
       await bindToSignedInUser(auth.userId!);
     }
+    // Restore the Superwall discount attribute for users attributed in a
+    // prior session (e.g. after re-login or app restart).
+    await syncAffiliateAttribute();
   }
 }
 
