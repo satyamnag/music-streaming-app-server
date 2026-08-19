@@ -21,6 +21,7 @@ import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
+import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import 'package:sangeet/collections/env.dart';
@@ -161,6 +162,13 @@ Future<void> main(List<String> rawArgs) async {
       if (Env.oneSignalAppId.isNotEmpty) {
         await OneSignalService.instance.initialize(Env.oneSignalAppId);
       }
+    }
+
+    // Read the Google Play Install Referrer (affiliate QR attribution) early
+    // on first launch so the code is stored before the user signs in. Binding
+    // to the signed-in user happens inside ClerkAuthNotifier.
+    if (kIsAndroid) {
+      await ReferrerService.instance.readReferrer();
     }
 
     runApp(

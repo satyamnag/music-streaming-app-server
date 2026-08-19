@@ -1583,4 +1583,42 @@ class ServerSupabaseDataRoutes {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
   }
+
+  /// POST /supabase/referrers/bind
+  ///
+  /// Binds a signed-in user to an affiliate via a QR install-referrer code.
+  /// Body: `{referrer_code, user_id}`. The RPC validates the code and records
+  /// the immutable attribution ONCE per user. Returns `{status}` where status
+  /// is one of: bound, already_bound, invalid.
+  Future<Response> bindReferrer(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(body) as Map<String, dynamic>;
+      final code = (data['referrer_code'] ?? '').toString().trim();
+      final userId = (data['user_id'] ?? data['userId'] ?? '')
+          .toString()
+          .trim();
+      if (code.isEmpty || userId.isEmpty) {
+        return Response.badRequest(
+            body: '{"error":"referrer_code and user_id required"}');
+      }
+      final sb = await _supabase;
+      final res = await sb.rpc(
+        'bind_affiliate_referral',
+        params: {'p_referrer_code': code, 'p_user_id': userId},
+      );
+      if (res.error != null) {
+        return Response.internalServerError(
+            body: '{"error":"${res.error!.message}"}');
+      }
+      return Response.ok(
+        jsonEncode({'status': res.data}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
 }

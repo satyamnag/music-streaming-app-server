@@ -162,6 +162,11 @@ dependencies {
     // Clerk Android SDK (Native API)
     implementation 'com.clerk:clerk-android-api:1.0.39'
 
+    // Google Play Install Referrer (affiliate QR attribution). Read explicitly
+    // (not transitively) so the referrer bridge never depends on Superwall's
+    // internal dependency graph.
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+
     // Google Play Billing Library (in-app purchases & subscriptions)
     // NOTE: keep at 8.0.0 — Superwall's native Android SDK (superwall-android)
     // is compiled against billing 8.0.0 and references SkuDetails /

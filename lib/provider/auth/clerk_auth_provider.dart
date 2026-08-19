@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 
@@ -110,6 +111,9 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
       if (email != null && email.isNotEmpty) {
         os.setEmail(email);
       }
+      // Best-effort: bind the QR install-referrer code to this user (once).
+      // Never blocks or disrupts sign-in.
+      ReferrerService.instance.bindToSignedInUser(authState.userId!);
     } else if (!authState.signedIn) {
       sw.reset();
       os.logout();

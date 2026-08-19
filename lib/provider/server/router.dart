@@ -71,6 +71,7 @@ final serverRouterProvider = Provider((ref) {
   // Coupon affiliate program (attribution-only codes)
   router.post("/supabase/coupons/validate", supabaseRoutes.validateCoupon);
   router.post("/supabase/coupons/redeem", supabaseRoutes.redeemCoupon);
+  router.post("/supabase/referrers/bind", supabaseRoutes.bindReferrer);
 
   router.all("/ws", connectRoutes.websocket);
 
