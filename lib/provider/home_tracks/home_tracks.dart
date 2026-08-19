@@ -98,6 +98,55 @@ final globalPlayCountsProvider =
   return _fetchGlobalPlayCounts(ref);
 });
 
+/// Fetches the admin-created albums (name + cover + assigned tracks) from the
+/// local server. These are shown alongside the auto-grouped albums under the
+/// home "Albums" component. Returns an empty list on any failure so the home
+/// screen never breaks.
+final homeAdminAlbumsProvider =
+    FutureProvider<List<HomeAlbum>>((ref) async {
+  try {
+    await ref.watch(serverProvider.future);
+    await SangeetMedia.ensurePortReady();
+    final response = await globalDio.get(
+      'http://127.0.0.1:${SangeetMedia.serverPort}/supabase/admin-albums',
+      options: Options(
+        validateStatus: (status) => status != null && status < 500,
+        headers: {'accept': 'application/json'},
+      ),
+    );
+    if (response.statusCode != 200) return const [];
+    final data = response.data as Map<String, dynamic>;
+    final items = (data['items'] as List<dynamic>? ?? []);
+    final result = <HomeAlbum>[];
+    for (final raw in items) {
+      final item = Map<String, dynamic>.from(raw as Map);
+      final name = (item['name'] ?? '').toString();
+      if (name.isEmpty) continue;
+      final id = (item['id'] ?? '').toString();
+      final album = SangeetSimpleAlbumObject(
+        id: id,
+        name: name,
+        externalUri: '',
+        artists: const [],
+        images: (item['images'] as List<dynamic>? ?? const [])
+            .map((e) => SangeetImageObject.fromJson(
+                Map<String, dynamic>.from(e as Map)))
+            .toList(),
+        albumType: SangeetAlbumType.album,
+        releaseDate: null,
+      );
+      final albumTracks = (item['tracks'] as List<dynamic>? ?? const [])
+          .map((e) => SangeetTrackObject.fromJson(
+              Map<String, dynamic>.from(e as Map)))
+          .toList();
+      result.add((album: album, tracks: albumTracks));
+    }
+    return result;
+  } catch (_) {
+    return const [];
+  }
+});
+
 /// Builds the "Newest Arrivals", "Top Trending" and "Albums" lists shown on
 /// the home screen. All three are derived from the same full catalog
 /// ([homeTracksProvider]):
@@ -130,13 +179,15 @@ final homeSectionsProvider =
     });
 
   final albums = _buildAlbums(tracks, playCounts);
+  // Merge admin-created albums (with covers) ahead of the auto-grouped ones.
+  final adminAlbums = await ref.watch(homeAdminAlbumsProvider.future);
   final languages = _buildLanguageGroups(tracks, playCounts);
 
   ref.keepAlive();
   return HomeSections(
     newestArrivals: newestArrivals,
     topTrending: topTrending,
-    albums: albums,
+    albums: [...adminAlbums, ...albums],
     languages: languages,
   );
 });

@@ -7,6 +7,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A horizontal "Albums" row shown on the home screen. Songs that share the
@@ -73,9 +74,17 @@ class HomeAlbumsSection extends HookConsumerWidget {
                     album: album,
                     trackCount: tracks.length,
                     imageUrl: imageUrl,
-                    onTap: () {
-                      // Open the album screen with its full song list.
-                      context.navigateTo(AlbumRoute(id: album.id, album: album));
+                    onTap: () async {
+                      // Play the album's songs from the first track through
+                      // the last, seamlessly, in the order they belong.
+                      if (tracks.isNotEmpty) {
+                        await ref
+                            .read(audioPlayerProvider.notifier)
+                            .load(tracks, initialIndex: 0, autoPlay: true);
+                      } else {
+                        // No tracks loaded yet — open the album screen instead.
+                        context.navigateTo(AlbumRoute(id: album.id, album: album));
+                      }
                     },
                   );
                 },
@@ -150,9 +159,7 @@ class _AlbumCard extends HookWidget {
               ),
               Gap(2 * scale),
               Text(
-                album.artists.isNotEmpty
-                    ? '${album.artists.asString()} • $trackCount songs'
-                    : '$trackCount songs',
+                '$trackCount songs',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.xSmall.copyWith(

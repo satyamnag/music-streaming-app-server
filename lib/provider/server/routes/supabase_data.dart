@@ -1254,6 +1254,51 @@ class ServerSupabaseDataRoutes {
     }
   }
 
+  /// GET /supabase/admin-albums
+  ///
+  /// Returns the admin-created albums (name + cover) with their assigned
+  /// tracks, so the home "Albums" component can show them and clicking one
+  /// plays its tracks first-to-last.
+  Future<Response> getAdminAlbums(Request request) async {
+    try {
+      final sb = await _supabase;
+      final albums = await sb.from('albums').select('*').order('created_at');
+      final allTracks = await sb.from('tracks').select('*').order('created_at');
+
+      final byAlbum = <String, List<Map<String, dynamic>>>{};
+      for (final t in allTracks) {
+        final albumId = t['album_id']?.toString();
+        if (albumId == null || albumId.isEmpty) continue;
+        (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
+      }
+
+      final items = albums.map((a) {
+        final cover = a['cover_url']?.toString();
+        return {
+          'id': a['id'].toString(),
+          'name': a['name']?.toString() ?? '',
+          'externalUri': '',
+          'artists': const <dynamic>[],
+          'images': cover != null
+              ? [
+                  {'url': cover, 'width': 300, 'height': 300}
+                ]
+              : const [],
+          'albumType': 'album',
+          'releaseDate': null,
+          'tracks': byAlbum[a['id'].toString()] ?? const [],
+        };
+      }).toList();
+
+      return Response.ok(
+        jsonEncode({'items': items}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
   /// POST /supabase/api/playlists
   ///
   /// Creates a user playlist in the local drift DB. Body: `{name, description}`.

@@ -68,6 +68,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="toolbar">
   <button class="btn btn-primary" onclick="showAdd()">+ Add Track</button>
   <button class="btn btn-secondary" onclick="loadTracks()">Refresh Tracks</button>
+  <button class="btn btn-secondary" onclick="toggleAlbums()">Albums</button>
   <button class="btn btn-secondary" onclick="toggleAffiliates()">Affiliates &amp; Coupons</button>
   <span id="count" style="font-size:14px;color:#666;"></span>
 </div>
@@ -84,6 +85,30 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
   <th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
+
+<div id="albumsPanel" style="display:none; margin-top:24px;">
+  <h2 style="margin-bottom:12px;">Albums</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Create an album with a name and cover photo. Then assign songs to it from
+    the "Album" dropdown when adding/editing a track. Created albums appear
+    under the "Albums" section on the home screen, and play their songs
+    first-to-last.
+  </p>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">New Album</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies"></div>
+      <div><label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;"></div>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload</button>
+      <button class="btn btn-success" onclick="createAlbum()">Create Album</button>
+    </div>
+    <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
+    <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+  </div>
+  <table><thead><tr>
+    <th>Name</th><th>Cover</th><th>Assigned Songs</th><th>Actions</th>
+  </tr></thead><tbody id="albumsTbody"></tbody></table>
+</div>
 
 <div id="affiliatesPanel" style="display:none; margin-top:24px;">
   <h2 style="margin-bottom:12px;">Affiliate Marketing</h2>
@@ -129,7 +154,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <input type="hidden" id="editId">
 <label>Title *</label><input id="fTitle" placeholder="Track title">
 <label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
-<label>Album</label><input id="fAlbum" placeholder="Album name">
+<label>Album *</label><select id="fAlbum"><option value="">— No album —</option></select>
 <label>Duration (seconds)</label><input id="fDuration" type="number" placeholder="e.g. 240">
 <label>Status</label>
 <select id="fStatus">
@@ -368,6 +393,96 @@ async function loadTracks() {
   }
 }
 
+let albums = [];
+async function loadAlbums() {
+  try {
+    const res = await authedFetch('/api/admin/albums', { credentials: 'same-origin' });
+    albums = await res.json();
+    // Populate the track-form album dropdown (value = album id).
+    const sel = document.getElementById('fAlbum');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— No album —</option>' + albums.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+    if (current) sel.value = current;
+    // Render the albums table.
+    const tbody = document.getElementById('albumsTbody');
+    if (!tbody) return;
+    if (albums.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No albums yet — create one above.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = albums.map(a => `<tr>
+      <td><b>${esc(a.name)}</b></td>
+      <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '-'}</td>
+      <td>${countAlbumTracks(a.id)}</td>
+      <td class="actions">
+        <button class="btn btn-danger btn-sm" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')">Del</button>
+      </td>
+    </tr>`).join('');
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message); }
+}
+
+function countAlbumTracks(albumId) {
+  if (!tracks) return 0;
+  return tracks.filter(t => t.album_id === albumId).length;
+}
+
+function toggleAlbums() {
+  const panel = document.getElementById('albumsPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') { loadAlbums(); }
+}
+
+async function createAlbum() {
+  const name = document.getElementById('alName').value.trim();
+  const cover_url = document.getElementById('alCover').value.trim() || null;
+  if (!name) { toast('Album name is required'); return; }
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/albums', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, cover_url }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Create failed'); }
+    toast('Album created');
+    document.getElementById('alName').value = '';
+    document.getElementById('alCover').value = '';
+    document.getElementById('alCoverStatus').textContent = '';
+    loadAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); }
+}
+
+function confirmDeleteAlbum(id, name) {
+  openConfirm('Delete album?', `Delete "${name}"? Assigned songs keep their album name but stop appearing under this admin album.`, () => deleteAlbum(id));
+}
+
+async function deleteAlbum(id) {
+  try {
+    const res = await authedFetch(`/api/admin/albums/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Delete failed');
+    toast('Album deleted');
+    loadAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+}
+
+async function handleAlbumCoverUpload(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
+    const data = await res.json();
+    const url = data.url || data.publicUrl || '';
+    if (url) {
+      document.getElementById('alCover').value = url;
+      document.getElementById('alCoverStatus').textContent = 'Cover uploaded: ' + url.substring(0, 50) + '...';
+    }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Upload error: ' + e.message); }
+}
+
 function renderTracks() {
   trackSearch = document.getElementById('searchInput').value.trim();
   const list = filteredTracks();
@@ -405,13 +520,16 @@ function pl(v) { return v || 0; }
 function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
-  ['fTitle','fArtist','fAlbum','fDuration','fThumbnail','fStorage','fLyrics','fSyncedLyrics'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fArtist','fDuration','fThumbnail','fStorage','fLyrics','fSyncedLyrics'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fAlbum').value = '';
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
   document.getElementById('modal').style.display = 'block';
+  // Ensure the album dropdown is populated with admin-created albums.
+  if (albums.length === 0) loadAlbums();
 }
 
 function showEdit(id) {
@@ -421,7 +539,7 @@ function showEdit(id) {
   document.getElementById('editId').value = id;
   document.getElementById('fTitle').value = t.title || '';
   document.getElementById('fArtist').value = (t.artist_names || []).join(', ');
-  document.getElementById('fAlbum').value = t.album || '';
+  document.getElementById('fAlbum').value = t.album_id || '';
   document.getElementById('fDuration').value = t.duration || '';
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
@@ -433,6 +551,8 @@ function showEdit(id) {
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
+  // Ensure the album dropdown is populated before setting its value.
+  if (albums.length === 0) loadAlbums().then(() => { document.getElementById('fAlbum').value = t.album_id || ''; });
 }
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -441,7 +561,9 @@ async function saveTrack() {
   const id = document.getElementById('editId').value;
   const title = document.getElementById('fTitle').value.trim();
   const artistStr = document.getElementById('fArtist').value.trim();
-  const album = document.getElementById('fAlbum').value.trim();
+  const albumSel = document.getElementById('fAlbum');
+  const album_id = albumSel ? (albumSel.value || null) : null;
+  const albumName = album_id ? (albums.find(a => a.id === album_id)?.name || '') : '';
   const duration = parseInt(document.getElementById('fDuration').value) || 0;
   const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
   const storage_path = document.getElementById('fStorage').value.trim();
@@ -452,7 +574,7 @@ async function saveTrack() {
   const language = document.getElementById('fLanguage').value || null;
   const lyrics = document.getElementById('fLyrics').value.trim() || null;
   const synced_lyrics = document.getElementById('fSyncedLyrics').value.trim() || null;
-  const body = { title, artist_names, album: album || title, duration, thumbnail, storage_path, status, language, lyrics, synced_lyrics };
+  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language, lyrics, synced_lyrics };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';

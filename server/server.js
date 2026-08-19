@@ -652,7 +652,54 @@ app.get('/artists/:id/top-tracks', async (req, res, next) => {
     }
 
     const items = data.map((t) => trackToJson(t, req))
-    res.json({ items, limit: 20, nextOffset: null, total: items.length, hasMore: false })
+    res.json({ items, limit: 100, nextOffset: null, total: items.length, hasMore: false })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// Public: admin-created albums with their assigned tracks. Used by the app's
+// home "Albums" component to show admin albums, and by the album screen to
+// play an album's tracks first-to-last. Each album includes its cover and the
+// ordered list of assigned tracks (in insertion order).
+app.get('/api/albums', async (req, res, next) => {
+  try {
+    const { data: albums, error: aErr } = await supabase
+      .from('albums')
+      .select('*')
+      .order('created_at', { ascending: true })
+    if (aErr) {
+      console.error('[albums] fetch failed:', aErr.message)
+      return res.status(500).json({ error: 'Failed to fetch albums' })
+    }
+
+    // Fetch all tracks once, then group by album_id (insertion order by row
+    // order, which PostgREST returns by created_at asc by default).
+    const { data: allTracks, error: tErr } = await supabase
+      .from('tracks')
+      .select('*')
+      .order('created_at', { ascending: true })
+    if (tErr) {
+      console.error('[albums] tracks fetch failed:', tErr.message)
+      return res.status(500).json({ error: 'Failed to fetch album tracks' })
+    }
+
+    const byAlbum = {}
+    for (const t of allTracks || []) {
+      if (t.album_id) {
+        (byAlbum[t.album_id] = byAlbum[t.album_id] || []).push(trackToJson(t, req))
+      }
+    }
+
+    const items = (albums || []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      cover_url: a.cover_url || null,
+      images: a.cover_url ? [{ url: a.cover_url, width: 300, height: 300 }] : [],
+      tracks: byAlbum[a.id] || [],
+    }))
+
+    res.json({ items })
   } catch (err) {
     next(err)
   }
@@ -849,7 +896,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -863,6 +910,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       artist_names: cleanArtists,
       artist_names_text: cleanArtists.join(', '),
       album: typeof album === 'string' && album.trim() ? album.trim() : cleanTitle,
+      album_id: typeof album_id === 'string' && album_id.trim() ? album_id.trim() : null,
       duration: cleanDuration,
       thumbnail: typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null,
       storage_path: storage_path.trim(),
@@ -879,7 +927,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -892,6 +940,7 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
       updates.artist_names_text = clean.join(', ')
     }
     if (album !== undefined) updates.album = typeof album === 'string' && album.trim() ? album.trim() : null
+    if (album_id !== undefined) updates.album_id = typeof album_id === 'string' && album_id.trim() ? album_id.trim() : null
     if (duration !== undefined) {
       if (!Number.isFinite(Number(duration)) || Number(duration) < 0) return res.status(400).json({ error: 'duration must be a non-negative number' })
       updates.duration = Math.floor(Number(duration))
@@ -920,6 +969,65 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     res.json({ success: true })
   } catch (err) { next(err) }
 })
+
+// List admin-created albums. Used by the admin UI and to feed the home
+// "Albums" component.
+app.get('/api/admin/albums', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('albums')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
+// Create an admin album (name + cover photo URL).
+app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, cover_url } = req.body || {}
+    if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' })
+    const { data, error } = await supabase
+      .from('albums')
+      .insert({
+        name: name.trim(),
+        cover_url: typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null,
+      })
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+// Update an admin album (name + cover photo URL).
+app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, cover_url } = req.body || {}
+    const updates = {}
+    if (name !== undefined) {
+      if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name must be a non-empty string' })
+      updates.name = name.trim()
+    }
+    if (cover_url !== undefined) updates.cover_url = typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
+    const { data, error } = await supabase.from('albums').update(updates).eq('id', req.params.id).select().single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Delete an admin album. Tracks assigned to it keep their legacy `album` text
+// (their album_id is set to null by the FK on delete set null).
+app.delete('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('albums').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
 
 // Upload file (audio -> Cloudflare R2 when configured, else Supabase Storage;
 // images -> Supabase Storage thumbnails bucket).
