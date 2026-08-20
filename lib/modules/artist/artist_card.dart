@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -15,7 +14,6 @@ class ArtistCard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final theme = Theme.of(context);
     final backgroundImage = UniversalImage.imageProvider(
       artist.images.asUrlString(
         placeholder: ImagePlaceholder.artist,
@@ -36,13 +34,8 @@ class ArtistCard extends HookConsumerWidget {
               size: 130,
             ),
             const Gap(10),
-            AutoSizeText(
-              artist.name,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: theme.typography.bold,
-            ),
+            // Artist name is intentionally hidden app-wide.
+            const SizedBox.shrink(),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

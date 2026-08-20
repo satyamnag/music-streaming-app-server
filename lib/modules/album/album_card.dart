@@ -65,7 +65,7 @@ class AlbumCard extends HookConsumerWidget {
 
     final isLoading =
         (isPlaylistPlaying && isFetchingActiveTrack) || updating.value;
-    final description = "${album.albumType.name} • ${album.artists.asString()}";
+    final description = album.albumType.name;
 
     final onTap = useCallback(() {
       // Open the album screen (list of its songs) instead of playing directly.

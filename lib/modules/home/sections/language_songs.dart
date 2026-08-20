@@ -1,108 +1,114 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
-/// A horizontal "Language Songs" row shown on the home screen — one card per
-/// language (e.g. "Telugu Songs", "Kannada Songs"). Tapping a card opens that
-/// language's song list (the same `album-language-<lang>` album screen that
-/// the server already serves), so the user can browse or play all songs in a
-/// given language.
-class HomeLanguageSongsSection extends HookConsumerWidget {
+/// Home screen components — one titled horizontal row per language (e.g.
+/// "Telugu Songs", "Kannada Songs"). Each language's songs appear under its own
+/// component heading, so a catalog with several languages yields several
+/// separate components. Tapping a track plays the language's songs from that
+/// point.
+///
+/// Renders as a list of slivers (one per language) so the caller can spread it
+/// into the home `CustomScrollView` alongside the other sections.
+class HomeLanguageSongsSections extends HookConsumerWidget {
   final List<HomeLanguageGroup> languages;
 
-  const HomeLanguageSongsSection({super.key, required this.languages});
+  const HomeLanguageSongsSections({super.key, required this.languages});
 
   @override
   Widget build(BuildContext context, ref) {
     if (languages.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
-
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-              child: DefaultTextStyle(
-                style: theme.typography.h4.copyWith(
-                  color: theme.colorScheme.foreground,
-                ),
-                child: const Text('Language Songs'),
-              ),
-            ),
-            Gap(8 * scale),
-            SizedBox(
-              height: 200,
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-                scrollDirection: Axis.horizontal,
-                itemCount: languages.length,
-                separatorBuilder: (_, __) => Gap(12 * scale),
-                itemBuilder: (context, index) {
-                  final group = languages[index];
-                  final trackCount = group.tracks.length;
-                  final coverUrl = group.tracks.isNotEmpty
-                      ? group.tracks.first.album.images
-                          .smallest(ImagePlaceholder.albumArt)
-                      : '';
-
-                  return _LanguageCard(
-                    language: group.language,
-                    trackCount: trackCount,
-                    imageUrl: coverUrl,
-                    onTap: () {
-                      // Build a lightweight album object so the existing
-                      // album-language-<lang> screen (served by the server)
-                      // opens with the language's full song list.
-                      final firstTrack = group.tracks.isNotEmpty
-                          ? group.tracks.first
-                          : null;
-                      final album = SangeetSimpleAlbumObject(
-                        id:
-                            'album-language-${group.language.toLowerCase().replaceAll(' ', '-')}',
-                        name: '${group.language} Songs',
-                        externalUri: firstTrack?.album.externalUri ?? '',
-                        artists: firstTrack?.album.artists ??
-                            const <SangeetSimpleArtistObject>[],
-                        images: firstTrack?.album.images ??
-                            const <SangeetImageObject>[],
-                        albumType: SangeetAlbumType.album,
-                        releaseDate: firstTrack?.album.releaseDate,
-                      );
-                      context.navigateTo(AlbumRoute(id: album.id, album: album));
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => _LanguageSection(group: languages[index]),
+        childCount: languages.length,
       ),
     );
   }
 }
 
-class _LanguageCard extends HookWidget {
-  final String language;
-  final int trackCount;
+/// A single language's home section: a heading "<Language> Songs" plus a
+/// horizontal row of that language's tracks.
+class _LanguageSection extends HookConsumerWidget {
+  final HomeLanguageGroup group;
+
+  const _LanguageSection({required this.group});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DefaultTextStyle(
+                    style: theme.typography.h4.copyWith(
+                      color: theme.colorScheme.foreground,
+                    ),
+                    child: Text('${group.language} Songs'),
+                  ),
+                ),
+                Text(
+                  '${group.tracks.length}',
+                  style: theme.typography.small.copyWith(
+                    color: theme.colorScheme.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Gap(8 * scale),
+          SizedBox(
+            height: 200,
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
+              scrollDirection: Axis.horizontal,
+              itemCount: group.tracks.length,
+              separatorBuilder: (_, __) => Gap(12 * scale),
+              itemBuilder: (context, index) {
+                final track = group.tracks[index];
+                final imageUrl = track.album.images
+                    .smallest(ImagePlaceholder.albumArt);
+                return _TrackCard(
+                  track: track,
+                  imageUrl: imageUrl,
+                  onTap: () async {
+                    await ref
+                        .read(audioPlayerProvider.notifier)
+                        .load(group.tracks, initialIndex: index, autoPlay: true);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrackCard extends HookWidget {
+  final SangeetTrackObject track;
   final String imageUrl;
   final VoidCallback onTap;
 
-  const _LanguageCard({
-    required this.language,
-    required this.trackCount,
+  const _TrackCard({
+    required this.track,
     required this.imageUrl,
     required this.onTap,
   });
@@ -146,7 +152,7 @@ class _LanguageCard extends HookWidget {
               ),
               Gap(8 * scale),
               Text(
-                '$language Songs',
+                track.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.small.copyWith(
@@ -156,7 +162,7 @@ class _LanguageCard extends HookWidget {
               ),
               Gap(2 * scale),
               Text(
-                '$trackCount songs',
+                track.album.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.xSmall.copyWith(

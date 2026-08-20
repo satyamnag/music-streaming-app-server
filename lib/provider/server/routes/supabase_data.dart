@@ -1262,8 +1262,8 @@ class ServerSupabaseDataRoutes {
   Future<Response> getAdminAlbums(Request request) async {
     try {
       final sb = await _supabase;
-      final albums = await sb.from('albums').select('*').order('created_at');
-      final allTracks = await sb.from('tracks').select('*').order('created_at');
+      final albums = await sb.from('albums').select('*').order('created_at', ascending: true);
+      final allTracks = await sb.from('tracks').select('*').order('created_at', ascending: true);
 
       final byAlbum = <String, List<Map<String, dynamic>>>{};
       for (final t in allTracks) {

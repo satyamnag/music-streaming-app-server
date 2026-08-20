@@ -24,9 +24,15 @@ create table if not exists public.albums (
 
 alter table public.albums enable row level security;
 
--- No user-facing policies: album data is admin-managed (service role
--- bypasses RLS). Read-only access for the app flows through the local
--- server (service role), not the anon key.
+-- Albums are publicly readable: the app's on-device local server reads them
+-- through the Supabase anon key (same as the `tracks` table, which has no
+-- RLS), so the home "Albums" component can show admin-created albums.
+-- Writes stay admin-only (service role bypasses RLS; anon has no insert/
+-- update/delete policy).
+create policy "Albums are publicly readable"
+  on public.albums
+  for select
+  using (true);
 
 create index if not exists albums_created_idx on public.albums (created_at desc);
 

@@ -1,8 +1,4 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.gr.dart';
-import 'package:sangeet/components/links/anchor_button.dart';
-import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 
 class ArtistLink extends StatelessWidget {
@@ -27,47 +23,9 @@ class ArtistLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData(:colorScheme) = Theme.of(context);
-
-    return Wrap(
-      crossAxisAlignment: crossAxisAlignment,
-      alignment: mainAxisAlignment,
-      children: [
-        ...(hideOverflowArtist ? artists.take(3).toList() : artists)
-            .asMap()
-            .entries
-            .map(
-              (artist) => Builder(builder: (context) {
-                return AnchorButton(
-                  (artist.key != artists.length - 1)
-                      ? "${artist.value.name}, "
-                      : artist.value.name,
-                  onTap: () {
-                    if (onRouteChange != null) {
-                      onRouteChange?.call("/artist/${artist.value.id}");
-                    } else {
-                      context
-                          .navigateTo(ArtistRoute(artistId: artist.value.id));
-                    }
-                  },
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle,
-                );
-              }),
-            ),
-        if (hideOverflowArtist && artists.length > 3)
-          AnchorButton(
-            context.l10n.and_n_more(artists.length - 3),
-            onTap: () {
-              onOverflowArtistClick?.call();
-            },
-            overflow: TextOverflow.ellipsis,
-            style: textStyle.copyWith(
-              color: colorScheme.secondary,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-      ],
-    );
+    // Artist names are intentionally hidden app-wide. Keep the component
+    // signature intact so callers and navigation still compile/work; just do
+    // not render any artist name text.
+    return const SizedBox.shrink();
   }
 }

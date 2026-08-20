@@ -33,8 +33,6 @@ class AlbumPage extends HookConsumerWidget {
     final savedAlbumsNotifier =
         ref.watch(metadataPluginSavedAlbumsProvider.notifier);
 
-    final artistName = album.artists.asString();
-
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
         ref.invalidate(metadataPluginAlbumTracksProvider(album.id));
@@ -58,10 +56,8 @@ class AlbumPage extends HookConsumerWidget {
             },
           ),
           title: album.name,
-          description: artistName.isEmpty
-              ? null
-              : "${album.albumType.name} • $artistName",
-          owner: artistName.isEmpty ? null : artistName,
+          description: album.albumType.name,
+          owner: null,
           tracks: tracks.asData?.value.items ?? [],
           error: tracks.error,
           routePath: '/album/${album.id}',

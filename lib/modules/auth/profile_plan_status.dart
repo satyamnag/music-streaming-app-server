@@ -1,6 +1,7 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
@@ -128,11 +129,44 @@ class ProfilePlanStatus extends HookConsumerWidget {
               value: activeSub.willRenew ? 'On' : 'Off',
             ),
           ] else
-            Text(
-              'Free plan',
-              style: theme.typography.base.copyWith(
-                color: theme.colorScheme.foreground,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Free plan',
+                  style: theme.typography.base.copyWith(
+                    color: theme.colorScheme.foreground,
+                  ),
+                ),
+                const Gap(8),
+                Flexible(
+                  child: Button(
+                    style: const ButtonStyle.primary(size: ButtonSize.small),
+                    onPressed: () async {
+                      if (!context.mounted) return;
+                      final purchased = await PremiumAccess.promptForPaidPlan(
+                        context,
+                        ref,
+                      );
+                      // Refresh the plan status after the paywall closes so a
+                      // fresh purchase is reflected immediately.
+                      if (!context.mounted || !purchased) return;
+                      loading.value = true;
+                      try {
+                        final info =
+                            await SuperwallService.instance.getCustomerInfo();
+                        if (!context.mounted) return;
+                        customerInfo.value = info;
+                      } catch (_) {
+                        // Keep the current state if the refresh fails.
+                      } finally {
+                        if (context.mounted) loading.value = false;
+                      }
+                    },
+                    child: const Text('Upgrade to Pro Plan Now'),
+                  ),
+                ),
+              ],
             ),
         ],
       ),

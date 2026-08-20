@@ -130,7 +130,7 @@ class PremiumAccess {
     var purchased = false;
     final result = await gateFeature(
       placement: SuperwallPlacements.premiumTrackPlay,
-      params: {'source': 'go_for_paid_plan'},
+      params: {'source': 'upgrade_to_pro_plan'},
       feature: () async {
         purchased = true;
       },

@@ -1,5 +1,15 @@
 # AGENTS.md
 
+# MANDATORY FIRST ACTION — READ THIS FILE BEFORE ANYTHING
+
+Before doing ANYTHING and EVERYTHING — before any investigation, any question,
+any command, any code change, any commit, any configuration, any debugging, or
+any engineering decision of any kind — the agent MUST first read this AGENTS.md
+file completely and in full, and strictly follow every instruction it contains.
+
+This obligation is ABSOLUTE / MANDATORY / NON-NEGOTIABLE / ZERO EXCEPTIONS and
+applies to EVERY single action, without exception, every time.
+
 # Enterprise Autonomous Engineering Excellence & Zero-Assumption Development Policy
 
 ## Version: 5.0
@@ -103,19 +113,51 @@ The agent MUST use appropriate official documentation MCP sources:
 
 ------------------------------------------------------------------------
 
+# Project-Specific Official Documentation (Mandatory Sources Of Truth)
+
+For ANY operation involving the technologies below, the agent MUST verify
+against these official sources FIRST, using the Approved Official
+Documentation MCP Sources (context7, ref, gitmcp, deepwiki, exa, etc.). Direct
+web/curl fetching is NOT a substitute for MCP-based documentation retrieval,
+and no implementation, debugging, bug fix, configuration change, API/SDK usage,
+or architecture change may begin before it is complete:
+
+## Media Playback & Streaming
+
+-   **media_kit (Flutter media library):** https://github.com/media-kit/media-kit
+-   **media_kit official docs:** https://media-kit.dev/
+-   **mpv manual (libmpv native engine):** https://mpv.io/manual/master/
+-   **Opus codec (Xiph.Org):** https://opus-codec.org/
+-   **Opus codec specification (IETF RFC 6716):** https://datatracker.ietf.org/doc/html/rfc6716
+-   **FFmpeg (demuxer/decoder used by libmpv):** https://ffmpeg.org/
+
+These links are the authoritative source for: supported audio formats, codecs,
+containers, streaming/network options, caching/buffering behavior, and codec
+efficiency claims. No media/streaming decision may be made without consulting
+them.
+
+------------------------------------------------------------------------
+
 # MCP Verification Enforcement
+
+Before ANY implementation, the agent MUST use the Approved Official
+Documentation MCP Sources listed above (context7, ref, gitmcp, deepwiki, exa,
+etc.) to fetch and verify all documentation. Direct web/curl fetching is NOT a
+substitute for MCP-based documentation retrieval. The agent MUST NOT begin any
+coding change until documentation verification is completed via MCP sources.
 
 Before ANY implementation:
 
 1.  Identify technologies involved.
-2.  Locate official documentation.
-3.  Verify versions.
-4.  Verify APIs.
-5.  Verify security recommendations.
-6.  Verify compatibility.
-7.  Verify migration notes and breaking changes.
+2.  Locate official documentation via the approved MCP sources.
+3.  Verify versions via MCP-fetched official documentation.
+4.  Verify APIs via MCP-fetched official documentation.
+5.  Verify security recommendations via MCP-fetched official documentation.
+6.  Verify compatibility via MCP-fetched official documentation.
+7.  Verify migration notes and breaking changes via MCP-fetched official
+    documentation.
 
-Only after verification may implementation begin.
+Only after MCP-based verification may implementation begin.
 
 ------------------------------------------------------------------------
 
@@ -197,7 +239,10 @@ Verify:
 
 ## Phase 4: Documentation Verification
 
-Verify:
+Verify — using ONLY the Approved Official Documentation MCP Sources (context7,
+ref, gitmcp, deepwiki, exa, etc.) — the following for every technology
+involved. Direct web/curl fetching is NOT a substitute for MCP-based
+documentation retrieval:
 
 1.  Official documentation
 2.  Official specifications
@@ -309,7 +354,7 @@ Verify:
 # Atomic Execution Loop
 
 1.  Discover
-2.  Verify official documentation
+2.  Verify official documentation via the Approved MCP Sources
 3.  Plan
 4.  Implement
 5.  Test

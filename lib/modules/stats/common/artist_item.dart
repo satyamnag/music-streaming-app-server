@@ -18,7 +18,8 @@ class StatsArtistItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ButtonTile(
       style: ButtonVariance.ghost,
-      title: Text(artist.name),
+      // Artist name is intentionally hidden app-wide.
+      title: const Text(''),
       leading: Avatar(
         initials: artist.name.substring(0, 1),
         provider: UniversalImage.imageProvider(
