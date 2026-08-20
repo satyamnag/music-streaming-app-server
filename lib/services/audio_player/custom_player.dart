@@ -19,10 +19,8 @@ class CustomPlayer extends Player {
   String _packageName = "";
   AndroidAudioManager? _androidAudioManager;
   bool _pausedByInterruption = false;
-  bool _pausedByNoisy = false;
   int _errorRetryCount = 0;
   static const int _maxErrorRetries = 3;
-  String? _positionSaveKey;
   int _lastSavedPosition = 0;
   int _lastSaveTime = 0;
 
@@ -194,7 +192,6 @@ class CustomPlayer extends Player {
         // https://github.com/ryanheise/audio_session#becoming-noisy
         s.becomingNoisyEventStream.listen((_) {
           if (state.playing) {
-            _pausedByNoisy = true;
             pause();
           }
         });

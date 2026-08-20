@@ -49,7 +49,6 @@ import es.antonborri.home_widget.HomeWidgetBackgroundIntent
 import es.antonborri.home_widget.actionStartActivity
 import com.sangeet.app.MainActivity
 import com.sangeet.app.glance.models.Track
-import com.sangeet.app.glance.widgets.FlutterAssetImageProvider
 import com.sangeet.app.glance.widgets.TrackDetailsView
 import com.sangeet.app.glance.widgets.TrackProgress
 

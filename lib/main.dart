@@ -76,7 +76,7 @@ Future<void> main(List<String> rawArgs) async {
   AppLogger.initialize(arguments["verbose"]);
 
   AppLogger.runZoned(() async {
-    final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
 
     HttpOverrides.global = BadCertificateAllowlistOverrides();
 
