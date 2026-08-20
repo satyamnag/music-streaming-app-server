@@ -110,6 +110,55 @@ The agent MUST use appropriate official documentation MCP sources:
 -   context-awesome
 -   flux
 -   sequential-thinking
+-   appium-mcp
+-   scrcpy-mcp
+-   agent-device
+-   uiautomator2-mcp
+
+------------------------------------------------------------------------
+
+# Android Mobile App Testing (Mandatory MCP Servers)
+
+For ANY Android app verification, UI testing, device interaction, screenshot
+capture, or end-to-end testing, the agent MUST use the dedicated Android MCP
+servers below instead of ad-hoc `adb shell` / `uiautomator dump` commands,
+whenever the servers are available and appropriate:
+
+-   **appium-mcp** — official Appium-team MCP server (Android + iOS). Use for
+    Appium-driven automation: sessions, element finding, gestures, screenshots,
+    device control.
+-   **scrcpy-mcp** — Android device control + vision via ADB and scrcpy. Use
+    for screen capture, tap/swipe/type input, app launch, UI element finding,
+    file transfer, and shell commands on the connected device/emulator.
+-   **agent-device** — Callstack's mobile automation CLI + MCP server (iOS,
+    Android, HarmonyOS). Use for app install/launch, UI interaction, snapshots,
+    and verification workflows.
+-   **uiautomator2-mcp** — Android automation via uiautomator2
+    (tap/swipe/type/screenshot/app management). Currently DISABLED in the
+    opencode config: upstream v0.1.1 crashes (mcp 2.x removed
+    `mcp.server.fastmcp`; mcp 1.9.0 still fails tool registration). Do NOT
+    enable until upstream is fixed; use appium-mcp / scrcpy-mcp / agent-device.
+
+## Prerequisites (verify before use)
+
+-   Target device/emulator visible via `adb devices` (ADB is at
+    `/home/ubuntu/Android/Sdk/platform-tools`; ensure it is on PATH when
+    invoking these servers).
+-   Node.js 22+ is required by appium-mcp, scrcpy-mcp and agent-device — use
+    `/opt/node22/bin/npx` (system node is v18 and too old).
+-   scrcpy and ffmpeg are optional but recommended for scrcpy-mcp performance;
+    the server falls back to ADB when they are absent.
+-   uv/uvx is used for the Python-based uiautomator2-mcp (currently disabled).
+
+## Usage Rules
+
+-   When a task matches one of these servers, prefer the server's MCP tools
+    over raw `adb shell` / `uiautomator dump` invocations.
+-   Verify the server is connected (its tools are actually available) before
+    relying on it; if a server fails to start, report the error and fall back
+    to the next appropriate server rather than guessing.
+-   Confirm the target device with the server's device-listing tool first
+    (the usual target for this workspace is emulator `emulator-5554`).
 
 ------------------------------------------------------------------------
 
