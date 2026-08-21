@@ -792,6 +792,25 @@ class ServerSupabaseDataRoutes {
     try {
       final tracks = await _fetchAllTracks(limit: 500);
 
+      // Admin-created album (public.albums uuid): return the tracks explicitly
+      // assigned to it via tracks.album_id.
+      if (!id.startsWith('album-')) {
+        final adminItems = tracks
+            .where((t) => t['album_id']?.toString() == id)
+            .map(_trackToJson)
+            .toList();
+        return Response.ok(
+          jsonEncode({
+            'items': adminItems,
+            'limit': 500,
+            'nextOffset': null,
+            'total': adminItems.length,
+            'hasMore': false
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+      }
+
       // Language albums: id `album-language-<lang>` -> all tracks of that lang.
       if (id.startsWith('album-language-')) {
         final lang = id
