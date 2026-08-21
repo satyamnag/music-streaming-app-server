@@ -54,6 +54,12 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .content { flex: 1; min-width: 0; }
 .view { display: none; }
 .view.active { display: block; }
+.pagination { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.pagination .page-info { font-size: 13px; color: #666; margin-right: auto; }
+.filter-row th { padding: 4px 6px; background: #fafafa; border-bottom: 1px solid #eee; }
+.col-filter { width: 100%; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
+.duration-filter { display: flex; gap: 4px; }
+.duration-filter .col-filter { min-width: 0; }
 @media (max-width: 768px) { th, td { font-size: 12px; padding: 6px; } .toolbar { flex-wrap: wrap; } .layout { flex-direction: column; } .sidebar { width: 100%; position: static; } }
 </style>
 </head>
@@ -100,7 +106,21 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th>Thumbnail</th><th>Storage</th>
   <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
   <th>Actions</th>
+</tr><tr class="filter-row">
+  <th></th>
+  <th><input id="filterArtist" class="col-filter" type="text" placeholder="Filter artist..." oninput="applyTrackFilters()"></th>
+  <th><input id="filterAlbum" class="col-filter" type="text" placeholder="Filter album..." oninput="applyTrackFilters()"></th>
+  <th><div class="duration-filter"><input id="filterDurMin" class="col-filter" type="number" min="0" placeholder="Min s" oninput="applyTrackFilters()"><input id="filterDurMax" class="col-filter" type="number" min="0" placeholder="Max s" oninput="applyTrackFilters()"></div></th>
+  <th><input id="filterLanguage" class="col-filter" type="text" placeholder="Filter language..." oninput="applyTrackFilters()"></th>
+  <th></th><th></th>
+  <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
+  <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
+    <div class="pagination" id="trackPagination" style="display:none;">
+      <span class="page-info" id="trackPageInfo"></span>
+      <button class="btn btn-secondary btn-sm" id="trackPrevBtn" onclick="changeTrackPage(-1)">Prev</button>
+      <button class="btn btn-secondary btn-sm" id="trackNextBtn" onclick="changeTrackPage(1)">Next</button>
+    </div>
     </div>
 
 <div id="albumsPanel" class="view">
@@ -272,6 +292,14 @@ let tracks = [];
 let trackSearch = '';
 let trackSortKey = null;
 let trackSortDir = 1;
+let trackPage = 1;
+let trackPageSize = 20;
+let filterArtist = '';
+let filterAlbum = '';
+let filterDurMin = '';
+let filterDurMax = '';
+let filterLanguage = '';
+let filterStatus = '';
 let pendingConfirm = null;
 let currentView = 'tracks';
 
@@ -298,6 +326,7 @@ function sortTracks(key) {
   document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
   const arrow = document.getElementById('arrow-' + key);
   if (arrow) arrow.textContent = trackSortDir === 1 ? '▲' : '▼';
+  trackPage = 1;
   renderTracks();
 }
 
@@ -310,6 +339,29 @@ function filteredTracks() {
       (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q) ||
       (t.album || '').toLowerCase().includes(q)
     );
+  }
+  if (filterArtist) {
+    const q = filterArtist.toLowerCase();
+    list = list.filter(t => (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q));
+  }
+  if (filterAlbum) {
+    const q = filterAlbum.toLowerCase();
+    list = list.filter(t => (t.album || '').toLowerCase().includes(q));
+  }
+  if (filterLanguage) {
+    const q = filterLanguage.toLowerCase();
+    list = list.filter(t => (t.language || '').toLowerCase().includes(q));
+  }
+  if (filterDurMin !== '' || filterDurMax !== '') {
+    const min = filterDurMin === '' ? -Infinity : (Number(filterDurMin) || 0);
+    const max = filterDurMax === '' ? Infinity : (Number(filterDurMax) || 0);
+    list = list.filter(t => {
+      const d = Number(t.duration) || 0;
+      return d >= min && d <= max;
+    });
+  }
+  if (filterStatus) {
+    list = list.filter(t => (t.status || 'free') === filterStatus);
   }
   if (trackSortKey) {
     list = [...list].sort((a, b) => {
@@ -525,15 +577,23 @@ async function handleAlbumCoverUpload(input) {
 }
 
 function renderTracks() {
-  trackSearch = document.getElementById('searchInput').value.trim();
+  const newSearch = document.getElementById('searchInput').value.trim();
+  if (newSearch !== trackSearch) trackPage = 1;
+  trackSearch = newSearch;
   const list = filteredTracks();
   const tbody = document.getElementById('tbody');
+  const pag = document.getElementById('trackPagination');
   if (list.length === 0) {
     tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search.') + '</td></tr>';
     document.getElementById('count').textContent = tracks.length + ' track(s)';
+    if (pag) pag.style.display = 'none';
     return;
   }
-  tbody.innerHTML = list.map(t => `<tr>
+  const totalPages = Math.max(1, Math.ceil(list.length / trackPageSize));
+  if (trackPage > totalPages) trackPage = totalPages;
+  const start = (trackPage - 1) * trackPageSize;
+  const pageList = list.slice(start, start + trackPageSize);
+  tbody.innerHTML = pageList.map(t => `<tr>
     <td>${esc(t.title)}</td>
     <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
     <td>${esc(t.album || '')}</td>
@@ -547,7 +607,33 @@ function renderTracks() {
       <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrack('${t.id}')">Del</button>
     </td>
   </tr>`).join('');
-  document.getElementById('count').textContent = `${tracks.length} track(s) (showing ${list.length})`;
+  document.getElementById('count').textContent = `${tracks.length} track(s) — page ${trackPage}/${totalPages}`;
+  if (pag) {
+    document.getElementById('trackPageInfo').textContent = `${start + 1}–${start + pageList.length} of ${list.length}`;
+    document.getElementById('trackPrevBtn').disabled = trackPage <= 1;
+    document.getElementById('trackNextBtn').disabled = trackPage >= totalPages;
+    pag.style.display = 'block';
+  }
+}
+
+function changeTrackPage(dir) {
+  const list = filteredTracks();
+  const totalPages = Math.max(1, Math.ceil(list.length / trackPageSize));
+  const newPage = trackPage + dir;
+  if (newPage < 1 || newPage > totalPages) return;
+  trackPage = newPage;
+  renderTracks();
+}
+
+function applyTrackFilters() {
+  filterArtist = document.getElementById('filterArtist').value.trim();
+  filterAlbum = document.getElementById('filterAlbum').value.trim();
+  filterDurMin = document.getElementById('filterDurMin').value.trim();
+  filterDurMax = document.getElementById('filterDurMax').value.trim();
+  filterLanguage = document.getElementById('filterLanguage').value.trim();
+  filterStatus = document.getElementById('filterStatus').value;
+  trackPage = 1;
+  renderTracks();
 }
 
 function confirmDeleteTrack(id) {
