@@ -76,6 +76,11 @@ class CustomPlayer extends Player {
           _stallTimer?.cancel();
           _stallTimer = Timer(_stallTimeout, () {
             if (!state.buffering) return;
+            // Never treat an intentionally paused player as stalled: when
+            // paused (e.g. the restored session waiting for the user to press
+            // play), buffering without position advance is expected and must
+            // NOT auto-play the track.
+            if (!state.playing) return;
             final now = state.position;
             final advanced = now > _positionAtStallStart;
             if (advanced) return; // still making progress — keep waiting
@@ -135,7 +140,11 @@ class CustomPlayer extends Player {
         // On error, pause and stay on the current track rather than letting
         // mpv advance. If the stream URL is stale/expired, refresh it and
         // retry the same track a limited number of times.
-        if (_errorRetryCount < _maxErrorRetries && state.playlist.index >= 0) {
+        // Never auto-start playback from an error while the player is paused
+        // (e.g. the restored session waiting for the user to press play).
+        if (state.playing &&
+            _errorRetryCount < _maxErrorRetries &&
+            state.playlist.index >= 0) {
           _errorRetryCount++;
           final idx = state.playlist.index;
           final medias = state.playlist.medias;
