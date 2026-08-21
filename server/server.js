@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 
@@ -439,8 +439,9 @@ app.get('/stream/:id', async (req, res, next) => {
 
 // Same-origin audio proxy for the admin "Add Sync Lyrics" player.
 // Streams the track bytes (with Range support for seeking) so playback does
-// not depend on bucket CORS or direct cross-origin media loading. Uses the
-// Supabase SDK (consistent with the rest of the app) instead of raw fetch.
+// not depend on bucket CORS or direct cross-origin media loading.
+// Audio is stored in Cloudflare R2 (when configured) or Supabase Storage, so
+// we try R2 first and fall back to Supabase Storage for either backend.
 const AUDIO_MIME = {
   mp3: 'audio/mpeg', m4a: 'audio/mp4', mp4: 'audio/mp4',
   opus: 'audio/ogg', oga: 'audio/ogg', ogg: 'audio/ogg',
@@ -458,14 +459,23 @@ app.get('/stream/:id/file', async (req, res, next) => {
 
     if (error || !track) return res.status(404).json({ error: 'Track not found' })
 
-    const { data: file, error: dlErr } = await supabase.storage
-      .from('music')
-      .download(track.storage_path)
+    let buf = null
+    if (r2) {
+      try {
+        const obj = await r2.send(new GetObjectCommand({ Bucket: R2_BUCKET, Key: track.storage_path }))
+        if (obj.Body) buf = Buffer.from(await obj.Body.transformToByteArray())
+      } catch (_) { /* fall through to Supabase Storage */ }
+    }
+    if (!buf) {
+      try {
+        const { data: file, error: dlErr } = await supabase.storage
+          .from('music')
+          .download(track.storage_path)
+        if (!dlErr && file) buf = Buffer.from(await file.arrayBuffer())
+      } catch (_) { /* ignore */ }
+    }
+    if (!buf) return res.status(500).json({ error: 'Failed to retrieve audio' })
 
-    if (dlErr || !file) return res.status(500).json({ error: 'Failed to download audio' })
-
-    const buf = Buffer.from(await file.arrayBuffer())
-    const total = buf.length
     const ext = (track.storage_path.split('.').pop() || '').toLowerCase()
     const mime = AUDIO_MIME[ext] || 'application/octet-stream'
 
@@ -476,21 +486,21 @@ app.get('/stream/:id/file', async (req, res, next) => {
     const m = req.headers.range && /^bytes=(\d+)-(\d*)$/.exec(req.headers.range)
     if (m) {
       const start = parseInt(m[1], 10)
-      const end = m[2] ? parseInt(m[2], 10) : total - 1
+      const end = m[2] ? parseInt(m[2], 10) : buf.length - 1
       const s = Math.max(0, start)
-      const e = Math.min(total - 1, end)
+      const e = Math.min(buf.length - 1, end)
       if (s > e) {
         res.status(416)
-        res.set('Content-Range', `bytes */${total}`)
+        res.set('Content-Range', `bytes */${buf.length}`)
         return res.end()
       }
       res.status(206)
-      res.set('Content-Range', `bytes ${s}-${e}/${total}`)
+      res.set('Content-Range', `bytes ${s}-${e}/${buf.length}`)
       res.set('Content-Length', e - s + 1)
       return res.end(buf.subarray(s, e + 1))
     }
 
-    res.set('Content-Length', total)
+    res.set('Content-Length', buf.length)
     res.end(buf)
   } catch (err) {
     next(err)
