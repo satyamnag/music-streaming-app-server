@@ -26,6 +26,20 @@ tr:hover { background: #f0f7ff; }
 .modal-content input, .modal-content textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
 .modal-content textarea { resize: vertical; }
 .modal-content .btn-row { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Add Sync Lyrics modal */
+.sync-player { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+.sync-player audio { flex: 1 1 240px; min-width: 200px; }
+.sync-live { font-variant-numeric: tabular-nums; font-size: 13px; color: #555; white-space: nowrap; }
+.sync-add-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.sync-ts-hint { font-variant-numeric: tabular-nums; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 13px; min-width: 74px; text-align: center; white-space: nowrap; }
+.sync-lang { flex: 1 1 140px; min-width: 120px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; }
+.sync-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sync-table th, .sync-table td { border: 1px solid #eee; padding: 4px 6px; text-align: left; vertical-align: middle; }
+.sync-table input { width: 100%; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+.sync-table .sync-ts-input { width: 88px; }
+.sync-list-wrap { max-height: 300px; overflow: auto; margin-bottom: 6px; border: 1px solid #eee; border-radius: 6px; }
+.sync-empty { color: #777; font-size: 13px; padding: 10px; text-align: center; }
 .actions { display: flex; gap: 4px; }
 .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
 .toast.show { opacity: 1; }
@@ -277,13 +291,49 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 <div id="toast" class="toast"></div>
 
-<div id="confirmModal" class="modal">
+<div id="confirmModal" class="modal" onclick="if(event.target===this)closeConfirm()">
   <div class="modal-content" style="max-width:400px;">
     <h2 id="confirmTitle">Confirm</h2>
     <p id="confirmMessage" style="color:#555;font-size:14px;"></p>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirmOkBtn" onclick="confirmAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="syncLyricsModal" class="modal">
+  <div class="modal-content" style="max-width: 780px;">
+    <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
+    <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+
+    <div class="sync-player">
+      <audio id="syncAudio" controls preload="metadata"></audio>
+      <span class="sync-live">Current: <span id="syncLiveTime">00:00.00</span></span>
+      <button class="btn btn-secondary btn-sm" type="button" onclick="syncSeekBack()">-5s</button>
+      <button class="btn btn-secondary btn-sm" type="button" onclick="syncSeekFwd()">+5s</button>
+    </div>
+
+    <div class="sync-add-row">
+      <span class="sync-ts-hint" id="syncTsHint">00:00.00</span>
+      <input id="syncTe" class="sync-lang" placeholder="Telugu (main language)">
+      <input id="syncEn" class="sync-lang" placeholder="English">
+      <input id="syncHi" class="sync-lang" placeholder="Hindi">
+      <button class="btn btn-success btn-sm" type="button" onclick="syncAddLine()">Add Line</button>
+    </div>
+
+    <div class="sync-list-wrap">
+      <table class="sync-table">
+        <thead>
+          <tr><th>#</th><th>Time</th><th>Telugu</th><th>English</th><th>Hindi</th><th></th></tr>
+        </thead>
+        <tbody id="syncTbody"></tbody>
+      </table>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" type="button" onclick="closeSyncLyrics()">Cancel</button>
+      <button class="btn btn-success" type="button" onclick="saveSyncLyrics()">Save</button>
     </div>
   </div>
 </div>
@@ -307,11 +357,188 @@ let currentView = 'tracks';
 
 function showLoading(on) { document.getElementById('loadingOverlay').classList.toggle('show', !!on); }
 
+/* ---------- Add Sync Lyrics (multi-language) ---------- */
+let syncTrackId = null;
+let syncEntries = [];
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function formatLrcTime(sec) {
+  sec = Math.max(0, Number(sec) || 0);
+  const totalCs = Math.round(sec * 100);
+  const m = Math.floor(totalCs / 6000);
+  const s = Math.floor((totalCs % 6000) / 100);
+  const cs = totalCs % 100;
+  return pad2(m) + ':' + pad2(s) + '.' + pad2(cs);
+}
+
+function parseLrcTime(str) {
+  const m = /^(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?$/.exec((str || '').trim());
+  if (!m) return null;
+  const mm = parseInt(m[1], 10);
+  const ss = parseInt(m[2], 10);
+  const frac = m[3] ? parseInt(m[3], 10) / Math.pow(10, m[3].length) : 0;
+  return mm * 60 + ss + frac;
+}
+
+function parseLrc(raw) {
+  if (!raw) return [];
+  const out = [];
+  raw.split('\n').forEach((line) => {
+    const m = /^\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/.exec(line);
+    if (!m) return;
+    const mm = parseInt(m[1], 10);
+    const ss = parseInt(m[2], 10);
+    const frac = m[3] ? parseInt(m[3], 10) / Math.pow(10, m[3].length) : 0;
+    out.push({ time: mm * 60 + ss + frac, text: line.slice(m[0].length).trim() });
+  });
+  return out.sort((a, b) => a.time - b.time);
+}
+
+function mergeSyncLrc(teRaw, enRaw, hiRaw) {
+  const te = parseLrc(teRaw);
+  const en = parseLrc(enRaw);
+  const hi = parseLrc(hiRaw);
+  const n = Math.max(te.length, en.length, hi.length);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push({
+      time: (te[i] || en[i] || hi[i]).time,
+      te: te[i] ? te[i].text : '',
+      en: en[i] ? en[i].text : '',
+      hi: hi[i] ? hi[i].text : '',
+    });
+  }
+  return out;
+}
+
+function buildLrc(entries, field) {
+  return entries
+    .slice()
+    .sort((a, b) => a.time - b.time)
+    .map((e) => '[' + formatLrcTime(e.time) + ']' + (e[field] || ''))
+    .join('\n');
+}
+
+function renderSyncEntries() {
+  const tb = document.getElementById('syncTbody');
+  if (!syncEntries.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="sync-empty">No lines yet — play the song and add lines with timestamps.</td></tr>';
+    return;
+  }
+  tb.innerHTML = syncEntries.map((e, i) => `<tr>
+    <td>${i + 1}</td>
+    <td><input class="sync-ts-input" type="text" value="${esc(formatLrcTime(e.time))}" onchange="syncEditTime(${i}, this.value)"></td>
+    <td><input type="text" value="${esc(e.te)}" onchange="syncEdit(${i}, 'te', this.value)"></td>
+    <td><input type="text" value="${esc(e.en)}" onchange="syncEdit(${i}, 'en', this.value)"></td>
+    <td><input type="text" value="${esc(e.hi)}" onchange="syncEdit(${i}, 'hi', this.value)"></td>
+    <td><button class="btn btn-danger btn-sm" type="button" onclick="syncDelete(${i})">Del</button></td>
+  </tr>`).join('');
+}
+
+function syncEdit(i, field, val) { if (syncEntries[i]) syncEntries[i][field] = val; }
+function syncEditTime(i, val) {
+  const sec = parseLrcTime(val);
+  if (sec === null) { toast('Invalid time format — use MM:SS.cc'); renderSyncEntries(); return; }
+  if (syncEntries[i]) { syncEntries[i].time = sec; syncEntries.sort((a, b) => a.time - b.time); renderSyncEntries(); }
+}
+function syncDelete(i) { syncEntries.splice(i, 1); renderSyncEntries(); }
+
+function syncSeekBack() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = Math.max(0, (a.currentTime || 0) - 5); }
+function syncSeekFwd() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = (a.currentTime || 0) + 5; }
+
+function syncAddLine() {
+  const audio = document.getElementById('syncAudio');
+  const time = audio && audio.src ? (audio.currentTime || 0) : 0;
+  const te = document.getElementById('syncTe').value;
+  const en = document.getElementById('syncEn').value;
+  const hi = document.getElementById('syncHi').value;
+  if (!te.trim() && !en.trim() && !hi.trim()) { toast('Enter at least one language line'); return; }
+  syncEntries.push({ time: Math.max(0, Number(time) || 0), te: te, en: en, hi: hi });
+  syncEntries.sort((a, b) => a.time - b.time);
+  document.getElementById('syncTe').value = '';
+  document.getElementById('syncEn').value = '';
+  document.getElementById('syncHi').value = '';
+  renderSyncEntries();
+}
+
+async function openSyncLyrics(id) {
+  const t = tracks.find((x) => x.id === id);
+  if (!t) return;
+  syncTrackId = id;
+  document.getElementById('syncTrackTitle').textContent = t.title || '';
+  document.getElementById('syncMsg').textContent = '';
+  syncEntries = mergeSyncLrc(t.synced_lyrics || '', t.synced_lyrics_en || '', t.synced_lyrics_hi || '');
+  const audio = document.getElementById('syncAudio');
+  audio.pause();
+  audio.removeAttribute('src');
+  audio.load();
+  if (t.storage_path) {
+    try {
+      const res = await authedFetch('/stream/' + id, { credentials: 'same-origin' });
+      const j = await res.json();
+      if (j && j.url) audio.src = j.url;
+    } catch (e) {
+      document.getElementById('syncMsg').textContent = 'Audio unavailable — you can still add lines with manual timestamps. (' + e.message + ')';
+    }
+  } else {
+    document.getElementById('syncMsg').textContent = 'No audio file for this track — you can still add lines with manual timestamps.';
+  }
+  renderSyncEntries();
+  document.getElementById('syncLyricsModal').style.display = 'block';
+}
+
+function closeSyncLyrics() {
+  const audio = document.getElementById('syncAudio');
+  if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); }
+  document.getElementById('syncLyricsModal').style.display = 'none';
+  syncTrackId = null;
+  syncEntries = [];
+}
+
+async function saveSyncLyrics() {
+  if (!syncTrackId) return;
+  const body = {
+    synced_lyrics: buildLrc(syncEntries, 'te') || null,
+    synced_lyrics_en: buildLrc(syncEntries, 'en') || null,
+    synced_lyrics_hi: buildLrc(syncEntries, 'hi') || null,
+  };
+  try {
+    showLoading(true);
+    const res = await authedFetch(`/api/admin/tracks/${syncTrackId}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Synced lyrics saved');
+    closeSyncLyrics();
+    loadTracks();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+(function attachSyncAudioListener() {
+  const audio = document.getElementById('syncAudio');
+  if (!audio) return;
+  audio.addEventListener('timeupdate', function () {
+    const tt = formatLrcTime(this.currentTime);
+    const lt = document.getElementById('syncLiveTime'); if (lt) lt.textContent = tt;
+    const th = document.getElementById('syncTsHint'); if (th) th.textContent = tt;
+  });
+})();
+
 function openConfirm(title, message, action) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMessage').textContent = message;
   pendingConfirm = action;
   document.getElementById('confirmModal').style.display = 'block';
+  const cancelBtn = document.querySelector('#confirmModal .btn-secondary');
+  if (cancelBtn) cancelBtn.focus();
 }
 
 function closeConfirm() { pendingConfirm = null; document.getElementById('confirmModal').style.display = 'none'; }
@@ -322,6 +549,10 @@ function confirmAction() {
   document.getElementById('confirmModal').style.display = 'none';
   if (action) action();
 }
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.getElementById('confirmModal').style.display === 'block') closeConfirm();
+});
 
 function sortTracks(key) {
   if (trackSortKey === key) { trackSortDir *= -1; } else { trackSortKey = key; trackSortDir = 1; }
@@ -603,6 +834,7 @@ function renderTracks() {
     <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
     <td class="actions">
+      <button class="btn btn-success btn-sm" onclick="openSyncLyrics('${t.id}')">Add Sync Lyrics</button>
       <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
       <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrack('${t.id}')">Del</button>
     </td>
@@ -821,7 +1053,7 @@ async function loadAffiliates() {
           <td>-</td>
           <td class="actions">
             <button class="btn btn-secondary btn-sm" onclick="showAffiliateQr('${a.id}', '${esc(a.name)}')">QR</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Del</button>
           </td>
         </tr>`);
       } else {
@@ -835,7 +1067,7 @@ async function loadAffiliates() {
           <td class="actions">
             <button class="btn btn-secondary btn-sm" onclick="showAffiliateQr('${a.id}', '${esc(a.name)}')">QR</button>
             <button class="btn btn-secondary btn-sm" onclick="toggleCoupon('${c.id}', '${c.status === 'active' ? 'paused' : 'active'}')">${c.status === 'active' ? 'Pause' : 'Resume'}</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Del</button>
           </td>
         </tr>`));
       }
@@ -947,9 +1179,8 @@ async function toggleCoupon(id, status) {
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
-function confirmDeleteAffiliate(id) {
-  const t = tracks.length ? null : null; // affiliate name not tracked here
-  openConfirm('Delete affiliate?', 'Delete this affiliate and its coupons? Commission ledger rows are preserved.', () => deleteAffiliate(id));
+function confirmDeleteAffiliate(id, name) {
+  openConfirm('Delete affiliate?', 'Delete affiliate "' + (name || 'this affiliate') + '" and its coupons? Commission ledger rows are preserved. This cannot be undone.', () => deleteAffiliate(id));
 }
 
 async function deleteAffiliate(id) {

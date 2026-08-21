@@ -16,6 +16,8 @@ create table tracks (
   status text not null default 'free' check (status in ('free', 'paid')),
   lyrics text,
   synced_lyrics text,
+  synced_lyrics_en text,
+  synced_lyrics_hi text,
   created_at timestamptz not null default now()
 );
 

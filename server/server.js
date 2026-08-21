@@ -896,7 +896,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, language } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -917,6 +917,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       status: cleanStatus,
       lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
+      synced_lyrics_en: typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null,
+      synced_lyrics_hi: typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null,
       language: typeof language === 'string' && language.trim() ? language.trim() : null,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
@@ -927,7 +929,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, language } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -953,6 +955,8 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
     if (lyrics !== undefined) updates.lyrics = typeof lyrics === 'string' && lyrics.trim() ? lyrics : null
     if (synced_lyrics !== undefined) updates.synced_lyrics = typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null
+    if (synced_lyrics_en !== undefined) updates.synced_lyrics_en = typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null
+    if (synced_lyrics_hi !== undefined) updates.synced_lyrics_hi = typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
