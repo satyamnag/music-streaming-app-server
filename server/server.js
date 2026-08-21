@@ -5,6 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
+import { Readable } from 'stream'
 import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
@@ -432,6 +433,51 @@ app.get('/stream/:id', async (req, res, next) => {
       codec: fmt === 'opus' ? 'opus' : fmt === 'mp3' ? 'mp3' : fmt,
       bitrate: fmt === 'opus' ? 96000 : 128000,
     })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// Same-origin audio proxy for the admin "Add Sync Lyrics" player.
+// Streams the track bytes (with Range support for seeking) so playback does
+// not depend on bucket CORS or direct cross-origin media loading.
+app.get('/stream/:id/file', async (req, res, next) => {
+  try {
+    const { data: track, error } = await supabase
+      .from('tracks')
+      .select('storage_path')
+      .eq('id', req.params.id)
+      .single()
+
+    if (error || !track) return res.status(404).json({ error: 'Track not found' })
+
+    const { data: signed, error: signError } = await supabase.storage
+      .from('music')
+      .createSignedUrl(track.storage_path, 3600)
+
+    if (signError || !signed) return res.status(500).json({ error: 'Failed to generate stream URL' })
+
+    const headers = {}
+    if (req.headers.range) headers.Range = req.headers.range
+    const upstream = await fetch(signed.signedUrl, { headers })
+    const pass = (k) => { const v = upstream.headers.get(k); if (v) res.set(k, v) }
+    res.status(upstream.status)
+    pass('content-type')
+    pass('content-range')
+    pass('accept-ranges')
+    pass('content-length')
+    pass('etag')
+    pass('last-modified')
+    res.set('Cache-Control', 'no-store')
+    if (upstream.body) {
+      const body = Readable.fromWeb(upstream.body)
+      body.on('error', () => { try { res.destroy() } catch (_) {} })
+      res.on('close', () => body.destroy())
+      body.pipe(res)
+    } else {
+      const buf = Buffer.from(await upstream.arrayBuffer())
+      res.send(buf)
+    }
   } catch (err) {
     next(err)
   }

@@ -473,15 +473,10 @@ async function openSyncLyrics(id) {
   const audio = document.getElementById('syncAudio');
   audio.pause();
   audio.removeAttribute('src');
-  audio.load();
   if (t.storage_path) {
-    try {
-      const res = await authedFetch('/stream/' + id, { credentials: 'same-origin' });
-      const j = await res.json();
-      if (j && j.url) audio.src = j.url;
-    } catch (e) {
-      document.getElementById('syncMsg').textContent = 'Audio unavailable — you can still add lines with manual timestamps. (' + e.message + ')';
-    }
+    audio.src = '/stream/' + id + '/file';
+    audio.load();
+    document.getElementById('syncMsg').textContent = '';
   } else {
     document.getElementById('syncMsg').textContent = 'No audio file for this track — you can still add lines with manual timestamps.';
   }
@@ -530,6 +525,11 @@ async function saveSyncLyrics() {
     const tt = formatLrcTime(this.currentTime);
     const lt = document.getElementById('syncLiveTime'); if (lt) lt.textContent = tt;
     const th = document.getElementById('syncTsHint'); if (th) th.textContent = tt;
+  });
+  audio.addEventListener('error', function () {
+    if (!this.src) return;
+    const msg = document.getElementById('syncMsg');
+    if (msg) msg.textContent = 'Audio could not be loaded for playback.';
   });
 })();
 
