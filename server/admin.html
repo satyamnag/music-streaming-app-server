@@ -50,6 +50,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .sidebar-item { display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 4px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: transparent; color: #333; }
 .sidebar-item:hover { background: #f0f7ff; }
 .sidebar-item.active { background: #3b82f6; color: #fff; font-weight: 600; }
+.sidebar-item.icon-only { display: flex; align-items: center; justify-content: center; }
+.sidebar-item.icon-only svg { width: 18px; height: 18px; }
 .sidebar-divider { height: 1px; background: #eee; margin: 8px 0; }
 .content { flex: 1; min-width: 0; }
 .view { display: none; }
@@ -82,9 +84,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </h1>
 <div class="layout">
   <nav class="sidebar">
+    <button class="sidebar-item icon-only" title="Refresh" onclick="refreshCurrent()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
     <button class="sidebar-item" id="nav-tracks" onclick="showView('tracks')">Tracks</button>
-    <button class="sidebar-item action" onclick="refreshCurrent()">Refresh</button>
-    <button class="sidebar-item action" onclick="showAdd()">+ Add Track</button>
+    <button class="sidebar-item" onclick="showAdd()">+ Add Track</button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-albums" onclick="showView('albums')">+ Add Album</button>
     <button class="sidebar-item" id="nav-affiliates" onclick="showView('affiliates')">Affiliate &amp; QR Code</button>
