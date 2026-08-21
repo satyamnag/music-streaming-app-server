@@ -26,6 +26,10 @@ class PlaylistAddTrackDialog extends HookConsumerWidget {
     final typography = Theme.of(context).typography;
     final userPlaylists = ref.watch(userPlaylistsProvider);
 
+    // Hook must be called at the top level of build (never inside a callback):
+    // used by the "New playlist" flow below.
+    final controller = useTextEditingController();
+
     final filteredPlaylists = useMemoized(
       () =>
           userPlaylists.asData?.value
@@ -54,7 +58,6 @@ class PlaylistAddTrackDialog extends HookConsumerWidget {
     Future<void> onCreateNew() async {
       // Create a new playlist from the selected tracks using the on-device
       // local playlist API (adds every selected track reliably).
-      final controller = useTextEditingController();
       final name = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(

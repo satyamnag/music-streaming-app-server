@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -64,14 +66,31 @@ class ProfilePlanStatus extends HookConsumerWidget {
     final loading = useState(true);
 
     useEffect(() {
+      var active = true;
+      StreamSubscription<CustomerInfo>? sub;
+
+      // Initial load: show the spinner until the first info arrives.
       SuperwallService.instance.getCustomerInfo().then((info) {
-        if (!context.mounted) return;
+        if (!active || !context.mounted) return;
         customerInfo.value = info;
         loading.value = false;
       }).catchError((_) {
-        if (context.mounted) loading.value = false;
+        if (active && context.mounted) loading.value = false;
       });
-      return null;
+
+      // Refresh whenever customer info changes (e.g. immediately after a
+      // checkout or restore completes anywhere in the app), so the plan name,
+      // start date and expiry date always reflect the current subscription.
+      sub = SuperwallService.instance.customerInfoStream.listen((info) {
+        if (!active || !context.mounted) return;
+        customerInfo.value = info;
+        loading.value = false;
+      });
+
+      return () {
+        active = false;
+        sub?.cancel();
+      };
     }, []);
 
     final info = customerInfo.value;

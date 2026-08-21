@@ -29,9 +29,9 @@ class UserPlaylistsPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final searchText = useState('');
 
-    // Owner-made playlists (developer/owner curated) and user-made playlists
-    // (created on this device) are served by the local server directly.
-    final ownerPlaylistsQuery = ref.watch(ownerPlaylistsProvider);
+    // User-made playlists (created on this device) and the liked-tracks
+    // playlist are served by the local server directly. Only these two groups
+    // are shown: owner/developer playlists are intentionally not listed.
     final userPlaylistsQuery = ref.watch(userPlaylistsProvider);
     final likedSongsQuery = ref.watch(likedSongsProvider);
 
@@ -69,10 +69,6 @@ class UserPlaylistsPage extends HookConsumerWidget {
           .toList();
     }
 
-    final ownerPlaylists = useMemoized(
-      () => filter(ownerPlaylistsQuery.asData?.value ?? []),
-      [ownerPlaylistsQuery, searchText.value],
-    );
     final userPlaylists = useMemoized(
       () => filter(userPlaylistsQuery.asData?.value ?? []),
       [userPlaylistsQuery, searchText.value],
@@ -88,13 +84,11 @@ class UserPlaylistsPage extends HookConsumerWidget {
       return const Center(child: NoDefaultMetadataPlugin());
     }
 
-    final hasError =
-        ownerPlaylistsQuery.hasError || userPlaylistsQuery.hasError;
+    final hasError = userPlaylistsQuery.hasError;
     if (hasError) {
       return ErrorBox(
-        error: ownerPlaylistsQuery.error ?? userPlaylistsQuery.error!,
+        error: userPlaylistsQuery.error!,
         onRetry: () {
-          ref.invalidate(ownerPlaylistsProvider);
           ref.invalidate(userPlaylistsProvider);
         },
       );
@@ -102,7 +96,6 @@ class UserPlaylistsPage extends HookConsumerWidget {
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
-        ref.invalidate(ownerPlaylistsProvider);
         ref.invalidate(userPlaylistsProvider);
       },
       child: SafeArea(
@@ -146,33 +139,6 @@ class UserPlaylistsPage extends HookConsumerWidget {
                 ),
               ),
               const SliverGap(16),
-              if (ownerPlaylists.isNotEmpty) ...[
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      'Playlists by Soulful Bhakti',
-                      style: context.theme.typography.h4,
-                    ),
-                  ),
-                ),
-                const SliverGap(8),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  sliver: PlaybuttonView(
-                    controller: controller,
-                    hasMore: false,
-                    isLoading: ownerPlaylistsQuery.isLoading,
-                    onRequestMore: () {},
-                    itemCount: ownerPlaylists.length,
-                    gridItemBuilder: (context, index) =>
-                        PlaylistCard(ownerPlaylists[index]),
-                    listItemBuilder: (context, index) =>
-                        PlaylistCard.tile(ownerPlaylists[index]),
-                  ),
-                ),
-                const SliverGap(16),
-              ],
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 sliver: SliverToBoxAdapter(

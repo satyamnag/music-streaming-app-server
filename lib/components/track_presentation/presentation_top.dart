@@ -11,7 +11,9 @@ import 'package:sangeet/components/track_presentation/use_action_callbacks.dart'
 import 'package:sangeet/components/track_presentation/use_is_user_playlist.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
 
 class TrackPresentationTopSection extends HookConsumerWidget {
   const TrackPresentationTopSection({super.key});
@@ -71,16 +73,27 @@ class TrackPresentationTopSection extends HookConsumerWidget {
           ),
         Button.primary(
           alignment: Alignment.center,
-          leading: switch ((isActive, isLoading)) {
-            (true, false) => const Icon(SangeetIcons.pause),
-            (false, true) => const Center(
+          leading: switch ((isActive, isLoading, audioPlayer.isPlaying)) {
+            (true, false, true) => const Icon(SangeetIcons.pause),
+            (false, true, _) => const Center(
                 child: CircularProgressIndicator(onSurface: true, size: 18),
               ),
             _ => const Icon(SangeetIcons.play),
           },
-          onPressed: onPlay,
-          enabled: !isLoading && !isActive,
-          child: isActive ? Text(context.l10n.pause) : Text(context.l10n.play),
+          onPressed: () {
+            if (!isActive) {
+              // Collection not loaded yet — start playing it from the top.
+              onPlay();
+            } else if (audioPlayer.isPlaying) {
+              audioPlayer.pause();
+            } else {
+              audioPlayer.resume();
+            }
+          },
+          enabled: !isLoading,
+          child: isActive && audioPlayer.isPlaying
+              ? Text(context.l10n.pause)
+              : Text(context.l10n.play),
         ),
       ],
     );
@@ -113,8 +126,18 @@ class TrackPresentationTopSection extends HookConsumerWidget {
               icon: const Icon(SangeetIcons.share),
               size: ButtonSize.small,
               onPressed: () async {
+                // Supabase albums/playlists have no external share URL, so
+                // fall back to sharing the collection name instead of sending
+                // an empty payload to the system share sheet.
+                final shareUrl = options.shareUrl ?? '';
+                final shareText = shareUrl.trim().isNotEmpty
+                    ? shareUrl
+                    : options.collection is SangeetSimpleAlbumObject
+                        ? (options.collection as SangeetSimpleAlbumObject).name
+                        : (options.collection as SangeetSimplePlaylistObject)
+                            .name;
                 await SharePlus.instance.share(
-                  ShareParams(text: options.shareUrl!),
+                  ShareParams(text: shareText),
                 );
               },
             ),

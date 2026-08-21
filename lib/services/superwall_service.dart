@@ -60,6 +60,12 @@ class SuperwallService {
   Stream<SubscriptionStatus> get subscriptionStatus =>
       Superwall.shared.subscriptionStatus;
 
+  /// Stream that emits whenever the customer info changes (e.g. right after a
+  /// purchase/restore completes), so UI showing plan details can refresh
+  /// immediately instead of relying on stale cached data.
+  Stream<CustomerInfo> get customerInfoStream =>
+      Superwall.shared.customerInfoStream;
+
   /// Sets custom user attributes for audience targeting / personalization.
   Future<void> setUserAttributes(Map<String, Object> attributes) =>
       Superwall.shared.setUserAttributes(attributes);
