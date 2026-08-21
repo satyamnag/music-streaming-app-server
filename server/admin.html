@@ -744,7 +744,8 @@ function filteredTracks() {
       const te = has(t.synced_lyrics);
       const en = has(t.synced_lyrics_en);
       const hi = has(t.synced_lyrics_hi);
-      if (filterSync === 'any') return te || en || hi;
+      // "All Synced" = synced in ALL THREE languages (Telugu + English + Hindi).
+      if (filterSync === 'any') return te && en && hi;
       if (filterSync === 'none') return !te && !en && !hi;
       if (filterSync === 'te') return te;
       if (filterSync === 'en') return en;
