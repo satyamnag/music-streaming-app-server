@@ -6,7 +6,6 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
-import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
@@ -133,54 +132,6 @@ class PlaylistCard extends HookConsumerWidget {
       updating
     ]);
 
-    final onAddToQueuePressed = useCallback(() async {
-      updating.value = true;
-      try {
-        if (isPlaylistPlaying) return;
-
-        final fetchedInitialTracks = await fetchAllTracks();
-
-        if (fetchedInitialTracks.isEmpty) return;
-
-        playlistNotifier.addTracks(fetchedInitialTracks);
-        playlistNotifier.addCollection(playlist.id);
-        historyNotifier.addPlaylists([playlist]);
-        if (context.mounted) {
-          showToast(
-            context: context,
-            builder: (context, overlay) {
-              return SurfaceCard(
-                child: Basic(
-                  content: Text(
-                    context.l10n
-                        .added_num_tracks_to_queue(fetchedInitialTracks.length),
-                  ),
-                  trailing: Button.outline(
-                    child: Text(context.l10n.undo),
-                    onPressed: () {
-                      playlistNotifier
-                          .removeTracks(fetchedInitialTracks.map((e) => e.id));
-                    },
-                  ),
-                ),
-              );
-            },
-          );
-        }
-      } finally {
-        updating.value = false;
-      }
-    }, [
-      isPlaylistPlaying,
-      fetchAllTracks,
-      playlistNotifier,
-      playlist.id,
-      historyNotifier,
-      playlist,
-      context,
-      updating
-    ]);
-
     final imageUrl = useMemoized(
       () => playlist.images.from200PxTo300PxOrSmallestImage(
         ImagePlaceholder.collection,
@@ -193,14 +144,6 @@ class PlaylistCard extends HookConsumerWidget {
     final isOwner = playlist.owner.id == me.asData?.value?.id &&
         me.asData?.value?.id != null;
 
-    // User-created playlists are stored locally and exposed with a
-    // `local-` id prefix, and "Liked Songs" is the user's own collection.
-    // Soulful Bhakti (owner) playlists use fixed ids (e.g.
-    // "supabase-all-tracks", "by-<artist>"). Only user-created playlists get
-    // the "add to queue" (+square) action.
-    final isUserCreated = playlist.id.startsWith('local-') ||
-        playlist.id == 'user-liked-tracks';
-
     if (_isTile) {
       return PlaybuttonTile(
         title: playlist.name,
@@ -212,7 +155,7 @@ class PlaylistCard extends HookConsumerWidget {
         isOwner: isOwner,
         onTap: onTap,
         onPlaybuttonPressed: onPlaybuttonPressed,
-        onAddToQueuePressed: isUserCreated ? onAddToQueuePressed : null,
+        onAddToQueuePressed: null,
       );
     }
 
@@ -226,7 +169,7 @@ class PlaylistCard extends HookConsumerWidget {
       isOwner: isOwner,
       onTap: onTap,
       onPlaybuttonPressed: onPlaybuttonPressed,
-      onAddToQueuePressed: isUserCreated ? onAddToQueuePressed : null,
+      onAddToQueuePressed: null,
     );
   }
 }
