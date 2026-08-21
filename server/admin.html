@@ -21,13 +21,13 @@ tr:hover { background: #f0f7ff; }
 .toolbar { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; }
 .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
 .modal-content { background: #fff; max-width: 540px; margin: 40px auto; padding: 24px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
-/* Add Sync Lyrics popup is anchored to the right-middle of the screen */
+/* Add Sync Lyrics popup is centered on the screen */
 #syncLyricsModal .modal-content {
   margin: 0;
   position: fixed;
   top: 50%;
-  right: 24px;
-  transform: translateY(-50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
   max-width: 780px;
   max-height: 92vh;
   overflow-y: auto;
