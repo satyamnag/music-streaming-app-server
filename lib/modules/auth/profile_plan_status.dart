@@ -141,7 +141,12 @@ class ProfilePlanStatus extends HookConsumerWidget {
             _Row(label: 'Start Date', value: _fmtDate(activeSub.purchaseDate)),
             _Row(
               label: 'End Date',
-              value: _fmtDate(activeSub.expirationDate),
+              // An active/ongoing subscription may have no expiration date
+              // (per the Superwall SDK docs). Show a meaningful label instead
+              // of a bare "-" when it auto-renews.
+              value: activeSub.expirationDate != null
+                  ? _fmtDate(activeSub.expirationDate)
+                  : (activeSub.willRenew ? 'Renews automatically' : '-'),
             ),
             _Row(
               label: 'Auto-renew',
