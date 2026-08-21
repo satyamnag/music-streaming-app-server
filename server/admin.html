@@ -45,7 +45,16 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .spinner { width: 36px; height: 36px; border: 4px solid #ddd; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; color: #999; padding: 24px; }
-@media (max-width: 768px) { th, td { font-size: 12px; padding: 6px; } .toolbar { flex-wrap: wrap; } }
+.layout { display: flex; gap: 20px; align-items: flex-start; }
+.sidebar { width: 220px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 20px; }
+.sidebar-item { display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 4px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: transparent; color: #333; }
+.sidebar-item:hover { background: #f0f7ff; }
+.sidebar-item.active { background: #3b82f6; color: #fff; font-weight: 600; }
+.sidebar-divider { height: 1px; background: #eee; margin: 8px 0; }
+.content { flex: 1; min-width: 0; }
+.view { display: none; }
+.view.active { display: block; }
+@media (max-width: 768px) { th, td { font-size: 12px; padding: 6px; } .toolbar { flex-wrap: wrap; } .layout { flex-direction: column; } .sidebar { width: 100%; position: static; } }
 </style>
 </head>
 <body>
@@ -65,16 +74,23 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="btn btn-secondary btn-sm" onclick="doLogout()">Logout</button>
   </span>
 </h1>
-<div class="toolbar">
-  <button class="btn btn-primary" onclick="showAdd()">+ Add Track</button>
-  <button class="btn btn-secondary" onclick="loadTracks()">Refresh Tracks</button>
-  <button class="btn btn-secondary" onclick="toggleAlbums()">Albums</button>
-  <button class="btn btn-secondary" onclick="toggleAffiliates()">Affiliates &amp; Coupons</button>
-  <span id="count" style="font-size:14px;color:#666;"></span>
-</div>
-<div class="search-row">
-  <input id="searchInput" type="text" placeholder="Search by title, artist or album..." oninput="renderTracks()">
-</div>
+<div class="layout">
+  <nav class="sidebar">
+    <button class="sidebar-item" id="nav-tracks" onclick="showView('tracks')">Tracks</button>
+    <button class="sidebar-item action" onclick="refreshCurrent()">Refresh</button>
+    <button class="sidebar-item action" onclick="showAdd()">+ Add Track</button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-albums" onclick="showView('albums')">+ Add Album</button>
+    <button class="sidebar-item" id="nav-affiliates" onclick="showView('affiliates')">Affiliate &amp; QR Code</button>
+  </nav>
+  <div class="content">
+    <div id="tracksPanel" class="view active">
+      <div class="toolbar">
+        <span id="count" style="font-size:14px;color:#666;"></span>
+      </div>
+      <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search by title, artist or album..." oninput="renderTracks()">
+      </div>
 <table><thead><tr>
   <th class="sortable" onclick="sortTracks('title')">Title<span id="arrow-title" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('artist_names_text')">Artist<span id="arrow-artist_names_text" class="sort-arrow"></span></th>
@@ -85,8 +101,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
   <th>Actions</th>
 </tr></thead><tbody id="tbody"></tbody></table>
+    </div>
 
-<div id="albumsPanel" style="display:none; margin-top:24px;">
+<div id="albumsPanel" class="view">
   <h2 style="margin-bottom:12px;">Albums</h2>
   <p style="font-size:13px;color:#666;margin-bottom:12px;">
     Create an album with a name and cover photo. Then assign songs to it from
@@ -110,7 +127,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   </tr></thead><tbody id="albumsTbody"></tbody></table>
 </div>
 
-<div id="affiliatesPanel" style="display:none; margin-top:24px;">
+<div id="affiliatesPanel" class="view">
   <h2 style="margin-bottom:12px;">Affiliate Marketing</h2>
   <p style="font-size:13px;color:#666;margin-bottom:12px;">
     Affiliate commission applies to the <b>yearly plan only</b>, with an
@@ -146,6 +163,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <table><thead><tr>
     <th>Date</th><th>Affiliate</th><th>Customer</th><th>Plan</th><th>Amount (₹)</th><th>Status</th>
   </tr></thead><tbody id="commTbody"></tbody></table>
+</div>
+  </div>
 </div>
 
 <div id="modal" class="modal">
@@ -254,6 +273,7 @@ let trackSearch = '';
 let trackSortKey = null;
 let trackSortDir = 1;
 let pendingConfirm = null;
+let currentView = 'tracks';
 
 function showLoading(on) { document.getElementById('loadingOverlay').classList.toggle('show', !!on); }
 
@@ -339,7 +359,26 @@ function showLogin() {
 function showApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  loadTracks();
+  showView('tracks');
+}
+
+function showView(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
+  var panel = document.getElementById(view + 'Panel');
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(function (b) { b.classList.remove('active'); });
+  var navBtn = document.getElementById('nav-' + view);
+  if (navBtn) navBtn.classList.add('active');
+  if (view === 'tracks') loadTracks();
+  else if (view === 'albums') loadAlbums();
+  else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
+}
+
+function refreshCurrent() {
+  if (currentView === 'tracks') loadTracks();
+  else if (currentView === 'albums') loadAlbums();
+  else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
 async function doLogin() {
