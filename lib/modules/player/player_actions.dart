@@ -6,6 +6,7 @@ import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_queue.dart';
@@ -124,7 +125,31 @@ class PlayerActions extends HookConsumerWidget {
             ),
           ),
         if (playlist.activeTrack != null && !isLocalTrack)
-          LocalTrackHeartButton(track: playlist.activeTrack!),
+          LocalTrackHeartButton(
+            track: playlist.activeTrack!,
+            // Match the surrounding action icons (queue / alt-route / timer),
+            // which are all ButtonSize.normal.
+            size: ButtonSize.normal,
+          ),
+        if (playlist.activeTrack != null)
+          Tooltip(
+            tooltip: TooltipContainer(
+              child: Text(context.l10n.add_to_playlist),
+            ).call,
+            child: IconButton.ghost(
+              enabled: playlist.activeTrack != null,
+              icon: const Icon(SangeetIcons.playlistAdd),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => PlaylistAddTrackDialog(
+                    tracks: [playlist.activeTrack!],
+                    openFromPlaylist: null,
+                  ),
+                );
+              },
+            ),
+          ),
         AdaptivePopSheetList<Duration>(
           tooltip: context.l10n.sleep_timer,
           offset: Offset(0, -50 * (sleepTimerEntries.values.length + 2)),
