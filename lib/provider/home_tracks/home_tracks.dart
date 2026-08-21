@@ -183,11 +183,23 @@ final homeSectionsProvider =
   final adminAlbums = await ref.watch(homeAdminAlbumsProvider.future);
   final languages = _buildLanguageGroups(tracks, playCounts);
 
+  // Deduplicate the merged album list by album name. Admin-created albums
+  // (which carry the real album cover) come first, so when tracks are also
+  // auto-grouped under the same album name the duplicate card (whose cover is
+  // just a song thumbnail) is dropped instead of being shown twice.
+  final mergedAlbums = <HomeAlbum>[];
+  final seen = <String>{};
+  for (final a in [...adminAlbums, ...albums]) {
+    final key = a.album.name.trim();
+    if (key.isEmpty || !seen.add(key)) continue;
+    mergedAlbums.add(a);
+  }
+
   ref.keepAlive();
   return HomeSections(
     newestArrivals: newestArrivals,
     topTrending: topTrending,
-    albums: [...adminAlbums, ...albums],
+    albums: mergedAlbums,
     languages: languages,
   );
 });
