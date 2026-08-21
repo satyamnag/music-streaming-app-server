@@ -5,7 +5,6 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
-import { Readable } from 'stream'
 import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
@@ -440,7 +439,15 @@ app.get('/stream/:id', async (req, res, next) => {
 
 // Same-origin audio proxy for the admin "Add Sync Lyrics" player.
 // Streams the track bytes (with Range support for seeking) so playback does
-// not depend on bucket CORS or direct cross-origin media loading.
+// not depend on bucket CORS or direct cross-origin media loading. Uses the
+// Supabase SDK (consistent with the rest of the app) instead of raw fetch.
+const AUDIO_MIME = {
+  mp3: 'audio/mpeg', m4a: 'audio/mp4', mp4: 'audio/mp4',
+  opus: 'audio/ogg', oga: 'audio/ogg', ogg: 'audio/ogg',
+  weba: 'audio/webm', webm: 'audio/webm',
+  wav: 'audio/wav', flac: 'audio/flac',
+}
+
 app.get('/stream/:id/file', async (req, res, next) => {
   try {
     const { data: track, error } = await supabase
@@ -451,33 +458,40 @@ app.get('/stream/:id/file', async (req, res, next) => {
 
     if (error || !track) return res.status(404).json({ error: 'Track not found' })
 
-    const { data: signed, error: signError } = await supabase.storage
+    const { data: file, error: dlErr } = await supabase.storage
       .from('music')
-      .createSignedUrl(track.storage_path, 3600)
+      .download(track.storage_path)
 
-    if (signError || !signed) return res.status(500).json({ error: 'Failed to generate stream URL' })
+    if (dlErr || !file) return res.status(500).json({ error: 'Failed to download audio' })
 
-    const headers = {}
-    if (req.headers.range) headers.Range = req.headers.range
-    const upstream = await fetch(signed.signedUrl, { headers })
-    const pass = (k) => { const v = upstream.headers.get(k); if (v) res.set(k, v) }
-    res.status(upstream.status)
-    pass('content-type')
-    pass('content-range')
-    pass('accept-ranges')
-    pass('content-length')
-    pass('etag')
-    pass('last-modified')
+    const buf = Buffer.from(await file.arrayBuffer())
+    const total = buf.length
+    const ext = (track.storage_path.split('.').pop() || '').toLowerCase()
+    const mime = AUDIO_MIME[ext] || 'application/octet-stream'
+
+    res.set('Accept-Ranges', 'bytes')
     res.set('Cache-Control', 'no-store')
-    if (upstream.body) {
-      const body = Readable.fromWeb(upstream.body)
-      body.on('error', () => { try { res.destroy() } catch (_) {} })
-      res.on('close', () => body.destroy())
-      body.pipe(res)
-    } else {
-      const buf = Buffer.from(await upstream.arrayBuffer())
-      res.send(buf)
+    res.set('Content-Type', mime)
+
+    const m = req.headers.range && /^bytes=(\d+)-(\d*)$/.exec(req.headers.range)
+    if (m) {
+      const start = parseInt(m[1], 10)
+      const end = m[2] ? parseInt(m[2], 10) : total - 1
+      const s = Math.max(0, start)
+      const e = Math.min(total - 1, end)
+      if (s > e) {
+        res.status(416)
+        res.set('Content-Range', `bytes */${total}`)
+        return res.end()
+      }
+      res.status(206)
+      res.set('Content-Range', `bytes ${s}-${e}/${total}`)
+      res.set('Content-Length', e - s + 1)
+      return res.end(buf.subarray(s, e + 1))
     }
+
+    res.set('Content-Length', total)
+    res.end(buf)
   } catch (err) {
     next(err)
   }
