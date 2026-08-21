@@ -108,10 +108,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
-  <th><input id="filterArtist" class="col-filter" type="text" placeholder="Filter artist..." oninput="applyTrackFilters()"></th>
-  <th><input id="filterAlbum" class="col-filter" type="text" placeholder="Filter album..." oninput="applyTrackFilters()"></th>
+  <th><select id="filterArtist" class="col-filter" onchange="applyTrackFilters()"><option value="">All artists</option></select></th>
+  <th><select id="filterAlbum" class="col-filter" onchange="applyTrackFilters()"><option value="">All albums</option></select></th>
   <th><div class="duration-filter"><input id="filterDurMin" class="col-filter" type="number" min="0" placeholder="Min s" oninput="applyTrackFilters()"><input id="filterDurMax" class="col-filter" type="number" min="0" placeholder="Max s" oninput="applyTrackFilters()"></div></th>
-  <th><input id="filterLanguage" class="col-filter" type="text" placeholder="Filter language..." oninput="applyTrackFilters()"></th>
+  <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th></th><th></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th></th>
@@ -341,16 +341,13 @@ function filteredTracks() {
     );
   }
   if (filterArtist) {
-    const q = filterArtist.toLowerCase();
-    list = list.filter(t => (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q));
+    list = list.filter(t => (t.artist_names_text || (t.artist_names || []).join(', ')).trim() === filterArtist);
   }
   if (filterAlbum) {
-    const q = filterAlbum.toLowerCase();
-    list = list.filter(t => (t.album || '').toLowerCase().includes(q));
+    list = list.filter(t => (t.album || '').trim() === filterAlbum);
   }
   if (filterLanguage) {
-    const q = filterLanguage.toLowerCase();
-    list = list.filter(t => (t.language || '').toLowerCase().includes(q));
+    list = list.filter(t => (t.language || '').trim() === filterLanguage);
   }
   if (filterDurMin !== '' || filterDurMax !== '') {
     const min = filterDurMin === '' ? -Infinity : (Number(filterDurMin) || 0);
@@ -478,6 +475,7 @@ async function loadTracks() {
     showLoading(true);
     const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
     tracks = await res.json();
+    populateTrackFilterDropdowns();
     renderTracks();
   } catch (e) {
     if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message);
@@ -626,14 +624,36 @@ function changeTrackPage(dir) {
 }
 
 function applyTrackFilters() {
-  filterArtist = document.getElementById('filterArtist').value.trim();
-  filterAlbum = document.getElementById('filterAlbum').value.trim();
+  filterArtist = document.getElementById('filterArtist').value;
+  filterAlbum = document.getElementById('filterAlbum').value;
   filterDurMin = document.getElementById('filterDurMin').value.trim();
   filterDurMax = document.getElementById('filterDurMax').value.trim();
-  filterLanguage = document.getElementById('filterLanguage').value.trim();
+  filterLanguage = document.getElementById('filterLanguage').value;
   filterStatus = document.getElementById('filterStatus').value;
   trackPage = 1;
   renderTracks();
+}
+
+function fillSelect(id, rawValues, allLabel) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const current = sel.value;
+  const values = Array.from(new Set(rawValues)).sort((a, b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="">' + allLabel + '</option>' + values.map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
+  if (current && values.indexOf(current) !== -1) {
+    sel.value = current;
+  } else if (current) {
+    sel.value = '';
+    if (id === 'filterArtist') filterArtist = '';
+    else if (id === 'filterAlbum') filterAlbum = '';
+    else if (id === 'filterLanguage') filterLanguage = '';
+  }
+}
+
+function populateTrackFilterDropdowns() {
+  fillSelect('filterArtist', tracks.map(t => (t.artist_names_text || (t.artist_names || []).join(', ')).trim()).filter(Boolean), 'All artists');
+  fillSelect('filterAlbum', tracks.map(t => (t.album || '').trim()).filter(Boolean), 'All albums');
+  fillSelect('filterLanguage', tracks.map(t => (t.language || '').trim()).filter(Boolean), 'All languages');
 }
 
 function confirmDeleteTrack(id) {
