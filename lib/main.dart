@@ -89,26 +89,49 @@ Future<void> main(List<String> rawArgs) async {
     // Firebase (Crashlytics + Analytics). Initialize once at startup and wire
     // the Crashlytics error handlers so all uncaught Flutter fatal errors and
     // uncaught async errors are recorded.
+    //
+    // Bounded + guarded: Firebase init is a platform-channel call that can hang
+    // or throw on some devices/firmware. A failure here must NEVER block app
+    // startup — the worst case is that Crashlytics/Analytics stay unconfigured
+    // for that session. (Per the Dart SDK docs, Future.timeout stops waiting
+    // without cancelling the underlying operation.)
     if (kIsAndroid || kIsIOS) {
-      await Firebase.initializeApp();
-      FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-      FlutterError.onError = (errorDetails) {
-        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-      };
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
+      try {
+        await Firebase.initializeApp()
+            .timeout(const Duration(seconds: 10));
+        FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+        FlutterError.onError = (errorDetails) {
+          FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+        };
+        PlatformDispatcher.instance.onError = (error, stack) {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          return true;
+        };
+      } catch (_) {
+        // Firebase unavailable (misconfigured, crashed, or timed out) — do not
+        // block startup or crash the app.
+      }
     }
 
     await migrateMacOsFromSandboxToNoSandbox();
 
-    // force High Refresh Rate on some Android devices (like One Plus)
+    // force High Refresh Rate on some Android devices (like One Plus).
+    // Bounded: the display-mode query is a platform channel that can stall on
+    // rare devices; a timeout simply leaves the default refresh rate.
     if (kIsAndroid) {
-      await FlutterDisplayMode.setHighRefreshRate();
+      try {
+        await FlutterDisplayMode.setHighRefreshRate()
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Display-mode query stalled/hung — keep the default refresh rate.
+      }
     }
     if (kIsAndroid || kIsDesktop) {
-      await NewPipeExtractor.init();
+      try {
+        await NewPipeExtractor.init().timeout(const Duration(seconds: 10));
+      } catch (_) {
+        // Extractor init stalled/hung — continue without it.
+      }
     }
 
     if (!kIsWeb) {
@@ -160,15 +183,35 @@ Future<void> main(List<String> rawArgs) async {
     // from the "Got it" action of the integration-complete dialog.
     if (kIsAndroid || kIsIOS) {
       if (Env.oneSignalAppId.isNotEmpty) {
-        await OneSignalService.instance.initialize(Env.oneSignalAppId);
+        // Bounded: OneSignal init is a network/SDK call that can stall on
+        // slow or unreachable networks; skip it rather than block startup.
+        try {
+          await OneSignalService.instance
+              .initialize(Env.oneSignalAppId)
+              .timeout(const Duration(seconds: 10));
+        } catch (_) {
+          // OneSignal init stalled/hung — continue without push messaging.
+        }
       }
     }
 
     // Read the Google Play Install Referrer (affiliate QR attribution) early
     // on first launch so the code is stored before the user signs in. Binding
     // to the signed-in user happens inside ClerkAuthNotifier.
+    //
+    // Bounded: this is a native MethodChannel call that can HANG indefinitely
+    // on devices without reliable Google Play Services — the most likely cause
+    // of the intermittent 2-3 minute cold-start stall at the splash screen. A
+    // timeout simply skips best-effort affiliate attribution.
     if (kIsAndroid) {
-      await ReferrerService.instance.readReferrer();
+      try {
+        await ReferrerService.instance
+            .readReferrer()
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Referrer read hung (no reliable Google Play Services) — skip
+        // best-effort attribution instead of stalling startup.
+      }
     }
 
     runApp(
