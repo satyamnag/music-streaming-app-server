@@ -264,10 +264,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <option value="Sanskrit">Sanskrit</option>
   <option value="Other">Other</option>
 </select>
-<label>Lyrics (plain text, one line per lyric)</label>
-<textarea id="fLyrics" rows="6" placeholder="Paste plain lyrics here..."></textarea>
-<label>Synced Lyrics (LRC format, e.g. [00:05.80]lyric line)</label>
-<textarea id="fSyncedLyrics" rows="6" placeholder="[00:05.80]Lyric line&#10;[00:09.70]Next line..."></textarea>
 <label>Thumbnail (300×300 recommended, 1:1 square)</label>
 <div class="upload-row">
   <input id="fThumbnail" placeholder="URL or upload an image">
@@ -464,6 +460,15 @@ function buildLrc(entries, field) {
     .join('\n');
 }
 
+// Plain lyrics are derived automatically from synced lines (first non-empty
+// language per line) so editing a track never needs a separate plain-lyrics field.
+function buildPlainLyrics(entries) {
+  return entries
+    .map((e) => (e.te && e.te.trim()) || (e.en && e.en.trim()) || (e.hi && e.hi.trim()) || '')
+    .filter((l) => l)
+    .join('\n');
+}
+
 function syncListHtml(entries, editing) {
   if (!entries.length) {
     return '<tr><td colspan="6" class="sync-empty">No lines yet — play the song and add lines, or attach an LRC/SRT file.</td></tr>';
@@ -593,6 +598,7 @@ async function saveSyncLyrics() {
     synced_lyrics: buildLrc(syncEntries, 'te') || null,
     synced_lyrics_en: buildLrc(syncEntries, 'en') || null,
     synced_lyrics_hi: buildLrc(syncEntries, 'hi') || null,
+    lyrics: buildPlainLyrics(syncEntries) || null,
   };
   try {
     showLoading(true);
@@ -997,7 +1003,7 @@ function pl(v) { return v || 0; }
 function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
-  ['fTitle','fArtist','fDuration','fThumbnail','fStorage','fLyrics','fSyncedLyrics'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fArtist','fDuration','fThumbnail','fStorage'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fAlbum').value = '';
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
@@ -1022,8 +1028,6 @@ function showEdit(id) {
   document.getElementById('fStorage').value = t.storage_path || '';
   document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
   document.getElementById('fLanguage').value = t.language || '';
-  document.getElementById('fLyrics').value = t.lyrics || '';
-  document.getElementById('fSyncedLyrics').value = t.synced_lyrics || '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
@@ -1049,9 +1053,7 @@ async function saveTrack() {
   const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
   const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
   const language = document.getElementById('fLanguage').value || null;
-  const lyrics = document.getElementById('fLyrics').value.trim() || null;
-  const synced_lyrics = document.getElementById('fSyncedLyrics').value.trim() || null;
-  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language, lyrics, synced_lyrics };
+  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
