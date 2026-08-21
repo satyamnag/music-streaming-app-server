@@ -61,6 +61,9 @@ tr:hover { background: #f0f7ff; }
 .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
 .toast.show { opacity: 1; }
 .thumb-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; background: #eee; }
+.sync-chip { display: inline-block; padding: 2px 7px; margin: 1px 3px 1px 0; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.sync-yes { background: #dcfce7; color: #15803d; }
+.sync-no { background: #fee2e2; color: #b91c1c; }
 .thumb-cell { display: flex; align-items: center; gap: 8px; }
 .upload-row { display: flex; gap: 8px; align-items: center; }
 .upload-row input { flex: 1; }
@@ -139,6 +142,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
   <th>Thumbnail</th><th>Storage</th>
   <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
+  <th>Synced Lyrics</th>
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
@@ -148,6 +152,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th></th><th></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
+  <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All synced</option><option value="any">Any language</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
     <div class="pagination" id="trackPagination" style="display:none;">
@@ -375,6 +380,7 @@ let filterDurMin = '';
 let filterDurMax = '';
 let filterLanguage = '';
 let filterStatus = '';
+let filterSync = '';
 let pendingConfirm = null;
 let currentView = 'tracks';
 // Guards against accidental double-submits (rapid clicks / re-entrancy).
@@ -385,10 +391,10 @@ let _searchTimer = null;
 function debouncedSearch() { clearTimeout(_searchTimer); _searchTimer = setTimeout(renderTracks, 200); }
 function clearTrackFilters() {
   document.getElementById('searchInput').value = '';
-  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus', 'filterSync'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const dmin = document.getElementById('filterDurMin'); if (dmin) dmin.value = '';
   const dmax = document.getElementById('filterDurMax'); if (dmax) dmax.value = '';
-  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterDurMin = ''; filterDurMax = '';
+  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterSync = ''; filterDurMin = ''; filterDurMax = '';
   trackSearch = '';
   trackSortKey = null; trackSortDir = 1;
   document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
@@ -720,6 +726,20 @@ function filteredTracks() {
   if (filterStatus) {
     list = list.filter(t => (t.status || 'free') === filterStatus);
   }
+  if (filterSync) {
+    list = list.filter(t => {
+      const has = (v) => typeof v === 'string' && v.trim().length > 0;
+      const te = has(t.synced_lyrics);
+      const en = has(t.synced_lyrics_en);
+      const hi = has(t.synced_lyrics_hi);
+      if (filterSync === 'any') return te || en || hi;
+      if (filterSync === 'none') return !te && !en && !hi;
+      if (filterSync === 'te') return te;
+      if (filterSync === 'en') return en;
+      if (filterSync === 'hi') return hi;
+      return true;
+    });
+  }
   if (trackSortKey) {
     list = [...list].sort((a, b) => {
       let va = a[trackSortKey], vb = b[trackSortKey];
@@ -963,6 +983,22 @@ async function handleAlbumCoverUpload(input) {
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Upload error: ' + e.message); }
 }
 
+function lrcLineCount(v) {
+  if (typeof v !== 'string' || !v.trim()) return 0;
+  return v.split('\n').filter(l => l.trim().startsWith('[')).length;
+}
+
+// Per-track synced-lyrics status across the three languages: a green chip
+// with the LRC line count when updated, a red chip with "✗" when not.
+function syncChips(t) {
+  const chip = (label, count) => count > 0
+    ? '<span class="sync-chip sync-yes" title="' + label + ' synced lyrics updated (' + count + ' lines)">' + label + ' ' + count + '</span>'
+    : '<span class="sync-chip sync-no" title="' + label + ' synced lyrics not updated">' + label + ' &#10007;</span>';
+  return chip('Telugu', lrcLineCount(t.synced_lyrics)) +
+         chip('English', lrcLineCount(t.synced_lyrics_en)) +
+         chip('Hindi', lrcLineCount(t.synced_lyrics_hi));
+}
+
 function renderTracks() {
   const newSearch = document.getElementById('searchInput').value.trim();
   if (newSearch !== trackSearch) trackPage = 1;
@@ -970,11 +1006,11 @@ function renderTracks() {
   const list = filteredTracks();
   const tbody = document.getElementById('tbody');
   const pag = document.getElementById('trackPagination');
-  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage || filterStatus || filterDurMin !== '' || filterDurMax !== '');
+  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage || filterStatus || filterSync || filterDurMin !== '' || filterDurMax !== '');
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
     document.getElementById('count').textContent = tracks.length + ' track(s)';
     if (pag) pag.style.display = 'none';
     return;
@@ -992,6 +1028,7 @@ function renderTracks() {
     <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
     <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
+    <td>${syncChips(t)}</td>
     <td class="actions">
       <button class="btn btn-success btn-sm" onclick="openSyncLyrics('${t.id}')">Add Sync Lyrics</button>
       <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
@@ -1023,6 +1060,7 @@ function applyTrackFilters() {
   filterDurMax = document.getElementById('filterDurMax').value.trim();
   filterLanguage = document.getElementById('filterLanguage').value;
   filterStatus = document.getElementById('filterStatus').value;
+  filterSync = document.getElementById('filterSync').value;
   trackPage = 1;
   renderTracks();
 }
