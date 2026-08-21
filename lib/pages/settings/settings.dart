@@ -51,11 +51,7 @@ class SettingsPage extends HookConsumerWidget {
     return SafeArea(
       bottom: false,
       child: Scaffold(
-        headers: [
-          TitleBar(
-            title: Text(context.l10n.settings),
-          )
-        ],
+        headers: const [TitleBar()],
         child: Scrollbar(
           controller: controller,
           child: Center(
