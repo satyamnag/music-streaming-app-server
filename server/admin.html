@@ -267,8 +267,10 @@ function openConfirm(title, message, action) {
 function closeConfirm() { pendingConfirm = null; document.getElementById('confirmModal').style.display = 'none'; }
 
 function confirmAction() {
-  closeConfirm();
-  if (pendingConfirm) pendingConfirm();
+  const action = pendingConfirm;
+  pendingConfirm = null;
+  document.getElementById('confirmModal').style.display = 'none';
+  if (action) action();
 }
 
 function sortTracks(key) {
