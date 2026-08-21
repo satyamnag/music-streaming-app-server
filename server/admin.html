@@ -21,6 +21,21 @@ tr:hover { background: #f0f7ff; }
 .toolbar { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; }
 .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
 .modal-content { background: #fff; max-width: 540px; margin: 40px auto; padding: 24px; border-radius: 8px; max-height: 90vh; overflow-y: auto; }
+/* Add Sync Lyrics popup is anchored to the right-middle of the screen */
+#syncLyricsModal .modal-content {
+  margin: 0;
+  position: fixed;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  max-width: 780px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.sync-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.sync-header h2 { margin: 0; font-size: 18px; }
+.sync-header-actions { flex: 0 0 auto; }
+.sync-muted { color: #bbb; }
 .modal-content h2 { margin-bottom: 16px; }
 .modal-content label { display: block; margin: 10px 0 4px; font-weight: 500; font-size: 13px; }
 .modal-content input, .modal-content textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
@@ -303,10 +318,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   </div>
 </div>
 
-<div id="syncLyricsModal" class="modal">
-  <div class="modal-content" style="max-width: 780px;">
-    <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
-    <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+ <div id="syncLyricsModal" class="modal">
+   <div class="modal-content" style="max-width: 780px;">
+     <div class="sync-header">
+       <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
+       <div class="sync-header-actions">
+         <button class="btn btn-primary btn-sm" type="button" onclick="document.getElementById('syncFile').click()">Attach Sync Lyrics</button>
+         <input type="file" id="syncFile" accept=".lrc,.srt,text/plain" style="display:none" onchange="handleSyncFile(this)">
+       </div>
+     </div>
+     <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+
 
     <div class="sync-player">
       <audio id="syncAudio" controls preload="metadata"></audio>
@@ -361,6 +383,7 @@ function showLoading(on) { document.getElementById('loadingOverlay').classList.t
 /* ---------- Add Sync Lyrics (multi-language) ---------- */
 let syncTrackId = null;
 let syncEntries = [];
+let syncEditing = -1;
 
 function pad2(n) { return String(n).padStart(2, '0'); }
 
@@ -396,6 +419,26 @@ function parseLrc(raw) {
   return out.sort((a, b) => a.time - b.time);
 }
 
+function parseSrt(raw) {
+  if (!raw) return [];
+  const out = [];
+  const blocks = raw.replace(/\r/g, '').split(/\n\s*\n/);
+  for (const blk of blocks) {
+    const lines = blk.split('\n').map((l) => l.trim()).filter((l) => l.length);
+    if (!lines.length) continue;
+    let idx = 0;
+    if (/^\d+$/.test(lines[0])) idx = 1;
+    const m = /(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})\s*-->\s*\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}/.exec(lines[idx] || '');
+    if (!m) continue;
+    const h = parseInt(m[1], 10), mm = parseInt(m[2], 10), ss = parseInt(m[3], 10);
+    const frac = parseInt(m[4], 10) / Math.pow(10, m[4].length);
+    const time = h * 3600 + mm * 60 + ss + frac;
+    const text = lines.slice(idx + 1).join(' ').trim();
+    out.push({ time, text });
+  }
+  return out.sort((a, b) => a.time - b.time);
+}
+
 function mergeSyncLrc(teRaw, enRaw, hiRaw) {
   const te = parseLrc(teRaw);
   const en = parseLrc(enRaw);
@@ -421,29 +464,58 @@ function buildLrc(entries, field) {
     .join('\n');
 }
 
-function renderSyncEntries() {
-  const tb = document.getElementById('syncTbody');
-  if (!syncEntries.length) {
-    tb.innerHTML = '<tr><td colspan="6" class="sync-empty">No lines yet — play the song and add lines with timestamps.</td></tr>';
-    return;
+function syncListHtml(entries, editing) {
+  if (!entries.length) {
+    return '<tr><td colspan="6" class="sync-empty">No lines yet — play the song and add lines, or attach an LRC/SRT file.</td></tr>';
   }
-  tb.innerHTML = syncEntries.map((e, i) => `<tr>
-    <td>${i + 1}</td>
-    <td><input class="sync-ts-input" type="text" value="${esc(formatLrcTime(e.time))}" onchange="syncEditTime(${i}, this.value)"></td>
-    <td><input type="text" value="${esc(e.te)}" onchange="syncEdit(${i}, 'te', this.value)"></td>
-    <td><input type="text" value="${esc(e.en)}" onchange="syncEdit(${i}, 'en', this.value)"></td>
-    <td><input type="text" value="${esc(e.hi)}" onchange="syncEdit(${i}, 'hi', this.value)"></td>
-    <td><button class="btn btn-danger btn-sm" type="button" onclick="syncDelete(${i})">Del</button></td>
-  </tr>`).join('');
+  return entries.map((e, i) => {
+    if (i === editing) {
+      return `<tr data-i="${i}">
+        <td>${i + 1}</td>
+        <td><input class="sync-ts-input" type="text" id="syncTime${i}" value="${esc(formatLrcTime(e.time))}"></td>
+        <td><input type="text" id="syncTe${i}" value="${esc(e.te)}"></td>
+        <td><input type="text" id="syncEn${i}" value="${esc(e.en)}"></td>
+        <td><input type="text" id="syncHi${i}" value="${esc(e.hi)}"></td>
+        <td>
+          <button class="btn btn-success btn-sm" type="button" onclick="syncSaveEdit(${i})">Save</button>
+          <button class="btn btn-secondary btn-sm" type="button" onclick="syncCancelEdit()">Cancel</button>
+        </td>
+      </tr>`;
+    }
+    return `<tr data-i="${i}">
+      <td>${i + 1}</td>
+      <td>${esc(formatLrcTime(e.time))}</td>
+      <td>${esc(e.te) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.en) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.hi) || '<span class="sync-muted">—</span>'}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" type="button" onclick="syncStartEdit(${i})">Edit</button>
+        <button class="btn btn-danger btn-sm" type="button" onclick="syncDelete(${i})">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-function syncEdit(i, field, val) { if (syncEntries[i]) syncEntries[i][field] = val; }
-function syncEditTime(i, val) {
-  const sec = parseLrcTime(val);
-  if (sec === null) { toast('Invalid time format — use MM:SS.cc'); renderSyncEntries(); return; }
-  if (syncEntries[i]) { syncEntries[i].time = sec; syncEntries.sort((a, b) => a.time - b.time); renderSyncEntries(); }
+function renderSyncEntries() {
+  document.getElementById('syncTbody').innerHTML = syncListHtml(syncEntries, syncEditing);
 }
-function syncDelete(i) { syncEntries.splice(i, 1); renderSyncEntries(); }
+
+function syncStartEdit(i) { syncEditing = i; renderSyncEntries(); }
+function syncCancelEdit() { syncEditing = -1; renderSyncEntries(); }
+function syncSaveEdit(i) {
+  const e = syncEntries[i];
+  if (!e) return;
+  const te = document.getElementById('syncTe' + i).value;
+  const en = document.getElementById('syncEn' + i).value;
+  const hi = document.getElementById('syncHi' + i).value;
+  const sec = parseLrcTime(document.getElementById('syncTime' + i).value);
+  if (sec === null) { toast('Invalid time format — use MM:SS.cc'); return; }
+  e.te = te; e.en = en; e.hi = hi; e.time = sec;
+  syncEntries.sort((a, b) => a.time - b.time);
+  syncEditing = -1;
+  renderSyncEntries();
+}
+function syncDelete(i) { syncEntries.splice(i, 1); syncEditing = -1; renderSyncEntries(); }
 
 function syncSeekBack() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = Math.max(0, (a.currentTime || 0) - 5); }
 function syncSeekFwd() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = (a.currentTime || 0) + 5; }
@@ -490,6 +562,29 @@ function closeSyncLyrics() {
   document.getElementById('syncLyricsModal').style.display = 'none';
   syncTrackId = null;
   syncEntries = [];
+}
+
+function handleSyncFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function () {
+    const text = String(reader.result || '');
+    const isSrt = /-->/.test(text);
+    const parsed = isSrt ? parseSrt(text) : parseLrc(text);
+    if (!parsed.length) {
+      toast('No valid LRC/SRT lines found in file');
+      input.value = '';
+      return;
+    }
+    syncEntries = parsed.map((p) => ({ time: p.time, te: p.text || '', en: '', hi: '' }));
+    syncEditing = -1;
+    renderSyncEntries();
+    toast('Attached ' + parsed.length + ' synced lines (' + (isSrt ? 'SRT' : 'LRC') + ')');
+    input.value = '';
+  };
+  reader.onerror = function () { toast('Failed to read file'); input.value = ''; };
+  reader.readAsText(file);
 }
 
 async function saveSyncLyrics() {
