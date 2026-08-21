@@ -953,10 +953,12 @@ async function handleAlbumCoverUpload(input) {
     const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
     const data = await res.json();
-    const url = data.url || data.publicUrl || '';
+    const url = data.thumbnail_url || data.url || data.publicUrl || '';
     if (url) {
       document.getElementById('alCover').value = url;
       document.getElementById('alCoverStatus').textContent = 'Cover uploaded: ' + url.substring(0, 50) + '...';
+    } else {
+      toast('Upload succeeded but no URL was returned');
     }
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Upload error: ' + e.message); }
 }
