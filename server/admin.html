@@ -166,12 +166,13 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     first-to-last.
   </p>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
-    <h3 style="margin-bottom:8px;">New Album</h3>
+    <h3 id="alFormTitle" style="margin-bottom:8px;">New Album</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
       <div><label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies"></div>
       <div><label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;"></div>
       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload</button>
-      <button class="btn btn-success" onclick="createAlbum()">Create Album</button>
+      <button class="btn btn-success" id="alSubmitBtn" onclick="createAlbum()">Create Album</button>
+      <button class="btn btn-secondary btn-sm" id="alCancelBtn" style="display:none;" onclick="cancelAlbumEdit()">Cancel</button>
     </div>
     <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
     <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
@@ -844,6 +845,7 @@ async function loadTracks() {
 }
 
 let albums = [];
+let editingAlbumId = null;
 async function loadAlbums() {
   try {
     const res = await authedFetch('/api/admin/albums', { credentials: 'same-origin' });
@@ -864,9 +866,10 @@ async function loadAlbums() {
       <td><b>${esc(a.name)}</b></td>
       <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '-'}</td>
       <td>${countAlbumTracks(a.id)}</td>
-      <td class="actions">
-        <button class="btn btn-danger btn-sm" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')">Del</button>
-      </td>
+       <td class="actions">
+         <button class="btn btn-primary btn-sm" onclick="editAlbum('${a.id}')">Edit</button>
+         <button class="btn btn-danger btn-sm" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')">Del</button>
+       </td>
     </tr>`).join('');
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message); }
 }
@@ -889,19 +892,41 @@ async function createAlbum() {
   if (!lock()) return;
   try {
     showLoading(true);
-    const res = await authedFetch('/api/admin/albums', {
-      method: 'POST', credentials: 'same-origin',
+    const url = editingAlbumId ? `/api/admin/albums/${editingAlbumId}` : '/api/admin/albums';
+    const res = await authedFetch(url, {
+      method: editingAlbumId ? 'PUT' : 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, cover_url }),
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Create failed'); }
-    toast('Album created');
-    document.getElementById('alName').value = '';
-    document.getElementById('alCover').value = '';
-    document.getElementById('alCoverStatus').textContent = '';
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
+    toast(editingAlbumId ? 'Album updated' : 'Album created');
+    cancelAlbumEdit();
     loadAlbums();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
+}
+
+function editAlbum(id) {
+  const a = albums.find(x => x.id === id);
+  if (!a) return;
+  editingAlbumId = id;
+  document.getElementById('alName').value = a.name || '';
+  document.getElementById('alCover').value = a.cover_url || '';
+  document.getElementById('alCoverStatus').textContent = 'Editing "' + (a.name || '') + '" — change the name or cover and save.';
+  document.getElementById('alFormTitle').textContent = 'Edit Album';
+  document.getElementById('alSubmitBtn').textContent = 'Save Changes';
+  document.getElementById('alCancelBtn').style.display = 'inline-block';
+  document.getElementById('alName').focus();
+}
+
+function cancelAlbumEdit() {
+  editingAlbumId = null;
+  document.getElementById('alName').value = '';
+  document.getElementById('alCover').value = '';
+  document.getElementById('alCoverStatus').textContent = '';
+  document.getElementById('alFormTitle').textContent = 'New Album';
+  document.getElementById('alSubmitBtn').textContent = 'Create Album';
+  document.getElementById('alCancelBtn').style.display = 'none';
 }
 
 function confirmDeleteAlbum(id, name) {
