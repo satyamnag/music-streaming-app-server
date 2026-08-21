@@ -33,19 +33,6 @@ Future<dynamic> _getJson(Ref ref, String path) async {
   return response.data;
 }
 
-/// Playlists made by the developer/owner: the whole catalog ("Songs") plus one
-/// playlist per artist, each showing the artist name and song count.
-final ownerPlaylistsProvider =
-    FutureProvider<List<SangeetSimplePlaylistObject>>((ref) async {
-  final data = await _getJson(ref, '/supabase/owner-playlists');
-  final items = (data['items'] as List<dynamic>? ?? [])
-      .map((e) => SangeetSimplePlaylistObject.fromJson(
-          Map<String, dynamic>.from(e as Map)))
-      .toList();
-  ref.keepAlive();
-  return items;
-});
-
 /// Playlists created by the user on this device (stored in the local drift DB).
 final userPlaylistsProvider =
     FutureProvider<List<SangeetSimplePlaylistObject>>((ref) async {

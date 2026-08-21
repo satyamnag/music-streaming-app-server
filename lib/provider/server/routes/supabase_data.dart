@@ -330,7 +330,8 @@ class ServerSupabaseDataRoutes {
             'tracks': fullTracks,
             'albums': [],
             'artists': [],
-            'playlists': await _buildOwnerPlaylists(data),
+            // No prebuilt/owner playlists: search results never include them.
+            'playlists': [],
           }),
           headers: {'content-type': 'application/json'},
         );
@@ -1125,109 +1126,6 @@ class ServerSupabaseDataRoutes {
     } catch (e) {
       return Response.internalServerError(body: '{"error":"${e.toString()}"}');
     }
-  }
-
-  /// GET /supabase/owner-playlists
-  ///
-  /// Returns the playlists made by the developer/owner: the full catalog
-  /// ("All Songs") plus one playlist per artist ("<Artist> — all songs"). Each
-  /// playlist shows the artist name and the number of songs it contains.
-  Future<Response> getOwnerPlaylists(Request request) async {
-    try {
-      final tracks = await _fetchAllTracks(limit: 500);
-      final items = await _buildOwnerPlaylists(tracks);
-
-      return Response.ok(
-        jsonEncode({
-          'items': items,
-          'limit': 500,
-          'nextOffset': null,
-          'total': items.length,
-          'hasMore': false
-        }),
-        headers: {'content-type': 'application/json'},
-      );
-    } catch (e) {
-      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
-    }
-  }
-
-  /// Builds the developer-curated "default" playlists from the track catalog:
-  ///  - "All Songs": the whole catalog.
-  ///  - One playlist per artist ("By <Artist>"), with the artist's songs.
-  ///  - One playlist per upload month ("August, 26", "September, 26", ...).
-  ///
-  /// Every playlist cover is the thumbnail of the most played song inside it
-  /// (per the shared `song_plays` table), so the home row shows the actual
-  /// album art users are listening to most.
-  Future<List<Map<String, dynamic>>> _buildOwnerPlaylists(
-    List<Map<String, dynamic>> tracks,
-  ) async {
-    final playCounts = await _playCounts();
-    final items = <Map<String, dynamic>>[];
-
-    items.add({
-      'id': 'supabase-all-tracks',
-      'name': 'All Songs',
-      'description': '${tracks.length} tracks',
-      'externalUri': '',
-      'owner': _defaultUser,
-      'images': _coverImagesFor(tracks, playCounts),
-      'totalTracks': tracks.length,
-    });
-
-    final artistNames = <String>[];
-    for (final t in tracks) {
-      for (final name in (t['artist_names'] as List<dynamic>? ?? const [])) {
-        final n = name.toString();
-        if (!artistNames.contains(n)) artistNames.add(n);
-      }
-    }
-    for (final name in artistNames) {
-      if (name == _hiddenArtistName) continue;
-      final slug = name.toLowerCase().replaceAll(RegExp(r'\s+'), '-');
-      final artistTracks = tracks.where((t) {
-        final names = (t['artist_names'] as List<dynamic>?)
-                ?.map((e) => e.toString())
-                .toList() ??
-            const <String>[];
-        return names.contains(name);
-      }).toList();
-      items.add({
-        'id': 'artist-$slug',
-        'name': name,
-        'description': '${artistTracks.length} songs',
-        'externalUri': '',
-        'owner': _defaultUser,
-        'images': _coverImagesFor(artistTracks, playCounts),
-        'totalTracks': artistTracks.length,
-      });
-    }
-
-    // Month playlists: segregate songs by the month they were uploaded,
-    // e.g. "August, 26", "September, 26", "October, 26"...
-    final months = <String, List<Map<String, dynamic>>>{};
-    for (final t in tracks) {
-      final created = t['created_at']?.toString();
-      if (created == null || created.isEmpty) continue;
-      final monthIndex = int.tryParse(created.substring(5, 7)) ?? -1;
-      if (monthIndex < 1 || monthIndex > 12) continue;
-      final key = monthsKey(created);
-      months.putIfAbsent(key, () => []).add(t);
-    }
-    for (final entry in months.entries) {
-      items.add({
-        'id': 'month-${entry.key}',
-        'name': _monthPlaylistName(entry.key),
-        'description': '${entry.value.length} songs',
-        'externalUri': '',
-        'owner': _defaultUser,
-        'images': _coverImagesFor(entry.value, playCounts),
-        'totalTracks': entry.value.length,
-      });
-    }
-
-    return items;
   }
 
   /// GET /supabase/user-playlists

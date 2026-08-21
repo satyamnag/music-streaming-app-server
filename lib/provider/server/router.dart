@@ -35,7 +35,6 @@ final serverRouterProvider = Provider((ref) {
   router.get("/supabase/playlists/<id>", supabaseRoutes.getPlaylist);
   router.get(
       "/supabase/playlists/<id>/tracks", supabaseRoutes.getPlaylistTracks);
-  router.get("/supabase/owner-playlists", supabaseRoutes.getOwnerPlaylists);
   router.get("/supabase/user-playlists", supabaseRoutes.getUserPlaylists);
   router.post("/supabase/api/playlists", supabaseRoutes.createUserPlaylist);
   router.post(
