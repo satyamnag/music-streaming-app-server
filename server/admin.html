@@ -152,7 +152,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th></th><th></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
-  <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All synced</option><option value="any">Any language</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
+  <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
     <div class="pagination" id="trackPagination" style="display:none;">
@@ -736,7 +736,11 @@ function filteredTracks() {
   }
   if (filterSync) {
     list = list.filter(t => {
-      const has = (v) => typeof v === 'string' && v.trim().length > 0;
+      // "Updated" means at least one line carries real text after its
+      // timestamp — timestamp-only LRCs (from before the save fix) are NOT
+      // treated as having that language's lyrics.
+      const has = (v) => typeof v === 'string' &&
+        v.split('\n').some(l => /\]\s*\S/.test(l));
       const te = has(t.synced_lyrics);
       const en = has(t.synced_lyrics_en);
       const hi = has(t.synced_lyrics_hi);
