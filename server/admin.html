@@ -622,10 +622,18 @@ function handleSyncFile(input) {
 
 async function saveSyncLyrics() {
   if (!syncTrackId) return;
+  // buildLrc keeps every line's timestamp so the three languages stay aligned.
+  // For English/Hindi, only store the LRC when it actually contains text lines
+  // (otherwise the column would hold timestamp-only lines that look "updated").
+  const teLrc = buildLrc(syncEntries, 'te');
+  const enLrc = buildLrc(syncEntries, 'en');
+  const hiLrc = buildLrc(syncEntries, 'hi');
+  const hasTextLines = (lrc) => typeof lrc === 'string' &&
+    lrc.split('\n').some(l => /\]\s*\S/.test(l));
   const body = {
-    synced_lyrics: buildLrc(syncEntries, 'te') || null,
-    synced_lyrics_en: buildLrc(syncEntries, 'en') || null,
-    synced_lyrics_hi: buildLrc(syncEntries, 'hi') || null,
+    synced_lyrics: teLrc || null,
+    synced_lyrics_en: hasTextLines(enLrc) ? enLrc : null,
+    synced_lyrics_hi: hasTextLines(hiLrc) ? hiLrc : null,
     lyrics: buildPlainLyrics(syncEntries) || null,
   };
   try {
@@ -985,7 +993,9 @@ async function handleAlbumCoverUpload(input) {
 
 function lrcLineCount(v) {
   if (typeof v !== 'string' || !v.trim()) return 0;
-  return v.split('\n').filter(l => l.trim().startsWith('[')).length;
+  // Count only lines that carry actual text after the timestamp — a line like
+  // "[00:01.00]" alone means the language has no lyrics for that line.
+  return v.split('\n').filter(l => /\]\s*\S/.test(l)).length;
 }
 
 // Per-track synced-lyrics status across the three languages: a green chip
