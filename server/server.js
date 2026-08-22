@@ -82,6 +82,7 @@ const secrets = {
   r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
+  google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
 }
 
 const VAULT_SECRET_KEYS = [
@@ -90,6 +91,7 @@ const VAULT_SECRET_KEYS = [
   'r2_access_key_id',
   'r2_secret_access_key',
   'superwall_webhook_secret',
+  'google_translate_api_key',
 ]
 
 // Loads each secret from the vault (overriding the env fallback when a
@@ -989,6 +991,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
       synced_lyrics_en: typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null,
       synced_lyrics_hi: typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null,
+      synced_lyrics_en_tr: typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null,
+      synced_lyrics_hi_tr: typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null,
       language: typeof language === 'string' && language.trim() ? language.trim() : null,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
@@ -1027,6 +1031,8 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (synced_lyrics !== undefined) updates.synced_lyrics = typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null
     if (synced_lyrics_en !== undefined) updates.synced_lyrics_en = typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null
     if (synced_lyrics_hi !== undefined) updates.synced_lyrics_hi = typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null
+    if (synced_lyrics_en_tr !== undefined) updates.synced_lyrics_en_tr = typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null
+    if (synced_lyrics_hi_tr !== undefined) updates.synced_lyrics_hi_tr = typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
@@ -1042,6 +1048,108 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (error) return res.status(500).json({ error: error.message })
     res.json({ success: true })
   } catch (err) { next(err) }
+})
+
+// ------------------------------------------------------------------
+// Google Translation + Transliteration (admin "Update Translation &
+// Transliteration" button in the Add Sync Lyrics editor).
+//
+// Translation uses the official Google Cloud Translation - Basic (v2) API
+// (https://cloud.google.com/translate/docs/basic/translating-text) with an
+// API key from GOOGLE_TRANSLATE_API_KEY.
+//
+// Transliteration uses Google's own transliteration services:
+//   * Telugu -> Latin: Google Translate romanization (translate_a/single
+//     with dt=rm), the same service translate.google.com uses.
+//   * Latin -> Devanagari (Hindi script): Google Input Tools transliteration
+//     API (inputtools.google.com/request).
+// ------------------------------------------------------------------
+
+const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
+
+// Translates Telugu lines into English and Hindi (official Cloud Translation v2).
+app.post('/api/admin/google/translate', requireAdmin, async (req, res, next) => {
+  try {
+    const googleKey = GOOGLE_TRANSLATE_KEY()
+    if (!googleKey) {
+      return res.status(503).json({ error: 'GOOGLE_TRANSLATE_API_KEY is not configured' })
+    }
+    const lines = (req.body?.lines || [])
+      .filter((l) => typeof l === 'string' && l.trim())
+      .slice(0, 200)
+    if (!lines.length) return res.json({ en: [], hi: [] })
+
+    const call = async (target) => {
+      const r = await fetch(
+        `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(googleKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ q: lines, source: 'te', target, format: 'text' }),
+        },
+      )
+      const data = await r.json()
+      if (data.error) throw new Error(data.error.message || `translate ${target} failed`)
+      return data.data.translations.map((t) => t.translatedText)
+    }
+
+    const [en, hi] = await Promise.all([call('en'), call('hi')])
+    res.json({ en, hi })
+  } catch (err) {
+    res.status(502).json({ error: err.message || 'Google translation failed' })
+  }
+})
+
+// Transliterates Telugu lines into English (Latin) and Hindi (Devanagari).
+app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next) => {
+  try {
+    const lines = (req.body?.lines || [])
+      .filter((l) => typeof l === 'string' && l.trim())
+      .slice(0, 200)
+    if (!lines.length) return res.json({ en: [], hi: [] })
+
+    const en = []
+    const hi = []
+    for (const line of lines) {
+      // 1) Google Translate romanization: Telugu script -> Latin (pure
+      //    phonetic; requesting tl=te keeps the source text untranslated).
+      let roman = ''
+      try {
+        const r = await fetch(
+          'https://translate.googleapis.com/translate_a/single?client=gtx&sl=te&tl=te&dt=rm&q=' +
+            encodeURIComponent(line),
+        )
+        const data = await r.json()
+        const c0 = data?.[0]?.[0]
+        if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) {
+          roman = c0[3]
+        } else if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) {
+          roman = c0[2]
+        } else if (Array.isArray(data[1]) && typeof data[1][3] === 'string') {
+          roman = data[1][3]
+        }
+      } catch (_) { /* keep '' */ }
+      en.push(roman)
+
+      // 2) Google Input Tools: Latin -> Devanagari (Hindi script).
+      let devanagari = ''
+      if (roman) {
+        try {
+          const it = await fetch(
+            'https://inputtools.google.com/request?itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage&text=' +
+              encodeURIComponent(roman),
+          )
+          const itData = await it.json()
+          const candidates = itData?.[1]?.[0]?.[1]
+          if (Array.isArray(candidates) && candidates.length) devanagari = String(candidates[0])
+        } catch (_) { /* keep '' */ }
+      }
+      hi.push(devanagari)
+    }
+    res.json({ en, hi })
+  } catch (err) {
+    res.status(502).json({ error: err.message || 'Google transliteration failed' })
+  }
 })
 
 // List admin-created albums. Used by the admin UI and to feed the home
