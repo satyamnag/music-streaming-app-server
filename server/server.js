@@ -968,7 +968,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -1003,7 +1003,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -1036,7 +1036,20 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) {
+      // The transliteration columns need migrations/012 to be run once in
+      // Supabase. If they are missing, retry without them so saving the
+      // translations still works (transliterations are simply not stored yet).
+      const missingTrColumns = error.code === 'PGRST204' || error.code === '42703' ||
+        /synced_lyrics_en_tr|synced_lyrics_hi_tr/.test(error.message || '')
+      if (missingTrColumns && ('synced_lyrics_en_tr' in updates || 'synced_lyrics_hi_tr' in updates)) {
+        delete updates.synced_lyrics_en_tr
+        delete updates.synced_lyrics_hi_tr
+        const retry = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
+        if (!retry.error) return res.json(retry.data)
+      }
+      return res.status(500).json({ error: error.message })
+    }
     res.json(data)
   } catch (err) { next(err) }
 })
