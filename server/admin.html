@@ -716,6 +716,7 @@ async function updateTranslationsAndTransliterations() {
     });
     if (!tlRes.ok) { const e = await tlRes.json().catch(() => ({})); throw new Error(e.error || 'Transliteration failed'); }
     const tl = await tlRes.json();
+    if (tl.warning) toast(tl.warning);
 
     let idx = 0;
     for (const e of syncEntries) {

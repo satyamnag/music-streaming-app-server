@@ -83,6 +83,7 @@ const secrets = {
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
   google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
+  google_service_account_json: process.env.GOOGLE_SERVICE_ACCOUNT_JSON || '',
 }
 
 const VAULT_SECRET_KEYS = [
@@ -92,6 +93,7 @@ const VAULT_SECRET_KEYS = [
   'r2_secret_access_key',
   'superwall_webhook_secret',
   'google_translate_api_key',
+  'google_service_account_json',
 ]
 
 // Loads each secret from the vault (overriding the env fallback when a
@@ -1100,7 +1102,110 @@ app.post('/api/admin/google/translate', requireAdmin, async (req, res, next) => 
   }
 })
 
-// Transliterates Telugu lines into English (Latin) and Hindi (Devanagari).
+// ------------------------------------------------------------------
+// Google OAuth (service account) — used by the official Cloud Translation
+// - Advanced (v3) romanizeText API. RS256 JWT assertion per the official
+// Google auth docs, using only Node's built-in crypto.
+// ------------------------------------------------------------------
+function googleJwtAssertion(sa) {
+  const now = Math.floor(Date.now() / 1000)
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
+  const header = { alg: 'RS256', typ: 'JWT' }
+  const claim = {
+    iss: sa.client_email,
+    scope: 'https://www.googleapis.com/auth/cloud-translation',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+  }
+  const signingInput = b64(header) + '.' + b64(claim)
+  const sign = crypto.createSign('RSA-SHA256')
+  sign.update(signingInput)
+  sign.end()
+  return signingInput + '.' + sign.sign(sa.private_key, 'base64url')
+}
+
+async function googleAccessToken(sa) {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: googleJwtAssertion(sa),
+    }),
+  })
+  const data = await res.json()
+  if (!data.access_token) {
+    throw new Error(data.error_description || data.error || 'Google OAuth token request failed')
+  }
+  return data.access_token
+}
+
+// Official Cloud Translation - Advanced (v3) romanizeText: non-Latin script
+// (Telugu) -> Latin, via a service account. Requires GOOGLE_SERVICE_ACCOUNT_JSON.
+async function romanizeOfficial(lines) {
+  const raw = secrets.google_service_account_json
+  if (!raw) return null
+  let sa
+  try {
+    sa = JSON.parse(raw)
+  } catch (_) {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON')
+  }
+  if (!sa.project_id || !sa.client_email || !sa.private_key) {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is missing project_id/client_email/private_key')
+  }
+  const token = await googleAccessToken(sa)
+  const res = await fetch(
+    `https://translation.googleapis.com/v3/projects/${encodeURIComponent(sa.project_id)}/locations/global:romanizeText`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'x-goog-user-project': sa.project_id,
+      },
+      body: JSON.stringify({ contents: lines, sourceLanguageCode: 'te' }),
+    },
+  )
+  const data = await res.json()
+  if (data.error) throw new Error(data.error.message || 'romanizeText failed')
+  return (data.romanizations || []).map((r) => r.romanizedText || '')
+}
+
+// Fallback: Google Translate romanization (dt=rm, tl=te = pure phonetic).
+async function romanizeGtx(line) {
+  try {
+    const r = await fetch(
+      'https://translate.googleapis.com/translate_a/single?client=gtx&sl=te&tl=te&dt=rm&q=' +
+        encodeURIComponent(line),
+    )
+    const data = await r.json()
+    const c0 = data?.[0]?.[0]
+    if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) return c0[3]
+    if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) return c0[2]
+    if (Array.isArray(data[1]) && typeof data[1][3] === 'string') return data[1][3]
+  } catch (_) { /* keep '' */ }
+  return ''
+}
+
+// Google Input Tools: Latin -> Devanagari (Hindi transliteration).
+async function devanagariFromLatin(roman) {
+  try {
+    const it = await fetch(
+      'https://inputtools.google.com/request?itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage&text=' +
+        encodeURIComponent(roman),
+    )
+    const itData = await it.json()
+    const candidates = itData?.[1]?.[0]?.[1]
+    if (Array.isArray(candidates) && candidates.length) return String(candidates[0])
+  } catch (_) { /* keep '' */ }
+  return ''
+}
+
+// Transliterates Telugu lines into English (Latin) and Hindi (Devanagari),
+// using only Google services (official romanizeText when a service account is
+// configured, with the Google Translate romanization as a fallback).
 app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next) => {
   try {
     const lines = (req.body?.lines || [])
@@ -1108,45 +1213,41 @@ app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next)
       .slice(0, 200)
     if (!lines.length) return res.json({ en: [], hi: [] })
 
+    let romanizations = null
+    let usedOfficial = false
+    try {
+      romanizations = await romanizeOfficial(lines)
+      if (romanizations) usedOfficial = true
+    } catch (err) {
+      // Report the official-path error only when nothing else can run.
+      console.warn(`[google] romanizeText failed: ${err.message}`)
+    }
+
     const en = []
     const hi = []
-    for (const line of lines) {
-      // 1) Google Translate romanization: Telugu script -> Latin (pure
-      //    phonetic; requesting tl=te keeps the source text untranslated).
-      let roman = ''
-      try {
-        const r = await fetch(
-          'https://translate.googleapis.com/translate_a/single?client=gtx&sl=te&tl=te&dt=rm&q=' +
-            encodeURIComponent(line),
-        )
-        const data = await r.json()
-        const c0 = data?.[0]?.[0]
-        if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) {
-          roman = c0[3]
-        } else if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) {
-          roman = c0[2]
-        } else if (Array.isArray(data[1]) && typeof data[1][3] === 'string') {
-          roman = data[1][3]
-        }
-      } catch (_) { /* keep '' */ }
-      en.push(roman)
-
-      // 2) Google Input Tools: Latin -> Devanagari (Hindi script).
-      let devanagari = ''
-      if (roman) {
-        try {
-          const it = await fetch(
-            'https://inputtools.google.com/request?itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage&text=' +
-              encodeURIComponent(roman),
-          )
-          const itData = await it.json()
-          const candidates = itData?.[1]?.[0]?.[1]
-          if (Array.isArray(candidates) && candidates.length) devanagari = String(candidates[0])
-        } catch (_) { /* keep '' */ }
+    if (romanizations) {
+      for (let i = 0; i < lines.length; i++) {
+        const roman = romanizations[i] || ''
+        en.push(roman)
+        hi.push(roman ? await devanagariFromLatin(roman) : '')
       }
-      hi.push(devanagari)
+    } else {
+      for (const line of lines) {
+        const roman = await romanizeGtx(line)
+        en.push(roman)
+        hi.push(roman ? await devanagariFromLatin(roman) : '')
+      }
     }
-    res.json({ en, hi })
+
+    const failed = lines.filter((_, i) => !en[i]).length
+    if (failed === lines.length) {
+      return res.status(502).json({
+        error: usedOfficial
+          ? 'Google romanizeText returned no transliterations'
+          : 'Google transliteration failed — configure GOOGLE_SERVICE_ACCOUNT_JSON (official romanizeText) or retry',
+      })
+    }
+    res.json({ en, hi, warning: failed > 0 ? `${failed} line(s) could not be transliterated` : undefined })
   } catch (err) {
     res.status(502).json({ error: err.message || 'Google transliteration failed' })
   }
