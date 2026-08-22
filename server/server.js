@@ -1071,11 +1071,12 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
 // (https://cloud.google.com/translate/docs/basic/translating-text) with an
 // API key from GOOGLE_TRANSLATE_API_KEY.
 //
-// Transliteration uses Google's own transliteration services:
-//   * Telugu -> Latin: Google Translate romanization (translate_a/single
-//     with dt=rm), the same service translate.google.com uses.
-//   * Latin -> Devanagari (Hindi script): Google Input Tools transliteration
-//     API (inputtools.google.com/request).
+// Transliteration:
+//   * Telugu -> Latin (English column): Google Translate romanization
+//     (translate_a/single with dt=rm), the same service translate.google.com
+//     uses.
+//   * Telugu -> Devanagari (Hindi column): deterministic 1:1 Brahmic script
+//     conversion (teluguToDevanagari) — always phonetically exact.
 // ------------------------------------------------------------------
 
 const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
@@ -1158,28 +1159,27 @@ async function romanizeGtx(line) {
   return ''
 }
 
-// Google Input Tools: Latin -> Devanagari (Hindi transliteration).
-async function devanagariFromLatin(roman) {
-  try {
-    const it = await fetch(
-      'https://inputtools.google.com/request?itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage&text=' +
-        encodeURIComponent(roman),
-    )
-    const itData = await it.json()
-    const candidates = itData?.[1]?.[0]?.[1]
-    let out = Array.isArray(candidates) && candidates.length ? String(candidates[0]) : ''
-    // Correct Google Input Tools' output: a Devanagari word can never start
-    // with the dependent vowel sign "ृ" (it emits it for word-initial "ra",
-    // e.g. "ravamma" -> "ृवम्मा"); rewrite it as "र" (ra).
-    out = out.replace(/(^|\s)ृ(?=[क-ह])/g, '$1र')
-    return out
-  } catch (_) { /* keep '' */ }
-  return ''
+// Deterministic Telugu -> Devanagari conversion (1:1 Brahmic mapping, always
+// phonetically exact; the virama becomes the halant so conjuncts stay exact).
+const TE2DE = {
+  '\u0C05':'\u0905','\u0C06':'\u0906','\u0C07':'\u0907','\u0C08':'\u0908','\u0C09':'\u0909','\u0C0A':'\u090A','\u0C0B':'\u090B','\u0C0C':'\u090C',
+  '\u0C0E':'\u090F','\u0C0F':'\u090F','\u0C10':'\u0910','\u0C12':'\u0913','\u0C13':'\u0913','\u0C14':'\u0914',
+  '\u0C15':'\u0915','\u0C16':'\u0916','\u0C17':'\u0917','\u0C18':'\u0918','\u0C19':'\u0919','\u0C1A':'\u091A','\u0C1B':'\u091B',
+  '\u0C1C':'\u091C','\u0C1D':'\u091D','\u0C1E':'\u091E','\u0C1F':'\u091F','\u0C20':'\u0920','\u0C21':'\u0921','\u0C22':'\u0922',
+  '\u0C23':'\u0923','\u0C24':'\u0924','\u0C25':'\u0925','\u0C26':'\u0926','\u0C27':'\u0927','\u0C28':'\u0928','\u0C2A':'\u092A',
+  '\u0C2B':'\u092B','\u0C2C':'\u092C','\u0C2D':'\u092D','\u0C2E':'\u092E','\u0C2F':'\u092F','\u0C30':'\u0930','\u0C32':'\u0932',
+  '\u0C33':'\u0933','\u0C35':'\u0935','\u0C36':'\u0936','\u0C37':'\u0937','\u0C38':'\u0938','\u0C39':'\u0939',
+  '\u0C3E':'\u093E','\u0C3F':'\u093F','\u0C40':'\u0940','\u0C41':'\u0941','\u0C42':'\u0942','\u0C43':'\u0943','\u0C44':'\u0944',
+  '\u0C46':'\u0947','\u0C47':'\u0947','\u0C48':'\u0948','\u0C4A':'\u094B','\u0C4B':'\u094B','\u0C4C':'\u094C',
+  '\u0C02':'\u0902','\u0C03':'\u0903','\u0C4D':'\u094D',
+  '\u0C66':'\u0966','\u0C67':'\u0967','\u0C68':'\u0968','\u0C69':'\u0969','\u0C6A':'\u096A','\u0C6B':'\u096B','\u0C6C':'\u096C','\u0C6D':'\u096D','\u0C6E':'\u096E','\u0C6F':'\u096F',
+}
+function teluguToDevanagari(text) {
+  return [...text].map((c) => TE2DE[c] || c).join('')
 }
 
-// Transliterates Telugu lines into English (Latin) and Hindi (Devanagari),
-// using only Google services (Google Translate romanization + Google Input
-// Tools).
+// Transliterates Telugu lines into English (Latin, Google Translate
+// romanization) and Hindi (Devanagari, deterministic script conversion).
 app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next) => {
   try {
     const lines = (req.body?.lines || [])
@@ -1190,9 +1190,8 @@ app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next)
     const en = []
     const hi = []
     for (const line of lines) {
-      const roman = await romanizeGtx(line)
-      en.push(roman)
-      hi.push(roman ? await devanagariFromLatin(roman) : '')
+      en.push(await romanizeGtx(line))
+      hi.push(teluguToDevanagari(line))
     }
 
     const failed = lines.filter((_, i) => !en[i]).length
