@@ -1113,26 +1113,34 @@ app.post('/api/admin/google/translate', requireAdmin, async (req, res, next) => 
 // ------------------------------------------------------------------
 
 // Google Translate romanization: Telugu script -> Latin (pure phonetic).
+// Several Google hosts serve the same translate_a endpoint; some network
+// egress (datacenter IPs) is blocked on one host but not another, so we try
+// them in order with a browser User-Agent.
+const ROMANIZATION_HOSTS = [
+  'https://translate.googleapis.com/translate_a/single',
+  'https://translate.google.com/translate_a/single',
+]
 async function romanizeGtx(line) {
   const headers = {
     'User-Agent':
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept': '*/*',
   }
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const r = await fetch(
-        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=te&tl=te&dt=rm&q=' +
-          encodeURIComponent(line),
-        { headers },
-      )
-      if (!r.ok) continue
-      const data = await r.json()
-      const c0 = data?.[0]?.[0]
-      if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) return c0[3]
-      if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) return c0[2]
-      if (Array.isArray(data[1]) && typeof data[1][3] === 'string') return data[1][3]
-    } catch (_) { /* retry */ }
+  for (const host of ROMANIZATION_HOSTS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const r = await fetch(
+          `${host}?client=gtx&sl=te&tl=te&dt=rm&q=${encodeURIComponent(line)}`,
+          { headers },
+        )
+        if (!r.ok) continue
+        const data = await r.json()
+        const c0 = data?.[0]?.[0]
+        if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) return c0[3]
+        if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) return c0[2]
+        if (Array.isArray(data[1]) && typeof data[1][3] === 'string') return data[1][3]
+      } catch (_) { /* try next host/attempt */ }
+    }
   }
   return ''
 }
