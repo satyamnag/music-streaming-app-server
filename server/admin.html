@@ -135,7 +135,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <button class="btn btn-secondary btn-sm" type="button" id="clearFiltersBtn" style="display:none;" onclick="clearTrackFilters()">Clear filters</button>
       </div>
       <div class="search-row">
-        <input id="searchInput" type="text" placeholder="Search by title, artist or album..." oninput="debouncedSearch()">
+        <input id="searchInput" type="text" placeholder="Search by title, artist, album or tag..." oninput="debouncedSearch()">
       </div>
 <table><thead><tr>
   <th class="sortable" onclick="sortTracks('title')">Title<span id="arrow-title" class="sort-arrow"></span></th>
@@ -143,6 +143,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('album')">Album<span id="arrow-album" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('duration')">Duration<span id="arrow-duration" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
+  <th>Tags</th>
   <th>Thumbnail</th><th>Storage</th>
   <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
   <th>Synced Lyrics</th>
@@ -153,7 +154,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th><select id="filterAlbum" class="col-filter" onchange="applyTrackFilters()"><option value="">All albums</option></select></th>
   <th><div class="duration-filter"><input id="filterDurMin" class="col-filter" type="number" min="0" placeholder="Min s" oninput="applyTrackFilters()"><input id="filterDurMax" class="col-filter" type="number" min="0" placeholder="Max s" oninput="applyTrackFilters()"></div></th>
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
-  <th></th><th></th>
+  <th></th><th></th><th></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
   <th></th>
@@ -275,6 +276,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <option value="Sanskrit">Sanskrit</option>
   <option value="Other">Other</option>
 </select>
+<label>Tags (comma separated)</label>
+<input id="fTags" placeholder="e.g. bhajan, devotional, morning">
 <label>Thumbnail (300×300 recommended, 1:1 square)</label>
 <div class="upload-row">
   <input id="fThumbnail" placeholder="URL or upload an image">
@@ -858,7 +861,8 @@ function filteredTracks() {
     list = list.filter(t =>
       (t.title || '').toLowerCase().includes(q) ||
       (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q) ||
-      (t.album || '').toLowerCase().includes(q)
+      (t.album || '').toLowerCase().includes(q) ||
+      (t.tags || '').toLowerCase().includes(q)
     );
   }
   if (filterArtist) {
@@ -1150,6 +1154,14 @@ function lrcLineCount(v) {
   return v.split('\n').filter(l => /\]\s*\S/.test(l)).length;
 }
 
+// Renders a track's comma-separated tags as small chips (or a dash when empty).
+function tagsChips(raw) {
+  if (typeof raw !== 'string' || !raw.trim()) return '<span style="color:#aaa;">—</span>';
+  return raw.split(',').map(s => s.trim()).filter(Boolean)
+    .map(t => '<span class="sync-chip sync-yes" style="background:#e0e7ff;color:#3730a3;">' + esc(t) + '</span>')
+    .join(' ');
+}
+
 // Per-track synced-lyrics status across the three languages: a green chip
 // with the LRC line count when updated, a red chip with "✗" when not.
 function syncChips(t) {
@@ -1172,7 +1184,7 @@ function renderTracks() {
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
     document.getElementById('count').textContent = tracks.length + ' track(s)';
     if (pag) pag.style.display = 'none';
     return;
@@ -1187,6 +1199,7 @@ function renderTracks() {
     <td>${esc(t.album || '')}</td>
     <td>${pl(t.duration)}s</td>
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
+    <td>${tagsChips(t.tags)}</td>
     <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
     <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
@@ -1285,6 +1298,7 @@ function showEdit(id) {
   document.getElementById('fStorage').value = t.storage_path || '';
   document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
   document.getElementById('fLanguage').value = t.language || '';
+  document.getElementById('fTags').value = t.tags || '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
@@ -1311,7 +1325,9 @@ async function saveTrack() {
   const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
   const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
   const language = document.getElementById('fLanguage').value || null;
-  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language };
+  const tagsRaw = document.getElementById('fTags').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
+  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language, tags };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';

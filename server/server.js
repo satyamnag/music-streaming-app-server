@@ -968,7 +968,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -994,6 +994,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       synced_lyrics_en_tr: typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null,
       synced_lyrics_hi_tr: typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null,
       language: typeof language === 'string' && language.trim() ? language.trim() : null,
+      tags: cleanTags(tags),
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data)
@@ -1003,7 +1004,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -1034,6 +1035,7 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (synced_lyrics_en_tr !== undefined) updates.synced_lyrics_en_tr = typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null
     if (synced_lyrics_hi_tr !== undefined) updates.synced_lyrics_hi_tr = typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
+    if (tags !== undefined) updates.tags = cleanTags(tags)
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) {
@@ -1078,6 +1080,14 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
 //   * Telugu -> Devanagari (Hindi column): deterministic 1:1 Brahmic script
 //     conversion (teluguToDevanagari) — always phonetically exact.
 // ------------------------------------------------------------------
+
+// Normalizes a comma-separated tags string (e.g. "bhajan, devotional") to a
+// clean ", "-joined value, or null when empty.
+function cleanTags(v) {
+  if (typeof v !== 'string') return null
+  const tags = v.split(',').map((s) => s.trim()).filter(Boolean)
+  return tags.length ? tags.join(', ') : null
+}
 
 const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
 
