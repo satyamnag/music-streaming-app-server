@@ -785,6 +785,10 @@ async function googleTransliterateLine(line) {
     const c = itData?.[1]?.[0]?.[1];
     if (Array.isArray(c) && c.length) devanagari = String(c[0]);
   }
+  // Correct Google Input Tools' output: a Devanagari word can never start with
+  // the dependent vowel sign "ृ" — the engine emits it for word-initial "ra"
+  // (e.g. "ravamma" -> "ृवम्मा"). Rewrite it as "र" (ra).
+  devanagari = devanagari.replace(/(^|\s)ृ(?=[क-ह])/g, '$1र');
   return { roman: roman, devanagari: devanagari };
 }
 

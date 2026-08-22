@@ -1154,7 +1154,12 @@ async function devanagariFromLatin(roman) {
     )
     const itData = await it.json()
     const candidates = itData?.[1]?.[0]?.[1]
-    if (Array.isArray(candidates) && candidates.length) return String(candidates[0])
+    let out = Array.isArray(candidates) && candidates.length ? String(candidates[0]) : ''
+    // Correct Google Input Tools' output: a Devanagari word can never start
+    // with the dependent vowel sign "ृ" (it emits it for word-initial "ra",
+    // e.g. "ravamma" -> "ृवम्मा"); rewrite it as "र" (ra).
+    out = out.replace(/(^|\s)ृ(?=[क-ह])/g, '$1र')
+    return out
   } catch (_) { /* keep '' */ }
   return ''
 }
