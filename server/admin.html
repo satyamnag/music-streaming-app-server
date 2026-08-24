@@ -373,6 +373,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-danger" type="button" onclick="confirmDeleteAllSyncLyrics()">Delete All Synced Lyrics</button>
       <button class="btn btn-secondary" type="button" onclick="closeSyncLyrics()">Cancel</button>
       <button class="btn btn-success" type="button" onclick="saveSyncLyrics()">Save</button>
     </div>
@@ -689,6 +690,47 @@ async function saveSyncLyrics() {
   }
 }
 
+// Warns the admin before permanently deleting all synced lyrics of the song.
+function confirmDeleteAllSyncLyrics() {
+  openConfirm(
+    'Delete all synced lyrics?',
+    'This will permanently delete the synced lyrics for this song — Telugu, English (Translation), Hindi (Translation), English (Transliteration) and Hindi (Transliteration) — as well as the derived plain lyrics. This cannot be undone.',
+    deleteAllSyncLyrics,
+    'Yes'
+  );
+}
+
+// Clears every synced-lyrics column (and the derived plain lyrics) via PUT.
+async function deleteAllSyncLyrics() {
+  if (!syncTrackId) return;
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch(`/api/admin/tracks/${syncTrackId}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        synced_lyrics: null,
+        synced_lyrics_en: null,
+        synced_lyrics_hi: null,
+        synced_lyrics_en_tr: null,
+        synced_lyrics_hi_tr: null,
+        lyrics: null,
+      }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Delete failed'); }
+    toast('All synced lyrics deleted');
+    closeSyncLyrics();
+    loadTracks();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally {
+    showLoading(false);
+    unlock();
+  }
+}
+
 // Auto-fills English/Hindi TRANSLATIONS and English/Hindi TRANSLITERATIONS
 // for every line that has Telugu text, using only Google's services:
 //  - Google Cloud Translation API (official, key from GOOGLE_TRANSLATE_API_KEY)
@@ -820,10 +862,11 @@ function teluguToDevanagari(text) {
   });
 })();
 
-function openConfirm(title, message, action) {
+function openConfirm(title, message, action, confirmLabel) {
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMessage').textContent = message;
   pendingConfirm = action;
+  document.getElementById('confirmOkBtn').textContent = confirmLabel || 'Delete';
   document.getElementById('confirmModal').style.display = 'block';
   const cancelBtn = document.querySelector('#confirmModal .btn-secondary');
   if (cancelBtn) cancelBtn.focus();
