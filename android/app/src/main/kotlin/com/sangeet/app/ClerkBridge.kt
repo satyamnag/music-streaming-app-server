@@ -9,6 +9,7 @@ import com.clerk.api.network.serialization.errorMessage
 import com.clerk.api.network.serialization.onFailure
 import com.clerk.api.network.serialization.onSuccess
 import com.clerk.api.sso.OAuthProvider
+import com.clerk.api.user.delete
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -249,6 +250,39 @@ class ClerkBridge(
                         .onFailure {
                             result.success(mapOf("status" to "error", "error" to it.errorMessage))
                         }
+                }
+            }
+
+            // Permanently deletes the signed-in user's Clerk account. This is the
+            // real account-deletion path required by the Google Play User Data
+            // policy (in-app account deletion). The Clerk SDK handles the
+            // backend DELETE /users/{user_id} call; on success the user session
+            // is destroyed and the user state streams back as signed-out.
+            "deleteAccount" -> {
+                scope.launch {
+                    val user = Clerk.userFlow.value
+                    if (user == null) {
+                        result.success(
+                            mapOf("status" to "error", "error" to "not_signed_in")
+                        )
+                    } else {
+                        user.delete()
+                            .onSuccess {
+                                android.util.Log.i(
+                                    "ClerkBridge", "deleteAccount success"
+                                )
+                                result.success(mapOf("status" to "success"))
+                            }
+                            .onFailure {
+                                android.util.Log.i(
+                                    "ClerkBridge",
+                                    "deleteAccount failure: ${it.errorMessage}"
+                                )
+                                result.success(
+                                    mapOf("status" to "error", "error" to it.errorMessage)
+                                )
+                            }
+                    }
                 }
             }
 

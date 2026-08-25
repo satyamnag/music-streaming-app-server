@@ -65,6 +65,41 @@ class ProfileDialog extends ConsumerWidget {
       if (context.mounted) Navigator.pop(context);
     }
 
+    Future<void> deleteAccount() async {
+      // Confirmation step — account deletion is permanent and irreversible.
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Delete account?'),
+          content: const Text(
+            'This will permanently delete your Soulful Bhakti account and '
+            'all data associated with it. This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            Button.destructive(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+
+      signOutError.value = null;
+      final failure = await ref.read(clerkAuthProvider.notifier).deleteAccount();
+      if (!context.mounted) return;
+      if (failure != null) {
+        // Keep the dialog open and surface the error inline.
+        signOutError.value = failure;
+        return;
+      }
+      if (context.mounted) Navigator.pop(context);
+    }
+
     return AlertDialog(
       title: const Text('Profile'),
       content: SizedBox(
@@ -152,6 +187,12 @@ class ProfileDialog extends ConsumerWidget {
                       Button.destructive(
                         onPressed: signOut,
                         child: const Text('Sign Out'),
+                      ),
+                      const Gap(8),
+                      Button(
+                        style: const ButtonStyle.outline(),
+                        onPressed: deleteAccount,
+                        child: const Text('Delete Account'),
                       ),
                     ],
                   ),

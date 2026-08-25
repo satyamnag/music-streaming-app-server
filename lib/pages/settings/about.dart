@@ -1,8 +1,10 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/assets.gen.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:auto_route/auto_route.dart';
@@ -77,6 +79,21 @@ class AboutSangeetPage extends HookConsumerWidget {
                     "written authorization from the applicable rights holder.\n\n"
                     "Soulful Bhakti is a part of FAMERELAY.",
                     textAlign: TextAlign.justify,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Button(
+                    style: const ButtonStyle.outline(),
+                    leading: const Icon(SangeetIcons.connect),
+                    onPressed: () {
+                      launchUrlString(
+                        "https://www.soulfulbhakti.com/privacy",
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: const Text("Privacy Policy"),
                   ),
                 ),
               ],

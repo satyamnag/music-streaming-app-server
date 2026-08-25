@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
+import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/services/install_referrer/referrer_service.dart';
+import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 
@@ -151,6 +153,55 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     );
     final status = result?['status'] as String?;
     if (status == 'error') return result?['error'] as String?;
+    return null;
+  }
+
+  /// Permanently deletes the signed-in user's account (Clerk) and clears the
+  /// user data associated with it, as required by the Google Play User Data
+  /// policy (in-app account deletion).
+  ///
+  /// On success:
+  ///  - the Clerk account is deleted natively (backend `DELETE /users/{id}`);
+  ///  - local user data (playlists, playlist songs, liked songs, history) is
+  ///    removed from the device database;
+  ///  - device-scoped affiliate/referral keys are cleared;
+  ///  - third-party identity (Superwall, OneSignal) is reset.
+  ///
+  /// Returns an error message on failure, or `null` on success.
+  Future<String?> deleteAccount() async {
+    final result = await _methodChannel.invokeMethod<Map<Object?, Object?>>(
+      'deleteAccount',
+    );
+    final status = result?['status'] as String?;
+    if (status == 'error') return result?['error'] as String?;
+
+    // Best-effort cleanup: never block the successful deletion report on
+    // local cleanup that might fail (e.g. a locked database).
+    try {
+      final db = ref.read(databaseProvider);
+      await db.delete(db.localPlaylistsTable).go();
+      await db.delete(db.localPlaylistSongsTable).go();
+      await db.delete(db.localLikedSongsTable).go();
+      await db.delete(db.historyTable).go();
+    } catch (_) {
+      // Local cleanup failure is non-fatal for account deletion.
+    }
+
+    // Clear device-scoped affiliate/referral attribution keys.
+    try {
+      final prefs = KVStoreService.sharedPreferences;
+      await prefs.remove('affiliateReferrerCode');
+      await prefs.remove('affiliateReferrerBound');
+      await prefs.remove('isQRAttributed');
+    } catch (_) {
+      // Best-effort; ignore.
+    }
+
+    // Reset third-party identity and reflect the signed-out state.
+    SuperwallService.instance.reset();
+    OneSignalService.instance.logout();
+    ref.invalidateSelf();
+
     return null;
   }
 }

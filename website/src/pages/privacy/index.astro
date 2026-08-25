@@ -91,9 +91,9 @@ import RootLayout from "~/layouts/RootLayout.astro";
           application-level identifiers that can be reset by the user. We do
           <strong>not</strong> collect or link persistent hardware device
           identifiers such as IMEI, IMSI or SIM serial numbers to personal or
-          sensitive user data. The push subscription is created only if you opt
-          in to push notifications; notification permission is requested only
-          from a user-initiated action and never at launch.
+          sensitive user data. We do not request notification permission at app
+          launch; push notifications are delivered only to users who have
+          granted notification permission.
         </li>
         <li>
           <strong>Purchase history (Financial info):</strong> If you subscribe
@@ -147,11 +147,11 @@ import RootLayout from "~/layouts/RootLayout.astro";
         it through clear, in-app prompts that require an affirmative action by
         you. Where data is gated by an Android runtime permission, we request
         that permission at runtime, only when the relevant feature needs it, and
-        only after you have seen the applicable disclosure. For example,
-        permission to send push notifications is requested only after a
-        user-initiated action and never at launch; you may grant or revoke it at
-        any time in your device settings. You are never asked to provide
-        information the Service does not need.
+        only after you have seen the applicable disclosure. For example, we do
+        not request notification permission at app launch; push notifications
+        are delivered only to users who have granted notification permission,
+        which you may grant or revoke at any time in your device settings. You
+        are never asked to provide information the Service does not need.
       </p>
 
       <h3>5. How We Share Information</h3>
@@ -244,21 +244,12 @@ import RootLayout from "~/layouts/RootLayout.astro";
       <h3>8. Account Deletion</h3>
       <p>
         You can request deletion of your Soulful Bhakti account and its
-        associated data in either of the following ways:
+        associated data by submitting a deletion request to
+        <a href="mailto:karthik@famerelay.com">karthik@famerelay.com</a> with
+        the subject &ldquo;Account Deletion&rdquo;, using the email address
+        associated with your account. We will process the request and confirm
+        once your account and its associated data have been deleted.
       </p>
-      <ul>
-        <li>
-          <strong>Within the app:</strong> Use the account deletion option
-          available in the app&rsquo;s profile/settings.
-        </li>
-        <li>
-          <strong>Outside the app (web):</strong> Submit a deletion request by
-          emailing
-          <a href="mailto:karthik@famerelay.com">karthik@famerelay.com</a> with
-          the subject &ldquo;Account Deletion&rdquo;, using the email address
-          associated with your account.
-        </li>
-      </ul>
       <p>
         Upon receiving a deletion request, we delete all data associated with
         your account, as described in Section 7. If you are not signed in, you
