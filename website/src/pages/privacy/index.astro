@@ -1,0 +1,321 @@
+---
+import RootLayout from "~/layouts/RootLayout.astro";
+---
+
+<RootLayout
+  metadata={{
+    title: "Privacy Policy — Soulful Bhakti",
+    description:
+      "Privacy Policy for the Soulful Bhakti Android app, explaining what data is collected, why, how it is used and shared, how it is protected, and how to delete your account and data.",
+    keywords:
+      "Soulful Bhakti, privacy policy, privacy, data, account deletion, devotional music",
+    author: "Soulful Bhakti",
+  }}
+>
+  <section class="p-4 md:p-16">
+    <h2 class="h2">Privacy Policy</h2>
+    <p class="opacity-70">Effective date: 25 August 2026</p>
+
+    <br />
+
+    <div class="prose lg:prose-lg dark:prose-invert max-w-4xl">
+      <p>
+        This Privacy Policy describes how <strong>Soulful Bhakti</strong>, an
+        application published by <strong>FAMERELAY</strong> (together
+        &ldquo;we&rdquo;, &ldquo;us&rdquo; or &ldquo;our&rdquo;), accesses,
+        collects, uses, handles and shares information in connection with the
+        Soulful Bhakti Android app and related services (&ldquo;the
+        Service&rdquo;). It also explains your choices, including how to request
+        deletion of your account and associated data.
+      </p>
+      <p>
+        By using the Service, you agree to the collection, use and sharing of
+        information as described in this policy. This policy is provided in
+        accordance with the Google Play User Data policy and Google Play&rsquo;s
+        requirements for developer privacy policies.
+      </p>
+
+      <h3>1. Overview</h3>
+      <p>
+        Soulful Bhakti is a devotional music streaming app. The Service can be
+        used without creating an account. Signing in with your Google account is
+        optional and is required only to sync your playlists, like songs, track
+        listening history, and to access paid (premium) content and
+        subscriptions. The Service does <strong>not</strong> display third-party
+        advertising, and we do <strong>not</strong> sell personal or sensitive
+        user data.
+      </p>
+
+      <h3>2. Information We Access and Collect</h3>
+      <p>
+        We access and collect information only to provide, secure and improve the
+        Service, consistent with what users reasonably expect from the Service.
+        The information we handle falls into the categories below, which also
+        appear in our Google Play Data safety declarations.
+      </p>
+
+      <h4>a. Information you provide</h4>
+      <ul>
+        <li>
+          <strong>Account information (Personal info):</strong> When you sign in
+          with your Google account through our authentication provider
+          (Clerk), we receive your name, email address, profile picture and a
+          unique account identifier. You can use the Service without providing
+          this information; this data is collected only when you choose to sign
+          in.
+        </li>
+        <li>
+          <strong>User-generated content (App activity):</strong> Playlists you
+          create, songs you like, and your listening history. This content is
+          stored in our backend database (Supabase) when you are signed in and
+          remains on your device (local database) even when you are signed out.
+        </li>
+      </ul>
+
+      <h4>b. Information we collect automatically</h4>
+      <ul>
+        <li>
+          <strong>App interactions (App activity):</strong> Analytics events
+          about how you use the app, collected through Firebase Analytics (for
+          example, which features you use).
+        </li>
+        <li>
+          <strong>Crash logs and diagnostics (App info and performance):</strong>
+          Anonymous technical data about crashes and performance, collected
+          through Firebase Crashlytics, so we can fix bugs and improve
+          reliability.
+        </li>
+        <li>
+          <strong>Device or other IDs:</strong> A Firebase installation ID and a
+          push-notification subscription ID (OneSignal). These are
+          application-level identifiers that can be reset by the user. We do
+          <strong>not</strong> collect or link persistent hardware device
+          identifiers such as IMEI, IMSI or SIM serial numbers to personal or
+          sensitive user data. The push subscription is created only if you opt
+          in to push notifications; notification permission is requested only
+          from a user-initiated action and never at launch.
+        </li>
+        <li>
+          <strong>Purchase history (Financial info):</strong> If you subscribe
+          to premium or make an in-app purchase, payment and transaction details
+          are processed by Google Play Billing (through our payment provider,
+          Superwall). We do not collect or store your full payment card details;
+          those are handled by Google. We never publicly disclose financial or
+          payment information.
+        </li>
+        <li>
+          <strong>Affiliate attribution:</strong> If you install the app from an
+          affiliate QR code or link, a short, non-identifying referral code
+          (utm_source) is read from the Google Play Install Referrer so we can
+          attribute the referral. This is attribution-only and is not used to
+          change prices.
+        </li>
+      </ul>
+
+      <h3>3. How We Use Information</h3>
+      <p>
+        We use the information we collect only for purposes that are reasonably
+        expected from the Service and disclosed in this policy:
+      </p>
+      <ul>
+        <li>Provide, operate and maintain the Service (app functionality);</li>
+        <li>
+          Sync your playlists, liked songs and listening history across devices
+          when you are signed in (account management);
+        </li>
+        <li>
+          Manage subscriptions and grant access to premium content (app
+          functionality, account management);
+        </li>
+        <li>
+          Analyze how the Service is used and diagnose and fix bugs and crashes
+          (analytics);
+        </li>
+        <li>
+          Send you push notifications if you have opted in (developer
+          communications);
+        </li>
+        <li>
+          Prevent fraud, protect security and comply with legal obligations
+          (fraud prevention, security and compliance).
+        </li>
+      </ul>
+
+      <h3>4. Consent</h3>
+      <p>
+        Before we collect or access any data that requires consent, we request
+        it through clear, in-app prompts that require an affirmative action by
+        you. Where data is gated by an Android runtime permission, we request
+        that permission at runtime, only when the relevant feature needs it, and
+        only after you have seen the applicable disclosure. For example,
+        permission to send push notifications is requested only after a
+        user-initiated action and never at launch; you may grant or revoke it at
+        any time in your device settings. You are never asked to provide
+        information the Service does not need.
+      </p>
+
+      <h3>5. How We Share Information</h3>
+      <p>
+        We do <strong>not</strong> sell personal and sensitive user data. We
+        share information only with service providers that process data on our
+        behalf to help us operate the Service, and only to the extent necessary
+        to provide it:
+      </p>
+      <ul>
+        <li>
+          <strong>Google Play Services / Google Play Billing</strong> — sign-in
+          and in-app purchase/subscription processing.
+        </li>
+        <li>
+          <strong>Clerk</strong> — authentication (Google sign-in).
+        </li>
+        <li>
+          <strong>Supabase</strong> — cloud database and file storage for music,
+          playlists and listening data.
+        </li>
+        <li>
+          <strong>Firebase (Analytics and Crashlytics)</strong> — analytics and
+          crash reporting.
+        </li>
+        <li>
+          <strong>OneSignal</strong> — push notifications (only if you opt in).
+        </li>
+        <li>
+          <strong>Superwall</strong> — subscription paywalls and entitlements.
+        </li>
+        <li>
+          <strong>Cloudflare R2</strong> — content delivery network used to
+          stream audio.
+        </li>
+      </ul>
+      <p>
+        These service providers are contractually obligated to use your
+        information only on our behalf and for the purposes described in this
+        policy. We may also disclose information where required by law, in
+        response to a valid governmental request, or to protect the rights,
+        property or safety of our users or the public.
+      </p>
+
+      <h3>6. Data Security</h3>
+      <p>
+        We take the protection of personal and sensitive user data seriously and
+        handle it securely:
+      </p>
+      <ul>
+        <li>
+          All data transmitted between your device and our servers is encrypted
+          in transit using modern cryptography (HTTPS/TLS).
+        </li>
+        <li>
+          Access to personal and sensitive user data is limited to personnel and
+          service providers who need it to provide and secure the Service.
+        </li>
+        <li>
+          We do not link persistent hardware device identifiers to personal and
+          sensitive user data.
+        </li>
+        <li>
+          We do not collect data that is not necessary for the Service&rsquo;s
+          functionality.
+        </li>
+      </ul>
+      <p>
+        No method of transmission or storage is 100% secure, and we cannot
+        guarantee absolute security.
+      </p>
+
+      <h3>7. Data Retention and Deletion Policy</h3>
+      <p>
+        <strong>Retention:</strong> We retain account-related data for as long as
+        your account is active or as needed to provide the Service. Analytics and
+        crash data are retained in a form that does not identify you. If we need
+        to retain certain data for legitimate reasons such as security, fraud
+        prevention or regulatory compliance, we retain only what is necessary and
+        for the shortest period permitted by law.
+      </p>
+      <p>
+        <strong>Deletion on request:</strong> When you request account deletion,
+        we permanently delete the data associated with your account (rather than
+        merely deactivating or &ldquo;freezing&rdquo; it), except for any data we
+        are required to retain by law, which we retain only for the legally
+        required period and protect in accordance with this policy.
+      </p>
+
+      <h3>8. Account Deletion</h3>
+      <p>
+        You can request deletion of your Soulful Bhakti account and its
+        associated data in either of the following ways:
+      </p>
+      <ul>
+        <li>
+          <strong>Within the app:</strong> Use the account deletion option
+          available in the app&rsquo;s profile/settings.
+        </li>
+        <li>
+          <strong>Outside the app (web):</strong> Submit a deletion request by
+          emailing
+          <a href="mailto:karthik@famerelay.com">karthik@famerelay.com</a> with
+          the subject &ldquo;Account Deletion&rdquo;, using the email address
+          associated with your account.
+        </li>
+      </ul>
+      <p>
+        Upon receiving a deletion request, we delete all data associated with
+        your account, as described in Section 7. If you are not signed in, you
+        can delete the data stored on your device by uninstalling the app.
+      </p>
+
+      <h3>9. Children&rsquo;s Privacy</h3>
+      <p>
+        The Service is not directed to children under 13. We do not knowingly
+        collect personal information from children under 13. If you believe a
+        child under 13 has provided us with personal information, please contact
+        us using the details below so we can delete it.
+      </p>
+
+      <h3>10. International Users</h3>
+      <p>
+        If you access the Service from the European Economic Area, the United
+        Kingdom or Switzerland, we comply with applicable privacy and data
+        protection laws, including the General Data Protection Regulation (GDPR)
+        where it applies. You may have rights to access, correct, restrict,
+        port or erase your personal data, and to object to its processing, by
+        contacting us using the details below.
+      </p>
+
+      <h3>11. Your Choices and Rights</h3>
+      <ul>
+        <li>
+          <strong>Push notifications:</strong> You can grant or revoke
+          notification permission at any time in your device settings.
+        </li>
+        <li>
+          <strong>Sign-out:</strong> Signing out stops account data from syncing
+          to our servers; data already stored locally remains on your device and
+          can be cleared by uninstalling the app.
+        </li>
+        <li>
+          <strong>Data deletion:</strong> To request deletion of your account
+          and associated data, follow the account deletion steps in Section 8.
+        </li>
+      </ul>
+
+      <h3>12. Changes to This Privacy Policy</h3>
+      <p>
+        We may update this Privacy Policy from time to time. The current version
+        will always be available on this page, with the effective date shown at
+        the top. Continued use of the Service after changes constitutes
+        acceptance of the updated policy.
+      </p>
+
+      <h3>13. Developer and Contact Information</h3>
+      <p>
+        This policy is provided by and for <strong>Soulful Bhakti</strong>, part
+        of <strong>FAMERELAY</strong>. If you have any questions, concerns or
+        requests about this Privacy Policy or your data, contact us at
+        <a href="mailto:karthik@famerelay.com">karthik@famerelay.com</a>. We
+        will respond within a reasonable time.
+      </p>
+    </div>
+  </section>
+</RootLayout>

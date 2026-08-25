@@ -2,27 +2,61 @@
 import RootLayout from "~/layouts/RootLayout.astro";
 ---
 
-<RootLayout>
+<RootLayout
+  metadata={{
+    title: "About — Soulful Bhakti",
+    description:
+      "Learn about Soulful Bhakti, a new era of devotional music blending traditional ragas with modern instrumentation.",
+    keywords:
+      "Soulful Bhakti, about, devotional music, ragas, meditation, spiritual music",
+    author: "Soulful Bhakti",
+  }}
+>
   <section class="p-4 md:p-16">
     <h2 class="h2">About</h2>
 
-    <br /><br />
-
-    <h4 class="h4">Author & Developer</h4>
     <br />
-    <a
-      href="https://github.com/KRTirtho"
-      target="_blank"
-      class="btn preset-tonal-primary max-w-44 flex flex-col items-center p-4 rounded-2xl"
-    >
-      <img
-        alt="Author of Spotube"
-        src="https://github.com/KRTirtho.png"
-        class="h-auto w-40 rounded-full"
-      />
-      <br />
-      <h5>Kingkor Roy Tirtho</h5>
-      <p>Flutter developer</p>
-    </a>
+
+    <div class="prose lg:prose-lg dark:prose-invert max-w-4xl">
+      <p>
+        Welcome to Soulful Bhakti — a new era of devotional music. We blend the
+        serenity of traditional ragas with modern instrumentation to create
+        soulful devotional songs that bring peace, devotion and spiritual
+        comfort.
+      </p>
+      <p>
+        Created for listeners of all ages, from children to elders, our music is
+        ideal for morning prayers, meditation, quiet reflection or as a peaceful
+        companion throughout the day.
+      </p>
+      <p>
+        Experience gentle, meaningful visuals that reflect the divine presence in
+        everyday life.
+      </p>
+
+      <h3>Copyright &amp; Rights Notice</h3>
+      <p>
+        All rights, title, and interest in and to all tracks released by Soulful
+        Bhakti are owned and/or controlled by Soulful Bhakti, to the extent
+        applicable. Unauthorized copying, reproduction, duplication,
+        distribution, modification, or other use of any track, in whole or in
+        part, is strictly prohibited without prior written authorization from
+        the applicable rights holder.
+      </p>
+      <p>
+        Soulful Bhakti is a part of <strong>FAMERELAY</strong>. Soulful Bhakti is
+        available on the
+        <a
+          href="https://play.google.com/store/apps/details?id=com.soulfulbhakti.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google Play Store
+        </a>
+        . For support, visit the <a href="/contact">Contact</a> page, or read our
+        <a href="/privacy">Privacy Policy</a> and
+        <a href="/terms">Terms of Service</a>.
+      </p>
+    </div>
   </section>
 </RootLayout>
