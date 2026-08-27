@@ -9,52 +9,53 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i33;
-import 'package:flutter/material.dart' as _i34;
-import 'package:sangeet/models/metadata/metadata.dart' as _i35;
+import 'package:auto_route/auto_route.dart' as _i34;
+import 'package:flutter/material.dart' as _i35;
+import 'package:sangeet/models/metadata/metadata.dart' as _i36;
 import 'package:sangeet/pages/album/album.dart' as _i2;
 import 'package:sangeet/pages/artist/artist.dart' as _i3;
 import 'package:sangeet/pages/connect/connect.dart' as _i5;
 import 'package:sangeet/pages/connect/control/control.dart' as _i4;
 import 'package:sangeet/pages/home/home.dart' as _i7;
+import 'package:sangeet/pages/home/home_see_all.dart' as _i8;
 import 'package:sangeet/pages/home/sections/section_items.dart' as _i6;
-import 'package:sangeet/pages/library/library.dart' as _i8;
-import 'package:sangeet/pages/library/user_artists.dart' as _i31;
-import 'package:sangeet/pages/library/user_playlists.dart' as _i32;
-import 'package:sangeet/pages/lyrics/lyrics.dart' as _i11;
-import 'package:sangeet/pages/lyrics/mini_lyrics.dart' as _i12;
-import 'package:sangeet/pages/player/lyrics.dart' as _i13;
-import 'package:sangeet/pages/player/queue.dart' as _i14;
-import 'package:sangeet/pages/player/sources.dart' as _i15;
-import 'package:sangeet/pages/playlist/liked_playlist.dart' as _i9;
-import 'package:sangeet/pages/playlist/playlist.dart' as _i16;
-import 'package:sangeet/pages/profile/profile.dart' as _i17;
-import 'package:sangeet/pages/recent/recently_played.dart' as _i18;
-import 'package:sangeet/pages/root/root_app.dart' as _i19;
-import 'package:sangeet/pages/search/search.dart' as _i20;
+import 'package:sangeet/pages/library/library.dart' as _i9;
+import 'package:sangeet/pages/library/user_artists.dart' as _i32;
+import 'package:sangeet/pages/library/user_playlists.dart' as _i33;
+import 'package:sangeet/pages/lyrics/lyrics.dart' as _i12;
+import 'package:sangeet/pages/lyrics/mini_lyrics.dart' as _i13;
+import 'package:sangeet/pages/player/lyrics.dart' as _i14;
+import 'package:sangeet/pages/player/queue.dart' as _i15;
+import 'package:sangeet/pages/player/sources.dart' as _i16;
+import 'package:sangeet/pages/playlist/liked_playlist.dart' as _i10;
+import 'package:sangeet/pages/playlist/playlist.dart' as _i17;
+import 'package:sangeet/pages/profile/profile.dart' as _i18;
+import 'package:sangeet/pages/recent/recently_played.dart' as _i19;
+import 'package:sangeet/pages/root/root_app.dart' as _i20;
+import 'package:sangeet/pages/search/search.dart' as _i21;
 import 'package:sangeet/pages/settings/about.dart' as _i1;
-import 'package:sangeet/pages/settings/logs.dart' as _i10;
-import 'package:sangeet/pages/settings/metadata/metadata_form.dart' as _i21;
-import 'package:sangeet/pages/settings/metadata_plugins.dart' as _i22;
-import 'package:sangeet/pages/settings/settings.dart' as _i23;
-import 'package:sangeet/pages/stats/artists/artists.dart' as _i24;
-import 'package:sangeet/pages/stats/fees/fees.dart' as _i28;
-import 'package:sangeet/pages/stats/minutes/minutes.dart' as _i25;
-import 'package:sangeet/pages/stats/playlists/playlists.dart' as _i27;
-import 'package:sangeet/pages/stats/stats.dart' as _i26;
-import 'package:sangeet/pages/stats/streams/streams.dart' as _i29;
-import 'package:sangeet/pages/track/track.dart' as _i30;
-import 'package:shadcn_flutter/shadcn_flutter.dart' as _i36;
+import 'package:sangeet/pages/settings/logs.dart' as _i11;
+import 'package:sangeet/pages/settings/metadata/metadata_form.dart' as _i22;
+import 'package:sangeet/pages/settings/metadata_plugins.dart' as _i23;
+import 'package:sangeet/pages/settings/settings.dart' as _i24;
+import 'package:sangeet/pages/stats/artists/artists.dart' as _i25;
+import 'package:sangeet/pages/stats/fees/fees.dart' as _i29;
+import 'package:sangeet/pages/stats/minutes/minutes.dart' as _i26;
+import 'package:sangeet/pages/stats/playlists/playlists.dart' as _i28;
+import 'package:sangeet/pages/stats/stats.dart' as _i27;
+import 'package:sangeet/pages/stats/streams/streams.dart' as _i30;
+import 'package:sangeet/pages/track/track.dart' as _i31;
+import 'package:shadcn_flutter/shadcn_flutter.dart' as _i37;
 
 /// generated route for
 /// [_i1.AboutSangeetPage]
-class AboutSangeetRoute extends _i33.PageRouteInfo<void> {
-  const AboutSangeetRoute({List<_i33.PageRouteInfo>? children})
+class AboutSangeetRoute extends _i34.PageRouteInfo<void> {
+  const AboutSangeetRoute({List<_i34.PageRouteInfo>? children})
     : super(AboutSangeetRoute.name, initialChildren: children);
 
   static const String name = 'AboutSangeetRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       return const _i1.AboutSangeetPage();
@@ -64,12 +65,12 @@ class AboutSangeetRoute extends _i33.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.AlbumPage]
-class AlbumRoute extends _i33.PageRouteInfo<AlbumRouteArgs> {
+class AlbumRoute extends _i34.PageRouteInfo<AlbumRouteArgs> {
   AlbumRoute({
-    _i34.Key? key,
+    _i35.Key? key,
     required String id,
-    required _i35.SangeetSimpleAlbumObject album,
-    List<_i33.PageRouteInfo>? children,
+    required _i36.SangeetSimpleAlbumObject album,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          AlbumRoute.name,
          args: AlbumRouteArgs(key: key, id: id, album: album),
@@ -79,7 +80,7 @@ class AlbumRoute extends _i33.PageRouteInfo<AlbumRouteArgs> {
 
   static const String name = 'AlbumRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<AlbumRouteArgs>();
@@ -91,11 +92,11 @@ class AlbumRoute extends _i33.PageRouteInfo<AlbumRouteArgs> {
 class AlbumRouteArgs {
   const AlbumRouteArgs({this.key, required this.id, required this.album});
 
-  final _i34.Key? key;
+  final _i35.Key? key;
 
   final String id;
 
-  final _i35.SangeetSimpleAlbumObject album;
+  final _i36.SangeetSimpleAlbumObject album;
 
   @override
   String toString() {
@@ -105,11 +106,11 @@ class AlbumRouteArgs {
 
 /// generated route for
 /// [_i3.ArtistPage]
-class ArtistRoute extends _i33.PageRouteInfo<ArtistRouteArgs> {
+class ArtistRoute extends _i34.PageRouteInfo<ArtistRouteArgs> {
   ArtistRoute({
     required String artistId,
-    _i34.Key? key,
-    List<_i33.PageRouteInfo>? children,
+    _i35.Key? key,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          ArtistRoute.name,
          args: ArtistRouteArgs(artistId: artistId, key: key),
@@ -119,7 +120,7 @@ class ArtistRoute extends _i33.PageRouteInfo<ArtistRouteArgs> {
 
   static const String name = 'ArtistRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
@@ -136,7 +137,7 @@ class ArtistRouteArgs {
 
   final String artistId;
 
-  final _i34.Key? key;
+  final _i35.Key? key;
 
   @override
   String toString() {
@@ -146,13 +147,13 @@ class ArtistRouteArgs {
 
 /// generated route for
 /// [_i4.ConnectControlPage]
-class ConnectControlRoute extends _i33.PageRouteInfo<void> {
-  const ConnectControlRoute({List<_i33.PageRouteInfo>? children})
+class ConnectControlRoute extends _i34.PageRouteInfo<void> {
+  const ConnectControlRoute({List<_i34.PageRouteInfo>? children})
     : super(ConnectControlRoute.name, initialChildren: children);
 
   static const String name = 'ConnectControlRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       return const _i4.ConnectControlPage();
@@ -162,13 +163,13 @@ class ConnectControlRoute extends _i33.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i5.ConnectPage]
-class ConnectRoute extends _i33.PageRouteInfo<void> {
-  const ConnectRoute({List<_i33.PageRouteInfo>? children})
+class ConnectRoute extends _i34.PageRouteInfo<void> {
+  const ConnectRoute({List<_i34.PageRouteInfo>? children})
     : super(ConnectRoute.name, initialChildren: children);
 
   static const String name = 'ConnectRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       return const _i5.ConnectPage();
@@ -179,12 +180,12 @@ class ConnectRoute extends _i33.PageRouteInfo<void> {
 /// generated route for
 /// [_i6.HomeBrowseSectionItemsPage]
 class HomeBrowseSectionItemsRoute
-    extends _i33.PageRouteInfo<HomeBrowseSectionItemsRouteArgs> {
+    extends _i34.PageRouteInfo<HomeBrowseSectionItemsRouteArgs> {
   HomeBrowseSectionItemsRoute({
-    _i36.Key? key,
+    _i37.Key? key,
     required String sectionId,
-    required _i35.SangeetBrowseSectionObject<Object> section,
-    List<_i33.PageRouteInfo>? children,
+    required _i36.SangeetBrowseSectionObject<Object> section,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          HomeBrowseSectionItemsRoute.name,
          args: HomeBrowseSectionItemsRouteArgs(
@@ -198,7 +199,7 @@ class HomeBrowseSectionItemsRoute
 
   static const String name = 'HomeBrowseSectionItemsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<HomeBrowseSectionItemsRouteArgs>();
@@ -218,11 +219,11 @@ class HomeBrowseSectionItemsRouteArgs {
     required this.section,
   });
 
-  final _i36.Key? key;
+  final _i37.Key? key;
 
   final String sectionId;
 
-  final _i35.SangeetBrowseSectionObject<Object> section;
+  final _i36.SangeetBrowseSectionObject<Object> section;
 
   @override
   String toString() {
@@ -232,13 +233,13 @@ class HomeBrowseSectionItemsRouteArgs {
 
 /// generated route for
 /// [_i7.HomePage]
-class HomeRoute extends _i33.PageRouteInfo<void> {
-  const HomeRoute({List<_i33.PageRouteInfo>? children})
+class HomeRoute extends _i34.PageRouteInfo<void> {
+  const HomeRoute({List<_i34.PageRouteInfo>? children})
     : super(HomeRoute.name, initialChildren: children);
 
   static const String name = 'HomeRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       return const _i7.HomePage();
@@ -247,28 +248,72 @@ class HomeRoute extends _i33.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i8.LibraryPage]
-class LibraryRoute extends _i33.PageRouteInfo<void> {
-  const LibraryRoute({List<_i33.PageRouteInfo>? children})
+/// [_i8.HomeSeeAllPage]
+class HomeSeeAllRoute extends _i34.PageRouteInfo<HomeSeeAllRouteArgs> {
+  HomeSeeAllRoute({
+    _i37.Key? key,
+    required _i8.HomeSeeAllKind kind,
+    String? language,
+    List<_i34.PageRouteInfo>? children,
+  }) : super(
+         HomeSeeAllRoute.name,
+         args: HomeSeeAllRouteArgs(key: key, kind: kind, language: language),
+         initialChildren: children,
+       );
+
+  static const String name = 'HomeSeeAllRoute';
+
+  static _i34.PageInfo page = _i34.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<HomeSeeAllRouteArgs>();
+      return _i8.HomeSeeAllPage(
+        key: args.key,
+        kind: args.kind,
+        language: args.language,
+      );
+    },
+  );
+}
+
+class HomeSeeAllRouteArgs {
+  const HomeSeeAllRouteArgs({this.key, required this.kind, this.language});
+
+  final _i37.Key? key;
+
+  final _i8.HomeSeeAllKind kind;
+
+  final String? language;
+
+  @override
+  String toString() {
+    return 'HomeSeeAllRouteArgs{key: $key, kind: $kind, language: $language}';
+  }
+}
+
+/// generated route for
+/// [_i9.LibraryPage]
+class LibraryRoute extends _i34.PageRouteInfo<void> {
+  const LibraryRoute({List<_i34.PageRouteInfo>? children})
     : super(LibraryRoute.name, initialChildren: children);
 
   static const String name = 'LibraryRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i8.LibraryPage();
+      return const _i9.LibraryPage();
     },
   );
 }
 
 /// generated route for
-/// [_i9.LikedPlaylistPage]
-class LikedPlaylistRoute extends _i33.PageRouteInfo<LikedPlaylistRouteArgs> {
+/// [_i10.LikedPlaylistPage]
+class LikedPlaylistRoute extends _i34.PageRouteInfo<LikedPlaylistRouteArgs> {
   LikedPlaylistRoute({
-    _i34.Key? key,
-    required _i35.SangeetSimplePlaylistObject playlist,
-    List<_i33.PageRouteInfo>? children,
+    _i35.Key? key,
+    required _i36.SangeetSimplePlaylistObject playlist,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          LikedPlaylistRoute.name,
          args: LikedPlaylistRouteArgs(key: key, playlist: playlist),
@@ -277,11 +322,11 @@ class LikedPlaylistRoute extends _i33.PageRouteInfo<LikedPlaylistRouteArgs> {
 
   static const String name = 'LikedPlaylistRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<LikedPlaylistRouteArgs>();
-      return _i9.LikedPlaylistPage(key: args.key, playlist: args.playlist);
+      return _i10.LikedPlaylistPage(key: args.key, playlist: args.playlist);
     },
   );
 }
@@ -289,9 +334,9 @@ class LikedPlaylistRoute extends _i33.PageRouteInfo<LikedPlaylistRouteArgs> {
 class LikedPlaylistRouteArgs {
   const LikedPlaylistRouteArgs({this.key, required this.playlist});
 
-  final _i34.Key? key;
+  final _i35.Key? key;
 
-  final _i35.SangeetSimplePlaylistObject playlist;
+  final _i36.SangeetSimplePlaylistObject playlist;
 
   @override
   String toString() {
@@ -300,44 +345,44 @@ class LikedPlaylistRouteArgs {
 }
 
 /// generated route for
-/// [_i10.LogsPage]
-class LogsRoute extends _i33.PageRouteInfo<void> {
-  const LogsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i11.LogsPage]
+class LogsRoute extends _i34.PageRouteInfo<void> {
+  const LogsRoute({List<_i34.PageRouteInfo>? children})
     : super(LogsRoute.name, initialChildren: children);
 
   static const String name = 'LogsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i10.LogsPage();
+      return const _i11.LogsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i11.LyricsPage]
-class LyricsRoute extends _i33.PageRouteInfo<void> {
-  const LyricsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i12.LyricsPage]
+class LyricsRoute extends _i34.PageRouteInfo<void> {
+  const LyricsRoute({List<_i34.PageRouteInfo>? children})
     : super(LyricsRoute.name, initialChildren: children);
 
   static const String name = 'LyricsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i11.LyricsPage();
+      return const _i12.LyricsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i12.MiniLyricsPage]
-class MiniLyricsRoute extends _i33.PageRouteInfo<MiniLyricsRouteArgs> {
+/// [_i13.MiniLyricsPage]
+class MiniLyricsRoute extends _i34.PageRouteInfo<MiniLyricsRouteArgs> {
   MiniLyricsRoute({
-    _i36.Key? key,
-    required _i36.Size prevSize,
-    List<_i33.PageRouteInfo>? children,
+    _i37.Key? key,
+    required _i37.Size prevSize,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          MiniLyricsRoute.name,
          args: MiniLyricsRouteArgs(key: key, prevSize: prevSize),
@@ -346,11 +391,11 @@ class MiniLyricsRoute extends _i33.PageRouteInfo<MiniLyricsRouteArgs> {
 
   static const String name = 'MiniLyricsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MiniLyricsRouteArgs>();
-      return _i12.MiniLyricsPage(key: args.key, prevSize: args.prevSize);
+      return _i13.MiniLyricsPage(key: args.key, prevSize: args.prevSize);
     },
   );
 }
@@ -358,9 +403,9 @@ class MiniLyricsRoute extends _i33.PageRouteInfo<MiniLyricsRouteArgs> {
 class MiniLyricsRouteArgs {
   const MiniLyricsRouteArgs({this.key, required this.prevSize});
 
-  final _i36.Key? key;
+  final _i37.Key? key;
 
-  final _i36.Size prevSize;
+  final _i37.Size prevSize;
 
   @override
   String toString() {
@@ -369,61 +414,61 @@ class MiniLyricsRouteArgs {
 }
 
 /// generated route for
-/// [_i13.PlayerLyricsPage]
-class PlayerLyricsRoute extends _i33.PageRouteInfo<void> {
-  const PlayerLyricsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i14.PlayerLyricsPage]
+class PlayerLyricsRoute extends _i34.PageRouteInfo<void> {
+  const PlayerLyricsRoute({List<_i34.PageRouteInfo>? children})
     : super(PlayerLyricsRoute.name, initialChildren: children);
 
   static const String name = 'PlayerLyricsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i13.PlayerLyricsPage();
+      return const _i14.PlayerLyricsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i14.PlayerQueuePage]
-class PlayerQueueRoute extends _i33.PageRouteInfo<void> {
-  const PlayerQueueRoute({List<_i33.PageRouteInfo>? children})
+/// [_i15.PlayerQueuePage]
+class PlayerQueueRoute extends _i34.PageRouteInfo<void> {
+  const PlayerQueueRoute({List<_i34.PageRouteInfo>? children})
     : super(PlayerQueueRoute.name, initialChildren: children);
 
   static const String name = 'PlayerQueueRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i14.PlayerQueuePage();
+      return const _i15.PlayerQueuePage();
     },
   );
 }
 
 /// generated route for
-/// [_i15.PlayerTrackSourcesPage]
-class PlayerTrackSourcesRoute extends _i33.PageRouteInfo<void> {
-  const PlayerTrackSourcesRoute({List<_i33.PageRouteInfo>? children})
+/// [_i16.PlayerTrackSourcesPage]
+class PlayerTrackSourcesRoute extends _i34.PageRouteInfo<void> {
+  const PlayerTrackSourcesRoute({List<_i34.PageRouteInfo>? children})
     : super(PlayerTrackSourcesRoute.name, initialChildren: children);
 
   static const String name = 'PlayerTrackSourcesRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i15.PlayerTrackSourcesPage();
+      return const _i16.PlayerTrackSourcesPage();
     },
   );
 }
 
 /// generated route for
-/// [_i16.PlaylistPage]
-class PlaylistRoute extends _i33.PageRouteInfo<PlaylistRouteArgs> {
+/// [_i17.PlaylistPage]
+class PlaylistRoute extends _i34.PageRouteInfo<PlaylistRouteArgs> {
   PlaylistRoute({
-    _i34.Key? key,
+    _i35.Key? key,
     required String id,
-    required _i35.SangeetSimplePlaylistObject playlist,
-    List<_i33.PageRouteInfo>? children,
+    required _i36.SangeetSimplePlaylistObject playlist,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          PlaylistRoute.name,
          args: PlaylistRouteArgs(key: key, id: id, playlist: playlist),
@@ -433,11 +478,11 @@ class PlaylistRoute extends _i33.PageRouteInfo<PlaylistRouteArgs> {
 
   static const String name = 'PlaylistRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<PlaylistRouteArgs>();
-      return _i16.PlaylistPage(
+      return _i17.PlaylistPage(
         key: args.key,
         id: args.id,
         playlist: args.playlist,
@@ -449,11 +494,11 @@ class PlaylistRoute extends _i33.PageRouteInfo<PlaylistRouteArgs> {
 class PlaylistRouteArgs {
   const PlaylistRouteArgs({this.key, required this.id, required this.playlist});
 
-  final _i34.Key? key;
+  final _i35.Key? key;
 
   final String id;
 
-  final _i35.SangeetSimplePlaylistObject playlist;
+  final _i36.SangeetSimplePlaylistObject playlist;
 
   @override
   String toString() {
@@ -462,78 +507,78 @@ class PlaylistRouteArgs {
 }
 
 /// generated route for
-/// [_i17.ProfilePage]
-class ProfileRoute extends _i33.PageRouteInfo<void> {
-  const ProfileRoute({List<_i33.PageRouteInfo>? children})
+/// [_i18.ProfilePage]
+class ProfileRoute extends _i34.PageRouteInfo<void> {
+  const ProfileRoute({List<_i34.PageRouteInfo>? children})
     : super(ProfileRoute.name, initialChildren: children);
 
   static const String name = 'ProfileRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i17.ProfilePage();
+      return const _i18.ProfilePage();
     },
   );
 }
 
 /// generated route for
-/// [_i18.RecentlyPlayedPage]
-class RecentlyPlayedRoute extends _i33.PageRouteInfo<void> {
-  const RecentlyPlayedRoute({List<_i33.PageRouteInfo>? children})
+/// [_i19.RecentlyPlayedPage]
+class RecentlyPlayedRoute extends _i34.PageRouteInfo<void> {
+  const RecentlyPlayedRoute({List<_i34.PageRouteInfo>? children})
     : super(RecentlyPlayedRoute.name, initialChildren: children);
 
   static const String name = 'RecentlyPlayedRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i18.RecentlyPlayedPage();
+      return const _i19.RecentlyPlayedPage();
     },
   );
 }
 
 /// generated route for
-/// [_i19.RootAppPage]
-class RootAppRoute extends _i33.PageRouteInfo<void> {
-  const RootAppRoute({List<_i33.PageRouteInfo>? children})
+/// [_i20.RootAppPage]
+class RootAppRoute extends _i34.PageRouteInfo<void> {
+  const RootAppRoute({List<_i34.PageRouteInfo>? children})
     : super(RootAppRoute.name, initialChildren: children);
 
   static const String name = 'RootAppRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i19.RootAppPage();
+      return const _i20.RootAppPage();
     },
   );
 }
 
 /// generated route for
-/// [_i20.SearchPage]
-class SearchRoute extends _i33.PageRouteInfo<void> {
-  const SearchRoute({List<_i33.PageRouteInfo>? children})
+/// [_i21.SearchPage]
+class SearchRoute extends _i34.PageRouteInfo<void> {
+  const SearchRoute({List<_i34.PageRouteInfo>? children})
     : super(SearchRoute.name, initialChildren: children);
 
   static const String name = 'SearchRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i20.SearchPage();
+      return const _i21.SearchPage();
     },
   );
 }
 
 /// generated route for
-/// [_i21.SettingsMetadataProviderFormPage]
+/// [_i22.SettingsMetadataProviderFormPage]
 class SettingsMetadataProviderFormRoute
-    extends _i33.PageRouteInfo<SettingsMetadataProviderFormRouteArgs> {
+    extends _i34.PageRouteInfo<SettingsMetadataProviderFormRouteArgs> {
   SettingsMetadataProviderFormRoute({
-    _i36.Key? key,
+    _i37.Key? key,
     required String title,
-    required List<_i35.MetadataFormFieldObject> fields,
-    List<_i33.PageRouteInfo>? children,
+    required List<_i36.MetadataFormFieldObject> fields,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          SettingsMetadataProviderFormRoute.name,
          args: SettingsMetadataProviderFormRouteArgs(
@@ -546,11 +591,11 @@ class SettingsMetadataProviderFormRoute
 
   static const String name = 'SettingsMetadataProviderFormRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<SettingsMetadataProviderFormRouteArgs>();
-      return _i21.SettingsMetadataProviderFormPage(
+      return _i22.SettingsMetadataProviderFormPage(
         key: args.key,
         title: args.title,
         fields: args.fields,
@@ -566,11 +611,11 @@ class SettingsMetadataProviderFormRouteArgs {
     required this.fields,
   });
 
-  final _i36.Key? key;
+  final _i37.Key? key;
 
   final String title;
 
-  final List<_i35.MetadataFormFieldObject> fields;
+  final List<_i36.MetadataFormFieldObject> fields;
 
   @override
   String toString() {
@@ -579,140 +624,140 @@ class SettingsMetadataProviderFormRouteArgs {
 }
 
 /// generated route for
-/// [_i22.SettingsMetadataProviderPage]
-class SettingsMetadataProviderRoute extends _i33.PageRouteInfo<void> {
-  const SettingsMetadataProviderRoute({List<_i33.PageRouteInfo>? children})
+/// [_i23.SettingsMetadataProviderPage]
+class SettingsMetadataProviderRoute extends _i34.PageRouteInfo<void> {
+  const SettingsMetadataProviderRoute({List<_i34.PageRouteInfo>? children})
     : super(SettingsMetadataProviderRoute.name, initialChildren: children);
 
   static const String name = 'SettingsMetadataProviderRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i22.SettingsMetadataProviderPage();
+      return const _i23.SettingsMetadataProviderPage();
     },
   );
 }
 
 /// generated route for
-/// [_i23.SettingsPage]
-class SettingsRoute extends _i33.PageRouteInfo<void> {
-  const SettingsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i24.SettingsPage]
+class SettingsRoute extends _i34.PageRouteInfo<void> {
+  const SettingsRoute({List<_i34.PageRouteInfo>? children})
     : super(SettingsRoute.name, initialChildren: children);
 
   static const String name = 'SettingsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i23.SettingsPage();
+      return const _i24.SettingsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i24.StatsArtistsPage]
-class StatsArtistsRoute extends _i33.PageRouteInfo<void> {
-  const StatsArtistsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i25.StatsArtistsPage]
+class StatsArtistsRoute extends _i34.PageRouteInfo<void> {
+  const StatsArtistsRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsArtistsRoute.name, initialChildren: children);
 
   static const String name = 'StatsArtistsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i24.StatsArtistsPage();
+      return const _i25.StatsArtistsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i25.StatsMinutesPage]
-class StatsMinutesRoute extends _i33.PageRouteInfo<void> {
-  const StatsMinutesRoute({List<_i33.PageRouteInfo>? children})
+/// [_i26.StatsMinutesPage]
+class StatsMinutesRoute extends _i34.PageRouteInfo<void> {
+  const StatsMinutesRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsMinutesRoute.name, initialChildren: children);
 
   static const String name = 'StatsMinutesRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i25.StatsMinutesPage();
+      return const _i26.StatsMinutesPage();
     },
   );
 }
 
 /// generated route for
-/// [_i26.StatsPage]
-class StatsRoute extends _i33.PageRouteInfo<void> {
-  const StatsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i27.StatsPage]
+class StatsRoute extends _i34.PageRouteInfo<void> {
+  const StatsRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsRoute.name, initialChildren: children);
 
   static const String name = 'StatsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i26.StatsPage();
+      return const _i27.StatsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i27.StatsPlaylistsPage]
-class StatsPlaylistsRoute extends _i33.PageRouteInfo<void> {
-  const StatsPlaylistsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i28.StatsPlaylistsPage]
+class StatsPlaylistsRoute extends _i34.PageRouteInfo<void> {
+  const StatsPlaylistsRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsPlaylistsRoute.name, initialChildren: children);
 
   static const String name = 'StatsPlaylistsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i27.StatsPlaylistsPage();
+      return const _i28.StatsPlaylistsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i28.StatsStreamFeesPage]
-class StatsStreamFeesRoute extends _i33.PageRouteInfo<void> {
-  const StatsStreamFeesRoute({List<_i33.PageRouteInfo>? children})
+/// [_i29.StatsStreamFeesPage]
+class StatsStreamFeesRoute extends _i34.PageRouteInfo<void> {
+  const StatsStreamFeesRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsStreamFeesRoute.name, initialChildren: children);
 
   static const String name = 'StatsStreamFeesRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i28.StatsStreamFeesPage();
+      return const _i29.StatsStreamFeesPage();
     },
   );
 }
 
 /// generated route for
-/// [_i29.StatsStreamsPage]
-class StatsStreamsRoute extends _i33.PageRouteInfo<void> {
-  const StatsStreamsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i30.StatsStreamsPage]
+class StatsStreamsRoute extends _i34.PageRouteInfo<void> {
+  const StatsStreamsRoute({List<_i34.PageRouteInfo>? children})
     : super(StatsStreamsRoute.name, initialChildren: children);
 
   static const String name = 'StatsStreamsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i29.StatsStreamsPage();
+      return const _i30.StatsStreamsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i30.TrackPage]
-class TrackRoute extends _i33.PageRouteInfo<TrackRouteArgs> {
+/// [_i31.TrackPage]
+class TrackRoute extends _i34.PageRouteInfo<TrackRouteArgs> {
   TrackRoute({
-    _i36.Key? key,
+    _i37.Key? key,
     required String trackId,
-    List<_i33.PageRouteInfo>? children,
+    List<_i34.PageRouteInfo>? children,
   }) : super(
          TrackRoute.name,
          args: TrackRouteArgs(key: key, trackId: trackId),
@@ -722,14 +767,14 @@ class TrackRoute extends _i33.PageRouteInfo<TrackRouteArgs> {
 
   static const String name = 'TrackRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<TrackRouteArgs>(
         orElse: () => TrackRouteArgs(trackId: pathParams.getString('id')),
       );
-      return _i30.TrackPage(key: args.key, trackId: args.trackId);
+      return _i31.TrackPage(key: args.key, trackId: args.trackId);
     },
   );
 }
@@ -737,7 +782,7 @@ class TrackRoute extends _i33.PageRouteInfo<TrackRouteArgs> {
 class TrackRouteArgs {
   const TrackRouteArgs({this.key, required this.trackId});
 
-  final _i36.Key? key;
+  final _i37.Key? key;
 
   final String trackId;
 
@@ -748,33 +793,33 @@ class TrackRouteArgs {
 }
 
 /// generated route for
-/// [_i31.UserArtistsPage]
-class UserArtistsRoute extends _i33.PageRouteInfo<void> {
-  const UserArtistsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i32.UserArtistsPage]
+class UserArtistsRoute extends _i34.PageRouteInfo<void> {
+  const UserArtistsRoute({List<_i34.PageRouteInfo>? children})
     : super(UserArtistsRoute.name, initialChildren: children);
 
   static const String name = 'UserArtistsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i31.UserArtistsPage();
+      return const _i32.UserArtistsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i32.UserPlaylistsPage]
-class UserPlaylistsRoute extends _i33.PageRouteInfo<void> {
-  const UserPlaylistsRoute({List<_i33.PageRouteInfo>? children})
+/// [_i33.UserPlaylistsPage]
+class UserPlaylistsRoute extends _i34.PageRouteInfo<void> {
+  const UserPlaylistsRoute({List<_i34.PageRouteInfo>? children})
     : super(UserPlaylistsRoute.name, initialChildren: children);
 
   static const String name = 'UserPlaylistsRoute';
 
-  static _i33.PageInfo page = _i33.PageInfo(
+  static _i34.PageInfo page = _i34.PageInfo(
     name,
     builder: (data) {
-      return const _i32.UserPlaylistsPage();
+      return const _i33.UserPlaylistsPage();
     },
   );
 }

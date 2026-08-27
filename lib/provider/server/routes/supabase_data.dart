@@ -209,16 +209,29 @@ class ServerSupabaseDataRoutes {
 
   /// GET /supabase/lyrics/<id>
   ///
-  /// Returns the plain lyrics and synced (LRC) lyrics stored for a track in the
-  /// tracks table: `{lyrics: string|null, synced_lyrics: string|null}`.
+  /// Returns the plain lyrics and the multi-language synced (LRC) lyrics
+  /// stored for a track in the tracks table:
+  /// `{lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi,
+  /// synced_lyrics_en_tr, synced_lyrics_hi_tr}`, where:
+  ///  - `lyrics`                -> plain lyrics,
+  ///  - `synced_lyrics`         -> Telugu (main),
+  ///  - `synced_lyrics_en`      -> English (Translation),
+  ///  - `synced_lyrics_hi`      -> Hindi (Translation),
+  ///  - `synced_lyrics_en_tr`   -> English (Transliteration),
+  ///  - `synced_lyrics_hi_tr`   -> Hindi (Transliteration).
   /// The lyrics provider prefers these server-provided lyrics and falls back
-  /// to LRCLib only when they are absent.
+  /// to LRCLib only when they are absent. The extra language columns are
+  /// returned even when null so the client can fill in the blank language
+  /// rows without an extra request.
   Future<Response> getLyrics(Request request, String id) async {
     try {
       final sb = await _supabase;
       final raw = await sb
           .from('tracks')
-          .select('lyrics,synced_lyrics')
+          .select(
+            'lyrics,synced_lyrics,synced_lyrics_en,synced_lyrics_hi,'
+            'synced_lyrics_en_tr,synced_lyrics_hi_tr',
+          )
           .eq('id', id)
           .maybeSingle();
       if (raw == null) {
@@ -228,6 +241,10 @@ class ServerSupabaseDataRoutes {
         jsonEncode({
           'lyrics': raw['lyrics'] as String?,
           'synced_lyrics': raw['synced_lyrics'] as String?,
+          'synced_lyrics_en': raw['synced_lyrics_en'] as String?,
+          'synced_lyrics_hi': raw['synced_lyrics_hi'] as String?,
+          'synced_lyrics_en_tr': raw['synced_lyrics_en_tr'] as String?,
+          'synced_lyrics_hi_tr': raw['synced_lyrics_hi_tr'] as String?,
         }),
         headers: {'content-type': 'application/json'},
       );

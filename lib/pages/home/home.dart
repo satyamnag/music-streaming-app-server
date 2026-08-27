@@ -16,6 +16,7 @@ import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
+import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -130,10 +131,24 @@ class HomePage extends HookConsumerWidget {
                         HomeTrackSection(
                           title: context.l10n.newest_arrivals,
                           tracks: sections.newestArrivals,
+                          onSeeAll: () {
+                            context.navigateTo(
+                              HomeSeeAllRoute(
+                                kind: HomeSeeAllKind.newestArrivals,
+                              ),
+                            );
+                          },
                         ),
                         HomeTrackSection(
                           title: context.l10n.top_trending,
                           tracks: sections.topTrending,
+                          onSeeAll: () {
+                            context.navigateTo(
+                              HomeSeeAllRoute(
+                                kind: HomeSeeAllKind.topTrending,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     AsyncLoading() => [
@@ -171,6 +186,12 @@ class HomePage extends HookConsumerWidget {
                         ),
                       ],
                   },
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.paddingOf(context).bottom +
+                          12 * theme.scaling,
+                    ),
+                  ),
                 ],
               ),
             ),

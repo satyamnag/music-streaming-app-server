@@ -29,6 +29,10 @@ class AppRouter extends RootStackRouter {
               page: HomeBrowseSectionItemsRoute.page,
             ),
             AutoRoute(
+              path: "home/see-all",
+              page: HomeSeeAllRoute.page,
+            ),
+            AutoRoute(
               path: "search",
               page: SearchRoute.page,
             ),

@@ -7,6 +7,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A horizontal "Albums" row shown on the home screen. Songs that share the
@@ -50,7 +51,11 @@ class HomeAlbumsSection extends HookConsumerWidget {
                     IconButton.ghost(
                       size: ButtonSize.small,
                       icon: const Icon(SangeetIcons.angleRight, size: 18),
-                      onPressed: () {},
+                      onPressed: () {
+                        context.navigateTo(
+                          HomeSeeAllRoute(kind: HomeSeeAllKind.albums),
+                        );
+                      },
                     ),
                 ],
               ),

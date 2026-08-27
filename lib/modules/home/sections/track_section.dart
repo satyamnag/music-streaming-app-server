@@ -17,10 +17,14 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 /// card reveals the next [pageSize] tracks on each tap until all tracks are
 /// visible. Tapping a track starts playback of the whole section from that
 /// track. Shows a compact skeleton while the tracks are loading.
+///
+/// The header shows a right arrow instead of the track count; tapping it calls
+/// [onSeeAll] (which opens the full-screen section) when provided.
 class HomeTrackSection extends HookConsumerWidget {
   final String title;
   final List<SangeetTrackObject> tracks;
   final bool isLoading;
+  final VoidCallback? onSeeAll;
 
   /// Number of tracks revealed per page.
   static const int pageSize = 5;
@@ -30,6 +34,7 @@ class HomeTrackSection extends HookConsumerWidget {
     required this.title,
     required this.tracks,
     this.isLoading = false,
+    this.onSeeAll,
   });
 
   @override
@@ -102,12 +107,11 @@ class HomeTrackSection extends HookConsumerWidget {
                       child: Text(title),
                     ),
                   ),
-                  if (tracks.isNotEmpty)
-                    Text(
-                      '${tracks.length}',
-                      style: theme.typography.small.copyWith(
-                        color: theme.colorScheme.mutedForeground,
-                      ),
+                  if (onSeeAll != null)
+                    IconButton.ghost(
+                      size: ButtonSize.small,
+                      icon: const Icon(SangeetIcons.angleRight, size: 18),
+                      onPressed: onSeeAll,
                     ),
                 ],
               ),

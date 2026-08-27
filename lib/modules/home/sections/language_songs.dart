@@ -1,8 +1,12 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
@@ -63,11 +67,17 @@ class _LanguageSection extends HookConsumerWidget {
                     child: Text('${group.language} Songs'),
                   ),
                 ),
-                Text(
-                  '${group.tracks.length}',
-                  style: theme.typography.small.copyWith(
-                    color: theme.colorScheme.mutedForeground,
-                  ),
+                IconButton.ghost(
+                  size: ButtonSize.small,
+                  icon: const Icon(SangeetIcons.angleRight, size: 18),
+                  onPressed: () {
+                    context.navigateTo(
+                      HomeSeeAllRoute(
+                        kind: HomeSeeAllKind.language,
+                        language: group.language,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

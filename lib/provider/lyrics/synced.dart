@@ -39,21 +39,91 @@ class SyncedLyricsNotifier
       final data = res.data as Map<String, dynamic>? ?? const {};
       final syncedRaw = data['synced_lyrics'] as String?;
       final plainRaw = data['lyrics'] as String?;
+      final syncedEnRaw = data['synced_lyrics_en'] as String?;
+      final syncedHiRaw = data['synced_lyrics_hi'] as String?;
+      final syncedEnTrRaw = data['synced_lyrics_en_tr'] as String?;
+      final syncedHiTrRaw = data['synced_lyrics_hi_tr'] as String?;
 
       if ((syncedRaw == null || syncedRaw.trim().isEmpty) &&
-          (plainRaw == null || plainRaw.trim().isEmpty)) {
+          (plainRaw == null || plainRaw.trim().isEmpty) &&
+          (syncedEnRaw == null || syncedEnRaw.trim().isEmpty) &&
+          (syncedHiRaw == null || syncedHiRaw.trim().isEmpty) &&
+          (syncedEnTrRaw == null || syncedEnTrRaw.trim().isEmpty) &&
+          (syncedHiTrRaw == null || syncedHiTrRaw.trim().isEmpty)) {
         return null;
       }
 
-      if (syncedRaw != null && syncedRaw.trim().isNotEmpty) {
-        final parsed = Lrc.parse(syncedRaw);
-        final slices = parsed.lyrics
-            .map(LyricSlice.fromLrcLine)
-            .where((s) => s.text.trim().isNotEmpty)
-            .toList();
+      Map<Duration, String>? parseLrcMap(String? raw) {
+        if (raw == null || raw.trim().isEmpty) return null;
+        final parsed = Lrc.parse(raw);
+        return {
+          for (final line in parsed.lyrics)
+            if (line.lyrics.trim().isNotEmpty) line.timestamp: line.lyrics.trim(),
+        };
+      }
+
+      // Build aligned multi-language rows. Every language column shares a
+      // timestamp, so we merge them keyed by time and render the full set.
+      final teMap = parseLrcMap(syncedRaw);
+      final enMap = parseLrcMap(syncedEnRaw);
+      final hiMap = parseLrcMap(syncedHiRaw);
+      final enTrMap = parseLrcMap(syncedEnTrRaw);
+      final hiTrMap = parseLrcMap(syncedHiTrRaw);
+      final hasAnySynced = (teMap?.isNotEmpty ?? false) ||
+          (enMap?.isNotEmpty ?? false) ||
+          (hiMap?.isNotEmpty ?? false) ||
+          (enTrMap?.isNotEmpty ?? false) ||
+          (hiTrMap?.isNotEmpty ?? false);
+
+      if (hasAnySynced) {
+        final times = <Duration>{
+          ...?teMap?.keys,
+          ...?enMap?.keys,
+          ...?hiMap?.keys,
+          ...?enTrMap?.keys,
+          ...?hiTrMap?.keys,
+        }.toList()
+          ..sort((a, b) => a.compareTo(b));
+
+        final variants =
+            times.map((t) {
+              return LyricVariant(
+                time: t,
+                te: teMap?[t] ?? '',
+                en: enMap?[t] ?? '',
+                hi: hiMap?[t] ?? '',
+                enTr: enTrMap?[t] ?? '',
+                hiTr: hiTrMap?[t] ?? '',
+              );
+            }).toList();
+
+        // Main synced list uses the Telugu (or first non-empty) line so the
+        // existing single-language consumers keep working unchanged.
+        final primaryRaw = syncedRaw ?? syncedEnRaw ?? syncedHiRaw;
+        final primary = primaryRaw != null && primaryRaw.trim().isNotEmpty
+            ? Lrc.parse(primaryRaw)
+                .lyrics
+                .map(LyricSlice.fromLrcLine)
+                .where((s) => s.text.trim().isNotEmpty)
+                .toList()
+            : <LyricSlice>[];
+        final slices = primary.isNotEmpty ? primary : variants.map((v) {
+            final text = v.te.isNotEmpty
+                ? v.te
+                : v.en.isNotEmpty
+                    ? v.en
+                    : v.hi.isNotEmpty
+                        ? v.hi
+                        : v.enTr.isNotEmpty
+                            ? v.enTr
+                            : v.hiTr;
+            return LyricSlice(time: v.time, text: text);
+          }).toList();
+
         if (slices.isNotEmpty) {
           return SubtitleSimple(
             lyrics: slices,
+            variants: variants,
             name: _track.name,
             uri: Uri.parse('server://${_track.id}'),
             rating: 100,

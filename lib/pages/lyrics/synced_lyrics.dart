@@ -10,6 +10,7 @@ import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/hooks/controllers/use_auto_scroll_controller.dart';
+import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/modules/lyrics/use_synced_lyrics.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
@@ -124,6 +125,18 @@ class SyncedLyrics extends HookConsumerWidget {
                 itemBuilder: (context, index) {
                   final lyricSlice = lyricValue.lyrics[index];
                   final isActive = lyricSlice.time.inSeconds == currentTime;
+                  final variant =
+                      (lyricValue.variants != null &&
+                              index < lyricValue.variants!.length)
+                          ? lyricValue.variants![index]
+                          : null;
+                  final subLines = variant == null
+                      ? const <String>[]
+                      : [
+                          for (final lang in LyricLanguages.order)
+                            if (lang != LyricLanguages.te) //
+                              LyricLanguages.fieldOf(variant, lang),
+                        ].where((t) => t.trim().isNotEmpty).toList();
 
                   if (isActive) {
                     controller.scrollToIndex(
@@ -135,7 +148,7 @@ class SyncedLyrics extends HookConsumerWidget {
                     key: ValueKey(index),
                     index: index,
                     controller: controller,
-                    child: lyricSlice.text.isEmpty
+                    child: lyricSlice.text.isEmpty && subLines.isEmpty
                         ? Container(
                             padding: index == lyricValue.lyrics.length - 1
                                 ? EdgeInsets.only(
@@ -177,7 +190,17 @@ class SyncedLyrics extends HookConsumerWidget {
                                       }
                                       audioPlayer.seek(time);
                                     },
-                                    child: Text(lyricSlice.text),
+                                    child: _SyncedLine(
+                                      mainText: lyricSlice.text,
+                                      subLines: subLines,
+                                      isActive: isActive,
+                                      activeColor:
+                                          theme.colorScheme.foreground,
+                                      inactiveColor:
+                                          theme.colorScheme.mutedForeground,
+                                      mainFontSize: (isActive ? 28 : 26) *
+                                          (textZoomLevel.value / 100),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -254,7 +277,7 @@ class SyncedLyrics extends HookConsumerWidget {
               ),
             ];
 
-            return isModal == true
+             return isModal == true
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -267,6 +290,60 @@ class SyncedLyrics extends HookConsumerWidget {
                   );
           }),
         ),
+      ],
+    );
+  }
+}
+
+/// Renders one synced lyric line. The [mainText] is the Telugu (or primary)
+/// line shown large; [subLines] carries the non-empty English/Hindi
+/// translations & transliterations rendered smaller beneath it, so the full
+/// multi-language set for a timestamp stays visible at a glance. When there
+/// are no sub-lines it simply renders the single [mainText] (existing
+/// behaviour).
+class _SyncedLine extends StatelessWidget {
+  final String mainText;
+  final List<String> subLines;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final double mainFontSize;
+
+  const _SyncedLine({
+    required this.mainText,
+    required this.subLines,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.mainFontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (subLines.isEmpty) {
+      return Text(mainText);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(mainText),
+        const Gap(6),
+        for (final line in subLines)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              line,
+              style: TextStyle(
+                fontSize: (mainFontSize * 0.62),
+                color: isActive
+                    ? theme.colorScheme.mutedForeground
+                    : theme.colorScheme.mutedForeground.withValues(alpha: 0.7),
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
       ],
     );
   }
