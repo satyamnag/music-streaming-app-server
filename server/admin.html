@@ -84,7 +84,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .empty-state { text-align: center; color: #999; padding: 24px; }
 .layout { display: flex; gap: 20px; align-items: flex-start; }
-.sidebar { width: 220px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 20px; }
+.sidebar { width: 220px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .sidebar-item { display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 4px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: transparent; color: #333; }
 .sidebar-item:hover { background: #f0f7ff; }
 .sidebar-item.active { background: #3b82f6; color: #fff; font-weight: 600; }
@@ -127,6 +127,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" onclick="showAdd()">+ Add Track</button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-albums" onclick="showView('albums')">+ Add Album</button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-arrangeSongs" onclick="showView('arrangeSongs')">Arrange Songs</button>
+    <button class="sidebar-item" id="nav-arrangeAlbums" onclick="showView('arrangeAlbums')">Arrange Albums</button>
+    <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" onclick="showView('affiliates')">Affiliate &amp; QR Code</button>
   </nav>
   <div class="content">
@@ -190,6 +194,44 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <table><thead><tr>
     <th>Name</th><th>Cover</th><th>Assigned Songs</th><th>Actions</th>
   </tr></thead><tbody id="albumsTbody"></tbody></table>
+</div>
+
+<div id="arrangeSongsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Arrange Songs</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Feature songs to control which tracks are shown first on the home screen.
+    Featured songs appear ahead of everything else, in the order you arrange
+    them here. Only the featured subset is stored, so this stays fast even
+    with 10000+ songs. Changes save immediately.
+  </p>
+  <div class="search-row">
+    <input id="arrangeTrackSearch" type="text" placeholder="Search by title, artist, album or tag..." oninput="renderArrangeTracks()">
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">Featured songs <span id="featuredTracksCount" style="font-size:12px;color:#888;"></span></h3>
+    <div id="featuredTracksList"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
+    <h3 style="margin-bottom:8px;">Add to featured <span style="font-size:12px;color:#888;">(search above, then pin)</span></h3>
+    <div id="arrangeTrackResults"><span class="empty-state" style="color:#999;">Type to search songs…</span></div>
+  </div>
+</div>
+
+<div id="arrangeAlbumsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Arrange Albums</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Feature albums to control which albums are shown first on the home screen.
+    Featured albums appear ahead of everything else, in the order you arrange
+    them here. Changes save immediately.
+  </p>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">Featured albums <span id="featuredAlbumsCount" style="font-size:12px;color:#888;"></span></h3>
+    <div id="featuredAlbumsList"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
+    <h3 style="margin-bottom:8px;">All albums — pin to feature</h3>
+    <div id="arrangeAlbumResults"></div>
+  </div>
 </div>
 
 <div id="affiliatesPanel" class="view">
@@ -1009,12 +1051,16 @@ function showView(view) {
   if (navBtn) navBtn.classList.add('active');
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
+  else if (view === 'arrangeSongs') { loadArrangeTracks(); }
+  else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
 function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
+  else if (currentView === 'arrangeSongs') { loadArrangeTracks(); }
+  else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
@@ -1616,6 +1662,232 @@ async function deleteAffiliate(id) {
     loadAffiliates();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
+}
+
+// ---------- Arrange Songs & Albums (featured ordering) ----------
+// Featured items carry a non-null featured_order. Only the featured subset is
+// stored and reordered, so arranging stays fast even with 10000+ tracks.
+
+// Featured tracks sorted by featured_order asc, then featured albums by
+// featured_order asc (albums returned by the server are already ordered).
+function featuredTracks() {
+  return tracks
+    .filter((t) => t.featured_order != null)
+    .sort((a, b) => Number(a.featured_order) - Number(b.featured_order));
+}
+
+function featuredAlbums() {
+  return albums
+    .filter((a) => a.featured_order != null)
+    .sort((a, b) => Number(a.featured_order) - Number(b.featured_order));
+}
+
+function notFeaturedTracks() {
+  return tracks.filter((t) => t.featured_order == null);
+}
+
+function notFeaturedAlbums() {
+  return albums.filter((a) => a.featured_order == null);
+}
+
+// Renders the "Add to featured" result list for the Arrange Songs panel.
+function arrangeTrackSearchResults() {
+  const q = (document.getElementById('arrangeTrackSearch').value || '').trim().toLowerCase();
+  let list = notFeaturedTracks();
+  if (q) {
+    list = list.filter((t) =>
+      (t.title || '').toLowerCase().includes(q) ||
+      (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q) ||
+      (t.album || '').toLowerCase().includes(q) ||
+      (t.tags || '').toLowerCase().includes(q)
+    );
+  }
+  const el = document.getElementById('arrangeTrackResults');
+  if (!list.length) {
+    el.innerHTML = '<span class="empty-state" style="color:#999;">' + (q ? 'No matching songs.' : 'No songs left — every song is already featured.') + '</span>';
+    return;
+  }
+  // Show at most 50 search hits so the panel stays light even with 10k tracks.
+  el.innerHTML = list.slice(0, 50).map((t) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">
+    ${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}
+    <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${esc(t.artist_names_text || (t.artist_names || []).join(', '))}${t.album ? ' · ' + esc(t.album) : ''}</div></div>
+    <button class="btn btn-primary btn-sm" onclick="pinTrack('${t.id}')">Pin</button>
+  </div>`).join('');
+}
+
+function renderArrangeTracks() {
+  const f = featuredTracks();
+  document.getElementById('featuredTracksCount').textContent = f.length ? '(' + f.length + ' featured)' : '';
+  const fl = document.getElementById('featuredTracksList');
+  if (!f.length) {
+    fl.innerHTML = '<span class="empty-state" style="color:#999;">No featured songs yet. Search above and click "Pin" to feature a song.</span>';
+  } else {
+    fl.innerHTML = f.map((t, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="min-width:26px;font-size:13px;font-weight:700;color:#3b82f6;">${i + 1}.</span>
+      ${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}
+      <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</div></div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveTrack('${t.id}', -1)" title="Move up">▲</button>
+        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveTrack('${t.id}', 1)" title="Move down">▼</button>
+        <button class="btn btn-danger btn-sm" onclick="unpinTrack('${t.id}')">Remove</button>
+      </div>
+    </div>`).join('');
+  }
+  arrangeTrackSearchResults();
+}
+
+function renderArrangeAlbums() {
+  const f = featuredAlbums();
+  document.getElementById('featuredAlbumsCount').textContent = f.length ? '(' + f.length + ' featured)' : '';
+  const fl = document.getElementById('featuredAlbumsList');
+  if (!f.length) {
+    fl.innerHTML = '<span class="empty-state" style="color:#999;">No featured albums yet. Pin an album below.</span>';
+  } else {
+    fl.innerHTML = f.map((a, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+      <span style="min-width:26px;font-size:13px;font-weight:700;color:#3b82f6;">${i + 1}.</span>
+      ${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : ''}
+      <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(a.name)}</b></div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', -1)" title="Move up">▲</button>
+        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', 1)" title="Move down">▼</button>
+        <button class="btn btn-danger btn-sm" onclick="unpinAlbum('${a.id}')">Remove</button>
+      </div>
+    </div>`).join('');
+  }
+  const el = document.getElementById('arrangeAlbumResults');
+  const rest = notFeaturedAlbums();
+  el.innerHTML = rest.length === 0
+    ? '<span class="empty-state" style="color:#999;">Every album is already featured.</span>'
+    : rest.map((a) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">
+        ${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : ''}
+        <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(a.name)}</b></div>
+        <button class="btn btn-primary btn-sm" onclick="pinAlbum('${a.id}')">Pin</button>
+      </div>`).join('');
+}
+
+async function loadArrangeTracks() {
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
+    tracks = await res.json();
+    populateTrackFilterDropdowns();
+    renderTracks();
+    renderArrangeTracks();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message);
+  } finally { showLoading(false); }
+}
+
+async function loadArrangeAlbums() {
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/albums', { credentials: 'same-origin' });
+    albums = await res.json();
+    renderArrangeAlbums();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message);
+  } finally { showLoading(false); }
+}
+
+// Persists the current featured ordering via the atomic reorder RPC.
+async function saveFeaturedTracks() {
+  const ids = featuredTracks().map((t) => t.id);
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/featured/tracks', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Song order saved');
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+async function saveFeaturedAlbums() {
+  const ids = featuredAlbums().map((a) => a.id);
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/featured/albums', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Album order saved');
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+function pinTrack(id) {
+  const t = tracks.find((x) => x.id === id);
+  if (!t || t.featured_order != null) return;
+  const f = featuredTracks();
+  const next = f.length ? Math.max(...f.map((x) => Number(x.featured_order))) + 1 : 1;
+  t.featured_order = next;
+  renderArrangeTracks();
+  saveFeaturedTracks().then(() => loadArrangeTracks());
+}
+
+function moveTrack(id, dir) {
+  const f = featuredTracks();
+  const i = f.findIndex((x) => x.id === id);
+  if (i === -1) return;
+  const j = i + dir;
+  if (j < 0 || j >= f.length) return;
+  const t1 = f[i], t2 = f[j];
+  const tmp = t1.featured_order;
+  t1.featured_order = t2.featured_order;
+  t2.featured_order = tmp;
+  renderArrangeTracks();
+  saveFeaturedTracks().then(() => loadArrangeTracks());
+}
+
+function unpinTrack(id) {
+  const t = tracks.find((x) => x.id === id);
+  if (!t) return;
+  t.featured_order = null;
+  renderArrangeTracks();
+  saveFeaturedTracks().then(() => loadArrangeTracks());
+}
+
+function pinAlbum(id) {
+  const a = albums.find((x) => x.id === id);
+  if (!a || a.featured_order != null) return;
+  const f = featuredAlbums();
+  const next = f.length ? Math.max(...f.map((x) => Number(x.featured_order))) + 1 : 1;
+  a.featured_order = next;
+  renderArrangeAlbums();
+  saveFeaturedAlbums().then(() => loadArrangeAlbums());
+}
+
+function moveAlbum(id, dir) {
+  const f = featuredAlbums();
+  const i = f.findIndex((x) => x.id === id);
+  if (i === -1) return;
+  const j = i + dir;
+  if (j < 0 || j >= f.length) return;
+  const a1 = f[i], a2 = f[j];
+  const tmp = a1.featured_order;
+  a1.featured_order = a2.featured_order;
+  a2.featured_order = tmp;
+  renderArrangeAlbums();
+  saveFeaturedAlbums().then(() => loadArrangeAlbums());
+}
+
+function unpinAlbum(id) {
+  const a = albums.find((x) => x.id === id);
+  if (!a) return;
+  a.featured_order = null;
+  renderArrangeAlbums();
+  saveFeaturedAlbums().then(() => loadArrangeAlbums());
 }
 
 checkSession();

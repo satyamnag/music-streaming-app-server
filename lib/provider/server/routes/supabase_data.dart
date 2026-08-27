@@ -114,6 +114,7 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'durationMs': (t['duration'] ?? 0) * 1000,
     'isrc': '',
     'explicit': false,
+    'featuredOrder': t['featured_order'],
   };
 }
 
@@ -180,6 +181,7 @@ class ServerSupabaseDataRoutes {
     final raw = await sb
         .from('tracks')
         .select()
+        .order('featured_order', ascending: true, nullsFirst: false)
         .order('created_at', ascending: true)
         .limit(limit);
     return (raw as List<dynamic>).cast<Map<String, dynamic>>();
@@ -299,12 +301,14 @@ class ServerSupabaseDataRoutes {
             .from('tracks')
             .select()
             .or('title.ilike.$pattern,artist_names_text.ilike.$pattern')
+            .order('featured_order', ascending: true, nullsFirst: false)
             .order('created_at', ascending: true)
             .limit(limit);
       } else {
         raw = await sb
             .from('tracks')
             .select()
+            .order('featured_order', ascending: true, nullsFirst: false)
             .order('created_at', ascending: true)
             .limit(limit);
       }
@@ -1179,8 +1183,16 @@ class ServerSupabaseDataRoutes {
   Future<Response> getAdminAlbums(Request request) async {
     try {
       final sb = await _supabase;
-      final albums = await sb.from('albums').select('*').order('created_at', ascending: true);
-      final allTracks = await sb.from('tracks').select('*').order('created_at', ascending: true);
+      final albums = await sb
+          .from('albums')
+          .select('*')
+          .order('featured_order', ascending: true, nullsFirst: false)
+          .order('created_at', ascending: true);
+      final allTracks = await sb
+          .from('tracks')
+          .select('*')
+          .order('featured_order', ascending: true, nullsFirst: false)
+          .order('created_at', ascending: true);
 
       final byAlbum = <String, List<Map<String, dynamic>>>{};
       for (final t in allTracks) {

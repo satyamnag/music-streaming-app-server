@@ -164,6 +164,16 @@ final homeSectionsProvider =
   final playCounts = await ref.watch(globalPlayCountsProvider.future);
 
   final newestArrivals = [...tracks]..sort((a, b) {
+      // Featured songs (admin-arranged) always come first.
+      final aF = a is SangeetFullTrackObject ? a.featuredOrder : null;
+      final bF = b is SangeetFullTrackObject ? b.featuredOrder : null;
+      if (aF != null || bF != null) {
+        if (aF != null && bF != null) {
+          if (aF != bF) return aF.compareTo(bF);
+        } else {
+          return aF != null ? -1 : 1;
+        }
+      }
       final aDate = DateTime.tryParse(a.album.releaseDate ?? '');
       final bDate = DateTime.tryParse(b.album.releaseDate ?? '');
       final cmp = (bDate ?? DateTime.fromMillisecondsSinceEpoch(0))

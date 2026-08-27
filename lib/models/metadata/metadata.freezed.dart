@@ -4981,7 +4981,8 @@ mixin _$SangeetTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)
+            String? language,
+            int? featuredOrder)
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5006,7 +5007,8 @@ mixin _$SangeetTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5031,7 +5033,8 @@ mixin _$SangeetTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
     required TResult orElse(),
   }) =>
@@ -5322,7 +5325,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)
+            String? language,
+            int? featuredOrder)
         full,
   }) {
     return local(id, name, externalUri, artists, album, durationMs, path);
@@ -5350,7 +5354,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
   }) {
     return local?.call(id, name, externalUri, artists, album, durationMs, path);
@@ -5378,7 +5383,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
     required TResult orElse(),
   }) {
@@ -5481,7 +5487,8 @@ abstract class _$$SangeetFullTrackObjectImplCopyWith<$Res>
       String isrc,
       bool explicit,
       String status,
-      String? language});
+      String? language,
+      int? featuredOrder});
 
   @override
   $SangeetSimpleAlbumObjectCopyWith<$Res> get album;
@@ -5511,6 +5518,7 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
     Object? explicit = null,
     Object? status = null,
     Object? language = freezed,
+    Object? featuredOrder = freezed,
   }) {
     return _then(_$SangeetFullTrackObjectImpl(
       id: null == id
@@ -5553,6 +5561,10 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
           ? _value.language
           : language // ignore: cast_nullable_to_non_nullable
               as String?,
+      featuredOrder: freezed == featuredOrder
+          ? _value.featuredOrder
+          : featuredOrder // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -5571,6 +5583,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
       required this.explicit,
       this.status = 'free',
       this.language,
+      this.featuredOrder,
       final String? $type})
       : _artists = artists,
         $type = $type ?? 'full';
@@ -5606,13 +5619,15 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
   final String status;
   @override
   final String? language;
+  @override
+  final int? featuredOrder;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language)';
+    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder)';
   }
 
   @override
@@ -5633,7 +5648,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
                 other.explicit == explicit) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.language, language) ||
-                other.language == language));
+                other.language == language) &&
+            (identical(other.featuredOrder, featuredOrder) ||
+                other.featuredOrder == featuredOrder));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5649,7 +5666,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
       isrc,
       explicit,
       status,
-      language);
+      language,
+      featuredOrder);
 
   /// Create a copy of SangeetTrackObject
   /// with the given fields replaced by the non-null parameter values.
@@ -5682,11 +5700,12 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)
+            String? language,
+            int? featuredOrder)
         full,
   }) {
     return full(id, name, externalUri, artists, album, durationMs, isrc,
-        explicit, status, language);
+        explicit, status, language, featuredOrder);
   }
 
   @override
@@ -5711,11 +5730,12 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
   }) {
     return full?.call(id, name, externalUri, artists, album, durationMs, isrc,
-        explicit, status, language);
+        explicit, status, language, featuredOrder);
   }
 
   @override
@@ -5740,13 +5760,14 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String isrc,
             bool explicit,
             String status,
-            String? language)?
+            String? language,
+            int? featuredOrder)?
         full,
     required TResult orElse(),
   }) {
     if (full != null) {
       return full(id, name, externalUri, artists, album, durationMs, isrc,
-          explicit, status, language);
+          explicit, status, language, featuredOrder);
     }
     return orElse();
   }
@@ -5801,7 +5822,8 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
       required final String isrc,
       required final bool explicit,
       final String status,
-      final String? language}) = _$SangeetFullTrackObjectImpl;
+      final String? language,
+      final int? featuredOrder}) = _$SangeetFullTrackObjectImpl;
 
   factory SangeetFullTrackObject.fromJson(Map<String, dynamic> json) =
       _$SangeetFullTrackObjectImpl.fromJson;
@@ -5822,6 +5844,7 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
   bool get explicit;
   String get status;
   String? get language;
+  int? get featuredOrder;
 
   /// Create a copy of SangeetTrackObject
   /// with the given fields replaced by the non-null parameter values.

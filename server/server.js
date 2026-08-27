@@ -324,6 +324,7 @@ app.get('/tracks', async (req, res, next) => {
     const { data, error } = await supabase
       .from('tracks')
       .select('*')
+      .order('featured_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true })
       .limit(100)
 
@@ -739,17 +740,19 @@ app.get('/api/albums', async (req, res, next) => {
     const { data: albums, error: aErr } = await supabase
       .from('albums')
       .select('*')
+      .order('featured_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true })
     if (aErr) {
       console.error('[albums] fetch failed:', aErr.message)
       return res.status(500).json({ error: 'Failed to fetch albums' })
     }
 
-    // Fetch all tracks once, then group by album_id (insertion order by row
-    // order, which PostgREST returns by created_at asc by default).
+    // Fetch all tracks once, then group by album_id (featured first, then
+    // insertion order by created_at asc).
     const { data: allTracks, error: tErr } = await supabase
       .from('tracks')
       .select('*')
+      .order('featured_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true })
     if (tErr) {
       console.error('[albums] tracks fetch failed:', tErr.message)
@@ -956,10 +959,17 @@ app.get('/api/admin/session', (req, res) => {
   res.json({ authenticated })
 })
 
-// List all tracks
+// List all tracks. Featured tracks (featured_order not null) come first in
+// ascending order, everything else follows by created_at desc. This is the
+// admin-facing view; the featured-first rule mirrors the home screen so the
+// admin sees exactly what listeners see first.
 app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { data, error } = await supabase.from('tracks').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('tracks')
+      .select('*')
+      .order('featured_order', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: false })
     if (error) return res.status(500).json({ error: error.message })
     res.json(data)
   } catch (err) { next(err) }
@@ -968,7 +978,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -977,6 +987,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       : ['Unknown Artist']
     const cleanDuration = Number.isFinite(Number(duration)) && Number(duration) >= 0 ? Math.floor(Number(duration)) : 0
     const cleanStatus = status === 'paid' ? 'paid' : 'free'
+    const cleanFeatured = featured_order == null ? null
+      : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     const { data, error } = await supabase.from('tracks').insert({
       title: cleanTitle,
       artist_names: cleanArtists,
@@ -995,6 +1007,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       synced_lyrics_hi_tr: typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null,
       language: typeof language === 'string' && language.trim() ? language.trim() : null,
       tags: cleanTags(tags),
+      featured_order: cleanFeatured,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
     res.status(201).json(data)
@@ -1004,7 +1017,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags } = req.body || {}
+    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -1036,6 +1049,10 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (synced_lyrics_hi_tr !== undefined) updates.synced_lyrics_hi_tr = typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (tags !== undefined) updates.tags = cleanTags(tags)
+    if (featured_order !== undefined) {
+      updates.featured_order = featured_order == null ? null
+        : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
+    }
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) {
@@ -1217,12 +1234,14 @@ app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next)
 })
 
 // List admin-created albums. Used by the admin UI and to feed the home
-// "Albums" component.
+// "Albums" component. Featured albums (featured_order not null) come first in
+// ascending order, everything else follows by created_at desc.
 app.get('/api/admin/albums', requireAdmin, async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from('albums')
       .select('*')
+      .order('featured_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
     if (error) return res.status(500).json({ error: error.message })
     res.json(data || [])
@@ -1232,13 +1251,16 @@ app.get('/api/admin/albums', requireAdmin, async (req, res, next) => {
 // Create an admin album (name + cover photo URL).
 app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
   try {
-    const { name, cover_url } = req.body || {}
+    const { name, cover_url, featured_order } = req.body || {}
     if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' })
+    const cleanFeatured = featured_order == null ? null
+      : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     const { data, error } = await supabase
       .from('albums')
       .insert({
         name: name.trim(),
         cover_url: typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null,
+        featured_order: cleanFeatured,
       })
       .select()
       .single()
@@ -1250,13 +1272,17 @@ app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
 // Update an admin album (name + cover photo URL).
 app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, cover_url } = req.body || {}
+    const { name, cover_url, featured_order } = req.body || {}
     const updates = {}
     if (name !== undefined) {
       if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name must be a non-empty string' })
       updates.name = name.trim()
     }
     if (cover_url !== undefined) updates.cover_url = typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null
+    if (featured_order !== undefined) {
+      updates.featured_order = featured_order == null ? null
+        : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
+    }
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
     const { data, error } = await supabase.from('albums').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })
@@ -1269,6 +1295,51 @@ app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
 app.delete('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
   try {
     const { error } = await supabase.from('albums').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// ------------------------------------------------------------------
+// Featured ordering (admin "Arrange Songs" / "Arrange Albums")
+//
+// Each endpoint receives the COMPLETE desired featured id list, in order:
+//   POST /api/admin/featured/tracks   { ids: ["uuid", ...] }
+//   POST /api/admin/featured/albums   { ids: ["uuid", ...] }
+//
+// Delegates to the atomic Postgres function reorder_featured_* which
+// assigns featured_order = 1..n for the listed ids and clears
+// featured_order for any previously-featured row not in the list.
+// Empty ids => unfeature everything.
+// ------------------------------------------------------------------
+function parseFeaturedIds(raw) {
+  if (!Array.isArray(raw)) return null
+  const seen = new Set()
+  const ids = []
+  for (const v of raw) {
+    if (typeof v !== 'string' || !v.trim()) return null
+    const id = v.trim()
+    if (!seen.has(id)) { seen.add(id); ids.push(id) }
+  }
+  if (ids.length > 2000) return null
+  return ids
+}
+
+app.post('/api/admin/featured/tracks', requireAdmin, async (req, res, next) => {
+  try {
+    const ids = parseFeaturedIds(req.body?.ids)
+    if (ids === null) return res.status(400).json({ error: 'ids must be an array of id strings (max 2000)' })
+    const { data, error } = await supabase.rpc('reorder_featured_tracks', { p_ids: ids })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+app.post('/api/admin/featured/albums', requireAdmin, async (req, res, next) => {
+  try {
+    const ids = parseFeaturedIds(req.body?.ids)
+    if (ids === null) return res.status(400).json({ error: 'ids must be an array of id strings (max 2000)' })
+    const { data, error } = await supabase.rpc('reorder_featured_albums', { p_ids: ids })
     if (error) return res.status(500).json({ error: error.message })
     res.json({ success: true })
   } catch (err) { next(err) }

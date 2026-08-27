@@ -93,3 +93,6 @@ node_modules/
 
 # Local machine npm config (contains machine-specific paths)
 .npmrc
+
+# Astro generated content (website build artifact)
+.astro/

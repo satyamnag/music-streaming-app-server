@@ -500,6 +500,7 @@ _$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
       explicit: json['explicit'] as bool,
       status: json['status'] as String? ?? 'free',
       language: json['language'] as String?,
+      featuredOrder: (json['featuredOrder'] as num?)?.toInt(),
       $type: json['runtimeType'] as String?,
     );
 
@@ -516,6 +517,7 @@ Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
       'explicit': instance.explicit,
       'status': instance.status,
       'language': instance.language,
+      'featuredOrder': instance.featuredOrder,
       'runtimeType': instance.$type,
     };
 
