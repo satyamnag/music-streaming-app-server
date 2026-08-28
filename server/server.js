@@ -49,6 +49,50 @@ const DEFAULT_USER = { id: 'supabase', name: 'Supabase', images: [], externalUri
 
 const PLAYLIST_ID = 'supabase-all-tracks'
 
+// ------------------------------------------------------------------
+// Multi-album helpers
+//
+// A song may belong to many admin-created albums. `album_songs` is the
+// many-to-many join; `tracks.album_id` stays as the nullable "primary"
+// album so the legacy single-album UI and home grouping keep working.
+// ------------------------------------------------------------------
+
+// Resolve the list of album ids a request wants, from EITHER the new
+// multi-value `album_ids` array OR the legacy single `album_id` string.
+function albumIdsFrom(body) {
+  if (Array.isArray(body && body.album_ids)) {
+    const ids = body.album_ids.filter((v) => typeof v === 'string' && v.trim())
+    return ids
+  }
+  if (typeof (body && body.album_id) === 'string' && body.album_id.trim()) {
+    return [body.album_id.trim()]
+  }
+  return []
+}
+
+// Replace a track's album membership with `ids` (in display order), keeping
+// `tracks.album_id` in sync with the first (primary) album. Errors if the
+// album_songs table is unavailable; callers handle that to stay compatible
+// with deployments that have not applied migration 015 yet.
+async function setTrackAlbums(client, trackId, ids) {
+  const { error: delErr } = await client.from('album_songs').delete().eq('track_id', trackId)
+  if (delErr) throw new Error(delErr.message)
+
+  if (ids.length > 0) {
+    const rows = ids.map((albumId, i) => ({
+      album_id: albumId,
+      track_id: trackId,
+      position: i,
+    }))
+    const { error: insErr } = await client.from('album_songs').insert(rows)
+    if (insErr) throw new Error(insErr.message)
+  }
+
+  const primary = ids[0] || null
+  const { error: updErr } = await client.from('tracks').update({ album_id: primary }).eq('id', trackId)
+  if (updErr) throw new Error(updErr.message)
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY,
@@ -747,8 +791,8 @@ app.get('/api/albums', async (req, res, next) => {
       return res.status(500).json({ error: 'Failed to fetch albums' })
     }
 
-    // Fetch all tracks once, then group by album_id (featured first, then
-    // insertion order by created_at asc).
+    // Fetch all tracks once, then group by album membership (featured first,
+    // then insertion order by created_at asc).
     const { data: allTracks, error: tErr } = await supabase
       .from('tracks')
       .select('*')
@@ -759,20 +803,58 @@ app.get('/api/albums', async (req, res, next) => {
       return res.status(500).json({ error: 'Failed to fetch album tracks' })
     }
 
+    const trackById = {}
+    for (const t of allTracks || []) trackById[t.id] = t
+
+    // Group by the many-to-many album_songs membership with per-album order.
     const byAlbum = {}
-    for (const t of allTracks || []) {
-      if (t.album_id) {
-        (byAlbum[t.album_id] = byAlbum[t.album_id] || []).push(trackToJson(t, req))
+    let albumsMode = false
+    try {
+      const { data: memberships, error: mErr } = await supabase
+        .from('album_songs')
+        .select('album_id, track_id, position')
+        .order('position', { ascending: true, nullsFirst: false })
+      if (!mErr && memberships && memberships.length) {
+        albumsMode = true
+        for (const m of memberships) {
+          const t = trackById[m.track_id]
+          if (t) (byAlbum[m.album_id] = byAlbum[m.album_id] || []).push({ track: t, pos: m.position ?? 0 })
+        }
+      }
+    } catch (_) {
+      albumsMode = false
+    }
+
+    // Backward compatibility: when album_songs is unavailable (migration 015
+    // not applied) or empty, fall back to grouping by the legacy
+    // tracks.album_id column. Also include any track whose album_id is set but
+    // is not yet in album_songs, so nothing is ever lost.
+    if (!albumsMode) {
+      for (const t of allTracks || []) {
+        if (t.album_id) (byAlbum[t.album_id] = byAlbum[t.album_id] || []).push({ track: t, pos: 0 })
+      }
+    } else {
+      for (const t of allTracks || []) {
+        if (!t.album_id) continue
+        const exists = (byAlbum[t.album_id] || []).some((x) => x.track.id === t.id)
+        if (!exists) (byAlbum[t.album_id] = byAlbum[t.album_id] || []).push({ track: t, pos: -1 })
       }
     }
 
-    const items = (albums || []).map((a) => ({
-      id: a.id,
-      name: a.name,
-      cover_url: a.cover_url || null,
-      images: a.cover_url ? [{ url: a.cover_url, width: 300, height: 300 }] : [],
-      tracks: byAlbum[a.id] || [],
-    }))
+    const items = (albums || []).map((a) => {
+      const list = (byAlbum[a.id] || [])
+        .slice()
+        .sort((x, y) => x.pos - y.pos)
+        .map((x) => trackToJson(x.track, req))
+      return {
+        id: a.id,
+        name: a.name,
+        cover_url: a.cover_url || null,
+        images: a.cover_url ? [{ url: a.cover_url, width: 300, height: 300 }] : [],
+        status: a.status || 'free',
+        tracks: list,
+      }
+    })
 
     res.json({ items })
   } catch (err) {
@@ -971,14 +1053,33 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       .order('featured_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
     if (error) return res.status(500).json({ error: error.message })
-    res.json(data)
+
+    // Attach each track's full album membership (all albums it belongs to).
+    const out = (data || []).map((t) => ({ ...t, album_ids: [t.album_id].filter(Boolean) }))
+    try {
+      const { data: memberships, error: mErr } = await supabase
+        .from('album_songs')
+        .select('track_id, album_id')
+        .order('position', { ascending: true })
+      if (!mErr && memberships) {
+        const byTrack = {}
+        for (const m of memberships) {
+          ;(byTrack[m.track_id] = byTrack[m.track_id] || []).push(m.album_id)
+        }
+        for (const t of out) {
+          if (byTrack[t.id] && byTrack[t.id].length) t.album_ids = byTrack[t.id]
+        }
+      }
+    } catch (_) { /* migration 015 not applied — fall back to album_id only */ }
+
+    res.json(out)
   } catch (err) { next(err) }
 })
 
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -989,12 +1090,13 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
     const cleanStatus = status === 'paid' ? 'paid' : 'free'
     const cleanFeatured = featured_order == null ? null
       : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
+    const albumIds = albumIdsFrom({ album_ids, album_id })
     const { data, error } = await supabase.from('tracks').insert({
       title: cleanTitle,
       artist_names: cleanArtists,
       artist_names_text: cleanArtists.join(', '),
       album: typeof album === 'string' && album.trim() ? album.trim() : cleanTitle,
-      album_id: typeof album_id === 'string' && album_id.trim() ? album_id.trim() : null,
+      album_id: albumIds[0] || null,
       duration: cleanDuration,
       thumbnail: typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null,
       storage_path: storage_path.trim(),
@@ -1010,6 +1112,12 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       featured_order: cleanFeatured,
     }).select().single()
     if (error) return res.status(500).json({ error: error.message })
+
+    // Record full album membership (multi-album). Best-effort: if migration
+    // 015 is not applied, the track still keeps its primary album_id.
+    if (albumIds.length > 0) {
+      try { await setTrackAlbums(supabase, data.id, albumIds) } catch (_) {}
+    }
     res.status(201).json(data)
   } catch (err) { next(err) }
 })
@@ -1017,7 +1125,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const albumIds = album_ids !== undefined ? albumIdsFrom({ album_ids }) : null
     const updates = {}
     if (title !== undefined) {
       if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title must be a non-empty string' })
@@ -1031,6 +1140,7 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     }
     if (album !== undefined) updates.album = typeof album === 'string' && album.trim() ? album.trim() : null
     if (album_id !== undefined) updates.album_id = typeof album_id === 'string' && album_id.trim() ? album_id.trim() : null
+    if (albumIds !== null) updates.album_id = albumIds[0] || null
     if (duration !== undefined) {
       if (!Number.isFinite(Number(duration)) || Number(duration) < 0) return res.status(400).json({ error: 'duration must be a non-negative number' })
       updates.duration = Math.floor(Number(duration))
@@ -1065,10 +1175,14 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
         delete updates.synced_lyrics_en_tr
         delete updates.synced_lyrics_hi_tr
         const retry = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
-        if (!retry.error) return res.json(retry.data)
+        if (!retry.error) {
+          if (albumIds !== null) { try { await setTrackAlbums(supabase, req.params.id, albumIds) } catch (_) {} }
+          return res.json(retry.data)
+        }
       }
       return res.status(500).json({ error: error.message })
     }
+    if (albumIds !== null) { try { await setTrackAlbums(supabase, req.params.id, albumIds) } catch (_) {} }
     res.json(data)
   } catch (err) { next(err) }
 })
@@ -1251,7 +1365,7 @@ app.get('/api/admin/albums', requireAdmin, async (req, res, next) => {
 // Create an admin album (name + cover photo URL).
 app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
   try {
-    const { name, cover_url, featured_order } = req.body || {}
+    const { name, cover_url, featured_order, status } = req.body || {}
     if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' })
     const cleanFeatured = featured_order == null ? null
       : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
@@ -1261,6 +1375,7 @@ app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
         name: name.trim(),
         cover_url: typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null,
         featured_order: cleanFeatured,
+        status: status === 'paid' ? 'paid' : 'free',
       })
       .select()
       .single()
@@ -1269,10 +1384,10 @@ app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Update an admin album (name + cover photo URL).
+// Update an admin album (name + cover photo URL + status).
 app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, cover_url, featured_order } = req.body || {}
+    const { name, cover_url, featured_order, status } = req.body || {}
     const updates = {}
     if (name !== undefined) {
       if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name must be a non-empty string' })
@@ -1283,6 +1398,7 @@ app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
       updates.featured_order = featured_order == null ? null
         : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     }
+    if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
     const { data, error } = await supabase.from('albums').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })

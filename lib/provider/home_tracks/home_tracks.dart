@@ -134,6 +134,7 @@ final homeAdminAlbumsProvider =
             .toList(),
         albumType: SangeetAlbumType.album,
         releaseDate: null,
+        status: (item['status'] ?? 'free').toString(),
       );
       final albumTracks = (item['tracks'] as List<dynamic>? ?? const [])
           .map((e) => SangeetTrackObject.fromJson(

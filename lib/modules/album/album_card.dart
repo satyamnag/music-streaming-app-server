@@ -6,9 +6,11 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
+import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/history/history.dart';
@@ -66,13 +68,24 @@ class AlbumCard extends HookConsumerWidget {
     final isLoading =
         (isPlaylistPlaying && isFetchingActiveTrack) || updating.value;
     final description = album.albumType.name;
+    final locked = PremiumAccess.isAlbumLocked(album, ref);
 
     final onTap = useCallback(() {
-      // Open the album screen (list of its songs) instead of playing directly.
-      context.navigateTo(AlbumRoute(id: album.id, album: album));
-    }, [context, album]);
+      void open() => context.navigateTo(AlbumRoute(id: album.id, album: album));
+      if (locked) {
+        PremiumAccess.gateAlbumPlay(
+          context: context,
+          ref: ref,
+          album: album,
+          feature: () async => open(),
+        );
+        return;
+      }
+      open();
+    }, [context, album, ref, locked]);
 
-    final onPlaybuttonPressed = useCallback(() async {
+    // Shared play logic (also used, gated, for locked albums).
+    Future<void> playAlbum() async {
       updating.value = true;
       try {
         if (isPlaylistPlaying) {
@@ -101,18 +114,20 @@ class AlbumCard extends HookConsumerWidget {
       } finally {
         updating.value = false;
       }
-    }, [
-      isPlaylistPlaying,
-      playing,
-      audioPlayer,
-      fetchAllTrack,
-      context,
-      ref,
-      playlistNotifier,
-      album,
-      historyNotifier,
-      updating
-    ]);
+    }
+
+    final onPlaybuttonPressed = useCallback(() async {
+      if (locked) {
+        await PremiumAccess.gateAlbumPlay(
+          context: context,
+          ref: ref,
+          album: album,
+          feature: () async => playAlbum(),
+        );
+        return;
+      }
+      await playAlbum();
+    }, [locked, context, ref, album, playAlbum]);
 
     final onAddToQueuePressed = useCallback(() async {
       if (isPlaylistPlaying) {
@@ -162,28 +177,33 @@ class AlbumCard extends HookConsumerWidget {
       context
     ]);
 
-    if (_isTile) {
-      return PlaybuttonTile(
-        imageUrl: imageUrl,
-        isPlaying: isPlaylistPlaying,
-        isLoading: isLoading,
-        title: album.name,
-        description: description,
-        onTap: onTap,
-        onPlaybuttonPressed: onPlaybuttonPressed,
-        onAddToQueuePressed: onAddToQueuePressed,
-      );
-    }
+    final card = _isTile
+        ? PlaybuttonTile(
+            imageUrl: imageUrl,
+            isPlaying: isPlaylistPlaying,
+            isLoading: isLoading,
+            title: album.name,
+            description: description,
+            onTap: onTap,
+            onPlaybuttonPressed: onPlaybuttonPressed,
+            onAddToQueuePressed: onAddToQueuePressed,
+          )
+        : PlaybuttonCard(
+            imageUrl: imageUrl,
+            isPlaying: isPlaylistPlaying,
+            isLoading: isLoading,
+            title: album.name,
+            description: description,
+            onTap: onTap,
+            onPlaybuttonPressed: onPlaybuttonPressed,
+            onAddToQueuePressed: onAddToQueuePressed,
+          );
 
-    return PlaybuttonCard(
-      imageUrl: imageUrl,
-      isPlaying: isPlaylistPlaying,
-      isLoading: isLoading,
-      title: album.name,
-      description: description,
-      onTap: onTap,
-      onPlaybuttonPressed: onPlaybuttonPressed,
-      onAddToQueuePressed: onAddToQueuePressed,
+    return Stack(
+      children: [
+        card,
+        LockedBadge(locked: locked, borderRadius: 0),
+      ],
     );
   }
 }

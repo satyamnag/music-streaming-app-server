@@ -1212,16 +1212,54 @@ class ServerSupabaseDataRoutes {
           .order('created_at', ascending: true);
 
       final byAlbum = <String, List<Map<String, dynamic>>>{};
-      for (final t in allTracks) {
-        final albumId = t['album_id']?.toString();
-        if (albumId == null || albumId.isEmpty) continue;
-        (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
+
+      // Prefer the many-to-many album_songs membership (multi-album). The
+      // app reflects exactly what the admin assigns, so a song appears in
+      // every album it belongs to.
+      var memberships = <Map<String, dynamic>>[];
+      try {
+        memberships = await sb
+            .from('album_songs')
+            .select('album_id, track_id, position')
+            .order('position', ascending: true);
+      } catch (_) {
+        // migration 015 not applied — fall back to the legacy album_id column.
+      }
+
+      final trackById = <String, Map<String, dynamic>>{
+        for (final t in allTracks) t['id'].toString(): t,
+      };
+      if (memberships.isNotEmpty) {
+        final inAlbum = <String, Set<String>>{};
+        for (final m in memberships) {
+          final albumId = m['album_id']?.toString();
+          final trackId = m['track_id']?.toString();
+          if (albumId == null || trackId == null) continue;
+          final t = trackById[trackId];
+          if (t == null) continue;
+          (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
+          (inAlbum[albumId] = inAlbum[albumId] ?? {}).add(trackId);
+        }
+        // Safety net: include legacy album_id tracks not yet in membership.
+        for (final t in allTracks) {
+          final albumId = t['album_id']?.toString();
+          if (albumId == null || albumId.isEmpty) continue;
+          if ((inAlbum[albumId]?.contains(t['id'].toString())) ?? false) continue;
+          (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
+        }
+      } else {
+        for (final t in allTracks) {
+          final albumId = t['album_id']?.toString();
+          if (albumId == null || albumId.isEmpty) continue;
+          (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
+        }
       }
 
       final items = albums.map((a) {
+        final id = a['id'].toString();
         final cover = a['cover_url']?.toString();
         return {
-          'id': a['id'].toString(),
+          'id': id,
           'name': a['name']?.toString() ?? '',
           'externalUri': '',
           'artists': const <dynamic>[],
@@ -1232,7 +1270,8 @@ class ServerSupabaseDataRoutes {
               : const [],
           'albumType': 'album',
           'releaseDate': null,
-          'tracks': byAlbum[a['id'].toString()] ?? const [],
+          'status': a['status']?.toString() ?? 'free',
+          'tracks': byAlbum[id] ?? const [],
         };
       }).toList();
 

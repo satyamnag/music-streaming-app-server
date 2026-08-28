@@ -18,6 +18,9 @@ tr:hover { background: #f0f7ff; }
 .btn-success { background: #22c55e; color: #fff; }
 .btn-secondary { background: #6b7280; color: #fff; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.badge-paid { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.badge-free { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 .toolbar { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; }
 .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; }
 #confirmModal { z-index: 1500; }
@@ -184,6 +187,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
       <div><label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies"></div>
       <div><label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;"></div>
+      <div><label>Status</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select></div>
       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload</button>
       <button class="btn btn-success" id="alSubmitBtn" onclick="createAlbum()">Create Album</button>
       <button class="btn btn-secondary btn-sm" id="alCancelBtn" style="display:none;" onclick="cancelAlbumEdit()">Cancel</button>
@@ -192,7 +196,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
   </div>
   <table><thead><tr>
-    <th>Name</th><th>Cover</th><th>Assigned Songs</th><th>Actions</th>
+    <th>Name</th><th>Cover</th><th>Status</th><th>Assigned Songs</th><th>Actions</th>
   </tr></thead><tbody id="albumsTbody"></tbody></table>
 </div>
 
@@ -280,7 +284,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <input type="hidden" id="editId">
 <label>Title *</label><input id="fTitle" placeholder="Track title">
 <label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
-<label>Album (optional)</label><select id="fAlbum"><option value="">— No album —</option></select>
+<label>Albums (a song can belong to multiple albums)</label>
+<div id="albumCheckboxes" class="album-checkboxes" style="max-height:140px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;"></div>
 <label>Duration (seconds)</label><input id="fDuration" type="number" placeholder="e.g. 240">
 <label>Status</label>
 <select id="fStatus">
@@ -1124,11 +1129,17 @@ async function loadAlbums() {
   try {
     const res = await authedFetch('/api/admin/albums', { credentials: 'same-origin' });
     albums = await res.json();
-    // Populate the track-form album dropdown (value = album id).
-    const sel = document.getElementById('fAlbum');
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— No album —</option>' + albums.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
-    if (current) sel.value = current;
+    // Populate the track-form album checkboxes (a song may belong to many).
+    const box = document.getElementById('albumCheckboxes');
+    if (box) {
+      const selected = new Set((readAlbumCheckboxes()).map((v) => String(v)));
+      box.innerHTML = albums.length === 0
+        ? '<div style="color:#888;">No albums yet — create one in the Albums section.</div>'
+        : albums.map(a => `<label style="display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer;">
+            <input type="checkbox" value="${a.id}" data-album-checkbox ${selected.has(String(a.id)) ? 'checked' : ''}>
+            <span>${esc(a.name)}</span>
+          </label>`).join('');
+    }
     // Render the albums table.
     const tbody = document.getElementById('albumsTbody');
     if (!tbody) return;
@@ -1139,6 +1150,7 @@ async function loadAlbums() {
     tbody.innerHTML = albums.map(a => `<tr>
       <td><b>${esc(a.name)}</b></td>
       <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '-'}</td>
+      <td>${a.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
       <td>${countAlbumTracks(a.id)}</td>
        <td class="actions">
          <button class="btn btn-primary btn-sm" onclick="editAlbum('${a.id}')">Edit</button>
@@ -1150,7 +1162,24 @@ async function loadAlbums() {
 
 function countAlbumTracks(albumId) {
   if (!tracks) return 0;
-  return tracks.filter(t => t.album_id === albumId).length;
+  return tracks.filter(t =>
+    Array.isArray(t.album_ids) ? t.album_ids.includes(albumId) : t.album_id === albumId
+  ).length;
+}
+
+// Read the currently checked album ids from the track form.
+function readAlbumCheckboxes() {
+  const box = document.getElementById('albumCheckboxes');
+  if (!box) return [];
+  return Array.from(box.querySelectorAll('input[data-album-checkbox]:checked')).map(i => i.value);
+}
+
+// Set the checked album ids in the track form.
+function setAlbumCheckboxes(ids) {
+  const keep = new Set((ids || []).map(String));
+  const box = document.getElementById('albumCheckboxes');
+  if (!box) return;
+  box.querySelectorAll('input[data-album-checkbox]').forEach(i => { i.checked = keep.has(i.value); });
 }
 
 function toggleAlbums() {
@@ -1162,6 +1191,7 @@ function toggleAlbums() {
 async function createAlbum() {
   const name = document.getElementById('alName').value.trim();
   const cover_url = document.getElementById('alCover').value.trim() || null;
+  const status = document.getElementById('alStatus').value === 'paid' ? 'paid' : 'free';
   if (!name) { toast('Album name is required'); return; }
   if (!lock()) return;
   try {
@@ -1170,7 +1200,7 @@ async function createAlbum() {
     const res = await authedFetch(url, {
       method: editingAlbumId ? 'PUT' : 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, cover_url }),
+      body: JSON.stringify({ name, cover_url, status }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
     toast(editingAlbumId ? 'Album updated' : 'Album created');
@@ -1186,6 +1216,7 @@ function editAlbum(id) {
   editingAlbumId = id;
   document.getElementById('alName').value = a.name || '';
   document.getElementById('alCover').value = a.cover_url || '';
+  document.getElementById('alStatus').value = a.status === 'paid' ? 'paid' : 'free';
   document.getElementById('alCoverStatus').textContent = 'Editing "' + (a.name || '') + '" — change the name or cover and save.';
   document.getElementById('alFormTitle').textContent = 'Edit Album';
   document.getElementById('alSubmitBtn').textContent = 'Save Changes';
@@ -1197,6 +1228,7 @@ function cancelAlbumEdit() {
   editingAlbumId = null;
   document.getElementById('alName').value = '';
   document.getElementById('alCover').value = '';
+  document.getElementById('alStatus').value = 'free';
   document.getElementById('alCoverStatus').textContent = '';
   document.getElementById('alFormTitle').textContent = 'New Album';
   document.getElementById('alSubmitBtn').textContent = 'Create Album';
@@ -1364,7 +1396,7 @@ function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
   ['fTitle','fArtist','fDuration','fThumbnail','fStorage'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fAlbum').value = '';
+  setAlbumCheckboxes([]);
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
   document.getElementById('thumbStatus').textContent = '';
@@ -1382,7 +1414,7 @@ function showEdit(id) {
   document.getElementById('editId').value = id;
   document.getElementById('fTitle').value = t.title || '';
   document.getElementById('fArtist').value = (t.artist_names || []).join(', ');
-  document.getElementById('fAlbum').value = t.album_id || '';
+  setAlbumCheckboxes(t.album_ids || (t.album_id ? [t.album_id] : []));
   document.getElementById('fDuration').value = t.duration || '';
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
@@ -1393,8 +1425,8 @@ function showEdit(id) {
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
-  // Ensure the album dropdown is populated before setting its value.
-  if (albums.length === 0) loadAlbums().then(() => { document.getElementById('fAlbum').value = t.album_id || ''; });
+  // Ensure the album checkboxes are populated before checking the track's.
+  if (albums.length === 0) loadAlbums().then(() => setAlbumCheckboxes(t.album_ids || (t.album_id ? [t.album_id] : [])));
 }
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -1403,9 +1435,11 @@ async function saveTrack() {
   const id = document.getElementById('editId').value;
   const title = document.getElementById('fTitle').value.trim();
   const artistStr = document.getElementById('fArtist').value.trim();
-  const albumSel = document.getElementById('fAlbum');
-  const album_id = albumSel ? (albumSel.value || null) : null;
+  const albumIds = readAlbumCheckboxes();
+  const album_id = albumIds[0] || null;
   const albumName = album_id ? (albums.find(a => a.id === album_id)?.name || '') : '';
+  const editingTrack = id ? tracks.find(x => x.id === id) : null;
+  const album = albumName || (editingTrack && editingTrack.album) || title;
   const duration = parseInt(document.getElementById('fDuration').value) || 0;
   const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
   const storage_path = document.getElementById('fStorage').value.trim();
@@ -1417,7 +1451,7 @@ async function saveTrack() {
   const language = document.getElementById('fLanguage').value || null;
   const tagsRaw = document.getElementById('fTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
-  const body = { title, artist_names, album: albumName || albumSel?.dataset?.legacy || title, album_id, duration, thumbnail, storage_path, status, language, tags };
+  const body = { title, artist_names, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, status, language, tags };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
