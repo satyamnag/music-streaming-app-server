@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/components/heart_button/local_heart_button.dart';
@@ -20,6 +18,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
+import 'package:sangeet/modules/player/player_overlay.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/services/audio_preload/track_byte_prefetcher.dart';
@@ -209,6 +208,15 @@ class TrackTile extends HookConsumerWidget {
                             builder: (context, ref, _) {
                               final isFetchingActiveTrack =
                                   ref.watch(queryingTrackInfoProvider);
+                              // Locked (paid) tracks always show a padlock in
+                              // place of the play/pause indicator and never
+                              // toggle to pause/loading.
+                              if (isLocked) {
+                                return const Icon(
+                                  Icons.lock,
+                                  color: Colors.white,
+                                );
+                              }
                               return AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 300),
                                 child: switch ((
@@ -268,9 +276,15 @@ class TrackTile extends HookConsumerWidget {
                 ),
                 onPressed: effectiveSelection
                   ? null
-                  : () {
-                    context
-                      .navigateTo(TrackRoute(trackId: track.id));
+                  : () async {
+                    // Play this track, then open the full on-screen player
+                    // (PlayerView) instead of the legacy Track detail page.
+                    await onTap?.call();
+                    if (context.mounted) {
+                      ref
+                          .read(playerOverlayControllerProvider)
+                          .open();
+                    }
                   },
                               child: Text(
                                 track.name,

@@ -1524,6 +1524,7 @@ mixin _$SangeetFullAlbumObject {
   String get externalUri => throw _privateConstructorUsedError;
   int get totalTracks => throw _privateConstructorUsedError;
   SangeetAlbumType get albumType => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
   String? get recordLabel => throw _privateConstructorUsedError;
   List<String>? get genres => throw _privateConstructorUsedError;
 
@@ -1552,6 +1553,7 @@ abstract class $SangeetFullAlbumObjectCopyWith<$Res> {
       String externalUri,
       int totalTracks,
       SangeetAlbumType albumType,
+      String status,
       String? recordLabel,
       List<String>? genres});
 }
@@ -1580,6 +1582,7 @@ class _$SangeetFullAlbumObjectCopyWithImpl<$Res,
     Object? externalUri = null,
     Object? totalTracks = null,
     Object? albumType = null,
+    Object? status = null,
     Object? recordLabel = freezed,
     Object? genres = freezed,
   }) {
@@ -1616,6 +1619,10 @@ class _$SangeetFullAlbumObjectCopyWithImpl<$Res,
           ? _value.albumType
           : albumType // ignore: cast_nullable_to_non_nullable
               as SangeetAlbumType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
       recordLabel: freezed == recordLabel
           ? _value.recordLabel
           : recordLabel // ignore: cast_nullable_to_non_nullable
@@ -1646,6 +1653,7 @@ abstract class _$$SangeetFullAlbumObjectImplCopyWith<$Res>
       String externalUri,
       int totalTracks,
       SangeetAlbumType albumType,
+      String status,
       String? recordLabel,
       List<String>? genres});
 }
@@ -1673,6 +1681,7 @@ class __$$SangeetFullAlbumObjectImplCopyWithImpl<$Res>
     Object? externalUri = null,
     Object? totalTracks = null,
     Object? albumType = null,
+    Object? status = null,
     Object? recordLabel = freezed,
     Object? genres = freezed,
   }) {
@@ -1709,6 +1718,10 @@ class __$$SangeetFullAlbumObjectImplCopyWithImpl<$Res>
           ? _value.albumType
           : albumType // ignore: cast_nullable_to_non_nullable
               as SangeetAlbumType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
       recordLabel: freezed == recordLabel
           ? _value.recordLabel
           : recordLabel // ignore: cast_nullable_to_non_nullable
@@ -1733,6 +1746,7 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
       required this.externalUri,
       required this.totalTracks,
       required this.albumType,
+      this.status = 'free',
       this.recordLabel,
       final List<String>? genres})
       : _artists = artists,
@@ -1772,6 +1786,9 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
   @override
   final SangeetAlbumType albumType;
   @override
+  @JsonKey()
+  final String status;
+  @override
   final String? recordLabel;
   final List<String>? _genres;
   @override
@@ -1785,7 +1802,7 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
 
   @override
   String toString() {
-    return 'SangeetFullAlbumObject(id: $id, name: $name, artists: $artists, images: $images, releaseDate: $releaseDate, externalUri: $externalUri, totalTracks: $totalTracks, albumType: $albumType, recordLabel: $recordLabel, genres: $genres)';
+    return 'SangeetFullAlbumObject(id: $id, name: $name, artists: $artists, images: $images, releaseDate: $releaseDate, externalUri: $externalUri, totalTracks: $totalTracks, albumType: $albumType, status: $status, recordLabel: $recordLabel, genres: $genres)';
   }
 
   @override
@@ -1805,6 +1822,7 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
                 other.totalTracks == totalTracks) &&
             (identical(other.albumType, albumType) ||
                 other.albumType == albumType) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.recordLabel, recordLabel) ||
                 other.recordLabel == recordLabel) &&
             const DeepCollectionEquality().equals(other._genres, _genres));
@@ -1822,6 +1840,7 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
       externalUri,
       totalTracks,
       albumType,
+      status,
       recordLabel,
       const DeepCollectionEquality().hash(_genres));
 
@@ -1852,6 +1871,7 @@ abstract class _SangeetFullAlbumObject implements SangeetFullAlbumObject {
       required final String externalUri,
       required final int totalTracks,
       required final SangeetAlbumType albumType,
+      final String status,
       final String? recordLabel,
       final List<String>? genres}) = _$SangeetFullAlbumObjectImpl;
 
@@ -1874,6 +1894,8 @@ abstract class _SangeetFullAlbumObject implements SangeetFullAlbumObject {
   int get totalTracks;
   @override
   SangeetAlbumType get albumType;
+  @override
+  String get status;
   @override
   String? get recordLabel;
   @override
@@ -1901,6 +1923,7 @@ mixin _$SangeetSimpleAlbumObject {
       throw _privateConstructorUsedError;
   List<SangeetImageObject> get images => throw _privateConstructorUsedError;
   SangeetAlbumType get albumType => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
   String? get releaseDate => throw _privateConstructorUsedError;
 
   /// Serializes this SangeetSimpleAlbumObject to a JSON map.
@@ -1926,6 +1949,7 @@ abstract class $SangeetSimpleAlbumObjectCopyWith<$Res> {
       List<SangeetSimpleArtistObject> artists,
       List<SangeetImageObject> images,
       SangeetAlbumType albumType,
+      String status,
       String? releaseDate});
 }
 
@@ -1951,6 +1975,7 @@ class _$SangeetSimpleAlbumObjectCopyWithImpl<$Res,
     Object? artists = null,
     Object? images = null,
     Object? albumType = null,
+    Object? status = null,
     Object? releaseDate = freezed,
   }) {
     return _then(_value.copyWith(
@@ -1978,6 +2003,10 @@ class _$SangeetSimpleAlbumObjectCopyWithImpl<$Res,
           ? _value.albumType
           : albumType // ignore: cast_nullable_to_non_nullable
               as SangeetAlbumType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
       releaseDate: freezed == releaseDate
           ? _value.releaseDate
           : releaseDate // ignore: cast_nullable_to_non_nullable
@@ -2002,6 +2031,7 @@ abstract class _$$SangeetSimpleAlbumObjectImplCopyWith<$Res>
       List<SangeetSimpleArtistObject> artists,
       List<SangeetImageObject> images,
       SangeetAlbumType albumType,
+      String status,
       String? releaseDate});
 }
 
@@ -2026,6 +2056,7 @@ class __$$SangeetSimpleAlbumObjectImplCopyWithImpl<$Res>
     Object? artists = null,
     Object? images = null,
     Object? albumType = null,
+    Object? status = null,
     Object? releaseDate = freezed,
   }) {
     return _then(_$SangeetSimpleAlbumObjectImpl(
@@ -2053,6 +2084,10 @@ class __$$SangeetSimpleAlbumObjectImplCopyWithImpl<$Res>
           ? _value.albumType
           : albumType // ignore: cast_nullable_to_non_nullable
               as SangeetAlbumType,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
       releaseDate: freezed == releaseDate
           ? _value.releaseDate
           : releaseDate // ignore: cast_nullable_to_non_nullable
@@ -2071,6 +2106,7 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
       required final List<SangeetSimpleArtistObject> artists,
       final List<SangeetImageObject> images = const [],
       required this.albumType,
+      this.status = 'free',
       this.releaseDate})
       : _artists = artists,
         _images = images;
@@ -2104,11 +2140,14 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
   @override
   final SangeetAlbumType albumType;
   @override
+  @JsonKey()
+  final String status;
+  @override
   final String? releaseDate;
 
   @override
   String toString() {
-    return 'SangeetSimpleAlbumObject(id: $id, name: $name, externalUri: $externalUri, artists: $artists, images: $images, albumType: $albumType, releaseDate: $releaseDate)';
+    return 'SangeetSimpleAlbumObject(id: $id, name: $name, externalUri: $externalUri, artists: $artists, images: $images, albumType: $albumType, status: $status, releaseDate: $releaseDate)';
   }
 
   @override
@@ -2124,6 +2163,7 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
             const DeepCollectionEquality().equals(other._images, _images) &&
             (identical(other.albumType, albumType) ||
                 other.albumType == albumType) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.releaseDate, releaseDate) ||
                 other.releaseDate == releaseDate));
   }
@@ -2138,6 +2178,7 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
       const DeepCollectionEquality().hash(_artists),
       const DeepCollectionEquality().hash(_images),
       albumType,
+      status,
       releaseDate);
 
   /// Create a copy of SangeetSimpleAlbumObject
@@ -2165,6 +2206,7 @@ abstract class _SangeetSimpleAlbumObject implements SangeetSimpleAlbumObject {
       required final List<SangeetSimpleArtistObject> artists,
       final List<SangeetImageObject> images,
       required final SangeetAlbumType albumType,
+      final String status,
       final String? releaseDate}) = _$SangeetSimpleAlbumObjectImpl;
 
   factory _SangeetSimpleAlbumObject.fromJson(Map<String, dynamic> json) =
@@ -2182,6 +2224,8 @@ abstract class _SangeetSimpleAlbumObject implements SangeetSimpleAlbumObject {
   List<SangeetImageObject> get images;
   @override
   SangeetAlbumType get albumType;
+  @override
+  String get status;
   @override
   String? get releaseDate;
 

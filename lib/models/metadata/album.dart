@@ -21,6 +21,7 @@ class SangeetFullAlbumObject with _$SangeetFullAlbumObject {
     required String externalUri,
     required int totalTracks,
     required SangeetAlbumType albumType,
+    @Default('free') String status,
     String? recordLabel,
     List<String>? genres,
   }) = _SangeetFullAlbumObject;
@@ -38,6 +39,7 @@ class SangeetSimpleAlbumObject with _$SangeetSimpleAlbumObject {
     required List<SangeetSimpleArtistObject> artists,
     @Default([]) List<SangeetImageObject> images,
     required SangeetAlbumType albumType,
+    @Default('free') String status,
     String? releaseDate,
   }) = _SangeetSimpleAlbumObject;
 

@@ -51,6 +51,25 @@ class PremiumAccess {
     return isPaidTrack(track) && !isPremiumUser(ref);
   }
 
+  /// Whether an album is a paid (premium) album.
+  ///
+  /// Albums have no shared base type, so this accepts either album variant and
+  /// reads its `status` field (default `'free'`).
+  static bool isPaidAlbum(Object album) {
+    final status = switch (album) {
+      SangeetFullAlbumObject a => a.status,
+      SangeetSimpleAlbumObject a => a.status,
+      _ => 'free',
+    };
+    return status == 'paid';
+  }
+
+  /// Whether a paid album is locked for the current user (i.e. it should show
+  /// a lock badge and be intercepted on tap).
+  static bool isAlbumLocked(Object album, dynamic ref) {
+    return isPaidAlbum(album) && !isPremiumUser(ref);
+  }
+
   /// Whether the current user may stream a track given its `status` string
   /// (used by server-side stream handlers that only have the raw status).
   static bool canStreamStatus(String? status, dynamic ref) {
@@ -65,6 +84,71 @@ class PremiumAccess {
       _subscriptionStatus = status;
     });
   }
+
+  /// Gating logic shared by tracks and albums: if the object is paid and the
+  /// user is not premium, prompts sign-in then the paywall, and only runs
+  /// [feature] after purchase. Returns true if [feature] ran.
+  static Future<bool> _gate({
+    required BuildContext context,
+    required WidgetRef ref,
+    required bool isPaid,
+    required Map<String, String> params,
+    required Future<void> Function() feature,
+  }) async {
+    if (!isPaid || isPremiumUser(ref)) {
+      await feature();
+      return true;
+    }
+
+    final auth = ref.read(clerkAuthProvider).valueOrNull;
+    if (auth?.signedIn != true) {
+      final signedIn = await promptSignIn(context, ref);
+      if (!signedIn) return false;
+    }
+
+    var unlocked = false;
+    final result = await gateFeature(
+      placement: SuperwallPlacements.premiumTrackPlay,
+      params: params,
+      feature: () async {
+        unlocked = true;
+        await feature();
+      },
+    );
+
+    if (result == GateResult.failed && context.mounted) {
+      showPaywallError(context);
+    }
+    return unlocked;
+  }
+
+  /// Gates opening/playing an album.
+  ///
+  ///  - Free album: [feature] runs immediately.
+  ///  - Paid album + premium user: [feature] runs immediately.
+  ///  - Paid album + signed-out user: prompts sign-in, then paywall, then runs
+  ///    [feature] only after purchase.
+  ///  - Paid album + signed-in free user: paywall; [feature] only after purchase.
+  static Future<bool> gateAlbumPlay({
+    required BuildContext context,
+    required WidgetRef ref,
+    required Object album,
+    required Future<void> Function() feature,
+  }) {
+    return _gate(
+      context: context,
+      ref: ref,
+      isPaid: isPaidAlbum(album),
+      params: {'album_id': _albumId(album)},
+      feature: feature,
+    );
+  }
+
+  static String _albumId(Object album) => switch (album) {
+        SangeetFullAlbumObject a => a.id,
+        SangeetSimpleAlbumObject a => a.id,
+        _ => '',
+      };
 
   /// Gates playback of a (possibly paid) track.
   ///

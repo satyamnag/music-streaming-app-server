@@ -1,12 +1,13 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
@@ -94,7 +95,7 @@ class HomeAlbumsSection extends HookConsumerWidget {
   }
 }
 
-class _AlbumCard extends HookWidget {
+class _AlbumCard extends HookConsumerWidget {
   final SangeetSimpleAlbumObject album;
   final int trackCount;
   final String imageUrl;
@@ -108,9 +109,10 @@ class _AlbumCard extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final locked = PremiumAccess.isAlbumLocked(album, ref);
 
     return Container(
       width: 140 * scale,
@@ -127,7 +129,18 @@ class _AlbumCard extends HookWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () async {
+          if (locked) {
+            await PremiumAccess.gateAlbumPlay(
+              context: context,
+              ref: ref,
+              album: album,
+              feature: () async => onTap(),
+            );
+            return;
+          }
+          onTap();
+        },
         behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: EdgeInsets.all(10 * scale),
@@ -137,11 +150,16 @@ class _AlbumCard extends HookWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8 * scale),
-                child: UniversalImage(
-                  path: imageUrl,
-                  height: 120 * scale,
-                  width: 120 * scale,
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    UniversalImage(
+                      path: imageUrl,
+                      height: 120 * scale,
+                      width: 120 * scale,
+                      fit: BoxFit.cover,
+                    ),
+                    LockedBadge(locked: locked, borderRadius: 0),
+                  ],
                 ),
               ),
               Gap(8 * scale),

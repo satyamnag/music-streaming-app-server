@@ -140,6 +140,7 @@ _$SangeetFullAlbumObjectImpl _$$SangeetFullAlbumObjectImplFromJson(Map json) =>
       externalUri: json['externalUri'] as String,
       totalTracks: (json['totalTracks'] as num).toInt(),
       albumType: $enumDecode(_$SangeetAlbumTypeEnumMap, json['albumType']),
+      status: json['status'] as String? ?? 'free',
       recordLabel: json['recordLabel'] as String?,
       genres:
           (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -156,6 +157,7 @@ Map<String, dynamic> _$$SangeetFullAlbumObjectImplToJson(
       'externalUri': instance.externalUri,
       'totalTracks': instance.totalTracks,
       'albumType': _$SangeetAlbumTypeEnumMap[instance.albumType]!,
+      'status': instance.status,
       'recordLabel': instance.recordLabel,
       'genres': instance.genres,
     };
@@ -182,6 +184,7 @@ _$SangeetSimpleAlbumObjectImpl _$$SangeetSimpleAlbumObjectImplFromJson(
               .toList() ??
           const [],
       albumType: $enumDecode(_$SangeetAlbumTypeEnumMap, json['albumType']),
+      status: json['status'] as String? ?? 'free',
       releaseDate: json['releaseDate'] as String?,
     );
 
@@ -194,6 +197,7 @@ Map<String, dynamic> _$$SangeetSimpleAlbumObjectImplToJson(
       'artists': instance.artists.map((e) => e.toJson()).toList(),
       'images': instance.images.map((e) => e.toJson()).toList(),
       'albumType': _$SangeetAlbumTypeEnumMap[instance.albumType]!,
+      'status': instance.status,
       'releaseDate': instance.releaseDate,
     };
 

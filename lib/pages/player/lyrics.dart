@@ -4,11 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
-import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/hooks/utils/use_palette_color.dart';
-import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/pages/lyrics/plain_lyrics.dart';
-import 'package:sangeet/pages/lyrics/synced_lyrics.dart';
+import 'package:sangeet/models/lyrics.dart';
+import 'package:sangeet/pages/lyrics/multilang_lyrics.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 @RoutePage()
@@ -18,26 +15,26 @@ class PlayerLyricsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final playlist = ref.watch(audioPlayerProvider);
-    String albumArt = useMemoized(
-      () => (playlist.activeTrack?.album.images).asUrlString(
-        index: (playlist.activeTrack?.album.images.length ?? 1) - 1,
-        placeholder: ImagePlaceholder.albumArt,
-      ),
-      [playlist.activeTrack?.album.images],
-    );
+    final track = playlist.activeTrack;
     final selectedIndex = useState(0);
-    final palette = usePaletteColor(albumArt, ref);
+
+    // Selected languages for the "Synced Lyrics" tab. Defaults to Telugu and
+    // always keeps at least one selected. Converted to a stable ValueNotifier
+    // so the open picker reflects live toggle state.
+    final selectedLangs = useMemoized(
+      () => ValueNotifier<Set<String>>({LyricLanguages.te}),
+      [],
+    );
+    useEffect(() => selectedLangs.dispose, []);
 
     final tabbar = TabList(
       index: selectedIndex.value,
       onChanged: (index) => selectedIndex.value = index,
-      children: [
-        TabItem(
-          child: Text(context.l10n.synced),
-        ),
-        TabItem(
-          child: Text(context.l10n.plain),
-        ),
+      children: const [
+        TabItem(child: Text('Telugu Lyrics')),
+        TabItem(child: Text('English Transliteration')),
+        TabItem(child: Text('English Translation')),
+        TabItem(child: Text('Synced Lyrics')),
       ],
     );
 
@@ -53,8 +50,10 @@ class PlayerLyricsPage extends HookConsumerWidget {
       child: IndexedStack(
         index: selectedIndex.value,
         children: [
-          SyncedLyrics(palette: palette, isModal: false),
-          PlainLyrics(palette: palette, isModal: false),
+          PlainLanguageViewBuilder(track: track, lang: LyricLanguages.te),
+          PlainLanguageViewBuilder(track: track, lang: LyricLanguages.enTr),
+          PlainLanguageViewBuilder(track: track, lang: LyricLanguages.en),
+          SyncedLanguageView(track: track, selected: selectedLangs),
         ],
       ),
     );

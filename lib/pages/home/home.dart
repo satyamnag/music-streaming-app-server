@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' as material;
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -43,7 +44,13 @@ class HomePage extends HookConsumerWidget {
     final clerkAuth = ref.watch(clerkAuthProvider);
     final clerkState = clerkAuth.valueOrNull ?? const ClerkAuthState();
 
-    return SafeArea(
+    return PopScope(
+      canPop: !kIsAndroid,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop || !kIsAndroid) return;
+        confirmExit(context);
+      },
+      child: SafeArea(
         bottom: false,
         child: Scaffold(
           headers: [
@@ -66,6 +73,7 @@ class HomePage extends HookConsumerWidget {
                       title: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          const SizedBox(width: 16),
                           ClipOval(
                             child: Image.asset(
                               'assets/branding/sangeet-logo.png',
@@ -196,6 +204,35 @@ class HomePage extends HookConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
+  }
+
+  /// Shows a confirmation dialog before the Android back button exits the app.
+  /// The app only exits after the user confirms; cancelling keeps them in the
+  /// app.
+  static Future<void> confirmExit(BuildContext context) async {
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Exit Soulful Bhakti?'),
+        content: const Text(
+          'Are you sure you want to exit Soulful Bhakti?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Exit'),
+          ),
+        ],
+      ),
+    );
+    if (exit == true) {
+      SystemNavigator.pop();
+    }
   }
 }

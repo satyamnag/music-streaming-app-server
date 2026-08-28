@@ -12,6 +12,7 @@ import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/list.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/player/track_lyrics.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/track.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -227,6 +228,21 @@ class TrackPage extends HookConsumerWidget {
                       ),
                     ),
                   ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: mediaQuery.size.height * 0.42,
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.background.withValues(alpha: 0.55),
+                  ),
+                  child: TrackLyricsPanel(track: track),
                 ),
               ),
             ),

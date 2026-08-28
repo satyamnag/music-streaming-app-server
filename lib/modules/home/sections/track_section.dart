@@ -5,8 +5,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// A titled horizontal row of track cards used for the home screen sections
@@ -155,7 +157,7 @@ class HomeTrackSection extends HookConsumerWidget {
   }
 }
 
-class _TrackCard extends HookWidget {
+class _TrackCard extends HookConsumerWidget {
   final SangeetTrackObject track;
   final String imageUrl;
   final VoidCallback onTap;
@@ -167,9 +169,10 @@ class _TrackCard extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final locked = PremiumAccess.isTrackLocked(track, ref);
 
     return Container(
       width: 140 * scale,
@@ -186,7 +189,18 @@ class _TrackCard extends HookWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () async {
+          if (locked) {
+            await PremiumAccess.gateTrackPlay(
+              context: context,
+              ref: ref,
+              track: track,
+              feature: () async => onTap(),
+            );
+            return;
+          }
+          onTap();
+        },
         behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: EdgeInsets.all(10 * scale),
@@ -196,11 +210,16 @@ class _TrackCard extends HookWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8 * scale),
-                child: UniversalImage(
-                  path: imageUrl,
-                  height: 120 * scale,
-                  width: 120 * scale,
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    UniversalImage(
+                      path: imageUrl,
+                      height: 120 * scale,
+                      width: 120 * scale,
+                      fit: BoxFit.cover,
+                    ),
+                    LockedBadge(locked: locked, borderRadius: 0),
+                  ],
                 ),
               ),
               Gap(8 * scale),
