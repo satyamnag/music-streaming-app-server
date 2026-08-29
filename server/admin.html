@@ -341,6 +341,13 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<label>Karaoke File (.opus/.mp3/.m4a, optional)</label>
+<div class="upload-row">
+  <input id="fKaraoke" placeholder="e.g. song-karaoke.opus (optional)">
+  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('karaokeInput').click()">Upload</button>
+</div>
+<input type="file" id="karaokeInput" accept=".opus,.mp3,.m4a,.m4b" style="display:none" onchange="handleKaraokeUpload(this)">
+<div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
     <button class="btn btn-success" onclick="saveTrack()">Save</button>
@@ -1395,12 +1402,13 @@ function pl(v) { return v || 0; }
 function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
-  ['fTitle','fArtist','fDuration','fThumbnail','fStorage'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fArtist','fDuration','fThumbnail','fStorage','fKaraoke'].forEach(id => document.getElementById(id).value = '');
   setAlbumCheckboxes([]);
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
+  document.getElementById('karaokeStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
   document.getElementById('modal').style.display = 'block';
   // Ensure the album dropdown is populated with admin-created albums.
@@ -1418,11 +1426,13 @@ function showEdit(id) {
   document.getElementById('fDuration').value = t.duration || '';
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
+  document.getElementById('fKaraoke').value = t.karaoke_storage_path || '';
   document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
   document.getElementById('fLanguage').value = t.language || '';
   document.getElementById('fTags').value = t.tags || '';
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
+  document.getElementById('karaokeStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
   // Ensure the album checkboxes are populated before checking the track's.
@@ -1443,6 +1453,7 @@ async function saveTrack() {
   const duration = parseInt(document.getElementById('fDuration').value) || 0;
   const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
   const storage_path = document.getElementById('fStorage').value.trim();
+  const karaoke_storage_path = document.getElementById('fKaraoke').value.trim() || null;
   if (!title) { toast('Title is required'); return; }
   if (!storage_path) { toast('Audio file path is required'); return; }
   if (!lock()) return;
@@ -1451,7 +1462,7 @@ async function saveTrack() {
   const language = document.getElementById('fLanguage').value || null;
   const tagsRaw = document.getElementById('fTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
-  const body = { title, artist_names, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, status, language, tags };
+  const body = { title, artist_names, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, status, language, tags };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
@@ -1488,6 +1499,21 @@ async function handleAudioUpload(input) {
     document.getElementById('fStorage').value = data.storage_path;
     document.getElementById('audioStatus').textContent = 'Uploaded: ' + data.storage_path;
   } catch (e) { document.getElementById('audioStatus').textContent = 'Error: ' + e.message; }
+  input.value = '';
+}
+
+async function handleKaraokeUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('karaokeStatus').textContent = 'Uploading...';
+  const form = new FormData(); form.append('file', file);
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('fKaraoke').value = data.storage_path;
+    document.getElementById('karaokeStatus').textContent = 'Uploaded: ' + data.storage_path;
+  } catch (e) { document.getElementById('karaokeStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
 

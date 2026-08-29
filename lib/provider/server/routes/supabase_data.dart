@@ -115,6 +115,7 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'isrc': '',
     'explicit': false,
     'featuredOrder': t['featured_order'],
+    'karaokeStoragePath': t['karaoke_storage_path'],
   };
 }
 

@@ -17,6 +17,11 @@ class SangeetMedia extends mk.Media {
   static int serverPort = 0;
   static final Completer<int> _portReady = Completer<int>();
 
+  /// When true, playback uses the track's karaoke variant (if one exists in
+  /// the backend) instead of the original. Reset to false to return to the
+  /// original song. Read by [SangeetMedia] when building the stream URL.
+  static bool karaokeMode = false;
+
   static Future<void> ensurePortReady() async {
     if (serverPort == 0) {
       await _portReady.future;
@@ -43,7 +48,8 @@ class SangeetMedia extends mk.Media {
         super(
           track is SangeetLocalTrackObject
               ? track.path
-              : "http://$_host:$serverPort/stream/${track.id}",
+              : "http://$_host:$serverPort/stream/${track.id}"
+                  "${karaokeMode ? '?variant=karaoke' : ''}",
           extras: track.toJson(),
         );
 

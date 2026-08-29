@@ -142,21 +142,37 @@ class ServerPlaybackRoutes {
   /// This is the fastest and most reliable path: it reads the track's storage
   /// path, generates a signed URL from the `music` bucket, and builds a
   /// [SourcedTrack] whose stream points straight at that URL.
-  Future<SourcedTrack?> _resolveStreamFromSupabase(String trackId) async {
+  Future<SourcedTrack?> _resolveStreamFromSupabase(
+    String trackId, {
+    bool karaoke = false,
+  }) async {
     final supabase = ref.read(supabaseClientProvider);
 
     final row = await supabase
         .from('tracks')
-        .select('id,title,artist_names,duration,thumbnail,storage_path,status')
+        .select(
+            'id,title,artist_names,duration,thumbnail,storage_path,karaoke_storage_path,status')
         .eq('id', trackId)
         .maybeSingle();
 
-    if (row == null || row['storage_path'] == null) {
-      _log('_resolveStreamFromMusicSource: no storage_path for $trackId');
+    if (row == null) {
+      _log('_resolveStreamFromMusicSource: no row for $trackId');
       return null;
     }
 
-    final storagePath = row['storage_path'].toString();
+    // Use the karaoke file when requested and one exists; otherwise fall back
+    // to the original so we never break the default playback path.
+    final karaokePath = row['karaoke_storage_path']?.toString();
+    final originalPath = row['storage_path']?.toString();
+    if (karaoke && (karaokePath == null || karaokePath.isEmpty)) {
+      _log('_resolveStreamFromMusicSource: no karaoke file for $trackId');
+      return null;
+    }
+    final storagePath = karaoke ? karaokePath! : originalPath;
+    if (storagePath == null || storagePath.isEmpty) {
+      _log('_resolveStreamFromMusicSource: no storage_path for $trackId');
+      return null;
+    }
     final ext = storagePath.split('.').last.toLowerCase();
     final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
 
@@ -453,6 +469,21 @@ class ServerPlaybackRoutes {
     return res;
   }
 
+  /// Returns the [SourcedTrack] to stream for a request, honouring the
+  /// `?variant=karaoke` query param (resolves the karaoke file when present;
+  /// falls back to the original otherwise so nothing breaks).
+  Future<SourcedTrack?> _sourcedTrackForVariant(
+    Request request,
+    String trackId,
+    SourcedTrack? fallback,
+  ) async {
+    if (request.url.queryParameters['variant'] == 'karaoke') {
+      final karaoke = await _resolveStreamFromSupabase(trackId, karaoke: true);
+      if (karaoke != null) return karaoke;
+    }
+    return fallback;
+  }
+
   /// @head('/stream/<trackId>')
   Future<Response> headStreamTrackId(Request request, String trackId) async {
     try {
@@ -462,16 +493,21 @@ class ServerPlaybackRoutes {
         return Response.notFound("Track not found in the current queue");
       }
 
+      final stream = await _sourcedTrackForVariant(request, trackId, sourcedTrack);
+      if (stream == null) {
+        return Response.notFound("Karaoke track not found");
+      }
+
       // Paid tracks are locked for free users — refuse to stream even if a
       // client bypasses the UI and hits the local stream endpoint directly.
-      final status = sourcedTrack.query.status;
+      final status = stream.query.status;
       if (status == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
         return Response.forbidden("This track requires a premium subscription");
       }
 
       final res = await streamTrackInformation(
         request,
-        sourcedTrack,
+        stream,
       );
 
       return Response(
@@ -493,16 +529,21 @@ class ServerPlaybackRoutes {
         return Response.notFound("Track not found in the current queue");
       }
 
+      final stream = await _sourcedTrackForVariant(request, trackId, sourcedTrack);
+      if (stream == null) {
+        return Response.notFound("Karaoke track not found");
+      }
+
       // Paid tracks are locked for free users — refuse to stream even if a
       // client bypasses the UI and hits the local stream endpoint directly.
-      final status = sourcedTrack.query.status;
+      final status = stream.query.status;
       if (status == 'paid' && !PremiumAccess.isPremiumUser(ref)) {
         return Response.forbidden("This track requires a premium subscription");
       }
 
       final res = await streamTrack(
         request,
-        sourcedTrack,
+        stream,
         request.headers,
       );
 

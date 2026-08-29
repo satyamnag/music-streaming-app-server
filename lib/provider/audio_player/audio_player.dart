@@ -462,6 +462,30 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     await audioPlayer.jumpTo(index);
   }
 
+  /// Reloads the current track as either the original or its karaoke variant,
+  /// returning to the supplied [position]. Used by the player's
+  /// Original / Karaoke switch. The default state (never called) leaves the
+  /// original playback path completely unchanged.
+  Future<void> toggleKaraoke({
+    required bool karaoke,
+    Duration? position,
+  }) async {
+    final index = state.currentIndex;
+    if (index < 0 || state.tracks.isEmpty) return;
+    final pos = position ?? audioPlayer.position;
+    SangeetMedia.karaokeMode = karaoke;
+    try {
+      await load(state.tracks, initialIndex: index, autoPlay: true);
+      if (pos > Duration.zero) {
+        await audioPlayer.seek(pos);
+      }
+    } catch (e, stack) {
+      AppLogger.reportError(e, stack);
+    } finally {
+      SangeetMedia.karaokeMode = false;
+    }
+  }
+
   Future<void> moveTrack(int oldIndex, int newIndex) async {
     if (oldIndex == newIndex ||
         newIndex < 0 ||

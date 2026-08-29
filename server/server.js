@@ -1079,7 +1079,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -1100,6 +1100,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       duration: cleanDuration,
       thumbnail: typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null,
       storage_path: storage_path.trim(),
+      karaoke_storage_path: typeof karaoke_storage_path === 'string' && karaoke_storage_path.trim() ? karaoke_storage_path.trim() : null,
       status: cleanStatus,
       lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
@@ -1125,7 +1126,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     const albumIds = album_ids !== undefined ? albumIdsFrom({ album_ids }) : null
     const updates = {}
     if (title !== undefined) {
@@ -1149,6 +1150,9 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (storage_path !== undefined) {
       if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path must be a non-empty string' })
       updates.storage_path = storage_path.trim()
+    }
+    if (karaoke_storage_path !== undefined) {
+      updates.karaoke_storage_path = typeof karaoke_storage_path === 'string' && karaoke_storage_path.trim() ? karaoke_storage_path.trim() : null
     }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
     if (lyrics !== undefined) updates.lyrics = typeof lyrics === 'string' && lyrics.trim() ? lyrics : null

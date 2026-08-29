@@ -24,6 +24,7 @@ class SangeetTrackObject with _$SangeetTrackObject {
     @Default('free') String status,
     String? language,
     int? featuredOrder,
+    String? karaokeStoragePath,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(

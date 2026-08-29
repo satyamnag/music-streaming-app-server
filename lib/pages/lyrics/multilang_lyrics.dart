@@ -45,6 +45,25 @@ const List<LyricLanguageDef> kLyricLanguages = [
   ),
 ];
 
+/// A small, appropriate icon for a lyric language (used in the Sync picker).
+Widget _langIcon(String key, Color color) => switch (key) {
+      LyricLanguages.te => Text(
+          'అ',
+          style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600, height: 1),
+        ),
+      LyricLanguages.enTr => Text(
+          'Aa',
+          style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600, height: 1),
+        ),
+      LyricLanguages.hiTr => Text(
+          'अ',
+          style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600, height: 1),
+        ),
+      LyricLanguages.en || LyricLanguages.hi =>
+        Icon(Icons.translate, size: 16, color: color),
+      _ => const SizedBox.shrink(),
+    };
+
 /// Derives the plain (timestamp-free) text for a single language from the
 /// aligned multi-language [variants]. Returns an empty string when the track
 /// has no text for that language.
@@ -309,7 +328,7 @@ class _SyncedLines extends HookWidget {
               ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: blocks,
             ),
           ),
@@ -341,6 +360,7 @@ class _LangBlock extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: theme.typography.base.copyWith(
           color: def.color,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
@@ -395,14 +415,7 @@ class LanguageMultiSelect extends HookConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: def.color,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              _langIcon(def.key, def.color),
               const SizedBox(width: 8),
               Text(def.label),
             ],
@@ -426,7 +439,6 @@ class LanguageMultiSelect extends HookConsumerWidget {
             child: Text(context.l10n.synced),
           ).call,
           child: Button.outline(
-            leading: const Icon(SangeetIcons.language, size: 16),
             child: Text(summary),
             onPressed: () {
               final mediaQuery = MediaQuery.of(context);

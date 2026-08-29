@@ -23,6 +23,7 @@ import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/volume_provider.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
 
 class PlayerView extends HookConsumerWidget {
   final PanelController panelController;
@@ -161,7 +162,14 @@ class PlayerView extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 16),
+                  // Original / Karaoke switch (karaoke only when a karaoke
+                  // track exists).
+                  _OriginalKaraokeToggle(
+                    karaokeAvailable: currentActiveTrack is SangeetFullTrackObject &&
+                        currentActiveTrack.karaokeStoragePath != null,
+                  ),
+                  const SizedBox(height: 44),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.centerLeft,
@@ -236,6 +244,98 @@ class PlayerView extends HookConsumerWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Original / Karaoke switch shown between the cover art and the track name.
+/// "Original" is the default (current playback, unchanged). "Karaoke" replays
+/// the track's karaoke variant when one exists; otherwise it is disabled.
+class _OriginalKaraokeToggle extends HookConsumerWidget {
+  final bool karaokeAvailable;
+  const _OriginalKaraokeToggle({required this.karaokeAvailable});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final karaoke = useState(false);
+    final notifier = ref.read(audioPlayerProvider.notifier);
+
+    void select(bool k) {
+      if (k && !karaokeAvailable) return;
+      if (karaoke.value == k) return;
+      karaoke.value = k;
+      notifier.toggleKaraoke(
+        karaoke: k,
+        position: audioPlayer.position,
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _ToggleButton(
+          label: 'Original',
+          selected: !karaoke.value,
+          enabled: true,
+          onTap: () => select(false),
+        ),
+        const SizedBox(width: 10),
+        _ToggleButton(
+          label: 'Karaoke',
+          selected: karaoke.value,
+          enabled: karaokeAvailable,
+          onTap: () => select(true),
+        ),
+      ],
+    );
+  }
+}
+
+class _ToggleButton extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _ToggleButton({
+    required this.label,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: enabled ? onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.muted,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: theme.typography.small.copyWith(
+            color: selected
+                ? theme.colorScheme.primaryForeground
+                : enabled
+                    ? theme.colorScheme.mutedForeground
+                    : theme.colorScheme.mutedForeground
+                        .withValues(alpha: 0.4),
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
       ),
