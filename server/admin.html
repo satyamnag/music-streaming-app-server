@@ -389,10 +389,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
       </div>
       <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+      <div style="font-size:12px;color:#666;margin-bottom:6px;">Lines: <b id="syncCount">0</b></div>
 
 
     <div class="sync-add-row">
-      <span class="sync-ts-hint" id="syncTsHint">00:00.00</span>
+      <input id="syncNewTime" class="sync-ts-hint" placeholder="00:00.00" title="Line timestamp — MM:SS.cc (optional; defaults to 0)">
       <input id="syncTe" class="sync-lang" placeholder="Telugu (main language)">
       <input id="syncEn" class="sync-lang" placeholder="English (Translation)">
       <input id="syncHi" class="sync-lang" placeholder="Hindi (Translation)">
@@ -400,6 +401,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
       <input id="syncHiTr" class="sync-lang" placeholder="Hindi (Transliteration)">
       <button class="btn btn-success btn-sm" type="button" onclick="syncAddLine()">Add Line</button>
     </div>
+    <div class="sync-hint">Enter the timestamp (optional), fill at least one language, then <b>Add Line</b> or press Enter.</div>
 
     <div class="sync-list-wrap">
       <table class="sync-table">
@@ -591,6 +593,8 @@ function syncListHtml(entries, editing) {
 }
 
 function renderSyncEntries() {
+  const countEl = document.getElementById('syncCount');
+  if (countEl) countEl.textContent = String(syncEntries.length);
   document.getElementById('syncTbody').innerHTML = syncListHtml(syncEntries, syncEditing);
 }
 
@@ -614,22 +618,39 @@ function syncSaveEdit(i) {
 function syncDelete(i) { syncEntries.splice(i, 1); syncEditing = -1; renderSyncEntries(); }
 
 function syncAddLine() {
-  const time = 0;
-  const te = document.getElementById('syncTe').value;
-  const en = document.getElementById('syncEn').value;
-  const hi = document.getElementById('syncHi').value;
-  const enTr = document.getElementById('syncEnTr').value;
-  const hiTr = document.getElementById('syncHiTr').value;
-  if (!te.trim() && !en.trim() && !hi.trim() && !enTr.trim() && !hiTr.trim()) { toast('Enter at least one language line'); return; }
-  syncEntries.push({ time: Math.max(0, Number(time) || 0), te: te, en: en, hi: hi, enTr: enTr, hiTr: hiTr });
+  const te = document.getElementById('syncTe').value.trim();
+  const en = document.getElementById('syncEn').value.trim();
+  const hi = document.getElementById('syncHi').value.trim();
+  const enTr = document.getElementById('syncEnTr').value.trim();
+  const hiTr = document.getElementById('syncHiTr').value.trim();
+  if (!te && !en && !hi && !enTr && !hiTr) { toast('Enter at least one language line'); return; }
+  const rawTime = document.getElementById('syncNewTime').value.trim();
+  let sec = 0;
+  if (rawTime) {
+    sec = parseLrcTime(rawTime);
+    if (sec === null) { toast('Invalid time format — use MM:SS.cc'); return; }
+  }
+  syncEntries.push({ time: Math.max(0, sec), te: te, en: en, hi: hi, enTr: enTr, hiTr: hiTr });
   syncEntries.sort((a, b) => a.time - b.time);
   document.getElementById('syncTe').value = '';
   document.getElementById('syncEn').value = '';
   document.getElementById('syncHi').value = '';
   document.getElementById('syncEnTr').value = '';
   document.getElementById('syncHiTr').value = '';
+  document.getElementById('syncNewTime').value = '';
   renderSyncEntries();
 }
+
+// Pressing Enter anywhere in the add-line inputs adds the line.
+(function bindSyncAddEnter() {
+  const ids = ['syncNewTime', 'syncTe', 'syncEn', 'syncHi', 'syncEnTr', 'syncHiTr'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); syncAddLine(); }
+    });
+  });
+})();
 
 async function openSyncLyrics(id) {
   const t = tracks.find((x) => x.id === id);
@@ -650,6 +671,7 @@ function closeSyncLyrics() {
 
 async function saveSyncLyrics() {
   if (!syncTrackId) return;
+  if (!lock()) return;
   // buildLrc keeps every line's timestamp so the languages stay aligned.
   // For the non-Telugu columns, only store the LRC when it actually contains
   // text lines (otherwise the column would hold timestamp-only lines that look
@@ -685,6 +707,7 @@ async function saveSyncLyrics() {
     if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
   } finally {
     showLoading(false);
+    unlock();
   }
 }
 
