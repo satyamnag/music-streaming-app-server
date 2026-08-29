@@ -30,8 +30,23 @@ void _log(String msg) {
 /// requests from hitting Supabase 3-4× per track (saving ~2-3 seconds per
 /// track switch). The cache is cleared when the playlist changes.
 final Map<String, SourcedTrack> _sourcedTrackCache = {};
+final Map<String, DateTime> _sourcedTrackFetchAt = {};
 
-void clearSourcedTrackCache() => _sourcedTrackCache.clear();
+/// How long a resolved stream URL is considered fresh. Signed URLs from
+/// Supabase expire (~1h) and the upstream cache is 30 min; re-resolving after
+/// 20 min guarantees the URL used on a retry/re-open is still valid, so a song
+/// cannot get stuck on an expired URL in low-network conditions.
+const Duration _streamUrlMaxAge = Duration(minutes: 20);
+
+void _cacheSourcedTrack(String trackId, SourcedTrack track) {
+  _sourcedTrackCache[trackId] = track;
+  _sourcedTrackFetchAt[trackId] = DateTime.now();
+}
+
+void clearSourcedTrackCache() {
+  _sourcedTrackCache.clear();
+  _sourcedTrackFetchAt.clear();
+}
 
 final _deviceClients = Set.unmodifiable({
   YoutubeApiClient.ios,
@@ -59,10 +74,18 @@ class ServerPlaybackRoutes {
   ) async {
     // Return cached result if available — mpv sends HEAD, GET, and retries,
     // so without caching we hit Supabase 3-4× per track (~2-3s wasted each).
+    // A cached URL older than [_streamUrlMaxAge] is treated as a miss so a
+    // stale/expired URL is re-resolved fresh on retry.
     final cached = _sourcedTrackCache[trackId];
-    if (cached != null) {
+    final fetchedAt = _sourcedTrackFetchAt[trackId];
+    if (cached != null &&
+        fetchedAt != null &&
+        DateTime.now().difference(fetchedAt) < _streamUrlMaxAge) {
       _log('_getSourcedTrack: cache hit for $trackId');
       return cached;
+    }
+    if (cached != null) {
+      _log('_getSourcedTrack: cached URL stale for $trackId, re-resolving...');
     }
 
     _log('_getSourcedTrack: trackId=$trackId, playlist.tracks=${playlist.tracks.length}');
@@ -74,7 +97,7 @@ class ServerPlaybackRoutes {
       final direct = await _resolveStreamFromSupabase(trackId);
       if (direct != null) {
         _log('_getSourcedTrack: resolved directly from the music source');
-        _sourcedTrackCache[trackId] = direct;
+        _cacheSourcedTrack(trackId, direct);
         return direct;
       }
     } catch (e) {
@@ -89,7 +112,7 @@ class ServerPlaybackRoutes {
       if (track == null) {
         _log('_getSourcedTrack: track $trackId NOT in playlist state, resolving from the music source');
         final result = await _resolveFromSupabase(trackId);
-        if (result != null) _sourcedTrackCache[trackId] = result;
+        if (result != null) _cacheSourcedTrack(trackId, result);
         return result;
       }
       _log('_getSourcedTrack: found track ${track.name} in playlist state');
@@ -126,7 +149,7 @@ class ServerPlaybackRoutes {
         }
       }
       _log('_getSourcedTrack: sourcedTrack url=${sourcedTrack?.url}');
-      if (sourcedTrack != null) _sourcedTrackCache[trackId] = sourcedTrack;
+      if (sourcedTrack != null) _cacheSourcedTrack(trackId, sourcedTrack);
       return sourcedTrack;
     } catch (e, stack) {
       _log('_getSourcedTrack ERROR: $e');
@@ -323,7 +346,7 @@ class ServerPlaybackRoutes {
       final direct = await _resolveStreamFromSupabase(track.query.id);
       if (direct != null && direct.url != null) {
         url = direct.url!;
-        _sourcedTrackCache[track.query.id] = direct;
+        _cacheSourcedTrack(track.query.id, direct);
       }
     }
     if (url.isEmpty) {
@@ -378,7 +401,7 @@ class ServerPlaybackRoutes {
       final direct = await _resolveStreamFromSupabase(track.query.id);
       if (direct != null && direct.url != null) {
         url = direct.url!;
-        _sourcedTrackCache[track.query.id] = direct;
+        _cacheSourcedTrack(track.query.id, direct);
       }
     }
     if (url.isEmpty) {
@@ -436,7 +459,7 @@ class ServerPlaybackRoutes {
         final direct = await _resolveStreamFromSupabase(track.query.id);
         if (direct != null && direct.url != null) {
           url = direct.url!;
-          _sourcedTrackCache[track.query.id] = direct;
+          _cacheSourcedTrack(track.query.id, direct);
         }
       }
 
