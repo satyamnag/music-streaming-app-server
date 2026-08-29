@@ -26,17 +26,17 @@ class LyricLanguageDef {
 /// [LyricLanguages] constants and therefore to the server's `synced_lyrics_*`
 /// columns.
 const List<LyricLanguageDef> kLyricLanguages = [
-  LyricLanguageDef(LyricLanguages.te, 'Telugu', Color(0xFFE53935)),
+  LyricLanguageDef(LyricLanguages.te, 'Telugu', Color(0xFFD4AF37)),
   LyricLanguageDef(
     LyricLanguages.en,
     'English Translation',
-    Color(0xFF1E88E5),
+    Color(0xFF22C55E),
   ),
   LyricLanguageDef(LyricLanguages.hi, 'Hindi Translation', Color(0xFF43A047)),
   LyricLanguageDef(
     LyricLanguages.enTr,
     'English Transliteration',
-    Color(0xFFFB8C00),
+    Color(0xFF2196F3),
   ),
   LyricLanguageDef(
     LyricLanguages.hiTr,
@@ -335,39 +335,18 @@ class _LangBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Each language is identified purely by its colour, so no language-name
+    // label is shown on the lyric lines.
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: def.color,
-              borderRadius: theme.borderRadiusSm,
-            ),
-            child: Text(
-              def.label,
-              style: theme.typography.small.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 3),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              text,
-              style: theme.typography.base.copyWith(
-                color: def.color,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                fontSize: 16,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        text,
+        style: theme.typography.base.copyWith(
+          color: def.color,
+          fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+          fontSize: 16,
+          height: 1.5,
+        ),
       ),
     );
   }
