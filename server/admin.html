@@ -385,23 +385,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
  <div id="syncLyricsModal" class="modal">
    <div class="modal-content" style="max-width: 780px;">
-     <div class="sync-header">
-       <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
-        <div class="sync-header-actions">
-          <button class="btn btn-primary btn-sm" type="button" onclick="document.getElementById('syncFile').click()">Attach Sync Lyrics</button>
-          <input type="file" id="syncFile" accept=".lrc,.srt,text/plain" style="display:none" onchange="handleSyncFile(this)">
-          <div class="sync-hint">LRC &amp; SRT supported</div>
-        </div>
-     </div>
-     <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+      <div class="sync-header">
+        <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
+      </div>
+      <p id="syncMsg" style="color:#555;font-size:13px;"></p>
 
-
-    <div class="sync-player">
-      <audio id="syncAudio" controls preload="metadata"></audio>
-      <span class="sync-live">Current: <span id="syncLiveTime">00:00.00</span></span>
-      <button class="btn btn-secondary btn-sm" type="button" onclick="syncSeekBack()">-5s</button>
-      <button class="btn btn-secondary btn-sm" type="button" onclick="syncSeekFwd()">+5s</button>
-    </div>
 
     <div class="sync-add-row">
       <span class="sync-ts-hint" id="syncTsHint">00:00.00</span>
@@ -420,11 +408,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         </thead>
         <tbody id="syncTbody"></tbody>
       </table>
-    </div>
-
-    <div class="sync-update-row">
-      <button class="btn btn-primary" type="button" onclick="updateTranslationsAndTransliterations()">Update Translation &amp; Transliteration</button>
-      <span id="syncUpdateStatus" style="font-size:12px;color:#555;"></span>
     </div>
 
     <div class="btn-row">
@@ -573,7 +556,7 @@ function buildPlainLyrics(entries) {
 
 function syncListHtml(entries, editing) {
   if (!entries.length) {
-    return '<tr><td colspan="8" class="sync-empty">No lines yet — play the song and add lines, or attach an LRC/SRT file.</td></tr>';
+    return '<tr><td colspan="8" class="sync-empty">No lines yet — use the fields below to add a line.</td></tr>';
   }
   return entries.map((e, i) => {
     if (i === editing) {
@@ -630,12 +613,8 @@ function syncSaveEdit(i) {
 }
 function syncDelete(i) { syncEntries.splice(i, 1); syncEditing = -1; renderSyncEntries(); }
 
-function syncSeekBack() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = Math.max(0, (a.currentTime || 0) - 5); }
-function syncSeekFwd() { const a = document.getElementById('syncAudio'); if (a) a.currentTime = (a.currentTime || 0) + 5; }
-
 function syncAddLine() {
-  const audio = document.getElementById('syncAudio');
-  const time = audio && audio.src ? (audio.currentTime || 0) : 0;
+  const time = 0;
   const te = document.getElementById('syncTe').value;
   const en = document.getElementById('syncEn').value;
   const hi = document.getElementById('syncHi').value;
@@ -658,51 +637,15 @@ async function openSyncLyrics(id) {
   syncTrackId = id;
   document.getElementById('syncTrackTitle').textContent = t.title || '';
   document.getElementById('syncMsg').textContent = '';
-  document.getElementById('syncUpdateStatus').textContent = '';
   syncEntries = mergeSyncLrc(t.synced_lyrics || '', t.synced_lyrics_en || '', t.synced_lyrics_hi || '', t.synced_lyrics_en_tr || '', t.synced_lyrics_hi_tr || '');
-  const audio = document.getElementById('syncAudio');
-  audio.pause();
-  audio.removeAttribute('src');
-  if (t.storage_path) {
-    audio.src = '/stream/' + id + '/file';
-    audio.load();
-    document.getElementById('syncMsg').textContent = '';
-  } else {
-    document.getElementById('syncMsg').textContent = 'No audio file for this track — you can still add lines with manual timestamps.';
-  }
   renderSyncEntries();
   document.getElementById('syncLyricsModal').style.display = 'block';
 }
 
 function closeSyncLyrics() {
-  const audio = document.getElementById('syncAudio');
-  if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); }
   document.getElementById('syncLyricsModal').style.display = 'none';
   syncTrackId = null;
   syncEntries = [];
-}
-
-function handleSyncFile(input) {
-  const file = input.files && input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function () {
-    const text = String(reader.result || '');
-    const isSrt = /-->/.test(text);
-    const parsed = isSrt ? parseSrt(text) : parseLrc(text);
-    if (!parsed.length) {
-      toast('No valid LRC/SRT lines found in file');
-      input.value = '';
-      return;
-    }
-    syncEntries = parsed.map((p) => ({ time: p.time, te: p.text || '', en: '', hi: '', enTr: '', hiTr: '' }));
-    syncEditing = -1;
-    renderSyncEntries();
-    toast('Attached ' + parsed.length + ' synced lines (' + (isSrt ? 'SRT' : 'LRC') + ')');
-    input.value = '';
-  };
-  reader.onerror = function () { toast('Failed to read file'); input.value = ''; };
-  reader.readAsText(file);
 }
 
 async function saveSyncLyrics() {
@@ -785,150 +728,6 @@ async function deleteAllSyncLyrics() {
     unlock();
   }
 }
-
-// Auto-fills English/Hindi TRANSLATIONS and English/Hindi TRANSLITERATIONS
-// for every line that has Telugu text, using only Google's services:
-//  - Google Cloud Translation API (official, key from GOOGLE_TRANSLATE_API_KEY)
-//  - Google Transliteration (Google Translate romanization + Google Input Tools)
-async function updateTranslationsAndTransliterations() {
-  const lines = syncEntries
-    .filter((e) => e.te && e.te.trim())
-    .map((e) => e.te.trim());
-  if (!lines.length) { toast('No Telugu lines yet — add or attach the Telugu lyrics first'); return; }
-  const status = document.getElementById('syncUpdateStatus');
-  if (!status) return;
-  try {
-    status.textContent = 'Translating ' + lines.length + ' lines to English & Hindi…';
-    showLoading(true);
-    let tr = { en: [], hi: [] };
-    let translationError = null;
-    try {
-      const trRes = await authedFetch('/api/admin/google/translate', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines: lines }),
-      });
-      if (!trRes.ok) { const e = await trRes.json().catch(() => ({})); throw new Error(e.error || 'Translation failed'); }
-      tr = await trRes.json();
-    } catch (e) {
-      // Translation is best-effort: a missing/invalid Google key must not
-      // block transliteration or saving. Surface the reason but continue.
-      translationError = e.message || 'Translation failed';
-    }
-
-    // Transliteration runs directly from this browser (Google's endpoints
-    // allow CORS and work from normal/residential connections), so the
-    // Render datacenter IP — which Google blocks on these consumer
-    // endpoints — is never involved. Falls back to the server proxy if
-    // every line fails here.
-    let tl = { en: [], hi: [] };
-    let browserFailedAll = true;
-    try {
-      const en = [];
-      const hi = [];
-      for (let i = 0; i < lines.length; i++) {
-        status.textContent = 'Transliterating line ' + (i + 1) + '/' + lines.length + '…';
-        const { roman } = await googleTransliterateLine(lines[i]);
-        en.push(roman);
-        // Hindi transliteration is a deterministic script conversion — always exact.
-        hi.push(teluguToDevanagari(lines[i]));
-      }
-      tl = { en: en, hi: hi };
-      browserFailedAll = !en.some(Boolean);
-    } catch (_) {
-      browserFailedAll = true;
-    }
-    if (browserFailedAll) {
-      status.textContent = 'Browser transliteration unavailable — trying server…';
-      const tlRes = await authedFetch('/api/admin/google/transliterate', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines: lines }),
-      });
-      if (!tlRes.ok) { const e = await tlRes.json().catch(() => ({})); throw new Error(e.error || 'Transliteration failed'); }
-      tl = await tlRes.json();
-    }
-
-    let idx = 0;
-    for (const e of syncEntries) {
-      if (!e.te || !e.te.trim()) continue;
-      e.en = tr.en[idx] !== undefined ? tr.en[idx] : e.en;
-      e.hi = tr.hi[idx] !== undefined ? tr.hi[idx] : e.hi;
-      e.enTr = tl.en[idx] !== undefined ? tl.en[idx] : e.enTr;
-      e.hiTr = tl.hi[idx] !== undefined ? tl.hi[idx] : e.hiTr;
-      idx++;
-    }
-    renderSyncEntries();
-    if (translationError) {
-      status.textContent = 'Note: ' + translationError + ' — transliteration updated; English/Hindi left as-is.';
-      toast('Note: ' + translationError + ' (transliteration still updated)');
-    } else {
-      status.textContent = '';
-      toast('Translation & Transliteration updated for ' + lines.length + ' lines');
-    }
-  } catch (e) {
-    status.textContent = '';
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
-  } finally {
-    showLoading(false);
-  }
-}
-
-// Google Transliteration for the English column: Telugu -> Latin, called
-// straight from the browser (CORS allowed) using Google Translate's
-// romanization endpoint (dt=rm, tl=te, pure phonetic).
-async function googleTransliterateLine(line) {
-  const r = await fetch(
-    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=te&tl=te&dt=rm&q=' +
-      encodeURIComponent(line),
-  );
-  if (!r.ok) return { roman: '', devanagari: '' };
-  const data = await r.json();
-  const c0 = data?.[0]?.[0];
-  let roman = '';
-  if (Array.isArray(c0) && typeof c0[3] === 'string' && c0[3]) roman = c0[3];
-  else if (Array.isArray(c0) && typeof c0[2] === 'string' && c0[2]) roman = c0[2];
-  else if (Array.isArray(data[1]) && typeof data[1][3] === 'string') roman = data[1][3];
-  return { roman: roman, devanagari: '' };
-}
-
-// Deterministic Telugu -> Devanagari conversion. Telugu and Devanagari share
-// the same Brahmic phoneme set, so every character maps 1:1 and the result is
-// always phonetically exact (never fuzzy like Input Tools). The virama (్)
-// becomes the halant (्), keeping conjuncts exact (క్ష -> क्ष, శ్రీ -> श्री).
-const TE2DE = {
-  '\u0C05':'\u0905','\u0C06':'\u0906','\u0C07':'\u0907','\u0C08':'\u0908','\u0C09':'\u0909','\u0C0A':'\u090A','\u0C0B':'\u090B','\u0C0C':'\u090C',
-  '\u0C0E':'\u090F','\u0C0F':'\u090F','\u0C10':'\u0910','\u0C12':'\u0913','\u0C13':'\u0913','\u0C14':'\u0914',
-  '\u0C15':'\u0915','\u0C16':'\u0916','\u0C17':'\u0917','\u0C18':'\u0918','\u0C19':'\u0919','\u0C1A':'\u091A','\u0C1B':'\u091B',
-  '\u0C1C':'\u091C','\u0C1D':'\u091D','\u0C1E':'\u091E','\u0C1F':'\u091F','\u0C20':'\u0920','\u0C21':'\u0921','\u0C22':'\u0922',
-  '\u0C23':'\u0923','\u0C24':'\u0924','\u0C25':'\u0925','\u0C26':'\u0926','\u0C27':'\u0927','\u0C28':'\u0928','\u0C2A':'\u092A',
-  '\u0C2B':'\u092B','\u0C2C':'\u092C','\u0C2D':'\u092D','\u0C2E':'\u092E','\u0C2F':'\u092F','\u0C30':'\u0930','\u0C32':'\u0932',
-  '\u0C33':'\u0933','\u0C35':'\u0935','\u0C36':'\u0936','\u0C37':'\u0937','\u0C38':'\u0938','\u0C39':'\u0939',
-  '\u0C3E':'\u093E','\u0C3F':'\u093F','\u0C40':'\u0940','\u0C41':'\u0941','\u0C42':'\u0942','\u0C43':'\u0943','\u0C44':'\u0944',
-  '\u0C46':'\u0947','\u0C47':'\u0947','\u0C48':'\u0948','\u0C4A':'\u094B','\u0C4B':'\u094B','\u0C4C':'\u094C',
-  '\u0C02':'\u0902','\u0C03':'\u0903','\u0C4D':'\u094D',
-  '\u0C66':'\u0966','\u0C67':'\u0967','\u0C68':'\u0968','\u0C69':'\u0969','\u0C6A':'\u096A','\u0C6B':'\u096B','\u0C6C':'\u096C','\u0C6D':'\u096D','\u0C6E':'\u096E','\u0C6F':'\u096F',
-};
-function teluguToDevanagari(text) {
-  return [...text].map(c => TE2DE[c] || c).join('');
-}
-
-(function attachSyncAudioListener() {
-  const audio = document.getElementById('syncAudio');
-  if (!audio) return;
-  audio.addEventListener('timeupdate', function () {
-    const tt = formatLrcTime(this.currentTime);
-    const lt = document.getElementById('syncLiveTime'); if (lt) lt.textContent = tt;
-    const th = document.getElementById('syncTsHint'); if (th) th.textContent = tt;
-  });
-  audio.addEventListener('error', function () {
-    if (!this.src) return;
-    const msg = document.getElementById('syncMsg');
-    if (msg) msg.textContent = 'Audio could not be loaded for playback.';
-  });
-})();
 
 function openConfirm(title, message, action, confirmLabel) {
   document.getElementById('confirmTitle').textContent = title;
