@@ -800,14 +800,22 @@ async function updateTranslationsAndTransliterations() {
   try {
     status.textContent = 'Translating ' + lines.length + ' lines to English & Hindi…';
     showLoading(true);
-    const trRes = await authedFetch('/api/admin/google/translate', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lines: lines }),
-    });
-    if (!trRes.ok) { const e = await trRes.json().catch(() => ({})); throw new Error(e.error || 'Translation failed'); }
-    const tr = await trRes.json();
+    let tr = { en: [], hi: [] };
+    let translationError = null;
+    try {
+      const trRes = await authedFetch('/api/admin/google/translate', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lines: lines }),
+      });
+      if (!trRes.ok) { const e = await trRes.json().catch(() => ({})); throw new Error(e.error || 'Translation failed'); }
+      tr = await trRes.json();
+    } catch (e) {
+      // Translation is best-effort: a missing/invalid Google key must not
+      // block transliteration or saving. Surface the reason but continue.
+      translationError = e.message || 'Translation failed';
+    }
 
     // Transliteration runs directly from this browser (Google's endpoints
     // allow CORS and work from normal/residential connections), so the
@@ -853,8 +861,13 @@ async function updateTranslationsAndTransliterations() {
       idx++;
     }
     renderSyncEntries();
-    status.textContent = '';
-    toast('Translation & Transliteration updated for ' + lines.length + ' lines');
+    if (translationError) {
+      status.textContent = 'Note: ' + translationError + ' — transliteration updated; English/Hindi left as-is.';
+      toast('Note: ' + translationError + ' (transliteration still updated)');
+    } else {
+      status.textContent = '';
+      toast('Translation & Transliteration updated for ' + lines.length + ' lines');
+    }
   } catch (e) {
     status.textContent = '';
     if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
