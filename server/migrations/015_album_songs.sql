@@ -29,7 +29,9 @@ create table if not exists public.album_songs (
 alter table public.album_songs enable row level security;
 
 -- Publicly readable (same as `albums` and `tracks`): the on-device local
--- server reads it through the anon key. Writes stay admin-only.
+-- server reads it through the anon key. Writes stay admin-only. Idempotent:
+-- drop-then-create makes re-running the migration safe.
+drop policy if exists "album_songs are publicly readable" on public.album_songs;
 create policy "album_songs are publicly readable"
   on public.album_songs
   for select
