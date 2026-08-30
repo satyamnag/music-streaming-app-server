@@ -153,8 +153,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-albums" title="Albums" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Albums</span></button>
     <div class="sidebar-divider"></div>
-    <button class="sidebar-item" id="nav-arrangeSongs" title="Arrange Songs" onclick="showView('arrangeSongs')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="label">Arrange Songs</span></button>
-    <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="label">Arrange Albums</span></button>
+    <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
   </nav>
@@ -228,34 +227,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   </div>
 </div>
 
-<div id="arrangeSongsPanel" class="view">
-  <h2 style="margin-bottom:12px;">Arrange Songs</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:12px;">
-    Feature songs to control which tracks are shown first on the home screen.
-    Featured songs appear ahead of everything else, in the order you arrange
-    them here. Only the featured subset is stored, so this stays fast even
-    with 10000+ songs. Changes save immediately.
-  </p>
-  <div class="search-row">
-    <input id="arrangeTrackSearch" type="text" placeholder="Search by title, artist, album or tag..." oninput="renderArrangeTracks()">
-  </div>
-  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
-    <h3 style="margin-bottom:8px;">Featured songs <span id="featuredTracksCount" style="font-size:12px;color:#888;"></span></h3>
-    <div id="featuredTracksList"></div>
-  </div>
-  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
-    <h3 style="margin-bottom:8px;">Add to featured <span style="font-size:12px;color:#888;">(search above, then pin)</span></h3>
-    <div id="arrangeTrackResults"><span class="empty-state" style="color:#999;">Type to search songs…</span></div>
-  </div>
-</div>
-
 <div id="arrangeAlbumsPanel" class="view">
   <h2 style="margin-bottom:12px;">Arrange Albums</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:12px;">
-    Feature albums to control which albums are shown first on the home screen.
-    Featured albums appear ahead of everything else, in the order you arrange
-    them here. Changes save immediately.
-  </p>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
     <h3 style="margin-bottom:8px;">Featured albums <span id="featuredAlbumsCount" style="font-size:12px;color:#888;"></span></h3>
     <div id="featuredAlbumsList"></div>
@@ -460,7 +433,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
       <input id="alCover" type="hidden" placeholder="https://... or upload">
       <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload Cover</button>
     </div>
-    <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
+    <input type="file" id="alCoverInput" accept=".webp,image/webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
     <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
     <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
     <div class="btn-row">
@@ -944,7 +917,6 @@ function showView(view) {
   if (navBtn) navBtn.classList.add('active');
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
-  else if (view === 'arrangeSongs') { loadArrangeTracks(); }
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
@@ -952,7 +924,6 @@ function showView(view) {
 function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
-  else if (currentView === 'arrangeSongs') { loadArrangeTracks(); }
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
@@ -1152,6 +1123,17 @@ async function deleteAlbum(id) {
 async function handleAlbumCoverUpload(input) {
   const file = input.files[0];
   if (!file) return;
+  // Strict: album covers must be WebP and exactly 1024x1024.
+  if (!file.type || file.type !== 'image/webp') { toast('Album cover must be a WebP image'); input.value = ''; return; }
+  const dims = await new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { resolve({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+    img.onerror = () => { resolve(null); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+  if (!dims) { toast('Could not read the album cover'); input.value = ''; return; }
+  if (dims.w !== 1024 || dims.h !== 1024) { toast('Album cover must be exactly 1024x1024'); input.value = ''; return; }
   const form = new FormData(); form.append('file', file);
   try {
     const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
@@ -1401,6 +1383,11 @@ async function saveTrack() {
   // tab) saves both the track fields and the lyrics in one request.
   const lyrCol = lyricsColumn();
   const lyrText = (document.getElementById('lyricsText').value || '').trim();
+  // Sync lyric textboxes must contain 100% valid SRT; reject otherwise.
+  if (lyrCol.indexOf('synced_lyrics') === 0 && lyrText !== '' && !isValidSrt(lyrText)) {
+    toast('Sync lyrics must be valid SRT format');
+    return;
+  }
   body[lyrCol] = lyrText !== '' ? lyrText : null;
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
@@ -1424,6 +1411,20 @@ async function deleteTrack(id) {
     loadTracks();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
+}
+
+// Validates that [text] is 100% valid SRT (each block: optional index line,
+// then an HH:MM:SS,xxx --> HH:MM:SS,xxx cue line, then text lines).
+function isValidSrt(text) {
+  const blocks = String(text || '').replace(/\r/g, '').trim().split(/\n\s*\n/).filter((b) => b.trim());
+  if (!blocks.length) return true;
+  const cue = /^\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}\s*-->\s*\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}/;
+  return blocks.every((block) => {
+    const lines = block.split('\n').filter((l) => l.trim());
+    if (lines.length < 2) return false;
+    if (/^\d+$/.test(lines[0].trim())) lines.shift();
+    return cue.test(lines[0]) && lines.length >= 2;
+  });
 }
 
 // Plays / pauses a just-uploaded original/karaoke .opus via the admin-only
