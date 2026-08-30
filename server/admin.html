@@ -311,16 +311,15 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
    <div class="modal-panes">
      <div id="trackPane" class="edit-pane active">
  <label>Title *</label><input id="fTitle" placeholder="Track title">
-<label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
-<label>Albums (a song can belong to multiple albums)</label>
-<div id="albumCheckboxes" class="album-checkboxes" style="max-height:140px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;"></div>
-<label>Duration (seconds)</label><input id="fDuration" type="number" placeholder="e.g. 240">
-<label>Status</label>
-<select id="fStatus">
-  <option value="free">Free</option>
-  <option value="paid">Paid (Premium)</option>
-</select>
-<label>Language</label>
+ <label>Albums (a song can belong to multiple albums)</label>
+ <div id="albumCheckboxes" class="album-checkboxes" style="max-height:140px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;"></div>
+ <label>Duration (seconds) *</label><input id="fDuration" type="number" placeholder="e.g. 240">
+ <label>Status</label>
+ <select id="fStatus">
+   <option value="free">Free</option>
+   <option value="paid">Paid (Premium)</option>
+ </select>
+ <label>Language *</label>
 <select id="fLanguage">
   <option value="">-- Select language --</option>
   <option value="Hindi">Hindi</option>
@@ -354,9 +353,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </select>
 <label>Tags (comma separated)</label>
 <input id="fTags" placeholder="e.g. bhajan, devotional, morning">
-<label>Thumbnail (300×300 recommended, 1:1 square)</label>
+<label>Thumbnail (1024×1024 pixels recommended)</label>
 <div class="upload-row">
-  <input id="fThumbnail" placeholder="URL or upload an image">
+  <input id="fThumbnail" type="hidden" placeholder="URL or upload an image">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('thumbInput').click()">Upload</button>
 </div>
 <input type="file" id="thumbInput" accept=".webp,image/webp" style="display:none" onchange="handleThumbUpload(this)">
@@ -365,17 +364,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024×1024.</div>
 <label>Audio File (.opus) *</label>
 <div class="upload-row">
-  <input id="fStorage" placeholder="e.g. song.opus">
+  <input id="fStorage" type="hidden" placeholder="e.g. song.opus">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('audioInput').click()">Upload</button>
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
-<label>Karaoke File (.opus/.mp3/.m4a, optional)</label>
+<label>Karaoke File (.opus, optional)</label>
 <div class="upload-row">
-  <input id="fKaraoke" placeholder="e.g. song-karaoke.opus (optional)">
+  <input id="fKaraoke" type="hidden" placeholder="e.g. song-karaoke.opus (optional)">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('karaokeInput').click()">Upload</button>
 </div>
-<input type="file" id="karaokeInput" accept=".opus,.mp3,.m4a,.m4b" style="display:none" onchange="handleKaraokeUpload(this)">
+<input type="file" id="karaokeInput" accept=".opus" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
    <div class="btn-row">
      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -1275,7 +1274,7 @@ function pl(v) { return v || 0; }
 function showAdd() {
   document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
-  ['fTitle','fArtist','fDuration','fThumbnail','fStorage','fKaraoke'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fDuration','fThumbnail','fStorage','fKaraoke'].forEach(id => document.getElementById(id).value = '');
   setAlbumCheckboxes([]);
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
@@ -1296,7 +1295,6 @@ function showEdit(id) {
   document.getElementById('modalTitle').textContent = 'Edit Track';
   document.getElementById('editId').value = id;
   document.getElementById('fTitle').value = t.title || '';
-  document.getElementById('fArtist').value = (t.artist_names || []).join(', ');
   setAlbumCheckboxes(t.album_ids || (t.album_id ? [t.album_id] : []));
   document.getElementById('fDuration').value = t.duration || '';
   document.getElementById('fThumbnail').value = t.thumbnail || '';
@@ -1321,7 +1319,6 @@ function closeModal() { document.getElementById('modal').style.display = 'none';
 async function saveTrack() {
   const id = document.getElementById('editId').value;
   const title = document.getElementById('fTitle').value.trim();
-  const artistStr = document.getElementById('fArtist').value.trim();
   const albumIds = readAlbumCheckboxes();
   const album_id = albumIds[0] || null;
   const albumName = album_id ? (albums.find(a => a.id === album_id)?.name || '') : '';
@@ -1331,15 +1328,18 @@ async function saveTrack() {
   const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
   const storage_path = document.getElementById('fStorage').value.trim();
   const karaoke_storage_path = document.getElementById('fKaraoke').value.trim() || null;
-  if (!title) { toast('Title is required'); return; }
-  if (!storage_path) { toast('Audio file path is required'); return; }
-  if (!lock()) return;
-  const artist_names = artistStr ? artistStr.split(',').map(s => s.trim()) : ['Unknown Artist'];
-  const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
   const language = document.getElementById('fLanguage').value || null;
+  // Mandatory fields: Title, original audio, Duration, Language (Status
+  // defaults to free).
+  if (!title) { toast('Title is required'); return; }
+  if (!storage_path) { toast('Audio file (.opus) is required'); return; }
+  if (!(duration > 0)) { toast('Duration (seconds) is required'); return; }
+  if (!language) { toast('Language is required'); return; }
+  if (!lock()) return;
+  const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
   const tagsRaw = document.getElementById('fTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
-  const body = { title, artist_names, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, status, language, tags };
+  const body = { title, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, status, language, tags };
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
@@ -1374,7 +1374,7 @@ async function handleAudioUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fStorage').value = data.storage_path;
-    document.getElementById('audioStatus').textContent = 'Uploaded: ' + data.storage_path;
+    document.getElementById('audioStatus').textContent = 'Uploaded ✓';
   } catch (e) { document.getElementById('audioStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
@@ -1389,7 +1389,7 @@ async function handleKaraokeUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fKaraoke').value = data.storage_path;
-    document.getElementById('karaokeStatus').textContent = 'Uploaded: ' + data.storage_path;
+    document.getElementById('karaokeStatus').textContent = 'Uploaded ✓';
   } catch (e) { document.getElementById('karaokeStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
