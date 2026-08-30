@@ -49,6 +49,17 @@ tr:hover { background: #f0f7ff; }
 .modal-content input, .modal-content textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
 .modal-content textarea { resize: vertical; }
 .modal-content .btn-row { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
+#trackModalContent { max-width: 1080px; }
+.modal-inner { display: flex; gap: 16px; }
+.modal-sidebar { width: 56px; flex-shrink: 0; background: #f7f7f7; border: 1px solid #eee; border-radius: 8px; padding: 8px 0; align-self: flex-start; }
+.modal-sidebar .edit-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 12px 0; border: none; background: transparent; color: #444; cursor: pointer; font-size: 11px; }
+.modal-sidebar .edit-tab .icon { width: 20px; height: 20px; }
+.modal-sidebar .edit-tab .icon svg { width: 20px; height: 20px; }
+.modal-sidebar .edit-tab:hover { background: #eef4ff; }
+.modal-sidebar .edit-tab.active { background: #3b82f6; color: #fff; }
+.modal-panes { flex: 1; min-width: 0; }
+.edit-pane { display: none; }
+.edit-pane.active { display: block; }
 
 /* Add Sync Lyrics modal */
 .sync-player { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
@@ -74,7 +85,7 @@ tr:hover { background: #f0f7ff; }
 .sync-no { background: #fee2e2; color: #b91c1c; }
 .track-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; background: #eee; cursor: zoom-in; transition: transform .18s ease; }
 .thumb-cell { display: flex; align-items: center; gap: 8px; position: relative; }
-.thumb-cell:hover .track-thumb { transform: scale(4); z-index: 9999; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.thumb-cell:hover .track-thumb { transform: scale(4); transform-origin: left center; z-index: 9999; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
 .upload-row { display: flex; gap: 8px; align-items: center; }
 .upload-row input { flex: 1; }
 .preview-img { max-width: 120px; max-height: 120px; border-radius: 4px; margin-top: 4px; border: 1px solid #ddd; }
@@ -289,10 +300,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
-<div class="modal-content">
-<h2 id="modalTitle">Add Track</h2>
-<input type="hidden" id="editId">
-<label>Title *</label><input id="fTitle" placeholder="Track title">
+ <div class="modal-content" id="trackModalContent">
+ <h2 id="modalTitle">Add Track</h2>
+ <input type="hidden" id="editId">
+ <div class="modal-inner">
+   <div class="modal-sidebar">
+     <button class="edit-tab active" id="tab-track" onclick="editTab('track')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span>Track</span></button>
+     <button class="edit-tab" id="tab-lyrics" onclick="editTab('lyrics')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span>Lyrics</span></button>
+   </div>
+   <div class="modal-panes">
+     <div id="trackPane" class="edit-pane active">
+ <label>Title *</label><input id="fTitle" placeholder="Track title">
 <label>Artist Name(s)</label><input id="fArtist" placeholder="Artist Name">
 <label>Albums (a song can belong to multiple albums)</label>
 <div id="albumCheckboxes" class="album-checkboxes" style="max-height:140px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;"></div>
@@ -359,12 +377,39 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="karaokeInput" accept=".opus,.mp3,.m4a,.m4b" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-    <button class="btn btn-primary" type="button" onclick="syncLyricsForEdit()">Sync Lyrics</button>
-    <button class="btn btn-success" onclick="saveTrack()">Save</button>
-  </div>
-</div></div>
+   <div class="btn-row">
+     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-success" onclick="saveTrack()">Save</button>
+   </div>
+     </div>
+     <div id="lyricsPane" class="edit-pane">
+       <div class="sync-header"><h2>Sync Lyrics — <span id="syncTrackTitle"></span></h2></div>
+       <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+       <div style="font-size:12px;color:#666;margin-bottom:6px;">Lines: <b id="syncCount">0</b></div>
+       <div class="sync-add-row">
+         <input id="syncNewTime" class="sync-ts-hint" placeholder="00:00.00" title="Line timestamp — MM:SS.cc (optional; defaults to 0)">
+         <input id="syncTe" class="sync-lang" placeholder="Telugu (main language)">
+         <input id="syncEn" class="sync-lang" placeholder="English (Translation)">
+         <input id="syncHi" class="sync-lang" placeholder="Hindi (Translation)">
+         <input id="syncEnTr" class="sync-lang" placeholder="English (Transliteration)">
+         <input id="syncHiTr" class="sync-lang" placeholder="Hindi (Transliteration)">
+         <button class="btn btn-success btn-sm" type="button" onclick="syncAddLine()">Add Line</button>
+       </div>
+       <div class="sync-hint">Enter the timestamp (optional), fill at least one language, then <b>Add Line</b> or press Enter.</div>
+       <div class="sync-list-wrap">
+         <table class="sync-table">
+           <thead><tr><th>#</th><th>Time</th><th>Telugu</th><th>English (Translation)</th><th>Hindi (Translation)</th><th>English (Transliteration)</th><th>Hindi (Transliteration)</th><th></th></tr></thead>
+           <tbody id="syncTbody"></tbody>
+         </table>
+       </div>
+       <div class="btn-row">
+         <button class="btn btn-danger" type="button" onclick="confirmDeleteAllSyncLyrics()">Delete All</button>
+         <button class="btn btn-success" type="button" onclick="saveSyncLyrics()">Save Lyrics</button>
+       </div>
+     </div>
+   </div>
+ </div>
+ </div></div>
 
 <div id="qrModal" class="modal" onclick="if(event.target===this)closeQrModal()">
   <div class="modal-content" style="max-width:420px;text-align:center;">
@@ -391,43 +436,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirmOkBtn" onclick="confirmAction()">Delete</button>
-    </div>
-  </div>
-</div>
-
- <div id="syncLyricsModal" class="modal">
-   <div class="modal-content" style="max-width: 780px;">
-      <div class="sync-header">
-        <h2>Add Sync Lyrics — <span id="syncTrackTitle"></span></h2>
-      </div>
-      <p id="syncMsg" style="color:#555;font-size:13px;"></p>
-      <div style="font-size:12px;color:#666;margin-bottom:6px;">Lines: <b id="syncCount">0</b></div>
-
-
-    <div class="sync-add-row">
-      <input id="syncNewTime" class="sync-ts-hint" placeholder="00:00.00" title="Line timestamp — MM:SS.cc (optional; defaults to 0)">
-      <input id="syncTe" class="sync-lang" placeholder="Telugu (main language)">
-      <input id="syncEn" class="sync-lang" placeholder="English (Translation)">
-      <input id="syncHi" class="sync-lang" placeholder="Hindi (Translation)">
-      <input id="syncEnTr" class="sync-lang" placeholder="English (Transliteration)">
-      <input id="syncHiTr" class="sync-lang" placeholder="Hindi (Transliteration)">
-      <button class="btn btn-success btn-sm" type="button" onclick="syncAddLine()">Add Line</button>
-    </div>
-    <div class="sync-hint">Enter the timestamp (optional), fill at least one language, then <b>Add Line</b> or press Enter.</div>
-
-    <div class="sync-list-wrap">
-      <table class="sync-table">
-        <thead>
-          <tr><th>#</th><th>Time</th><th>Telugu</th><th>English (Translation)</th><th>Hindi (Translation)</th><th>English (Transliteration)</th><th>Hindi (Transliteration)</th><th></th></tr>
-        </thead>
-        <tbody id="syncTbody"></tbody>
-      </table>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-danger" type="button" onclick="confirmDeleteAllSyncLyrics()">Delete All Synced Lyrics</button>
-      <button class="btn btn-secondary" type="button" onclick="closeSyncLyrics()">Cancel</button>
-      <button class="btn btn-success" type="button" onclick="saveSyncLyrics()">Save</button>
     </div>
   </div>
 </div>
@@ -664,21 +672,32 @@ function syncAddLine() {
   });
 })();
 
-async function openSyncLyrics(id) {
+// Loads a track's lyrics into the in-modal Lyrics editor.
+function loadSyncLyricsInto(id) {
   const t = tracks.find((x) => x.id === id);
-  if (!t) return;
-  syncTrackId = id;
-  document.getElementById('syncTrackTitle').textContent = t.title || '';
-  document.getElementById('syncMsg').textContent = '';
-  syncEntries = mergeSyncLrc(t.synced_lyrics || '', t.synced_lyrics_en || '', t.synced_lyrics_hi || '', t.synced_lyrics_en_tr || '', t.synced_lyrics_hi_tr || '');
+  syncTrackId = id || null;
+  const titleEl = document.getElementById('syncTrackTitle');
+  if (titleEl) titleEl.textContent = t ? (t.title || '') : '';
+  const msg = document.getElementById('syncMsg'); if (msg) msg.textContent = '';
+  syncEntries = t
+    ? mergeSyncLrc(t.synced_lyrics || '', t.synced_lyrics_en || '', t.synced_lyrics_hi || '', t.synced_lyrics_en_tr || '', t.synced_lyrics_hi_tr || '')
+    : [];
   renderSyncEntries();
-  document.getElementById('syncLyricsModal').style.display = 'block';
 }
 
 function closeSyncLyrics() {
-  document.getElementById('syncLyricsModal').style.display = 'none';
   syncTrackId = null;
   syncEntries = [];
+}
+
+// Switches between the "Track" and "Lyrics" panes of the edit modal.
+function editTab(name) {
+  document.querySelectorAll('.edit-pane').forEach(function (p) { p.classList.remove('active'); });
+  var pane = document.getElementById(name === 'track' ? 'trackPane' : 'lyricsPane');
+  if (pane) pane.classList.add('active');
+  document.querySelectorAll('.modal-sidebar .edit-tab').forEach(function (b) { b.classList.remove('active'); });
+  var tab = document.getElementById(name === 'track' ? 'tab-track' : 'tab-lyrics');
+  if (tab) tab.classList.add('active');
 }
 
 async function saveSyncLyrics() {
@@ -714,6 +733,7 @@ async function saveSyncLyrics() {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
     toast('Synced lyrics saved');
     closeSyncLyrics();
+    closeModal();
     loadTracks();
   } catch (e) {
     if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
@@ -755,6 +775,7 @@ async function deleteAllSyncLyrics() {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Delete failed'); }
     toast('All synced lyrics deleted');
     closeSyncLyrics();
+    renderSyncEntries();
     loadTracks();
   } catch (e) {
     if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
@@ -1263,6 +1284,8 @@ function showAdd() {
   document.getElementById('karaokeStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
   document.getElementById('modal').style.display = 'block';
+  loadSyncLyricsInto(null);
+  editTab('track');
   // Ensure the album dropdown is populated with admin-created albums.
   if (albums.length === 0) loadAlbums();
 }
@@ -1287,19 +1310,13 @@ function showEdit(id) {
   document.getElementById('karaokeStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
+  loadSyncLyricsInto(id);
+  editTab('track');
   // Ensure the album checkboxes are populated before checking the track's.
   if (albums.length === 0) loadAlbums().then(() => setAlbumCheckboxes(t.album_ids || (t.album_id ? [t.album_id] : [])));
 }
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-// Opens the sync-lyrics editor for the track currently open in the edit modal.
-function syncLyricsForEdit() {
-  const id = document.getElementById('editId').value;
-  if (!id) return;
-  closeModal();
-  openSyncLyrics(id);
-}
 
 async function saveTrack() {
   const id = document.getElementById('editId').value;
