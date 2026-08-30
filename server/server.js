@@ -1134,7 +1134,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -1163,6 +1163,11 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       synced_lyrics_hi: typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null,
       synced_lyrics_en_tr: typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null,
       synced_lyrics_hi_tr: typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null,
+      plain_lyrics: typeof plain_lyrics === 'string' && plain_lyrics.trim() ? plain_lyrics : null,
+      plain_lyrics_en: typeof plain_lyrics_en === 'string' && plain_lyrics_en.trim() ? plain_lyrics_en : null,
+      plain_lyrics_hi: typeof plain_lyrics_hi === 'string' && plain_lyrics_hi.trim() ? plain_lyrics_hi : null,
+      plain_lyrics_en_tr: typeof plain_lyrics_en_tr === 'string' && plain_lyrics_en_tr.trim() ? plain_lyrics_en_tr : null,
+      plain_lyrics_hi_tr: typeof plain_lyrics_hi_tr === 'string' && plain_lyrics_hi_tr.trim() ? plain_lyrics_hi_tr : null,
       language: typeof language === 'string' && language.trim() ? language.trim() : null,
       tags: cleanTags(tags),
       featured_order: cleanFeatured,
@@ -1181,7 +1186,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     const albumIds = album_ids !== undefined ? albumIdsFrom({ album_ids }) : null
     const updates = {}
     if (title !== undefined) {
@@ -1216,6 +1221,11 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (synced_lyrics_hi !== undefined) updates.synced_lyrics_hi = typeof synced_lyrics_hi === 'string' && synced_lyrics_hi.trim() ? synced_lyrics_hi : null
     if (synced_lyrics_en_tr !== undefined) updates.synced_lyrics_en_tr = typeof synced_lyrics_en_tr === 'string' && synced_lyrics_en_tr.trim() ? synced_lyrics_en_tr : null
     if (synced_lyrics_hi_tr !== undefined) updates.synced_lyrics_hi_tr = typeof synced_lyrics_hi_tr === 'string' && synced_lyrics_hi_tr.trim() ? synced_lyrics_hi_tr : null
+    if (plain_lyrics !== undefined) updates.plain_lyrics = typeof plain_lyrics === 'string' && plain_lyrics.trim() ? plain_lyrics : null
+    if (plain_lyrics_en !== undefined) updates.plain_lyrics_en = typeof plain_lyrics_en === 'string' && plain_lyrics_en.trim() ? plain_lyrics_en : null
+    if (plain_lyrics_hi !== undefined) updates.plain_lyrics_hi = typeof plain_lyrics_hi === 'string' && plain_lyrics_hi.trim() ? plain_lyrics_hi : null
+    if (plain_lyrics_en_tr !== undefined) updates.plain_lyrics_en_tr = typeof plain_lyrics_en_tr === 'string' && plain_lyrics_en_tr.trim() ? plain_lyrics_en_tr : null
+    if (plain_lyrics_hi_tr !== undefined) updates.plain_lyrics_hi_tr = typeof plain_lyrics_hi_tr === 'string' && plain_lyrics_hi_tr.trim() ? plain_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (tags !== undefined) updates.tags = cleanTags(tags)
     if (featured_order !== undefined) {

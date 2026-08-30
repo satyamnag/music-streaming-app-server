@@ -60,6 +60,12 @@ tr:hover { background: #f0f7ff; }
 .modal-panes { flex: 1; min-width: 0; }
 .edit-pane { display: none; }
 .edit-pane.active { display: block; }
+.lyrics-nested { display: flex; gap: 12px; }
+.lyrics-sidebar { width: 150px; flex-shrink: 0; background: #f7f7f7; border: 1px solid #eee; border-radius: 8px; padding: 6px; align-self: flex-start; }
+.lyrics-l1, .lyrics-l2 { display: block; width: 100%; text-align: left; padding: 9px 10px; margin-bottom: 3px; border: none; border-radius: 6px; background: transparent; color: #333; cursor: pointer; font-size: 13px; }
+.lyrics-l1:hover, .lyrics-l2:hover { background: #eef4ff; }
+.lyrics-l1.active, .lyrics-l2.active { background: #3b82f6; color: #fff; font-weight: 600; }
+.lyrics-editor { flex: 1; min-width: 0; }
 
 /* Add Sync Lyrics modal */
 .sync-player { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
@@ -384,31 +390,30 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
      <button class="btn btn-success" onclick="saveTrack()">Save</button>
    </div>
      </div>
-     <div id="lyricsPane" class="edit-pane">
-       <div class="sync-header"><h2>Sync Lyrics — <span id="syncTrackTitle"></span></h2></div>
-       <p id="syncMsg" style="color:#555;font-size:13px;"></p>
-       <div style="font-size:12px;color:#666;margin-bottom:6px;">Lines: <b id="syncCount">0</b></div>
-       <div class="sync-add-row">
-         <input id="syncNewTime" class="sync-ts-hint" placeholder="00:00.00" title="Line timestamp — MM:SS.cc (optional; defaults to 0)">
-         <input id="syncTe" class="sync-lang" placeholder="Telugu (main language)">
-         <input id="syncEn" class="sync-lang" placeholder="English (Translation)">
-         <input id="syncHi" class="sync-lang" placeholder="Hindi (Translation)">
-         <input id="syncEnTr" class="sync-lang" placeholder="English (Transliteration)">
-         <input id="syncHiTr" class="sync-lang" placeholder="Hindi (Transliteration)">
-         <button class="btn btn-success btn-sm" type="button" onclick="syncAddLine()">Add Line</button>
-       </div>
-       <div class="sync-hint">Enter the timestamp (optional), fill at least one language, then <b>Add Line</b> or press Enter.</div>
-       <div class="sync-list-wrap">
-         <table class="sync-table">
-           <thead><tr><th>#</th><th>Time</th><th>Telugu</th><th>English (Translation)</th><th>Hindi (Translation)</th><th>English (Transliteration)</th><th>Hindi (Transliteration)</th><th></th></tr></thead>
-           <tbody id="syncTbody"></tbody>
-         </table>
-       </div>
-       <div class="btn-row">
-         <button class="btn btn-danger" type="button" onclick="confirmDeleteAllSyncLyrics()">Delete All</button>
-         <button class="btn btn-success" type="button" onclick="saveSyncLyrics()">Save Lyrics</button>
-       </div>
-     </div>
+      <div id="lyricsPane" class="edit-pane">
+        <div class="sync-header"><h2>Lyrics — <span id="syncTrackTitle"></span></h2></div>
+        <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+        <div class="lyrics-nested">
+          <div class="lyrics-sidebar">
+            <button type="button" class="lyrics-l1 active" id="lvl-plain" onclick="lyricsSetLevel('plain')">Plain</button>
+            <button type="button" class="lyrics-l1" id="lvl-sync" onclick="lyricsSetLevel('sync')">Sync</button>
+          </div>
+          <div class="lyrics-sidebar">
+            <button type="button" class="lyrics-l2 active" id="lang-te" onclick="lyricsSetLang('te')">Telugu</button>
+            <button type="button" class="lyrics-l2" id="lang-en" onclick="lyricsSetLang('en')">English (Translation)</button>
+            <button type="button" class="lyrics-l2" id="lang-hi" onclick="lyricsSetLang('hi')">Hindi (Translation)</button>
+            <button type="button" class="lyrics-l2" id="lang-enTr" onclick="lyricsSetLang('enTr')">English (Transliteration)</button>
+            <button type="button" class="lyrics-l2" id="lang-hiTr" onclick="lyricsSetLang('hiTr')">Hindi (Transliteration)</button>
+          </div>
+          <div class="lyrics-editor">
+            <textarea id="lyricsText" placeholder="Enter lyrics here..." style="width:100%;min-height:260px;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;line-height:1.6;box-sizing:border-box;"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-danger" type="button" onclick="clearLyricsPane()">Clear</button>
+              <button class="btn btn-success" type="button" onclick="saveLyricsPane()">Save Lyrics</button>
+            </div>
+          </div>
+        </div>
+      </div>
    </div>
  </div>
  </div></div>
@@ -681,15 +686,83 @@ function loadSyncLyricsInto(id) {
   const titleEl = document.getElementById('syncTrackTitle');
   if (titleEl) titleEl.textContent = t ? (t.title || '') : '';
   const msg = document.getElementById('syncMsg'); if (msg) msg.textContent = '';
-  syncEntries = t
-    ? mergeSyncLrc(t.synced_lyrics || '', t.synced_lyrics_en || '', t.synced_lyrics_hi || '', t.synced_lyrics_en_tr || '', t.synced_lyrics_hi_tr || '')
-    : [];
-  renderSyncEntries();
+  lyricsLevel = 'plain'; lyricsLang = 'te';
+  document.querySelectorAll('.lyrics-l1').forEach((b) => b.classList.remove('active'));
+  document.querySelectorAll('.lyrics-l2').forEach((b) => b.classList.remove('active'));
+  const l1 = document.getElementById('lvl-plain'); if (l1) l1.classList.add('active');
+  const l2 = document.getElementById('lang-te'); if (l2) l2.classList.add('active');
+  loadLyricsText();
 }
 
 function closeSyncLyrics() {
   syncTrackId = null;
   syncEntries = [];
+}
+
+// ----- Nested Plain/Sync lyrics editor -----
+let lyricsLevel = 'plain';
+let lyricsLang = 'te';
+
+function lyricsColumn() {
+  const map = {
+    plain: { te: 'plain_lyrics', en: 'plain_lyrics_en', hi: 'plain_lyrics_hi', enTr: 'plain_lyrics_en_tr', hiTr: 'plain_lyrics_hi_tr' },
+    sync: { te: 'synced_lyrics', en: 'synced_lyrics_en', hi: 'synced_lyrics_hi', enTr: 'synced_lyrics_en_tr', hiTr: 'synced_lyrics_hi_tr' },
+  };
+  return map[lyricsLevel][lyricsLang];
+}
+
+function lyricsSetLevel(lvl) {
+  lyricsLevel = lvl;
+  document.querySelectorAll('.lyrics-l1').forEach((b) => b.classList.remove('active'));
+  const el = document.getElementById('lvl-' + lvl); if (el) el.classList.add('active');
+  loadLyricsText();
+}
+
+function lyricsSetLang(lang) {
+  lyricsLang = lang;
+  document.querySelectorAll('.lyrics-l2').forEach((b) => b.classList.remove('active'));
+  const el = document.getElementById('lang-' + lang); if (el) el.classList.add('active');
+  loadLyricsText();
+}
+
+function currentEditTrack() {
+  return tracks.find((x) => x.id === syncTrackId);
+}
+
+function loadLyricsText() {
+  const ta = document.getElementById('lyricsText'); if (!ta) return;
+  const t = currentEditTrack();
+  ta.value = t ? (t[lyricsColumn()] || '') : '';
+}
+
+function clearLyricsPane() {
+  const ta = document.getElementById('lyricsText'); if (ta) ta.value = '';
+}
+
+async function saveLyricsPane() {
+  const t = currentEditTrack();
+  if (!t || !syncTrackId) { toast('No track selected'); return; }
+  if (!lock()) return;
+  const col = lyricsColumn();
+  const text = (document.getElementById('lyricsText').value || '').trim();
+  const body = {}; body[col] = text !== '' ? text : null;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/tracks/' + syncTrackId, {
+      method: 'PUT', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Lyrics saved');
+    await loadTracks();
+    loadLyricsText();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally {
+    showLoading(false);
+    unlock();
+  }
 }
 
 // Switches between the "Track" and "Lyrics" panes of the edit modal.
@@ -700,91 +773,6 @@ function editTab(name) {
   document.querySelectorAll('.modal-sidebar .edit-tab').forEach(function (b) { b.classList.remove('active'); });
   var tab = document.getElementById(name === 'track' ? 'tab-track' : 'tab-lyrics');
   if (tab) tab.classList.add('active');
-}
-
-async function saveSyncLyrics() {
-  if (!syncTrackId) return;
-  if (!lock()) return;
-  // buildLrc keeps every line's timestamp so the languages stay aligned.
-  // For the non-Telugu columns, only store the LRC when it actually contains
-  // text lines (otherwise the column would hold timestamp-only lines that look
-  // "updated").
-  const teLrc = buildLrc(syncEntries, 'te');
-  const enLrc = buildLrc(syncEntries, 'en');
-  const hiLrc = buildLrc(syncEntries, 'hi');
-  const enTrLrc = buildLrc(syncEntries, 'enTr');
-  const hiTrLrc = buildLrc(syncEntries, 'hiTr');
-  const hasTextLines = (lrc) => typeof lrc === 'string' &&
-    lrc.split('\n').some(l => /\]\s*\S/.test(l));
-  const body = {
-    synced_lyrics: teLrc || null,
-    synced_lyrics_en: hasTextLines(enLrc) ? enLrc : null,
-    synced_lyrics_hi: hasTextLines(hiLrc) ? hiLrc : null,
-    synced_lyrics_en_tr: hasTextLines(enTrLrc) ? enTrLrc : null,
-    synced_lyrics_hi_tr: hasTextLines(hiTrLrc) ? hiTrLrc : null,
-    lyrics: buildPlainLyrics(syncEntries) || null,
-  };
-  try {
-    showLoading(true);
-    const res = await authedFetch(`/api/admin/tracks/${syncTrackId}`, {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
-    toast('Synced lyrics saved');
-    closeSyncLyrics();
-    closeModal();
-    loadTracks();
-  } catch (e) {
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
-  } finally {
-    showLoading(false);
-    unlock();
-  }
-}
-
-// Warns the admin before permanently deleting all synced lyrics of the song.
-function confirmDeleteAllSyncLyrics() {
-  openConfirm(
-    'Delete all synced lyrics?',
-    'This will permanently delete the synced lyrics for this song — Telugu, English (Translation), Hindi (Translation), English (Transliteration) and Hindi (Transliteration) — as well as the derived plain lyrics. This cannot be undone.',
-    deleteAllSyncLyrics,
-    'Yes'
-  );
-}
-
-// Clears every synced-lyrics column (and the derived plain lyrics) via PUT.
-async function deleteAllSyncLyrics() {
-  if (!syncTrackId) return;
-  if (!lock()) return;
-  try {
-    showLoading(true);
-    const res = await authedFetch(`/api/admin/tracks/${syncTrackId}`, {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        synced_lyrics: null,
-        synced_lyrics_en: null,
-        synced_lyrics_hi: null,
-        synced_lyrics_en_tr: null,
-        synced_lyrics_hi_tr: null,
-        lyrics: null,
-      }),
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Delete failed'); }
-    toast('All synced lyrics deleted');
-    closeSyncLyrics();
-    renderSyncEntries();
-    loadTracks();
-  } catch (e) {
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
-  } finally {
-    showLoading(false);
-    unlock();
-  }
 }
 
 function openConfirm(title, message, action, confirmLabel) {
