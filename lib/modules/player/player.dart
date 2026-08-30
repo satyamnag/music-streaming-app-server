@@ -206,6 +206,7 @@ class PlayerView extends HookConsumerWidget {
                           leading: const Icon(SangeetIcons.queue),
                           child: Text(context.l10n.queue),
                           onPressed: () {
+                            if (!context.mounted) return;
                             context.pushRoute(const PlayerQueueRoute());
                           },
                         ),
@@ -216,6 +217,7 @@ class PlayerView extends HookConsumerWidget {
                           leading: const Icon(SangeetIcons.music),
                           child: Text(context.l10n.lyrics),
                           onPressed: () {
+                            if (!context.mounted) return;
                             context.pushRoute(const PlayerLyricsRoute());
                           },
                         ),
