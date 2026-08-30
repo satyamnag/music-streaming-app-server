@@ -89,9 +89,8 @@ tr:hover { background: #f0f7ff; }
 .sync-chip { display: inline-block; padding: 2px 7px; margin: 1px 3px 1px 0; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .sync-yes { background: #dcfce7; color: #15803d; }
 .sync-no { background: #fee2e2; color: #b91c1c; }
-.track-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; background: #eee; cursor: zoom-in; transition: transform .18s ease; }
+.track-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; background: #eee; }
 .thumb-cell { display: flex; align-items: center; gap: 8px; position: relative; }
-.thumb-cell:hover .track-thumb { transform: scale(4); transform-origin: left center; z-index: 9999; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
 .upload-row { display: flex; gap: 8px; align-items: center; }
 .upload-row input { flex: 1; }
 .preview-img { max-width: 120px; max-height: 120px; border-radius: 4px; margin-top: 4px; border: 1px solid #ddd; }
@@ -307,7 +306,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
  <div class="modal-content" id="trackModalContent">
- <h2 id="modalTitle">Add Track</h2>
  <input type="hidden" id="editId">
  <div class="modal-inner">
    <div class="modal-sidebar">
@@ -317,8 +315,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
    <div class="modal-panes">
      <div id="trackPane" class="edit-pane active">
  <label>Title *</label><input id="fTitle" placeholder="Track title">
- <label>Albums (a song can belong to multiple albums)</label>
- <div id="albumCheckboxes" class="album-checkboxes" style="max-height:140px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;"></div>
+ <label>Albums</label>
+ <div class="album-picker">
+   <button type="button" class="btn btn-secondary btn-sm" id="albumsToggleBtn" onclick="toggleAlbumsPicker()">Select Albums ▾</button>
+   <div id="albumCheckboxes" class="album-checkboxes" style="display:none;max-height:160px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;margin-top:6px;"></div>
+ </div>
  <label>Duration (seconds) *</label><input id="fDuration" type="number" placeholder="e.g. 240">
  <label>Status</label>
  <select id="fStatus">
@@ -368,7 +369,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="thumbPreviewContainer"></div>
 <div id="thumbStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
 <div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024×1024.</div>
-<label>Audio File (.opus) *</label>
+<label>Original Audio File (.opus) *</label>
 <div class="upload-row">
   <input id="fStorage" type="hidden" placeholder="e.g. song.opus">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('audioInput').click()">Upload</button>
@@ -376,7 +377,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
-<label>Karaoke File (.opus, optional)</label>
+<label>Karaoke Audio File (.opus, optional)</label>
 <div class="upload-row">
   <input id="fKaraoke" type="hidden" placeholder="e.g. song-karaoke.opus (optional)">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('karaokeInput').click()">Upload</button>
@@ -408,8 +409,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
           <div class="lyrics-editor">
             <textarea id="lyricsText" placeholder="Enter lyrics here..." style="width:100%;min-height:260px;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;line-height:1.6;box-sizing:border-box;"></textarea>
             <div class="btn-row">
-              <button class="btn btn-danger" type="button" onclick="clearLyricsPane()">Clear</button>
-              <button class="btn btn-success" type="button" onclick="saveLyricsPane()">Save Lyrics</button>
+              <button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button>
+              <button class="btn btn-success" type="button" onclick="saveTrack()">Save</button>
             </div>
           </div>
         </div>
@@ -1004,6 +1005,8 @@ async function loadAlbums() {
             <input type="checkbox" value="${a.id}" data-album-checkbox ${selected.has(String(a.id)) ? 'checked' : ''}>
             <span>${esc(a.name)}</span>
           </label>`).join('');
+      box.querySelectorAll('input[data-album-checkbox]').forEach((cb) => cb.addEventListener('change', updateAlbumsCount));
+      updateAlbumsCount();
     }
     // Render the albums table.
     const tbody = document.getElementById('albumsTbody');
@@ -1032,9 +1035,24 @@ function countAlbumTracks(albumId) {
   ).length;
 }
 
+// Toggles the album multi-select dropdown in the track form.
+function toggleAlbumsPicker() {
+  const panel = document.getElementById('albumCheckboxes');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  updateAlbumsCount();
+}
+
+// Updates the "Select Albums" button with the number of selected albums.
+function updateAlbumsCount() {
+  const btn = document.getElementById('albumsToggleBtn');
+  if (!btn) return;
+  const n = readAlbumCheckboxes().length;
+  btn.textContent = 'Select Albums' + (n ? ' (' + n + ')' : '') + ' ▾';
+}
+
 // Read the currently checked album ids from the track form.
-function readAlbumCheckboxes() {
-  const box = document.getElementById('albumCheckboxes');
+function readAlbumCheckboxes() {  const box = document.getElementById('albumCheckboxes');
   if (!box) return [];
   return Array.from(box.querySelectorAll('input[data-album-checkbox]:checked')).map(i => i.value);
 }
@@ -1045,6 +1063,7 @@ function setAlbumCheckboxes(ids) {
   const box = document.getElementById('albumCheckboxes');
   if (!box) return;
   box.querySelectorAll('input[data-album-checkbox]').forEach(i => { i.checked = keep.has(i.value); });
+  updateAlbumsCount();
 }
 
 function toggleAlbums() {
@@ -1263,7 +1282,6 @@ function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.
 function pl(v) { return v || 0; }
 
 function showAdd() {
-  document.getElementById('modalTitle').textContent = 'Add Track';
   document.getElementById('editId').value = '';
   ['fTitle','fDuration','fThumbnail','fStorage','fKaraoke'].forEach(id => document.getElementById(id).value = '');
   setAlbumCheckboxes([]);
@@ -1283,7 +1301,6 @@ function showAdd() {
 function showEdit(id) {
   const t = tracks.find(x => x.id === id);
   if (!t) return;
-  document.getElementById('modalTitle').textContent = 'Edit Track';
   document.getElementById('editId').value = id;
   document.getElementById('fTitle').value = t.title || '';
   setAlbumCheckboxes(t.album_ids || (t.album_id ? [t.album_id] : []));
@@ -1331,6 +1348,11 @@ async function saveTrack() {
   const tagsRaw = document.getElementById('fTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
   const body = { title, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, status, language, tags };
+  // Persist the currently-edited lyric column too, so "Save" (Track or Lyrics
+  // tab) saves both the track fields and the lyrics in one request.
+  const lyrCol = lyricsColumn();
+  const lyrText = (document.getElementById('lyricsText').value || '').trim();
+  body[lyrCol] = lyrText !== '' ? lyrText : null;
   try {
     const url = id ? `/api/admin/tracks/${id}` : '/api/admin/tracks';
     const method = id ? 'PUT' : 'POST';
@@ -1355,20 +1377,33 @@ async function deleteTrack(id) {
   finally { showLoading(false); unlock(); }
 }
 
-// Plays a just-uploaded original/karaoke .opus through the admin-only stream
-// endpoint so the admin can verify the audio before saving.
+// Plays / pauses a just-uploaded original/karaoke .opus via the admin-only
+// stream endpoint so the admin can verify the audio before saving.
 function playAudioUpload(kind) {
   const isKaraoke = kind === 'karaoke';
+  const btn = document.getElementById(isKaraoke ? 'karaokePlayBtn' : 'audioPlayBtn');
   const pathEl = document.getElementById(isKaraoke ? 'fKaraoke' : 'fStorage');
   const statusEl = document.getElementById(isKaraoke ? 'karaokeStatus' : 'audioStatus');
   const path = pathEl ? pathEl.value.trim() : '';
-  if (!path) { if (statusEl) statusEl.textContent = 'No file uploaded yet'; return; }
   const audio = document.getElementById('audioVerify');
   if (!audio) return;
+  if (!path) { if (statusEl) statusEl.textContent = 'No file uploaded yet'; return; }
+  const isPlaying = !audio.paused && !audio.ended;
+  if (isPlaying) {
+    audio.pause();
+    if (btn) btn.textContent = '▶ Play';
+    if (statusEl) statusEl.textContent = 'Paused';
+    return;
+  }
   audio.pause();
   audio.src = '/api/admin/audio/file?path=' + encodeURIComponent(path);
-  audio.play().then(function () { if (statusEl) statusEl.textContent = 'Playing ▶'; })
-    .catch(function () { if (statusEl) statusEl.textContent = 'Playback error'; });
+  audio.play().then(function () {
+    if (btn) btn.textContent = '⏸ Pause';
+    if (statusEl) statusEl.textContent = 'Playing ▶';
+  }).catch(function () {
+    if (btn) btn.textContent = '▶ Play';
+    if (statusEl) statusEl.textContent = 'Playback error';
+  });
 }
 
 async function handleAudioUpload(input) {
