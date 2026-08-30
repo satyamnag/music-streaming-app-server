@@ -9,6 +9,7 @@ import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
+import { createClerkClient } from '@clerk/backend'
 
 dotenv.config()
 
@@ -122,6 +123,8 @@ const supabase = createClient(
 // ------------------------------------------------------------------
 const secrets = {
   admin_token: process.env.ADMIN_TOKEN || '',
+  clerk_secret_key: process.env.CLERK_SECRET_KEY || '',
+  clerk_publishable_key: process.env.CLERK_PUBLISHABLE_KEY || '',
   r2_account_id: process.env.R2_ACCOUNT_ID || '',
   r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
@@ -131,6 +134,7 @@ const secrets = {
 
 const VAULT_SECRET_KEYS = [
   'admin_token',
+  'clerk_secret_key',
   'r2_account_id',
   'r2_access_key_id',
   'r2_secret_access_key',
@@ -990,9 +994,58 @@ function adminSessionCookieValue(req) {
   return ''
 }
 
+// ----- Clerk (email) admin auth -----
+// Optional, fail-safe: only activates when CLERK_SECRET_KEY is configured.
+// If enabled and a valid Clerk session is present on a request, /api/admin/*
+// is allowed. Otherwise the legacy ADMIN_TOKEN cookie flow is used, so the
+// admin keeps working even before Clerk is set up.
+const clerkClient = secrets.clerk_secret_key
+  ? createClerkClient({ secretKey: secrets.clerk_secret_key })
+  : null
+const clerkEnabled = () => !!clerkClient
+
+function readCookie(req, name) {
+  const header = req.headers.cookie || ''
+  for (const part of header.split(';')) {
+    const idx = part.indexOf('=')
+    if (idx === -1) continue
+    if (part.slice(0, idx).trim() === name) {
+      const raw = part.slice(idx + 1).trim()
+      try { return decodeURIComponent(raw) } catch (_) { return raw }
+    }
+  }
+  return ''
+}
+
+async function verifyClerkRequest(req) {
+  if (!clerkClient) return null
+  const token = readCookie(req, '__session') ||
+    (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')
+      ? req.headers.authorization.slice(7).trim()
+      : '')
+  if (!token) return null
+  try {
+    return await clerkClient.verifyToken(token, { skipJwksCache: false }) || null
+  } catch (_) {
+    return null
+  }
+}
+
+// Public: tells the admin page whether email (Clerk) login is available and
+// returns the publishable key so the front-end can render Clerk sign-in.
+app.get('/api/admin/auth-config', (req, res) => {
+  res.json({ clerkEnabled: clerkEnabled(), publishableKey: secrets.clerk_publishable_key || '' })
+})
+
 // Middleware protecting /api/admin/*. The cookie must be present, valid, and
 // unexpired. On failure a 401 is returned (the SPA shows the login form).
-function requireAdmin(req, res, next) {
+async function requireAdmin(req, res, next) {
+  // Preferred path: a valid Clerk (email) session.
+  if (clerkEnabled()) {
+    const claims = await verifyClerkRequest(req)
+    if (claims) return next()
+  }
+  // Fail-safe fallback: the legacy ADMIN_TOKEN session.
   if (!secrets.admin_token) {
     return res.status(503).json({ error: 'admin not configured' })
   }
