@@ -180,10 +180,13 @@ class ClerkAuthView extends HookConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    SangeetIcons.music,
-                    size: 22,
-                    color: Color(0xFF9C4D5B),
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/branding/sangeet-logo.png',
+                      height: 28,
+                      width: 28,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const Gap(10),
                   Text(
