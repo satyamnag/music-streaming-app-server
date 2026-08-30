@@ -166,7 +166,7 @@ class PlayerView extends HookConsumerWidget {
                   // track exists).
                   _OriginalKaraokeToggle(
                     karaokeAvailable: currentActiveTrack is SangeetFullTrackObject &&
-                        currentActiveTrack.karaokeStoragePath != null,
+                        (currentActiveTrack.karaokeStoragePath?.trim().isNotEmpty ?? false),
                   ),
                   const SizedBox(height: 44),
                   Container(
