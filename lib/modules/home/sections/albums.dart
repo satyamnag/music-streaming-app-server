@@ -121,7 +121,9 @@ class _AlbumCard extends HookConsumerWidget {
         color: theme.colorScheme.card,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.06),
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.black.withValues(alpha: 0.12)
+                : theme.colorScheme.primary.withValues(alpha: 0.18),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

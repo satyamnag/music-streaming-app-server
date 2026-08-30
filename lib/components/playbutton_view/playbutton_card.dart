@@ -59,12 +59,33 @@ class PlaybuttonCard extends StatelessWidget {
                     ),
                     fit: BoxFit.cover,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black.withValues(alpha: 0.12)
+                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
               )
             else
-              SizedBox(
+              Container(
                 width: 150 * scale,
                 height: 150 * scale,
+                decoration: BoxDecoration(
+                  borderRadius: context.theme.borderRadiusMd,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? Colors.black.withValues(alpha: 0.12)
+                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: ClipRRect(
                   borderRadius: context.theme.borderRadiusMd,
                   child: image!,

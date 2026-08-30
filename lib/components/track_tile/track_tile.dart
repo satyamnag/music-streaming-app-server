@@ -16,6 +16,7 @@ import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
+import 'package:sangeet/components/track_presentation/presentation_props.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/modules/player/player_overlay.dart';
@@ -65,7 +66,17 @@ class TrackTile extends HookConsumerWidget {
     // A paid (locked) track is never "playing" for a free user: the play/pause
     // overlay must not appear (only the lock badge does), and the row must not
     // light up as the active track. Paid users are unaffected.
-    final isLocked = PremiumAccess.isTrackLocked(track, ref);
+    // Also: if the track is shown inside a locked album presentation, it is
+    // considered locked even when its own status is 'free' (album lock
+    // cascades to all its tracks per product requirement).
+    final isLocked = () {
+      if (PremiumAccess.isTrackLocked(track, ref)) return true;
+      try {
+        final collection = TrackPresentationOptions.of(context).collection;
+        return PremiumAccess.isAlbumLocked(collection, ref);
+      } catch (_) {}
+      return false;
+    }();
     final isPlaying = !isLocked && playlist.activeTrack?.id == track.id;
 
     final isSelected = isPlaying || isLoading.value;
@@ -373,50 +384,7 @@ class TrackTile extends HookConsumerWidget {
               ],
             ),
           ),
-              // Locked (paid) tracks are visually unavailable for non-premium
-              // users: a gray translucent cover with a lock icon over the
-              // whole row. Tapping shows the Superwall paywall — playback
-              // never starts unless the user purchases.
-              if (isLocked)
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () async {
-                      isLoading.value = true;
-                      try {
-                        await PremiumAccess.gateTrackPlay(
-                          context: context,
-                          ref: ref,
-                          track: track,
-                          feature: onTap ?? () async {},
-                        );
-                      } finally {
-                        if (context.mounted) isLoading.value = false;
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.muted
-                            .withValues(alpha: 0.55),
-                        borderRadius: theme.borderRadiusMd,
-                      ),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.45),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.lock,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+
             ],
           ),
         ),
