@@ -18,6 +18,7 @@ tr:hover { background: #f0f7ff; }
 .btn-success { background: #22c55e; color: #fff; }
 .btn-secondary { background: #6b7280; color: #fff; }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
+.icon-btn { min-width: 30px; width: 30px; padding: 4px 6px; font-size: 14px; text-align: center; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
 .badge-paid { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 .badge-free { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
@@ -146,24 +147,19 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <input id="searchInput" type="text" placeholder="Search by title, artist, album or tag..." oninput="debouncedSearch()">
       </div>
 <table><thead><tr>
+  <th>Thumbnail</th>
   <th class="sortable" onclick="sortTracks('title')">Title<span id="arrow-title" class="sort-arrow"></span></th>
-  <th class="sortable" onclick="sortTracks('artist_names_text')">Artist<span id="arrow-artist_names_text" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('album')">Album<span id="arrow-album" class="sort-arrow"></span></th>
-  <th class="sortable" onclick="sortTracks('duration')">Duration<span id="arrow-duration" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
-  <th>Tags</th>
-  <th>Thumbnail</th><th>Storage</th>
-  <th class="sortable" onclick="sortTracks('status')">Status<span id="arrow-status" class="sort-arrow"></span></th>
-  <th>Synced Lyrics</th>
+  <th class="sortable" onclick="sortTracks('status')">Subscription<span id="arrow-status" class="sort-arrow"></span></th>
+  <th>Lyrics</th>
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
-  <th><select id="filterArtist" class="col-filter" onchange="applyTrackFilters()"><option value="">All artists</option></select></th>
+  <th></th>
   <th><select id="filterAlbum" class="col-filter" onchange="applyTrackFilters()"><option value="">All albums</option></select></th>
-  <th><div class="duration-filter"><input id="filterDurMin" class="col-filter" type="number" min="0" placeholder="Min s" oninput="applyTrackFilters()"><input id="filterDurMax" class="col-filter" type="number" min="0" placeholder="Max s" oninput="applyTrackFilters()"></div></th>
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
-  <th></th><th></th><th></th>
-  <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All statuses</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
+  <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
@@ -331,7 +327,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <input id="fThumbnail" placeholder="URL or upload an image">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('thumbInput').click()">Upload</button>
 </div>
-<input type="file" id="thumbInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleThumbUpload(this)">
+<input type="file" id="thumbInput" accept=".webp,image/webp" style="display:none" onchange="handleThumbUpload(this)">
 <div id="thumbPreviewContainer"></div>
 <div id="thumbStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
 <label>Audio File (.opus) *</label>
@@ -350,6 +346,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" type="button" onclick="syncLyricsForEdit()">Sync Lyrics</button>
     <button class="btn btn-success" onclick="saveTrack()">Save</button>
   </div>
 </div></div>
@@ -1148,7 +1145,7 @@ function renderTracks() {
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
     document.getElementById('count').textContent = tracks.length + ' track(s)';
     if (pag) pag.style.display = 'none';
     return;
@@ -1158,20 +1155,15 @@ function renderTracks() {
   const start = (trackPage - 1) * trackPageSize;
   const pageList = list.slice(start, start + trackPageSize);
   tbody.innerHTML = pageList.map(t => `<tr>
+    <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
     <td>${esc(t.title)}</td>
-    <td>${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</td>
     <td>${esc(t.album || '')}</td>
-    <td>${pl(t.duration)}s</td>
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
-    <td>${tagsChips(t.tags)}</td>
-    <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}${t.thumbnail ? esc(t.thumbnail).substring(0,30)+'...' : '-'}</td>
-    <td style="font-size:12px;word-break:break-all;">${esc(t.storage_path)}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
     <td>${syncChips(t)}</td>
     <td class="actions">
-      <button class="btn btn-success btn-sm" onclick="openSyncLyrics('${t.id}')">Add Sync Lyrics</button>
-      <button class="btn btn-primary btn-sm" onclick="showEdit('${t.id}')">Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrack('${t.id}')">Del</button>
+      <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">✎</button>
+      <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')">✕</button>
     </td>
   </tr>`).join('');
   document.getElementById('count').textContent = `${tracks.length} track(s) — page ${trackPage}/${totalPages}`;
@@ -1276,6 +1268,14 @@ function showEdit(id) {
 
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
+// Opens the sync-lyrics editor for the track currently open in the edit modal.
+function syncLyricsForEdit() {
+  const id = document.getElementById('editId').value;
+  if (!id) return;
+  closeModal();
+  openSyncLyrics(id);
+}
+
 async function saveTrack() {
   const id = document.getElementById('editId').value;
   const title = document.getElementById('fTitle').value.trim();
@@ -1355,6 +1355,17 @@ async function handleKaraokeUpload(input) {
 async function handleThumbUpload(input) {
   const file = input.files[0];
   if (!file) return;
+  // Strict: track thumbnails must be WebP and exactly 1024×1024.
+  if (!file.type || file.type !== 'image/webp') { toast('Thumbnail must be a WebP image'); input.value = ''; return; }
+  const dims = await new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { resolve({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+    img.onerror = () => { resolve(null); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+  if (!dims) { toast('Could not read the thumbnail image'); input.value = ''; return; }
+  if (dims.w !== 1024 || dims.h !== 1024) { toast('Thumbnail must be exactly 1024×1024 pixels'); input.value = ''; return; }
   document.getElementById('thumbStatus').textContent = 'Uploading...';
   const form = new FormData(); form.append('file', file);
   try {
