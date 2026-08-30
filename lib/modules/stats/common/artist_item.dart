@@ -1,6 +1,4 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -29,9 +27,8 @@ class StatsArtistItem extends StatelessWidget {
         ),
       ),
       trailing: info,
-      onPressed: () {
-        context.navigateTo(ArtistRoute(artistId: artist.id));
-      },
+      // Artist page navigation removed app-wide (artist names already hidden).
+      onPressed: () {},
     );
   }
 }

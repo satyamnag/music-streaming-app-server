@@ -1,9 +1,6 @@
-import 'package:auto_route/auto_route.dart';
-
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
-import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -23,9 +20,9 @@ class ArtistCard extends HookConsumerWidget {
     return SizedBox(
       width: 180,
       child: Button.card(
-        onPressed: () {
-          context.navigateTo(ArtistRoute(artistId: artist.id));
-        },
+        // Artist page intentionally removed app-wide: tapping an artist card
+        // does nothing (keeps the route registered to avoid nav breakage).
+        onPressed: () {},
         child: Column(
           children: [
             Avatar(
