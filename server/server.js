@@ -1043,7 +1043,16 @@ async function requireAdmin(req, res, next) {
   // Preferred path: a valid Clerk (email) session.
   if (clerkEnabled()) {
     const claims = await verifyClerkRequest(req)
-    if (claims) return next()
+    if (claims) {
+      // Strict admin email-domain policy: only @soulfulbhakti.com allowed.
+      // (Requires a Clerk session-token JWT template that includes the
+      //  emailAddress claim — see docs below.)
+      const email = (claims.emailAddress || claims.email || '').toLowerCase()
+      if (email && !email.endsWith('@soulfulbhakti.com')) {
+        return res.status(403).json({ error: 'This email domain is not authorized for the admin.' })
+      }
+      return next()
+    }
   }
   // Fail-safe fallback: the legacy ADMIN_TOKEN session.
   if (!secrets.admin_token) {
