@@ -366,6 +366,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="upload-row">
   <input id="fStorage" type="hidden" placeholder="e.g. song.opus">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('audioInput').click()">Upload</button>
+  <button class="btn btn-secondary btn-sm" id="audioPlayBtn" onclick="playAudioUpload('original')">▶ Play</button>
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
@@ -373,9 +374,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="upload-row">
   <input id="fKaraoke" type="hidden" placeholder="e.g. song-karaoke.opus (optional)">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('karaokeInput').click()">Upload</button>
+  <button class="btn btn-secondary btn-sm" id="karaokePlayBtn" onclick="playAudioUpload('karaoke')">▶ Play</button>
 </div>
 <input type="file" id="karaokeInput" accept=".opus" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<audio id="audioVerify" preload="none" style="display:none;"></audio>
    <div class="btn-row">
      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
      <button class="btn btn-success" onclick="saveTrack()">Save</button>
@@ -1364,11 +1367,26 @@ async function deleteTrack(id) {
   finally { showLoading(false); unlock(); }
 }
 
+// Plays a just-uploaded original/karaoke .opus through the admin-only stream
+// endpoint so the admin can verify the audio before saving.
+function playAudioUpload(kind) {
+  const isKaraoke = kind === 'karaoke';
+  const pathEl = document.getElementById(isKaraoke ? 'fKaraoke' : 'fStorage');
+  const statusEl = document.getElementById(isKaraoke ? 'karaokeStatus' : 'audioStatus');
+  const path = pathEl ? pathEl.value.trim() : '';
+  if (!path) { if (statusEl) statusEl.textContent = 'No file uploaded yet'; return; }
+  const audio = document.getElementById('audioVerify');
+  if (!audio) return;
+  audio.pause();
+  audio.src = '/api/admin/audio/file?path=' + encodeURIComponent(path);
+  audio.play().then(function () { if (statusEl) statusEl.textContent = 'Playing ▶'; })
+    .catch(function () { if (statusEl) statusEl.textContent = 'Playback error'; });
+}
+
 async function handleAudioUpload(input) {
   const file = input.files[0];
   if (!file) return;
-  document.getElementById('audioStatus').textContent = 'Uploading...';
-  const form = new FormData(); form.append('file', file);
+  document.getElementById('audioStatus').textContent = 'Uploading...';  const form = new FormData(); form.append('file', file);
   try {
     const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
     const data = await res.json();

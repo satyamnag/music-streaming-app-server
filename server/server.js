@@ -554,6 +554,61 @@ app.get('/stream/:id/file', async (req, res, next) => {
   }
 })
 
+// Admin-only audio preview: streams an uploaded audio file (by storage path)
+// with Range support so the admin can verify a just-uploaded original/karaoke
+// .opus by playing it. Never exposes the raw path — the browser just plays
+// this same-origin, admin-protected endpoint.
+app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
+  try {
+    const path = (req.query.path || '').toString().trim()
+    if (!path) return res.status(400).json({ error: 'path is required' })
+
+    let buf = null
+    if (r2) {
+      try {
+        const obj = await r2.send(new GetObjectCommand({ Bucket: R2_BUCKET, Key: path }))
+        if (obj.Body) buf = Buffer.from(await obj.Body.transformToByteArray())
+      } catch (_) { /* fall through to Supabase Storage */ }
+    }
+    if (!buf) {
+      try {
+        const { data: file, error: dlErr } = await supabase.storage.from('music').download(path)
+        if (!dlErr && file) buf = Buffer.from(await file.arrayBuffer())
+      } catch (_) { /* ignore */ }
+    }
+    if (!buf) return res.status(404).json({ error: 'File not found' })
+
+    const ext = (path.split('.').pop() || '').toLowerCase()
+    const mime = AUDIO_MIME[ext] || 'application/octet-stream'
+
+    res.set('Accept-Ranges', 'bytes')
+    res.set('Cache-Control', 'no-store')
+    res.set('Content-Type', mime)
+
+    const m = req.headers.range && /^bytes=(\d+)-(\d*)$/.exec(req.headers.range)
+    if (m) {
+      const start = parseInt(m[1], 10)
+      const end = m[2] ? parseInt(m[2], 10) : buf.length - 1
+      const s = Math.max(0, start)
+      const e = Math.min(buf.length - 1, end)
+      if (s > e) {
+        res.status(416)
+        res.set('Content-Range', `bytes */${buf.length}`)
+        return res.end()
+      }
+      res.status(206)
+      res.set('Content-Range', `bytes ${s}-${e}/${buf.length}`)
+      res.set('Content-Length', e - s + 1)
+      return res.end(buf.subarray(s, e + 1))
+    }
+
+    res.set('Content-Length', buf.length)
+    res.end(buf)
+  } catch (err) {
+    next(err)
+  }
+})
+
 app.get('/browse/sections', async (req, res, next) => {
   try {
     const { data, error } = await supabase
