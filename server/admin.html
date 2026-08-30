@@ -151,7 +151,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item icon-only" title="Refresh" onclick="refreshCurrent()"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span><span class="label">Refresh</span></button>
     <button class="sidebar-item" id="nav-tracks" title="Tracks" onclick="showView('tracks')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="label">Tracks</span></button>
     <div class="sidebar-divider"></div>
-    <button class="sidebar-item" id="nav-albums" title="+ Add Album" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="label">+ Add Album</span></button>
+    <button class="sidebar-item" id="nav-albums" title="Albums" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Albums</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeSongs" title="Arrange Songs" onclick="showView('arrangeSongs')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="label">Arrange Songs</span></button>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span class="label">Arrange Albums</span></button>
@@ -202,28 +202,30 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 <div id="albumsPanel" class="view">
   <h2 style="margin-bottom:12px;">Albums</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:12px;">
-    Create an album with a name and cover photo. Then assign songs to it from
-    the "Album" dropdown when adding/editing a track. Created albums appear
-    under the "Albums" section on the home screen, and play their songs
-    first-to-last.
-  </p>
-  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
-    <h3 id="alFormTitle" style="margin-bottom:8px;">New Album</h3>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-      <div><label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies"></div>
-      <div><label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;"></div>
-      <div><label>Status</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select></div>
-      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload</button>
-      <button class="btn btn-success" id="alSubmitBtn" onclick="createAlbum()">Create Album</button>
-      <button class="btn btn-secondary btn-sm" id="alCancelBtn" style="display:none;" onclick="cancelAlbumEdit()">Cancel</button>
-    </div>
-    <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
-    <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+  <div class="search-row">
+    <input id="albumSearch" type="text" placeholder="Search by album name..." oninput="renderAlbums()">
   </div>
   <table><thead><tr>
-    <th>Name</th><th>Cover</th><th>Status</th><th>Assigned Songs</th><th>Actions</th>
+    <th>Cover</th>
+    <th class="sortable" onclick="sortAlbums('name')">Name<span id="arrow-albumName" class="sort-arrow"></span></th>
+    <th class="sortable" onclick="sortAlbums('status')">Subscription<span id="arrow-albumStatus" class="sort-arrow"></span></th>
+    <th>Assigned Songs</th>
+    <th>Actions</th>
+  </tr><tr class="filter-row">
+    <th></th><th></th>
+    <th><select id="albumFilterStatus" class="col-filter" onchange="renderAlbums()"><option value="">All</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
+    <th></th><th></th>
   </tr></thead><tbody id="albumsTbody"></tbody></table>
+  <div class="pagination" id="albumsPagination" style="display:none;">
+    <label style="font-size:12px;color:#666;margin-right:8px;">Per page:
+      <select id="albumPageSizeSel" onchange="setAlbumPageSize(this.value)">
+        <option value="10">10</option><option value="20" selected>20</option><option value="50">50</option><option value="100">100</option>
+      </select>
+    </label>
+    <span class="page-info" id="albumsPageInfo"></span>
+    <button class="btn btn-secondary btn-sm" id="albumsPrevBtn" onclick="changeAlbumsPage(-1)">Prev</button>
+    <button class="btn btn-secondary btn-sm" id="albumsNextBtn" onclick="changeAlbumsPage(1)">Next</button>
+  </div>
 </div>
 
 <div id="arrangeSongsPanel" class="view">
@@ -444,6 +446,22 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
       <button class="btn btn-danger" id="confirmOkBtn" onclick="confirmAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="albumEditModal" class="modal" onclick="if(event.target===this)closeAlbumEdit()">
+  <div class="modal-content" style="max-width:480px;">
+    <h2>Edit Album</h2>
+    <input type="hidden" id="albumEditId">
+    <label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies">
+    <label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;">
+    <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
+    <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
+    <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeAlbumEdit()">Cancel</button>
+      <button class="btn btn-success" onclick="saveAlbumEdit()">Save</button>
     </div>
   </div>
 </div>
@@ -1008,24 +1026,137 @@ async function loadAlbums() {
       box.querySelectorAll('input[data-album-checkbox]').forEach((cb) => cb.addEventListener('change', updateAlbumsCount));
       updateAlbumsCount();
     }
-    // Render the albums table.
-    const tbody = document.getElementById('albumsTbody');
-    if (!tbody) return;
-    if (albums.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No albums yet — create one above.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = albums.map(a => `<tr>
+    renderAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message); }
+}
+
+// ----- Albums list (pagination / sort / filter) -----
+let albumPage = 1;
+let albumPageSize = 20;
+let albumSortKey = null;
+let albumSortDir = 1;
+
+function filterAlbums() {
+  const q = (document.getElementById('albumSearch') ? document.getElementById('albumSearch').value : '').trim().toLowerCase();
+  const st = document.getElementById('albumFilterStatus') ? document.getElementById('albumFilterStatus').value : '';
+  let list = albums.slice();
+  if (q) list = list.filter(a => (a.name || '').toLowerCase().includes(q));
+  if (st) list = list.filter(a => (a.status || 'free') === st);
+  if (albumSortKey) {
+    list.sort((a, b) => {
+      const va = ((a[albumSortKey] != null ? a[albumSortKey] : '') + '').toLowerCase();
+      const vb = ((b[albumSortKey] != null ? b[albumSortKey] : '') + '').toLowerCase();
+      if (va < vb) return -1 * albumSortDir;
+      if (va > vb) return 1 * albumSortDir;
+      return 0;
+    });
+  }
+  return list;
+}
+
+function renderAlbums() {
+  const list = filterAlbums();
+  const tbody = document.getElementById('albumsTbody');
+  if (!tbody) return;
+  const totalPages = Math.max(1, Math.ceil(list.length / albumPageSize));
+  if (albumPage > totalPages) albumPage = totalPages;
+  const start = (albumPage - 1) * albumPageSize;
+  const pageList = list.slice(start, start + albumPageSize);
+  const pageSizeSel = document.getElementById('albumPageSizeSel');
+  if (pageSizeSel && String(pageSizeSel.value) !== String(albumPageSize)) pageSizeSel.value = String(albumPageSize);
+  tbody.innerHTML = list.length === 0
+    ? '<tr><td colspan="5" class="empty-state">No albums found.</td></tr>'
+    : pageList.map(a => `<tr>
+      <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
       <td><b>${esc(a.name)}</b></td>
-      <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '-'}</td>
       <td>${a.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
       <td>${countAlbumTracks(a.id)}</td>
-       <td class="actions">
-         <button class="btn btn-primary btn-sm" onclick="editAlbum('${a.id}')">Edit</button>
-         <button class="btn btn-danger btn-sm" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')">Del</button>
-       </td>
+      <td class="actions">
+        <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="openAlbumEdit('${a.id}')">✎</button>
+        <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
+      </td>
     </tr>`).join('');
-  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message); }
+  const pag = document.getElementById('albumsPagination');
+  if (pag) {
+    document.getElementById('albumsPageInfo').textContent = 'Page ' + albumPage + ' of ' + totalPages + ' — ' + list.length + ' album(s)';
+    document.getElementById('albumsPrevBtn').disabled = albumPage <= 1;
+    document.getElementById('albumsNextBtn').disabled = albumPage >= totalPages;
+    pag.style.display = list.length > albumPageSize ? 'block' : 'none';
+  }
+}
+
+function sortAlbums(key) {
+  if (albumSortKey === key) albumSortDir *= -1; else { albumSortKey = key; albumSortDir = 1; }
+  document.querySelectorAll('#albumsPanel th.sortable .sort-arrow').forEach(a => a.textContent = '');
+  const arrow = document.getElementById('arrow-album' + (key === 'name' ? 'Name' : 'Status'));
+  if (arrow) arrow.textContent = albumSortDir === 1 ? '▲' : '▼';
+  albumPage = 1;
+  renderAlbums();
+}
+
+function setAlbumPageSize(v) { const n = parseInt(v, 10); if (!Number.isFinite(n) || n < 1) return; albumPageSize = n; albumPage = 1; renderAlbums(); }
+function changeAlbumsPage(dir) { const total = Math.max(1, Math.ceil(filterAlbums().length / albumPageSize)); const p = albumPage + dir; if (p < 1 || p > total) return; albumPage = p; renderAlbums(); }
+
+function openAlbumEdit(id) {
+  const a = albums.find(x => x.id === id);
+  if (!a) return;
+  editingAlbumId = id;
+  document.getElementById('albumEditId').value = id;
+  document.getElementById('alName').value = a.name || '';
+  document.getElementById('alCover').value = a.cover_url || '';
+  document.getElementById('alStatus').value = a.status === 'paid' ? 'paid' : 'free';
+  document.getElementById('alCoverStatus').textContent = '';
+  document.getElementById('albumEditModal').style.display = 'block';
+}
+
+function closeAlbumEdit() { editingAlbumId = null; const m = document.getElementById('albumEditModal'); if (m) m.style.display = 'none'; }
+
+async function saveAlbumEdit() {
+  const id = document.getElementById('albumEditId').value;
+  const name = document.getElementById('alName').value.trim();
+  const cover_url = document.getElementById('alCover').value.trim() || null;
+  const status = document.getElementById('alStatus').value === 'paid' ? 'paid' : 'free';
+  if (!name) { toast('Album name is required'); return; }
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/albums/' + id, { method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, cover_url, status }) });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Album updated');
+    closeAlbumEdit();
+    loadAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); unlock(); }
+}
+
+function confirmDeleteAlbum(id, name) {
+  openConfirm('Delete album?', 'Delete "' + name + '"? Its track memberships are removed.', function () { deleteAlbum(id); }, 'Yes');
+}
+
+async function deleteAlbum(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/albums/' + id, { method: 'DELETE', credentials: 'same-origin' });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Delete failed'); }
+    toast('Album deleted');
+    loadAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); unlock(); }
+}
+
+async function handleAlbumCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const form = new FormData(); form.append('file', file);
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('alCover').value = data.thumbnail_url;
+    const st = document.getElementById('alCoverStatus'); if (st) st.textContent = 'Uploaded ✓';
+  } catch (e) { const st = document.getElementById('alCoverStatus'); if (st) st.textContent = 'Error: ' + e.message; }
+  input.value = '';
 }
 
 function countAlbumTracks(albumId) {
@@ -1066,92 +1197,6 @@ function setAlbumCheckboxes(ids) {
   updateAlbumsCount();
 }
 
-function toggleAlbums() {
-  const panel = document.getElementById('albumsPanel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-  if (panel.style.display === 'block') { loadAlbums(); }
-}
-
-async function createAlbum() {
-  const name = document.getElementById('alName').value.trim();
-  const cover_url = document.getElementById('alCover').value.trim() || null;
-  const status = document.getElementById('alStatus').value === 'paid' ? 'paid' : 'free';
-  if (!name) { toast('Album name is required'); return; }
-  if (!lock()) return;
-  try {
-    showLoading(true);
-    const url = editingAlbumId ? `/api/admin/albums/${editingAlbumId}` : '/api/admin/albums';
-    const res = await authedFetch(url, {
-      method: editingAlbumId ? 'PUT' : 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, cover_url, status }),
-    });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
-    toast(editingAlbumId ? 'Album updated' : 'Album created');
-    cancelAlbumEdit();
-    loadAlbums();
-  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
-  finally { showLoading(false); unlock(); }
-}
-
-function editAlbum(id) {
-  const a = albums.find(x => x.id === id);
-  if (!a) return;
-  editingAlbumId = id;
-  document.getElementById('alName').value = a.name || '';
-  document.getElementById('alCover').value = a.cover_url || '';
-  document.getElementById('alStatus').value = a.status === 'paid' ? 'paid' : 'free';
-  document.getElementById('alCoverStatus').textContent = 'Editing "' + (a.name || '') + '" — change the name or cover and save.';
-  document.getElementById('alFormTitle').textContent = 'Edit Album';
-  document.getElementById('alSubmitBtn').textContent = 'Save Changes';
-  document.getElementById('alCancelBtn').style.display = 'inline-block';
-  document.getElementById('alName').focus();
-}
-
-function cancelAlbumEdit() {
-  editingAlbumId = null;
-  document.getElementById('alName').value = '';
-  document.getElementById('alCover').value = '';
-  document.getElementById('alStatus').value = 'free';
-  document.getElementById('alCoverStatus').textContent = '';
-  document.getElementById('alFormTitle').textContent = 'New Album';
-  document.getElementById('alSubmitBtn').textContent = 'Create Album';
-  document.getElementById('alCancelBtn').style.display = 'none';
-}
-
-function confirmDeleteAlbum(id, name) {
-  openConfirm('Delete album?', `Delete "${name}"? Assigned songs keep their album name but stop appearing under this admin album.`, () => deleteAlbum(id));
-}
-
-async function deleteAlbum(id) {
-  if (!lock()) return;
-  try {
-    const res = await authedFetch(`/api/admin/albums/${id}`, { method: 'DELETE', credentials: 'same-origin' });
-    if (!res.ok) throw new Error('Delete failed');
-    toast('Album deleted');
-    loadAlbums();
-  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
-  finally { unlock(); }
-}
-
-async function handleAlbumCoverUpload(input) {
-  const file = input.files && input.files[0];
-  if (!file) return;
-  const form = new FormData();
-  form.append('file', file);
-  try {
-    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
-    const data = await res.json();
-    const url = data.thumbnail_url || data.url || data.publicUrl || '';
-    if (url) {
-      document.getElementById('alCover').value = url;
-      document.getElementById('alCoverStatus').textContent = 'Cover uploaded: ' + url.substring(0, 50) + '...';
-    } else {
-      toast('Upload succeeded but no URL was returned');
-    }
-  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Upload error: ' + e.message); }
-}
 
 function lrcLineCount(v) {
   if (typeof v !== 'string' || !v.trim()) return 0;
