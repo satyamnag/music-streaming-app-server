@@ -155,7 +155,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
     <div class="sidebar-divider"></div>
-    <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
+    <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
   </nav>
   <div class="content">
     <div id="tracksPanel" class="view active">
@@ -240,13 +240,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 
 <div id="affiliatesPanel" class="view">
-  <h2 style="margin-bottom:12px;">Affiliate Marketing</h2>
+  <h2 style="margin-bottom:12px;">Affiliate &amp; QR Code</h2>
   <p style="font-size:13px;color:#666;margin-bottom:12px;">
-    Affiliate commission applies to the <b>yearly plan only</b>, with an
-    admin-decided flat amount per affiliate per yearly sale. Create an
-    affiliate, set their commission amount, then issue a coupon code in
-    their name. Commissions are credited only from verified Superwall
-    webhooks.
+    Affiliate commission applies to the <b>yearly plan only</b>.
   </p>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
     <h3 style="margin-bottom:8px;">New Affiliate</h3>
@@ -1042,7 +1038,7 @@ function renderAlbums() {
   tbody.innerHTML = list.length === 0
     ? '<tr><td colspan="5" class="empty-state">No albums found.</td></tr>'
     : pageList.map(a => `<tr>
-      <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
+      <td class="thumb-cell">${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#ef4444;font-weight:600;cursor:pointer;" onclick="openAlbumEdit(\''+a.id+'\')">Upload Cover</span>'}</td>
       <td><b>${esc(a.name)}</b></td>
       <td>${a.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
       <td>${countAlbumTracks(a.id)}</td>
@@ -1231,7 +1227,7 @@ function renderTracks() {
   const start = (trackPage - 1) * trackPageSize;
   const pageList = list.slice(start, start + trackPageSize);
   tbody.innerHTML = pageList.map(t => `<tr>
-    <td class="thumb-cell">${t.thumbnail ? '<img class="track-thumb" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
+    <td class="thumb-cell">${t.thumbnail ? '<img class="track-thumb" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#ef4444;font-weight:600;cursor:pointer;" onclick="showEdit(\''+t.id+'\')">Upload thumbnail</span>'}</td>
     <td>${esc(t.title)}</td>
     <td>${esc(t.album || '')}</td>
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
