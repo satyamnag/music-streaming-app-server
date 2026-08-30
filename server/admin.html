@@ -72,7 +72,9 @@ tr:hover { background: #f0f7ff; }
 .sync-chip { display: inline-block; padding: 2px 7px; margin: 1px 3px 1px 0; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
 .sync-yes { background: #dcfce7; color: #15803d; }
 .sync-no { background: #fee2e2; color: #b91c1c; }
-.thumb-cell { display: flex; align-items: center; gap: 8px; }
+.track-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; background: #eee; cursor: zoom-in; transition: transform .18s ease; }
+.thumb-cell { display: flex; align-items: center; gap: 8px; position: relative; }
+.thumb-cell:hover .track-thumb { transform: scale(1.7); z-index: 5; box-shadow: 0 6px 18px rgba(0,0,0,.3); }
 .upload-row { display: flex; gap: 8px; align-items: center; }
 .upload-row input { flex: 1; }
 .preview-img { max-width: 120px; max-height: 120px; border-radius: 4px; margin-top: 4px; border: 1px solid #ddd; }
@@ -141,10 +143,18 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div id="tracksPanel" class="view active">
       <div class="toolbar">
         <span id="count" style="font-size:14px;color:#666;"></span>
+        <label style="font-size:12px;color:#666;margin-left:auto;display:flex;align-items:center;gap:6px;">Per page:
+          <select id="pageSizeSel" onchange="setTrackPageSize(this.value)">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
         <button class="btn btn-secondary btn-sm" type="button" id="clearFiltersBtn" style="display:none;" onclick="clearTrackFilters()">Clear filters</button>
       </div>
       <div class="search-row">
-        <input id="searchInput" type="text" placeholder="Search by title, artist, album or tag..." oninput="debouncedSearch()">
+        <input id="searchInput" type="text" placeholder="Search by Title, Album or Tag..." oninput="debouncedSearch()">
       </div>
 <table><thead><tr>
   <th>Thumbnail</th>
@@ -1156,7 +1166,7 @@ function renderTracks() {
   const start = (trackPage - 1) * trackPageSize;
   const pageList = list.slice(start, start + trackPageSize);
   tbody.innerHTML = pageList.map(t => `<tr>
-    <td class="thumb-cell">${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
+    <td class="thumb-cell">${t.thumbnail ? '<img class="track-thumb" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#aaa;">—</span>'}</td>
     <td>${esc(t.title)}</td>
     <td>${esc(t.album || '')}</td>
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
@@ -1164,16 +1174,26 @@ function renderTracks() {
     <td>${syncChips(t)}</td>
     <td class="actions">
       <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">✎</button>
-      <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')">✕</button>
+      <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
     </td>
   </tr>`).join('');
-  document.getElementById('count').textContent = `${tracks.length} track(s) — page ${trackPage}/${totalPages}`;
+  const pageSizeSel = document.getElementById('pageSizeSel');
+  if (pageSizeSel && String(pageSizeSel.value) !== String(trackPageSize)) pageSizeSel.value = String(trackPageSize);
+  document.getElementById('count').innerHTML = 'Total tracks: ' + tracks.length + '<br>Page: ' + trackPage + ' of ' + totalPages;
   if (pag) {
     document.getElementById('trackPageInfo').textContent = `${start + 1}–${start + pageList.length} of ${list.length}`;
     document.getElementById('trackPrevBtn').disabled = trackPage <= 1;
     document.getElementById('trackNextBtn').disabled = trackPage >= totalPages;
     pag.style.display = 'block';
   }
+}
+
+function setTrackPageSize(v) {
+  const n = parseInt(v, 10);
+  if (!Number.isFinite(n) || n < 1) return;
+  trackPageSize = n;
+  trackPage = 1;
+  renderTracks();
 }
 
 function changeTrackPage(dir) {
