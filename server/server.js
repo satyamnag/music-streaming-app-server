@@ -917,8 +917,13 @@ app.get('/api/albums', async (req, res, next) => {
   }
 })
 
-app.get('/users/me', (req, res) => {
-  res.json(DEFAULT_USER)
+// Lightweight, public health check used by keep-alive pings / uptime monitors
+// to prevent Render free-tier idle spin-down (cold starts). No DB, fast.
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() })
+})
+
+app.get('/users/me', (req, res) => {  res.json(DEFAULT_USER)
 })
 
 // ----- Admin authentication (ADMIN_TOKEN) -----

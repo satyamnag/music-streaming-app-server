@@ -16,4 +16,4 @@ jobs:
         run: |
           curl --fail --silent --show-error --max-time 90 \
             -o /dev/null \
-            https://music-streaming-app-server.onrender.com/api/albums
+            https://music-streaming-app-server.onrender.com/health
