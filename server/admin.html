@@ -950,7 +950,13 @@ async function clerkAdminLogin() {
     config = await (await authedFetch('/api/admin/auth-config', { method: 'GET', credentials: 'same-origin' })).json();
   } catch (e) { /* leave defaults */ }
   if (!config.clerkEnabled || !config.publishableKey) {
-    if (msg) msg.textContent = 'Email login is not enabled (CLERK_SECRET_KEY not configured).';
+    if (msg) {
+      if (!config.clerkEnabled) {
+        msg.textContent = 'Email login is not enabled — the admin server has not loaded a Clerk secret key. Restart the server after storing CLERK_SECRET_KEY in the Supabase Vault.';
+      } else {
+        msg.textContent = 'Email login is not fully configured — set CLERK_PUBLISHABLE_KEY (Vault secret "clerk_publishable_key" or Render env var), then restart the server.';
+      }
+    }
     return;
   }
   try {

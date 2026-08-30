@@ -135,6 +135,7 @@ const secrets = {
 const VAULT_SECRET_KEYS = [
   'admin_token',
   'clerk_secret_key',
+  'clerk_publishable_key',
   'r2_account_id',
   'r2_access_key_id',
   'r2_secret_access_key',
@@ -999,10 +1000,27 @@ function adminSessionCookieValue(req) {
 // If enabled and a valid Clerk session is present on a request, /api/admin/*
 // is allowed. Otherwise the legacy ADMIN_TOKEN cookie flow is used, so the
 // admin keeps working even before Clerk is set up.
-const clerkClient = secrets.clerk_secret_key
+// NOTE: clerkClient is re-initialized after vault/env secrets load (see start())
+// so that a vault-loaded CLERK_SECRET_KEY takes effect without requiring a
+// separate code change. clerkEnabled checks the live secrets, not just the
+// captured initial client.
+let clerkClient = secrets.clerk_secret_key
   ? createClerkClient({ secretKey: secrets.clerk_secret_key })
   : null
-const clerkEnabled = () => !!clerkClient
+function initClerkClient() {
+  if (secrets.clerk_secret_key) {
+    try {
+      clerkClient = createClerkClient({ secretKey: secrets.clerk_secret_key })
+      console.log('[secrets] clerk client initialized')
+    } catch (e) {
+      console.warn(`[secrets] clerk client init failed: ${e.message}`)
+      clerkClient = null
+    }
+  } else {
+    clerkClient = null
+  }
+}
+const clerkEnabled = () => !!secrets.clerk_secret_key && !!clerkClient
 
 function readCookie(req, name) {
   const header = req.headers.cookie || ''
@@ -2008,9 +2026,11 @@ const port = process.env.PORT || 3000
 
 async function start() {
   await loadSecretsFromVault()
+  initClerkClient()
   initR2Client()
   app.listen(port, () => {
     console.log(`Sangeet Supabase server running on port ${port} - v3`)
+    console.log(`[auth] clerkEnabled=${clerkEnabled()} publishableKey=${secrets.clerk_publishable_key ? 'set' : 'missing'}`)
   })
 }
 
