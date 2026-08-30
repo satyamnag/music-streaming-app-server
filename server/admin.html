@@ -330,6 +330,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <input type="file" id="thumbInput" accept=".webp,image/webp" style="display:none" onchange="handleThumbUpload(this)">
 <div id="thumbPreviewContainer"></div>
 <div id="thumbStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024×1024.</div>
 <label>Audio File (.opus) *</label>
 <div class="upload-row">
   <input id="fStorage" placeholder="e.g. song.opus">
@@ -1367,7 +1368,7 @@ async function handleThumbUpload(input) {
   if (!dims) { toast('Could not read the thumbnail image'); input.value = ''; return; }
   if (dims.w !== 1024 || dims.h !== 1024) { toast('Thumbnail must be exactly 1024×1024 pixels'); input.value = ''; return; }
   document.getElementById('thumbStatus').textContent = 'Uploading...';
-  const form = new FormData(); form.append('file', file);
+  const form = new FormData(); form.append('file', file); form.append('kind', 'track_thumb');
   try {
     const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
     const data = await res.json();

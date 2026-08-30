@@ -1475,6 +1475,14 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext)
     const isAudio = ext === 'opus'
     if (!isImage && !isAudio) return res.status(400).json({ error: 'Allowed: .opus for audio, .png/.jpg/.jpeg/.webp for thumbnails' })
+
+    // Track thumbnails are STRICTLY WebP (enforced server-side so the rule
+    // cannot be bypassed by hitting the API directly). Album covers are
+    // unaffected (they omit the kind flag).
+    if (req.body && req.body.kind === 'track_thumb' && ext !== 'webp') {
+      return res.status(400).json({ error: 'Track thumbnail must be a WebP file' })
+    }
+
     const fileName = `${Date.now()}-${req.file.originalname}`
     const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
 
