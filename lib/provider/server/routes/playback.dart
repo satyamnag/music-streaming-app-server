@@ -66,7 +66,14 @@ class ServerPlaybackRoutes {
   AudioPlayerState get playlist => ref.read(audioPlayerProvider);
   final Dio dio;
 
-  ServerPlaybackRoutes(this.ref) : dio = Dio();
+  ServerPlaybackRoutes(this.ref)
+      : dio = Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 15),
+            receiveTimeout: const Duration(seconds: 30),
+            sendTimeout: const Duration(seconds: 15),
+          ),
+        );
 
   Future<SourcedTrack?> _getSourcedTrack(
     Request request,

@@ -164,17 +164,30 @@ class TrackBytePrefetcher {
       // A tiny range (e.g. very short tracks) still warms the connection.
       if (rangeEnd <= 0) return;
 
-      await globalDio.get<List<int>>(
-        url,
-        options: Options(
-          headers: {'range': 'bytes=0-$rangeEnd'},
-          responseType: ResponseType.bytes,
-          validateStatus: (status) => status != null && status < 500,
-          receiveTimeout: const Duration(seconds: 15),
-        ),
-      );
+      // Low-connectivity: retry with exponential backoff, longer timeout.
+      // Battle-tested for 2G: first try 30s, retry after 2s, then 4s. Silent
+      // failures keep playback functional via on-demand resolver.
+      for (var attempt = 0; attempt < 3; attempt++) {
+        try {
+          await globalDio.get<List<int>>(
+            url,
+            options: Options(
+              headers: {'range': 'bytes=0-$rangeEnd'},
+              responseType: ResponseType.bytes,
+              validateStatus: (status) => status != null && status < 500,
+              receiveTimeout: const Duration(seconds: 30),
+              sendTimeout: const Duration(seconds: 15),
+            ),
+          );
+          return;
+        } catch (_) {
+          if (attempt < 2) {
+            await Future.delayed(Duration(seconds: 2 << attempt));
+          }
+        }
+      }
     } catch (_) {
-      // Best-effort warm-up; failures are ignored.
+      // Best-effort warm-up; failures are ignored after retries.
     }
   }
 }

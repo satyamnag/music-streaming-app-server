@@ -44,13 +44,33 @@ class CustomPlayer extends Player {
     // of audio/video to prefetch if the cache is active.")
     nativePlayer.setProperty("cache-secs", "3600");
     // Low-connectivity smooth start: enter "buffering" mode before playback and
-    // wait until ~5s of audio is buffered, so playback does not start then
-    // immediately underrun on a slow network. (Official mpv manual:
+    // wait until ~8s of audio is buffered, so playback does not start then
+    // immediately underrun on a slow network. Increased from 5s to 8s for
+    // bullet-proof 2G/3G: ensures 8s buffered before first frame, preventing
+    // underrun when bandwidth < bitrate. (Official mpv manual:
     // cache-pause-initial "can be used to ensure playback starts smoothly, in
     // exchange for waiting some time to prefetch network data".) The stall
     // watchdog below still re-opens the track if buffering gets stuck.
     nativePlayer.setProperty("cache-pause-initial", "yes");
-    nativePlayer.setProperty("cache-pause-wait", "5");
+    nativePlayer.setProperty("cache-pause-wait", "8");
+    // Bullet-proof reconnection for flaky networks (mpv 0.30+/FFmpeg reconnect):
+    // Reconnect automatically when TCP drops, server resets, or HTTP 4xx/5xx.
+    // Battle-tested for low-connectivity: without this mpv would get stuck in
+    // "Cache is not responding" forever (mpv issue #1566, #5793). With it,
+    // mpv retries 5x with exponential backoff up to 30s and resumes at the
+    // same byte offset (range request) for static files (R2/Supabase).
+    nativePlayer.setProperty(
+      "stream-lavf-o",
+      "reconnect=1,reconnect_streamed=1,reconnect_at_eof=1,reconnect_on_network_error=1,reconnect_on_http_error=4xx,5xx,reconnect_delay_max=30",
+    );
+    nativePlayer.setProperty(
+      "demuxer-lavf-o",
+      "reconnect=1,reconnect_streamed=1,reconnect_delay_max=30,reconnect_on_network_error=1,reconnect_on_http_error=4xx,5xx",
+    );
+    // Readahead: keep 30s of audio demuxed ahead, so short stalls are absorbed
+    // without entering buffering. Low connectivity needs larger readahead.
+    nativePlayer.setProperty("demuxer-readahead-secs", "30");
+    nativePlayer.setProperty("demuxer-cache-wait", "yes");
     // Byte caps large enough to hold 60 minutes at high bitrates: 60 min at
     // 320 kbps is ~144 MB, at lossless ~630 MB — 512M comfortably covers the
     // catalog while still bounding memory.
