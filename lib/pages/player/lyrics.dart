@@ -395,18 +395,39 @@ class _SingleSyncView extends HookConsumerWidget {
             audioPlayer.seek(variants[index].time);
           },
           behavior: HitTestBehavior.translucent,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutBack,
             margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(isActive ? 14 : 10),
             decoration: BoxDecoration(
-              color: isActive ? theme.colorScheme.primary.withValues(alpha: 0.08) : Colors.transparent,
+              color: isActive ? theme.colorScheme.primary.withValues(alpha: 0.10) : Colors.transparent,
               borderRadius: theme.borderRadiusMd,
-              border: Border(left: BorderSide(width: 3, color: isActive ? theme.colorScheme.primary : Colors.transparent)),
+              border: Border(left: BorderSide(width: isActive ? 4 : 3, color: isActive ? theme.colorScheme.primary : Colors.transparent)),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: theme.typography.base.copyWith(color: def.color, fontWeight: isActive ? FontWeight.w600 : FontWeight.w400, fontSize: 16, height: 1.5),
+            child: AnimatedScale(
+              scale: isActive ? 1.06 : 1.0,
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutBack,
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: theme.typography.base.copyWith(
+                  color: isActive ? theme.colorScheme.primary : def.color,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                  fontSize: isActive ? 19 : 16,
+                  height: isActive ? 1.6 : 1.5,
+                ),
+              ),
             ),
           ),
         );
