@@ -455,10 +455,14 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <h2>Edit Album</h2>
     <input type="hidden" id="albumEditId">
     <label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies">
-    <label>Cover photo URL</label><input id="alCover" placeholder="https://... or upload" style="min-width:280px;">
-    <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
+    <label>Cover photo (upload only)</label>
+    <div class="upload-row">
+      <input id="alCover" type="hidden" placeholder="https://... or upload">
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('alCoverInput').click()">Upload Cover</button>
+    </div>
     <input type="file" id="alCoverInput" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="handleAlbumCoverUpload(this)">
     <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeAlbumEdit()">Cancel</button>
       <button class="btn btn-success" onclick="saveAlbumEdit()">Save</button>
