@@ -126,6 +126,21 @@ class _NoLyrics extends StatelessWidget {
   }
 }
 
+/// The admin-stored plain lyrics for [lang] on [track], or null when the track
+/// has none for that language. When present, the Plain tab shows this text
+/// (authored in the admin) instead of deriving it from the synced variants.
+String? plainForTrack(SangeetTrackObject? track, String lang) {
+  if (track is! SangeetFullTrackObject) return null;
+  return switch (lang) {
+    LyricLanguages.te => track.plainLyrics,
+    LyricLanguages.en => track.plainLyricsEn,
+    LyricLanguages.hi => track.plainLyricsHi,
+    LyricLanguages.enTr => track.plainLyricsEnTr,
+    LyricLanguages.hiTr => track.plainLyricsHiTr,
+    _ => null,
+  };
+}
+
 /// Builder wrapper that observes the lyrics provider for one plain language.
 class PlainLanguageViewBuilder extends HookConsumerWidget {
   final SangeetTrackObject? track;
@@ -153,7 +168,12 @@ class PlainLanguageViewBuilder extends HookConsumerWidget {
       return const _NoLyrics();
     }
 
-    final text = plainLyricTextFor(subtitle, lang);
+    // Prefer admin-authored plain lyrics for the language; otherwise derive
+    // from the synced variants (backward compatible).
+    final stored = plainForTrack(track, lang)?.trim();
+    final text = (stored != null && stored.isNotEmpty)
+        ? stored
+        : plainLyricTextFor(subtitle, lang);
     if (text.isEmpty) return const _NoLyrics();
 
     return SingleChildScrollView(

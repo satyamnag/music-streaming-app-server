@@ -506,6 +506,11 @@ _$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
       language: json['language'] as String?,
       featuredOrder: (json['featuredOrder'] as num?)?.toInt(),
       karaokeStoragePath: json['karaokeStoragePath'] as String?,
+      plainLyrics: json['plainLyrics'] as String?,
+      plainLyricsEn: json['plainLyricsEn'] as String?,
+      plainLyricsHi: json['plainLyricsHi'] as String?,
+      plainLyricsEnTr: json['plainLyricsEnTr'] as String?,
+      plainLyricsHiTr: json['plainLyricsHiTr'] as String?,
       $type: json['runtimeType'] as String?,
     );
 
@@ -524,6 +529,11 @@ Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
       'language': instance.language,
       'featuredOrder': instance.featuredOrder,
       'karaokeStoragePath': instance.karaokeStoragePath,
+      'plainLyrics': instance.plainLyrics,
+      'plainLyricsEn': instance.plainLyricsEn,
+      'plainLyricsHi': instance.plainLyricsHi,
+      'plainLyricsEnTr': instance.plainLyricsEnTr,
+      'plainLyricsHiTr': instance.plainLyricsHiTr,
       'runtimeType': instance.$type,
     };
 

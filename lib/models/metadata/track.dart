@@ -25,6 +25,11 @@ class SangeetTrackObject with _$SangeetTrackObject {
     String? language,
     int? featuredOrder,
     String? karaokeStoragePath,
+    String? plainLyrics,
+    String? plainLyricsEn,
+    String? plainLyricsHi,
+    String? plainLyricsEnTr,
+    String? plainLyricsHiTr,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(
