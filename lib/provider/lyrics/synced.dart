@@ -53,13 +53,91 @@ class SyncedLyricsNotifier
         return null;
       }
 
+      Duration? parseTimestamp(String s) {
+        s = s.trim().replaceAll(',', '.');
+        final parts = s.split(':');
+        try {
+          if (parts.length == 3) {
+            final h = int.parse(parts[0].trim());
+            final m = int.parse(parts[1].trim());
+            final secParts = parts[2].trim().split('.');
+            final sec = int.parse(secParts[0].trim());
+            final msStr = secParts.length > 1 ? secParts[1].trim() : '0';
+            final ms = int.parse(msStr.padRight(3, '0').substring(0, 3));
+            return Duration(hours: h, minutes: m, seconds: sec, milliseconds: ms);
+          } else if (parts.length == 2) {
+            final m = int.parse(parts[0].trim());
+            final secParts = parts[1].trim().split('.');
+            final sec = int.parse(secParts[0].trim());
+            final msStr = secParts.length > 1 ? secParts[1].trim() : '0';
+            final ms = int.parse(msStr.padRight(3, '0').substring(0, 3));
+            return Duration(minutes: m, seconds: sec, milliseconds: ms);
+          }
+        } catch (_) {
+          return null;
+        }
+        return null;
+      }
+
+      Map<Duration, String> parseSrtMap(String raw) {
+        final normalized = raw.replaceAll('\r', '').trim();
+        if (normalized.isEmpty) return {};
+        final blocks = normalized.split(RegExp(r'\n\s*\n'));
+        final map = <Duration, String>{};
+        for (final block in blocks) {
+          final lines = block.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+          if (lines.isEmpty) continue;
+          // First line may be numeric index
+          if (RegExp(r'^\d+$').hasMatch(lines[0])) {
+            lines.removeAt(0);
+            if (lines.isEmpty) continue;
+          }
+          // Timestamp line: "00:00:01,000 --> 00:00:02,000" or "00:00:01.000 --> 00:00:02.000"
+          final timeLine = lines[0];
+          final arrowIdx = timeLine.indexOf('-->');
+          final startStr = arrowIdx != -1 ? timeLine.substring(0, arrowIdx).trim() : timeLine.trim();
+          final ts = parseTimestamp(startStr);
+          if (ts == null) continue;
+          final text = lines.sublist(1).join('\n').trim();
+          if (text.isEmpty) continue;
+          map[ts] = text;
+        }
+        return map;
+      }
+
       Map<Duration, String>? parseLrcMap(String? raw) {
         if (raw == null || raw.trim().isEmpty) return null;
-        final parsed = Lrc.parse(raw);
-        return {
-          for (final line in parsed.lyrics)
-            if (line.lyrics.trim().isNotEmpty) line.timestamp: line.lyrics.trim(),
-        };
+        // Try LRC first (LRCLib and legacy). If input is SRT (admin STR), Lrc.parse throws FormatException.
+        try {
+          final parsed = Lrc.parse(raw);
+          final map = {
+            for (final line in parsed.lyrics)
+              if (line.lyrics.trim().isNotEmpty) line.timestamp: line.lyrics.trim(),
+          };
+          if (map.isNotEmpty) return map;
+        } catch (_) {
+          // Fall through to SRT
+        }
+        // SRT fallback: admin web interface only accepts SRT STR format (isValidSrt)
+        try {
+          final srtMap = parseSrtMap(raw);
+          if (srtMap.isNotEmpty) return srtMap;
+        } catch (_) {}
+        return null;
+      }
+
+      List<LyricSlice> parseToSlices(String? raw) {
+        if (raw == null || raw.trim().isEmpty) return [];
+        try {
+          final parsed = Lrc.parse(raw);
+          final slices = parsed.lyrics.map(LyricSlice.fromLrcLine).where((s) => s.text.trim().isNotEmpty).toList();
+          if (slices.isNotEmpty) return slices;
+        } catch (_) {}
+        // SRT fallback
+        final srtMap = parseSrtMap(raw);
+        if (srtMap.isEmpty) return [];
+        final sorted = srtMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+        return sorted.map((e) => LyricSlice(time: e.key, text: e.value)).toList();
       }
 
       // Build aligned multi-language rows. Every language column shares a
@@ -99,14 +177,9 @@ class SyncedLyricsNotifier
 
         // Main synced list uses the Telugu (or first non-empty) line so the
         // existing single-language consumers keep working unchanged.
+        // Handles both LRC (LRCLib) and SRT (admin STR) via parseToSlices.
         final primaryRaw = syncedRaw ?? syncedEnRaw ?? syncedHiRaw;
-        final primary = primaryRaw != null && primaryRaw.trim().isNotEmpty
-            ? Lrc.parse(primaryRaw)
-                .lyrics
-                .map(LyricSlice.fromLrcLine)
-                .where((s) => s.text.trim().isNotEmpty)
-                .toList()
-            : <LyricSlice>[];
+        final primary = parseToSlices(primaryRaw);
         final slices = primary.isNotEmpty ? primary : variants.map((v) {
             final text = v.te.isNotEmpty
                 ? v.te
