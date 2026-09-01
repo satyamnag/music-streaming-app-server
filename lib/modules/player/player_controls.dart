@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -106,6 +106,9 @@ class PlayerControls extends HookConsumerWidget {
                                       progress.value = v.value;
                                     },
                               onChangeEnd: (value) async {
+                                // Only seek once a valid duration is known;
+                                // otherwise a drag would target 0:00.
+                                if (duration.inSeconds <= 0) return;
                                 await audioPlayer.seek(
                                   Duration(
                                     seconds: (value.value * duration.inSeconds)

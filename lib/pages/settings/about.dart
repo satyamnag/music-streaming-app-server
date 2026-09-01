@@ -1,4 +1,6 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:sangeet/collections/assets.gen.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
@@ -17,6 +19,12 @@ class AboutSangeetPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    // Show the installed app version as "buildNumber (version)", e.g. "71 (1.0.0)",
+    // so the About screen always reflects the actual running build.
+    final packageInfo = useFuture(PackageInfo.fromPlatform());
+    final versionLabel = packageInfo.data == null
+        ? ""
+        : "${packageInfo.data!.buildNumber} (${packageInfo.data!.version})";
     return SafeArea(
       bottom: false,
       child: Scaffold(
@@ -42,6 +50,17 @@ class AboutSangeetPage extends HookConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                if (versionLabel.isNotEmpty)
+                  Center(
+                    child: Text(
+                      versionLabel,
+                      style: Theme.of(context)
+                          .typography
+                          .xSmall
+                          .copyWith(color: Theme.of(context).colorScheme.mutedForeground),
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 Center(
                   child: Text(

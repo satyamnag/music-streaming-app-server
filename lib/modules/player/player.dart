@@ -20,9 +20,9 @@ import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/volume_provider.dart';
-import 'package:sangeet/services/audio_player/audio_player.dart';
 
 class PlayerView extends HookConsumerWidget {
   final PanelController panelController;
@@ -162,8 +162,8 @@ class PlayerView extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Original / Karaoke switch (karaoke only when a karaoke
-                  // track exists).
+                  // Original / Karaoke switch (enabled only when a karaoke file
+                  // exists for the track).
                   _OriginalKaraokeToggle(
                     karaokeAvailable: currentActiveTrack is SangeetFullTrackObject &&
                         (currentActiveTrack.karaokeStoragePath?.trim().isNotEmpty ?? false),
@@ -250,6 +250,7 @@ class PlayerView extends HookConsumerWidget {
   }
 }
 
+
 /// Original / Karaoke switch shown between the cover art and the track name.
 /// "Original" is the default (current playback, unchanged). "Karaoke" replays
 /// the track's karaoke variant when one exists; otherwise it is disabled.
@@ -261,6 +262,16 @@ class _OriginalKaraokeToggle extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final karaoke = useState(false);
     final notifier = ref.read(audioPlayerProvider.notifier);
+    final activeTrack = ref.watch(
+      audioPlayerProvider.select((s) => s.activeTrack?.id),
+    );
+
+    // Reset the toggle to "Original" whenever the playing track changes or
+    // karaoke becomes unavailable, so the UI never shows a stale selection.
+    useEffect(() {
+      karaoke.value = false;
+      return null;
+    }, [activeTrack, karaokeAvailable]);
 
     void select(bool k) {
       if (k && !karaokeAvailable) return;

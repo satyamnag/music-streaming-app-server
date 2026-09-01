@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:media_kit/media_kit.dart' hide Track;
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 
 part 'state.freezed.dart';
 part 'state.g.dart';

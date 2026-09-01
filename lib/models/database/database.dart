@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/remote.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:media_kit/media_kit.dart' hide Track;
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' show ThemeMode;

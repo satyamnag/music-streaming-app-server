@@ -8,6 +8,7 @@ import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
@@ -58,6 +59,74 @@ class SearchPageTracksTab extends HookConsumerWidget {
                 playlist: playlist,
                 index: index,
                 onTap: () async {
+                  if (PremiumAccess.isTrackLocked(track, ref)) {
+                    await PremiumAccess.gateTrackPlay(
+                      context: context,
+                      ref: ref,
+                      track: track,
+                      feature: () async {
+                        final isRemoteDevice =
+                            await showSelectDeviceDialog(context, ref);
+
+                        if (isRemoteDevice == null) return;
+
+                        if (isRemoteDevice) {
+                          final remotePlayback = ref.read(connectProvider.notifier);
+                          final remotePlaylist = ref.read(queueProvider);
+
+                          final isTrackPlaying =
+                              remotePlaylist.activeTrack?.id == track.id;
+
+                          if (!isTrackPlaying && context.mounted) {
+                            final shouldPlay = (playlist.tracks.length) > 20
+                                ? await showPromptDialog(
+                                    context: context,
+                                    title: context.l10n.playing_track(
+                                      track.name,
+                                    ),
+                                    message: context.l10n.queue_clear_alert(
+                                      playlist.tracks.length,
+                                    ),
+                                  )
+                                : true;
+
+                            if (shouldPlay) {
+                              await remotePlayback.load(
+                                WebSocketLoadEventData.playlist(
+                                  tracks: [track],
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          final isTrackPlaying =
+                              playlist.activeTrack?.id == track.id;
+                          if (!isTrackPlaying && context.mounted) {
+                            final shouldPlay = (playlist.tracks.length) > 20
+                                ? await showPromptDialog(
+                                    context: context,
+                                    title: context.l10n.playing_track(
+                                      track.name,
+                                    ),
+                                    message: context.l10n.queue_clear_alert(
+                                      playlist.tracks.length,
+                                    ),
+                                  )
+                                : true;
+
+                            if (shouldPlay) {
+                              await playlistNotifier.load(
+                                [track],
+                                autoPlay: true,
+                              );
+                            }
+                          }
+                        }
+                      },
+                    );
+                    return;
+                  }
+
                   final isRemoteDevice =
                       await showSelectDeviceDialog(context, ref);
 

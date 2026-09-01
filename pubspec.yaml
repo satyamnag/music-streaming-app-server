@@ -3,7 +3,7 @@ description: Open source extensible music streaming platform and app, based on B
 
 publish_to: "none"
 
-version: 1.0.0+70
+version: 1.0.0+73
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
@@ -18,6 +18,7 @@ dependencies:
   audio_service: ^0.18.13
   audio_service_mpris: ^0.2.0
   audio_session: ^0.1.19
+  just_audio: ^0.9.42
   auto_route: ^9.3.0+1
   auto_size_text: ^3.0.0
   bonsoir: ^5.1.10
@@ -135,15 +136,6 @@ dependencies:
   pub_semver: ^2.2.0
   change_case: ^1.1.0
   flutter_secure_storage: ^9.2.4
-  # Have to use the git version due to unresponsive .move() after .add()
-  media_kit:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: media_kit
-  media_kit_libs_audio:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/universal/media_kit_libs_audio
   base32: ^2.2.0
   superwallkit_flutter: ^2.4.9
   onesignal_flutter: 5.5.2
@@ -176,6 +168,11 @@ dev_dependencies:
   auto_route_generator: ^9.0.0
 
 dependency_overrides:
+  # Pin flutter_rust_bridge to match metadata_god 1.1.0's generated code
+  # (codegen 2.11.1). Without this, pub resolves FRB to 2.12.0 and
+  # MetadataGod.initialize() throws "codegen version (2.11.1) should be the
+  # same as runtime version (2.12.0)" at startup, breaking the plugin layer.
+  flutter_rust_bridge: 2.11.1
   bonsoir_android:
     git:
       url: https://github.com/KRTirtho/Bonsoir.git
@@ -191,26 +188,6 @@ dependency_overrides:
       url: https://github.com/m-berto/flutter_secure_storage.git
       ref: patch-2
       path: flutter_secure_storage_linux
-  media_kit_libs_android_audio:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/android/media_kit_libs_android_audio
-  media_kit_libs_ios_audio:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/ios/media_kit_libs_ios_audio
-  media_kit_libs_macos_audio:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/macos/media_kit_libs_macos_audio
-  media_kit_libs_windows_audio:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/windows/media_kit_libs_windows_audio
-  media_kit_libs_linux:
-    git:
-      url: https://github.com/media-kit/media-kit
-      path: libs/linux/media_kit_libs_linux
 
 flutter:
   generate: true

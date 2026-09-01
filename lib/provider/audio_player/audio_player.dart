@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:sangeet/extensions/list.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -148,20 +148,32 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
           AppLogger.reportError(e, stack);
         }
       }),
-      audioPlayer.playlistStream.listen((playlist) async {
+      audioPlayer.playlistStream.listen((tracks) async {
         try {
-          final tracks =
-              playlist.medias.map((e) => SangeetMedia.media(e).track).toList();
-
           state = state.copyWith(
             tracks: tracks,
-            currentIndex: playlist.index,
+            currentIndex: state.currentIndex.clamp(0, tracks.isEmpty ? 0 : tracks.length - 1),
           );
 
           await _updatePlayerState(
             AudioPlayerStateTableCompanion(
               currentIndex: Value(state.currentIndex),
               tracks: Value(state.tracks),
+            ),
+          );
+        } catch (e, stack) {
+          AppLogger.reportError(e, stack);
+        }
+      }),
+      // Sync the current index whenever the engine changes tracks (next /
+      // previous / auto-advance / jump). This keeps the mini-player and
+      // PlayerView activeTrack in sync with the actually playing track.
+      audioPlayer.currentIndexChangedStream.listen((index) async {
+        try {
+          state = state.copyWith(currentIndex: index);
+          await _updatePlayerState(
+            AudioPlayerStateTableCompanion(
+              currentIndex: Value(index),
             ),
           );
         } catch (e, stack) {
@@ -462,28 +474,17 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     await audioPlayer.jumpTo(index);
   }
 
-  /// Reloads the current track as either the original or its karaoke variant,
-  /// returning to the supplied [position]. Used by the player's
-  /// Original / Karaoke switch. The default state (never called) leaves the
-  /// original playback path completely unchanged.
+  /// Original / Karaoke switch. Reloads the currently playing track with the
+  /// karaoke audio variant (when one exists) and restores the playhead, so the
+  /// switch is seamless. The karaoke variant is served by the local stream
+  /// server via `?variant=karaoke`, which falls back to the original if no
+  /// karaoke file exists.
   Future<void> toggleKaraoke({
     required bool karaoke,
     Duration? position,
   }) async {
-    final index = state.currentIndex;
-    if (index < 0 || state.tracks.isEmpty) return;
-    final pos = position ?? audioPlayer.position;
-    SangeetMedia.karaokeMode = karaoke;
-    try {
-      await load(state.tracks, initialIndex: index, autoPlay: true);
-      if (pos > Duration.zero) {
-        await audioPlayer.seek(pos);
-      }
-    } catch (e, stack) {
-      AppLogger.reportError(e, stack);
-    } finally {
-      SangeetMedia.karaokeMode = false;
-    }
+    await SangeetMedia.ensurePortReady();
+    await audioPlayer.setKaraoke(karaoke);
   }
 
   Future<void> moveTrack(int oldIndex, int newIndex) async {

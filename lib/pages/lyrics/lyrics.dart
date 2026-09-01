@@ -34,6 +34,24 @@ class LyricsPage extends HookConsumerWidget {
     final palette = usePaletteColor(albumArt, ref);
     final selectedIndex = useState(0);
 
+    // Auto-select the right tab so lyrics always show without manual toggling:
+    // if the track has no timed (synced) lines, default to the Plain tab;
+    // otherwise keep the Synced tab. This prevents a plain-only song from
+    // appearing blank on the default Synced tab.
+    final lyricsState = ref.watch(
+      syncedLyricsMapProvider(playlist.activeTrack),
+    );
+    final shouldShowSynced = lyricsState.asData?.value.static != true;
+    useEffect(() {
+      if (!shouldShowSynced) {
+        selectedIndex.value = 1;
+      } else if (selectedIndex.value == 1 &&
+          lyricsState.asData?.value.lyricsMap.isNotEmpty == true) {
+        selectedIndex.value = 0;
+      }
+      return null;
+    }, [shouldShowSynced, playlist.activeTrack?.id]);
+
     Widget tabbar = Padding(
       padding: const EdgeInsets.all(10),
       child: Tabs(

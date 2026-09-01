@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
-import 'package:media_kit/media_kit.dart' hide Track;
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 

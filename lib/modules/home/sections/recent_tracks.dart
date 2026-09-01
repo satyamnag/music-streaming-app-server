@@ -9,9 +9,10 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
-import 'package:sangeet/provider/history/recent_tracks.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
+import 'package:sangeet/provider/history/recent_tracks.dart';
 
 /// A horizontal "Recently played" row of track cards shown on the home screen.
 /// Devotional & calm mood: rounded corners, soft shadow, maroon accent.
@@ -145,6 +146,20 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                     track: track,
                     imageUrl: imageUrl,
                     onTap: () async {
+                      if (PremiumAccess.isTrackLocked(track, ref)) {
+                        await PremiumAccess.gateTrackPlay(
+                          context: context,
+                          ref: ref,
+                          track: track,
+                          feature: () async {
+                            await ref
+                                .read(audioPlayerProvider.notifier)
+                                .load(tracks, initialIndex: index, autoPlay: true);
+                          },
+                        );
+                        return;
+                      }
+
                       await ref
                           .read(audioPlayerProvider.notifier)
                           .load(tracks, initialIndex: index, autoPlay: true);

@@ -16,7 +16,6 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
@@ -83,8 +82,6 @@ Future<void> main(List<String> rawArgs) async {
     // await registerWindowsScheme("spotify");
 
     tz.initializeTimeZones();
-
-    MediaKit.ensureInitialized();
 
     // Firebase (Crashlytics + Analytics). Initialize once at startup and wire
     // the Crashlytics error handlers so all uncaught Flutter fatal errors and

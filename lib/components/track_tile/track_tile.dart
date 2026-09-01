@@ -288,6 +288,24 @@ class TrackTile extends HookConsumerWidget {
                 onPressed: effectiveSelection
                   ? null
                   : () async {
+                    if (PremiumAccess.isTrackLocked(track, ref)) {
+                      await PremiumAccess.gateTrackPlay(
+                        context: context,
+                        ref: ref,
+                        track: track,
+                        feature: () async {
+                          // Play this track, then open the full on-screen player
+                          // (PlayerView) instead of the legacy Track detail page.
+                          await onTap?.call();
+                          if (context.mounted) {
+                            ref
+                                .read(playerOverlayControllerProvider)
+                                .open();
+                          }
+                        },
+                      );
+                      return;
+                    }
                     // Play this track, then open the full on-screen player
                     // (PlayerView) instead of the legacy Track detail page.
                     await onTap?.call();

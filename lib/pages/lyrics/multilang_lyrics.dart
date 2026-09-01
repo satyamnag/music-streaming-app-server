@@ -224,6 +224,9 @@ class SyncedLanguageView extends HookConsumerWidget {
       return const ShimmerLyrics();
     }
     if (query.hasError) return const _NoLyrics();
+    // Plain (static/untimed) variants are not synced lyrics — the Sync view
+    // must not render them.
+    if ((mapState.asData?.value.static ?? true) == true) return const _NoLyrics();
 
     final variants = subtitle?.variants ?? const <LyricVariant>[];
     final hasData =

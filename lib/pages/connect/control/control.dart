@@ -19,7 +19,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/provider/connect/clients.dart';
 import 'package:sangeet/provider/connect/connect.dart';
-import 'package:media_kit/media_kit.dart' hide Track;
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 
 class RemotePlayerQueue extends ConsumerWidget {
   const RemotePlayerQueue({super.key});

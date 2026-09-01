@@ -21,8 +21,8 @@ import flutter_inappwebview_macos
 import flutter_new_pipe_extractor
 import flutter_secure_storage_macos
 import flutter_timezone
+import just_audio
 import local_notifier
-import media_kit_libs_macos_audio
 import open_file_mac
 import package_info_plus
 import path_provider_foundation
@@ -52,8 +52,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterNewPipeExtractorPlugin.register(with: registry.registrar(forPlugin: "FlutterNewPipeExtractorPlugin"))
   FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
   FlutterTimezonePlugin.register(with: registry.registrar(forPlugin: "FlutterTimezonePlugin"))
+  JustAudioPlugin.register(with: registry.registrar(forPlugin: "JustAudioPlugin"))
   LocalNotifierPlugin.register(with: registry.registrar(forPlugin: "LocalNotifierPlugin"))
-  MediaKitLibsMacosAudioPlugin.register(with: registry.registrar(forPlugin: "MediaKitLibsMacosAudioPlugin"))
   OpenFilePlugin.register(with: registry.registrar(forPlugin: "OpenFilePlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))

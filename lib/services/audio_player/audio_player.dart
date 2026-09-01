@@ -1,26 +1,15 @@
-import 'package:media_kit/media_kit.dart' hide Track;
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/services/logger/logger.dart';
-import 'package:flutter/foundation.dart';
-import 'package:sangeet/services/audio_player/custom_player.dart';
 import 'dart:async';
 
-import 'package:media_kit/media_kit.dart' as mk;
-
+import 'package:sangeet/services/audio_player/just_audio_engine.dart';
 import 'package:sangeet/services/audio_player/playback_state.dart';
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:sangeet/utils/platform.dart';
 
-part 'audio_players_streams_mixin.dart';
-part 'audio_player_impl.dart';
-
-class SangeetMedia extends mk.Media {
+/// A [SangeetTrackObject] plus its playable stream URI, engine-agnostic.
+class SangeetMedia {
   static int serverPort = 0;
   static final Completer<int> _portReady = Completer<int>();
-
-  /// When true, playback uses the track's karaoke variant (if one exists in
-  /// the backend) instead of the original. Reset to false to return to the
-  /// original song. Read by [SangeetMedia] when building the stream URL.
-  static bool karaokeMode = false;
 
   static Future<void> ensurePortReady() async {
     if (serverPort == 0) {
@@ -39,106 +28,168 @@ class SangeetMedia extends mk.Media {
       kIsWindows ? "localhost" : "127.0.0.1";
 
   final SangeetTrackObject track;
+
+  /// Playable URI: local path for local tracks, or the local stream-server
+  /// endpoint (which audits paid-track access) for full tracks.
+  String get uri {
+    if (track is SangeetLocalTrackObject) {
+      return (track as SangeetLocalTrackObject).path;
+    }
+    return 'http://$_host:$serverPort/stream/${track.id}';
+  }
+
   SangeetMedia(this.track)
       : assert(
           track is SangeetLocalTrackObject || track is SangeetFullTrackObject,
           "Track must be a either a local track or a full track object with ISRC",
-        ),
-        // If the track is a local track, use its path, otherwise use the server URL
-        super(
-          track is SangeetLocalTrackObject
-              ? track.path
-              : "http://$_host:$serverPort/stream/${track.id}"
-                  "${karaokeMode ? '?variant=karaoke' : ''}",
-          extras: track.toJson(),
         );
 
-  factory SangeetMedia.media(Media media) {
-    assert(media.extras != null, "[Media] must have extra metadata set");
-    return SangeetMedia(SangeetTrackObject.fromJson(media.extras!));
+  /// Playable URI for a track, engine-agnostic (used by just_audio). When
+  /// [karaoke] is true and the track has a karaoke file, the local stream
+  /// server serves the karaoke variant via the `?variant=karaoke` query param.
+  static String uriFor(SangeetTrackObject track, {bool karaoke = false}) {
+    if (track is SangeetLocalTrackObject) return track.path;
+    final suffix = karaoke && track is SangeetFullTrackObject &&
+            (track.karaokeStoragePath?.trim().isNotEmpty ?? false)
+        ? '?variant=karaoke'
+        : '';
+    return 'http://$_host:$serverPort/stream/${track.id}$suffix';
   }
 }
 
-abstract class AudioPlayerInterface {
-  final CustomPlayer _mkPlayer;
+/// A just_audio-backed playback engine exposing the same public surface the
+/// app's notifier and consumers rely on. It preserves the prior method names
+/// (openPlaylist, addTrackAt, moveTrack, jumpTo, etc.) so callers are unchanged,
+/// while delegating playback to the platform ExoPlayer via just_audio.
+class SangeetAudioPlayer {
+  final JustAudioEngine _bridge;
 
-  AudioPlayerInterface()
-      : _mkPlayer = CustomPlayer(
-          configuration: const mk.PlayerConfiguration(
-            title: "Soulful Bhakti",
-            logLevel: kDebugMode ? mk.MPVLogLevel.info : mk.MPVLogLevel.error,
-            async: true,
-          ),
-        ) {
-    _mkPlayer.stream.error.listen((event) {
-      AppLogger.reportError(event, StackTrace.current);
-    });
+  SangeetAudioPlayer() : _bridge = JustAudioEngine();
+
+  Future<void> pause() => _bridge.pause();
+  Future<void> resume() => _bridge.resume();
+  Future<void> stop() => _bridge.stop();
+  Future<void> seek(Duration position) => _bridge.seek(position);
+
+  /// Volume is between 0 and 1
+  Future<void> setVolume(double volume) => _bridge.setVolume(volume);
+
+  Future<void> setSpeed(double speed) => _bridge.setSpeed(speed);
+
+  Future<void> setAudioDevice(Object device) async {
+    // just_audio does not support arbitrary audio-device switching.
   }
 
-  /// Whether the current platform supports the audioplayers plugin
-  static const bool _mkSupportedPlatform = true;
+  /// No switchable output devices (just_audio); the connect/devices UI shows
+  /// an empty list so nothing can be selected incorrectly.
+  Future<List<AudioOutputDevice>> get devices async => const [];
+  Stream<List<AudioOutputDevice>> get devicesStream =>
+      const Stream<List<AudioOutputDevice>>.empty();
+  Future<AudioOutputDevice?> get selectedDevice async => null;
+  Stream<AudioOutputDevice?> get selectedDeviceStream =>
+      const Stream<AudioOutputDevice?>.empty();
 
-  bool get mkSupportedPlatform => _mkSupportedPlatform;
+  Future<void> dispose() => _bridge.dispose();
 
-  Duration get duration {
-    return _mkPlayer.state.duration;
+  // Playlist related
+
+  Future<void> openPlaylist(
+    List<SangeetMedia> tracks, {
+    bool autoPlay = true,
+    int initialIndex = 0,
+  }) async {
+    assert(tracks.isNotEmpty);
+    assert(initialIndex <= tracks.length - 1);
+    await _bridge.openPlaylist(
+      tracks.map((e) => e.track).toList(),
+      initialIndex: initialIndex,
+      autoPlay: autoPlay,
+    );
   }
 
-  Playlist get playlist {
-    return _mkPlayer.state.playlist;
+  List<String> get sources => _bridge.sources;
+  String? get currentSource => _bridge.currentSource;
+  String? get nextSource => _bridge.nextSource;
+  String? get previousSource => _bridge.previousSource;
+  int get currentIndex => _bridge.currentIndex;
+
+  Future<void> skipToNext() => _bridge.skipToNext();
+  Future<void> skipToPrevious() => _bridge.skipToPrevious();
+  Future<void> jumpTo(int index) => _bridge.jumpTo(index);
+
+  Future<void> addTrack(SangeetMedia media) =>
+      _bridge.addTrack(media.track, index: null);
+
+  Future<void> addTrackAt(SangeetMedia media, int index) =>
+      _bridge.addTrack(media.track, index: index);
+
+  Future<void> removeTrack(int index) => _bridge.removeTrack(index);
+
+  Future<void> moveTrack(int from, int to) => _bridge.moveTrack(from, to);
+
+  Future<void> clearPlaylist() => _bridge.stop();
+
+  Future<void> setShuffle(bool shuffle) => _bridge.setShuffle(shuffle);
+
+  Future<void> setKaraoke(bool karaoke) => _bridge.setKaraoke(karaoke);
+
+  Future<void> setLoopMode(PlaylistMode loop) => _bridge.setLoopMode(loop);
+
+  Future<void> setAudioNormalization(bool normalize) async {
+    // just_audio does not expose mpv's dynamic audio normalization.
   }
 
-  Duration get position {
-    return _mkPlayer.state.position;
+  Future<void> setDemuxerBufferSize(int sizeInBytes) async {
+    // just_audio manages its own network buffer; no-op.
   }
 
-  Duration get bufferedPosition {
-    return _mkPlayer.state.buffer;
-  }
+  // Streams & state forwarded from the engine
+  Stream<Duration> get durationStream => _bridge.durationStream;
+  Stream<Duration> get positionStream => _bridge.positionStream;
+  Stream<Duration> get bufferedPositionStream => _bridge.bufferedPositionStream;
+  Stream<bool> get completedStream => _bridge.completedStream;
+  Stream<bool> get playingStream => _bridge.playingStream;
+  Stream<bool> get shuffledStream => _bridge.shuffledStream;
+  Stream<PlaylistMode> get loopModeStream => _bridge.loopModeStream;
+  Stream<double> get volumeStream => _bridge.volumeStream;
+  Stream<bool> get bufferingStream => _bridge.bufferingStream;
+  Stream<AudioPlaybackState> get playerStateStream => _bridge.playerStateStream;
+  Stream<int> get currentIndexChangedStream => _bridge.currentIndexChangedStream;
+  Stream<String> get activeSourceChangedStream =>
+      _bridge.activeSourceChangedStream;
+  Stream<String> get errorStream => _bridge.errorStream;
+  Stream<List<SangeetTrackObject>> get playlistTrackStream =>
+      _bridge.playlistTrackStream;
 
-  Future<mk.AudioDevice> get selectedDevice async {
-    return _mkPlayer.state.audioDevice;
-  }
+  // Future<string?>.playlistStream-like: expose current tracks so the notifier
+  // can rebuild its state from a playlist update.
+  Stream<List<SangeetTrackObject>> get playlistStream =>
+      _bridge.playlistTrackStream;
 
-  Future<List<mk.AudioDevice>> get devices async {
-    return _mkPlayer.state.audioDevices;
-  }
-
-  bool get hasSource {
-    return _mkPlayer.state.playlist.medias.isNotEmpty;
-  }
-
-  // states
-  bool get isPlaying {
-    return _mkPlayer.state.playing;
-  }
-
-  bool get isPaused {
-    return !_mkPlayer.state.playing;
-  }
-
-  bool get isStopped {
-    return !hasSource;
-  }
-
-  Future<bool> get isCompleted async {
-    return _mkPlayer.state.completed;
-  }
-
-  bool get isShuffled {
-    return _mkPlayer.shuffled;
-  }
-
-  PlaylistMode get loopMode {
-    return _mkPlayer.state.playlistMode;
-  }
-
-  /// Returns the current volume of the player, between 0 and 1
-  double get volume {
-    return _mkPlayer.state.volume / 100;
-  }
-
-  bool get isBuffering {
-    return _mkPlayer.state.buffering;
-  }
+  List<SangeetTrackObject> get playlistTracks => _bridge.tracks;
+  bool get isPlaying => _bridge.isPlaying;
+  bool get isPaused => _bridge.isPaused;
+  bool get isStopped => _bridge.isStopped;
+  bool get isShuffled => _bridge.isShuffled;
+  PlaylistMode get loopMode => _bridge.loopMode;
+  bool get isBuffering => _bridge.isBuffering;
+  Duration get position => _bridge.position;
+  Duration get bufferedPosition => _bridge.bufferedPosition;
+  Duration get duration => _bridge.duration ?? Duration.zero;
+  bool get hasSource => _bridge.tracks.isNotEmpty;
+  double get volume => _bridge.volume;
+  Future<bool> get isCompleted async => _bridge.isCompleted;
+  bool get mkSupportedPlatform => true;
 }
+
+/// A minimal audio-output-device descriptor for the connect/devices UI.
+///
+/// just_audio does not expose arbitrary output-device switching on Android, so
+/// the device picker surfaces no entries (a deliberate option-1 feature drop).
+class AudioOutputDevice {
+  final String name;
+  final String description;
+  const AudioOutputDevice(this.name, this.description);
+}
+
+final audioPlayer = SangeetAudioPlayer();

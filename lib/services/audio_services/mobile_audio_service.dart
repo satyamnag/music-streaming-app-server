@@ -6,7 +6,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
-import 'package:media_kit/media_kit.dart' hide Track;
+import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:sangeet/services/audio_player/playback_state.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/utils/platform.dart';

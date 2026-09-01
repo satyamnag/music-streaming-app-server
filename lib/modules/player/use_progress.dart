@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 
 ({
@@ -14,28 +15,26 @@ import 'package:sangeet/services/audio_player/audio_player.dart';
   final duration = useState(Duration.zero);
   final position = useState(Duration.zero);
 
+  // Re-sync whenever the active track changes, so a newly loaded song's
+  // duration and position are picked up (and the previous track's values are
+  // not carried over).
+  final activeTrackId = ref.watch(
+    (audioPlayerProvider).select((s) => s.activeTrack?.id),
+  );
+
   final sliderMax = duration.value.inSeconds;
   final sliderValue = position.value.inSeconds;
 
   useEffect(() {
+    // Ensure the engine's position/duration getters reflect the current track.
     duration.value = audioPlayer.duration;
+    position.value = audioPlayer.position;
 
     final durationSubscription = audioPlayer.durationStream.listen((event) {
       duration.value = event;
     });
 
-    position.value = audioPlayer.position;
-
-    var lastPosition = position.value;
-
-    // audioPlayer.positionStream is fired every 200ms and only 1s delay is
-    // enough. Thus only update the position if the difference is more than 1s
-    // Reduces CPU usage
     final positionSubscription = audioPlayer.positionStream.listen((event) {
-      final diff = event.inMilliseconds - lastPosition.inMilliseconds;
-      if (event.inMilliseconds > 1000 && diff < 1000 && diff > 0) return;
-
-      lastPosition = event;
       position.value = event;
     });
 
@@ -43,7 +42,7 @@ import 'package:sangeet/services/audio_player/audio_player.dart';
       positionSubscription.cancel();
       durationSubscription.cancel();
     };
-  }, []);
+  }, [activeTrackId]);
 
   return (
     progressStatic:

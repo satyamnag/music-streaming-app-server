@@ -28,6 +28,10 @@ class PlayerLyricsPage extends HookConsumerWidget {
     final query = ref.watch(syncedLyricsProvider(track));
     final subtitle = query.asData?.value;
     final isLoading = query.isLoading || query.isRefreshing;
+    final mapState = ref.watch(syncedLyricsMapProvider(track));
+    // `static` is true when the lyrics have no timestamps (i.e. they are plain,
+    // not synced). The Sync tab must only list timed/synced lyrics.
+    final isStatic = mapState.asData?.value.static ?? true;
 
     bool hasPlain(String lang) {
       final stored = plainForTrack(track, lang)?.trim();
@@ -36,6 +40,9 @@ class PlayerLyricsPage extends HookConsumerWidget {
     }
 
     bool hasSync(String lang) {
+      // Plain (static, untimed) variants are NOT synced lyrics; they must only
+      // appear on the Plain tab, never the Sync tab.
+      if (isStatic) return false;
       final variants = subtitle?.variants ?? const <LyricVariant>[];
       if (variants.isEmpty) return false;
       for (final v in variants) {
@@ -360,6 +367,9 @@ class _SingleSyncView extends HookConsumerWidget {
     final currentTime = useSyncedLyrics(ref, lyricsMap, delay);
     if (query.isLoading || query.isRefreshing) return const Center(child: CircularProgressIndicator());
     if (query.hasError) return const _NoData();
+    // Plain (static/untimed) variants are not synced lyrics — do not render
+    // them in the Sync view.
+    if ((mapState.asData?.value.static ?? true) == true) return const _NoData();
     final variants = subtitle?.variants ?? const <LyricVariant>[];
     if (variants.isEmpty) return const _NoData();
     final hasAny = variants.any((v) => LyricLanguages.fieldOf(v, lang).trim().isNotEmpty);

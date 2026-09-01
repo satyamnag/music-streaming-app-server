@@ -17,14 +17,6 @@ class SettingsPlaybackSection extends HookConsumerWidget {
       heading: context.l10n.playback,
       children: [
         ListTile(
-          leading: const Icon(SangeetIcons.normalize),
-          title: Text(context.l10n.normalize_audio),
-          trailing: Switch(
-            value: preferences.normalizeAudio,
-            onChanged: preferencesNotifier.setNormalizeAudio,
-          ),
-        ),
-        ListTile(
             leading: const Icon(SangeetIcons.repeat),
             title: Text(context.l10n.endless_playback),
             trailing: Switch(

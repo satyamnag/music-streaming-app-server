@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
@@ -57,6 +58,10 @@ class HomePage extends HookConsumerWidget {
             if (kTitlebarVisible) const TitleBar(height: 30),
           ],
           child: material.RefreshIndicator.adaptive(
+            // Theme the Material refresh spinner so it matches the app instead
+            // of rendering the default grey overlay on pull-down.
+            color: context.theme.colorScheme.primary,
+            backgroundColor: context.theme.colorScheme.background,
             onRefresh: () async {
               ref.invalidate(homeTracksProvider);
               ref.invalidate(homeSectionsProvider);

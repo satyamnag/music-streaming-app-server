@@ -43,13 +43,20 @@ class SyncedLyricsNotifier
       final syncedHiRaw = data['synced_lyrics_hi'] as String?;
       final syncedEnTrRaw = data['synced_lyrics_en_tr'] as String?;
       final syncedHiTrRaw = data['synced_lyrics_hi_tr'] as String?;
+      final plainEnRaw = data['plain_lyrics_en'] as String?;
+      final plainHiRaw = data['plain_lyrics_hi'] as String?;
+      final plainEnTrRaw = data['plain_lyrics_en_tr'] as String?;
+      final plainHiTrRaw = data['plain_lyrics_hi_tr'] as String?;
 
       if ((syncedRaw == null || syncedRaw.trim().isEmpty) &&
           (plainRaw == null || plainRaw.trim().isEmpty) &&
           (syncedEnRaw == null || syncedEnRaw.trim().isEmpty) &&
           (syncedHiRaw == null || syncedHiRaw.trim().isEmpty) &&
           (syncedEnTrRaw == null || syncedEnTrRaw.trim().isEmpty) &&
-          (syncedHiTrRaw == null || syncedHiTrRaw.trim().isEmpty)) {
+          (syncedHiTrRaw == null || syncedHiTrRaw.trim().isEmpty) &&
+          (plainEnRaw == null || plainEnRaw.trim().isEmpty) &&
+          (plainHiRaw == null || plainHiRaw.trim().isEmpty) &&
+          (plainEnTrRaw == null || plainEnTrRaw.trim().isEmpty)) {
         return null;
       }
 
@@ -205,11 +212,75 @@ class SyncedLyricsNotifier
         }
       }
 
-      if (plainRaw != null && plainRaw.trim().isNotEmpty) {
-        final lines = plainRaw
-            .split("\n")
-            .map((line) => LyricSlice(text: line.trim(), time: Duration.zero))
-            .where((s) => s.text.isNotEmpty)
+      // Plain (non-timed) lyrics: use the legacy `lyrics` column or any of the
+      // per-language `plain_lyrics*` columns. Build a `SubtitleSimple` whose
+      // [lyrics] lines are shown as plain text and whose [variants] carry the
+      // full multilanguage (Telugu / English / Hindi × translation /
+      // transliteration) set, so the Plain tab renders every available
+      // language even when there are no synced/timed lyrics.
+      final plainTe = (plainRaw != null && plainRaw.trim().isNotEmpty)
+          ? plainRaw
+          : (data['plain_lyrics'] as String?);
+      final hasPlain =
+          (plainTe?.trim().isNotEmpty ?? false) ||
+          (plainEnRaw?.trim().isNotEmpty ?? false) ||
+          (plainHiRaw?.trim().isNotEmpty ?? false) ||
+          (plainEnTrRaw?.trim().isNotEmpty ?? false) ||
+          (plainHiTrRaw?.trim().isNotEmpty ?? false);
+
+      if (hasPlain) {
+        // Split each language column into lines aligned by index (they are
+        // stored line-per-line, same order).
+        final teLines = _plainLinesOf(plainTe);
+        final enLines = _plainLinesOf(plainEnRaw);
+        final hiLines = _plainLinesOf(plainHiRaw);
+        final enTrLines = _plainLinesOf(plainEnTrRaw);
+        final hiTrLines = _plainLinesOf(plainHiTrRaw);
+        final lineCount = [
+          teLines.length, enLines.length, hiLines.length,
+          enTrLines.length, hiTrLines.length,
+        ].fold<int>(0, (m, v) => v > m ? v : m);
+
+        final variants = <LyricVariant>[];
+        final slices = <LyricSlice>[];
+        for (var i = 0; i < lineCount; i++) {
+          final te = i < teLines.length ? teLines[i] : '';
+          final en = i < enLines.length ? enLines[i] : '';
+          final hi = i < hiLines.length ? hiLines[i] : '';
+          final enTr = i < enTrLines.length ? enTrLines[i] : '';
+          final hiTr = i < hiTrLines.length ? hiTrLines[i] : '';
+          final first = (te.isNotEmpty ? te : en.isNotEmpty ? en : hi.isNotEmpty ? enTr : hiTr);
+          if (first.isEmpty) continue;
+          variants.add(LyricVariant(
+            time: Duration.zero, te: te, en: en, hi: hi, enTr: enTr, hiTr: hiTr,
+          ));
+          slices.add(LyricSlice(text: first, time: Duration.zero));
+        }
+
+        if (slices.isNotEmpty) {
+          return SubtitleSimple(
+            lyrics: slices,
+            variants: variants,
+            name: _track.name,
+            uri: Uri.parse('server://${_track.id}'),
+            rating: 0,
+            provider: "Server",
+          );
+        }
+      }
+
+      // Last-resort salvage: if the database has lyrics text but neither the
+      // LRC/SRT (synced) parser nor the `lyrics` plain column produced a set
+      // (e.g. an unusual or unparseable format), show the raw text as plain
+      // lines rather than silently reporting "no lyrics". This guarantees any
+      // available lyrics surface on screen.
+      final anyRaw = syncedRaw ?? syncedEnRaw ?? syncedHiRaw ?? syncedEnTrRaw ?? syncedHiTrRaw;
+      if (anyRaw != null && anyRaw.trim().isNotEmpty) {
+        final lines = anyRaw
+            .split(RegExp(r'\r?\n'))
+            .map((line) => line.trim())
+            .where((s) => s.isNotEmpty)
+            .map((s) => LyricSlice(text: s, time: Duration.zero))
             .toList();
         if (lines.isNotEmpty) {
           return SubtitleSimple(
@@ -285,7 +356,21 @@ class SyncedLyricsNotifier
       );
     }
 
-    final plainLyrics = (json["plainLyrics"] as String)
+    final plainLyricsRaw = json["plainLyrics"] as String?;
+    if (plainLyricsRaw == null || plainLyricsRaw.trim().isEmpty) {
+      // No synced and no plain lyrics from the provider: return an empty set
+      // (never throw) so the app shows a clean "no lyrics available" state
+      // rather than a crash/error.
+      return SubtitleSimple(
+        lyrics: [],
+        name: _track.name,
+        uri: res.realUri,
+        rating: 0,
+        provider: "LRCLib",
+      );
+    }
+
+    final plainLyrics = plainLyricsRaw
         .split("\n")
         .map((line) => LyricSlice(text: line, time: Duration.zero))
         .toList();
@@ -315,30 +400,33 @@ class SyncedLyricsNotifier
 
       SubtitleSimple? lyrics = cachedLyrics;
 
-      if (lyrics == null ||
-          lyrics.lyrics.isEmpty ||
-          lyrics.lyrics.length <= 5) {
-        // Prefer lyrics stored server-side (added via the admin web app), and
-        // only fall back to LRCLib when the server has none for this track.
-        lyrics = await getServerLyrics();
+      // Always prefer the server/Database lyrics (added via the admin app) —
+      // they are the source of truth and must display regardless of line
+      // count (e.g. a 5-line lyric set). Only fall back to LRCLib when the
+      // server genuinely has no lyrics for the track.
+      final serverLyrics = await getServerLyrics();
+      if (serverLyrics != null &&
+          (serverLyrics.lyrics.isNotEmpty || (serverLyrics.variants?.isNotEmpty ?? false))) {
+        lyrics = serverLyrics;
+      } else {
         if (lyrics == null || lyrics.lyrics.isEmpty) {
           lyrics = await getLRCLibLyrics();
         }
       }
 
-      if (lyrics.lyrics.isEmpty) {
+      if (lyrics == null || lyrics.lyrics.isEmpty) {
         throw Exception("Unable to find lyrics");
       }
 
-      if (cachedLyrics == null || cachedLyrics.lyrics.isEmpty) {
-        await database.into(database.lyricsTable).insert(
-              LyricsTableCompanion.insert(
-                trackId: track.id,
-                data: lyrics,
-              ),
-              mode: InsertMode.replace,
-            );
-      }
+      // Persist fresh server lyrics so an updated plain/sync set is reflected
+      // immediately and on subsequent opens.
+      await database.into(database.lyricsTable).insert(
+            LyricsTableCompanion.insert(
+              trackId: track.id,
+              data: lyrics,
+            ),
+            mode: InsertMode.replace,
+          );
 
       return lyrics;
     } catch (e, stackTrace) {
@@ -368,3 +456,15 @@ final syncedLyricsMapProvider =
 
   return (static: isStaticLyrics, lyricsMap: lyricsMap);
 });
+
+/// Splits a per-language plain-lyrics string into cleaned non-empty lines.
+/// Used to align the multilingual `plain_lyrics*` columns line-by-line so each
+/// translation/transliteration maps to the same lyric index.
+List<String> _plainLinesOf(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return const [];
+  return raw
+      .split(RegExp(r'\r?\n'))
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty)
+      .toList();
+}

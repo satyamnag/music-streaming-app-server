@@ -8,6 +8,7 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -132,11 +133,27 @@ class HomeSeeAllPage extends HookConsumerWidget {
                     track: tracks[index],
                     playlist: playlist,
                     onTap: () async {
-                      await ref.read(audioPlayerProvider.notifier).load(
-                            tracks,
-                            initialIndex: index,
-                            autoPlay: true,
-                          );
+                      if (PremiumAccess.isTrackLocked(tracks[index], ref)) {
+                        await PremiumAccess.gateTrackPlay(
+                          context: context,
+                          ref: ref,
+                          track: tracks[index],
+                          feature: () async {
+                            await ref
+                                .read(audioPlayerProvider.notifier)
+                                .load(tracks,
+                                    initialIndex: index,
+                                    autoPlay: true);
+                          },
+                        );
+                        return;
+                      }
+
+                      await ref
+                          .read(audioPlayerProvider.notifier)
+                          .load(tracks,
+                              initialIndex: index,
+                              autoPlay: true);
                     },
                   );
                 },

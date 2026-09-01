@@ -236,7 +236,9 @@ class ServerSupabaseDataRoutes {
           .from('tracks')
           .select(
             'lyrics,synced_lyrics,synced_lyrics_en,synced_lyrics_hi,'
-            'synced_lyrics_en_tr,synced_lyrics_hi_tr',
+            'synced_lyrics_en_tr,synced_lyrics_hi_tr,'
+            'plain_lyrics,plain_lyrics_en,plain_lyrics_hi,'
+            'plain_lyrics_en_tr,plain_lyrics_hi_tr',
           )
           .eq('id', id)
           .maybeSingle();
@@ -251,6 +253,11 @@ class ServerSupabaseDataRoutes {
           'synced_lyrics_hi': raw['synced_lyrics_hi'] as String?,
           'synced_lyrics_en_tr': raw['synced_lyrics_en_tr'] as String?,
           'synced_lyrics_hi_tr': raw['synced_lyrics_hi_tr'] as String?,
+          'plain_lyrics': raw['plain_lyrics'] as String?,
+          'plain_lyrics_en': raw['plain_lyrics_en'] as String?,
+          'plain_lyrics_hi': raw['plain_lyrics_hi'] as String?,
+          'plain_lyrics_en_tr': raw['plain_lyrics_en_tr'] as String?,
+          'plain_lyrics_hi_tr': raw['plain_lyrics_hi_tr'] as String?,
         }),
         headers: {'content-type': 'application/json'},
       );
