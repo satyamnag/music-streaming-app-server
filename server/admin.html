@@ -207,6 +207,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <h2 style="margin-bottom:12px;">Albums</h2>
   <div class="search-row">
     <input id="albumSearch" type="text" placeholder="Search by album name..." oninput="renderAlbums()">
+    <button class="btn btn-success btn-sm" type="button" onclick="openAlbumCreate()">+ New Album</button>
   </div>
   <table><thead><tr>
     <th>Cover</th>
@@ -425,7 +426,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 <div id="albumEditModal" class="modal" onclick="if(event.target===this)closeAlbumEdit()">
   <div class="modal-content" style="max-width:480px;">
-    <h2>Edit Album</h2>
+    <h2 id="albumModalTitle">Edit Album</h2>
     <input type="hidden" id="albumEditId">
     <label>Album name *</label><input id="alName" placeholder="e.g. Divine Melodies">
     <label>Cover photo (upload only)</label>
@@ -438,7 +439,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeAlbumEdit()">Cancel</button>
-      <button class="btn btn-success" onclick="saveAlbumEdit()">Save</button>
+      <button class="btn btn-success" id="albumSaveBtn" onclick="saveAlbumEdit()">Save</button>
     </div>
   </div>
 </div>
@@ -1114,6 +1115,8 @@ function changeAlbumsPage(dir) { const total = Math.max(1, Math.ceil(filterAlbum
 function openAlbumEdit(id) {
   const a = albums.find(x => x.id === id);
   if (!a) return;
+  document.getElementById('albumModalTitle').textContent = 'Edit Album';
+  document.getElementById('albumSaveBtn').setAttribute('onclick', 'saveAlbumEdit()');
   editingAlbumId = id;
   document.getElementById('albumEditId').value = id;
   document.getElementById('alName').value = a.name || '';
@@ -1137,6 +1140,36 @@ async function saveAlbumEdit() {
     const res = await authedFetch('/api/admin/albums/' + id, { method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, cover_url, status }) });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
     toast('Album updated');
+    closeAlbumEdit();
+    loadAlbums();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); unlock(); }
+}
+
+function openAlbumCreate() {
+  editingAlbumId = null;
+  document.getElementById('albumEditId').value = '';
+  document.getElementById('alName').value = '';
+  document.getElementById('alCover').value = '';
+  document.getElementById('alStatus').value = 'free';
+  document.getElementById('alCoverStatus').textContent = '';
+  document.getElementById('alCoverInput').value = '';
+  document.getElementById('albumModalTitle').textContent = 'New Album';
+  document.getElementById('albumSaveBtn').setAttribute('onclick', 'saveNewAlbum()');
+  document.getElementById('albumEditModal').style.display = 'block';
+}
+
+async function saveNewAlbum() {
+  const name = document.getElementById('alName').value.trim();
+  const cover_url = document.getElementById('alCover').value.trim() || null;
+  const status = document.getElementById('alStatus').value === 'paid' ? 'paid' : 'free';
+  if (!name) { toast('Album name is required'); return; }
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/albums', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, cover_url, status }) });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Create failed'); }
+    toast('Album created');
     closeAlbumEdit();
     loadAlbums();
   } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
