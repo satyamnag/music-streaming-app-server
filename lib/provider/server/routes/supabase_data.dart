@@ -409,11 +409,16 @@ class ServerSupabaseDataRoutes {
               ? 'webm'
               : ext;
 
-      // Stream from the Cloudflare R2 public CDN (zero egress). Fall back to a
-      // Supabase signed URL only when R2 is not configured.
-      final r2 = r2StreamUrl(storagePath);
-      final url = r2 ??
-          await sb.storage.from('music').createSignedUrl(storagePath, 3600);
+      // Stream from the Cloudflare R2 public CDN only. There is deliberately no
+      // Supabase Storage fallback here: signed-URL audio exhausted the Storage
+      // CDN (cached) egress quota, so an unconfigured CDN is reported as an
+      // explicit error rather than silently falling back.
+      final url = r2StreamUrl(storagePath);
+      if (url == null) {
+        return Response.internalServerError(
+          body: '{"error":"Audio CDN is not configured (R2_BASE_URL missing)"}',
+        );
+      }
       return Response.ok(
         jsonEncode({
           'url': url,

@@ -38,11 +38,14 @@ Future<SangeetAudioSourceStreamObject?> resolveDirectSupabaseStream(
     final ext = storagePath.split('.').last.toLowerCase();
     final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
 
-    // Stream from the Cloudflare R2 public CDN (zero egress). Fall back to a
-    // Supabase signed URL only when R2 is not configured.
-    final r2 = r2StreamUrl(storagePath);
-    final url = r2 ??
-        await supabase.storage.from('music').createSignedUrl(storagePath, 3600);
+    // Stream from the Cloudflare R2 public CDN only. There is deliberately no
+    // Supabase Storage fallback here: signed-URL audio exhausted the Storage
+    // CDN (cached) egress quota, so an unconfigured CDN fails instead of
+    // silently falling back to Supabase.
+    final url = r2StreamUrl(storagePath);
+    if (url == null) {
+      return null;
+    }
 
     return SangeetAudioSourceStreamObject(
       url: url,

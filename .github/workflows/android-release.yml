@@ -1,0 +1,142 @@
+name: Android Release Build
+
+# Manual, on-demand Android build for the Soulful Bhakti app.
+# Produces a signed release APK (and optionally an AAB for Play).
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   KEYSTORE        base64-encoded release keystore (.jks)
+#   KEY_PROPERTIES  contents of android/key.properties (storeFile=upload-keystore.jks)
+#   DOTENV_RELEASE  full .env contents used at compile time
+#
+# This workflow is independent of spotube-release-binary.yml, which is left
+# untouched so nothing existing breaks.
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel baked into the app
+        type: choice
+        options:
+          - stable
+          - nightly
+        default: stable
+      format:
+        description: Build output format
+        type: choice
+        options:
+          - apk
+          - appbundle
+          - both
+        default: apk
+      split_per_abi:
+        description: Split APK per CPU architecture (smaller downloads)
+        type: boolean
+        default: false
+
+env:
+  FLUTTER_VERSION: 3.35.2
+
+permissions:
+  contents: read
+
+jobs:
+  build_android:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Verify toolchain
+        run: |
+          flutter --version
+          java -version
+
+      - name: Write .env (compile-time config)
+        env:
+          DOTENV: ${{ secrets.DOTENV_RELEASE }}
+        run: |
+          if [ -z "$DOTENV" ]; then
+            echo "::error::Secret DOTENV_RELEASE is not set. Add it in Settings -> Secrets -> Actions."
+            exit 1
+          fi
+          printf '%s\n' "$DOTENV" > .env
+          # Show only the KEYS, never the values, so the log stays safe.
+          echo "Wrote .env with these keys:"
+          grep -oE '^[A-Z_]+' .env | sort -u
+
+      - name: Write signing config
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEY_PROPERTIES" ]; then
+            echo "::error::Secrets KEYSTORE and/or KEY_PROPERTIES are not set."
+            exit 1
+          fi
+          # The workflow writes the keystore here; key.properties must reference
+          # this exact relative path (storeFile=upload-keystore.jks).
+          echo "$KEYSTORE_B64" | base64 --decode > android/app/upload-keystore.jks
+          printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
+          test -s android/app/upload-keystore.jks || { echo "::error::keystore decode produced an empty file"; exit 1; }
+          echo "Signing files written."
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code (routes, drift, envied)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build APK
+        if: ${{ inputs.format == 'apk' || inputs.format == 'both' }}
+        env:
+          RELEASE_CHANNEL: ${{ inputs.channel }}
+        run: |
+          if [ "${{ inputs.split_per_abi }}" = "true" ]; then
+            flutter build apk --release --split-per-abi
+          else
+            flutter build apk --release
+          fi
+
+      - name: Build App Bundle (Play upload)
+        if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
+        env:
+          RELEASE_CHANNEL: ${{ inputs.channel }}
+        run: flutter build appbundle --release
+
+      - name: List build outputs
+        run: |
+          echo "--- flutter-apk ---"
+          ls -lh build/app/outputs/flutter-apk/ 2>/dev/null || true
+          echo "--- bundle ---"
+          ls -lh build/app/outputs/bundle/release/ 2>/dev/null || true
+
+      - name: Upload APK artifact
+        if: ${{ inputs.format == 'apk' || inputs.format == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: soulful-bhakti-apk
+          path: build/app/outputs/flutter-apk/*.apk
+
+      - name: Upload AAB artifact
+        if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: soulful-bhakti-aab
+          path: build/app/outputs/bundle/release/*.aab

@@ -7,8 +7,9 @@ import 'package:sangeet/collections/env.dart';
 /// `R2_BASE_URL=https://music.soulfulbhakti.com` →
 /// `https://music.soulfulbhakti.com/Niluvadu-Manasu.opus`.
 ///
-/// Returns null when `R2_BASE_URL` is not configured, so callers can fall
-/// back to the previous Supabase signed-URL path.
+/// Returns null when `R2_BASE_URL` is not configured. Callers MUST treat null
+/// as a hard failure: audio must never be served from Supabase Storage, because
+/// signed-URL audio exhausted the Storage CDN (cached) egress quota.
 String? r2StreamUrl(String storagePath) {
   final base = Env.r2BaseUrl.trim();
   if (base.isEmpty || storagePath.isEmpty) return null;

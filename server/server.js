@@ -469,16 +469,18 @@ app.get('/stream/:id', async (req, res, next) => {
     const ext = track.storage_path.split('.').pop().toLowerCase()
     const fmt = ext === 'm4a' ? 'mp4' : ext === 'weba' ? 'webm' : ext
 
-    const { data: signed, error: signError } = await supabase.storage
-      .from('music')
-      .createSignedUrl(track.storage_path, 3600)
-
-    if (signError || !signed) {
-      return res.status(500).json({ error: 'Failed to generate stream URL' })
+    // Serve audio ONLY from the Cloudflare R2 public CDN. There is deliberately
+    // no Supabase Storage signed-URL fallback here: that path burned the
+    // Storage CDN egress quota. An unconfigured CDN fails loudly instead.
+    const publicUrl = r2PublicUrl(track.storage_path)
+    if (!publicUrl) {
+      return res.status(503).json({
+        error: 'Audio CDN is not configured (R2_BASE_URL is missing)',
+      })
     }
 
     res.json({
-      url: signed.signedUrl,
+      url: publicUrl,
       container: fmt,
       type: 'lossy',
       codec: fmt === 'opus' ? 'opus' : fmt === 'mp3' ? 'mp3' : fmt,
@@ -519,14 +521,10 @@ app.get('/stream/:id/file', async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      try {
-        const { data: file, error: dlErr } = await supabase.storage
-          .from('music')
-          .download(track.storage_path)
-        if (!dlErr && file) buf = Buffer.from(await file.arrayBuffer())
-      } catch (_) { /* ignore */ }
+      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
+      // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
+      return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
-    if (!buf) return res.status(500).json({ error: 'Failed to retrieve audio' })
 
     const ext = (track.storage_path.split('.').pop() || '').toLowerCase()
     const mime = AUDIO_MIME[ext] || 'application/octet-stream'
@@ -576,12 +574,10 @@ app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      try {
-        const { data: file, error: dlErr } = await supabase.storage.from('music').download(path)
-        if (!dlErr && file) buf = Buffer.from(await file.arrayBuffer())
-      } catch (_) { /* ignore */ }
+      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
+      // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
+      return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
-    if (!buf) return res.status(404).json({ error: 'File not found' })
 
     const ext = (path.split('.').pop() || '').toLowerCase()
     const mime = AUDIO_MIME[ext] || 'application/octet-stream'
@@ -1086,6 +1082,17 @@ async function requireAdmin(req, res, next) {
 // from the vault (secrets.*). When unset, the admin upload falls back to
 // Supabase Storage (the previous behaviour).
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'soulful-bhakti-music'
+
+// Public CDN base for the R2 bucket, e.g. https://music.soulfulbhakti.com
+// Audio is served from here ONLY. Supabase Storage must never serve audio:
+// signed-URL audio exhausted the Storage CDN (cached) egress quota in Aug 2026,
+// which is what restricted the project. See the notes on the routes below.
+const R2_PUBLIC_BASE_URL = (process.env.R2_BASE_URL || '').replace(/\/+$/, '')
+
+/** Public R2 CDN URL for an object key, or null when the CDN is unconfigured. */
+function r2PublicUrl(key) {
+  return R2_PUBLIC_BASE_URL ? `${R2_PUBLIC_BASE_URL}/${key}` : null
+}
 let r2Enabled = false
 let r2 = null
 
@@ -1636,13 +1643,21 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     const fileName = `${Date.now()}-${req.file.originalname}`
     const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
 
-    if (isAudio && r2Enabled) {
-      // Stream to Cloudflare R2 so new songs are served from the CDN.
+    if (isAudio) {
+      // Audio MUST go to Cloudflare R2. Storing audio in Supabase Storage is
+      // what exhausted the Storage CDN egress quota, so we refuse rather than
+      // silently falling back to it.
+      if (!r2Enabled) {
+        return res.status(503).json({
+          error: 'Audio storage (R2) is not configured — refusing to store audio in Supabase Storage',
+        })
+      }
       const key = await uploadAudioToR2(fileName, req.file.buffer, contentType)
       return res.json({ storage_path: key })
     }
 
-    const bucket = isImage ? 'thumbnails' : 'music'
+    // Only images reach this point; audio is handled above and always uses R2.
+    const bucket = 'thumbnails'
     const { data, error } = await supabase.storage.from(bucket).upload(fileName, req.file.buffer, {
       contentType,
       upsert: false,
