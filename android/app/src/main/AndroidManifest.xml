@@ -7,6 +7,10 @@
   <!-- OneSignal push notifications (Android 13+ runtime permission) -->
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
   <uses-permission android:name="android.permission.VIBRATE" />
+  <!-- Setting a ringtone/notification/alarm sound requires the user to grant
+       "modify system settings" via Settings.ACTION_MANAGE_WRITE_SETTINGS.
+       This is a special permission, not a runtime prompt. -->
+  <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
   <queries>
     <!-- If your app opens https URLs -->

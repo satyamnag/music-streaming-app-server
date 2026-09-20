@@ -1616,4 +1616,13 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get local => 'স্থানীয়';
+
+  @override
+  String get set_as_ringtone => 'Set as ringtone';
+
+  @override
+  String get ringtone_set => 'Ringtone set';
+
+  @override
+  String get ringtone_failed => 'Could not set ringtone';
 }

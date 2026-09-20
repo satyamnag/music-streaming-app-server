@@ -10,6 +10,7 @@ import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_queue.dart';
+import 'package:sangeet/modules/player/ringtone_action_button.dart';
 import 'package:sangeet/modules/player/sibling_tracks_sheet.dart';
 import 'package:sangeet/components/adaptive/adaptive_pop_sheet_list.dart';
 import 'package:sangeet/components/heart_button/local_heart_button.dart';
@@ -131,6 +132,9 @@ class PlayerActions extends HookConsumerWidget {
             // which are all ButtonSize.normal.
             size: ButtonSize.normal,
           ),
+        // Renders nothing unless the platform can set ringtones and the track
+        // actually has a ringtone file.
+        const RingtoneActionButton(),
         if (playlist.activeTrack != null)
           Tooltip(
             tooltip: TooltipContainer(

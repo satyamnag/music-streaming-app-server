@@ -20,6 +20,14 @@ class MainActivity: AudioServiceActivity() {
             ),
             applicationContext,
         )
+        // Ringtone channel: sets a downloaded MP3 as the device's ringtone,
+        // notification sound or alarm. Requires the user to grant WRITE_SETTINGS.
+        RingtoneBridge(this).register(
+            MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                RingtoneBridge.CHANNEL,
+            )
+        )
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {

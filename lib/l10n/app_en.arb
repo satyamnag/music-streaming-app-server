@@ -485,5 +485,8 @@
   "uncompressed": "Uncompressed",
   "dab_music_source_description": "For audiophiles. Provides high-quality/lossless audio streams. Accurate ISRC based track matching.",
   "summary_top_track": "Top track\nthis period",
-  "local": "Local"
+  "local": "Local",
+  "set_as_ringtone": "Set as ringtone",
+  "ringtone_set": "Ringtone set",
+  "ringtone_failed": "Could not set ringtone"
 }

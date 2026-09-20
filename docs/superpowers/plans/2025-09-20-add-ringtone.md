@@ -46,57 +46,56 @@
 
 ---
 
-### Task 0: Repair the test harness (prerequisite)
+### Task 0: Repair the test harness (prerequisite) — **BLOCKED, see status**
+
+> **STATUS (implementation attempt):** Partially diagnosed, not resolved.
+>
+> **Root cause found:** `lib/collections/env.g.dart` is gitignored and absent
+> from the checkout. `flutter test` and `flutter analyze` cannot compile `lib/`
+> without it — this was the source of the `Undefined name '_Env'` errors.
+> **Fix applied:** `dart run build_runner build --delete-conflicting-outputs`
+> generates it. This is required before *any* Flutter analysis/test work.
+>
+> **Second, deeper problem — NOT fixable by imports:** the snapshots
+> `test/drift/app_db/generated/schema_v*.dart` reference enums that **no longer
+> exist anywhere in this codebase or its dependencies**:
+>
+> | Referenced name | Present in `lib/` today |
+> |---|---|
+> | `ThemeMode`, `LayoutMode`, `Market`, `SearchMode`, `CloseBehavior`, `YoutubeClientEngine` | yes — imports added, compiles |
+> | `SourceCodecs` | **no (0 files)** |
+> | `SourceQualities` | **no (0 files)** |
+> | `SourceType` | **no (0 files)** |
+>
+> These are stale artifacts from the upstream Spotube fork (last touched
+> 2025-10-25, before the Soulful Bhakti rebrand). No import can resolve a type
+> that does not exist. The migration test therefore cannot compile until the
+> snapshots are **regenerated** (`dart run drift_dev schema dump` /
+> `schema steps`) rather than hand-patched.
+>
+> **Decision taken:** the ringtone feature needs **no Drift change** —
+> `ringtone_storage_path` is a remote PostgREST column, not a local table. Task 0
+> is therefore **not a prerequisite for Tasks 1-9** and is parked as a
+> pre-existing defect. Do not hand-patch the snapshots further.
 
 **Files:**
-- Modify: `test/drift/app_db/generated/schema_v1.dart` … `schema_v12.dart` (add missing enum imports)
-- Delete or replace: `test/widget_test.dart`
+- Modify: `test/drift/app_db/generated/schema_v1.dart` … `schema_v12.dart` (**do not** — regenerate instead)
+- Delete or replace: `test/widget_test.dart` (stale Flutter template)
 
 **Interfaces:**
 - Produces: a working `flutter test` baseline so every later task's test step can actually run.
 
-- [ ] **Step 1: Confirm the baseline failures**
-
-Run: `flutter test 2>&1 | Select-Object -Last 20`
-Expected: `Undefined name '_Env'` (missing `env.g.dart`) and/or 27 errors in `test/drift/app_db/generated/schema_*.dart`, plus a widget_test failure.
-
-- [ ] **Step 2: Generate the missing env file**
+- [ ] **Step 1: Generate the missing env file (the real first fix)**
 
 Run: `dart run build_runner build --delete-conflicting-outputs`
 Expected: writes `lib/collections/env.g.dart` (requires a root `.env` with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `CLERK_PUBLISHABLE_KEY`).
 
-- [ ] **Step 3: Add the missing enum imports to the snapshot files**
+- [ ] **Step 2: Regenerate the drift schema snapshots**
 
-Each snapshot references enums without importing them. Determine the exact import list per file by reading the errors, then add the imports. For `schema_v4.dart` the errors are:
+Run: `dart run drift_dev schema dump lib/models/database/database.dart drift_schemas/` then `dart run drift_dev schema generate drift_schemas/ test/drift/app_db/generated/`
+Expected: snapshots are rewritten from the current schema and compile. **Verify against drift's official docs before running** — do not hand-edit the generated files.
 
-```
-test\drift\app_db\generated\schema_v4.dart:523:30 - Undefined name 'CloseBehavior'
-test\drift\app_db\generated\schema_v4.dart:533:30 - Undefined name 'LayoutMode'
-test\drift\app_db\generated\schema_v4.dart:544:30 - Undefined name 'Market'
-test\drift\app_db\generated\schema_v4.dart:549:30 - Undefined name 'SearchMode'
-test\drift\app_db\generated\schema_v4.dart:574:30 - Undefined name 'ThemeMode'
-test\drift\app_db\generated\schema_v4.dart:579:30 - Undefined name 'AudioSource'
-test\drift\app_db\generated\schema_v4.dart:584:34 - Undefined name 'YoutubeClientEngine'
-test\drift\app_db\generated\schema_v4.dart:589:30 - Undefined name 'SourceCodecs'
-test\drift\app_db\generated\schema_v4.dart:594:34 - Undefined name 'SourceCodecs'
-test\drift\app_db\generated\schema_v4.dart:2008:30 - Undefined name 'SourceType'
-```
-
-Add the corresponding imports at the top of each affected snapshot (find the defining file with `git grep -n "enum CloseBehavior" -- lib`). For `schema_v4.dart` that is:
-
-```dart
-import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/services/audio_player/playlist_mode.dart';
-import 'package:sangeet/services/youtube_engine/newpipe_engine.dart';
-import 'package:sangeet/services/youtube_engine/youtube_explode_engine.dart';
-```
-
-- [ ] **Step 4: Verify the snapshots compile**
-
-Run: `flutter analyze test\drift\app_db\generated\ 2>&1 | Select-Object -Last 5`
-Expected: `No issues found!`
-
-- [ ] **Step 5: Replace the stale widget test**
+- [ ] **Step 3: Replace the stale widget test**
 
 `test/widget_test.dart` asserts a counter app (`find.text('0')`, `SangeetIcons.add`) that does not exist. Replace its body with a real smoke test:
 
@@ -114,16 +113,16 @@ void main() {
 }
 ```
 
-- [ ] **Step 6: Run the full suite**
+- [ ] **Step 4: Run the full suite**
 
 Run: `flutter test`
 Expected: PASS (drift migration tests + the smoke test).
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add test/ lib/collections/env.g.dart
-git commit -m "test: repair pre-existing harness breakage (snapshot imports + stale widget test)"
+git add test/ drift_schemas/
+git commit -m "test: regenerate drift schema snapshots and replace stale widget test"
 ```
 
 ---

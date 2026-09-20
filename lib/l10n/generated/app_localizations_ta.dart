@@ -1631,4 +1631,13 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get local => 'உள்ளூர்';
+
+  @override
+  String get set_as_ringtone => 'Set as ringtone';
+
+  @override
+  String get ringtone_set => 'Ringtone set';
+
+  @override
+  String get ringtone_failed => 'Could not set ringtone';
 }

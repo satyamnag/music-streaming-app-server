@@ -116,6 +116,7 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'explicit': false,
     'featuredOrder': t['featured_order'],
     'karaokeStoragePath': t['karaoke_storage_path'],
+    'ringtoneStoragePath': t['ringtone_storage_path'],
     'plainLyrics': t['plain_lyrics'],
     'plainLyricsEn': t['plain_lyrics_en'],
     'plainLyricsHi': t['plain_lyrics_hi'],

@@ -3074,6 +3074,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Local'**
   String get local;
+
+  /// No description provided for @set_as_ringtone.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as ringtone'**
+  String get set_as_ringtone;
+
+  /// No description provided for @ringtone_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Ringtone set'**
+  String get ringtone_set;
+
+  /// No description provided for @ringtone_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not set ringtone'**
+  String get ringtone_failed;
 }
 
 class _AppLocalizationsDelegate

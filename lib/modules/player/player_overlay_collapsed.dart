@@ -5,6 +5,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:sangeet/collections/intents.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/modules/player/player_track_details.dart';
+import 'package:sangeet/modules/player/ringtone_action_button.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
@@ -100,6 +101,11 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
                                 onPressed: isFetchingActiveTrack
                                     ? null
                                     : audioPlayer.skipToNext,
+                              ),
+                              // 4th action: hidden unless the platform supports
+                              // ringtones and this track has a ringtone file.
+                              const RingtoneActionButton(
+                                size: ButtonSize.xSmall,
                               ),
                               const Gap(5),
                             ],
