@@ -72,7 +72,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -271,6 +271,16 @@ class AppDatabase extends _$AppDatabase {
         if (to >= 13 && from < 13) {
           await m.createTable(jaapCountersTable);
           await m.createTable(jaapDailyCountsTable);
+        }
+        // v13 -> v14: repair the local playlist foreign key. local_playlists_table
+        // had no primary key, so local_playlist_songs_table.playlist_id pointed at
+        // a non-unique column. With `PRAGMA foreign_keys = ON` that is an invalid
+        // foreign key and SQLite rejects writes with "foreign key mismatch".
+        // Recreate both tables: id becomes the primary key and playlist_id now
+        // cascades on delete. `alterTable` preserves the existing rows.
+        if (to >= 14 && from < 14) {
+          await m.alterTable(TableMigration(localPlaylistsTable));
+          await m.alterTable(TableMigration(localPlaylistSongsTable));
         }
       },
     );

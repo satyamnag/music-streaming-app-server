@@ -3386,7 +3386,7 @@ class $LocalPlaylistsTableTable extends LocalPlaylistsTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
   LocalPlaylistsTableData map(Map<String, dynamic> data,
       {String? tablePrefix}) {
@@ -3614,7 +3614,7 @@ class $LocalPlaylistSongsTableTable extends LocalPlaylistSongsTable
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'REFERENCES local_playlists_table (id)'));
+          'REFERENCES local_playlists_table (id) ON DELETE CASCADE'));
   static const VerificationMeta _trackIdMeta =
       const VerificationMeta('trackId');
   @override
@@ -4741,6 +4741,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('local_playlists_table',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('local_playlist_songs_table',
+                  kind: UpdateKind.delete),
+            ],
+          ),
           WritePropagation(
             on: TableUpdateQuery.onTableName('jaap_counters_table',
                 limitUpdateKind: UpdateKind.delete),

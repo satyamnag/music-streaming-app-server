@@ -179,8 +179,12 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     // local cleanup that might fail (e.g. a locked database).
     try {
       final db = ref.read(databaseProvider);
-      await db.delete(db.localPlaylistsTable).go();
+      // Children before parents: local_playlist_songs.playlist_id has a
+      // foreign key to local_playlists.id and PRAGMA foreign_keys is ON, so
+      // deleting the parent first would fail (and the catch below would
+      // silently skip the whole cleanup).
       await db.delete(db.localPlaylistSongsTable).go();
+      await db.delete(db.localPlaylistsTable).go();
       await db.delete(db.localLikedSongsTable).go();
       await db.delete(db.historyTable).go();
     } catch (_) {
