@@ -1128,7 +1128,7 @@ abstract class AppLocalizations {
   /// No description provided for @made_with.
   ///
   /// In en, this message translates to:
-  /// **'Made with ❤️ in Bangladesh🇧🇩'**
+  /// **'Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©'**
   String get made_with;
 
   /// No description provided for @kingkor_roy_tirtho.
@@ -1140,7 +1140,7 @@ abstract class AppLocalizations {
   /// No description provided for @copyright.
   ///
   /// In en, this message translates to:
-  /// **'© 2021-{current_year} Kingkor Roy Tirtho'**
+  /// **'Â© 2021-{current_year} Kingkor Roy Tirtho'**
   String copyright(Object current_year);
 
   /// No description provided for @license.
@@ -1962,13 +1962,13 @@ abstract class AppLocalizations {
   /// No description provided for @freedom_of_music.
   ///
   /// In en, this message translates to:
-  /// **'“Freedom of Music”'**
+  /// **'â€œFreedom of Musicâ€'**
   String get freedom_of_music;
 
   /// No description provided for @freedom_of_music_palm.
   ///
   /// In en, this message translates to:
-  /// **'“Freedom of Music in the palm of your hand”'**
+  /// **'â€œFreedom of Music in the palm of your handâ€'**
   String get freedom_of_music_palm;
 
   /// No description provided for @get_started.
@@ -3176,6 +3176,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to count'**
   String get jaap_tap_to_count;
+
+  /// No description provided for @jaap_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get jaap_name_required;
+
+  /// No description provided for @jaap_target_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Target must be greater than 0'**
+  String get jaap_target_invalid;
 }
 
 class _AppLocalizationsDelegate

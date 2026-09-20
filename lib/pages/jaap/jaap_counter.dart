@@ -9,6 +9,7 @@ import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/jaap/jaap_counter_chips.dart';
+import 'package:sangeet/modules/jaap/jaap_new_counter_dialog.dart';
 import 'package:sangeet/modules/jaap/jaap_progress_ring.dart';
 import 'package:sangeet/modules/jaap/jaap_streak_strip.dart';
 import 'package:sangeet/modules/jaap/jaap_tap_target.dart';
@@ -80,13 +81,18 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// Creates a counter.
-///
-/// Placeholder for now: Task 6 of the plan implements the dialog that collects
-/// a name and a daily target. Kept as a no-op so the empty state stays tappable
-/// and the screen is exercisable before then.
+/// Creates a counter from the name/target dialog, then selects it.
 Future<void> _createCounter(BuildContext context, WidgetRef ref) async {
-  // Implemented in Task 6.
+  final result = await showDialog<({String name, int target})>(
+    context: context,
+    builder: (_) => const JaapNewCounterDialog(),
+  );
+  if (result == null) return;
+  final id = await ref
+      .read(jaapRepositoryProvider)
+      .createCounter(name: result.name, dailyTarget: result.target);
+  ref.invalidate(jaapCountersProvider);
+  ref.read(selectedJaapCounterProvider.notifier).state = id;
 }
 
 /// Buffers increments that have not been written to disk yet.
@@ -236,6 +242,73 @@ class _CounterView extends HookConsumerWidget {
           child: Text(
             '${context.l10n.jaap_lifetime}: ${lifetime.value}',
             style: TextStyle(color: context.theme.colorScheme.mutedForeground),
+          ),
+        ),
+        const Gap(20),
+        Center(
+          child: Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              Button.outline(
+                onPressed: () async {
+                  final edited = await showDialog<({String name, int target})>(
+                    context: context,
+                    builder: (_) => JaapNewCounterDialog(
+                      initialName: counter.name,
+                      initialTarget: counter.dailyTarget,
+                    ),
+                  );
+                  if (edited == null) return;
+                  await repo.renameCounter(counter.id, edited.name);
+                  await repo.setDailyTarget(counter.id, edited.target);
+                  if (!context.mounted) return;
+                  ref.invalidate(jaapCountersProvider);
+                  await refreshDerived();
+                },
+                child: Text(context.l10n.jaap_rename),
+              ),
+              Button.outline(
+                onPressed: () async {
+                  await repo.resetToday(counter.id, today);
+                  count.value = 0;
+                  pending.clear();
+                  if (!context.mounted) return;
+                  await refreshDerived();
+                },
+                child: Text(context.l10n.jaap_reset_today),
+              ),
+              Button.destructive(
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: Text(context.l10n.jaap_delete),
+                      content: Text(context.l10n.jaap_delete_confirm),
+                      actions: [
+                        Button.outline(
+                          onPressed: () => Navigator.of(dialogContext).pop(false),
+                          child: Text(context.l10n.cancel),
+                        ),
+                        Button.destructive(
+                          onPressed: () => Navigator.of(dialogContext).pop(true),
+                          child: Text(context.l10n.jaap_delete),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed != true) return;
+                  // Drop any unsaved taps before the rows disappear, so the
+                  // dispose flush cannot recreate them.
+                  pending.clear();
+                  await repo.deleteCounter(counter.id);
+                  if (!context.mounted) return;
+                  ref.read(selectedJaapCounterProvider.notifier).state = null;
+                  ref.invalidate(jaapCountersProvider);
+                },
+                child: Text(context.l10n.jaap_delete),
+              ),
+            ],
           ),
         ),
       ],

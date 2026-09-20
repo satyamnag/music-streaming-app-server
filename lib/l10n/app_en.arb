@@ -161,9 +161,9 @@
   "founder": "Founder",
   "repository": "Repository",
   "bug_issues": "Bug+Issues",
-  "made_with": "Made with ❤️ in Bangladesh🇧🇩",
+  "made_with": "Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©",
   "kingkor_roy_tirtho": "Kingkor Roy Tirtho",
-  "copyright": "© 2021-{current_year} Kingkor Roy Tirtho",
+  "copyright": "Â© 2021-{current_year} Kingkor Roy Tirtho",
   "license": "License",
   "credentials_will_not_be_shared_disclaimer": "Don't worry, any of your credentials won't be collected or shared with anyone",
   "know_how_to_login": "Don't know how to do this?",
@@ -300,8 +300,8 @@
   "local_tab": "Local",
   "song_link": "Song Link",
   "skip_this_nonsense": "Skip this nonsense",
-  "freedom_of_music": "“Freedom of Music”",
-  "freedom_of_music_palm": "“Freedom of Music in the palm of your hand”",
+  "freedom_of_music": "â€œFreedom of Musicâ€",
+  "freedom_of_music_palm": "â€œFreedom of Music in the palm of your handâ€",
   "get_started": "Let's get started",
   "youtube_source_description": "Recommended and works best.",
   "piped_source_description": "Feeling free? Same as YouTube but a lot free.",
@@ -502,5 +502,7 @@
   "jaap_delete_confirm": "Delete this counter and its history?",
   "jaap_reset_today": "Reset today",
   "jaap_target_reached": "Target reached",
-  "jaap_tap_to_count": "Tap to count"
+  "jaap_tap_to_count": "Tap to count",
+  "jaap_name_required": "Name is required",
+  "jaap_target_invalid": "Target must be greater than 0"
 }

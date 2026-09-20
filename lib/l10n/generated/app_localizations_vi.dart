@@ -1675,4 +1675,10 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get jaap_tap_to_count => 'Tap to count';
+
+  @override
+  String get jaap_name_required => 'Name is required';
+
+  @override
+  String get jaap_target_invalid => 'Target must be greater than 0';
 }
