@@ -16,7 +16,7 @@ import 'package:sangeet/models/metadata/market.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/services/kv_store/encrypted_kv_store.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
-import 'package:flutter/widgets.dart' hide Table, Key, View;
+import 'package:flutter/widgets.dart' hide Table, Key, View, Column;
 import 'package:sangeet/modules/settings/color_scheme_picker_dialog.dart';
 import 'package:drift/native.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -68,12 +68,21 @@ part 'typeconverters/subtitle.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// A database backed by a caller-provided executor, used by tests.
+  AppDatabase.forTesting(super.executor);
+
   @override
   int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
+      beforeOpen: (details) async {
+        // sqlite3 leaves foreign key enforcement off by default, which would
+        // make the ON DELETE CASCADE on jaap_daily_counts_table.counter_id
+        // inert. Enable it for every connection.
+        await customStatement('PRAGMA foreign_keys = ON');
+      },
       onUpgrade: (m, from, to) async {
         // Run the existing step-by-step chain (up to v11). This must be capped
         // at 11 because the generated database.steps.dart does not yet carry a

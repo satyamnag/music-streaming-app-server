@@ -20,7 +20,7 @@ class JaapDailyCountsTable extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  List<Set<GeneratedColumn>> get uniqueKeys => [
+  List<Set<Column>> get uniqueKeys => [
         {counterId, day},
       ];
 }
