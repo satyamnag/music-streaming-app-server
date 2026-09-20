@@ -4083,6 +4083,619 @@ class LocalLikedSongsTableCompanion
   }
 }
 
+class $JaapCountersTableTable extends JaapCountersTable
+    with TableInfo<$JaapCountersTableTable, JaapCountersTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JaapCountersTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 64),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _dailyTargetMeta =
+      const VerificationMeta('dailyTarget');
+  @override
+  late final GeneratedColumn<int> dailyTarget = GeneratedColumn<int>(
+      'daily_target', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(108));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, dailyTarget, sortOrder, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'jaap_counters_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<JaapCountersTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('daily_target')) {
+      context.handle(
+          _dailyTargetMeta,
+          dailyTarget.isAcceptableOrUnknown(
+              data['daily_target']!, _dailyTargetMeta));
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  JaapCountersTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JaapCountersTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      dailyTarget: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}daily_target'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $JaapCountersTableTable createAlias(String alias) {
+    return $JaapCountersTableTable(attachedDatabase, alias);
+  }
+}
+
+class JaapCountersTableData extends DataClass
+    implements Insertable<JaapCountersTableData> {
+  final int id;
+  final String name;
+  final int dailyTarget;
+  final int sortOrder;
+  final DateTime createdAt;
+  const JaapCountersTableData(
+      {required this.id,
+      required this.name,
+      required this.dailyTarget,
+      required this.sortOrder,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['daily_target'] = Variable<int>(dailyTarget);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  JaapCountersTableCompanion toCompanion(bool nullToAbsent) {
+    return JaapCountersTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      dailyTarget: Value(dailyTarget),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory JaapCountersTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JaapCountersTableData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      dailyTarget: serializer.fromJson<int>(json['dailyTarget']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'dailyTarget': serializer.toJson<int>(dailyTarget),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  JaapCountersTableData copyWith(
+          {int? id,
+          String? name,
+          int? dailyTarget,
+          int? sortOrder,
+          DateTime? createdAt}) =>
+      JaapCountersTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        dailyTarget: dailyTarget ?? this.dailyTarget,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  JaapCountersTableData copyWithCompanion(JaapCountersTableCompanion data) {
+    return JaapCountersTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      dailyTarget:
+          data.dailyTarget.present ? data.dailyTarget.value : this.dailyTarget,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JaapCountersTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('dailyTarget: $dailyTarget, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, dailyTarget, sortOrder, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JaapCountersTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.dailyTarget == this.dailyTarget &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt);
+}
+
+class JaapCountersTableCompanion
+    extends UpdateCompanion<JaapCountersTableData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> dailyTarget;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  const JaapCountersTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.dailyTarget = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  JaapCountersTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.dailyTarget = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<JaapCountersTableData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? dailyTarget,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (dailyTarget != null) 'daily_target': dailyTarget,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  JaapCountersTableCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? name,
+      Value<int>? dailyTarget,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt}) {
+    return JaapCountersTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      dailyTarget: dailyTarget ?? this.dailyTarget,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (dailyTarget.present) {
+      map['daily_target'] = Variable<int>(dailyTarget.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JaapCountersTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('dailyTarget: $dailyTarget, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $JaapDailyCountsTableTable extends JaapDailyCountsTable
+    with TableInfo<$JaapDailyCountsTableTable, JaapDailyCountsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JaapDailyCountsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _counterIdMeta =
+      const VerificationMeta('counterId');
+  @override
+  late final GeneratedColumn<int> counterId = GeneratedColumn<int>(
+      'counter_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES jaap_counters_table (id) ON DELETE CASCADE'));
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<String> day = GeneratedColumn<String>(
+      'day', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 10, maxTextLength: 10),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+      'count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, counterId, day, count, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'jaap_daily_counts_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<JaapDailyCountsTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('counter_id')) {
+      context.handle(_counterIdMeta,
+          counterId.isAcceptableOrUnknown(data['counter_id']!, _counterIdMeta));
+    } else if (isInserting) {
+      context.missing(_counterIdMeta);
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+          _dayMeta, day.isAcceptableOrUnknown(data['day']!, _dayMeta));
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+          _countMeta, count.isAcceptableOrUnknown(data['count']!, _countMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {counterId, day},
+      ];
+  @override
+  JaapDailyCountsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JaapDailyCountsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      counterId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}counter_id'])!,
+      day: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}day'])!,
+      count: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}count'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $JaapDailyCountsTableTable createAlias(String alias) {
+    return $JaapDailyCountsTableTable(attachedDatabase, alias);
+  }
+}
+
+class JaapDailyCountsTableData extends DataClass
+    implements Insertable<JaapDailyCountsTableData> {
+  final int id;
+  final int counterId;
+  final String day;
+  final int count;
+  final DateTime updatedAt;
+  const JaapDailyCountsTableData(
+      {required this.id,
+      required this.counterId,
+      required this.day,
+      required this.count,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['counter_id'] = Variable<int>(counterId);
+    map['day'] = Variable<String>(day);
+    map['count'] = Variable<int>(count);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  JaapDailyCountsTableCompanion toCompanion(bool nullToAbsent) {
+    return JaapDailyCountsTableCompanion(
+      id: Value(id),
+      counterId: Value(counterId),
+      day: Value(day),
+      count: Value(count),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory JaapDailyCountsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JaapDailyCountsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      counterId: serializer.fromJson<int>(json['counterId']),
+      day: serializer.fromJson<String>(json['day']),
+      count: serializer.fromJson<int>(json['count']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'counterId': serializer.toJson<int>(counterId),
+      'day': serializer.toJson<String>(day),
+      'count': serializer.toJson<int>(count),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  JaapDailyCountsTableData copyWith(
+          {int? id,
+          int? counterId,
+          String? day,
+          int? count,
+          DateTime? updatedAt}) =>
+      JaapDailyCountsTableData(
+        id: id ?? this.id,
+        counterId: counterId ?? this.counterId,
+        day: day ?? this.day,
+        count: count ?? this.count,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  JaapDailyCountsTableData copyWithCompanion(
+      JaapDailyCountsTableCompanion data) {
+    return JaapDailyCountsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      counterId: data.counterId.present ? data.counterId.value : this.counterId,
+      day: data.day.present ? data.day.value : this.day,
+      count: data.count.present ? data.count.value : this.count,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JaapDailyCountsTableData(')
+          ..write('id: $id, ')
+          ..write('counterId: $counterId, ')
+          ..write('day: $day, ')
+          ..write('count: $count, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, counterId, day, count, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JaapDailyCountsTableData &&
+          other.id == this.id &&
+          other.counterId == this.counterId &&
+          other.day == this.day &&
+          other.count == this.count &&
+          other.updatedAt == this.updatedAt);
+}
+
+class JaapDailyCountsTableCompanion
+    extends UpdateCompanion<JaapDailyCountsTableData> {
+  final Value<int> id;
+  final Value<int> counterId;
+  final Value<String> day;
+  final Value<int> count;
+  final Value<DateTime> updatedAt;
+  const JaapDailyCountsTableCompanion({
+    this.id = const Value.absent(),
+    this.counterId = const Value.absent(),
+    this.day = const Value.absent(),
+    this.count = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  JaapDailyCountsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int counterId,
+    required String day,
+    this.count = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  })  : counterId = Value(counterId),
+        day = Value(day);
+  static Insertable<JaapDailyCountsTableData> custom({
+    Expression<int>? id,
+    Expression<int>? counterId,
+    Expression<String>? day,
+    Expression<int>? count,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (counterId != null) 'counter_id': counterId,
+      if (day != null) 'day': day,
+      if (count != null) 'count': count,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  JaapDailyCountsTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? counterId,
+      Value<String>? day,
+      Value<int>? count,
+      Value<DateTime>? updatedAt}) {
+    return JaapDailyCountsTableCompanion(
+      id: id ?? this.id,
+      counterId: counterId ?? this.counterId,
+      day: day ?? this.day,
+      count: count ?? this.count,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (counterId.present) {
+      map['counter_id'] = Variable<int>(counterId.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<String>(day.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JaapDailyCountsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('counterId: $counterId, ')
+          ..write('day: $day, ')
+          ..write('count: $count, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4103,6 +4716,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalPlaylistSongsTableTable(this);
   late final $LocalLikedSongsTableTable localLikedSongsTable =
       $LocalLikedSongsTableTable(this);
+  late final $JaapCountersTableTable jaapCountersTable =
+      $JaapCountersTableTable(this);
+  late final $JaapDailyCountsTableTable jaapDailyCountsTable =
+      $JaapDailyCountsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4117,8 +4734,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         pluginsTable,
         localPlaylistsTable,
         localPlaylistSongsTable,
-        localLikedSongsTable
+        localLikedSongsTable,
+        jaapCountersTable,
+        jaapDailyCountsTable
       ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('jaap_counters_table',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('jaap_daily_counts_table', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$PreferencesTableTableCreateCompanionBuilder
@@ -6436,6 +7067,544 @@ typedef $$LocalLikedSongsTableTableProcessedTableManager
         ),
         LocalLikedSongsTableData,
         PrefetchHooks Function()>;
+typedef $$JaapCountersTableTableCreateCompanionBuilder
+    = JaapCountersTableCompanion Function({
+  Value<int> id,
+  required String name,
+  Value<int> dailyTarget,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+});
+typedef $$JaapCountersTableTableUpdateCompanionBuilder
+    = JaapCountersTableCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<int> dailyTarget,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+});
+
+final class $$JaapCountersTableTableReferences extends BaseReferences<
+    _$AppDatabase, $JaapCountersTableTable, JaapCountersTableData> {
+  $$JaapCountersTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$JaapDailyCountsTableTable,
+      List<JaapDailyCountsTableData>> _jaapDailyCountsTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.jaapDailyCountsTable,
+          aliasName: $_aliasNameGenerator(
+              db.jaapCountersTable.id, db.jaapDailyCountsTable.counterId));
+
+  $$JaapDailyCountsTableTableProcessedTableManager
+      get jaapDailyCountsTableRefs {
+    final manager =
+        $$JaapDailyCountsTableTableTableManager($_db, $_db.jaapDailyCountsTable)
+            .filter((f) => f.counterId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_jaapDailyCountsTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$JaapCountersTableTableFilterComposer
+    extends Composer<_$AppDatabase, $JaapCountersTableTable> {
+  $$JaapCountersTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get dailyTarget => $composableBuilder(
+      column: $table.dailyTarget, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> jaapDailyCountsTableRefs(
+      Expression<bool> Function($$JaapDailyCountsTableTableFilterComposer f)
+          f) {
+    final $$JaapDailyCountsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.jaapDailyCountsTable,
+        getReferencedColumn: (t) => t.counterId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$JaapDailyCountsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.jaapDailyCountsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$JaapCountersTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $JaapCountersTableTable> {
+  $$JaapCountersTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get dailyTarget => $composableBuilder(
+      column: $table.dailyTarget, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$JaapCountersTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JaapCountersTableTable> {
+  $$JaapCountersTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get dailyTarget => $composableBuilder(
+      column: $table.dailyTarget, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> jaapDailyCountsTableRefs<T extends Object>(
+      Expression<T> Function($$JaapDailyCountsTableTableAnnotationComposer a)
+          f) {
+    final $$JaapDailyCountsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.jaapDailyCountsTable,
+            getReferencedColumn: (t) => t.counterId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$JaapDailyCountsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.jaapDailyCountsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$JaapCountersTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $JaapCountersTableTable,
+    JaapCountersTableData,
+    $$JaapCountersTableTableFilterComposer,
+    $$JaapCountersTableTableOrderingComposer,
+    $$JaapCountersTableTableAnnotationComposer,
+    $$JaapCountersTableTableCreateCompanionBuilder,
+    $$JaapCountersTableTableUpdateCompanionBuilder,
+    (JaapCountersTableData, $$JaapCountersTableTableReferences),
+    JaapCountersTableData,
+    PrefetchHooks Function({bool jaapDailyCountsTableRefs})> {
+  $$JaapCountersTableTableTableManager(
+      _$AppDatabase db, $JaapCountersTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JaapCountersTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JaapCountersTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JaapCountersTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> dailyTarget = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              JaapCountersTableCompanion(
+            id: id,
+            name: name,
+            dailyTarget: dailyTarget,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String name,
+            Value<int> dailyTarget = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              JaapCountersTableCompanion.insert(
+            id: id,
+            name: name,
+            dailyTarget: dailyTarget,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$JaapCountersTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({jaapDailyCountsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (jaapDailyCountsTableRefs) db.jaapDailyCountsTable
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (jaapDailyCountsTableRefs)
+                    await $_getPrefetchedData<JaapCountersTableData,
+                            $JaapCountersTableTable, JaapDailyCountsTableData>(
+                        currentTable: table,
+                        referencedTable: $$JaapCountersTableTableReferences
+                            ._jaapDailyCountsTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$JaapCountersTableTableReferences(db, table, p0)
+                                .jaapDailyCountsTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.counterId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$JaapCountersTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $JaapCountersTableTable,
+    JaapCountersTableData,
+    $$JaapCountersTableTableFilterComposer,
+    $$JaapCountersTableTableOrderingComposer,
+    $$JaapCountersTableTableAnnotationComposer,
+    $$JaapCountersTableTableCreateCompanionBuilder,
+    $$JaapCountersTableTableUpdateCompanionBuilder,
+    (JaapCountersTableData, $$JaapCountersTableTableReferences),
+    JaapCountersTableData,
+    PrefetchHooks Function({bool jaapDailyCountsTableRefs})>;
+typedef $$JaapDailyCountsTableTableCreateCompanionBuilder
+    = JaapDailyCountsTableCompanion Function({
+  Value<int> id,
+  required int counterId,
+  required String day,
+  Value<int> count,
+  Value<DateTime> updatedAt,
+});
+typedef $$JaapDailyCountsTableTableUpdateCompanionBuilder
+    = JaapDailyCountsTableCompanion Function({
+  Value<int> id,
+  Value<int> counterId,
+  Value<String> day,
+  Value<int> count,
+  Value<DateTime> updatedAt,
+});
+
+final class $$JaapDailyCountsTableTableReferences extends BaseReferences<
+    _$AppDatabase, $JaapDailyCountsTableTable, JaapDailyCountsTableData> {
+  $$JaapDailyCountsTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $JaapCountersTableTable _counterIdTable(_$AppDatabase db) =>
+      db.jaapCountersTable.createAlias($_aliasNameGenerator(
+          db.jaapDailyCountsTable.counterId, db.jaapCountersTable.id));
+
+  $$JaapCountersTableTableProcessedTableManager get counterId {
+    final $_column = $_itemColumn<int>('counter_id')!;
+
+    final manager =
+        $$JaapCountersTableTableTableManager($_db, $_db.jaapCountersTable)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_counterIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$JaapDailyCountsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $JaapDailyCountsTableTable> {
+  $$JaapDailyCountsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get count => $composableBuilder(
+      column: $table.count, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$JaapCountersTableTableFilterComposer get counterId {
+    final $$JaapCountersTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.counterId,
+        referencedTable: $db.jaapCountersTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$JaapCountersTableTableFilterComposer(
+              $db: $db,
+              $table: $db.jaapCountersTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$JaapDailyCountsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $JaapDailyCountsTableTable> {
+  $$JaapDailyCountsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get count => $composableBuilder(
+      column: $table.count, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$JaapCountersTableTableOrderingComposer get counterId {
+    final $$JaapCountersTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.counterId,
+        referencedTable: $db.jaapCountersTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$JaapCountersTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.jaapCountersTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$JaapDailyCountsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JaapDailyCountsTableTable> {
+  $$JaapDailyCountsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$JaapCountersTableTableAnnotationComposer get counterId {
+    final $$JaapCountersTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.counterId,
+            referencedTable: $db.jaapCountersTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$JaapCountersTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.jaapCountersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$JaapDailyCountsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $JaapDailyCountsTableTable,
+    JaapDailyCountsTableData,
+    $$JaapDailyCountsTableTableFilterComposer,
+    $$JaapDailyCountsTableTableOrderingComposer,
+    $$JaapDailyCountsTableTableAnnotationComposer,
+    $$JaapDailyCountsTableTableCreateCompanionBuilder,
+    $$JaapDailyCountsTableTableUpdateCompanionBuilder,
+    (JaapDailyCountsTableData, $$JaapDailyCountsTableTableReferences),
+    JaapDailyCountsTableData,
+    PrefetchHooks Function({bool counterId})> {
+  $$JaapDailyCountsTableTableTableManager(
+      _$AppDatabase db, $JaapDailyCountsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JaapDailyCountsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JaapDailyCountsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JaapDailyCountsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> counterId = const Value.absent(),
+            Value<String> day = const Value.absent(),
+            Value<int> count = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+          }) =>
+              JaapDailyCountsTableCompanion(
+            id: id,
+            counterId: counterId,
+            day: day,
+            count: count,
+            updatedAt: updatedAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int counterId,
+            required String day,
+            Value<int> count = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+          }) =>
+              JaapDailyCountsTableCompanion.insert(
+            id: id,
+            counterId: counterId,
+            day: day,
+            count: count,
+            updatedAt: updatedAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$JaapDailyCountsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({counterId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (counterId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.counterId,
+                    referencedTable: $$JaapDailyCountsTableTableReferences
+                        ._counterIdTable(db),
+                    referencedColumn: $$JaapDailyCountsTableTableReferences
+                        ._counterIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$JaapDailyCountsTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $JaapDailyCountsTableTable,
+        JaapDailyCountsTableData,
+        $$JaapDailyCountsTableTableFilterComposer,
+        $$JaapDailyCountsTableTableOrderingComposer,
+        $$JaapDailyCountsTableTableAnnotationComposer,
+        $$JaapDailyCountsTableTableCreateCompanionBuilder,
+        $$JaapDailyCountsTableTableUpdateCompanionBuilder,
+        (JaapDailyCountsTableData, $$JaapDailyCountsTableTableReferences),
+        JaapDailyCountsTableData,
+        PrefetchHooks Function({bool counterId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6461,4 +7630,8 @@ class $AppDatabaseManager {
           _db, _db.localPlaylistSongsTable);
   $$LocalLikedSongsTableTableTableManager get localLikedSongsTable =>
       $$LocalLikedSongsTableTableTableManager(_db, _db.localLikedSongsTable);
+  $$JaapCountersTableTableTableManager get jaapCountersTable =>
+      $$JaapCountersTableTableTableManager(_db, _db.jaapCountersTable);
+  $$JaapDailyCountsTableTableTableManager get jaapDailyCountsTable =>
+      $$JaapDailyCountsTableTableTableManager(_db, _db.jaapDailyCountsTable);
 }

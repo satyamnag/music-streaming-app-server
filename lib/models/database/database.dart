@@ -38,6 +38,8 @@ part 'tables/lyrics.dart';
 part 'tables/metadata_plugins.dart';
 part 'tables/local_playlists.dart';
 part 'tables/local_liked_songs.dart';
+part 'tables/jaap_counters.dart';
+part 'tables/jaap_daily_counts.dart';
 
 part 'typeconverters/color.dart';
 part 'typeconverters/locale.dart';
@@ -59,13 +61,15 @@ part 'typeconverters/subtitle.dart';
     LocalPlaylistsTable,
     LocalPlaylistSongsTable,
     LocalLikedSongsTable,
+    JaapCountersTable,
+    JaapDailyCountsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -253,6 +257,11 @@ class AppDatabase extends _$AppDatabase {
         // v11 -> v12: local liked songs (device-local, no Supabase account).
         if (to >= 12 && from < 12) {
           await m.createTable(localLikedSongsTable);
+        }
+        // v12 -> v13: local Jaap Counter (counters + per-day counts).
+        if (to >= 13 && from < 13) {
+          await m.createTable(jaapCountersTable);
+          await m.createTable(jaapDailyCountsTable);
         }
       },
     );
