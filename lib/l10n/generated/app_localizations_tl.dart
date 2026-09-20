@@ -1643,4 +1643,43 @@ class AppLocalizationsTl extends AppLocalizations {
 
   @override
   String get jaap_counter => 'Jaap';
+
+  @override
+  String get jaap_today => 'Today';
+
+  @override
+  String get jaap_streak => 'Streak';
+
+  @override
+  String get jaap_days => 'days';
+
+  @override
+  String get jaap_lifetime => 'Lifetime';
+
+  @override
+  String get jaap_new_counter => 'New counter';
+
+  @override
+  String get jaap_name => 'Name';
+
+  @override
+  String get jaap_daily_target => 'Daily target';
+
+  @override
+  String get jaap_rename => 'Rename';
+
+  @override
+  String get jaap_delete => 'Delete';
+
+  @override
+  String get jaap_delete_confirm => 'Delete this counter and its history?';
+
+  @override
+  String get jaap_reset_today => 'Reset today';
+
+  @override
+  String get jaap_target_reached => 'Target reached';
+
+  @override
+  String get jaap_tap_to_count => 'Tap to count';
 }

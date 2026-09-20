@@ -3098,6 +3098,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Jaap'**
   String get jaap_counter;
+
+  /// No description provided for @jaap_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get jaap_today;
+
+  /// No description provided for @jaap_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get jaap_streak;
+
+  /// No description provided for @jaap_days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get jaap_days;
+
+  /// No description provided for @jaap_lifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get jaap_lifetime;
+
+  /// No description provided for @jaap_new_counter.
+  ///
+  /// In en, this message translates to:
+  /// **'New counter'**
+  String get jaap_new_counter;
+
+  /// No description provided for @jaap_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get jaap_name;
+
+  /// No description provided for @jaap_daily_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily target'**
+  String get jaap_daily_target;
+
+  /// No description provided for @jaap_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get jaap_rename;
+
+  /// No description provided for @jaap_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get jaap_delete;
+
+  /// No description provided for @jaap_delete_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this counter and its history?'**
+  String get jaap_delete_confirm;
+
+  /// No description provided for @jaap_reset_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset today'**
+  String get jaap_reset_today;
+
+  /// No description provided for @jaap_target_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached'**
+  String get jaap_target_reached;
+
+  /// No description provided for @jaap_tap_to_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to count'**
+  String get jaap_tap_to_count;
 }
 
 class _AppLocalizationsDelegate
