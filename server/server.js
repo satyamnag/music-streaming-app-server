@@ -1139,7 +1139,12 @@ const upload = multer({
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).
 // All data is protected server-side by requireAdmin regardless.
-app.get('/admin', (req, res) => {
+//
+// Shared by both the domain root and /admin so that visiting
+// https://admin.soulfulbhakti.com renders the panel directly, without a
+// redirect changing the URL. Both paths serve byte-identical markup; the
+// page's own calls use absolute /api/admin/* paths, so it works from either.
+function serveAdminHtml(req, res) {
   const htmlPath = path.join(__dirname, 'admin.html')
   if (fs.existsSync(htmlPath)) {
     // Inject the public R2 CDN base so the ringtone preview player can build
@@ -1154,16 +1159,16 @@ app.get('/admin', (req, res) => {
   } else {
     res.status(500).send('admin.html not found')
   }
-})
+}
+
+app.get('/admin', serveAdminHtml)
 
 // Root path: this server exists to serve the admin panel and the API, so a
-// bare visit to the domain (e.g. https://admin.soulfulbhakti.com) lands on the
-// admin panel instead of a 404. Only the exact root is redirected - /api/*,
-// /stream/* and every other route is untouched. ?next= is NOT honoured, so
-// this cannot be used as an open redirect.
-app.get('/', (req, res) => {
-  res.redirect(302, '/admin')
-})
+// bare visit to the domain (e.g. https://admin.soulfulbhakti.com) renders the
+// admin panel directly - no redirect, so the URL in the address bar is
+// unchanged. Only the exact root is matched (Express 4 '/' is an exact match,
+// not a wildcard), so /api/*, /stream/* and every other route are untouched.
+app.get('/', serveAdminHtml)
 
 // Login: verifies the ADMIN_TOKEN (timing-safe) and sets a signed HttpOnly
 // session cookie. Rate-limited per IP to prevent brute-force guessing. The
