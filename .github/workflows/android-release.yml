@@ -107,23 +107,23 @@ jobs:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
           if [ "${{ inputs.split_per_abi }}" = "true" ]; then
-            flutter build apk --release --split-per-abi
+            flutter build apk --release --flavor stable --split-per-abi
           else
-            flutter build apk --release
+            flutter build apk --release --flavor stable
           fi
 
       - name: Build App Bundle (Play upload)
         if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
         env:
           RELEASE_CHANNEL: ${{ inputs.channel }}
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release --flavor stable
 
       - name: List build outputs
         run: |
           echo "--- flutter-apk ---"
-          ls -lh build/app/outputs/flutter-apk/ 2>/dev/null || true
+          find build/app/outputs/flutter-apk -type f -name '*.apk' -exec ls -lh {} \; 2>/dev/null || true
           echo "--- bundle ---"
-          ls -lh build/app/outputs/bundle/release/ 2>/dev/null || true
+          find build/app/outputs/bundle -type f -name '*.aab' -exec ls -lh {} \; 2>/dev/null || true
 
       - name: Upload APK artifact
         if: ${{ inputs.format == 'apk' || inputs.format == 'both' }}
@@ -131,7 +131,7 @@ jobs:
         with:
           if-no-files-found: error
           name: soulful-bhakti-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/*stable*.apk
 
       - name: Upload AAB artifact
         if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
@@ -139,4 +139,4 @@ jobs:
         with:
           if-no-files-found: error
           name: soulful-bhakti-aab
-          path: build/app/outputs/bundle/release/*.aab
+          path: build/app/outputs/bundle/*Release/*.aab
