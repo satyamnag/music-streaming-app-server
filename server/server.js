@@ -1156,6 +1156,15 @@ app.get('/admin', (req, res) => {
   }
 })
 
+// Root path: this server exists to serve the admin panel and the API, so a
+// bare visit to the domain (e.g. https://admin.soulfulbhakti.com) lands on the
+// admin panel instead of a 404. Only the exact root is redirected - /api/*,
+// /stream/* and every other route is untouched. ?next= is NOT honoured, so
+// this cannot be used as an open redirect.
+app.get('/', (req, res) => {
+  res.redirect(302, '/admin')
+})
+
 // Login: verifies the ADMIN_TOKEN (timing-safe) and sets a signed HttpOnly
 // session cookie. Rate-limited per IP to prevent brute-force guessing. The
 // browser sends `{ token }` in the JSON body. The cookie is Secure (HTTPS
