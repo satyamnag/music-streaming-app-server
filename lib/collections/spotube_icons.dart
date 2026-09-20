@@ -92,6 +92,7 @@ abstract class SangeetIcons {
   static const volumeMedium = FeatherIcons.volume1;
   static const volumeLow = FeatherIcons.volume;
   static const volumeMute = FeatherIcons.volumeX;
+  static const jaap = FeatherIcons.circle;
   static const ringtone = Icons.notifications_active_outlined;
   static const timer = FeatherIcons.clock;
   static const logs = FeatherIcons.fileText;

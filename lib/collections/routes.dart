@@ -33,6 +33,10 @@ class AppRouter extends RootStackRouter {
               page: HomeSeeAllRoute.page,
             ),
             AutoRoute(
+              path: "jaap",
+              page: JaapCounterRoute.page,
+            ),
+            AutoRoute(
               path: "search",
               page: SearchRoute.page,
             ),

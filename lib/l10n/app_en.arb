@@ -488,5 +488,6 @@
   "local": "Local",
   "set_as_ringtone": "Set as ringtone",
   "ringtone_set": "Ringtone set",
-  "ringtone_failed": "Could not set ringtone"
+  "ringtone_failed": "Could not set ringtone",
+  "jaap_counter": "Jaap"
 }

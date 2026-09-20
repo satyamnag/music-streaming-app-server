@@ -3092,6 +3092,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not set ringtone'**
   String get ringtone_failed;
+
+  /// No description provided for @jaap_counter.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaap'**
+  String get jaap_counter;
 }
 
 class _AppLocalizationsDelegate

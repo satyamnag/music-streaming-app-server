@@ -1634,4 +1634,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get jaap_counter => 'Jaap';
 }

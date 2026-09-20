@@ -1586,6 +1586,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get jaap_counter => 'Jaap';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
