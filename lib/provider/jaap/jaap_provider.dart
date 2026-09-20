@@ -145,12 +145,17 @@ class JaapRepository {
 
   /// Consecutive days up to and including [today] where the target was met.
   /// Today only counts as part of the streak once its target is met.
+  /// Historical days are evaluated against the counter's *current* target.
   Future<int> currentStreak(int counterId, DateTime today) async {
     final counter = await (db.select(db.jaapCountersTable)
           ..where((t) => t.id.equals(counterId)))
         .getSingleOrNull();
     if (counter == null) return 0;
     final target = counter.dailyTarget;
+    // Defensive: a non-positive target would make the loop below run forever,
+    // because `0 >= 0` is always true. The public API rejects such values, but
+    // the column has no CHECK constraint, so guard here too.
+    if (target <= 0) return 0;
     final rows = await (db.select(db.jaapDailyCountsTable)
           ..where((t) => t.counterId.equals(counterId)))
         .get();
@@ -161,7 +166,10 @@ class JaapRepository {
       final c = byDay[dayKey(cursor)] ?? 0;
       if (c >= target) {
         streak++;
-        cursor = cursor.subtract(const Duration(days: 1));
+        // Step by calendar day, not by 24h: DST transitions can make a local
+        // day 23 or 25 hours long, and the DateTime constructor normalises
+        // out-of-range day values.
+        cursor = DateTime(cursor.year, cursor.month, cursor.day - 1);
       } else {
         break;
       }
@@ -170,6 +178,7 @@ class JaapRepository {
   }
 
   /// The last 7 local days ending at [today], oldest first.
+  /// `targetMet` is evaluated against the counter's *current* target.
   Future<List<JaapDayStatus>> last7Days(int counterId, DateTime today) async {
     final counter = await (db.select(db.jaapCountersTable)
           ..where((t) => t.id.equals(counterId)))
@@ -181,7 +190,7 @@ class JaapRepository {
     final byDay = {for (final r in rows) r.day: r.count};
     final base = DateTime(today.year, today.month, today.day);
     return List.generate(7, (i) {
-      final d = base.subtract(Duration(days: 6 - i));
+      final d = DateTime(base.year, base.month, base.day - (6 - i));
       final c = byDay[dayKey(d)] ?? 0;
       return JaapDayStatus(day: d, count: c, targetMet: c >= target);
     });

@@ -95,6 +95,7 @@ void main() {
     await repo.increment(id, today);
     await repo.increment(id, today);
     await repo.setDailyTarget(id, 10);
+    expect((await repo.counters()).single.dailyTarget, 10);
     expect(await repo.todayCount(id, today), 2);
   });
 
@@ -113,5 +114,26 @@ void main() {
     await repo.deleteCounter(id);
     expect(await repo.counters(), isEmpty);
     expect(await repo.lifetimeTotal(id), 0);
+  });
+
+  test('dayKey zero-pads single-digit months and days', () {
+    expect(JaapRepository.dayKey(DateTime(2026, 1, 5)), '2026-01-05');
+    expect(JaapRepository.dayKey(DateTime(2026, 12, 31)), '2026-12-31');
+  });
+
+  test('createCounter rejects an empty name and a non-positive target', () async {
+    expect(
+      () => repo.createCounter(name: '   ', dailyTarget: 108),
+      throwsA(isA<ArgumentError>()),
+    );
+    expect(
+      () => repo.createCounter(name: 'Gayatri', dailyTarget: 0),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('setDailyTarget rejects a non-positive target', () async {
+    final id = await repo.createCounter(name: 'Gayatri', dailyTarget: 108);
+    expect(() => repo.setDailyTarget(id, 0), throwsA(isA<ArgumentError>()));
   });
 }
