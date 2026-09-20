@@ -365,6 +365,15 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="karaokeInput" accept=".opus" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<label>Ringtone File (.mp3, optional)</label>
+<div class="upload-row">
+  <input id="fRingtone" type="hidden" placeholder="e.g. song-ringtone.mp3 (optional)">
+  <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('ringtoneInput').click()">Upload</button>
+  <button class="btn btn-secondary btn-sm" id="ringtonePlayBtn" type="button" onclick="playRingtoneUpload()">&#9654; Play</button>
+</div>
+<input type="file" id="ringtoneInput" accept=".mp3,audio/mpeg" style="display:none" onchange="handleRingtoneUpload(this)">
+<div id="ringtoneStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div style="font-size:11px;color:#999;margin-top:2px;">MP3 only &mdash; Android cannot use .opus as a ringtone.</div>
 <audio id="audioVerify" preload="none" style="display:none;"></audio>
    <div class="btn-row">
      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -1429,7 +1438,7 @@ function pl(v) { return v || 0; }
 
 function showAdd() {
   document.getElementById('editId').value = '';
-  ['fTitle','fDuration','fThumbnail','fStorage','fKaraoke'].forEach(id => document.getElementById(id).value = '');
+  ['fTitle','fDuration','fThumbnail','fStorage','fKaraoke','fRingtone'].forEach(id => document.getElementById(id).value = '');
   setAlbumCheckboxes([]);
   document.getElementById('fStatus').value = 'free';
   document.getElementById('fLanguage').value = '';
@@ -1454,6 +1463,7 @@ function showEdit(id) {
   document.getElementById('fThumbnail').value = t.thumbnail || '';
   document.getElementById('fStorage').value = t.storage_path || '';
   document.getElementById('fKaraoke').value = t.karaoke_storage_path || '';
+  document.getElementById('fRingtone').value = t.ringtone_storage_path || '';
   document.getElementById('fStatus').value = t.status === 'paid' ? 'paid' : 'free';
   document.getElementById('fLanguage').value = t.language || '';
   document.getElementById('fTags').value = t.tags || '';
@@ -1482,6 +1492,7 @@ async function saveTrack() {
   const thumbnail = document.getElementById('fThumbnail').value.trim() || null;
   const storage_path = document.getElementById('fStorage').value.trim();
   const karaoke_storage_path = document.getElementById('fKaraoke').value.trim() || null;
+  const ringtone_storage_path = document.getElementById('fRingtone').value.trim() || null;
   const language = document.getElementById('fLanguage').value || null;
   // Mandatory fields: Title, original audio, Duration, Language (Status
   // defaults to free).
@@ -1493,7 +1504,7 @@ async function saveTrack() {
   const status = document.getElementById('fStatus').value === 'paid' ? 'paid' : 'free';
   const tagsRaw = document.getElementById('fTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean).join(', ') : null;
-  const body = { title, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, status, language, tags };
+  const body = { title, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, language, tags };
   // Persist the currently-edited lyric column too, so "Save" (Track or Lyrics
   // tab) saves both the track fields and the lyrics in one request.
   const lyrCol = lyricsColumn();
@@ -1598,6 +1609,42 @@ async function handleKaraokeUpload(input) {
     document.getElementById('karaokeStatus').textContent = 'Uploaded ✓';
   } catch (e) { document.getElementById('karaokeStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
+}
+
+async function handleRingtoneUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Android's RingtoneManager cannot use .opus, so ringtones are MP3 only.
+  if (!file.name.toLowerCase().endsWith('.mp3')) {
+    toast('Ringtone must be an .mp3 file');
+    input.value = '';
+    return;
+  }
+  document.getElementById('ringtoneStatus').textContent = 'Uploading...';
+  const form = new FormData();
+  form.append('file', file);
+  form.append('kind', 'ringtone');
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('fRingtone').value = data.storage_path;
+    document.getElementById('ringtoneStatus').textContent = 'Uploaded \u2713';
+  } catch (e) { document.getElementById('ringtoneStatus').textContent = 'Error: ' + e.message; }
+  input.value = '';
+}
+
+// Preview uses the public R2 CDN (same base the app streams from) rather than
+// the track-audio proxy, because ringtones are plain MP3 objects.
+function playRingtoneUpload() {
+  const path = document.getElementById('fRingtone').value.trim();
+  const statusEl = document.getElementById('ringtoneStatus');
+  if (!path) { statusEl.textContent = 'No ringtone uploaded yet'; return; }
+  const r2Base = (document.body.dataset.r2Base || '').replace(/\/+$/, '');
+  if (!r2Base) { statusEl.textContent = 'R2 CDN base not configured'; return; }
+  const audio = document.getElementById('audioVerify');
+  audio.src = r2Base + '/' + path.split('/').map(encodeURIComponent).join('/');
+  audio.play().catch(() => { statusEl.textContent = 'Could not play ringtone (check bucket CORS)'; });
 }
 
 async function handleThumbUpload(input) {

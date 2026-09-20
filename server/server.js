@@ -1142,7 +1142,15 @@ const upload = multer({
 app.get('/admin', (req, res) => {
   const htmlPath = path.join(__dirname, 'admin.html')
   if (fs.existsSync(htmlPath)) {
-    res.sendFile(htmlPath)
+    // Inject the public R2 CDN base so the ringtone preview player can build
+    // object URLs. It is a public URL (not a secret) and is only used to
+    // construct an <audio> src for an MP3 object.
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    const withConfig = html.replace(
+      '<body>',
+      `<body data-r2-base="${R2_PUBLIC_BASE_URL}">`,
+    )
+    res.type('html').send(withConfig)
   } else {
     res.status(500).send('admin.html not found')
   }
@@ -1226,7 +1234,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Create track
 app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
     const cleanTitle = title.trim()
@@ -1248,6 +1256,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       thumbnail: typeof thumbnail === 'string' && thumbnail.trim() ? thumbnail.trim() : null,
       storage_path: storage_path.trim(),
       karaoke_storage_path: typeof karaoke_storage_path === 'string' && karaoke_storage_path.trim() ? karaoke_storage_path.trim() : null,
+      ringtone_storage_path: typeof ringtone_storage_path === 'string' && ringtone_storage_path.trim() ? ringtone_storage_path.trim() : null,
       status: cleanStatus,
       lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
@@ -1278,7 +1287,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 // Update track
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     const albumIds = album_ids !== undefined ? albumIdsFrom({ album_ids }) : null
     const updates = {}
     if (title !== undefined) {
@@ -1305,6 +1314,9 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     }
     if (karaoke_storage_path !== undefined) {
       updates.karaoke_storage_path = typeof karaoke_storage_path === 'string' && karaoke_storage_path.trim() ? karaoke_storage_path.trim() : null
+    }
+    if (ringtone_storage_path !== undefined) {
+      updates.ringtone_storage_path = typeof ringtone_storage_path === 'string' && ringtone_storage_path.trim() ? ringtone_storage_path.trim() : null
     }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
     if (lyrics !== undefined) updates.lyrics = typeof lyrics === 'string' && lyrics.trim() ? lyrics : null
@@ -1631,7 +1643,11 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     const ext = req.file.originalname.split('.').pop().toLowerCase()
     const isImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext)
     const isAudio = ext === 'opus'
-    if (!isImage && !isAudio) return res.status(400).json({ error: 'Allowed: .opus for audio, .png/.jpg/.jpeg/.webp for thumbnails' })
+    // Ringtone clips are MP3: Android's RingtoneManager does not accept .opus.
+    const isRingtone = ext === 'mp3' && req.body && req.body.kind === 'ringtone'
+    if (!isImage && !isAudio && !isRingtone) {
+      return res.status(400).json({ error: 'Allowed: .opus for audio, .mp3 for ringtones, .png/.jpg/.jpeg/.webp for thumbnails' })
+    }
 
     // Track thumbnails are STRICTLY WebP (enforced server-side so the rule
     // cannot be bypassed by hitting the API directly). Album covers are
@@ -1641,12 +1657,14 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     }
 
     const fileName = `${Date.now()}-${req.file.originalname}`
-    const contentType = isImage ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg') : 'audio/ogg'
+    const contentType = isImage
+      ? (ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg')
+      : (isRingtone ? 'audio/mpeg' : 'audio/ogg')
 
-    if (isAudio) {
-      // Audio MUST go to Cloudflare R2. Storing audio in Supabase Storage is
-      // what exhausted the Storage CDN egress quota, so we refuse rather than
-      // silently falling back to it.
+    if (isAudio || isRingtone) {
+      // Audio (originals and ringtone clips) MUST go to Cloudflare R2. Storing
+      // audio in Supabase Storage is what exhausted the Storage CDN egress
+      // quota, so we refuse rather than silently falling back to it.
       if (!r2Enabled) {
         return res.status(503).json({
           error: 'Audio storage (R2) is not configured — refusing to store audio in Supabase Storage',
