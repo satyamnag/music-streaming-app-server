@@ -4,7 +4,7 @@
 
 **Goal:** Add a bottom-nav Jaap Counter that lets a devotee count mantra repetitions across multiple named counters — each with its own daily target — showing today's progress, a streak, and a 7-day discipline strip, entirely on-device.
 
-**Architecture:** Two new Drift tables (`jaap_counters`, `jaap_daily_counts`) at schema 12 → 13, mirroring the existing `LocalLikedSongsTable` local-only pattern. A repository/provider layer wraps `databaseProvider` so the UI never touches Drift directly and streak/history logic is unit-testable. One distraction-free screen holds a counter selector, a progress ring, one large tap target, the discipline strip, and a lifetime total.
+**Architecture:** Two new Drift tables (`jaap_counters`, `jaap_daily_counts`) at schema 12 → 14, mirroring the existing `LocalLikedSongsTable` local-only pattern. (v13 adds the Jaap tables; v14 repairs a pre-existing invalid foreign key on the local playlists — see the implementation note.) A repository/provider layer wraps `databaseProvider` so the UI never touches Drift directly and streak/history logic is unit-testable. One distraction-free screen holds a counter selector, a progress ring, one large tap target, the discipline strip, and a lifetime total.
 
 **Tech Stack:** Flutter 3.35.2 / Dart 3.9.0, Drift (`drift`, `drift_dev`), hooks_riverpod, Shadcn Flutter UI, auto_route, `build_runner` for codegen. Release builds go through GitHub Actions.
 
@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - **Local-only storage.** No Supabase table, no server endpoint, no cloud sync in v1.
-- **Schema version 12 → 13.** Both new tables are created in a `to >= 13 && from < 13` block, following the existing `to >= 12 && from < 12` pattern in `database.dart`.
+- **Schema version 12 → 14.** The Jaap tables are created in a `to >= 13 && from < 13` block. A separate `to >= 14 && from < 14` block repairs a **pre-existing** bug exposed by enabling foreign keys: `LocalPlaylistsTable` had no primary key, so `local_playlist_songs.playlist_id` was an invalid foreign key. See the implementation note below.
 - **`day` is a local calendar date string (`YYYY-MM-DD`)**, never a `DateTime` and never UTC. Streaks are calendar-day questions.
 - **Unique `(counterId, day)`** on `jaap_daily_counts` so every write is an idempotent upsert.
 - **`dailyTarget` lives on the counter**, not the daily row; changing it must not alter past days.
@@ -28,7 +28,55 @@
 
 ---
 
-## File Structure
+## Implementation note — the pre-existing foreign-key bug (discovered during Task 1)
+
+Task 1 was implemented and reviewed, and the review surfaced a genuine pre-existing defect
+that this work had to repair. Recording it here so the plan matches reality.
+
+**What was wrong.** `lib/models/database/tables/local_playlists.dart` declared
+`TextColumn get id => text()();` with **no `primaryKey` override**. Its child table declared
+`playlistId => text().references(LocalPlaylistsTable, #id)()`. SQLite only accepts a foreign
+key whose parent column is a primary key or has a unique index, so that reference was
+**invalid** — it simply never fired, because SQLite leaves foreign-key enforcement off by
+default.
+
+**Why this work exposed it.** `onDelete: KeyAction.cascade` on the new Jaap table is
+worthless unless foreign keys are actually enforced, so the implementation added the
+documented `beforeOpen` callback:
+
+```dart
+beforeOpen: (details) async {
+  await customStatement('PRAGMA foreign_keys = ON');
+},
+```
+
+Turning enforcement on immediately activated the broken playlist reference, and every write
+to `local_playlist_songs_table` failed with `foreign key mismatch`. It also broke the
+account-deletion cleanup in `lib/provider/auth/clerk_auth_provider.dart`, which deleted
+`localPlaylistsTable` **before** `localPlaylistSongsTable` — the resulting exception was
+swallowed by a `catch (_)`, so local cleanup silently no-oped.
+
+**The repair (parts of Task 1, as implemented).**
+
+1. `LocalPlaylistsTable` now declares `Set<Column> get primaryKey => {id};`
+2. `local_playlist_songs.playlistId` now specifies `onDelete: KeyAction.cascade`
+3. `clerk_auth_provider.dart` deletes children before parents, so cleanup is correct
+   whether or not cascade applies
+4. Schema bumped **13 → 14**, with a dedicated `to >= 14 && from < 14` block running
+   `m.alterTable(TableMigration(...))` for both tables. A separate step was required
+   because folding the repair into the v13 block would leave any database already at v13
+   silently broken.
+
+**Verification:** `test/models/database/foreign_keys_test.dart` — 7 tests, all passing:
+FK enforcement is on at open; counter delete cascades; an orphan daily row is rejected;
+playlist delete cascades; an orphan song is rejected; the account-deletion cleanup order
+empties both tables; and a **v13 → v14 migration test that seeds a real v13 schema and
+migrates it with data**, proving existing installs are repaired rather than reset.
+
+**Consequence for the rest of this plan:** the schema version is **14**, not 13. Task 2 must
+not re-bump it.
+
+---
 
 **Create:**
 
@@ -50,7 +98,7 @@
 
 | Path | Change |
 |---|---|
-| `lib/models/database/database.dart` | Add 2 `part` lines, 2 tables to `@DriftDatabase`, `schemaVersion => 13`, the v13 migration block |
+| `lib/models/database/database.dart` | Add 2 `part` lines, 2 tables to `@DriftDatabase`, `schemaVersion => 14`, the v13 (Jaap tables) and v14 (playlist FK repair) migration blocks, and `beforeOpen` enabling `PRAGMA foreign_keys = ON` |
 | `lib/collections/side_bar_tiles.dart` | Add the Jaap entry after `home` in both lists |
 | `lib/collections/routes.dart` | Add `AutoRoute(path: "jaap", page: JaapCounterRoute.page)` |
 | `lib/collections/spotube_icons.dart` | Add `SangeetIcons.jaap` |
@@ -145,7 +193,7 @@ part 'tables/jaap_daily_counts.dart';
 3. Change the version (line ~68):
 
 ```dart
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 ```
 
 - [ ] **Step 4: Add the v13 migration block**
