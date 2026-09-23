@@ -956,19 +956,45 @@ function refreshCurrent() {
 }
 
 // ----- Clerk email sign-in (optional, fail-safe) -----
-function clerkScript(publishableKey) {
-  return 'https://' + publishableKey + '.clerk.accounts.dev/npm/@clerk/clerk-js/dist/clerk.browser.js';
+// The Frontend API host is encoded inside the publishable key:
+//   pk_test_<base64(fapi_host + '$')>  ->  <fapi_host>
+// The browser SDK must be loaded FROM that host; using the raw publishable
+// key as the host (the previous behaviour) produced an invalid URL, so the
+// email sign-in button could never load Clerk. See the official Clerk docs
+// "Add the SDK using a <script> tag" / "Decode a Clerk Publishable Key".
+function clerkFrontendApi(publishableKey) {
+  try {
+    const part = String(publishableKey).split('_')[2];
+    return part ? atob(part).replace(/\$$/, '') : '';
+  } catch (e) { return ''; }
 }
-function loadClerk(publishableKey) {
-  return new Promise((resolve, reject) => {
-    if (window.Clerk) return resolve();
+function clerkScriptUrl(publishableKey, pkg) {
+  const fapi = clerkFrontendApi(publishableKey);
+  return fapi ? 'https://' + fapi + '/npm/' + pkg : '';
+}
+function loadScriptTag(src, attrs) {
+  return new Promise(function (resolve, reject) {
     const s = document.createElement('script');
-    s.src = clerkScript(publishableKey);
+    s.src = src;
     s.async = true;
-    s.onload = function () { window.Clerk.load({ publishableKey: publishableKey }).then(resolve).catch(reject); };
-    s.onerror = reject;
+    s.crossOrigin = 'anonymous';
+    if (attrs) Object.keys(attrs).forEach(function (k) { s.setAttribute(k, attrs[k]); });
+    s.onload = function () { resolve(); };
+    s.onerror = function () { reject(new Error('Failed to load ' + src)); };
     document.head.appendChild(s);
   });
+}
+async function loadClerk(publishableKey) {
+  if (window.Clerk && window.Clerk.loaded) return;
+  if (!clerkFrontendApi(publishableKey)) throw new Error('Invalid Clerk publishable key');
+  // The UI bundle is required by openSignIn(); the SDK reads the publishable
+  // key from its data-clerk-publishable-key attribute.
+  await loadScriptTag(clerkScriptUrl(publishableKey, '@clerk/ui@1/dist/ui.browser.js'));
+  await loadScriptTag(
+    clerkScriptUrl(publishableKey, '@clerk/clerk-js@6/dist/clerk.browser.js'),
+    { 'data-clerk-publishable-key': publishableKey }
+  );
+  await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
 }
 async function clerkAdminLogin() {
   const msg = document.getElementById('clerkMsg');
@@ -995,7 +1021,8 @@ async function clerkAdminLogin() {
   }
 }
 
-async function doLogin() {  const token = document.getElementById('loginToken').value.trim();
+async function doLogin() {
+  const token = document.getElementById('loginToken').value.trim();
   const errBox = document.getElementById('loginError');
   errBox.style.display = 'none';
   if (!token) { errBox.textContent = 'Please enter the admin token.'; errBox.style.display = 'block'; return; }
@@ -1006,14 +1033,27 @@ async function doLogin() {  const token = document.getElementById('loginToken').
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
     });
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch (e) { data = {}; }
     if (res.ok && data.authenticated) {
       document.getElementById('loginToken').value = '';
       showApp();
-    } else {
-      errBox.textContent = 'Incorrect token.';
-      errBox.style.display = 'block';
+      return;
     }
+    // Report the REAL cause. Previously every failure (rate limit, not
+    // configured, network) was shown as "Incorrect token.", which made a
+    // correct token look wrong.
+    if (res.status === 429) {
+      errBox.textContent = 'Too many login attempts. Please wait 15 minutes, then try again.';
+    } else if (res.status === 503) {
+      errBox.textContent = 'Admin is not configured on the server (ADMIN_TOKEN is missing).';
+      document.getElementById('loginToken').disabled = true;
+    } else if (res.status === 401) {
+      errBox.textContent = 'Incorrect token.';
+    } else {
+      errBox.textContent = 'Login failed (' + res.status + '). ' + (data.error || 'Please try again.');
+    }
+    errBox.style.display = 'block';
   } catch (e) {
     errBox.textContent = 'Could not reach the server.';
     errBox.style.display = 'block';

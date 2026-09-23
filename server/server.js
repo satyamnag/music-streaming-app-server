@@ -121,8 +121,18 @@ const supabase = createClient(
 // Each value falls back to process.env so local dev without a vault entry
 // keeps working, and a vault value always wins once present.
 // ------------------------------------------------------------------
+// The admin token is compared byte-for-byte against a single-line browser
+// input that is trimmed client-side. If the value is pasted into the Vault
+// (or set as an env var) with a trailing newline or space, a *correct* token
+// would be impossible to enter — the browser strips it, the server does not,
+// and every attempt returns 401. Normalize the value once at load so that
+// signing, verifying and comparing all use exactly the same bytes.
+function normalizeAdminToken(value) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 const secrets = {
-  admin_token: process.env.ADMIN_TOKEN || '',
+  admin_token: normalizeAdminToken(process.env.ADMIN_TOKEN),
   clerk_secret_key: process.env.CLERK_SECRET_KEY || '',
   clerk_publishable_key: process.env.CLERK_PUBLISHABLE_KEY || '',
   r2_account_id: process.env.R2_ACCOUNT_ID || '',
@@ -154,7 +164,9 @@ async function loadSecretsFromVault() {
         continue
       }
       if (data) {
-        secrets[key] = data
+        // admin_token is normalized (trimmed) so a stray newline/space in the
+        // stored secret cannot lock the admin out. Other secrets are opaque.
+        secrets[key] = key === 'admin_token' ? normalizeAdminToken(data) : data
         console.log(`[secrets] ${key} loaded from vault`)
       }
     } catch (err) {
@@ -1054,6 +1066,11 @@ app.get('/api/admin/auth-config', (req, res) => {
 // Middleware protecting /api/admin/*. The cookie must be present, valid, and
 // unexpired. On failure a 401 is returned (the SPA shows the login form).
 async function requireAdmin(req, res, next) {
+  // The legacy ADMIN_TOKEN session is checked first so that a stale or
+  // non-company Clerk session can never lock a valid token session out.
+  const tokenSessionOk =
+    Boolean(secrets.admin_token) && verifyAdminSession(adminSessionCookieValue(req))
+
   // Preferred path: a valid Clerk (email) session.
   if (clerkEnabled()) {
     const claims = await verifyClerkRequest(req)
@@ -1063,7 +1080,14 @@ async function requireAdmin(req, res, next) {
       //  emailAddress claim — see docs below.)
       const email = (claims.emailAddress || claims.email || '').toLowerCase()
       if (email && !email.endsWith('@soulfulbhakti.com')) {
-        return res.status(403).json({ error: 'This email domain is not authorized for the admin.' })
+        // A signed-in Clerk user from an unauthorized domain must NOT be
+        // granted admin access — but must NOT block a valid token session
+        // either. Fall through to the token check; only 403 if that also
+        // fails, so a non-company Clerk session cannot break token login.
+        if (!tokenSessionOk) {
+          return res.status(403).json({ error: 'This email domain is not authorized for the admin.' })
+        }
+        return next()
       }
       return next()
     }
@@ -1072,7 +1096,7 @@ async function requireAdmin(req, res, next) {
   if (!secrets.admin_token) {
     return res.status(503).json({ error: 'admin not configured' })
   }
-  if (!verifyAdminSession(adminSessionCookieValue(req))) {
+  if (!tokenSessionOk) {
     return res.status(401).json({ error: 'unauthorized' })
   }
   next()
@@ -1179,10 +1203,13 @@ app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
     return res.status(503).json({ error: 'admin not configured' })
   }
   const { token } = req.body || {}
-  if (typeof token !== 'string' || token.length === 0) {
+  // Trim to mirror the browser input (and the normalized stored secret), so
+  // pasted whitespace cannot cause a false mismatch.
+  const cleanToken = typeof token === 'string' ? token.trim() : ''
+  if (!cleanToken) {
     return res.status(401).json({ error: 'unauthorized' })
   }
-  const a = Buffer.from(token)
+  const a = Buffer.from(cleanToken)
   const b = Buffer.from(secrets.admin_token)
   const ok = a.length === b.length && crypto.timingSafeEqual(a, b)
   if (!ok) return res.status(401).json({ error: 'unauthorized' })
@@ -1203,10 +1230,22 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ authenticated: false })
 })
 
-// Check current admin session state (used by the SPA on load).
-app.get('/api/admin/session', (req, res) => {
-  const authenticated =
+// Check current admin session state (used by the SPA on load). Mirrors
+// requireAdmin: either a valid ADMIN_TOKEN session or an authorized Clerk
+// (email) session counts as authenticated, so the two login methods agree
+// and a Clerk-signed-in admin is not shown the token form.
+app.get('/api/admin/session', async (req, res) => {
+  let authenticated =
     Boolean(secrets.admin_token) && verifyAdminSession(adminSessionCookieValue(req))
+  if (!authenticated && clerkEnabled()) {
+    try {
+      const claims = await verifyClerkRequest(req)
+      if (claims) {
+        const email = (claims.emailAddress || claims.email || '').toLowerCase()
+        if (!email || email.endsWith('@soulfulbhakti.com')) authenticated = true
+      }
+    } catch (_) { /* stay unauthenticated */ }
+  }
   res.json({ authenticated })
 })
 
