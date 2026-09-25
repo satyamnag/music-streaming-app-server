@@ -98,6 +98,11 @@ Future<void> main(List<String> rawArgs) async {
             .timeout(const Duration(seconds: 10));
         FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
         FlutterError.onError = (errorDetails) {
+          // CHAIN, never replace: AppLogger's handler (installed in
+          // AppLogger.runZoned) writes framework errors to the local log file.
+          // Replacing it with Crashlytics alone silently disabled file logging
+          // on the common Android path.
+          AppLogger.reportError(errorDetails.exception, errorDetails.stack ?? StackTrace.current);
           FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
         };
         PlatformDispatcher.instance.onError = (error, stack) {
@@ -109,6 +114,28 @@ Future<void> main(List<String> rawArgs) async {
         // block startup or crash the app.
       }
     }
+
+    // Friendly error widget for uncaught build/layout errors. In release the
+    // framework would otherwise show the raw red/black error screen; any
+    // framework error is also logged (file + crash reporter) first.
+    material.ErrorWidget.builder = (errorDetails) {
+      if (kReleaseMode) {
+        AppLogger.reportError(errorDetails.exception, errorDetails.stack);
+      }
+      return const material.Material(
+        color: material.Color(0xFF111111),
+        child: material.Center(
+          child: material.Padding(
+            padding: material.EdgeInsets.all(24),
+            child: material.Text(
+              'Something went wrong. Please restart the app.',
+              textAlign: material.TextAlign.center,
+              style: material.TextStyle(color: material.Colors.white, fontSize: 15),
+            ),
+          ),
+        ),
+      );
+    };
 
     await migrateMacOsFromSandboxToNoSandbox();
 

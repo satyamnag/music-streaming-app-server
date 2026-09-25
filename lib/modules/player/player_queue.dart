@@ -208,8 +208,15 @@ class PlayerQueue extends HookConsumerWidget {
                                   final ids = selectedTrackIds.value.toList();
                                   close();
                                   if (ids.isEmpty) return;
-                                  await Future.wait(
-                                      ids.map((id) => onRemove(id)));
+                                  // Sequential removal: each onRemove computes
+                                  // its engine index from the CURRENT queue, so
+                                  // running them concurrently (Future.wait) made
+                                  // several calls compute indices against the
+                                  // same pre-removal list and delete wrong
+                                  // tracks.
+                                  for (final id in ids) {
+                                    await onRemove(id);
+                                  }
                                   if (context.mounted) {
                                     selectedTrackIds.value = {};
                                     selectionMode.value = false;

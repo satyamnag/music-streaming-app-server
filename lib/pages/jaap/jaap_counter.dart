@@ -132,7 +132,11 @@ class _CounterView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final repo = ref.read(jaapRepositoryProvider);
-    final today = DateTime.now();
+    // Fresh local calendar day every build. `today` must NEVER be pinned at a
+    // single build: japa sessions deliberately stay open across midnight
+    // (opened at night, resumed at 4 AM), so writes, resets and streak math
+    // must always use the CURRENT day, not the day the screen was built.
+    final todayKey = JaapRepository.dayKey(DateTime.now());
 
     // Today's count lives in memory so a tap paints on the next frame. It is
     // seeded from the database once; until then taps are ignored, because
@@ -140,6 +144,7 @@ class _CounterView extends HookConsumerWidget {
     // existing tally.
     final count = useState(0);
     final seeded = useRef(false);
+    final seededDayKey = useRef<String?>(null);
     final pending = useMemoized(_PendingIncrements.new);
     final debounce = useRef<Timer?>(null);
 
@@ -148,9 +153,10 @@ class _CounterView extends HookConsumerWidget {
     final week = useState<List<JaapDayStatus>>(const []);
 
     Future<void> refreshDerived() async {
-      final s = await repo.currentStreak(counter.id, today);
+      final now = DateTime.now();
+      final s = await repo.currentStreak(counter.id, now);
       final l = await repo.lifetimeTotal(counter.id);
-      final w = await repo.last7Days(counter.id, today);
+      final w = await repo.last7Days(counter.id, now);
       if (!context.mounted) return;
       streak.value = s;
       lifetime.value = l;
@@ -158,18 +164,23 @@ class _CounterView extends HookConsumerWidget {
     }
 
     /// Writes whatever is buffered. Failures are swallowed on purpose: a
-    /// transient write error must never interrupt counting, so the unsaved
+    /// transient write error must never interrupt counting, so the UNSAVED
     /// increments go back into the buffer for the next tap to retry. The spec
     /// forbids any error surface here.
     Future<void> flush() async {
       final n = pending.take();
       if (n <= 0) return;
+      var written = 0;
       try {
         for (var i = 0; i < n; i++) {
-          await repo.increment(counter.id, today);
+          await repo.increment(counter.id, DateTime.now());
+          written++;
         }
       } catch (_) {
-        pending.restore(n);
+        // Some of the n increments may already be persisted. Restoring ALL of
+        // them would re-count the persisted ones on the next flush and
+        // permanently inflate the day's tally; restore only the remainder.
+        pending.restore(n - written);
       }
     }
 
@@ -181,10 +192,11 @@ class _CounterView extends HookConsumerWidget {
     useEffect(() {
       var cancelled = false;
       Future<void> load() async {
-        final stored = await repo.todayCount(counter.id, today);
+        final stored = await repo.todayCount(counter.id, DateTime.now());
         if (cancelled) return;
         count.value = stored;
         seeded.value = true;
+        seededDayKey.value = JaapRepository.dayKey(DateTime.now());
         await refreshDerived();
       }
 
@@ -196,6 +208,29 @@ class _CounterView extends HookConsumerWidget {
         flush();
       };
     }, [counter.id]);
+
+    // Japa sessions deliberately stay open across midnight, so the LOCAL day
+    // can roll over while this screen is alive. When it does, reseed the
+    // in-memory count from the NEW day's stored tally (after flushing any
+    // post-midnight taps to the new day) so counting continues on the correct
+    // day and yesterday's tally is never carried over or re-counted.
+    useEffect(() {
+      if (!seeded.value) return;
+      if (seededDayKey.value == todayKey) return;
+      Future<void> reseed() async {
+        await flush();
+        if (!context.mounted) return;
+        final stored = await repo.todayCount(counter.id, DateTime.now());
+        count.value = stored;
+        // NOTE: no pending.clear() here — flush() already emptied the buffer on
+        // success; on a transient failure the unsaved taps must STAY queued for
+        // the next flush rather than being dropped.
+        seededDayKey.value = todayKey;
+        await refreshDerived();
+      }
+
+      reseed();
+    }, [todayKey, counter.id]);
 
     final targetReached = count.value >= counter.dailyTarget;
 
@@ -270,9 +305,11 @@ class _CounterView extends HookConsumerWidget {
               ),
               Button.outline(
                 onPressed: () async {
-                  await repo.resetToday(counter.id, today);
+                  final now = DateTime.now();
+                  await repo.resetToday(counter.id, now);
                   count.value = 0;
                   pending.clear();
+                  seededDayKey.value = JaapRepository.dayKey(now);
                   if (!context.mounted) return;
                   await refreshDerived();
                 },

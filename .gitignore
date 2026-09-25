@@ -96,3 +96,7 @@ node_modules/
 
 # Astro generated content (website build artifact)
 .astro/
+
+# Local temp password scratch files (contain plaintext secrets - never commit)
+.tmp-newpass.txt
+*.tmp-newpass.txt

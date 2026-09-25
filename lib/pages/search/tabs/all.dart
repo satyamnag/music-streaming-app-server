@@ -1,3 +1,4 @@
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
@@ -13,7 +14,10 @@ class SearchPageAllTab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final scrollController = ScrollController();
+    // Stable, auto-disposed controller: building a fresh ScrollController every
+    // rebuild (each debounced keystroke) reset the scroll position to the top
+    // while typing and leaked the previous controller.
+    final scrollController = useScrollController();
     final searchTerm = ref.watch(searchTermStateProvider);
     final searchSnapshot =
         ref.watch(metadataPluginSearchAllProvider(searchTerm));

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/services/audio_player/playlist_mode.dart';
@@ -334,19 +333,27 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   }
 
   Future<void> removeTracks(Iterable<String> trackIds) async {
-    final trackIndexes = state.tracks
-        .where((element) => trackIds.any((trackId) => trackId == element.id))
-        .mapIndexed((index, element) => index);
+    // Compute the REAL positions in the ORIGINAL queue. Indexing the filtered
+    // stream (the old `mapIndexed` over a `where()`) renumbered from 0..n-1 and
+    // told the engine to remove the TOP of the queue instead of the selected
+    // tracks — e.g. "Undo add album" deleted the wrong engine tracks.
+    final idSet = trackIds.toSet();
+    final indexes = <int>[];
+    for (var i = 0; i < state.tracks.length; i++) {
+      if (idSet.contains(state.tracks[i].id)) indexes.add(i);
+    }
 
     final tracks = state.tracks.where(
-      (element) => !trackIds.contains(element.id),
+      (element) => !idSet.contains(element.id),
     );
 
     state = state.copyWith(
       tracks: tracks.toList(),
     );
 
-    for (final index in trackIndexes) {
+    // Remove in DESCENDING order: each engine removal shifts every later index
+    // down by one, so highest-to-lowest keeps each index valid.
+    for (final index in indexes.reversed) {
       await audioPlayer.removeTrack(index);
     }
 
