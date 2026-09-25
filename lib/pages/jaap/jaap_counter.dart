@@ -230,6 +230,10 @@ class _CounterView extends HookConsumerWidget {
       }
 
       reseed();
+      // The hook callback must return void/null, not the fire-and-forget
+      // Future above (keeps flutter_lints' body_might_complete_normally_nullable
+      // quiet).
+      return;
     }, [todayKey, counter.id]);
 
     final targetReached = count.value >= counter.dailyTarget;

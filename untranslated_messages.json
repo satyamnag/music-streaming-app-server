@@ -16,7 +16,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "bn": [
@@ -36,7 +38,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ca": [
@@ -56,7 +60,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "cs": [
@@ -76,7 +82,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "de": [
@@ -96,7 +104,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "es": [
@@ -116,7 +126,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "eu": [
@@ -136,7 +148,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "fa": [
@@ -156,7 +170,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "fi": [
@@ -176,7 +192,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "fr": [
@@ -196,7 +214,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "hi": [
@@ -216,7 +236,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "id": [
@@ -236,7 +258,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "it": [
@@ -256,7 +280,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ja": [
@@ -276,7 +302,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ka": [
@@ -296,7 +324,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ko": [
@@ -316,7 +346,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ne": [
@@ -336,7 +368,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "nl": [
@@ -356,7 +390,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "pl": [
@@ -376,7 +412,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "pt": [
@@ -396,7 +434,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ru": [
@@ -416,7 +456,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "ta": [
@@ -436,7 +478,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "th": [
@@ -456,7 +500,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "tl": [
@@ -476,7 +522,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "tr": [
@@ -496,7 +544,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "uk": [
@@ -516,7 +566,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "vi": [
@@ -536,7 +588,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "zh": [
@@ -556,7 +610,9 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ],
 
   "zh_TW": [
@@ -576,6 +632,8 @@
     "jaap_delete_confirm",
     "jaap_reset_today",
     "jaap_target_reached",
-    "jaap_tap_to_count"
+    "jaap_tap_to_count",
+    "jaap_name_required",
+    "jaap_target_invalid"
   ]
 }
