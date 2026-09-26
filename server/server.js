@@ -309,7 +309,10 @@ async function handleSuperwallEvent(event) {
   if (environment === 'SANDBOX') return
   if (store !== 'PLAY_STORE' && store !== 'STRIPE') return
   if (name !== 'initial_purchase' && name !== 'renewal' && name !== 'non_renewing_purchase') return
-  if (data.price === undefined || Number(data.price) <= 0) return
+  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) — reject any
+  // non-finite price, then any non-positive price.
+  const price = Number(data.price)
+  if (!Number.isFinite(price) || price <= 0) return
   if (data.periodType === 'TRIAL' || data.periodType === 'INTRO') return
 
   const referredUserId = data.originalAppUserId || data.appUserId
@@ -374,7 +377,7 @@ app.use(express.json())
 function escapePostgrestValue(value) {
   // PostgREST reserved characters (, . ( )) in values must be double-quoted
   // https://postgrest.org/en/stable/api.html#reserved-characters
-  if (/[,()]/.test(value)) {
+  if (/[,.()]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`
   }
   return value
@@ -593,6 +596,12 @@ app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
 
     const ext = (path.split('.').pop() || '').toLowerCase()
     const mime = AUDIO_MIME[ext] || 'application/octet-stream'
+    // Only serve known audio extensions: the R2 bucket may later hold artwork /
+    // other objects, and this admin route must never become a general file
+    // exfiltration path for them.
+    if (ext !== '' && !AUDIO_MIME[ext]) {
+      return res.status(400).json({ error: 'Only audio files are served' })
+    }
 
     res.set('Accept-Ranges', 'bytes')
     res.set('Cache-Control', 'no-store')
@@ -1077,15 +1086,23 @@ async function requireAdmin(req, res, next) {
     if (claims) {
       // Strict admin email-domain policy: only @soulfulbhakti.com allowed.
       // (Requires a Clerk session-token JWT template that includes the
-      //  emailAddress claim — see docs below.)
+      //  emailAddress claim; Clerk's DEFAULT template does NOT include it.)
       const email = (claims.emailAddress || claims.email || '').toLowerCase()
-      if (email && !email.endsWith('@soulfulbhakti.com')) {
-        // A signed-in Clerk user from an unauthorized domain must NOT be
-        // granted admin access — but must NOT block a valid token session
-        // either. Fall through to the token check; only 403 if that also
-        // fails, so a non-company Clerk session cannot break token login.
+      // Fail CLOSED: a claim-less session (missing emailAddress) must never
+      // grant admin access — the old `email &&` guard skipped the domain
+      // check when email was '' and made every signed-in Clerk user an admin.
+      if (!email || !email.endsWith('@soulfulbhakti.com')) {
+        // A signed-in Clerk user from an unauthorized domain OR a session
+        // without the email claim must NOT be granted admin access — but must
+        // NOT block a valid token session either. Fall through to the token
+        // check; only 403 if that also fails, so a non-company Clerk session
+        // cannot break token login.
         if (!tokenSessionOk) {
-          return res.status(403).json({ error: 'This email domain is not authorized for the admin.' })
+          return res.status(403).json({
+            error: email
+              ? 'This email domain is not authorized for the admin.'
+              : 'The Clerk session is missing the admin email claim.',
+          })
         }
         return next()
       }
@@ -1242,7 +1259,8 @@ app.get('/api/admin/session', async (req, res) => {
       const claims = await verifyClerkRequest(req)
       if (claims) {
         const email = (claims.emailAddress || claims.email || '').toLowerCase()
-        if (!email || email.endsWith('@soulfulbhakti.com')) authenticated = true
+        // Fail CLOSED: a valid session WITHOUT the email claim is not admin.
+        if (email && email.endsWith('@soulfulbhakti.com')) authenticated = true
       }
     } catch (_) { /* stay unauthenticated */ }
   }
@@ -1639,6 +1657,129 @@ app.delete('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
     const { error } = await supabase.from('albums').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
     res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// ------------------------------------------------------------------
+// Jaap chant metadata.
+//
+// An admin authors the canonical name and the EXACT chant text here; the app
+// reads them from the public endpoint below. Only admins may write - every
+// mutating route is behind requireAdmin, and the table's RLS policy grants
+// SELECT only, so writes are possible only with the service_role key.
+//
+// A user's counting stays on-device and is never stored in this table.
+// ------------------------------------------------------------------
+
+// List jaap chants for the admin panel (and, via the public route below, the app).
+app.get('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('jaap_chants')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data || [])
+  } catch (err) { next(err) }
+})
+
+// Create a jaap chant (name + exact chant text required).
+app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, chant_text, default_target, sort_order, status } = req.body || {}
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: 'name is required' })
+    }
+    if (typeof chant_text !== 'string' || !chant_text.trim()) {
+      return res.status(400).json({ error: 'chant_text is required' })
+    }
+    const target = default_target == null ? 108 : Number(default_target)
+    if (!Number.isInteger(target) || target <= 0) {
+      return res.status(400).json({ error: 'default_target must be a positive integer' })
+    }
+    const order = sort_order == null ? 0 : Number(sort_order)
+    const { data, error } = await supabase
+      .from('jaap_chants')
+      .insert({
+        name: name.trim(),
+        chant_text: chant_text.trim(),
+        default_target: target,
+        sort_order: Number.isInteger(order) ? order : 0,
+        status: status === 'paid' ? 'paid' : 'free',
+      })
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.status(201).json(data)
+  } catch (err) { next(err) }
+})
+
+// Update a jaap chant. This is the route the admin panel uses to change the
+// EXACT text of a single chant. Partial update: only the supplied fields change,
+// and a blank name/chant_text is rejected rather than silently emptied.
+app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, chant_text, default_target, sort_order, status } = req.body || {}
+    const updates = {}
+    if (name !== undefined) {
+      if (typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ error: 'name must be a non-empty string' })
+      }
+      updates.name = name.trim()
+    }
+    if (chant_text !== undefined) {
+      if (typeof chant_text !== 'string' || !chant_text.trim()) {
+        return res.status(400).json({ error: 'chant_text must be a non-empty string' })
+      }
+      updates.chant_text = chant_text.trim()
+    }
+    if (default_target !== undefined) {
+      const target = Number(default_target)
+      if (!Number.isInteger(target) || target <= 0) {
+        return res.status(400).json({ error: 'default_target must be a positive integer' })
+      }
+      updates.default_target = target
+    }
+    if (sort_order !== undefined) {
+      const order = Number(sort_order)
+      if (!Number.isInteger(order)) {
+        return res.status(400).json({ error: 'sort_order must be an integer' })
+      }
+      updates.sort_order = order
+    }
+    if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
+    const { data, error } = await supabase
+      .from('jaap_chants')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Delete a jaap chant.
+app.delete('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('jaap_chants').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// Public: the jaap chants the app may offer. No auth, matching /api/albums.
+app.get('/api/jaap-chants', async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('jaap_chants')
+      .select('id, name, chant_text, default_target, sort_order, status')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ items: data || [] })
   } catch (err) { next(err) }
 })
 

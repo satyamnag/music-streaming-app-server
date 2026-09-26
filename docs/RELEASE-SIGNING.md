@@ -38,6 +38,15 @@ The authoritative "as-built" key in CI is therefore `upload-keystore.jks`.
 
 ## Rules for builds in this project
 
+0. **ALWAYS prefer GitHub Actions for APK/AAB builds** (user directive, 2026-09-25): local
+   Android builds on this machine are slow (multi-ABI Rust/Cargokit compile + Gradle; first run
+   can take 30–60 min) and need the MSVC toolchain. The fast, correct path is the existing
+   `android-release.yml` workflow (Ubuntu, caches, no local toolchain) — trigger it in the repo's
+   Actions tab (workflow_dispatch). It needs these repo secrets configured: `KEYSTORE`
+   (base64 of the upload keystore), `KEY_PROPERTIES` (contents of key.properties),
+   `DOTENV_RELEASE` (the .env used at compile time). Only fall back to a local build when CI is
+   unavailable AND the machine has the MSVC C++ toolchain installed.
+
 1. AAB (Play) or release APK → sign with the upload key pair above (or the CI secret pair).
    Do NOT sign with `sunao_kotlin.jks` (stale/absent) and do NOT ship the debug keystore.
 2. The certificate uploaded to Google Play Console must be `upload_certificate.pem`.

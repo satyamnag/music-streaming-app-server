@@ -163,6 +163,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
     <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-jaapChants" title="Jaap" onclick="showView('jaapChants')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span><span class="label">Jaap</span></button>
+    <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
   </nav>
   <div class="content">
@@ -190,6 +192,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('status')">Subscription<span id="arrow-status" class="sort-arrow"></span></th>
   <th title="P = Plain lyrics, S = Sync lyrics · TE = Telugu, EN-T = English (Translation), EN-TR = English (Transliteration)">Lyrics</th>
+  <th title="K = a karaoke audio file is attached to this track">Karaoke</th>
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
@@ -198,6 +201,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
+  <th><select id="filterKaraoke" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="yes">With karaoke</option><option value="no">Without</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
     <div class="pagination" id="trackPagination" style="display:none;">
@@ -245,6 +249,35 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
     <h3 style="margin-bottom:8px;">All albums — pin to feature</h3>
     <div id="arrangeAlbumResults"></div>
+  </div>
+</div>
+
+<div id="jaapChantsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Jaap</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    The canonical name and the <b>exact text</b> of each chant. These are shared
+    definitions read by the app; a user's counting stays on their device.
+  </p>
+  <div class="search-row">
+    <input id="jaapChantSearch" type="text" placeholder="Search by name or chant text..." oninput="renderJaapChants()">
+    <button class="btn btn-success btn-sm" type="button" onclick="openJaapChantCreate()">+ Add Jaap</button>
+  </div>
+  <table><thead><tr>
+    <th>Name</th>
+    <th>Chant text</th>
+    <th>Target</th>
+    <th>Subscription</th>
+    <th>Actions</th>
+  </tr></thead><tbody id="jaapChantsTbody"></tbody></table>
+  <div class="pagination" id="jaapChantsPagination" style="display:none;">
+    <label style="font-size:12px;color:#666;margin-right:8px;">Per page:
+      <select id="jaapChantPageSizeSel" onchange="setJaapChantPageSize(this.value)">
+        <option value="10">10</option><option value="20" selected>20</option><option value="50">50</option><option value="100">100</option>
+      </select>
+    </label>
+    <span class="page-info" id="jaapChantsPageInfo"></span>
+    <button class="btn btn-secondary btn-sm" id="jaapChantsPrevBtn" onclick="changeJaapChantPage(-1)">Prev</button>
+    <button class="btn btn-secondary btn-sm" id="jaapChantsNextBtn" onclick="changeJaapChantPage(1)">Next</button>
   </div>
 </div>
 
@@ -472,6 +505,7 @@ let filterDurMax = '';
 let filterLanguage = '';
 let filterStatus = '';
 let filterSync = '';
+let filterKaraoke = '';
 let pendingConfirm = null;
 let currentView = 'tracks';
 // Guards against accidental double-submits (rapid clicks / re-entrancy).
@@ -482,10 +516,10 @@ let _searchTimer = null;
 function debouncedSearch() { clearTimeout(_searchTimer); _searchTimer = setTimeout(renderTracks, 200); }
 function clearTrackFilters() {
   document.getElementById('searchInput').value = '';
-  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus', 'filterSync'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus', 'filterSync', 'filterKaraoke'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const dmin = document.getElementById('filterDurMin'); if (dmin) dmin.value = '';
   const dmax = document.getElementById('filterDurMax'); if (dmax) dmax.value = '';
-  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterSync = ''; filterDurMin = ''; filterDurMax = '';
+  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterSync = ''; filterKaraoke = ''; filterDurMin = ''; filterDurMax = '';
   trackSearch = '';
   trackSortKey = null; trackSortDir = 1;
   document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
@@ -881,6 +915,12 @@ function filteredTracks() {
       if (filterSync === 'en') return en;
       if (filterSync === 'hi') return hi;
       return true;
+    });
+  }
+  if (filterKaraoke) {
+    list = list.filter(t => {
+      const has = !!((t.karaoke_storage_path || '').trim());
+      return filterKaraoke === 'yes' ? has : !has;
     });
   }
   if (trackSortKey) {
@@ -1366,6 +1406,15 @@ function lyricsStatusCell(t) {
   }).join('') + '</div>';
 }
 
+// Shows whether a track has a karaoke audio file attached. The tooltip carries
+// the attached file path so an admin can see WHICH karaoke is currently set.
+function karaokeCell(t) {
+  const path = (t.karaoke_storage_path || '').trim();
+  const ok = path.length > 0;
+  const tip = ok ? ('Karaoke attached: ' + path) : 'No karaoke file attached';
+  return '<span class="sync-chip ' + (ok ? 'sync-yes' : 'sync-no') + '" title="' + esc(tip) + '">K ' + (ok ? '&#10003; Yes' : '&#10007; No') + '</span>';
+}
+
 // Renders a track's comma-separated tags as small chips (or a dash when empty).
 function tagsChips(raw) {
   if (typeof raw !== 'string' || !raw.trim()) return '<span style="color:#aaa;">—</span>';
@@ -1381,11 +1430,11 @@ function renderTracks() {
   const list = filteredTracks();
   const tbody = document.getElementById('tbody');
   const pag = document.getElementById('trackPagination');
-  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage || filterStatus || filterSync || filterDurMin !== '' || filterDurMax !== '');
+  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage || filterStatus || filterSync || filterKaraoke || filterDurMin !== '' || filterDurMax !== '');
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
   if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">' + (tracks.length === 0 ? 'No tracks yet. Click "+ Add Track".' : 'No tracks match your search or filters.') + '</td></tr>';
     document.getElementById('count').textContent = tracks.length + ' track(s)';
     if (pag) pag.style.display = 'none';
     return;
@@ -1401,6 +1450,7 @@ function renderTracks() {
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
     <td>${lyricsStatusCell(t)}</td>
+    <td>${karaokeCell(t)}</td>
     <td class="actions">
       <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">✎</button>
       <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
@@ -1442,6 +1492,7 @@ function applyTrackFilters() {
   filterLanguage = document.getElementById('filterLanguage').value;
   filterStatus = document.getElementById('filterStatus').value;
   filterSync = document.getElementById('filterSync').value;
+  filterKaraoke = document.getElementById('filterKaraoke').value;
   trackPage = 1;
   renderTracks();
 }
