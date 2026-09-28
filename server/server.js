@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
@@ -1168,6 +1168,40 @@ async function uploadAudioToR2(key, body, contentType) {
   return key
 }
 
+// Best-effort cleanup of a replaced or deleted R2 audio object so the bucket
+// never accumulates stale copies after an admin updates a mantra/track.
+// Only objects matching OUR upload naming (epochms-name.opus|mp3) are ever
+// deleted, so a mistaken or hand-typed path can never remove unrelated bucket
+// content. Failures are logged and swallowed: cleanup must never block the
+// metadata operation it follows.
+async function deleteR2AudioFile(key) {
+  if (!r2Enabled || typeof key !== 'string' || !key.trim()) return
+  const cleanKey = key.trim()
+  if (!/^\d+-.+\.(opus|mp3)$/i.test(cleanKey)) return
+  try {
+    await r2.send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: cleanKey }))
+  } catch (err) {
+    console.warn(`[admin] failed to delete stale R2 object ${cleanKey}: ${err.message}`)
+  }
+}
+
+// After a track update, drop the R2 objects that the row stopped pointing at
+// (only the fields that actually CHANGED, compared against the pre-update row).
+// `updates` carries the validated new values; `existing` the previous row.
+async function cleanupReplacedR2Files(existing, updates) {
+  if (!existing) return
+  const pairs = [
+    [updates && updates.storage_path, existing.storage_path],
+    [updates && updates.karaoke_storage_path, existing.karaoke_storage_path],
+    [updates && updates.ringtone_storage_path, existing.ringtone_storage_path],
+  ]
+  for (const [next, prev] of pairs) {
+    if (typeof next === 'string' && typeof prev === 'string' && next !== prev) {
+      await deleteR2AudioFile(prev)
+    }
+  }
+}
+
 // ----- Admin CRUD -----
 import multer from 'multer'
 const upload = multer({
@@ -1359,6 +1393,13 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
     const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    // The pre-update audio paths, needed to delete the R2 objects this row no
+    // longer points at after a successful save.
+    const { data: existing } = await supabase
+      .from('tracks')
+      .select('storage_path, karaoke_storage_path, ringtone_storage_path')
+      .eq('id', req.params.id)
+      .single()
     const albumIds = album_ids !== undefined ? albumIdsFrom({ album_ids }) : null
     const updates = {}
     if (title !== undefined) {
@@ -1421,12 +1462,14 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
         const retry = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
         if (!retry.error) {
           if (albumIds !== null) { try { await setTrackAlbums(supabase, req.params.id, albumIds) } catch (_) {} }
+          await cleanupReplacedR2Files(existing, updates)
           return res.json(retry.data)
         }
       }
       return res.status(500).json({ error: error.message })
     }
     if (albumIds !== null) { try { await setTrackAlbums(supabase, req.params.id, albumIds) } catch (_) {} }
+    await cleanupReplacedR2Files(existing, updates)
     res.json(data)
   } catch (err) { next(err) }
 })
@@ -1434,8 +1477,20 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
 // Delete track
 app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
+    // Read the audio paths first so the R2 objects can be cleaned up after
+    // the row is gone (best-effort; the delete itself never depends on it).
+    const { data: existing } = await supabase
+      .from('tracks')
+      .select('storage_path, karaoke_storage_path, ringtone_storage_path')
+      .eq('id', req.params.id)
+      .single()
     const { error } = await supabase.from('tracks').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
+    if (existing) {
+      await deleteR2AudioFile(existing.storage_path)
+      await deleteR2AudioFile(existing.karaoke_storage_path)
+      await deleteR2AudioFile(existing.ringtone_storage_path)
+    }
     res.json({ success: true })
   } catch (err) { next(err) }
 })

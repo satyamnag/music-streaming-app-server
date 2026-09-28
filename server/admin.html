@@ -1536,6 +1536,7 @@ function showAdd() {
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('karaokeStatus').textContent = '';
+  document.getElementById('ringtoneStatus').textContent = '';
   document.getElementById('thumbPreviewContainer').innerHTML = '';
   document.getElementById('modal').style.display = 'block';
   loadSyncLyricsInto(null);
@@ -1559,8 +1560,9 @@ function showEdit(id) {
   document.getElementById('fLanguage').value = t.language || '';
   document.getElementById('fTags').value = t.tags || '';
   document.getElementById('thumbStatus').textContent = '';
-  document.getElementById('audioStatus').textContent = '';
-  document.getElementById('karaokeStatus').textContent = '';
+  document.getElementById('audioStatus').textContent = t.storage_path ? 'Current: ' + (t.storage_path.split('/').pop() || t.storage_path) : '';
+  document.getElementById('karaokeStatus').textContent = t.karaoke_storage_path ? 'Current: ' + (t.karaoke_storage_path.split('/').pop() || t.karaoke_storage_path) : '';
+  document.getElementById('ringtoneStatus').textContent = t.ringtone_storage_path ? 'Current: ' + (t.ringtone_storage_path.split('/').pop() || t.ringtone_storage_path) : '';
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
   loadSyncLyricsInto(id);
@@ -1682,7 +1684,7 @@ async function handleAudioUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fStorage').value = data.storage_path;
-    document.getElementById('audioStatus').textContent = 'Uploaded ✓';
+    document.getElementById('audioStatus').textContent = 'Uploaded \u2713 ' + (data.storage_path.split('/').pop() || '');
   } catch (e) { document.getElementById('audioStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
@@ -1697,7 +1699,7 @@ async function handleKaraokeUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fKaraoke').value = data.storage_path;
-    document.getElementById('karaokeStatus').textContent = 'Uploaded ✓';
+    document.getElementById('karaokeStatus').textContent = 'Uploaded ✓ ' + (data.storage_path.split('/').pop() || '');
   } catch (e) { document.getElementById('karaokeStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
@@ -1720,7 +1722,7 @@ async function handleRingtoneUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fRingtone').value = data.storage_path;
-    document.getElementById('ringtoneStatus').textContent = 'Uploaded \u2713';
+    document.getElementById('ringtoneStatus').textContent = 'Uploaded \u2713 ' + (data.storage_path.split('/').pop() || '');
   } catch (e) { document.getElementById('ringtoneStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
