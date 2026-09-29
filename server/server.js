@@ -1743,7 +1743,7 @@ app.get('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
 // shared cover and SRT are optional).
 app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
     if (typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'name is required' })
     }
@@ -1764,6 +1764,7 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
         default_target: target,
         sort_order: Number.isInteger(order) ? order : 0,
         status: status === 'paid' ? 'paid' : 'free',
+        category: category === 'stotra' ? 'stotra' : 'mantra',
         cover_url: clean(cover_url),
         srt: clean(srt),
         audio_11: clean(audio_11),
@@ -1785,7 +1786,7 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
 // so stale audio never accumulates on Cloudflare R2.
 app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
     // Pre-update audio keys, needed to drop replaced/removed R2 objects.
     const { data: existing } = await supabase
       .from('jaap_chants')
@@ -1821,6 +1822,12 @@ app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
       updates.sort_order = order
     }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
+    if (category !== undefined) {
+      if (category !== 'mantra' && category !== 'stotra') {
+        return res.status(400).json({ error: 'category must be "mantra" or "stotra"' })
+      }
+      updates.category = category
+    }
     if (cover_url !== undefined) updates.cover_url = clean(cover_url)
     if (srt !== undefined) updates.srt = clean(srt)
     if (audio_11 !== undefined) updates.audio_11 = clean(audio_11)

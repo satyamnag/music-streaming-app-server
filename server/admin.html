@@ -300,6 +300,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <label>Subscription</label>
         <select id="fJaapStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
       </div>
+      <div style="flex:1;min-width:140px;">
+        <label>Category</label>
+        <select id="fJaapCategory"><option value="mantra">Mantra Japa</option><option value="stotra">Stotra Japa</option></select>
+      </div>
     </div>
     <label>Cover (shared by all variants)</label>
     <div class="upload-row">
@@ -1660,7 +1664,7 @@ function renderJaapChants() {
     ? '<tr><td colspan="7" class="empty-state">No jaap yet. Click "+ Add Jaap".</td></tr>'
     : pageList.map(j => `<tr>
       <td class="thumb-cell">${j.cover_url ? '<img class="thumb-preview" src="'+esc(j.cover_url)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#888;">—</span>'}</td>
-      <td><b>${esc(j.name)}</b></td>
+      <td><b>${esc(j.name)}</b> <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">${(j.category === 'stotra' ? 'stotra' : 'mantra')}</span></td>
       <td style="max-width:260px;">${esc((j.chant_text || '').slice(0, 120))}${(j.chant_text || '').length > 120 ? '…' : ''}</td>
       <td>${esc(String(j.default_target == null ? '' : j.default_target))}</td>
       <td>${j.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
@@ -1701,6 +1705,7 @@ function resetJaapForm() {
   document.getElementById('fJaapChantText').value = '';
   document.getElementById('fJaapTarget').value = '108';
   document.getElementById('fJaapStatus').value = 'free';
+  document.getElementById('fJaapCategory').value = 'mantra';
   document.getElementById('fJaapCover').value = '';
   document.getElementById('jaapCoverPreviewContainer').innerHTML = '';
   document.getElementById('jaapCoverStatus').textContent = '';
@@ -1728,6 +1733,7 @@ function openJaapChantEdit(id) {
   document.getElementById('fJaapChantText').value = j.chant_text || '';
   document.getElementById('fJaapTarget').value = j.default_target == null ? 108 : j.default_target;
   document.getElementById('fJaapStatus').value = j.status === 'paid' ? 'paid' : 'free';
+  document.getElementById('fJaapCategory').value = (j.category === 'stotra') ? 'stotra' : 'mantra';
   document.getElementById('fJaapCover').value = j.cover_url || '';
   document.getElementById('jaapCoverPreviewContainer').innerHTML = j.cover_url ? '<img class="preview-img" src="'+esc(j.cover_url)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('jaapCoverStatus').textContent = j.cover_url ? 'Current: cover' : '';
@@ -1762,6 +1768,7 @@ async function saveJaapChant() {
     chant_text: chant_text,
     default_target: target,
     status: document.getElementById('fJaapStatus').value === 'paid' ? 'paid' : 'free',
+    category: document.getElementById('fJaapCategory').value === 'stotra' ? 'stotra' : 'mantra',
     cover_url: document.getElementById('fJaapCover').value.trim() || null,
     srt: srt || null,
   };
