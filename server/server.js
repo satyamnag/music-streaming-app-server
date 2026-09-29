@@ -1168,6 +1168,23 @@ async function uploadAudioToR2(key, body, contentType) {
   return key
 }
 
+// Image objects are immutable (their keys embed a unique timestamp), so both
+// the browser and the Cloudflare CDN can cache them for a year with the
+// "immutable" directive: after the first visit, WebP covers load from cache
+// and never touch Supabase Storage egress again.
+async function uploadImageToR2(key, body, contentType) {
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: 'public, max-age=31536000, immutable',
+    })
+  )
+  return key
+}
+
 // Best-effort cleanup of a replaced or deleted R2 audio object so the bucket
 // never accumulates stale copies after an admin updates a mantra/track.
 // Only objects matching OUR upload naming (epochms-name.opus|mp3) are ever
@@ -1937,7 +1954,8 @@ app.post('/api/admin/featured/albums', requireAdmin, async (req, res, next) => {
 
 
 // Upload file (audio -> Cloudflare R2 when configured, else Supabase Storage;
-// images -> Supabase Storage thumbnails bucket).
+// images -> Cloudflare R2 (immutable, far-future cache) when configured, else
+// Supabase Storage thumbnails bucket).
 app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
@@ -1976,18 +1994,24 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     }
 
     // Only images reach this point; audio is handled above and always uses R2.
+    // Images go to Cloudflare R2 with a far-future immutable cache when R2 is
+    // configured (fastest browser/CDN loading + zero Supabase Storage egress
+    // for images); otherwise we fall back to the Supabase thumbnails bucket so
+    // nothing breaks while R2 is unavailable.
+    const imageKey = `images/${fileName}`
+    if (r2Enabled) {
+      await uploadImageToR2(imageKey, req.file.buffer, contentType)
+      return res.json({ thumbnail_url: r2PublicUrl(imageKey) })
+    }
     const bucket = 'thumbnails'
     const { data, error } = await supabase.storage.from(bucket).upload(fileName, req.file.buffer, {
       contentType,
       upsert: false,
+      cacheControl: '31536000',
     })
     if (error) return res.status(500).json({ error: error.message })
-    if (isImage) {
-      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName)
-      res.json({ thumbnail_url: publicUrl })
-    } else {
-      res.json({ storage_path: fileName })
-    }
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName)
+    res.json({ thumbnail_url: publicUrl })
   } catch (err) { next(err) }
 })
 
