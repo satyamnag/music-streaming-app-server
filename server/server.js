@@ -1743,7 +1743,7 @@ app.get('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
 // shared cover and SRT are optional).
 app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, count_timeline, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
     if (typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'name is required' })
     }
@@ -1767,6 +1767,7 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
         category: category === 'stotra' ? 'stotra' : 'mantra',
         cover_url: clean(cover_url),
         srt: clean(srt),
+        count_timeline: clean(count_timeline),
         audio_11: clean(audio_11),
         audio_21: clean(audio_21),
         audio_108: clean(audio_108),
@@ -1786,7 +1787,7 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
 // so stale audio never accumulates on Cloudflare R2.
 app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, category, cover_url, srt, count_timeline, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
     // Pre-update audio keys, needed to drop replaced/removed R2 objects.
     const { data: existing } = await supabase
       .from('jaap_chants')
@@ -1830,6 +1831,7 @@ app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
     }
     if (cover_url !== undefined) updates.cover_url = clean(cover_url)
     if (srt !== undefined) updates.srt = clean(srt)
+    if (count_timeline !== undefined) updates.count_timeline = clean(count_timeline)
     if (audio_11 !== undefined) updates.audio_11 = clean(audio_11)
     if (audio_21 !== undefined) updates.audio_21 = clean(audio_21)
     if (audio_108 !== undefined) updates.audio_108 = clean(audio_108)
