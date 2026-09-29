@@ -259,14 +259,16 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     definitions read by the app; a user's counting stays on their device.
   </p>
   <div class="search-row">
-    <input id="jaapChantSearch" type="text" placeholder="Search by name or chant text..." oninput="renderJaapChants()">
+    <input id="jaapChantSearch" type="text" placeholder="Search by name or chant text..." oninput="jaapSearch = this.value; jaapPage = 1; renderJaapChants()">
     <button class="btn btn-success btn-sm" type="button" onclick="openJaapChantCreate()">+ Add Jaap</button>
   </div>
   <table><thead><tr>
+    <th>Cover</th>
     <th>Name</th>
     <th>Chant text</th>
     <th>Target</th>
     <th>Subscription</th>
+    <th title="11 = Daily Prayers 11× · 21 = Daily Prayers 21× · 108 = 1 Mala · 1080 = 10 Malas">Audios</th>
     <th>Actions</th>
   </tr></thead><tbody id="jaapChantsTbody"></tbody></table>
   <div class="pagination" id="jaapChantsPagination" style="display:none;">
@@ -278,6 +280,78 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <span class="page-info" id="jaapChantsPageInfo"></span>
     <button class="btn btn-secondary btn-sm" id="jaapChantsPrevBtn" onclick="changeJaapChantPage(-1)">Prev</button>
     <button class="btn btn-secondary btn-sm" id="jaapChantsNextBtn" onclick="changeJaapChantPage(1)">Next</button>
+  </div>
+</div>
+
+<div id="jaapModal" class="modal" onclick="if(event.target===this)closeJaapModal()">
+  <div class="modal-content" style="max-width:640px;">
+    <h2 id="jaapModalTitle">New Jaap</h2>
+    <input type="hidden" id="fJaapId">
+    <label>Title *</label>
+    <input id="fJaapTitle" placeholder="e.g. Gayatri Mantra">
+    <label>Chant text *</label>
+    <textarea id="fJaapChantText" placeholder="The exact chant text (the app shows this while counting)" style="width:100%;min-height:90px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;line-height:1.6;box-sizing:border-box;"></textarea>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:140px;">
+        <label>Default target</label>
+        <input id="fJaapTarget" type="number" min="1" placeholder="108">
+      </div>
+      <div style="flex:1;min-width:140px;">
+        <label>Subscription</label>
+        <select id="fJaapStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
+      </div>
+    </div>
+    <label>Cover (shared by all variants)</label>
+    <div class="upload-row">
+      <input id="fJaapCover" type="hidden" placeholder="URL or upload an image">
+      <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('jaapCoverInput').click()">Upload Cover</button>
+    </div>
+    <input type="file" id="jaapCoverInput" accept=".webp,image/webp" style="display:none" onchange="handleJaapCoverUpload(this)">
+    <div id="jaapCoverPreviewContainer"></div>
+    <div id="jaapCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    <label>SRT / synced lyrics (shared by all variants)</label>
+    <textarea id="fJaapSrt" placeholder="Optional SRT (cue lines + text). Validated as SRT before saving." style="width:100%;min-height:110px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;line-height:1.5;box-sizing:border-box;font-family:monospace;"></textarea>
+    <div id="jaapSrtStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    <div style="margin-top:10px;border-top:1px solid #eee;padding-top:10px;">
+      <div style="font-size:13px;color:#555;margin-bottom:8px;"><b>Audio variants (.opus → Cloudflare R2)</b></div>
+      <label>Daily Prayers — 11 times</label>
+      <div class="upload-row">
+        <input id="fJaapAudio11" type="hidden" placeholder="e.g. gayatri-11.opus">
+        <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('jaapAudio11Input').click()">Upload</button>
+        <button class="btn btn-secondary btn-sm" type="button" onclick="playJaapAudio(11)">&#9654; Play</button>
+      </div>
+      <input type="file" id="jaapAudio11Input" accept=".opus" style="display:none" onchange="handleJaapAudioUpload(11, this)">
+      <div id="jaapAudio11Status" style="font-size:12px;color:#666;margin-top:4px;"></div>
+      <label style="margin-top:10px;">Daily Prayers — 21 times</label>
+      <div class="upload-row">
+        <input id="fJaapAudio21" type="hidden" placeholder="e.g. gayatri-21.opus">
+        <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('jaapAudio21Input').click()">Upload</button>
+        <button class="btn btn-secondary btn-sm" type="button" onclick="playJaapAudio(21)">&#9654; Play</button>
+      </div>
+      <input type="file" id="jaapAudio21Input" accept=".opus" style="display:none" onchange="handleJaapAudioUpload(21, this)">
+      <div id="jaapAudio21Status" style="font-size:12px;color:#666;margin-top:4px;"></div>
+      <label style="margin-top:10px;">1 Mala — 108 times</label>
+      <div class="upload-row">
+        <input id="fJaapAudio108" type="hidden" placeholder="e.g. gayatri-108.opus">
+        <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('jaapAudio108Input').click()">Upload</button>
+        <button class="btn btn-secondary btn-sm" type="button" onclick="playJaapAudio(108)">&#9654; Play</button>
+      </div>
+      <input type="file" id="jaapAudio108Input" accept=".opus" style="display:none" onchange="handleJaapAudioUpload(108, this)">
+      <div id="jaapAudio108Status" style="font-size:12px;color:#666;margin-top:4px;"></div>
+      <label style="margin-top:10px;">10 Malas — 1080 times</label>
+      <div class="upload-row">
+        <input id="fJaapAudio1080" type="hidden" placeholder="e.g. gayatri-1080.opus">
+        <button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('jaapAudio1080Input').click()">Upload</button>
+        <button class="btn btn-secondary btn-sm" type="button" onclick="playJaapAudio(1080)">&#9654; Play</button>
+      </div>
+      <input type="file" id="jaapAudio1080Input" accept=".opus" style="display:none" onchange="handleJaapAudioUpload(1080, this)">
+      <div id="jaapAudio1080Status" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    </div>
+    <audio id="jaapAudioVerify" preload="none" style="display:none;"></audio>
+    <div class="btn-row">
+      <button class="btn btn-secondary" type="button" onclick="closeJaapModal()">Cancel</button>
+      <button class="btn btn-success" type="button" onclick="saveJaapChant()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -855,6 +929,7 @@ document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (document.getElementById('confirmModal').style.display === 'block') closeConfirm();
   else if (document.getElementById('modal').style.display === 'block') closeModal();
+  else if (document.getElementById('jaapModal').style.display === 'block') closeJaapModal();
   else if (document.getElementById('qrModal').style.display === 'flex') closeQrModal();
 });
 
@@ -984,6 +1059,7 @@ function showView(view) {
   if (navBtn) navBtn.classList.add('active');
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
+  else if (view === 'jaapChants') loadJaapChants();
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
@@ -991,6 +1067,7 @@ function showView(view) {
 function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
+  else if (currentView === 'jaapChants') loadJaapChants();
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
@@ -1522,6 +1599,258 @@ function populateTrackFilterDropdowns() {
 function confirmDeleteTrack(id) {
   const t = tracks.find(x => x.id === id);
   openConfirm('Delete track?', `Delete "${t ? t.title : 'this track'}"? This cannot be undone.`, () => deleteTrack(id));
+}
+
+// ----- Jaap admin (chants + audio variants) -----
+let jaapChants = [];
+let jaapPage = 1;
+let jaapPageSize = 20;
+let jaapSearch = '';
+
+// The four repetition variants. `field` is the jaap_chants column holding the
+// R2 key of that variant's .opus audio.
+const JAAP_AUDIO_FIELDS = [
+  { count: 11, field: 'audio_11', label: 'Daily Prayers — 11x' },
+  { count: 21, field: 'audio_21', label: 'Daily Prayers — 21x' },
+  { count: 108, field: 'audio_108', label: '1 Mala — 108x' },
+  { count: 1080, field: 'audio_1080', label: '10 Malas — 1080x' },
+];
+
+const jaapAudioStatusId = (count) => 'jaapAudio' + count + 'Status';
+
+async function loadJaapChants() {
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/jaap-chants', { credentials: 'same-origin' });
+    jaapChants = await res.json();
+    renderJaapChants();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message); }
+  finally { showLoading(false); }
+}
+
+function filteredJaapChants() {
+  const q = String(jaapSearch || '').trim().toLowerCase();
+  if (!q) return jaapChants;
+  return jaapChants.filter(j =>
+    (j.name || '').toLowerCase().includes(q) ||
+    (j.chant_text || '').toLowerCase().includes(q)
+  );
+}
+
+// Which repetition variants have audio attached (chip per variant, like the
+// track karaoke/lyrics chips).
+function jaapAudioCell(j) {
+  return JAAP_AUDIO_FIELDS.map(f => {
+    const path = ((j && j[f.field]) || '').trim();
+    const ok = path.length > 0;
+    const tip = ok ? (f.label + ': ' + path) : (f.label + ': no audio');
+    return '<span class="sync-chip ' + (ok ? 'sync-yes' : 'sync-no') + '" title="' + esc(tip) + '">' + f.count + (ok ? ' \u2713' : ' \u2717') + '</span>';
+  }).join(' ');
+}
+
+function renderJaapChants() {
+  const list = filteredJaapChants();
+  const tbody = document.getElementById('jaapChantsTbody');
+  if (!tbody) return;
+  const totalPages = Math.max(1, Math.ceil(list.length / jaapPageSize));
+  if (jaapPage > totalPages) jaapPage = totalPages;
+  const start = (jaapPage - 1) * jaapPageSize;
+  const pageList = list.slice(start, start + jaapPageSize);
+  tbody.innerHTML = list.length === 0
+    ? '<tr><td colspan="7" class="empty-state">No jaap yet. Click "+ Add Jaap".</td></tr>'
+    : pageList.map(j => `<tr>
+      <td class="thumb-cell">${j.cover_url ? '<img class="thumb-preview" src="'+esc(j.cover_url)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#888;">—</span>'}</td>
+      <td><b>${esc(j.name)}</b></td>
+      <td style="max-width:260px;">${esc((j.chant_text || '').slice(0, 120))}${(j.chant_text || '').length > 120 ? '…' : ''}</td>
+      <td>${esc(String(j.default_target == null ? '' : j.default_target))}</td>
+      <td>${j.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
+      <td>${jaapAudioCell(j)}</td>
+      <td class="actions">
+        <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="openJaapChantEdit('${j.id}')">✎</button>
+        <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteJaapChant('${j.id}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
+      </td>
+    </tr>`).join('');
+  const pag = document.getElementById('jaapChantsPagination');
+  if (pag) {
+    document.getElementById('jaapChantsPageInfo').textContent = (start + 1) + '–' + (start + pageList.length) + ' of ' + list.length;
+    document.getElementById('jaapChantsPrevBtn').disabled = jaapPage <= 1;
+    document.getElementById('jaapChantsNextBtn').disabled = jaapPage >= totalPages;
+    pag.style.display = list.length > jaapPageSize ? 'block' : 'none';
+  }
+}
+
+function setJaapChantPageSize(v) {
+  const n = parseInt(v, 10);
+  if (!Number.isFinite(n) || n < 1) return;
+  jaapPageSize = n;
+  jaapPage = 1;
+  renderJaapChants();
+}
+
+function changeJaapChantPage(dir) {
+  const total = Math.max(1, Math.ceil(filteredJaapChants().length / jaapPageSize));
+  const p = jaapPage + dir;
+  if (p < 1 || p > total) return;
+  jaapPage = p;
+  renderJaapChants();
+}
+
+function resetJaapForm() {
+  document.getElementById('fJaapId').value = '';
+  document.getElementById('fJaapTitle').value = '';
+  document.getElementById('fJaapChantText').value = '';
+  document.getElementById('fJaapTarget').value = '108';
+  document.getElementById('fJaapStatus').value = 'free';
+  document.getElementById('fJaapCover').value = '';
+  document.getElementById('jaapCoverPreviewContainer').innerHTML = '';
+  document.getElementById('jaapCoverStatus').textContent = '';
+  document.getElementById('fJaapSrt').value = '';
+  document.getElementById('jaapSrtStatus').textContent = '';
+  JAAP_AUDIO_FIELDS.forEach(f => {
+    document.getElementById('fJaapAudio' + f.count).value = '';
+    document.getElementById(jaapAudioStatusId(f.count)).textContent = '';
+  });
+}
+
+function openJaapChantCreate() {
+  resetJaapForm();
+  document.getElementById('jaapModalTitle').textContent = 'New Jaap';
+  document.getElementById('jaapModal').style.display = 'block';
+}
+
+function openJaapChantEdit(id) {
+  const j = jaapChants.find(x => x.id === id);
+  if (!j) return;
+  resetJaapForm();
+  document.getElementById('jaapModalTitle').textContent = 'Edit Jaap';
+  document.getElementById('fJaapId').value = id;
+  document.getElementById('fJaapTitle').value = j.name || '';
+  document.getElementById('fJaapChantText').value = j.chant_text || '';
+  document.getElementById('fJaapTarget').value = j.default_target == null ? 108 : j.default_target;
+  document.getElementById('fJaapStatus').value = j.status === 'paid' ? 'paid' : 'free';
+  document.getElementById('fJaapCover').value = j.cover_url || '';
+  document.getElementById('jaapCoverPreviewContainer').innerHTML = j.cover_url ? '<img class="preview-img" src="'+esc(j.cover_url)+'" onerror="this.style.display=\'none\'">' : '';
+  document.getElementById('jaapCoverStatus').textContent = j.cover_url ? 'Current: cover' : '';
+  document.getElementById('fJaapSrt').value = j.srt || '';
+  document.getElementById('jaapSrtStatus').textContent = (j.srt && j.srt.trim()) ? 'Saved: ' + (j.srt.trim().split('\n').length) + ' line(s)' : '';
+  JAAP_AUDIO_FIELDS.forEach(f => {
+    const path = ((j[f.field]) || '').trim();
+    document.getElementById('fJaapAudio' + f.count).value = path;
+    document.getElementById(jaapAudioStatusId(f.count)).textContent = path ? 'Current: ' + (path.split('/').pop() || path) : '';
+  });
+  document.getElementById('jaapModal').style.display = 'block';
+}
+
+function closeJaapModal() {
+  const m = document.getElementById('jaapModal');
+  if (m) m.style.display = 'none';
+}
+
+async function saveJaapChant() {
+  const id = document.getElementById('fJaapId').value;
+  const name = document.getElementById('fJaapTitle').value.trim();
+  const chant_text = document.getElementById('fJaapChantText').value.trim();
+  const target = parseInt(document.getElementById('fJaapTarget').value, 10);
+  if (!name) { toast('Title is required'); return; }
+  if (!chant_text) { toast('Chant text is required'); return; }
+  if (!Number.isFinite(target) || target <= 0) { toast('Default target must be a positive number'); return; }
+  const srt = document.getElementById('fJaapSrt').value.trim();
+  if (srt && !isValidSrt(srt)) { toast('SRT must be valid SRT format'); return; }
+  if (!lock()) return;
+  const body = {
+    name: name,
+    chant_text: chant_text,
+    default_target: target,
+    status: document.getElementById('fJaapStatus').value === 'paid' ? 'paid' : 'free',
+    cover_url: document.getElementById('fJaapCover').value.trim() || null,
+    srt: srt || null,
+  };
+  JAAP_AUDIO_FIELDS.forEach(f => { body[f.field] = document.getElementById('fJaapAudio' + f.count).value.trim() || null; });
+  try {
+    const url = id ? '/api/admin/jaap-chants/' + id : '/api/admin/jaap-chants';
+    const method = id ? 'PUT' : 'POST';
+    const res = await authedFetch(url, { method: method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed'); }
+    toast(id ? 'Updated' : 'Created');
+    closeJaapModal();
+    loadJaapChants();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { unlock(); }
+}
+
+function confirmDeleteJaapChant(id) {
+  const j = jaapChants.find(x => x.id === id);
+  openConfirm('Delete jaap?', 'Delete "' + (j ? j.name : 'this jaap') + '"? Its audio files on Cloudflare R2 will also be removed.', function () { deleteJaapChant(id); });
+}
+
+async function deleteJaapChant(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/jaap-chants/' + id, { method: 'DELETE', credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Delete failed');
+    toast('Deleted');
+    loadJaapChants();
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
+  finally { showLoading(false); unlock(); }
+}
+
+// Jaap cover: strictly WebP and exactly 1024x1024 (same rule as album covers).
+async function handleJaapCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.type || file.type !== 'image/webp') { toast('Jaap cover must be a WebP image'); input.value = ''; return; }
+  const dims = await new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function () { const d = { w: img.naturalWidth, h: img.naturalHeight }; URL.revokeObjectURL(url); resolve(d); };
+    img.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+  if (!dims) { toast('Could not read the jaap cover'); input.value = ''; return; }
+  if (dims.w !== 1024 || dims.h !== 1024) { toast('Jaap cover must be exactly 1024x1024'); input.value = ''; return; }
+  const form = new FormData(); form.append('file', file);
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('fJaapCover').value = data.thumbnail_url;
+    document.getElementById('jaapCoverPreviewContainer').innerHTML = '<img class="preview-img" src="'+esc(data.thumbnail_url)+'" onerror="this.style.display=\'none\'">';
+    const st = document.getElementById('jaapCoverStatus'); if (st) st.textContent = 'Uploaded \u2713';
+  } catch (e) { const st = document.getElementById('jaapCoverStatus'); if (st) st.textContent = 'Error: ' + e.message; }
+  input.value = '';
+}
+
+// Uploads one .opus variant to Cloudflare R2 and stores its key in the form.
+async function handleJaapAudioUpload(count, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(jaapAudioStatusId(count));
+  if (statusEl) statusEl.textContent = 'Uploading...';
+  const form = new FormData(); form.append('file', file);
+  try {
+    const res = await authedFetch('/api/admin/upload', { method: 'POST', credentials: 'same-origin', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('fJaapAudio' + count).value = data.storage_path;
+    if (statusEl) statusEl.textContent = 'Uploaded \u2713 ' + ((data.storage_path || '').split('/').pop() || '');
+  } catch (e) { if (statusEl) statusEl.textContent = 'Error: ' + e.message; }
+  input.value = '';
+}
+
+// Plays / pauses a just-uploaded jaap variant via the admin-only stream proxy.
+function playJaapAudio(count) {
+  const statusEl = document.getElementById(jaapAudioStatusId(count));
+  const path = document.getElementById('fJaapAudio' + count).value.trim();
+  const audio = document.getElementById('jaapAudioVerify');
+  if (!audio) return;
+  if (!path) { if (statusEl) statusEl.textContent = 'No file uploaded yet'; return; }
+  const isPlaying = !audio.paused && !audio.ended;
+  if (isPlaying) { audio.pause(); if (statusEl) statusEl.textContent = 'Paused'; return; }
+  audio.pause();
+  audio.src = '/api/admin/audio/file?path=' + encodeURIComponent(path);
+  audio.play().then(function () { if (statusEl) statusEl.textContent = 'Playing \u25b6'; })
+    .catch(function () { if (statusEl) statusEl.textContent = 'Playback error'; });
 }
 
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

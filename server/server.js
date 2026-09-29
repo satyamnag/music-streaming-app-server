@@ -1739,10 +1739,11 @@ app.get('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Create a jaap chant (name + exact chant text required).
+// Create a jaap chant (name + exact chant text required; audio variants,
+// shared cover and SRT are optional).
 app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
     if (typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'name is required' })
     }
@@ -1754,6 +1755,7 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
       return res.status(400).json({ error: 'default_target must be a positive integer' })
     }
     const order = sort_order == null ? 0 : Number(sort_order)
+    const clean = (v) => (typeof v === 'string' && v.trim() ? v.trim() : null)
     const { data, error } = await supabase
       .from('jaap_chants')
       .insert({
@@ -1762,6 +1764,12 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
         default_target: target,
         sort_order: Number.isInteger(order) ? order : 0,
         status: status === 'paid' ? 'paid' : 'free',
+        cover_url: clean(cover_url),
+        srt: clean(srt),
+        audio_11: clean(audio_11),
+        audio_21: clean(audio_21),
+        audio_108: clean(audio_108),
+        audio_1080: clean(audio_1080),
       })
       .select()
       .single()
@@ -1770,12 +1778,21 @@ app.post('/api/admin/jaap-chants', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Update a jaap chant. This is the route the admin panel uses to change the
-// EXACT text of a single chant. Partial update: only the supplied fields change,
-// and a blank name/chant_text is rejected rather than silently emptied.
+// Update a jaap chant. Partial update: only the supplied fields change, and a
+// blank name/chant_text is rejected rather than silently emptied. Audio
+// variants / cover / SRT may be cleared (empty string -> null). When a variant
+// audio is replaced or cleared, the previous R2 object is removed (best-effort)
+// so stale audio never accumulates on Cloudflare R2.
 app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, chant_text, default_target, sort_order, status } = req.body || {}
+    const { name, chant_text, default_target, sort_order, status, cover_url, srt, audio_11, audio_21, audio_108, audio_1080 } = req.body || {}
+    // Pre-update audio keys, needed to drop replaced/removed R2 objects.
+    const { data: existing } = await supabase
+      .from('jaap_chants')
+      .select('audio_11, audio_21, audio_108, audio_1080')
+      .eq('id', req.params.id)
+      .single()
+    const clean = (v) => (typeof v === 'string' && v.trim() ? v.trim() : null)
     const updates = {}
     if (name !== undefined) {
       if (typeof name !== 'string' || !name.trim()) {
@@ -1804,7 +1821,14 @@ app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
       updates.sort_order = order
     }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
+    if (cover_url !== undefined) updates.cover_url = clean(cover_url)
+    if (srt !== undefined) updates.srt = clean(srt)
+    if (audio_11 !== undefined) updates.audio_11 = clean(audio_11)
+    if (audio_21 !== undefined) updates.audio_21 = clean(audio_21)
+    if (audio_108 !== undefined) updates.audio_108 = clean(audio_108)
+    if (audio_1080 !== undefined) updates.audio_1080 = clean(audio_1080)
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
+    updates.updated_at = new Date().toISOString()
     const { data, error } = await supabase
       .from('jaap_chants')
       .update(updates)
@@ -1812,15 +1836,34 @@ app.put('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
       .select()
       .single()
     if (error) return res.status(500).json({ error: error.message })
+    // Drop the R2 objects this jaap stopped pointing at. Only runs after the
+    // metadata save succeeded and never blocks it (deleteR2AudioFile swallows).
+    if (existing) {
+      for (const field of ['audio_11', 'audio_21', 'audio_108', 'audio_1080']) {
+        if (field in updates && updates[field] !== existing[field] && typeof existing[field] === 'string') {
+          await deleteR2AudioFile(existing[field])
+        }
+      }
+    }
     res.json(data)
   } catch (err) { next(err) }
 })
 
-// Delete a jaap chant.
+// Delete a jaap chant (and its variant audio objects on Cloudflare R2).
 app.delete('/api/admin/jaap-chants/:id', requireAdmin, async (req, res, next) => {
   try {
+    const { data: existing } = await supabase
+      .from('jaap_chants')
+      .select('audio_11, audio_21, audio_108, audio_1080')
+      .eq('id', req.params.id)
+      .single()
     const { error } = await supabase.from('jaap_chants').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
+    if (existing) {
+      for (const field of ['audio_11', 'audio_21', 'audio_108', 'audio_1080']) {
+        await deleteR2AudioFile(existing[field])
+      }
+    }
     res.json({ success: true })
   } catch (err) { next(err) }
 })
