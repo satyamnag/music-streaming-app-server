@@ -321,6 +321,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <textarea id="fJaapCountTimeline" placeholder="Optional SRT whose cue start times each count one repetition (auto-count)." style="width:100%;min-height:80px;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;line-height:1.5;box-sizing:border-box;font-family:monospace;"></textarea>
     <div style="font-size:11px;color:#999;margin-top:2px;">When the app plays this japa with Auto count on, the counter increments once per cue start — synced to the audio.</div>
     <div id="jaapTimelineStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+    <div style="margin-top:16px;font-size:12px;color:#999;">Per-variant SRT (optional) — each repetition variant can have its own lyrics SRT and count timeline. When a variant has none, the shared SRT / count timeline above are used.</div>
+    <div id="jaapVariantSrtFields"></div>
     <div style="margin-top:10px;border-top:1px solid #eee;padding-top:10px;">
       <div style="font-size:13px;color:#555;margin-bottom:8px;"><b>Audio variants (.opus → Cloudflare R2)</b></div>
       <label>Daily Prayers — 11 times</label>
@@ -1626,6 +1628,38 @@ const JAAP_AUDIO_FIELDS = [
 ];
 
 const jaapAudioStatusId = (count) => 'jaapAudio' + count + 'Status';
+const jaapVariantSrtStatusId = (count) => 'jaapSrtStatus' + count;
+const jaapVariantCtStatusId = (count) => 'jaapCtStatus' + count;
+
+// Builds the per-variant SRT editor blocks (one per repetition variant):
+// lyrics SRT + count timeline, each with its own status line. The ids follow
+// fJaapSrt<count> / fJaapCt<count> so reset/edit/save can drive them by loop.
+function jaapVariantSrtHtml() {
+  if (typeof JAAP_AUDIO_FIELDS !== 'undefined' && JAAP_AUDIO_FIELDS.length === 0) return '';
+  return JAAP_AUDIO_FIELDS.map(function (f) {
+    var parts = String(f.label || '').split(' — ');
+    var title = parts.length > 1 ? parts[1] : (f.label || f.count);
+    var note = parts.length > 1 ? parts[0] : '';
+    return (
+      '<div style="margin-top:10px;border:1px solid #eee;border-radius:8px;padding:10px;">' +
+      '<strong style="font-size:13px;">' + esc(title) + (note ? ' <span style="font-weight:normal;color:#888;">(' + esc(note) + ')</span>' : '') + '</strong>' +
+      '<label style="margin-top:6px;">Lyrics SRT (optional — overrides shared SRT)</label>' +
+      '<textarea id="fJaapSrt' + f.count + '" placeholder="Optional per-variant lyrics SRT." style="width:100%;min-height:64px;padding:6px;border:1px solid #ddd;border-radius:6px;font-size:12px;line-height:1.5;box-sizing:border-box;font-family:monospace;"></textarea>' +
+      '<div id="jaapSrtStatus' + f.count + '" style="font-size:12px;color:#666;margin-top:4px;"></div>' +
+      '<label style="margin-top:8px;">Count timeline (optional — overrides shared count timeline)</label>' +
+      '<textarea id="fJaapCt' + f.count + '" placeholder="Optional per-variant count timeline (one count per cue)." style="width:100%;min-height:64px;padding:6px;border:1px solid #ddd;border-radius:6px;font-size:12px;line-height:1.5;box-sizing:border-box;font-family:monospace;"></textarea>' +
+      '<div id="jaapCtStatus' + f.count + '" style="font-size:12px;color:#666;margin-top:4px;"></div>' +
+      '</div>'
+    )
+  }).join('');
+}
+
+// Inject the per-variant editors into the jaap modal (script runs after the
+// markup, so the container exists).
+(function () {
+  var host = document.getElementById('jaapVariantSrtFields');
+  if (host) host.innerHTML = jaapVariantSrtHtml();
+})();
 
 async function loadJaapChants() {
   try {
@@ -1719,6 +1753,14 @@ function resetJaapForm() {
   document.getElementById('fJaapCountTimeline').value = '';
   document.getElementById('jaapTimelineStatus').textContent = '';
   JAAP_AUDIO_FIELDS.forEach(f => {
+    const srtEl = document.getElementById('fJaapSrt' + f.count);
+    if (srtEl) srtEl.value = '';
+    const srtSt = document.getElementById(jaapVariantSrtStatusId(f.count));
+    if (srtSt) srtSt.textContent = '';
+    const ctEl = document.getElementById('fJaapCt' + f.count);
+    if (ctEl) ctEl.value = '';
+    const ctSt = document.getElementById(jaapVariantCtStatusId(f.count));
+    if (ctSt) ctSt.textContent = '';
     document.getElementById('fJaapAudio' + f.count).value = '';
     document.getElementById(jaapAudioStatusId(f.count)).textContent = '';
   });
@@ -1749,6 +1791,16 @@ function openJaapChantEdit(id) {
   document.getElementById('fJaapCountTimeline').value = j.count_timeline || '';
   document.getElementById('jaapTimelineStatus').textContent = (j.count_timeline && j.count_timeline.trim()) ? 'Saved: ' + (j.count_timeline.trim().split('\n').length) + ' cue line(s)' : '';
   JAAP_AUDIO_FIELDS.forEach(f => {
+    const srtV = ((j['srt_' + f.count]) || '').trim();
+    const srtEl = document.getElementById('fJaapSrt' + f.count);
+    if (srtEl) srtEl.value = srtV;
+    const srtSt = document.getElementById(jaapVariantSrtStatusId(f.count));
+    if (srtSt) srtSt.textContent = srtV ? 'Saved: ' + (srtV.split('\n').length) + ' line(s)' : '';
+    const ctV = ((j['count_timeline_' + f.count]) || '').trim();
+    const ctEl = document.getElementById('fJaapCt' + f.count);
+    if (ctEl) ctEl.value = ctV;
+    const ctSt = document.getElementById(jaapVariantCtStatusId(f.count));
+    if (ctSt) ctSt.textContent = ctV ? 'Saved: ' + (ctV.split('\n').length) + ' cue line(s)' : '';
     const path = ((j[f.field]) || '').trim();
     document.getElementById('fJaapAudio' + f.count).value = path;
     document.getElementById(jaapAudioStatusId(f.count)).textContent = path ? 'Current: ' + (path.split('/').pop() || path) : '';
@@ -1773,6 +1825,20 @@ async function saveJaapChant() {
   if (srt && !isValidSrt(srt)) { toast('SRT must be valid SRT format'); return; }
   const count_timeline = document.getElementById('fJaapCountTimeline').value.trim();
   if (count_timeline && !isValidSrt(count_timeline)) { toast('Count timeline must be valid SRT format'); return; }
+  // Per-variant SRTs (validate each; any single invalid one blocks the save).
+  var variantSrt = {};
+  var variantCt = {};
+  for (var vi = 0; vi < JAAP_AUDIO_FIELDS.length; vi++) {
+    var vf = JAAP_AUDIO_FIELDS[vi];
+    var vsrtEl = document.getElementById('fJaapSrt' + vf.count);
+    var vsrt = (vsrtEl ? vsrtEl.value : '').trim();
+    if (vsrt && !isValidSrt(vsrt)) { toast(vf.label + ' lyrics SRT must be valid SRT format'); return; }
+    variantSrt['srt_' + vf.count] = vsrt || null;
+    var vctEl = document.getElementById('fJaapCt' + vf.count);
+    var vct = (vctEl ? vctEl.value : '').trim();
+    if (vct && !isValidSrt(vct)) { toast(vf.label + ' count timeline must be valid SRT format'); return; }
+    variantCt['count_timeline_' + vf.count] = vct || null;
+  }
   if (!lock()) return;
   const body = {
     name: name,
@@ -1784,6 +1850,7 @@ async function saveJaapChant() {
     srt: srt || null,
     count_timeline: count_timeline || null,
   };
+  Object.assign(body, variantSrt, variantCt);
   JAAP_AUDIO_FIELDS.forEach(f => { body[f.field] = document.getElementById('fJaapAudio' + f.count).value.trim() || null; });
   try {
     const url = id ? '/api/admin/jaap-chants/' + id : '/api/admin/jaap-chants';
