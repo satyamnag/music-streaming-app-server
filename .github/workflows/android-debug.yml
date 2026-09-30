@@ -21,13 +21,17 @@ on:
   workflow_dispatch:
     inputs:
       flavor:
-        description: App flavor to compile (applicationId suffix + app name)
+        description: >-
+          App flavor to compile. 'stable' is the only fully verified choice:
+          google-services.json (Firebase) currently contains a client only for
+          com.soulfulbhakti.app. 'dev'/'nightly' need matching Firebase client
+          entries in android/app/google-services.json first.
         type: choice
         options:
+          - stable
           - dev
           - nightly
-          - stable
-        default: dev
+        default: stable
       build_type:
         description: Flutter/Gradle build type (debug is debuggable + all ABIs)
         type: choice
