@@ -34,15 +34,10 @@ void main() {
       });
     }
 
-    // v12 -> v13 adds the local Jaap Counter tables (jaapCountersTable and
-    // jaapDailyCountsTable). `migrateAndValidate` checks the full expected
-    // schema, so it also asserts that both new tables exist afterwards.
-    test('from 12 to 13', () async {
-      final schema = await verifier.schemaAt(12);
-      final db = Database(schema.newConnection());
-      await verifier.migrateAndValidate(db, 13);
-      await db.close();
-    });
+    // v13 -> v14 repairs the local playlist foreign key, and v14 -> v15 drops
+    // the local Jaap Counter tables. `migrateAndValidate` checks the full
+    // expected schema for every generated version, so intermediate hop
+    // coverage is already exercised by the loop above.
   });
 
   // Simple tests ensure the schema is transformed correctly, but some

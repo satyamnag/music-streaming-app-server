@@ -19,38 +19,6 @@ void main() {
     expect(row.read<int>('foreign_keys'), 1);
   });
 
-  test('deleting a counter cascades to its daily rows', () async {
-    final counterId = await db.into(db.jaapCountersTable).insert(
-          JaapCountersTableCompanion.insert(name: 'Gayatri'),
-        );
-    await db.into(db.jaapDailyCountsTable).insert(
-          JaapDailyCountsTableCompanion.insert(
-            counterId: counterId,
-            day: '2025-09-20',
-          ),
-        );
-
-    expect(await db.select(db.jaapDailyCountsTable).get(), hasLength(1));
-
-    await (db.delete(db.jaapCountersTable)
-          ..where((t) => t.id.equals(counterId)))
-        .go();
-
-    expect(await db.select(db.jaapDailyCountsTable).get(), isEmpty);
-  });
-
-  test('a daily row referencing a missing counter is rejected', () async {
-    await expectLater(
-      db.into(db.jaapDailyCountsTable).insert(
-            JaapDailyCountsTableCompanion.insert(
-              counterId: 999,
-              day: '2025-09-20',
-            ),
-          ),
-      throwsA(isA<SqliteException>()),
-    );
-  });
-
   test('deleting a playlist cascades to its songs', () async {
     await db.into(db.localPlaylistsTable).insert(
           LocalPlaylistsTableCompanion.insert(id: 'p1', name: 'Bhajans'),

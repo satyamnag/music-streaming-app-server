@@ -38,8 +38,6 @@ part 'tables/lyrics.dart';
 part 'tables/metadata_plugins.dart';
 part 'tables/local_playlists.dart';
 part 'tables/local_liked_songs.dart';
-part 'tables/jaap_counters.dart';
-part 'tables/jaap_daily_counts.dart';
 
 part 'typeconverters/color.dart';
 part 'typeconverters/locale.dart';
@@ -61,8 +59,6 @@ part 'typeconverters/subtitle.dart';
     LocalPlaylistsTable,
     LocalPlaylistSongsTable,
     LocalLikedSongsTable,
-    JaapCountersTable,
-    JaapDailyCountsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -72,14 +68,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
         // sqlite3 leaves foreign key enforcement off by default, which would
-        // make the ON DELETE CASCADE on jaap_daily_counts_table.counter_id
+        // make ON DELETE CASCADE (e.g. local_playlist_songs_table.playlist_id)
         // inert. Enable it for every connection.
         await customStatement('PRAGMA foreign_keys = ON');
       },
@@ -267,11 +263,6 @@ class AppDatabase extends _$AppDatabase {
         if (to >= 12 && from < 12) {
           await m.createTable(localLikedSongsTable);
         }
-        // v12 -> v13: local Jaap Counter (counters + per-day counts).
-        if (to >= 13 && from < 13) {
-          await m.createTable(jaapCountersTable);
-          await m.createTable(jaapDailyCountsTable);
-        }
         // v13 -> v14: repair the local playlist foreign key. local_playlists_table
         // had no primary key, so local_playlist_songs_table.playlist_id pointed at
         // a non-unique column. With `PRAGMA foreign_keys = ON` that is an invalid
@@ -281,6 +272,14 @@ class AppDatabase extends _$AppDatabase {
         if (to >= 14 && from < 14) {
           await m.alterTable(TableMigration(localPlaylistsTable));
           await m.alterTable(TableMigration(localPlaylistSongsTable));
+        }
+        // v14 -> v15: the Jaap Counter feature was removed. Drop the local
+        // counters and per-day counts tables. IF EXISTS keeps this a no-op for
+        // installs that never created them (fresh databases, or upgrades that
+        // skipped the jaap era entirely).
+        if (to >= 15 && from < 15) {
+          await customStatement('DROP TABLE IF EXISTS jaap_counters_table');
+          await customStatement('DROP TABLE IF EXISTS jaap_daily_counts_table');
         }
       },
     );

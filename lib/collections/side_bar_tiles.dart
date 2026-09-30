@@ -29,13 +29,6 @@ List<SideBarTiles> getSidebarTileList(AppLocalizations l10n) => [
         title: l10n.browse,
       ),
       SideBarTiles(
-        id: "jaap",
-        pathPrefix: "/jaap",
-        route: const JaapCounterRoute(),
-        icon: SangeetIcons.jaap,
-        title: l10n.jaap_counter,
-      ),
-      SideBarTiles(
         id: "search",
         pathPrefix: "/search",
         route: const SearchRoute(),
@@ -75,13 +68,6 @@ List<SideBarTiles> getNavbarTileList(AppLocalizations l10n) => [
         route: const HomeRoute(),
         icon: SangeetIcons.home,
         title: l10n.browse,
-      ),
-      SideBarTiles(
-        id: "jaap",
-        pathPrefix: "/jaap",
-        route: const JaapCounterRoute(),
-        icon: SangeetIcons.jaap,
-        title: l10n.jaap_counter,
       ),
       SideBarTiles(
         id: "search",

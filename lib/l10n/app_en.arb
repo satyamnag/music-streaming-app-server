@@ -488,21 +488,5 @@
   "local": "Local",
   "set_as_ringtone": "Set as ringtone",
   "ringtone_set": "Ringtone set",
-  "ringtone_failed": "Could not set ringtone",
-  "jaap_counter": "Jaap",
-  "jaap_today": "Today",
-  "jaap_streak": "Streak",
-  "jaap_days": "days",
-  "jaap_lifetime": "Lifetime",
-  "jaap_new_counter": "New counter",
-  "jaap_name": "Name",
-  "jaap_daily_target": "Daily target",
-  "jaap_rename": "Rename",
-  "jaap_delete": "Delete",
-  "jaap_delete_confirm": "Delete this counter and its history?",
-  "jaap_reset_today": "Reset today",
-  "jaap_target_reached": "Target reached",
-  "jaap_tap_to_count": "Tap to count",
-  "jaap_name_required": "Name is required",
-  "jaap_target_invalid": "Target must be greater than 0"
+  "ringtone_failed": "Could not set ringtone"
 }
