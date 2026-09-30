@@ -9,6 +9,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -56,7 +57,10 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
               Skeletonizer(
                 enabled: true,
                 child: SizedBox(
-                  height: 200,
+                  height: HomeSectionLayout.rowHeight(
+                    context,
+                    withSubtitle: false,
+                  ),
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
@@ -119,7 +123,10 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
             ),
             Gap(8 * scale),
             SizedBox(
-              height: 200,
+              height: HomeSectionLayout.rowHeight(
+                context,
+                withSubtitle: false,
+              ),
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
@@ -139,8 +146,7 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                   final images = track.album.images.isNotEmpty
                       ? track.album.images
                       : (historyTrack?.album.images ?? const []);
-                  final imageUrl =
-                      images.smallest(ImagePlaceholder.albumArt);
+                  final imageUrl = images.smallest(ImagePlaceholder.albumArt);
 
                   return _RecentTrackCard(
                     track: track,
@@ -152,9 +158,10 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                           ref: ref,
                           track: track,
                           feature: () async {
-                            await ref
-                                .read(audioPlayerProvider.notifier)
-                                .load(tracks, initialIndex: index, autoPlay: true);
+                            await ref.read(audioPlayerProvider.notifier).load(
+                                tracks,
+                                initialIndex: index,
+                                autoPlay: true);
                           },
                         );
                         return;

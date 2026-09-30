@@ -7,6 +7,7 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -63,7 +64,7 @@ class HomeAlbumsSection extends HookConsumerWidget {
             ),
             Gap(8 * scale),
             SizedBox(
-              height: 200,
+              height: HomeSectionLayout.rowHeight(context),
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
@@ -72,8 +73,8 @@ class HomeAlbumsSection extends HookConsumerWidget {
                 itemBuilder: (context, index) {
                   final album = albums[index].album;
                   final tracks = albums[index].tracks;
-                  final imageUrl = album.images
-                      .smallest(ImagePlaceholder.albumArt);
+                  final imageUrl =
+                      album.images.smallest(ImagePlaceholder.albumArt);
 
                   return _AlbumCard(
                     album: album,
@@ -82,7 +83,8 @@ class HomeAlbumsSection extends HookConsumerWidget {
                     onTap: () {
                       // Open the album screen listing its songs (like a
                       // playlist) instead of immediately playing the album.
-                      context.navigateTo(AlbumRoute(id: album.id, album: album));
+                      context
+                          .navigateTo(AlbumRoute(id: album.id, album: album));
                     },
                   );
                 },

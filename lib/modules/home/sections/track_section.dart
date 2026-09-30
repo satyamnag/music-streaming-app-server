@@ -8,6 +8,7 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
@@ -64,7 +65,7 @@ class HomeTrackSection extends HookConsumerWidget {
               Skeletonizer(
                 enabled: true,
                 child: SizedBox(
-                  height: 200,
+                  height: HomeSectionLayout.rowHeight(context),
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
@@ -120,7 +121,7 @@ class HomeTrackSection extends HookConsumerWidget {
             ),
             Gap(8 * scale),
             SizedBox(
-              height: 200,
+              height: HomeSectionLayout.rowHeight(context),
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
