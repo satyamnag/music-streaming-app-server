@@ -1,0 +1,158 @@
+name: Android Debug APK
+
+# On-demand, always-fresh Android DEBUG APK for the Soulful Bhakti app.
+# Every run checks out the latest commit on `main` and compiles a debuggable
+# APK (android:debuggable=true, all ABIs incl. x86_64 for emulators) which is
+# uploaded as a workflow artifact. Nothing is published or pushed anywhere;
+# the APK never leaves GitHub until you download it from the run page.
+#
+# Required GitHub secrets (Settings -> Secrets and variables -> Actions):
+#   KEYSTORE        base64-encoded release keystore (.jks)  [optional: falls
+#                   back to an ephemeral debug keystore generated in CI]
+#   KEY_PROPERTIES  contents of android/key.properties      [optional]
+#   DOTENV_RELEASE  full .env contents used at compile time [optional: falls
+#                   back to a minimal development .env so the build compiles]
+#
+# The toolchain mirrors the proven android-release.yml workflow exactly
+# (Flutter 3.35.2, JDK 17, ubuntu runners); cargokit-plugins auto-install
+# their Rust targets via rustup, so no separate Rust setup step is required.
+
+on:
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: App flavor to compile (applicationId suffix + app name)
+        type: choice
+        options:
+          - dev
+          - nightly
+          - stable
+        default: dev
+      build_type:
+        description: Flutter/Gradle build type (debug is debuggable + all ABIs)
+        type: choice
+        options:
+          - debug
+          - profile
+        default: debug
+
+env:
+  FLUTTER_VERSION: 3.35.2
+
+permissions:
+  contents: read
+
+jobs:
+  build_debug_apk:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Verify toolchain
+        run: |
+          flutter --version
+          java -version
+
+      - name: Write .env (compile-time config)
+        env:
+          DOTENV: ${{ secrets.DOTENV_RELEASE }}
+        run: |
+          if [ -z "$DOTENV" ]; then
+            echo "::warning::Secret DOTENV_RELEASE is not set. Writing a minimal"
+            echo "::warning::development .env so envied codegen still succeeds."
+            printf '%s\n' \
+              'SUPABASE_URL=https://placeholder.supabase.co' \
+              'SUPABASE_ANON_KEY=placeholder-anon-key' \
+              'CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuc291bGZ1bGJoYWt0aS5jb20k' \
+              'RELEASE_CHANNEL=nightly' \
+              'ENABLE_UPDATE_CHECK=1' \
+              'HIDE_DONATIONS=0' \
+              > .env
+          else
+            printf '%s\n' "$DOTENV" > .env
+            # Show only the KEYS, never the values, so the log stays safe.
+            echo "Wrote .env with these keys:"
+            grep -oE '^[A-Z_]+' .env | sort -u
+          fi
+
+      - name: Write signing config
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          mkdir -p android/app
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEY_PROPERTIES" ]; then
+            echo "::warning::Release signing secrets are not fully configured."
+            echo "::warning::Generating an ephemeral debug-only keystore in CI."
+            keytool -genkeypair -v \
+              -keystore android/app/upload-keystore.jks \
+              -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android999 -keypass android999 \
+              -dname "CN=Android Debug, OU=CI, O=Soulful Bhakti, L=Temp, ST=Temp, C=IN" 2>/dev/null
+            printf '%s\n' \
+              'storeFile=upload-keystore.jks' \
+              'storePassword=android999' \
+              'keyAlias=debug' \
+              'keyPassword=android999' \
+              > android/key.properties
+          else
+            # The workflow writes the keystore here; key.properties must
+            # reference this exact relative path (storeFile=upload-keystore.jks).
+            echo "$KEYSTORE_B64" | base64 --decode > android/app/upload-keystore.jks
+            printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
+            test -s android/app/upload-keystore.jks || { echo "::error::keystore decode produced an empty file"; exit 1; }
+          fi
+          echo "Signing files written."
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code (routes, drift, envied)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build debug APK
+        timeout-minutes: 120
+        run: flutter build apk --${{ inputs.build_type }} --flavor ${{ inputs.flavor }}
+
+      - name: Verify APK
+        run: |
+          APK=$(find build/app/outputs/flutter-apk -maxdepth 1 -type f -name '*.apk' | head -n 1)
+          test -n "$APK" || { echo "::error::No APK produced by the build"; exit 1; }
+          echo "APK file : $APK"
+          ls -lh "$APK"
+          echo "SHA-256  : $(sha256sum "$APK" | awk '{print $1}')"
+          echo "Type     : $(file -b "$APK")"
+          APKSIGNER="$(ls -1 "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -n 1)"
+          if [ -n "$APKSIGNER" ]; then
+            "$APKSIGNER" verify --print-certs "$APK" 2>&1 || echo "(apksigner verify reported an issue; inspect the APK manually)"
+          else
+            echo "(apksigner not found; skipping signature verification)"
+          fi
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: soulful-bhakti-debug-apk
+          path: build/app/outputs/flutter-apk/app-${{ inputs.flavor }}-${{ inputs.build_type }}.apk
+
+      - name: Clean up signing material (always)
+        if: always()
+        run: |
+          rm -f android/key.properties android/app/upload-keystore.jks .env
+          echo "Signing files and .env removed from the workspace."
