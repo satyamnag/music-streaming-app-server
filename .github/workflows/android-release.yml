@@ -28,7 +28,15 @@ on:
           - apk
           - appbundle
           - both
-        default: apk
+        default: appbundle
+      version_code:
+        description: Android versionCode (monotonic, must increase per Play upload)
+        type: number
+        default: 75
+      version_name:
+        description: Android versionName (user-visible, e.g. 75 or 75.0)
+        type: string
+        default: "75"
       split_per_abi:
         description: Split APK per CPU architecture (smaller downloads)
         type: boolean
@@ -107,16 +115,24 @@ jobs:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
           if [ "${{ inputs.split_per_abi }}" = "true" ]; then
-            flutter build apk --release --flavor stable --split-per-abi
+            flutter build apk --release --flavor stable \
+              --build-number ${{ inputs.version_code }} \
+              --build-name ${{ inputs.version_name }} \
+              --split-per-abi
           else
-            flutter build apk --release --flavor stable
+            flutter build apk --release --flavor stable \
+              --build-number ${{ inputs.version_code }} \
+              --build-name ${{ inputs.version_name }}
           fi
 
       - name: Build App Bundle (Play upload)
         if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
         env:
           RELEASE_CHANNEL: ${{ inputs.channel }}
-        run: flutter build appbundle --release --flavor stable
+        run: |
+          flutter build appbundle --release --flavor stable \
+            --build-number ${{ inputs.version_code }} \
+            --build-name ${{ inputs.version_name }}
 
       - name: List build outputs
         run: |
