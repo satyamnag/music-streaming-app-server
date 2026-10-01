@@ -101,8 +101,14 @@ Future<void> main(List<String> rawArgs) async {
           // CHAIN, never replace: AppLogger's handler (installed in
           // AppLogger.runZoned) writes framework errors to the local log file.
           // Replacing it with Crashlytics alone silently disabled file logging
-          // on the common Android path.
-          AppLogger.reportError(errorDetails.exception, errorDetails.stack ?? StackTrace.current);
+          // on the common Android path. Log the FULL details object (not just
+          // .exception) so debug logs carry the widget context ("relevant
+          // error-causing widget") instead of only the exception text.
+          AppLogger.reportError(
+            errorDetails,
+            errorDetails.stack ?? StackTrace.current,
+            "framework: ${errorDetails.library ?? 'Flutter'}",
+          );
           FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
         };
         PlatformDispatcher.instance.onError = (error, stack) {
