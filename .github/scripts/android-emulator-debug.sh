@@ -14,24 +14,31 @@ EXERCISE="${1:-true}"
 LVL="${2:-warning}"
 
 adb wait-for-device
-# google_apis image: root lets us read /data/anr (best-effort).
-adb root || true
-adb wait-for-device
+# Launch as the regular shell user (adb default). Starting an activity as uid 0
+# (adb root) can be aborted by ActivityTaskManager (START_ABORTED).
 adb shell input keyevent 82 || true # dismiss keyguard
 
 echo "::group::Install and launch"
 adb install -t -r "$APK"
+# Let PackageManager finish committing the install before starting the app;
+# an immediate am start races the install (result code -92 START_ABORTED).
+sleep 8
 adb logcat -c
-adb shell am start -W -n "$ACT" || true
 APP_PID=""
-for i in $(seq 1 45); do
-  APP_PID=$(adb shell pidof "$PKG" 2>/dev/null | tr -d '\r' || true)
+for attempt in 1 2 3 4 5; do
+  adb shell am start -W -n "$ACT" || true
+  for i in $(seq 1 15); do
+    APP_PID=$(adb shell pidof "$PKG" 2>/dev/null | tr -d '\r' || true)
+    [ -n "$APP_PID" ] && break
+    sleep 2
+  done
   [ -n "$APP_PID" ] && break
-  sleep 2
+  echo "attempt $attempt: process not up yet, retrying launch"
+  sleep 5
 done
 echo "APP_PID=${APP_PID:-NOT RUNNING}"
 # Let the splash gate + first data load settle.
-sleep 10
+sleep 12
 echo "::endgroup::"
 
 if [ "$EXERCISE" = "true" ]; then
@@ -50,6 +57,9 @@ if [ "$EXERCISE" = "true" ]; then
 fi
 
 echo "::group::Capture debugging logs"
+# Root only now (post-launch), so we can try to read /data/anr; adbd restarts.
+adb root || true
+adb wait-for-device
 adb logcat -d -v threadtime > full_logcat.txt || true
 adb logcat -d -v threadtime --pid="${APP_PID}" > app_logcat.txt 2>/dev/null || true
 adb logcat -d -b crash -v threadtime > crash_logcat.txt || true
