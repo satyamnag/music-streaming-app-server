@@ -58,9 +58,10 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                 enabled: true,
                 child: SizedBox(
                   height: HomeSectionLayout.rowHeight(
-                    context,
-                    withSubtitle: false,
-                  ),
+                        context,
+                        withSubtitle: false,
+                      ) +
+                      HomeSectionLayout.skeletonHeadroom,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,

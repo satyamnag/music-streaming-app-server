@@ -28,6 +28,15 @@ abstract final class HomeSectionLayout {
   /// Gap between cards inside a row, at scale == 1.
   static const double cardGap = 12;
 
+  /// Extra row height reserved for SKELETON rows only. The measured
+  /// [rowHeight] is razor-exact against the loaded card, but Skeletonizer's
+  /// bone glyphs render a couple of pixels taller under real (non-test) font
+  /// metrics, which intermittently overflowed the tight row
+  /// ("A RenderFlex overflowed by 4.0 pixels", track_section.dart card
+  /// Column, observed on the emulator). Skeleton rows reserve this headroom;
+  /// loaded rows stay exact.
+  static const double skeletonHeadroom = 4;
+
   /// Measured height of one line rendered with [style].
   static double _lineHeight(TextStyle style) {
     final painter = TextPainter(

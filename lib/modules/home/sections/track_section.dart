@@ -65,7 +65,8 @@ class HomeTrackSection extends HookConsumerWidget {
               Skeletonizer(
                 enabled: true,
                 child: SizedBox(
-                  height: HomeSectionLayout.rowHeight(context),
+                  height: HomeSectionLayout.rowHeight(context) +
+                      HomeSectionLayout.skeletonHeadroom,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
