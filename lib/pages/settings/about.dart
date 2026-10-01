@@ -35,7 +35,7 @@ class AboutSangeetPage extends HookConsumerWidget {
           )
         ],
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: EdgeInsets.only(bottom: 40 + context.bottomPlayerReserve),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(

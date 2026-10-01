@@ -100,8 +100,13 @@ class PlaybackHistorySummaryNotifier
               ))
             .map((row) => row.read(uniqItemIdCountingCol));
 
-    final oldestDate = DateTime.now().copyWith(day: 1, hour: 0, minute: 0);
-    final newestDate = DateTime.now().copyWith(day: 30, hour: 23, minute: 59);
+    // "This month" = calendar month [1st .. first day of next month). Using
+    // first-of-next-month as the upper bound avoids the previous
+    // `.copyWith(day: 30)` bug, which normalized into the NEXT month on short
+    // months (Feb 30 -> Mar 1) and leaked next-month plays into fees.
+    final now = DateTime.now();
+    final oldestDate = DateTime(now.year, now.month, 1, 0, 0);
+    final newestDate = DateTime(now.year, now.month + 1, 1, 0, 0);
     final totalTracksListenedThisMonthQuery =
         (database.selectOnly(database.historyTable)
               ..addColumns([itemIdCountingCol])

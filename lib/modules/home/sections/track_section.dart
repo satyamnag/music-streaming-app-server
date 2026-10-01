@@ -30,7 +30,7 @@ class HomeTrackSection extends HookConsumerWidget {
   final VoidCallback? onSeeAll;
 
   /// Number of tracks revealed per page.
-  static const int pageSize = 5;
+  static const int pageSize = 25;
 
   const HomeTrackSection({
     super.key,
@@ -49,7 +49,7 @@ class HomeTrackSection extends HookConsumerWidget {
     if (isLoading) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -70,7 +70,7 @@ class HomeTrackSection extends HookConsumerWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
-                    separatorBuilder: (_, __) => const Gap(12),
+                    separatorBuilder: (_, __) => const Gap(6),
                     itemBuilder: (context, index) => _TrackCard(
                       track: FakeData.track,
                       imageUrl: '',
@@ -94,7 +94,7 @@ class HomeTrackSection extends HookConsumerWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -127,7 +127,7 @@ class HomeTrackSection extends HookConsumerWidget {
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
                 itemCount: shown.length + (hasMore ? 1 : 0),
-                separatorBuilder: (_, __) => Gap(12 * scale),
+                separatorBuilder: (_, __) => Gap(6 * scale),
                 itemBuilder: (context, index) {
                   if (hasMore && index == shown.length) {
                     return _SeeMoreCard(
@@ -177,7 +177,7 @@ class _TrackCard extends HookConsumerWidget {
     final locked = PremiumAccess.isTrackLocked(track, ref);
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -218,15 +218,15 @@ class _TrackCard extends HookConsumerWidget {
                   children: [
                     UniversalImage(
                       path: imageUrl,
-                      height: 120 * scale,
-                      width: 120 * scale,
+                      height: 150 * scale,
+                      width: 150 * scale,
                       fit: BoxFit.cover,
                     ),
                     LockedBadge(locked: locked, borderRadius: 0),
                   ],
                 ),
               ),
-              Gap(8 * scale),
+              Gap(4 * scale),
               Text(
                 track.name,
                 maxLines: 1,
@@ -266,7 +266,7 @@ class _SeeMoreCard extends StatelessWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,

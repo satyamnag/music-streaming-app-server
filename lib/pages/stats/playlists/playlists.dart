@@ -37,25 +37,28 @@ class StatsPlaylistsPage extends HookConsumerWidget {
         ],
         child: Skeletonizer(
           enabled: topPlaylists.isLoading && !topPlaylists.isLoadingNextPage,
-          child: InfiniteList(
-            onFetchData: () async {
-              await topPlaylistsNotifier.fetchMore();
-            },
-            hasError: topPlaylists.hasError,
-            isLoading:
-                topPlaylists.isLoading && !topPlaylists.isLoadingNextPage,
-            hasReachedMax: topPlaylists.asData?.value.hasMore ?? true,
-            itemCount: playlistsData.length,
-            itemBuilder: (context, index) {
-              final playlist = playlistsData[index];
-              return StatsPlaylistItem(
-                playlist: playlist.playlist,
-                info: Text(
-                  context.l10n.count_plays(
-                      compactNumberFormatter.format(playlist.count)),
-                ),
-              );
-            },
+          child: Padding(
+            padding: EdgeInsets.only(bottom: context.bottomPlayerReserve + 10),
+            child: InfiniteList(
+              onFetchData: () async {
+                await topPlaylistsNotifier.fetchMore();
+              },
+              hasError: topPlaylists.hasError,
+              isLoading:
+                  topPlaylists.isLoading && !topPlaylists.isLoadingNextPage,
+              hasReachedMax: topPlaylists.asData?.value.hasMore ?? true,
+              itemCount: playlistsData.length,
+              itemBuilder: (context, index) {
+                final playlist = playlistsData[index];
+                return StatsPlaylistItem(
+                  playlist: playlist.playlist,
+                  info: Text(
+                    context.l10n.count_plays(
+                        compactNumberFormatter.format(playlist.count)),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

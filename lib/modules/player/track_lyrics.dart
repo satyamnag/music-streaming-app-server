@@ -41,12 +41,18 @@ class TrackLyricsPanel extends HookConsumerWidget {
     final lyricsState = ref.watch(syncedLyricsMapProvider(track));
     final delay = ref.watch(syncedLyricsDelayProvider);
 
-    final lyricsMap = lyricsState.asData?.value.lyricsMap ?? const <int, String>{};
+    final lyricsMap =
+        lyricsState.asData?.value.lyricsMap ?? const <int, String>{};
 
     // Only sync timing when this exact track is actively playing; otherwise
     // render statically so timing never mismatches the wrong song.
     final currentTime = isActiveTrack
-        ? useSyncedLyrics(ref, lyricsMap, delay)
+        ? useSyncedLyrics(
+            ref,
+            lyricsMap,
+            delay,
+            cues: lyricsState.asData?.value.cues ?? const [],
+          )
         : -1;
 
     final value = lyricsQuery.asData?.value;
@@ -134,8 +140,7 @@ class _LyricsList extends HookWidget {
               color: isActive
                   ? theme.colorScheme.foreground
                   : theme.colorScheme.mutedForeground,
-              fontWeight:
-                  isActive ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               fontSize: isActive ? 18 : 16,
               height: 1.5,
             ),

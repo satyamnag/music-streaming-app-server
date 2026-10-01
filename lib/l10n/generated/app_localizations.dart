@@ -2529,6 +2529,42 @@ abstract class AppLocalizations {
   /// **'plays'**
   String get summary_plays;
 
+  /// No description provided for @insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get insights;
+
+  /// No description provided for @insights_top_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Top track'**
+  String get insights_top_track;
+
+  /// No description provided for @insights_listening_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours listened'**
+  String get insights_listening_hours;
+
+  /// No description provided for @insights_best_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Best day'**
+  String get insights_best_day;
+
+  /// No description provided for @insights_current_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Play streak'**
+  String get insights_current_streak;
+
+  /// No description provided for @insights_vs_last_week.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last week'**
+  String get insights_vs_last_week;
+
   /// No description provided for @total_money.
   ///
   /// In en, this message translates to:

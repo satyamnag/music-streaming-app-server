@@ -1,10 +1,12 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
@@ -44,15 +46,21 @@ class HomeLanguageSongsSections extends HookConsumerWidget {
 class _LanguageSection extends HookConsumerWidget {
   final HomeLanguageGroup group;
 
+  /// Number of tracks revealed per page.
+  static const int pageSize = 25;
+
   const _LanguageSection({required this.group});
 
   @override
   Widget build(BuildContext context, ref) {
+    final visibleCount = useState(_LanguageSection.pageSize);
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final shown = group.tracks.take(visibleCount.value).toList();
+    final hasMore = group.tracks.length > visibleCount.value;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -90,10 +98,17 @@ class _LanguageSection extends HookConsumerWidget {
             child: ListView.separated(
               padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
               scrollDirection: Axis.horizontal,
-              itemCount: group.tracks.length,
-              separatorBuilder: (_, __) => Gap(12 * scale),
+              itemCount: shown.length + (hasMore ? 1 : 0),
+              separatorBuilder: (_, __) => Gap(6 * scale),
               itemBuilder: (context, index) {
-                final track = group.tracks[index];
+                if (hasMore && index == shown.length) {
+                  return _SeeMoreCard(
+                    onTap: () {
+                      visibleCount.value += _LanguageSection.pageSize;
+                    },
+                  );
+                }
+                final track = shown[index];
                 final imageUrl =
                     track.album.images.smallest(ImagePlaceholder.albumArt);
                 return _TrackCard(
@@ -133,7 +148,7 @@ class _TrackCard extends HookConsumerWidget {
     final locked = PremiumAccess.isTrackLocked(track, ref);
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -174,15 +189,15 @@ class _TrackCard extends HookConsumerWidget {
                   children: [
                     UniversalImage(
                       path: imageUrl,
-                      height: 120 * scale,
-                      width: 120 * scale,
+                      height: 150 * scale,
+                      width: 150 * scale,
                       fit: BoxFit.cover,
                     ),
                     LockedBadge(locked: locked, borderRadius: 0),
                   ],
                 ),
               ),
-              Gap(8 * scale),
+              Gap(4 * scale),
               Text(
                 track.name,
                 maxLines: 1,
@@ -199,6 +214,56 @@ class _TrackCard extends HookConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.xSmall.copyWith(
                   color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A "See More" card shown after the visible track cards. Tapping it reveals
+/// the next page of cards.
+class _SeeMoreCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SeeMoreCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      width: 175 * scale,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                SangeetIcons.angleDown,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+              Gap(8 * scale),
+              Text(
+                context.l10n.see_more,
+                style: theme.typography.base.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

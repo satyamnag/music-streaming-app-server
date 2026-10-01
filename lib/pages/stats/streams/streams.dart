@@ -38,25 +38,28 @@ class StatsStreamsPage extends HookConsumerWidget {
         ],
         child: Skeletonizer(
           enabled: topTracks.isLoading && !topTracks.isLoadingNextPage,
-          child: InfiniteList(
-            separatorBuilder: (context, index) => const Gap(4),
-            onFetchData: () async {
-              await topTracksNotifier.fetchMore();
-            },
-            hasError: topTracks.hasError,
-            isLoading: topTracks.isLoading && !topTracks.isLoadingNextPage,
-            hasReachedMax: topTracks.asData?.value.hasMore ?? true,
-            itemCount: tracksData.length,
-            itemBuilder: (context, index) {
-              final track = tracksData[index];
-              return StatsTrackItem(
-                track: track.track,
-                info: Text(
-                  context.l10n
-                      .count_plays(compactNumberFormatter.format(track.count)),
-                ),
-              );
-            },
+          child: Padding(
+            padding: EdgeInsets.only(bottom: context.bottomPlayerReserve + 10),
+            child: InfiniteList(
+              separatorBuilder: (context, index) => const Gap(4),
+              onFetchData: () async {
+                await topTracksNotifier.fetchMore();
+              },
+              hasError: topTracks.hasError,
+              isLoading: topTracks.isLoading && !topTracks.isLoadingNextPage,
+              hasReachedMax: topTracks.asData?.value.hasMore ?? true,
+              itemCount: tracksData.length,
+              itemBuilder: (context, index) {
+                final track = tracksData[index];
+                return StatsTrackItem(
+                  track: track.track,
+                  info: Text(
+                    context.l10n.count_plays(
+                        compactNumberFormatter.format(track.count)),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

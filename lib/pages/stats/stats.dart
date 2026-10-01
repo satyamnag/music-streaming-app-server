@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/modules/stats/insights/insights_section.dart';
 import 'package:sangeet/modules/stats/summary/summary.dart';
 import 'package:sangeet/modules/stats/top/top.dart';
 import 'package:sangeet/utils/platform.dart';
@@ -30,6 +31,7 @@ class StatsPage extends HookConsumerWidget {
           child: CustomScrollView(
             slivers: [
               if (kIsMacOS) const SliverGap(20),
+              const StatsPageInsightsSection(),
               const StatsPageSummarySection(),
               const StatsPageTopSection(),
               const SliverToBoxAdapter(

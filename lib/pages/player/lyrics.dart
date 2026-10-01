@@ -60,18 +60,17 @@ class PlayerLyricsPage extends HookConsumerWidget {
       LyricLanguages.hiTr,
     ];
 
-    final availablePlain = isLoading
-        ? allLangs
-        : allLangs.where(hasPlain).toList();
-    final availableSync = isLoading
-        ? allLangs
-        : allLangs.where(hasSync).toList();
+    final availablePlain =
+        isLoading ? allLangs : allLangs.where(hasPlain).toList();
+    final availableSync =
+        isLoading ? allLangs : allLangs.where(hasSync).toList();
 
     final hasAnyPlain = availablePlain.isNotEmpty;
     final hasAnySync = availableSync.isNotEmpty;
 
     useEffect(() {
-      if (plainSub.value >= availablePlain.length && availablePlain.isNotEmpty) {
+      if (plainSub.value >= availablePlain.length &&
+          availablePlain.isNotEmpty) {
         plainSub.value = 0;
       }
       if (syncSub.value >= availableSync.length && availableSync.isNotEmpty) {
@@ -85,12 +84,16 @@ class PlayerLyricsPage extends HookConsumerWidget {
     Widget plainIcon(bool selected) => Icon(
           Icons.menu_book,
           size: 18,
-          color: selected ? theme.colorScheme.primary : theme.colorScheme.mutedForeground,
+          color: selected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.mutedForeground,
         );
     Widget syncIcon(bool selected) => Icon(
           Icons.graphic_eq,
           size: 18,
-          color: selected ? theme.colorScheme.primary : theme.colorScheme.mutedForeground,
+          color: selected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.mutedForeground,
         );
 
     // Top tabs: Plain / Sync (always visible)
@@ -170,7 +173,8 @@ class PlayerLyricsPage extends HookConsumerWidget {
       if (!hasAnyPlain) {
         return const _NoData();
       }
-      final lang = availablePlain[plainSub.value.clamp(0, availablePlain.length - 1)];
+      final lang =
+          availablePlain[plainSub.value.clamp(0, availablePlain.length - 1)];
       return PlainLanguageViewBuilder(track: track, lang: lang);
     }
 
@@ -179,7 +183,8 @@ class PlayerLyricsPage extends HookConsumerWidget {
       if (!hasAnySync) {
         return const _NoData();
       }
-      final lang = availableSync[syncSub.value.clamp(0, availableSync.length - 1)];
+      final lang =
+          availableSync[syncSub.value.clamp(0, availableSync.length - 1)];
       return _SingleSyncView(track: track, lang: lang);
     }
 
@@ -223,7 +228,11 @@ class _TopTab extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _TopTab({required this.icon, required this.label, required this.selected, required this.onTap});
+  const _TopTab(
+      {required this.icon,
+      required this.label,
+      required this.selected,
+      required this.onTap});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -232,7 +241,9 @@ class _TopTab extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
-          color: selected ? theme.colorScheme.primary.withValues(alpha: 0.14) : Colors.transparent,
+          color: selected
+              ? theme.colorScheme.primary.withValues(alpha: 0.14)
+              : Colors.transparent,
           borderRadius: theme.borderRadiusSm,
         ),
         child: Row(
@@ -243,7 +254,9 @@ class _TopTab extends StatelessWidget {
             Text(
               label,
               style: theme.typography.small.copyWith(
-                color: selected ? theme.colorScheme.primary : theme.colorScheme.mutedForeground,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.mutedForeground,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -258,16 +271,24 @@ class _SubTab extends StatelessWidget {
   final String lang;
   final bool selected;
   final VoidCallback onTap;
-  const _SubTab({required this.lang, required this.selected, required this.onTap});
+  const _SubTab(
+      {required this.lang, required this.selected, required this.onTap});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = selected ? theme.colorScheme.primary : theme.colorScheme.mutedForeground;
+    final color = selected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.mutedForeground;
     Widget icon;
     String label;
     switch (lang) {
       case LyricLanguages.te:
-        icon = Text('అ', style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600, height: 1));
+        icon = Text('అ',
+            style: TextStyle(
+                color: color,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1));
         label = 'Telugu';
         break;
       case LyricLanguages.en:
@@ -279,44 +300,68 @@ class _SubTab extends StatelessWidget {
         label = 'Hi';
         break;
       case LyricLanguages.enTr:
-        icon = Text('Aa', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600, height: 1));
+        icon = Text('Aa',
+            style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1));
         label = 'Eng';
         break;
       case LyricLanguages.hiTr:
-        icon = Text('अ', style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600, height: 1));
+        icon = Text('अ',
+            style: TextStyle(
+                color: color,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                height: 1));
         label = 'Hi';
         break;
       default:
         icon = const SizedBox.shrink();
         label = lang;
     }
-    final isTransliteration = lang == LyricLanguages.enTr || lang == LyricLanguages.hiTr;
-    final isTranslation = lang == LyricLanguages.en || lang == LyricLanguages.hi;
+    final isTransliteration =
+        lang == LyricLanguages.enTr || lang == LyricLanguages.hiTr;
+    final isTranslation =
+        lang == LyricLanguages.en || lang == LyricLanguages.hi;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         decoration: BoxDecoration(
-          color: selected ? theme.colorScheme.primary.withValues(alpha: 0.12) : theme.colorScheme.muted.withValues(alpha: 0.25),
+          color: selected
+              ? theme.colorScheme.primary.withValues(alpha: 0.12)
+              : theme.colorScheme.muted.withValues(alpha: 0.25),
           borderRadius: theme.borderRadiusMd,
-          border: Border.all(color: selected ? theme.colorScheme.primary : theme.colorScheme.border),
+          border: Border.all(
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (lang == LyricLanguages.te) icon else ...[
-              Text(label, style: theme.typography.small.copyWith(color: color, fontWeight: FontWeight.w600, fontSize: 12)),
+            if (lang == LyricLanguages.te)
+              icon
+            else ...[
+              Text(label,
+                  style: theme.typography.small.copyWith(
+                      color: color, fontWeight: FontWeight.w600, fontSize: 12)),
               const Gap(4),
               icon,
               if (isTranslation) const Gap(2),
               if (isTransliteration)
-                Icon(isTransliteration ? Icons.text_fields : Icons.translate, size: 10, color: color.withValues(alpha: 0.0)),
+                Icon(isTransliteration ? Icons.text_fields : Icons.translate,
+                    size: 10, color: color.withValues(alpha: 0.0)),
             ],
             if (lang != LyricLanguages.te)
               Padding(
                 padding: const EdgeInsets.only(left: 2),
                 child: Icon(
-                  isTransliteration ? Icons.abc : (isTranslation ? Icons.translate : Icons.abc),
+                  isTransliteration
+                      ? Icons.abc
+                      : (isTranslation ? Icons.translate : Icons.abc),
                   size: 0,
                   color: Colors.transparent,
                 ),
@@ -339,11 +384,13 @@ class _NoData extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.inbox_outlined, size: 48, color: theme.colorScheme.mutedForeground),
+            Icon(Icons.inbox_outlined,
+                size: 48, color: theme.colorScheme.mutedForeground),
             const Gap(12),
             Text(
               'There is no data',
-              style: theme.typography.base.copyWith(color: theme.colorScheme.mutedForeground),
+              style: theme.typography.base
+                  .copyWith(color: theme.colorScheme.mutedForeground),
             ),
           ],
         ),
@@ -364,15 +411,23 @@ class _SingleSyncView extends HookConsumerWidget {
     final subtitle = query.asData?.value;
     final mapState = ref.watch(syncedLyricsMapProvider(track));
     final lyricsMap = mapState.asData?.value.lyricsMap ?? const <int, String>{};
-    final currentTime = useSyncedLyrics(ref, lyricsMap, delay);
-    if (query.isLoading || query.isRefreshing) return const Center(child: CircularProgressIndicator());
+    final currentTime = useSyncedLyrics(
+      ref,
+      lyricsMap,
+      delay,
+      cues: mapState.asData?.value.cues ?? const [],
+    );
+    if (query.isLoading || query.isRefreshing) {
+      return const Center(child: CircularProgressIndicator());
+    }
     if (query.hasError) return const _NoData();
     // Plain (static/untimed) variants are not synced lyrics — do not render
     // them in the Sync view.
     if ((mapState.asData?.value.static ?? true) == true) return const _NoData();
     final variants = subtitle?.variants ?? const <LyricVariant>[];
     if (variants.isEmpty) return const _NoData();
-    final hasAny = variants.any((v) => LyricLanguages.fieldOf(v, lang).trim().isNotEmpty);
+    final hasAny =
+        variants.any((v) => LyricLanguages.fieldOf(v, lang).trim().isNotEmpty);
     if (!hasAny) return const _NoData();
     var currentIndex = 0;
     for (var i = 0; i < variants.length; i++) {
@@ -385,12 +440,15 @@ class _SingleSyncView extends HookConsumerWidget {
     final controller = useScrollController();
     useEffect(() {
       if (!controller.hasClients || variants.isEmpty) return;
-      final target = controller.position.maxScrollExtent * (currentIndex / variants.length);
-      controller.animateTo(target, duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
+      final target = controller.position.maxScrollExtent *
+          (currentIndex / variants.length);
+      controller.animateTo(target,
+          duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
       return null;
     }, [currentIndex, variants.length]);
     final theme = Theme.of(context);
-    final def = kLyricLanguages.firstWhere((d) => d.key == lang, orElse: () => kLyricLanguages.first);
+    final def = kLyricLanguages.firstWhere((d) => d.key == lang,
+        orElse: () => kLyricLanguages.first);
     return ListView.builder(
       controller: controller,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -401,7 +459,10 @@ class _SingleSyncView extends HookConsumerWidget {
         final isActive = index == currentIndex;
         return GestureDetector(
           onTap: () {
-            if (variants[index].time.isNegative || variants[index].time > audioPlayer.duration) return;
+            if (variants[index].time.isNegative ||
+                variants[index].time > audioPlayer.duration) {
+              return;
+            }
             audioPlayer.seek(variants[index].time);
           },
           behavior: HitTestBehavior.translucent,
@@ -411,13 +472,21 @@ class _SingleSyncView extends HookConsumerWidget {
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: EdgeInsets.all(isActive ? 14 : 10),
             decoration: BoxDecoration(
-              color: isActive ? theme.colorScheme.primary.withValues(alpha: 0.10) : Colors.transparent,
+              color: isActive
+                  ? theme.colorScheme.primary.withValues(alpha: 0.10)
+                  : Colors.transparent,
               borderRadius: theme.borderRadiusMd,
-              border: Border(left: BorderSide(width: isActive ? 4 : 3, color: isActive ? theme.colorScheme.primary : Colors.transparent)),
+              border: Border(
+                  left: BorderSide(
+                      width: isActive ? 4 : 3,
+                      color: isActive
+                          ? theme.colorScheme.primary
+                          : Colors.transparent)),
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                        color:
+                            theme.colorScheme.primary.withValues(alpha: 0.12),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -445,5 +514,3 @@ class _SingleSyncView extends HookConsumerWidget {
     );
   }
 }
-
-

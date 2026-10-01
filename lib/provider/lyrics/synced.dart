@@ -71,7 +71,8 @@ class SyncedLyricsNotifier
             final sec = int.parse(secParts[0].trim());
             final msStr = secParts.length > 1 ? secParts[1].trim() : '0';
             final ms = int.parse(msStr.padRight(3, '0').substring(0, 3));
-            return Duration(hours: h, minutes: m, seconds: sec, milliseconds: ms);
+            return Duration(
+                hours: h, minutes: m, seconds: sec, milliseconds: ms);
           } else if (parts.length == 2) {
             final m = int.parse(parts[0].trim());
             final secParts = parts[1].trim().split('.');
@@ -92,7 +93,11 @@ class SyncedLyricsNotifier
         final blocks = normalized.split(RegExp(r'\n\s*\n'));
         final map = <Duration, String>{};
         for (final block in blocks) {
-          final lines = block.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+          final lines = block
+              .split('\n')
+              .map((l) => l.trim())
+              .where((l) => l.isNotEmpty)
+              .toList();
           if (lines.isEmpty) continue;
           // First line may be numeric index
           if (RegExp(r'^\d+$').hasMatch(lines[0])) {
@@ -102,7 +107,9 @@ class SyncedLyricsNotifier
           // Timestamp line: "00:00:01,000 --> 00:00:02,000" or "00:00:01.000 --> 00:00:02.000"
           final timeLine = lines[0];
           final arrowIdx = timeLine.indexOf('-->');
-          final startStr = arrowIdx != -1 ? timeLine.substring(0, arrowIdx).trim() : timeLine.trim();
+          final startStr = arrowIdx != -1
+              ? timeLine.substring(0, arrowIdx).trim()
+              : timeLine.trim();
           final ts = parseTimestamp(startStr);
           if (ts == null) continue;
           final text = lines.sublist(1).join('\n').trim();
@@ -119,7 +126,8 @@ class SyncedLyricsNotifier
           final parsed = Lrc.parse(raw);
           final map = {
             for (final line in parsed.lyrics)
-              if (line.lyrics.trim().isNotEmpty) line.timestamp: line.lyrics.trim(),
+              if (line.lyrics.trim().isNotEmpty)
+                line.timestamp: line.lyrics.trim(),
           };
           if (map.isNotEmpty) return map;
         } catch (_) {
@@ -137,14 +145,20 @@ class SyncedLyricsNotifier
         if (raw == null || raw.trim().isEmpty) return [];
         try {
           final parsed = Lrc.parse(raw);
-          final slices = parsed.lyrics.map(LyricSlice.fromLrcLine).where((s) => s.text.trim().isNotEmpty).toList();
+          final slices = parsed.lyrics
+              .map(LyricSlice.fromLrcLine)
+              .where((s) => s.text.trim().isNotEmpty)
+              .toList();
           if (slices.isNotEmpty) return slices;
         } catch (_) {}
         // SRT fallback
         final srtMap = parseSrtMap(raw);
         if (srtMap.isEmpty) return [];
-        final sorted = srtMap.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
-        return sorted.map((e) => LyricSlice(time: e.key, text: e.value)).toList();
+        final sorted = srtMap.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
+        return sorted
+            .map((e) => LyricSlice(time: e.key, text: e.value))
+            .toList();
       }
 
       // Build aligned multi-language rows. Every language column shares a
@@ -170,35 +184,36 @@ class SyncedLyricsNotifier
         }.toList()
           ..sort((a, b) => a.compareTo(b));
 
-        final variants =
-            times.map((t) {
-              return LyricVariant(
-                time: t,
-                te: teMap?[t] ?? '',
-                en: enMap?[t] ?? '',
-                hi: hiMap?[t] ?? '',
-                enTr: enTrMap?[t] ?? '',
-                hiTr: hiTrMap?[t] ?? '',
-              );
-            }).toList();
+        final variants = times.map((t) {
+          return LyricVariant(
+            time: t,
+            te: teMap?[t] ?? '',
+            en: enMap?[t] ?? '',
+            hi: hiMap?[t] ?? '',
+            enTr: enTrMap?[t] ?? '',
+            hiTr: hiTrMap?[t] ?? '',
+          );
+        }).toList();
 
         // Main synced list uses the Telugu (or first non-empty) line so the
         // existing single-language consumers keep working unchanged.
         // Handles both LRC (LRCLib) and SRT (admin STR) via parseToSlices.
         final primaryRaw = syncedRaw ?? syncedEnRaw ?? syncedHiRaw;
         final primary = parseToSlices(primaryRaw);
-        final slices = primary.isNotEmpty ? primary : variants.map((v) {
-            final text = v.te.isNotEmpty
-                ? v.te
-                : v.en.isNotEmpty
-                    ? v.en
-                    : v.hi.isNotEmpty
-                        ? v.hi
-                        : v.enTr.isNotEmpty
-                            ? v.enTr
-                            : v.hiTr;
-            return LyricSlice(time: v.time, text: text);
-          }).toList();
+        final slices = primary.isNotEmpty
+            ? primary
+            : variants.map((v) {
+                final text = v.te.isNotEmpty
+                    ? v.te
+                    : v.en.isNotEmpty
+                        ? v.en
+                        : v.hi.isNotEmpty
+                            ? v.hi
+                            : v.enTr.isNotEmpty
+                                ? v.enTr
+                                : v.hiTr;
+                return LyricSlice(time: v.time, text: text);
+              }).toList();
 
         if (slices.isNotEmpty) {
           return SubtitleSimple(
@@ -221,8 +236,7 @@ class SyncedLyricsNotifier
       final plainTe = (plainRaw != null && plainRaw.trim().isNotEmpty)
           ? plainRaw
           : (data['plain_lyrics'] as String?);
-      final hasPlain =
-          (plainTe?.trim().isNotEmpty ?? false) ||
+      final hasPlain = (plainTe?.trim().isNotEmpty ?? false) ||
           (plainEnRaw?.trim().isNotEmpty ?? false) ||
           (plainHiRaw?.trim().isNotEmpty ?? false) ||
           (plainEnTrRaw?.trim().isNotEmpty ?? false) ||
@@ -237,8 +251,11 @@ class SyncedLyricsNotifier
         final enTrLines = _plainLinesOf(plainEnTrRaw);
         final hiTrLines = _plainLinesOf(plainHiTrRaw);
         final lineCount = [
-          teLines.length, enLines.length, hiLines.length,
-          enTrLines.length, hiTrLines.length,
+          teLines.length,
+          enLines.length,
+          hiLines.length,
+          enTrLines.length,
+          hiTrLines.length,
         ].fold<int>(0, (m, v) => v > m ? v : m);
 
         final variants = <LyricVariant>[];
@@ -249,10 +266,21 @@ class SyncedLyricsNotifier
           final hi = i < hiLines.length ? hiLines[i] : '';
           final enTr = i < enTrLines.length ? enTrLines[i] : '';
           final hiTr = i < hiTrLines.length ? hiTrLines[i] : '';
-          final first = (te.isNotEmpty ? te : en.isNotEmpty ? en : hi.isNotEmpty ? enTr : hiTr);
+          final first = (te.isNotEmpty
+              ? te
+              : en.isNotEmpty
+                  ? en
+                  : hi.isNotEmpty
+                      ? enTr
+                      : hiTr);
           if (first.isEmpty) continue;
           variants.add(LyricVariant(
-            time: Duration.zero, te: te, en: en, hi: hi, enTr: enTr, hiTr: hiTr,
+            time: Duration.zero,
+            te: te,
+            en: en,
+            hi: hi,
+            enTr: enTr,
+            hiTr: hiTr,
           ));
           slices.add(LyricSlice(text: first, time: Duration.zero));
         }
@@ -274,7 +302,11 @@ class SyncedLyricsNotifier
       // (e.g. an unusual or unparseable format), show the raw text as plain
       // lines rather than silently reporting "no lyrics". This guarantees any
       // available lyrics surface on screen.
-      final anyRaw = syncedRaw ?? syncedEnRaw ?? syncedHiRaw ?? syncedEnTrRaw ?? syncedHiTrRaw;
+      final anyRaw = syncedRaw ??
+          syncedEnRaw ??
+          syncedHiRaw ??
+          syncedEnTrRaw ??
+          syncedHiTrRaw;
       if (anyRaw != null && anyRaw.trim().isNotEmpty) {
         final lines = anyRaw
             .split(RegExp(r'\r?\n'))
@@ -299,6 +331,7 @@ class SyncedLyricsNotifier
       return null;
     }
   }
+
   /// Lyrics credits: [lrclib.net](https://lrclib.net) and their contributors
   /// Thanks for their generous public API
   Future<SubtitleSimple> getLRCLibLyrics() async {
@@ -406,7 +439,8 @@ class SyncedLyricsNotifier
       // server genuinely has no lyrics for the track.
       final serverLyrics = await getServerLyrics();
       if (serverLyrics != null &&
-          (serverLyrics.lyrics.isNotEmpty || (serverLyrics.variants?.isNotEmpty ?? false))) {
+          (serverLyrics.lyrics.isNotEmpty ||
+              (serverLyrics.variants?.isNotEmpty ?? false))) {
         lyrics = serverLyrics;
       } else {
         if (lyrics == null || lyrics.lyrics.isEmpty) {
@@ -450,11 +484,20 @@ final syncedLyricsMapProvider =
   final isStaticLyrics =
       syncedLyrics.lyrics.every((l) => l.time == Duration.zero);
 
-  final lyricsMap = syncedLyrics.lyrics
+  // Keep the ms-precise SRT cue order (sorted) so the active-line hook can do
+  // an exact range lookup instead of the old whole-second containsKey check.
+  final sorted = [...syncedLyrics.lyrics]
+    ..sort((a, b) => a.time.compareTo(b.time));
+
+  final lyricsMap = sorted
       .map((lyric) => {lyric.time.inSeconds: lyric.text})
       .reduce((accumulator, lyricSlice) => {...accumulator, ...lyricSlice});
 
-  return (static: isStaticLyrics, lyricsMap: lyricsMap);
+  return (
+    static: isStaticLyrics,
+    lyricsMap: lyricsMap,
+    cues: sorted.map((l) => l.time).toList(growable: false),
+  );
 });
 
 /// Splits a per-language plain-lyrics string into cleaned non-empty lines.

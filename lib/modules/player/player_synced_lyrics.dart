@@ -25,8 +25,12 @@ class PlayerSyncedLyrics extends HookConsumerWidget {
     final delay = ref.watch(syncedLyricsDelayProvider);
     final lyricsState = ref.watch(syncedLyricsMapProvider(track));
     final lyricValue = lyricsState.asData?.value.lyricsMap ?? const {};
-    final currentTime =
-        useSyncedLyrics(ref, lyricValue, delay);
+    final currentTime = useSyncedLyrics(
+      ref,
+      lyricValue,
+      delay,
+      cues: lyricsState.asData?.value.cues ?? const [],
+    );
 
     if (track == null) return const SizedBox.shrink();
 

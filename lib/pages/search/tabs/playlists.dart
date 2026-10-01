@@ -78,6 +78,9 @@ class SearchPagePlaylistsTab extends HookConsumerWidget {
             listItemBuilder: (context, index) =>
                 PlaylistCard.tile(playlists[index]),
           ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.bottomPlayerReserve + 10),
+          ),
         ],
       ),
     );

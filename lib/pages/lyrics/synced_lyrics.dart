@@ -49,8 +49,12 @@ class SyncedLyrics extends HookConsumerWidget {
     final lyricsState = ref.watch(
       syncedLyricsMapProvider(playlist.activeTrack),
     );
-    final currentTime =
-        useSyncedLyrics(ref, lyricsState.asData?.value.lyricsMap ?? {}, delay);
+    final currentTime = useSyncedLyrics(
+      ref,
+      lyricsState.asData?.value.lyricsMap ?? {},
+      delay,
+      cues: lyricsState.asData?.value.cues ?? const [],
+    );
     final textZoomLevel = useState<int>(defaultTextZoom);
 
     final typography = Theme.of(context).typography;
@@ -125,11 +129,10 @@ class SyncedLyrics extends HookConsumerWidget {
                 itemBuilder: (context, index) {
                   final lyricSlice = lyricValue.lyrics[index];
                   final isActive = lyricSlice.time.inSeconds == currentTime;
-                  final variant =
-                      (lyricValue.variants != null &&
-                              index < lyricValue.variants!.length)
-                          ? lyricValue.variants![index]
-                          : null;
+                  final variant = (lyricValue.variants != null &&
+                          index < lyricValue.variants!.length)
+                      ? lyricValue.variants![index]
+                      : null;
                   final subLines = variant == null
                       ? const <String>[]
                       : [
@@ -170,10 +173,14 @@ class SyncedLyrics extends HookConsumerWidget {
                                       ? theme.colorScheme.foreground
                                       : theme.colorScheme.mutedForeground,
                                   fontWeight: isActive
-                                      ? FontWeight.w500
+                                      ? FontWeight.w600
                                       : FontWeight.normal,
-                                  fontSize: (isActive ? 28 : 26) *
+                                  // The playing line is clearly ZOOMED for
+                                  // instant recognition; the rest stays at a
+                                  // smaller, dimmer size.
+                                  fontSize: (isActive ? 30 : 24) *
                                       (textZoomLevel.value / 100),
+                                  height: isActive ? 1.35 : 1.25,
                                 ),
                                 textAlign: TextAlign.center,
                                 child: MouseRegion(
@@ -194,8 +201,7 @@ class SyncedLyrics extends HookConsumerWidget {
                                       mainText: lyricSlice.text,
                                       subLines: subLines,
                                       isActive: isActive,
-                                      activeColor:
-                                          theme.colorScheme.foreground,
+                                      activeColor: theme.colorScheme.foreground,
                                       inactiveColor:
                                           theme.colorScheme.mutedForeground,
                                       mainFontSize: (isActive ? 28 : 26) *
@@ -277,7 +283,7 @@ class SyncedLyrics extends HookConsumerWidget {
               ),
             ];
 
-             return isModal == true
+            return isModal == true
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,

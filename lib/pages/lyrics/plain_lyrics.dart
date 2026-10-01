@@ -55,7 +55,12 @@ class PlainLyrics extends HookConsumerWidget {
               child: SingleChildScrollView(
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: EdgeInsets.fromLTRB(
+                      8,
+                      8,
+                      8,
+                      8 + context.bottomPlayerReserve,
+                    ),
                     child: Builder(
                       builder: (context) {
                         if (lyricsQuery.isLoading || lyricsQuery.isRefreshing) {
@@ -114,8 +119,7 @@ class PlainLyrics extends HookConsumerWidget {
                           );
                         }
 
-                        final lyrics =
-                            subtitle!.lyrics.mapIndexed((i, e) {
+                        final lyrics = subtitle!.lyrics.mapIndexed((i, e) {
                           final next = subtitle.lyrics.elementAtOrNull(i + 1);
                           if (next != null &&
                               e.time - next.time >

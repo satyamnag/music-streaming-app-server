@@ -14,19 +14,19 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 abstract final class HomeSectionLayout {
   /// The square artwork width/height of every home card, in logical pixels at
   /// scale == 1 (cards multiply by `theme.scaling` themselves).
-  static const double imageSize = 120;
+  static const double imageSize = 150;
 
   /// Horizontal/vertical padding inside each card, at scale == 1.
   static const double cardPadding = 10;
 
   /// Gap between the artwork and the title, at scale == 1.
-  static const double imageTitleGap = 8;
+  static const double imageTitleGap = 4;
 
   /// Gap between the title and the subtitle, at scale == 1.
   static const double titleSubtitleGap = 2;
 
   /// Gap between cards inside a row, at scale == 1.
-  static const double cardGap = 12;
+  static const double cardGap = 6;
 
   /// Extra row height reserved for SKELETON rows only. The measured
   /// [rowHeight] is razor-exact against the loaded card, but Skeletonizer's

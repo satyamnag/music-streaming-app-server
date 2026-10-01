@@ -22,7 +22,7 @@ import 'package:sangeet/provider/history/recent_tracks.dart';
 /// next [pageSize] on each tap. Hidden when there is no listening history yet.
 class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
   /// Number of cards revealed per page.
-  static const int pageSize = 5;
+  static const int pageSize = 25;
 
   const HomeRecentlyPlayedTracksSection({super.key});
 
@@ -41,7 +41,7 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
     if (history.isLoading) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -65,7 +65,7 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
-                    separatorBuilder: (_, __) => const Gap(12),
+                    separatorBuilder: (_, __) => const Gap(6),
                     itemBuilder: (context, index) => _RecentTrackCard(
                       track: FakeData.track,
                       imageUrl: '',
@@ -90,7 +90,7 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -132,7 +132,7 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
                 itemCount: shown.length + (hasMore ? 1 : 0),
-                separatorBuilder: (_, __) => Gap(12 * scale),
+                separatorBuilder: (_, __) => Gap(6 * scale),
                 itemBuilder: (context, index) {
                   if (hasMore && index == shown.length) {
                     return _SeeMoreCard(
@@ -200,7 +200,7 @@ class _RecentTrackCard extends HookWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -228,12 +228,12 @@ class _RecentTrackCard extends HookWidget {
                 borderRadius: BorderRadius.circular(8 * scale),
                 child: UniversalImage(
                   path: imageUrl,
-                  height: 120 * scale,
-                  width: 120 * scale,
+                  height: 150 * scale,
+                  width: 150 * scale,
                   fit: BoxFit.cover,
                 ),
               ),
-              Gap(8 * scale),
+              Gap(4 * scale),
               Text(
                 track.name,
                 maxLines: 1,
@@ -266,7 +266,7 @@ class _SeeMoreCard extends StatelessWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,

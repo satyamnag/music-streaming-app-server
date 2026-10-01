@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
@@ -19,20 +20,27 @@ import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 class HomeAlbumsSection extends HookConsumerWidget {
   final List<HomeAlbum> albums;
 
+  /// Number of albums revealed per page.
+  static const int pageSize = 25;
+
   const HomeAlbumsSection({super.key, required this.albums});
 
   @override
   Widget build(BuildContext context, ref) {
+    final visibleCount = useState(HomeAlbumsSection.pageSize);
+
     if (albums.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final shown = albums.take(visibleCount.value).toList();
+    final hasMore = albums.length > visibleCount.value;
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -68,11 +76,18 @@ class HomeAlbumsSection extends HookConsumerWidget {
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 scrollDirection: Axis.horizontal,
-                itemCount: albums.length,
-                separatorBuilder: (_, __) => Gap(12 * scale),
+                itemCount: shown.length + (hasMore ? 1 : 0),
+                separatorBuilder: (_, __) => Gap(6 * scale),
                 itemBuilder: (context, index) {
-                  final album = albums[index].album;
-                  final tracks = albums[index].tracks;
+                  if (hasMore && index == shown.length) {
+                    return _SeeMoreCard(
+                      onTap: () {
+                        visibleCount.value += HomeAlbumsSection.pageSize;
+                      },
+                    );
+                  }
+                  final album = shown[index].album;
+                  final tracks = shown[index].tracks;
                   final imageUrl =
                       album.images.smallest(ImagePlaceholder.albumArt);
 
@@ -117,7 +132,7 @@ class _AlbumCard extends HookConsumerWidget {
     final locked = PremiumAccess.isAlbumLocked(album, ref);
 
     return Container(
-      width: 140 * scale,
+      width: 175 * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -158,15 +173,15 @@ class _AlbumCard extends HookConsumerWidget {
                   children: [
                     UniversalImage(
                       path: imageUrl,
-                      height: 120 * scale,
-                      width: 120 * scale,
+                      height: 150 * scale,
+                      width: 150 * scale,
                       fit: BoxFit.cover,
                     ),
                     LockedBadge(locked: locked, borderRadius: 0),
                   ],
                 ),
               ),
-              Gap(8 * scale),
+              Gap(4 * scale),
               Text(
                 album.name,
                 maxLines: 1,
@@ -183,6 +198,56 @@ class _AlbumCard extends HookConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.typography.xSmall.copyWith(
                   color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A "See More" card shown after the visible album cards. Tapping it reveals
+/// the next page of cards.
+class _SeeMoreCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SeeMoreCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      width: 175 * scale,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                SangeetIcons.angleDown,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+              Gap(8 * scale),
+              Text(
+                context.l10n.see_more,
+                style: theme.typography.base.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

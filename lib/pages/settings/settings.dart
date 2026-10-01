@@ -63,9 +63,11 @@ class SettingsPage extends HookConsumerWidget {
                   type: MaterialType.transparency,
                   child: ListView(
                     controller: controller,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      16,
+                      16,
+                      context.bottomPlayerReserve,
                     ),
                     children: [
                       Center(

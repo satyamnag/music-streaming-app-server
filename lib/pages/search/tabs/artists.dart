@@ -65,7 +65,12 @@ class SearchPageArtistsTab extends HookConsumerWidget {
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + context.bottomPlayerReserve,
+            ),
             itemCount: searchArtists.length + (hasMore ? 1 : 0),
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 200,

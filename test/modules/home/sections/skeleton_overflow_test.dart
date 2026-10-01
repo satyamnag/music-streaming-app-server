@@ -72,7 +72,7 @@ class _PlaybuttonSkeletonRow extends StatelessWidget {
   }
 }
 
-/// Mirrors the home card anatomy (10 padding + 120 art + 8 gap + title line)
+/// Mirrors the home card anatomy (10 padding + 150 art + 4 gap + title line)
 /// so the skeleton exercise covers the exact geometry rowHeight measures.
 class _HomeCardSkeletonRow extends StatelessWidget {
   const _HomeCardSkeletonRow();
@@ -89,14 +89,14 @@ class _HomeCardSkeletonRow extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           children: [
             Container(
-              width: 140 * scale,
+              width: 175 * scale,
               child: Padding(
                 padding: EdgeInsets.all(10 * scale),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(height: 120 * scale, width: 120 * scale),
-                    const Gap(8),
+                    Container(height: 150 * scale, width: 150 * scale),
+                    const Gap(4),
                     Text(
                       'A good track',
                       maxLines: 1,

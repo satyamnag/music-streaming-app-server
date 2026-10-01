@@ -1307,6 +1307,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get summary_plays => 'afspeelbeurten';
 
   @override
+  String get insights => 'Insights';
+
+  @override
+  String get insights_top_track => 'Top track';
+
+  @override
+  String get insights_listening_hours => 'Hours listened';
+
+  @override
+  String get insights_best_day => 'Best day';
+
+  @override
+  String get insights_current_streak => 'Play streak';
+
+  @override
+  String get insights_vs_last_week => 'vs last week';
+
+  @override
   String total_money(Object money) {
     return 'Totaal $money';
   }

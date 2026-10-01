@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/services/audio_player/audio_engine.dart';
-import 'package:sangeet/services/audio_player/audio_player.dart' show SangeetMedia;
+import 'package:sangeet/services/audio_player/audio_player.dart'
+    show SangeetMedia;
 import 'package:sangeet/services/audio_player/playback_state.dart';
 import 'package:sangeet/services/audio_player/playlist_mode.dart';
 
@@ -59,7 +60,8 @@ class JustAudioEngine implements AudioEngine {
       }
     }));
     _subs.add(_player.positionStream.listen((p) => _positionCtrl.add(p)));
-    _subs.add(_player.bufferedPositionStream.listen((p) => _bufferedCtrl.add(p)));
+    _subs.add(
+        _player.bufferedPositionStream.listen((p) => _bufferedCtrl.add(p)));
     _subs.add(_player.durationStream.listen((d) {
       if (d != null) _durationCtrl.add(d);
     }));
@@ -98,14 +100,20 @@ class JustAudioEngine implements AudioEngine {
   }
 
   Future<void> _rebuild({int? atIndex}) async {
+    final wasPlaying = _player.playing;
+    final position = _player.position;
     final current = (atIndex ?? _index).clamp(0, _tracks.length - 1);
     await _player.setAudioSource(
       ja.ConcatenatingAudioSource(children: _tracks.map(_source).toList()),
       initialIndex: current,
-      initialPosition: Duration.zero,
+      initialPosition: position,
     );
     await _player.setLoopMode(toJa(_loopMode));
     await _player.setShuffleModeEnabled(_shuffle);
+    // Restore playback: rebuilding the source (e.g. when "Endless playback"
+    // radio-appends tracks at the end of the queue) must never restart the
+    // currently playing track at 0:00.
+    if (wasPlaying) _player.play();
   }
 
   @override
@@ -195,8 +203,16 @@ class JustAudioEngine implements AudioEngine {
       await s.cancel();
     }
     for (final c in [
-      _tracksCtrl, _indexCtrl, _playingCtrl, _bufferingCtrl, _completedCtrl,
-      _positionCtrl, _bufferedCtrl, _durationCtrl, _loopCtrl, _shuffleCtrl,
+      _tracksCtrl,
+      _indexCtrl,
+      _playingCtrl,
+      _bufferingCtrl,
+      _completedCtrl,
+      _positionCtrl,
+      _bufferedCtrl,
+      _durationCtrl,
+      _loopCtrl,
+      _shuffleCtrl,
       _stateCtrl,
     ]) {
       await c.close();
@@ -225,26 +241,28 @@ class JustAudioEngine implements AudioEngine {
       _player.processingState == ja.ProcessingState.buffering;
 
   List<SangeetTrackObject> get tracks => _tracks;
-  List<String> get sources => _tracks.map((t) => SangeetMedia.uriFor(t)).toList();
-  String? get currentSource =>
-      _index >= 0 && _index < _tracks.length ? SangeetMedia.uriFor(_tracks[_index]) : null;
-  String? get nextSource =>
-      _index + 1 >= 0 && _index + 1 < _tracks.length
-          ? SangeetMedia.uriFor(_tracks[_index + 1])
-          : null;
-  String? get previousSource =>
-      _index - 1 >= 0 && _index - 1 < _tracks.length
-          ? SangeetMedia.uriFor(_tracks[_index - 1])
-          : null;
+  List<String> get sources =>
+      _tracks.map((t) => SangeetMedia.uriFor(t)).toList();
+  String? get currentSource => _index >= 0 && _index < _tracks.length
+      ? SangeetMedia.uriFor(_tracks[_index])
+      : null;
+  String? get nextSource => _index + 1 >= 0 && _index + 1 < _tracks.length
+      ? SangeetMedia.uriFor(_tracks[_index + 1])
+      : null;
+  String? get previousSource => _index - 1 >= 0 && _index - 1 < _tracks.length
+      ? SangeetMedia.uriFor(_tracks[_index - 1])
+      : null;
   bool get isStopped => _tracks.isEmpty;
   Future<bool> get isCompleted async =>
       _player.processingState == ja.ProcessingState.completed;
   double get volume => _player.volume;
 
-  Stream<List<SangeetTrackObject>> get playlistTrackStream => _tracksCtrl.stream;
+  Stream<List<SangeetTrackObject>> get playlistTrackStream =>
+      _tracksCtrl.stream;
   Stream<int> get currentIndexChangedStream => _indexCtrl.stream;
   Stream<String> get activeSourceChangedStream => _indexCtrl.stream
-      .map((i) => i >= 0 && i < _tracks.length ? SangeetMedia.uriFor(_tracks[i]) : '')
+      .map((i) =>
+          i >= 0 && i < _tracks.length ? SangeetMedia.uriFor(_tracks[i]) : '')
       .where((s) => s.isNotEmpty);
   Stream<String> get errorStream => StreamController<String>().stream;
   Stream<double> get volumeStream => _player.volumeStream;

@@ -79,15 +79,6 @@ class PlayerControls extends HookConsumerWidget {
                       :progressStatic
                     ) = useProgress(ref);
 
-                    final progress = useState<num>(
-                      useMemoized(() => progressStatic, []),
-                    );
-
-                    useEffect(() {
-                      progress.value = progressStatic;
-                      return null;
-                    }, [progressStatic]);
-
                     return Column(
                       children: [
                         Tooltip(
@@ -98,13 +89,17 @@ class PlayerControls extends HookConsumerWidget {
                             width: mediaQuery.xlAndUp ? 600 : 500,
                             child: Slider(
                               hintValue: SliderValue.single(bufferProgress),
-                              value:
-                                  SliderValue.single(progress.value.toDouble()),
-                              onChanged: isFetchingActiveTrack
-                                  ? null
-                                  : (v) {
-                                      progress.value = v.value;
-                                    },
+                              // Feed the thumb ONLY from the position stream.
+                              // onChanged deliberately does not write local
+                              // state: writing it would mirror the stream value
+                              // back, so shadcn's slider would suppress the
+                              // onChangeEnd seek (value == widget.value).
+                              // The thumb still follows the finger while
+                              // dragging and the seek fires on release.
+                              value: SliderValue.single(
+                                progressStatic.toDouble(),
+                              ),
+                              onChanged: isFetchingActiveTrack ? null : (v) {},
                               onChangeEnd: (value) async {
                                 // Only seek once a valid duration is known;
                                 // otherwise a drag would target 0:00.

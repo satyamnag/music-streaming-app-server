@@ -49,17 +49,30 @@ const List<LyricLanguageDef> kLyricLanguages = [
 Widget _langIcon(String key, Color color) => switch (key) {
       LyricLanguages.te => Text(
           'అ',
-          style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600, height: 1),
+          style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1),
         ),
       LyricLanguages.enTr => Text(
           'Aa',
-          style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600, height: 1),
+          style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              height: 1),
         ),
       LyricLanguages.hiTr => Text(
           'अ',
-          style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600, height: 1),
+          style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1),
         ),
-      LyricLanguages.en || LyricLanguages.hi =>
+      LyricLanguages.en ||
+      LyricLanguages.hi =>
         Icon(Icons.translate, size: 16, color: color),
       _ => const SizedBox.shrink(),
     };
@@ -177,7 +190,12 @@ class PlainLanguageViewBuilder extends HookConsumerWidget {
     if (text.isEmpty) return const _NoLyrics();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        12 + context.bottomPlayerReserve,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
@@ -218,7 +236,12 @@ class SyncedLanguageView extends HookConsumerWidget {
     final mapState = ref.watch(syncedLyricsMapProvider(track));
     final lyricsMap = mapState.asData?.value.lyricsMap ?? const <int, String>{};
 
-    final currentTime = useSyncedLyrics(ref, lyricsMap, delay);
+    final currentTime = useSyncedLyrics(
+      ref,
+      lyricsMap,
+      delay,
+      cues: mapState.asData?.value.cues ?? const [],
+    );
 
     if (query.isLoading || query.isRefreshing) {
       return const ShimmerLyrics();
@@ -226,14 +249,16 @@ class SyncedLanguageView extends HookConsumerWidget {
     if (query.hasError) return const _NoLyrics();
     // Plain (static/untimed) variants are not synced lyrics — the Sync view
     // must not render them.
-    if ((mapState.asData?.value.static ?? true) == true) return const _NoLyrics();
+    if ((mapState.asData?.value.static ?? true) == true) {
+      return const _NoLyrics();
+    }
 
     final variants = subtitle?.variants ?? const <LyricVariant>[];
-    final hasData =
-        variants.any((v) => kLyricLanguages.any(
-              (d) => selected.value.contains(d.key) &&
-                  LyricLanguages.fieldOf(v, d.key).trim().isNotEmpty,
-            ));
+    final hasData = variants.any((v) => kLyricLanguages.any(
+          (d) =>
+              selected.value.contains(d.key) &&
+              LyricLanguages.fieldOf(v, d.key).trim().isNotEmpty,
+        ));
 
     return Column(
       children: [
@@ -344,9 +369,8 @@ class _SyncedLines extends HookWidget {
               border: Border(
                 left: BorderSide(
                   width: 3,
-                  color: isActive
-                      ? theme.colorScheme.primary
-                      : Colors.transparent,
+                  color:
+                      isActive ? theme.colorScheme.primary : Colors.transparent,
                 ),
               ),
             ),
@@ -497,7 +521,9 @@ class LanguageMultiSelect extends HookConsumerWidget {
                   transformBackdrop: false,
                   builder: (context) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
+                      padding: EdgeInsets.only(
+                        bottom: 24 + context.bottomPlayerReserve,
+                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: rows,

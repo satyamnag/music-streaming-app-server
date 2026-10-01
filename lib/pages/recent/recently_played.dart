@@ -44,6 +44,7 @@ class RecentlyPlayedPage extends HookConsumerWidget {
                 ),
               )
             : ListView.builder(
+                padding: EdgeInsets.only(bottom: context.bottomPlayerReserve),
                 itemCount: tracks.length,
                 itemBuilder: (context, index) {
                   return TrackTile(

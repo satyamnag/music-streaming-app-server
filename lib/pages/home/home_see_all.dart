@@ -3,10 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
-import 'package:sangeet/components/track_tile/track_tile.dart';
+import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
@@ -18,20 +19,15 @@ import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 enum HomeSeeAllKind { albums, newestArrivals, topTrending, language }
 
 /// A full-screen "see all" page reached from the arrow on a home section
-/// header. It shows every item of that section in one scrollable screen:
-///  - [HomeSeeAllKind.albums]        -> a grid of all albums.
-///  - [HomeSeeAllKind.newestArrivals]-> a list of up to [HomeSeeAllPage.limit]
-///    newest tracks.
-///  - [HomeSeeAllKind.topTrending]   -> a list of up to [HomeSeeAllPage.limit]
-///    most-played tracks.
-///  - [HomeSeeAllKind.language]      -> a list of all songs in [language].
-///
+/// header. Every kind renders as a responsive GRID of 1.25x cards (matching
+/// the home covers) with a search box, an initial page of [pageSize] items
+/// and a "load more" button that reveals the next page — no list view.
 /// Data comes from the shared [homeSectionsProvider], so the section always
 /// matches what the home screen shows and no extra fetch is needed.
 @RoutePage()
 class HomeSeeAllPage extends HookConsumerWidget {
-  /// Max tracks shown for "Newest Arrivals" and "Top Trending" screens.
-  static const int limit = 100;
+  /// Items revealed per page.
+  static const int pageSize = 100;
 
   static const name = "home_see_all";
 
@@ -57,22 +53,21 @@ class HomeSeeAllPage extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final isAlbums = kind == HomeSeeAllKind.albums;
     final sectionsAsync = ref.watch(homeSectionsProvider);
-    final playlist = ref.watch(audioPlayerProvider);
-
     final sections = switch (sectionsAsync) {
       AsyncData(value: final s) => s,
       _ => null,
     };
 
-    // Tracks shown by this page (empty for the albums grid).
+    final query = useState('');
+    final visibleCount = useState(HomeSeeAllPage.pageSize);
+
     final tracks = switch (kind) {
       HomeSeeAllKind.newestArrivals =>
-        sections?.newestArrivals.take(limit).toList() ??
-            const <SangeetTrackObject>[],
+        sections?.newestArrivals ?? const <SangeetTrackObject>[],
       HomeSeeAllKind.topTrending =>
-        sections?.topTrending.take(limit).toList() ??
-            const <SangeetTrackObject>[],
+        sections?.topTrending ?? const <SangeetTrackObject>[],
       HomeSeeAllKind.language => sections?.languages
               .where((g) => g.language == language || language == null)
               .expand((g) => g.tracks)
@@ -86,6 +81,45 @@ class HomeSeeAllPage extends HookConsumerWidget {
       _ => const <HomeAlbum>[],
     };
 
+    // Search filter (case-insensitive, applies to the full list).
+    final q = query.value.trim().toLowerCase();
+    final filteredAlbums = q.isEmpty
+        ? albums
+        : albums.where((a) => a.album.name.toLowerCase().contains(q)).toList();
+    final filteredTracks = q.isEmpty
+        ? tracks
+        : tracks.where((t) => t.name.toLowerCase().contains(q)).toList();
+
+    final shownAlbums = filteredAlbums.take(visibleCount.value).toList();
+    final shownTracks = filteredTracks.take(visibleCount.value).toList();
+    final hasMore = (isAlbums ? filteredAlbums.length : filteredTracks.length) >
+        visibleCount.value;
+
+    Future<void> playFrom(HomeSeeAllKind useKind, int index,
+        List<SangeetTrackObject> list) async {
+      final track = list[index];
+      if (PremiumAccess.isTrackLocked(track, ref)) {
+        await PremiumAccess.gateTrackPlay(
+          context: context,
+          ref: ref,
+          track: track,
+          feature: () async {
+            await ref.read(audioPlayerProvider.notifier).load(
+                  list,
+                  initialIndex: index,
+                  autoPlay: true,
+                );
+          },
+        );
+        return;
+      }
+      await ref.read(audioPlayerProvider.notifier).load(
+            list,
+            initialIndex: index,
+            autoPlay: true,
+          );
+    }
+
     return SafeArea(
       bottom: false,
       child: Scaffold(
@@ -95,77 +129,117 @@ class HomeSeeAllPage extends HookConsumerWidget {
             title: Text(_title(context)),
           ),
         ],
-        child: kind == HomeSeeAllKind.albums
-            ? CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.all(16.0 * scale),
-                    sliver: SliverGrid.builder(
-                      itemCount: albums.length,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 160 * scale,
-                        mainAxisExtent: HomeSectionLayout.rowHeight(
-                          context,
-                          withSubtitle: false,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16 * scale,
+                  8 * scale,
+                  16 * scale,
+                  8 * scale,
+                ),
+                child: TextField(
+                  onChanged: (value) {
+                    query.value = value;
+                    visibleCount.value = HomeSeeAllPage.pageSize;
+                  },
+                  features: const [
+                    InputFeature.leading(Icon(SangeetIcons.search)),
+                  ],
+                  placeholder: Text(
+                    isAlbums ? context.l10n.filter_artist : context.l10n.search,
+                  ),
+                ),
+              ),
+            ),
+            if ((isAlbums ? filteredAlbums : filteredTracks).isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(context.l10n.nothing_found),
+                  ),
+                ),
+              )
+            else ...[
+              SliverPadding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12 * scale,
+                  vertical: 4 * scale,
+                ),
+                sliver: SliverGrid.builder(
+                  itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: trackGridCrossAxisCount(context),
+                    mainAxisExtent: HomeSectionLayout.rowHeight(
+                      context,
+                      withSubtitle: !isAlbums,
+                    ),
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                  ),
+                  itemBuilder: (context, index) {
+                    if (isAlbums) {
+                      final album = shownAlbums[index].album;
+                      return _SeeAllAlbumCard(
+                        album: album,
+                        imageUrl:
+                            album.images.smallest(ImagePlaceholder.albumArt),
+                        onTap: () {
+                          context.navigateTo(
+                            AlbumRoute(id: album.id, album: album),
+                          );
+                        },
+                      );
+                    }
+                    final track = shownTracks[index];
+                    return TrackCard(
+                      imageUrl: trackCardImageUrl(track),
+                      title: track.name,
+                      subtitle: track.album.name,
+                      locked: PremiumAccess.isTrackLocked(track, ref),
+                      onTap: () => playFrom(kind, index, filteredTracks),
+                    );
+                  },
+                ),
+              ),
+              if (hasMore)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Center(
+                      child: Button.text(
+                        onPressed: () {
+                          visibleCount.value += HomeSeeAllPage.pageSize;
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(SangeetIcons.angleDown, size: 16),
+                            const Gap(6),
+                            Text(context.l10n.load_more),
+                          ],
                         ),
-                        crossAxisSpacing: 12 * scale,
-                        mainAxisSpacing: 12 * scale,
                       ),
-                      itemBuilder: (context, index) {
-                        final album = albums[index].album;
-                        final cover =
-                            album.images.smallest(ImagePlaceholder.albumArt);
-                        return _SeeAllAlbumCard(
-                          album: album,
-                          imageUrl: cover,
-                          onTap: () {
-                            context.navigateTo(
-                              AlbumRoute(id: album.id, album: album),
-                            );
-                          },
-                        );
-                      },
                     ),
                   ),
-                ],
-              )
-            : ListView.builder(
-                itemCount: tracks.length,
-                itemBuilder: (context, index) {
-                  return TrackTile(
-                    index: index,
-                    track: tracks[index],
-                    playlist: playlist,
-                    onTap: () async {
-                      if (PremiumAccess.isTrackLocked(tracks[index], ref)) {
-                        await PremiumAccess.gateTrackPlay(
-                          context: context,
-                          ref: ref,
-                          track: tracks[index],
-                          feature: () async {
-                            await ref.read(audioPlayerProvider.notifier).load(
-                                tracks,
-                                initialIndex: index,
-                                autoPlay: true);
-                          },
-                        );
-                        return;
-                      }
-
-                      await ref
-                          .read(audioPlayerProvider.notifier)
-                          .load(tracks, initialIndex: index, autoPlay: true);
-                    },
-                  );
-                },
-              ),
+                ),
+            ],
+            // Reserve space so the floating player footer never covers the
+            // last grid row.
+            SliverToBoxAdapter(
+              child: SizedBox(height: context.bottomPlayerReserve),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// A compact album card used in the "see all albums" grid. Tapping it opens
-/// the album screen with its full song list, matching the home album cards.
+/// A compact album card for the "see all albums" grid (1.25x art, same as the
+/// home album cards). Tapping it opens the album screen.
 class _SeeAllAlbumCard extends HookWidget {
   final SangeetSimpleAlbumObject album;
   final String imageUrl;
@@ -183,6 +257,7 @@ class _SeeAllAlbumCard extends HookWidget {
     final scale = theme.scaling;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -194,16 +269,18 @@ class _SeeAllAlbumCard extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8 * scale),
-              child: UniversalImage(
-                path: imageUrl,
-                height: 120 * scale,
-                width: 120 * scale,
-                fit: BoxFit.cover,
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8 * scale),
+                child: UniversalImage(
+                  path: imageUrl,
+                  height: 150 * scale,
+                  width: 150 * scale,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-            Gap(8 * scale),
+            SizedBox(height: 4 * scale),
             Text(
               album.name,
               maxLines: 1,
