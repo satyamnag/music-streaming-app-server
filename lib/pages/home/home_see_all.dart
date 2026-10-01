@@ -8,6 +8,7 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
@@ -103,14 +104,17 @@ class HomeSeeAllPage extends HookConsumerWidget {
                       itemCount: albums.length,
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 160 * scale,
-                        mainAxisExtent: 220 * scale,
+                        mainAxisExtent: HomeSectionLayout.rowHeight(
+                          context,
+                          withSubtitle: false,
+                        ),
                         crossAxisSpacing: 12 * scale,
                         mainAxisSpacing: 12 * scale,
                       ),
                       itemBuilder: (context, index) {
                         final album = albums[index].album;
-                        final cover = album.images
-                            .smallest(ImagePlaceholder.albumArt);
+                        final cover =
+                            album.images.smallest(ImagePlaceholder.albumArt);
                         return _SeeAllAlbumCard(
                           album: album,
                           imageUrl: cover,
@@ -139,11 +143,10 @@ class HomeSeeAllPage extends HookConsumerWidget {
                           ref: ref,
                           track: tracks[index],
                           feature: () async {
-                            await ref
-                                .read(audioPlayerProvider.notifier)
-                                .load(tracks,
-                                    initialIndex: index,
-                                    autoPlay: true);
+                            await ref.read(audioPlayerProvider.notifier).load(
+                                tracks,
+                                initialIndex: index,
+                                autoPlay: true);
                           },
                         );
                         return;
@@ -151,9 +154,7 @@ class HomeSeeAllPage extends HookConsumerWidget {
 
                       await ref
                           .read(audioPlayerProvider.notifier)
-                          .load(tracks,
-                              initialIndex: index,
-                              autoPlay: true);
+                          .load(tracks, initialIndex: index, autoPlay: true);
                     },
                   );
                 },

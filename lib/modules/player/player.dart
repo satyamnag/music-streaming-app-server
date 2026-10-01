@@ -40,6 +40,10 @@ class PlayerView extends HookConsumerWidget {
         ref.watch(audioPlayerProvider.select((s) => s.activeTrack));
     final currentActiveTrackSource = sourcedCurrentTrack.asData?.value?.source;
     final isLocalTrack = currentActiveTrack is SangeetLocalTrackObject;
+    // The Original/Karaoke toggle is only meaningful when the track actually
+    // ships a karaoke variant; otherwise the whole row is inert.
+    final karaokeAvailable = currentActiveTrack is SangeetFullTrackObject &&
+        (currentActiveTrack.karaokeStoragePath?.trim().isNotEmpty ?? false);
     final mediaQuery = MediaQuery.sizeOf(context);
 
     final shouldHide = useState(true);
@@ -161,14 +165,13 @@ class PlayerView extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Original / Karaoke switch (enabled only when a karaoke file
-                  // exists for the track).
-                  _OriginalKaraokeToggle(
-                    karaokeAvailable: currentActiveTrack is SangeetFullTrackObject &&
-                        (currentActiveTrack.karaokeStoragePath?.trim().isNotEmpty ?? false),
-                  ),
-                  const SizedBox(height: 44),
+                  const SizedBox(height: 12),
+                  // Original / Karaoke switch (only shown when a karaoke file
+                  // exists for the track; otherwise it would be inert).
+                  if (karaokeAvailable) ...[
+                    const _OriginalKaraokeToggle(karaokeAvailable: true),
+                    const SizedBox(height: 16),
+                  ],
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.centerLeft,
@@ -191,7 +194,7 @@ class PlayerView extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   const PlayerControls(),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 12),
                   const PlayerActions(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     showQueue: false,
@@ -200,7 +203,6 @@ class PlayerView extends HookConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      const SizedBox(width: 10),
                       Expanded(
                         child: OutlineButton(
                           leading: const Icon(SangeetIcons.queue),
@@ -222,10 +224,9 @@ class PlayerView extends HookConsumerWidget {
                           },
                         ),
                       ),
-                      const SizedBox(width: 10),
                     ],
                   ),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Consumer(builder: (context, ref, _) {
@@ -239,7 +240,7 @@ class PlayerView extends HookConsumerWidget {
                       );
                     }),
                   ),
-                  const Gap(25),
+                  const Gap(16),
                 ],
               ),
             ),
@@ -249,7 +250,6 @@ class PlayerView extends HookConsumerWidget {
     );
   }
 }
-
 
 /// Original / Karaoke switch shown between the cover art and the track name.
 /// "Original" is the default (current playback, unchanged). "Karaoke" replays
@@ -326,14 +326,11 @@ class _ToggleButton extends StatelessWidget {
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
         decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.muted,
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.muted,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.border,
+            color:
+                selected ? theme.colorScheme.primary : theme.colorScheme.border,
           ),
         ),
         child: Text(
@@ -343,8 +340,7 @@ class _ToggleButton extends StatelessWidget {
                 ? theme.colorScheme.primaryForeground
                 : enabled
                     ? theme.colorScheme.mutedForeground
-                    : theme.colorScheme.mutedForeground
-                        .withValues(alpha: 0.4),
+                    : theme.colorScheme.mutedForeground.withValues(alpha: 0.4),
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

@@ -8,6 +8,7 @@ import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/album/album_card.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 
@@ -70,7 +71,9 @@ class HorizontalPlaybuttonCardView<T> extends HookWidget {
             error!
           else
             SizedBox(
-              height: isArtist ? 250 : 225,
+              height: isArtist
+                  ? HomeSectionLayout.artistRowHeight(context)
+                  : HomeSectionLayout.playbuttonRowHeight(context),
               child: NotificationListener(
                 // disable multiple scrollbar to use this
                 onNotification: (notification) => true,

@@ -90,7 +90,8 @@ class ProfileDialog extends ConsumerWidget {
       if (confirmed != true) return;
 
       signOutError.value = null;
-      final failure = await ref.read(clerkAuthProvider.notifier).deleteAccount();
+      final failure =
+          await ref.read(clerkAuthProvider.notifier).deleteAccount();
       if (!context.mounted) return;
       if (failure != null) {
         // Keep the dialog open and surface the error inline.
@@ -127,7 +128,7 @@ class ProfileDialog extends ConsumerWidget {
                         color: theme.colorScheme.primary,
                       ),
               ),
-              const Gap(12),
+              const Gap(8),
               if (isSignedIn) ...[
                 if (state.username != null && state.username!.isNotEmpty) ...[
                   Text(
@@ -149,11 +150,11 @@ class ProfileDialog extends ConsumerWidget {
                       color: theme.colorScheme.mutedForeground,
                     ),
                   ),
-                const Gap(16),
+                const Gap(12),
                 // Show the paid plan status (plan name, duration, start/end
                 // dates) for signed-in users, read from Superwall CustomerInfo.
                 const ProfilePlanStatus(),
-                const Gap(16),
+                const Gap(12),
                 ValueListenableBuilder<String?>(
                   valueListenable: signOutError,
                   builder: (context, error, _) => Column(

@@ -19,7 +19,6 @@ class SettingsDesktopSection extends HookConsumerWidget {
     return SectionCardWithHeading(
       heading: context.l10n.desktop,
       children: [
-        const Gap(10),
         AdaptiveSelectTile<CloseBehavior>(
           secondary: const Icon(SangeetIcons.close),
           title: Text(context.l10n.close_behavior),
@@ -56,7 +55,6 @@ class SettingsDesktopSection extends HookConsumerWidget {
             onChanged: preferencesNotifier.setSystemTitleBar,
           ),
         ),
-
       ],
     );
   }

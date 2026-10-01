@@ -9,6 +9,7 @@ import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
 import 'package:sangeet/components/waypoint.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 
 const _dummyPlaybuttonCard = PlaybuttonCard(
@@ -127,10 +128,12 @@ class PlaybuttonView extends StatelessWidget {
                       ),
                     )
                   : SliverGrid.builder(
-                      itemCount: isLoading ? 6 : itemCount + 1,
+                      itemCount:
+                          isLoading ? 6 : (hasMore ? itemCount + 1 : itemCount),
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 150 * scale,
-                        mainAxisExtent: 225 * scale,
+                        mainAxisExtent:
+                            HomeSectionLayout.playbuttonCardHeight(context),
                         crossAxisSpacing: 12 * scale,
                         mainAxisSpacing: 12 * scale,
                       ),

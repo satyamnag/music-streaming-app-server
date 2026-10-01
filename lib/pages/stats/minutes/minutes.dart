@@ -39,7 +39,7 @@ class StatsMinutesPage extends HookConsumerWidget {
         child: Skeletonizer(
           enabled: topTracks.isLoading && !topTracks.isLoadingNextPage,
           child: InfiniteList(
-            separatorBuilder: (context, index) => const Gap(8),
+            separatorBuilder: (context, index) => const Gap(4),
             onFetchData: () async {
               await topTracksNotifier.fetchMore();
             },

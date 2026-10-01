@@ -21,7 +21,7 @@ class SectionCardWithHeading extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Center(
                 child: Text(
                   heading,
@@ -50,10 +50,11 @@ class SectionCardWithHeading extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: context.theme.borderRadiusLg,
-                  color: context.theme.colorScheme.muted.withValues(alpha: 0.35),
+                  color:
+                      context.theme.colorScheme.muted.withValues(alpha: 0.35),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(6.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,

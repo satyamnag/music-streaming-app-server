@@ -358,7 +358,7 @@ class PlayerQueue extends HookConsumerWidget {
                               );
                             },
                           ),
-                          const SliverSafeArea(sliver: SliverGap(100)),
+                          const SliverSafeArea(sliver: SliverGap(48)),
                         ],
                       ),
                     ),

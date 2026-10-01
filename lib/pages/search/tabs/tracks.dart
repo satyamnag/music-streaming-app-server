@@ -1,4 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_undraw/flutter_undraw.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/fake.dart';
@@ -71,7 +72,8 @@ class SearchPageTracksTab extends HookConsumerWidget {
                         if (isRemoteDevice == null) return;
 
                         if (isRemoteDevice) {
-                          final remotePlayback = ref.read(connectProvider.notifier);
+                          final remotePlayback =
+                              ref.read(connectProvider.notifier);
                           final remotePlaylist = ref.read(queueProvider);
 
                           final isTrackPlaying =
@@ -199,6 +201,27 @@ class SearchPageTracksTab extends HookConsumerWidget {
                       const Icon(SangeetIcons.angleDown, size: 16),
                       const Gap(6),
                       Text(context.l10n.see_more),
+                    ],
+                  ),
+                ),
+              ),
+            if (searchTracksSnapshot.hasValue && searchTracks.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 10,
+                    children: [
+                      Undraw(
+                        height: 120,
+                        illustration: UndrawIllustration.taken,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      Text(
+                        context.l10n.nothing_found,
+                        textAlign: TextAlign.center,
+                      ).muted().small(),
                     ],
                   ),
                 ),

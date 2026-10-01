@@ -45,7 +45,6 @@ class SearchPageAllTab extends HookConsumerWidget {
                 children: [
                   SearchTracksSection(),
                   SearchPlaylistsSection(),
-                  Gap(20),
                 ],
               ),
             ),

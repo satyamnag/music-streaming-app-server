@@ -134,7 +134,7 @@ class SettingsMetadataProviderFormPage extends HookConsumerWidget {
                       child: Text(context.l10n.submit),
                     ),
                   ),
-                  const SliverGap(200)
+                  const SliverGap(16)
                 ],
               ),
             ),

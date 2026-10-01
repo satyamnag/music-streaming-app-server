@@ -99,14 +99,13 @@ class SettingsPage extends HookConsumerWidget {
                       ],
                       const Gap(12),
                       const SettingsAboutSection(),
-                      const Gap(20),
+                      const Gap(12),
                       Center(
                         child: Button.destructive(
                           onPressed: confirmReset,
                           child: Text(context.l10n.restore_defaults),
                         ),
                       ),
-                      const SizedBox(height: 40),
                     ],
                   ),
                 ),

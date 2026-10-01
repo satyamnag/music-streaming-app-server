@@ -63,4 +63,41 @@ abstract final class HomeSectionLayout {
             cardPadding) *
         scale;
   }
+
+  /// Exact tile height for the shared 150px-art `PlaybuttonCard` grids
+  /// (playlists/albums grids). The card renders a 150px artwork, a 12px
+  /// content gap and a title + up-to-two-line subtitle, so the tile is sized
+  /// to that with zero dead band and no clipping of two-line descriptions.
+  static double playbuttonCardHeight(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+    final titleLine = _lineHeight(theme.typography.small);
+    final subtitleLine = _lineHeight(theme.typography.xSmall);
+    // 150 artwork + 12 CardImage gap + title + 2 title/subtitle gap +
+    // subtitle (reserve two lines so long playlist descriptions never clip).
+    return (150 + 12 + titleLine + 2 + subtitleLine * 2) * scale;
+  }
+
+  /// Exact row height for horizontal rows of `PlaybuttonCard`s. The rows add
+  /// 8px of top and bottom list padding around the cards.
+  static double playbuttonRowHeight(BuildContext context) =>
+      playbuttonCardHeight(context) + 16;
+
+  /// Exact tile height for `ArtistCard` grids. The card is a padded `Button`
+  /// (16px padding at scale 1) holding a 130px avatar, a 10px gap and the
+  /// song-count badge, with no fixed middle filler, so tiles fit ~198px
+  /// instead of the previous fixed 225/250 that left a dead band in every
+  /// tile (absorbed by the card's internal [Spacer]).
+  static double artistCardHeight(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+    // Badge line + SecondaryBadge's internal padding (~8px).
+    final badgeLine = _lineHeight(theme.typography.small) + 8;
+    return (16 + 130 + 10 + badgeLine + 16) * scale;
+  }
+
+  /// Exact row height for horizontal rows of `ArtistCard`s (row adds 8px of
+  /// top/bottom list padding around the cards).
+  static double artistRowHeight(BuildContext context) =>
+      artistCardHeight(context) + 16;
 }

@@ -7,9 +7,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/waypoint.dart';
-import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
 import 'package:sangeet/provider/metadata_plugin/search/artists.dart';
@@ -27,6 +27,7 @@ class SearchPageArtistsTab extends HookConsumerWidget {
     final searchArtistsNotifier =
         ref.read(metadataPluginSearchArtistsProvider(searchTerm).notifier);
     final searchArtists = searchArtistsSnapshot.asData?.value.items ?? [];
+    final hasMore = searchArtistsSnapshot.asData?.value.hasMore == true;
 
     if (searchArtistsSnapshot.hasError) {
       return ErrorBox(
@@ -65,19 +66,15 @@ class SearchPageArtistsTab extends HookConsumerWidget {
 
           return GridView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: searchArtists.length + 1,
+            itemCount: searchArtists.length + (hasMore ? 1 : 0),
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 200,
-              mainAxisExtent: constrains.smAndDown ? 225 : 250,
+              mainAxisExtent: HomeSectionLayout.artistCardHeight(context),
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
             itemBuilder: (context, index) {
-              if (searchArtists.isNotEmpty && index == searchArtists.length) {
-                if (searchArtistsSnapshot.asData?.value.hasMore != true) {
-                  return const SizedBox.shrink();
-                }
-
+              if (hasMore && index == searchArtists.length) {
                 return Waypoint(
                   controller: controller,
                   isGrid: true,

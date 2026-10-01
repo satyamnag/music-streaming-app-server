@@ -66,7 +66,7 @@ class StatsStreamFeesPage extends HookConsumerWidget {
               maxCrossAxisExtent: 600,
               alignment: -1,
               child: SliverPadding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     context.l10n.hipotetical_calculation,

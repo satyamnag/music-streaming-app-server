@@ -271,7 +271,6 @@ class PlayerControls extends HookConsumerWidget {
                   }),
                 ],
               ),
-              const SizedBox(height: 5)
             ],
           ),
         ),

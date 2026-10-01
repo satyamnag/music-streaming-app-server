@@ -93,6 +93,9 @@ class StatsPageSummarySection extends HookConsumerWidget {
                         segments: chartSegments,
                         centerValue: topPlayCount.toString(),
                         centerLabel: context.l10n.summary_plays,
+                        // Keep the donut compact so the legend column keeps
+                        // enough width on phones (180px starved it).
+                        size: 140,
                       ),
                     ],
                   ),
@@ -115,7 +118,7 @@ class StatsPageSummarySection extends HookConsumerWidget {
                                   : 6,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
-                  childAspectRatio: constrains.isXs ? 1.3 : 1.5,
+                  childAspectRatio: 1.5,
                 ),
                 delegate: SliverChildListDelegate([
                   SummaryCard(

@@ -188,7 +188,7 @@ class MiniLyricsPage extends HookConsumerWidget {
                 ),
               )
             else
-              const Gap(20),
+              const Gap(8),
             AnimatedCrossFade(
               crossFadeState: areaActive.value
                   ? CrossFadeState.showFirst

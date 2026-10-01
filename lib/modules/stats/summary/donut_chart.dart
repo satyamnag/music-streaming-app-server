@@ -18,12 +18,16 @@ class DonutChart extends StatelessWidget {
   /// Space (in logical pixels) between the outer edge and the inner hole.
   final double thickness;
 
+  /// Width and height of the square canvas the donut is drawn on.
+  final double size;
+
   const DonutChart({
     super.key,
     required this.segments,
     this.centerValue,
     this.centerLabel,
     this.thickness = 14,
+    this.size = 180,
   });
 
   @override
@@ -32,8 +36,8 @@ class DonutChart extends StatelessWidget {
     final resolved = _resolvedSegments(scheme);
 
     return SizedBox(
-      width: 180,
-      height: 180,
+      width: size,
+      height: size,
       child: CustomPaint(
         painter: _DonutPainter(
           segments: resolved,

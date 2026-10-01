@@ -44,11 +44,11 @@ class TopTracks extends HookConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Gap(50),
+                  const Gap(16),
                   Undraw(
                     illustration: UndrawIllustration.happyMusic,
                     color: context.theme.colorScheme.primary,
-                    height: 200 * context.theme.scaling,
+                    height: 120 * context.theme.scaling,
                   ),
                   Text(
                     context.l10n.no_tracks_listened_yet,

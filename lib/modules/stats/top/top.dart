@@ -31,7 +31,7 @@ class StatsPageTopSection extends HookConsumerWidget {
     final dropdown = Select<HistoryDuration>(
         popupConstraints: const BoxConstraints(maxWidth: 150),
         popupWidthConstraint: PopoverConstraint.flexible,
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(2),
         borderRadius: BorderRadius.circular(4),
         value: historyDuration,
         onChanged: (value) {
@@ -63,7 +63,7 @@ class StatsPageTopSection extends HookConsumerWidget {
             backgroundColor: context.theme.colorScheme.background,
             automaticallyImplyLeading: false,
             flexibleSpace: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
                   TabList(

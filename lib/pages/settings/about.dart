@@ -35,12 +35,12 @@ class AboutSangeetPage extends HookConsumerWidget {
           )
         ],
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 120),
+          padding: const EdgeInsets.only(bottom: 40),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
                 Center(
                   child: ClipOval(
                     child: Assets.branding.sangeetLogoPng.image(
@@ -55,10 +55,8 @@ class AboutSangeetPage extends HookConsumerWidget {
                   Center(
                     child: Text(
                       versionLabel,
-                      style: Theme.of(context)
-                          .typography
-                          .xSmall
-                          .copyWith(color: Theme.of(context).colorScheme.mutedForeground),
+                      style: Theme.of(context).typography.xSmall.copyWith(
+                          color: Theme.of(context).colorScheme.mutedForeground),
                     ),
                   ),
                 const SizedBox(height: 20),
@@ -76,9 +74,9 @@ class AboutSangeetPage extends HookConsumerWidget {
                     textAlign: TextAlign.justify,
                   ).semiBold().large(),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 const Divider(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -100,7 +98,7 @@ class AboutSangeetPage extends HookConsumerWidget {
                     textAlign: TextAlign.justify,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Button(

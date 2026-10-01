@@ -9,6 +9,7 @@ import 'package:sangeet/components/waypoint.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/album/album_card.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/provider/metadata_plugin/browse/section_items.dart';
@@ -66,10 +67,15 @@ class HomeBrowseSectionItemsPage extends HookConsumerWidget {
               controller: controller,
               slivers: [
                 SliverGrid.builder(
-                  itemCount: isLoading ? 6 : itemCount + 1,
+                  itemCount:
+                      isLoading ? 6 : (hasMore ? itemCount + 1 : itemCount),
                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 150 * scale,
-                    mainAxisExtent: 225 * scale,
+                    // Mixed grid: albums/playlists are PlaybuttonCards; the
+                    // artist variant is shorter, so the PlaybuttonCard extent
+                    // governs.
+                    mainAxisExtent:
+                        HomeSectionLayout.playbuttonCardHeight(context),
                     crossAxisSpacing: 12 * scale,
                     mainAxisSpacing: 12 * scale,
                   ),

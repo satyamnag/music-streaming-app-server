@@ -175,4 +175,30 @@ void main() {
     );
     expect(full! - slim!, moreOrLessEquals(expectedDelta!, epsilon: 0.5));
   });
+
+  testWidgets('card/artist metrics keep their internal invariants',
+      (tester) async {
+    double? cardH;
+    double? rowH;
+    double? artistH;
+    double? artistRow;
+    await tester.pumpWidget(
+      _harness(
+        Builder(
+          builder: (context) {
+            cardH = HomeSectionLayout.playbuttonCardHeight(context);
+            rowH = HomeSectionLayout.playbuttonRowHeight(context);
+            artistH = HomeSectionLayout.artistCardHeight(context);
+            artistRow = HomeSectionLayout.artistRowHeight(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    expect(cardH, isNotNull);
+    expect(cardH!, greaterThan(150)); // artwork + text block
+    expect(rowH! - cardH!, moreOrLessEquals(16)); // 8px top/bottom row padding
+    expect(artistH!, greaterThan(130));
+    expect(artistRow! - artistH!, moreOrLessEquals(16));
+  });
 }

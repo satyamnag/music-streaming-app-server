@@ -14,8 +14,8 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/modules/artist/artist_card.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
-import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
@@ -101,10 +101,12 @@ class UserArtistsPage extends HookConsumerWidget {
                   if (filteredArtists.isNotEmpty || artistQuery.isLoading)
                     SliverLayoutBuilder(builder: (context, constrains) {
                       return SliverGrid.builder(
-                        itemCount: filteredArtists.length,
+                        itemCount:
+                            artistQuery.isLoading ? 6 : filteredArtists.length,
                         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 200,
-                          mainAxisExtent: constrains.smAndDown ? 225 : 250,
+                          mainAxisExtent:
+                              HomeSectionLayout.artistCardHeight(context),
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                         ),

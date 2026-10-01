@@ -137,7 +137,7 @@ class ClerkAuthView extends HookConsumerWidget {
                   color: theme.colorScheme.foreground,
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
               SizedBox(
                 width: double.infinity,
                 child: Button.destructive(
@@ -216,9 +216,15 @@ class _StatusBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 320,
-      height: 180,
+    // A modest min-size keeps the dialog from jumping when the loading
+    // state flips to the signed-in/signed-out views, without reserving a
+    // 180px-tall box for a ~40px spinner.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 280,
+        minHeight: 120,
+        maxWidth: 320,
+      ),
       child: Center(child: child),
     );
   }
@@ -267,7 +273,9 @@ class _GoogleSignInView extends HookConsumerWidget {
             error.value = message;
         }
       } catch (_) {
-        if (context.mounted) error.value = 'Something went wrong. Please try again.';
+        if (context.mounted) {
+          error.value = 'Something went wrong. Please try again.';
+        }
       } finally {
         submitting.value = false;
         requestInFlight = false;

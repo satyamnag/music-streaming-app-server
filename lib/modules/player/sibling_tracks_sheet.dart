@@ -60,8 +60,7 @@ class SiblingTracksSheet extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
               child: Row(
                 spacing: 5,
                 children: [

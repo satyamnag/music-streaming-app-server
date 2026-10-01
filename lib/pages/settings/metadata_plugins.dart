@@ -251,7 +251,7 @@ class SettingsMetadataProviderPage extends HookConsumerWidget {
                     ],
                   ),
                 ),
-              const SliverGap(20),
+              const SliverGap(12),
               SliverList.separated(
                 itemCount: installedPlugins?.length ?? 0,
                 separatorBuilder: (context, index) => const Gap(12),
@@ -313,7 +313,7 @@ class SettingsMetadataProviderPage extends HookConsumerWidget {
                   );
                 },
               ),
-              const SliverGap(20),
+              const SliverGap(12),
               SliverCrossAxisConstrained(
                 maxCrossAxisExtent: 720,
                 child: SliverFillRemaining(
