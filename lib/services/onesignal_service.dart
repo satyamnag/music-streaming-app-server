@@ -5,8 +5,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 /// All OneSignal interactions in the app MUST go through this class so the
 /// SDK surface is isolated in one place (easier to test, update, and audit).
 /// Follows the OneSignal Flutter integration guide: initialized once at app
-/// startup, push permission is ONLY requested from the "Got it" action of the
-/// integration-complete dialog (never at launch).
+/// startup; push permission is requested from an explicit user action (after
+/// sign-in and from the profile popup), never silently at launch.
 class OneSignalService {
   OneSignalService._internal();
 
@@ -46,9 +46,11 @@ class OneSignalService {
   }
 
   /// Requests push notification permission. This is the ONLY place the app may
-  /// prompt for permission (per the OneSignal integration guide).
-  Future<bool> requestPermission() {
-    return OneSignal.Notifications.requestPermission(false);
+  /// prompt for permission. With [fallbackToSettings] the user is sent to the
+  /// system notification settings after a denial, giving a re-enable path
+  /// instead of a permanent silent drop.
+  Future<bool> requestPermission({bool fallbackToSettings = false}) {
+    return OneSignal.Notifications.requestPermission(fallbackToSettings);
   }
 
   /// Associates the current user with an external identifier (e.g. the Clerk

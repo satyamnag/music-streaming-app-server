@@ -6,6 +6,7 @@ import 'package:sangeet/collections/env.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
+import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 
@@ -120,26 +121,42 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   ///    `login`, so it lands on the identified user (per the guide, operations
   ///    done under the device-scoped user are lost on login).
   void _syncThirdPartyIdentity(ClerkAuthState authState) {
+    unawaited(_syncThirdPartyIdentityAsync(authState));
+  }
+
+  /// Best-effort async body of [_syncThirdPartyIdentity]. Each third-party call
+  /// is awaited in order and failures are logged, never thrown: the auth
+  /// pipeline must not break because a push/analytics service hiccups.
+  Future<void> _syncThirdPartyIdentityAsync(ClerkAuthState authState) async {
     final sw = SuperwallService.instance;
     final os = OneSignalService.instance;
-    if (authState.signedIn && authState.userId != null) {
-      sw.identify(authState.userId!);
-      sw.setUserAttributes({
-        'email': authState.email ?? '',
-        'username': authState.username ?? '',
-        'name': authState.displayName ?? '',
-      });
-      os.login(authState.userId!);
-      final email = authState.email;
-      if (email != null && email.isNotEmpty) {
-        os.setEmail(email);
+    try {
+      if (authState.signedIn && authState.userId != null) {
+        await sw.identify(authState.userId!);
+        await sw.setUserAttributes({
+          'email': authState.email ?? '',
+          'username': authState.username ?? '',
+          'name': authState.displayName ?? '',
+        });
+        await os.login(authState.userId!);
+        // Ask for push permission right after a successful sign-in: signing in
+        // is an explicit user action (satisfies the no-permission-at-launch
+        // guidance) and maximizes Android 13+ opt-in, which otherwise silently
+        // drops notifications. OneSignal never re-prompts once decided.
+        await os.requestPermission(fallbackToSettings: true);
+        final email = authState.email;
+        if (email != null && email.isNotEmpty) {
+          await os.setEmail(email);
+        }
+        // Best-effort: bind the QR install-referrer code to this user (once).
+        // Never blocks or disrupts sign-in.
+        await ReferrerService.instance.bindToSignedInUser(authState.userId!);
+      } else if (!authState.signedIn) {
+        await sw.reset();
+        await os.logout();
       }
-      // Best-effort: bind the QR install-referrer code to this user (once).
-      // Never blocks or disrupts sign-in.
-      ReferrerService.instance.bindToSignedInUser(authState.userId!);
-    } else if (!authState.signedIn) {
-      sw.reset();
-      os.logout();
+    } catch (e, stack) {
+      AppLogger.reportError(e, stack);
     }
   }
 

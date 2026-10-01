@@ -94,8 +94,7 @@ Future<void> main(List<String> rawArgs) async {
     // without cancelling the underlying operation.)
     if (kIsAndroid || kIsIOS) {
       try {
-        await Firebase.initializeApp()
-            .timeout(const Duration(seconds: 10));
+        await Firebase.initializeApp().timeout(const Duration(seconds: 10));
         FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
         FlutterError.onError = (errorDetails) {
           // CHAIN, never replace: AppLogger's handler (installed in
@@ -136,7 +135,8 @@ Future<void> main(List<String> rawArgs) async {
             child: material.Text(
               'Something went wrong. Please restart the app.',
               textAlign: material.TextAlign.center,
-              style: material.TextStyle(color: material.Colors.white, fontSize: 15),
+              style: material.TextStyle(
+                  color: material.Colors.white, fontSize: 15),
             ),
           ),
         ),
@@ -208,19 +208,35 @@ Future<void> main(List<String> rawArgs) async {
     }
 
     // OneSignal push notifications & in-app messages, via the centralized
-    // service wrapper. The App ID is public by design; initialize only when
-    // present. Push permission is NOT requested here — it is requested only
-    // from the "Got it" action of the integration-complete dialog.
+    // service wrapper. The App ID is public by design; initialize only when a
+    // VALID App ID is configured. Push permission is NOT requested here — it
+    // is requested from explicit user actions (after sign-in and from the
+    // profile popup).
     if (kIsAndroid || kIsIOS) {
       if (Env.oneSignalAppId.isNotEmpty) {
-        // Bounded: OneSignal init is a network/SDK call that can stall on
-        // slow or unreachable networks; skip it rather than block startup.
-        try {
-          await OneSignalService.instance
-              .initialize(Env.oneSignalAppId)
-              .timeout(const Duration(seconds: 10));
-        } catch (_) {
-          // OneSignal init stalled/hung — continue without push messaging.
+        // OneSignal App IDs are UUIDs (per the official docs). Guard against a
+        // malformed value (e.g. a REST key pasted into ONESIGNAL_APP_ID)
+        // silently initializing the SDK with a bogus id: skip + log instead.
+        final appId = Env.oneSignalAppId;
+        final looksValid = RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+          r'[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+        ).hasMatch(appId);
+        if (looksValid) {
+          // Bounded: OneSignal init is a network/SDK call that can stall on
+          // slow or unreachable networks; skip it rather than block startup.
+          try {
+            await OneSignalService.instance
+                .initialize(appId)
+                .timeout(const Duration(seconds: 10));
+          } catch (_) {
+            // OneSignal init stalled/hung — continue without push messaging.
+          }
+        } else {
+          AppLogger.log.w(
+            'ONESIGNAL_APP_ID in .env is not a valid OneSignal App ID '
+            '(UUID expected); OneSignal is not initialized.',
+          );
         }
       }
     }

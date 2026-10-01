@@ -5,6 +5,7 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/auth/profile_plan_status.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/services/onesignal_service.dart';
 
 /// Shows the signed-in user's Clerk profile (avatar, name, email) with a
 /// sign-out action, or a sign-in prompt when the user is logged out.
@@ -161,6 +162,18 @@ class ProfileDialog extends ConsumerWidget {
                 // Show the paid plan status (plan name, duration, start/end
                 // dates) for signed-in users, read from Superwall CustomerInfo.
                 const ProfilePlanStatus(),
+                const Gap(8),
+                Builder(
+                  builder: (dialogContext) => Button.secondary(
+                    onPressed: () {
+                      // Explicit opt-in for push notifications (Android 13+
+                      // needs the system permission; see OneSignalService).
+                      OneSignalService.instance
+                          .requestPermission(fallbackToSettings: true);
+                    },
+                    child: const Text('Enable Notifications'),
+                  ),
+                ),
                 const Gap(12),
                 ValueListenableBuilder<String?>(
                   valueListenable: signOutError,
@@ -245,6 +258,19 @@ class ProfileDialog extends ConsumerWidget {
                     );
                   },
                   child: const Text('Sign In'),
+                ),
+                const Gap(8),
+                Builder(
+                  builder: (dialogContext) => Button.secondary(
+                    onPressed: () {
+                      // Signed-out users can still opt into push notifications:
+                      // the device-scoped subscription receives admin
+                      // broadcasts to "All Subscribers".
+                      OneSignalService.instance
+                          .requestPermission(fallbackToSettings: true);
+                    },
+                    child: const Text('Enable Notifications'),
+                  ),
                 ),
               ],
             ],

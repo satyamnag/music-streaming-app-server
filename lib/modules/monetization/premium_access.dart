@@ -106,6 +106,13 @@ class PremiumAccess {
       if (!signedIn) return false;
     }
 
+    // See gateTrackPlay: ensure Superwall knows the identity before evaluating
+    // the placement so returning subscribers don't hit a spurious paywall.
+    final user = ref.read(clerkAuthProvider).valueOrNull;
+    if (user?.signedIn == true && user?.userId != null) {
+      await SuperwallService.instance.identify(user!.userId!);
+    }
+
     var unlocked = false;
     final result = await gateFeature(
       placement: SuperwallPlacements.premiumTrackPlay,
@@ -159,19 +166,26 @@ class PremiumAccess {
   ///  - Paid track + signed-in free user: presents the paywall; [feature] runs
   ///    only after a successful purchase (Gated mode).
   ///
+  /// [albumLock] optionally carries the album this track was tapped from: when
+  /// the album itself is paid, the track is treated as locked too (album lock
+  /// cascades to its tracks, matching the padlock the row already shows).
+  ///
   /// Returns true when [feature] ran (track was unlocked), false otherwise.
   static Future<bool> gateTrackPlay({
     required BuildContext context,
     required WidgetRef ref,
     required SangeetTrackObject track,
+    Object? albumLock,
     required Future<void> Function() feature,
   }) async {
-    if (!isPaidTrack(track) || isPremiumUser(ref)) {
+    final isPaid =
+        isPaidTrack(track) || (albumLock != null && isPaidAlbum(albumLock));
+    if (!isPaid || isPremiumUser(ref)) {
       await feature();
       return true;
     }
 
-    // Paid track and the user is not premium.
+    // Paid track (or a track inside a paid album) and the user is not premium.
     final auth = ref.read(clerkAuthProvider).valueOrNull;
     if (auth?.signedIn != true) {
       // User must sign in first in all conditions before paying.
@@ -179,11 +193,23 @@ class PremiumAccess {
       if (!signedIn) return false;
     }
 
+    // Make sure Superwall knows the (possibly just signed-in) identity BEFORE
+    // the placement is evaluated: identify() is normally fire-and-forget from
+    // the auth sync, so without this a returning subscriber could hit a
+    // spurious paywall while identify() is still in flight.
+    final user = ref.read(clerkAuthProvider).valueOrNull;
+    if (user?.signedIn == true && user?.userId != null) {
+      await SuperwallService.instance.identify(user!.userId!);
+    }
+
     // Present the paywall (Gated mode: feature runs only after purchase).
     var unlocked = false;
     final result = await gateFeature(
       placement: SuperwallPlacements.premiumTrackPlay,
-      params: {'track_id': track.id},
+      params: {
+        'track_id': track.id,
+        if (albumLock != null) 'album_id': _albumId(albumLock),
+      },
       feature: () async {
         unlocked = true;
         await feature();
@@ -209,6 +235,12 @@ class PremiumAccess {
     if (auth?.signedIn != true) {
       final signedIn = await promptSignIn(context, ref);
       if (!signedIn) return false;
+    }
+
+    // See gateTrackPlay: identify before evaluating the placement.
+    final user = ref.read(clerkAuthProvider).valueOrNull;
+    if (user?.signedIn == true && user?.userId != null) {
+      await SuperwallService.instance.identify(user!.userId!);
     }
 
     var purchased = false;
@@ -253,14 +285,24 @@ class PremiumAccess {
   static Future<bool> promptSignIn(
     BuildContext context,
     WidgetRef ref,
-  ) async {    // Present the sign-in dialog and wait for it to be dismissed. After the
+  ) async {
+    // Present the sign-in dialog and wait for it to be dismissed. After the
     // flow completes the auth state is refreshed by the dialog itself.
     await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (_) => const ClerkAuthView(),
     );
-    // Re-read auth state after the dialog closed.
+    // Re-read auth state only AFTER the provider has refreshed. The sign-in
+    // dialog invalidates the auth provider and pops; an immediate read can
+    // return the STALE signed-out value (the rebuild is async) and wrongly
+    // abort the gate before the paywall. Force a refresh and await it.
+    try {
+      ref.invalidate(clerkAuthProvider);
+      await ref.read(clerkAuthProvider.future);
+    } catch (_) {
+      // A refresh failure must not crash the gate; fall through to a read.
+    }
     final state = ref.read(clerkAuthProvider).valueOrNull;
     return state?.signedIn == true;
   }

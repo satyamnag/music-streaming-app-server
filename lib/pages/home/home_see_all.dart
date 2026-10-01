@@ -6,6 +6,7 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -182,11 +183,30 @@ class HomeSeeAllPage extends HookConsumerWidget {
                   itemBuilder: (context, index) {
                     if (isAlbums) {
                       final album = shownAlbums[index].album;
+                      final locked = PremiumAccess.isAlbumLocked(album, ref);
                       return _SeeAllAlbumCard(
                         album: album,
                         imageUrl:
                             album.images.smallest(ImagePlaceholder.albumArt),
+                        locked: locked,
                         onTap: () {
+                          if (locked) {
+                            // Paid album: payment gate first (paywall for free
+                            // users), then open the album only after access.
+                            PremiumAccess.gateAlbumPlay(
+                              context: context,
+                              ref: ref,
+                              album: album,
+                              feature: () async {
+                                if (context.mounted) {
+                                  context.navigateTo(
+                                    AlbumRoute(id: album.id, album: album),
+                                  );
+                                }
+                              },
+                            );
+                            return;
+                          }
                           context.navigateTo(
                             AlbumRoute(id: album.id, album: album),
                           );
@@ -243,11 +263,13 @@ class HomeSeeAllPage extends HookConsumerWidget {
 class _SeeAllAlbumCard extends HookWidget {
   final SangeetSimpleAlbumObject album;
   final String imageUrl;
+  final bool locked;
   final VoidCallback onTap;
 
   const _SeeAllAlbumCard({
     required this.album,
     required this.imageUrl,
+    required this.locked,
     required this.onTap,
   });
 
@@ -272,11 +294,16 @@ class _SeeAllAlbumCard extends HookWidget {
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8 * scale),
-                child: UniversalImage(
-                  path: imageUrl,
-                  height: 150 * scale,
-                  width: 150 * scale,
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    UniversalImage(
+                      path: imageUrl,
+                      height: 150 * scale,
+                      width: 150 * scale,
+                      fit: BoxFit.cover,
+                    ),
+                    LockedBadge(locked: locked, borderRadius: 0),
+                  ],
                 ),
               ),
             ),

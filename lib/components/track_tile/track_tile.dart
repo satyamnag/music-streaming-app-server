@@ -63,6 +63,17 @@ class TrackTile extends HookConsumerWidget {
 
     final isLoading = useState(false);
 
+    // Album this track is presented inside, when rendered in a collection
+    // context (null otherwise). Used both for the lock badge and for gating
+    // taps so a track inside a paid album is locked consistently.
+    Object? albumLockContext() {
+      try {
+        return TrackPresentationOptions.of(context).collection;
+      } catch (_) {
+        return null;
+      }
+    }
+
     // A paid (locked) track is never "playing" for a free user: the play/pause
     // overlay must not appear (only the lock badge does), and the row must not
     // light up as the active track. Paid users are unaffected.
@@ -71,11 +82,8 @@ class TrackTile extends HookConsumerWidget {
     // cascades to all its tracks per product requirement).
     final isLocked = () {
       if (PremiumAccess.isTrackLocked(track, ref)) return true;
-      try {
-        final collection = TrackPresentationOptions.of(context).collection;
-        return PremiumAccess.isAlbumLocked(collection, ref);
-      } catch (_) {}
-      return false;
+      final collection = albumLockContext();
+      return collection != null && PremiumAccess.isAlbumLocked(collection, ref);
     }();
     final isPlaying = !isLocked && playlist.activeTrack?.id == track.id;
 
@@ -128,281 +136,293 @@ class TrackTile extends HookConsumerWidget {
           builder: (context, isHovering) => Stack(
             children: [
               ButtonTile(
-            selected: isSelected,
-            onPressed: () async {
-              try {
-                isLoading.value = true;
-                // In selection mode, taps toggle checkboxes — never gate those.
-                if (onChanged != null) {
-                  await onTap?.call();
-                  return;
-                }
-                // Locked (paid) tracks: never play for non-premium users.
-                // Present the Superwall paywall — playback runs only after a
-                // successful purchase.
-                await PremiumAccess.gateTrackPlay(
-                  context: context,
-                  ref: ref,
-                  track: track,
-                  feature: onTap ?? () async {},
-                );
-              } finally {
-                if (context.mounted) {
-                  isLoading.value = false;
-                }
-              }
-            },
-            onLongPress: onLongPress,
-            style: ButtonVariance.ghost.copyWith(
-              padding: (context, states, value) =>
-                  const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-            ),
-            leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...?leadingActions,
-                AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 300),
-                  crossFadeState: index != null && onChanged == null
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  firstChild: Checkbox(
-                    state: selected
-                        ? CheckboxState.checked
-                        : CheckboxState.unchecked,
-                    onChanged: (state) =>
-                        onChanged?.call(state == CheckboxState.checked),
-                  ),
-                  secondChild: constrains.smAndDown
-                      ? const SizedBox(width: 16)
-                      : SizedBox(
-                          width: 50,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Text(
-                              '${(index ?? 0) + 1}',
-                              maxLines: 1,
-                              style: theme.typography.small,
-                              textAlign: TextAlign.center,
+                selected: isSelected,
+                onPressed: () async {
+                  try {
+                    isLoading.value = true;
+                    // In selection mode, taps toggle checkboxes — never gate those.
+                    if (onChanged != null) {
+                      await onTap?.call();
+                      return;
+                    }
+                    // Locked (paid) tracks: never play for non-premium users.
+                    // Present the Superwall paywall — playback runs only after a
+                    // successful purchase.
+                    await PremiumAccess.gateTrackPlay(
+                      context: context,
+                      ref: ref,
+                      track: track,
+                      albumLock: albumLockContext(),
+                      feature: onTap ?? () async {},
+                    );
+                  } finally {
+                    if (context.mounted) {
+                      isLoading.value = false;
+                    }
+                  }
+                },
+                onLongPress: onLongPress,
+                style: ButtonVariance.ghost.copyWith(
+                  padding: (context, states, value) =>
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                ),
+                leading: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...?leadingActions,
+                    AnimatedCrossFade(
+                      duration: const Duration(milliseconds: 300),
+                      crossFadeState: index != null && onChanged == null
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      firstChild: Checkbox(
+                        state: selected
+                            ? CheckboxState.checked
+                            : CheckboxState.unchecked,
+                        onChanged: (state) =>
+                            onChanged?.call(state == CheckboxState.checked),
+                      ),
+                      secondChild: constrains.smAndDown
+                          ? const SizedBox(width: 16)
+                          : SizedBox(
+                              width: 50,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text(
+                                  '${(index ?? 0) + 1}',
+                                  maxLines: 1,
+                                  style: theme.typography.small,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                    ),
+                    Stack(
+                      children: [
+                        Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: theme.borderRadiusMd,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: imageProvider,
                             ),
                           ),
                         ),
-                ),
-                Stack(
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: theme.borderRadiusMd,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: imageProvider,
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        decoration: BoxDecoration(
-                          borderRadius: theme.borderRadiusMd,
-                          color: isHovering
-                              ? Colors.black.withAlpha(102)
-                              : Colors.transparent,
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: Center(
-                        child: Skeleton.ignore(
-                          child: Consumer(
-                            builder: (context, ref, _) {
-                              final isFetchingActiveTrack =
-                                  ref.watch(queryingTrackInfoProvider);
-                              // Locked (paid) tracks always show a padlock in
-                              // place of the play/pause indicator and never
-                              // toggle to pause/loading.
-                              if (isLocked) {
-                                return const Icon(
-                                  Icons.lock,
-                                  color: Colors.white,
-                                );
-                              }
-                              return AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                child: switch ((
-                                  isPlaying,
-                                  isFetchingActiveTrack,
-                                  isPlaying,
-                                  isHovering,
-                                  isLoading.value
-                                )) {
-                                  (true, true, _, _, _) ||
-                                  (_, _, _, _, true) =>
-                                    const SizedBox(
-                                      width: 26,
-                                      height: 26,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  (_, _, true, _, _) => Icon(
-                                      SangeetIcons.pause,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  (_, _, _, true, _) => const Icon(
-                                      SangeetIcons.play,
-                                      color: Colors.white,
-                                    ),
-                                  _ => const SizedBox.shrink(),
-                                },
-                              );
-                            },
+                        Positioned.fill(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            decoration: BoxDecoration(
+                              borderRadius: theme.borderRadiusMd,
+                              color: isHovering
+                                  ? Colors.black.withAlpha(102)
+                                  : Colors.transparent,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            title: Row(
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: AbsorbPointer(
-                    absorbing: selectionMode,
-                    child: switch (track) {
-                    SangeetLocalTrackObject() => Text(
-                        track.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    _ => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                child: Button(
-                style: ButtonVariance.link.copyWith(
-                padding: (context, states, value) =>
-                  EdgeInsets.zero,
-                ),
-                onPressed: effectiveSelection
-                  ? null
-                  : () async {
-                    if (PremiumAccess.isTrackLocked(track, ref)) {
-                      await PremiumAccess.gateTrackPlay(
-                        context: context,
-                        ref: ref,
-                        track: track,
-                        feature: () async {
-                          // Play this track, then open the full on-screen player
-                          // (PlayerView) instead of the legacy Track detail page.
-                          await onTap?.call();
-                          if (context.mounted) {
-                            ref
-                                .read(playerOverlayControllerProvider)
-                                .open();
-                          }
-                        },
-                      );
-                      return;
-                    }
-                    // Play this track, then open the full on-screen player
-                    // (PlayerView) instead of the legacy Track detail page.
-                    await onTap?.call();
-                    if (context.mounted) {
-                      ref
-                          .read(playerOverlayControllerProvider)
-                          .open();
-                    }
-                  },
-                              child: Text(
-                                track.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                        Positioned.fill(
+                          child: Center(
+                            child: Skeleton.ignore(
+                              child: Consumer(
+                                builder: (context, ref, _) {
+                                  final isFetchingActiveTrack =
+                                      ref.watch(queryingTrackInfoProvider);
+                                  // Locked (paid) tracks always show a padlock in
+                                  // place of the play/pause indicator and never
+                                  // toggle to pause/loading.
+                                  if (isLocked) {
+                                    return const Icon(
+                                      Icons.lock,
+                                      color: Colors.white,
+                                    );
+                                  }
+                                  return AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: switch ((
+                                      isPlaying,
+                                      isFetchingActiveTrack,
+                                      isPlaying,
+                                      isHovering,
+                                      isLoading.value
+                                    )) {
+                                      (true, true, _, _, _) ||
+                                      (_, _, _, _, true) =>
+                                        const SizedBox(
+                                          width: 26,
+                                          height: 26,
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      (_, _, true, _, _) => Icon(
+                                          SangeetIcons.pause,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      (_, _, _, true, _) => const Icon(
+                                          SangeetIcons.play,
+                                          color: Colors.white,
+                                        ),
+                                      _ => const SizedBox.shrink(),
+                                    },
+                                  );
+                                },
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                  },
-                  ),
-                ),
-                if (constrains.mdAndUp) ...[
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 4,
-                    child: switch (track) {
-                      SangeetLocalTrackObject() => Text(
-                          track.album.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      _ => Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            track.album.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        )
-                    },
-                  ),
-                ],
-              ],
-            ),
-            subtitle: const SizedBox.shrink(),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 8),
-                Text(
-                  Duration(milliseconds: track.durationMs)
-                      .toHumanReadableString(padZero: false),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                // Locked (paid) tracks are covered by the gray overlay above,
-                // so the trailing row keeps the normal heart button (which is
-                // inert under the overlay's IgnorePointer).
-                LocalTrackHeartButton(track: track),
-                const SizedBox(width: 4),
-                Builder(
-                  builder: (context) {
-                    return Tooltip(
-                      tooltip: TooltipContainer(
-                        child: Text(context.l10n.add_to_playlist),
-                      ).call,
-                      child: IconButton.ghost(
-                        size: ButtonSize.small,
-                        icon: const Icon(SangeetIcons.playlistAdd),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => PlaylistAddTrackDialog(
-                              tracks: [track],
-                              openFromPlaylist: playlistId,
+                title: Row(
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: AbsorbPointer(
+                        absorbing: selectionMode,
+                        child: switch (track) {
+                          SangeetLocalTrackObject() => Text(
+                              track.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          );
+                          _ => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Button(
+                                    style: ButtonVariance.link.copyWith(
+                                      padding: (context, states, value) =>
+                                          EdgeInsets.zero,
+                                    ),
+                                    onPressed: effectiveSelection
+                                        ? null
+                                        : () async {
+                                            if (PremiumAccess.isTrackLocked(
+                                                    track, ref) ||
+                                                (() {
+                                                  final c = albumLockContext();
+                                                  return c != null &&
+                                                      PremiumAccess
+                                                          .isAlbumLocked(
+                                                              c, ref);
+                                                })()) {
+                                              await PremiumAccess.gateTrackPlay(
+                                                context: context,
+                                                ref: ref,
+                                                track: track,
+                                                albumLock: albumLockContext(),
+                                                feature: () async {
+                                                  // Play this track, then open the full on-screen player
+                                                  // (PlayerView) instead of the legacy Track detail page.
+                                                  await onTap?.call();
+                                                  if (context.mounted) {
+                                                    ref
+                                                        .read(
+                                                            playerOverlayControllerProvider)
+                                                        .open();
+                                                  }
+                                                },
+                                              );
+                                              return;
+                                            }
+                                            // Play this track, then open the full on-screen player
+                                            // (PlayerView) instead of the legacy Track detail page.
+                                            await onTap?.call();
+                                            if (context.mounted) {
+                                              ref
+                                                  .read(
+                                                      playerOverlayControllerProvider)
+                                                  .open();
+                                            }
+                                          },
+                                    child: Text(
+                                      track.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                         },
                       ),
-                    );
-                  },
+                    ),
+                    if (constrains.mdAndUp) ...[
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 4,
+                        child: switch (track) {
+                          SangeetLocalTrackObject() => Text(
+                              track.album.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          _ => Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                track.album.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
+                        },
+                      ),
+                    ],
+                  ],
                 ),
-                Builder(
-                  builder: (context) {
-                    return TrackOptionsButton(
-                      track: track,
-                      userPlaylist: userPlaylist,
-                      playlistId: playlistId,
-                    );
-                  },
+                subtitle: const SizedBox.shrink(),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 8),
+                    Text(
+                      Duration(milliseconds: track.durationMs)
+                          .toHumanReadableString(padZero: false),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(width: 8),
+                    // Locked (paid) tracks are covered by the gray overlay above,
+                    // so the trailing row keeps the normal heart button (which is
+                    // inert under the overlay's IgnorePointer).
+                    LocalTrackHeartButton(track: track),
+                    const SizedBox(width: 4),
+                    Builder(
+                      builder: (context) {
+                        return Tooltip(
+                          tooltip: TooltipContainer(
+                            child: Text(context.l10n.add_to_playlist),
+                          ).call,
+                          child: IconButton.ghost(
+                            size: ButtonSize.small,
+                            icon: const Icon(SangeetIcons.playlistAdd),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => PlaylistAddTrackDialog(
+                                  tracks: [track],
+                                  openFromPlaylist: playlistId,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    Builder(
+                      builder: (context) {
+                        return TrackOptionsButton(
+                          track: track,
+                          userPlaylist: userPlaylist,
+                          playlistId: playlistId,
+                        );
+                      },
+                    ),
+                    if (kIsDesktop) const Gap(10),
+                  ],
                 ),
-                if (kIsDesktop) const Gap(10),
-              ],
-            ),
-          ),
-
+              ),
             ],
           ),
         ),
