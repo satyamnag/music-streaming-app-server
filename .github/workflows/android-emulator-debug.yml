@@ -136,7 +136,9 @@ jobs:
           # -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           emulator-boot-timeout: 900
           script: |
-            set -euo pipefail
+            # NOTE: this script runs under /bin/sh (dash) on the runner, so no
+            # bash-only options (e.g. pipefail) — risky commands use || true.
+            set -eu
             export APK=build/app/outputs/flutter-apk/app-stable-debug.apk
             export PKG=com.soulfulbhakti.app
             export ACT=com.sangeet.app/.MainActivity
