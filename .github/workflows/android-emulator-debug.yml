@@ -118,6 +118,12 @@ jobs:
       - name: Build debug APK
         run: flutter build apk --debug --flavor stable
 
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Boot emulator and run debug session
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -126,7 +132,9 @@ jobs:
           target: google_apis
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-snapshot -no-audio
+          # Emulator options left at action defaults:
+          # -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-boot-timeout: 900
           script: |
             set -euo pipefail
             export APK=build/app/outputs/flutter-apk/app-stable-debug.apk
