@@ -25,6 +25,12 @@ class ClerkAuthState {
   final String? imageUrl;
   final bool emailVerified;
 
+  /// Display name for the profile popup: derived by the native bridge from
+  /// the signed-in Gmail address local part (e.g. "arjun.sharma@gmail.com" ->
+  /// "Arjun Sharma"), falling back to the Clerk username when the email is
+  /// not usable. Null when the profile carries no usable name.
+  final String? fullName;
+
   const ClerkAuthState({
     this.initialized = false,
     this.signedIn = false,
@@ -33,7 +39,18 @@ class ClerkAuthState {
     this.username,
     this.imageUrl,
     this.emailVerified = false,
+    this.fullName,
   });
+
+  /// The name shown in the profile popup: the composed Google profile name
+  /// when present, otherwise the Clerk username, otherwise nothing.
+  String? get displayName {
+    final name = fullName?.trim();
+    if (name != null && name.isNotEmpty) return name;
+    final user = username?.trim();
+    if (user != null && user.isNotEmpty) return user;
+    return null;
+  }
 
   factory ClerkAuthState.fromMap(Map<Object?, Object?> map) {
     return ClerkAuthState(
@@ -52,6 +69,9 @@ class ClerkAuthState {
           ? map['imageUrl'] as String
           : null,
       emailVerified: map['emailVerified'] == true,
+      fullName: (map['fullName'] as String?)?.isNotEmpty == true
+          ? map['fullName'] as String
+          : null,
     );
   }
 }
@@ -107,6 +127,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
       sw.setUserAttributes({
         'email': authState.email ?? '',
         'username': authState.username ?? '',
+        'name': authState.displayName ?? '',
       });
       os.login(authState.userId!);
       final email = authState.email;

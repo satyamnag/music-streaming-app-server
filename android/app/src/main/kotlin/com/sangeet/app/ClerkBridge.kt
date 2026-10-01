@@ -111,6 +111,7 @@ class ClerkBridge(
                 userId = user?.id,
                 email = user?.primaryEmailAddress?.emailAddress,
                 username = user?.username,
+                fullName = currentFullName(),
                 imageUrl = user?.imageUrl,
                 emailVerified =
                     user?.primaryEmailAddress?.verification?.status == Verification.Status.VERIFIED,
@@ -120,12 +121,34 @@ class ClerkBridge(
         }.launchIn(scope)
     }
 
+    /**
+     * Best-effort display name for the signed-in user.
+     *
+     * The Android Clerk SDK does not expose first/last name on its `User`
+     * model, so the name is derived from the signed-in Gmail address's local
+     * part (e.g. "arjun.sharma@gmail.com" -> "Arjun Sharma"), falling back to
+     * the Clerk username when the email is not usable. Emits an empty string
+     * when neither source yields a name (the UI then hides the name row).
+     */
+    private fun currentFullName(): String {
+        val user = Clerk.userFlow.value
+        user?.username?.takeIf { it.isNotBlank() }?.let { return it }
+        val email = user?.primaryEmailAddress?.emailAddress?.trim().orEmpty()
+        val local = email.substringBefore('@').trim()
+        if (local.isEmpty()) return ""
+        return local
+            .split('.', '_', '-', '+')
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { part -> part.replaceFirstChar { it.titlecase() } }
+    }
+
     private fun emitState(
         initialized: Boolean = Clerk.isInitialized.value,
         signedIn: Boolean = Clerk.userFlow.value != null,
         userId: String? = Clerk.userFlow.value?.id,
         email: String? = Clerk.userFlow.value?.primaryEmailAddress?.emailAddress,
         username: String? = Clerk.userFlow.value?.username,
+        fullName: String = currentFullName(),
         imageUrl: String? = Clerk.userFlow.value?.imageUrl,
         emailVerified: Boolean =
             Clerk.userFlow.value?.primaryEmailAddress?.verification?.status ==
@@ -137,6 +160,7 @@ class ClerkBridge(
             "userId" to (userId ?: ""),
             "email" to (email ?: ""),
             "username" to (username ?: ""),
+            "fullName" to fullName,
             "imageUrl" to (imageUrl ?: ""),
             "emailVerified" to emailVerified,
         )
@@ -162,6 +186,7 @@ class ClerkBridge(
                         "userId" to (Clerk.userFlow.value?.id ?: ""),
                         "email" to (Clerk.userFlow.value?.primaryEmailAddress?.emailAddress ?: ""),
                         "username" to (Clerk.userFlow.value?.username ?: ""),
+                        "fullName" to currentFullName(),
                         "imageUrl" to (Clerk.userFlow.value?.imageUrl ?: ""),
                         "emailVerified" to
                             (Clerk.userFlow.value?.primaryEmailAddress?.verification?.status ==

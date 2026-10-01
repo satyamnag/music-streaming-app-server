@@ -6,11 +6,15 @@ import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/auth/profile_plan_status.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 
-/// Shows the signed-in user's Clerk profile (avatar, username, email) with a
+/// Shows the signed-in user's Clerk profile (avatar, name, email) with a
 /// sign-out action, or a sign-in prompt when the user is logged out.
 ///
-///  - Logged in: avatar photo (when available), email, username and a
-///    working "Sign Out" button. Sign-out asks for confirmation first; if the
+///  - Logged in: avatar photo (when available), the user's name (derived from
+///    the signed-in Gmail address by the native bridge, falling back to the
+///    Clerk username), email and a working "Sign Out" button. "Delete
+///    Account" is presented as a plain underlined link (still fully in-app
+///    and discoverable, satisfying the Google Play User Data policy) and asks
+///    for explicit confirmation. Sign-out asks for confirmation first; if the
 ///    native call fails, the dialog stays open and an inline error is shown.
 ///  - Logged out: a generic avatar icon and a "Sign In" button. Tapping it
 ///    opens the Google-only [ClerkAuthView] dialog.
@@ -130,9 +134,12 @@ class ProfileDialog extends ConsumerWidget {
               ),
               const Gap(8),
               if (isSignedIn) ...[
-                if (state.username != null && state.username!.isNotEmpty) ...[
+                // Name (derived from the signed-in Gmail address / Clerk
+                // username) below the photo and above the email; hidden when
+                // the profile carries no name.
+                if (state.displayName != null) ...[
                   Text(
-                    state.username!,
+                    state.displayName!,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 16,
@@ -189,11 +196,29 @@ class ProfileDialog extends ConsumerWidget {
                         onPressed: signOut,
                         child: const Text('Sign Out'),
                       ),
-                      const Gap(8),
-                      Button(
-                        style: const ButtonStyle.outline(),
-                        onPressed: deleteAccount,
-                        child: const Text('Delete Account'),
+                      const Gap(2),
+                      // "Delete Account" rendered as a plain underlined link
+                      // (no button chrome), per the Google Play User Data
+                      // policy: the option stays fully in-app, discoverable,
+                      // and still asks for explicit confirmation first.
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: deleteAccount,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Text(
+                            'Delete Account',
+                            textAlign: TextAlign.center,
+                            style: theme.typography.small.copyWith(
+                              color: theme.colorScheme.destructive,
+                              decoration: TextDecoration.underline,
+                              decorationColor: theme.colorScheme.destructive,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
