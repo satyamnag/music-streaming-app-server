@@ -9,7 +9,8 @@ set -euo pipefail
 
 APK=build/app/outputs/flutter-apk/app-stable-debug.apk
 PKG=com.soulfulbhakti.app
-ACT=com.sangeet.app/.MainActivity
+# full component: installed package (applicationId) + Kotlin-namespace activity
+ACT=com.soulfulbhakti.app/com.sangeet.app.MainActivity
 EXERCISE="${1:-true}"
 LVL="${2:-warning}"
 
