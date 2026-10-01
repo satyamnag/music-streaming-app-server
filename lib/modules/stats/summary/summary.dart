@@ -118,7 +118,11 @@ class StatsPageSummarySection extends HookConsumerWidget {
                                   : 6,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
-                  childAspectRatio: 1.5,
+                  // Phones get a slightly taller tile (1.4) than larger
+                  // screens: at 1.5 the ~110px phone tile sits right at the
+                  // content height and intermittently overflows (~4px) under
+                  // real (non-test) font metrics in the skeleton state.
+                  childAspectRatio: constrains.smAndDown ? 1.4 : 1.5,
                 ),
                 delegate: SliverChildListDelegate([
                   SummaryCard(
