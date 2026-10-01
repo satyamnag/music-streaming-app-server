@@ -1,173 +1,347 @@
 {
   "ar": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "bn": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ca": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "cs": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "de": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "es": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "eu": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "fa": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "fi": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "fr": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "hi": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "id": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "it": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ja": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ka": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ko": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ne": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "nl": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "pl": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "pt": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ru": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "ta": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "th": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "tl": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "tr": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "uk": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "vi": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "zh": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
   ],
 
   "zh_TW": [
+    "insights",
+    "insights_top_track",
+    "insights_listening_hours",
+    "insights_best_day",
+    "insights_current_streak",
+    "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
     "ringtone_failed"
