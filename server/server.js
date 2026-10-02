@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
@@ -629,6 +629,68 @@ app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
   } catch (err) {
     next(err)
   }
+})
+
+/** HEAD an R2 object to confirm it physically exists. Never throws. */
+async function r2ObjectIsPresent(key) {
+  if (!r2Enabled || !r2 || !key) return { exists: false, size: null, error: 'R2 not configured' }
+  try {
+    const head = await r2.send(new HeadObjectCommand({ Bucket: R2_BUCKET, Key: key }))
+    return { exists: true, size: Number(head.ContentLength) || null, error: null }
+  } catch (err) {
+    if (err && err.$metadata && err.$metadata.httpStatusCode === 404) {
+      return { exists: false, size: null, error: 'Not found in R2' }
+    }
+    return { exists: false, size: null, error: 'R2 HEAD failed' }
+  }
+}
+
+// Admin: live "updated / not updated" status for a track's three audio files
+// (Original Audio File, Karaoke Audio File, Ringtone File). Each is reported
+// from its DB path plus an R2 HEAD existence/size check when R2 is enabled.
+app.get('/api/admin/tracks/:id/audio-status', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('tracks')
+      .select('id, title, storage_path, karaoke_storage_path, ringtone_storage_path, updated_at')
+      .eq('id', req.params.id)
+      .maybeSingle()
+    if (error) return res.status(500).json({ error: error.message })
+    if (!data) return res.status(404).json({ error: 'Track not found' })
+
+    const kinds = [
+      { key: 'original', column: 'storage_path', label: 'Original Audio File' },
+      { key: 'karaoke', column: 'karaoke_storage_path', label: 'Karaoke Audio File' },
+      { key: 'ringtone', column: 'ringtone_storage_path', label: 'Ringtone File' },
+    ]
+    const statuses = await Promise.all(kinds.map(async (k) => {
+      const path = (data[k.column] || '').trim()
+      if (!path) return { key: k.key, label: k.label, updated: false, path: null, size: null, note: 'Not updated' }
+      const head = await r2ObjectIsPresent(path)
+      const unavailable = head.error === 'R2 not configured' || head.error === 'R2 HEAD failed'
+      return {
+        key: k.key,
+        label: k.label,
+        updated: unavailable ? true : head.exists,
+        path,
+        size: head.size,
+        note: unavailable
+          ? 'Recorded (R2 check unavailable)'
+          : head.exists
+            ? 'Updated · R2 verified'
+            : 'Path set, but object missing in R2',
+      }
+    }))
+
+    res.json({
+      track_id: data.id,
+      title: data.title,
+      updated_at: data.updated_at,
+      r2_verified: r2Enabled,
+      checked_at: new Date().toISOString(),
+      statuses,
+    })
+  } catch (err) { next(err) }
 })
 
 app.get('/browse/sections', async (req, res, next) => {

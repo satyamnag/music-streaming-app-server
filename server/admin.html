@@ -93,6 +93,13 @@ tr:hover { background: #f0f7ff; }
 .lyr-status .sync-chip { margin: 0; }
 .sync-yes { background: #dcfce7; color: #15803d; }
 .sync-no { background: #fee2e2; color: #b91c1c; }
+.af-wrap { display: inline-flex; gap: 3px; align-items: center; }
+.af-badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.af-ok { background: #dcfce7; color: #15803d; }
+.af-no { background: #fee2e2; color: #b91c1c; }
+.af-unk { background: #fef3c7; color: #b45309; }
+.af-verify { cursor: pointer; border: none; background: transparent; color: #64748b; font-size: 13px; padding: 0 2px; line-height: 1; }
+.af-verify:hover { color: #0f172a; }
 .track-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 6px; background: #eee; }
 .thumb-cell { display: flex; align-items: center; gap: 8px; position: relative; }
 .upload-row { display: flex; gap: 8px; align-items: center; }
@@ -190,7 +197,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('status')">Subscription<span id="arrow-status" class="sort-arrow"></span></th>
   <th title="P = Plain lyrics, S = Sync lyrics · TE = Telugu, EN-T = English (Translation), EN-TR = English (Transliteration)">Lyrics</th>
-  <th title="K = a karaoke audio file is attached to this track">Karaoke</th>
+  <th title="Audio file status — O = Original Audio File, K = Karaoke Audio File, R = Ringtone File. Green = updated, red = not updated. Click the refresh icon to re-verify against the CDN (R2).">Audio Files (O/K/R)</th>
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
@@ -199,7 +206,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
-  <th><select id="filterKaraoke" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="yes">With karaoke</option><option value="no">Without</option></select></th>
+  <th style="display:flex;flex-direction:column;gap:2px;"><select id="filterKaraoke" class="col-filter" onchange="applyTrackFilters()"><option value="">Karaoke: All</option><option value="yes">With</option><option value="no">Without</option></select><select id="filterRingtone" class="col-filter" onchange="applyTrackFilters()"><option value="">Ringtone: All</option><option value="yes">With</option><option value="no">Without</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
     <div class="pagination" id="trackPagination" style="display:none;">
@@ -359,6 +366,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div id="afBadgeOriginal" class="af-wrap" style="margin-top:2px;"></div>
 <label>Karaoke Audio File (.opus, optional)</label>
 <div class="upload-row">
   <input id="fKaraoke" type="hidden" placeholder="e.g. song-karaoke.opus (optional)">
@@ -367,6 +375,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="karaokeInput" accept=".opus" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div id="afBadgeKaraoke" class="af-wrap" style="margin-top:2px;"></div>
 <label>Ringtone File (.mp3, optional)</label>
 <div class="upload-row">
   <input id="fRingtone" type="hidden" placeholder="e.g. song-ringtone.mp3 (optional)">
@@ -375,6 +384,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </div>
 <input type="file" id="ringtoneInput" accept=".mp3,audio/mpeg" style="display:none" onchange="handleRingtoneUpload(this)">
 <div id="ringtoneStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
+<div id="afBadgeRingtone" class="af-wrap" style="margin-top:2px;"></div>
 <div style="font-size:11px;color:#999;margin-top:2px;">MP3 only &mdash; Android cannot use .opus as a ringtone.</div>
 <audio id="audioVerify" preload="none" style="display:none;"></audio>
    <div class="btn-row">
@@ -475,6 +485,7 @@ let filterLanguage = '';
 let filterStatus = '';
 let filterSync = '';
 let filterKaraoke = '';
+let filterRingtone = '';
 let pendingConfirm = null;
 let currentView = 'tracks';
 // Guards against accidental double-submits (rapid clicks / re-entrancy).
@@ -485,10 +496,10 @@ let _searchTimer = null;
 function debouncedSearch() { clearTimeout(_searchTimer); _searchTimer = setTimeout(renderTracks, 200); }
 function clearTrackFilters() {
   document.getElementById('searchInput').value = '';
-  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus', 'filterSync', 'filterKaraoke'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['filterArtist', 'filterAlbum', 'filterLanguage', 'filterStatus', 'filterSync', 'filterKaraoke', 'filterRingtone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const dmin = document.getElementById('filterDurMin'); if (dmin) dmin.value = '';
   const dmax = document.getElementById('filterDurMax'); if (dmax) dmax.value = '';
-  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterSync = ''; filterKaraoke = ''; filterDurMin = ''; filterDurMax = '';
+  filterArtist = ''; filterAlbum = ''; filterLanguage = ''; filterStatus = ''; filterSync = ''; filterKaraoke = ''; filterRingtone = ''; filterDurMin = ''; filterDurMax = '';
   trackSearch = '';
   trackSortKey = null; trackSortDir = 1;
   document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
@@ -890,6 +901,12 @@ function filteredTracks() {
     list = list.filter(t => {
       const has = !!((t.karaoke_storage_path || '').trim());
       return filterKaraoke === 'yes' ? has : !has;
+    });
+  }
+  if (filterRingtone) {
+    list = list.filter(t => {
+      const has = !!((t.ringtone_storage_path || '').trim());
+      return filterRingtone === 'yes' ? has : !has;
     });
   }
   if (trackSortKey) {
@@ -1375,13 +1392,81 @@ function lyricsStatusCell(t) {
   }).join('') + '</div>';
 }
 
-// Shows whether a track has a karaoke audio file attached. The tooltip carries
-// the attached file path so an admin can see WHICH karaoke is currently set.
-function karaokeCell(t) {
-  const path = (t.karaoke_storage_path || '').trim();
-  const ok = path.length > 0;
-  const tip = ok ? ('Karaoke attached: ' + path) : 'No karaoke file attached';
-  return '<span class="sync-chip ' + (ok ? 'sync-yes' : 'sync-no') + '" title="' + esc(tip) + '">K ' + (ok ? '&#10003; Yes' : '&#10007; No') + '</span>';
+// Audio-file status chips (Original / Karaoke / Ringtone). The list renders
+// instantly from the DB row (path presence); the small refresh icon re-checks
+// each file against the CDN (R2) via /api/admin/tracks/:id/audio-status.
+function audioChip(label, ok, path, note) {
+  const cls = ok ? 'af-ok' : 'af-no';
+  const tip = (note ? note + ' \u00b7 ' : '') + (path || label);
+  return '<span class="af-badge ' + cls + '" title="' + esc(tip) + '">' + esc(label) + (ok ? ' \u2713' : ' \u2717') + '</span>';
+}
+function audioFilesCell(t) {
+  const o = (t.storage_path || '').trim();
+  const k = (t.karaoke_storage_path || '').trim();
+  const r = (t.ringtone_storage_path || '').trim();
+  return '<span class="af-wrap">'
+    + audioChip('O', o.length > 0, o, 'Original Audio File')
+    + audioChip('K', k.length > 0, k, 'Karaoke Audio File')
+    + audioChip('R', r.length > 0, r, 'Ringtone File')
+    + '<button class="af-verify" type="button" title="Verify against CDN (R2)" onclick="verifyTrackAudio(\'' + esc(t.id) + '\')">&#10227;</button>'
+    + '</span>';
+}
+function fmtSize(bytes) {
+  if (bytes == null || !Number.isFinite(bytes) || bytes < 0) return '';
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+  if (bytes >= 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  return bytes + ' B';
+}
+function audioChipsFromStatus(statuses, t) {
+  const by = {};
+  (statuses || []).forEach(s => { by[s.key] = s; });
+  const item = (key, fallback) => by[key] || { updated: !!((t[key === 'original' ? 'storage_path' : (key + '_storage_path')] || '').trim()), path: '', note: '' };
+  return '<span class="af-wrap">'
+    + audioChip('O', item('original').updated, item('original').path || (t.storage_path || ''), item('original').note || 'Original Audio File')
+    + audioChip('K', item('karaoke').updated, item('karaoke').path || (t.karaoke_storage_path || ''), item('karaoke').note || 'Karaoke Audio File')
+    + audioChip('R', item('ringtone').updated, item('ringtone').path || (t.ringtone_storage_path || ''), item('ringtone').note || 'Ringtone File')
+    + '<button class="af-verify" type="button" title="Re-verify against CDN (R2)" onclick="verifyTrackAudio(\'' + esc(t.id) + '\')">&#10227;</button>'
+    + '</span>';
+}
+async function fetchTrackAudioStatus(id) {
+  const resp = await fetch('/api/admin/tracks/' + encodeURIComponent(id) + '/audio-status', { credentials: 'same-origin' });
+  if (!resp.ok) {
+    let msg = 'Status fetch failed (' + resp.status + ')';
+    try { const j = await resp.json(); if (j && j.error) msg = j.error; } catch (_) {}
+    throw new Error(msg);
+  }
+  return resp.json();
+}
+async function verifyTrackAudio(id) {
+  const t = tracks.find(x => x.id === id);
+  const cell = document.getElementById('af-' + id);
+  if (cell) cell.innerHTML = '<span class="af-badge af-unk">checking\u2026</span>';
+  try {
+    const data = await fetchTrackAudioStatus(id);
+    if (cell && t) cell.innerHTML = audioChipsFromStatus(data.statuses, t);
+    renderModalAudioBadges(data);
+  } catch (err) {
+    if (cell) cell.innerHTML = '<span class="af-badge af-unk" title="' + esc(String((err && err.message) || err)) + '">check failed</span>';
+  }
+}
+// Live status badges shown in the track editor for the three audio files.
+function renderModalAudioBadges(data) {
+  const by = {};
+  (data.statuses || []).forEach(s => { by[s.key] = s; });
+  const put = (key, elId) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const s = by[key];
+    el.innerHTML = s
+      ? audioChip(s.label.split(' ')[0], s.updated, s.path, s.note + (s.size ? ' \u00b7 ' + fmtSize(s.size) : ''))
+      : '';
+  };
+  put('original', 'afBadgeOriginal');
+  put('karaoke', 'afBadgeKaraoke');
+  put('ringtone', 'afBadgeRingtone');
+}
+async function refreshModalAudioStatus(id) {
+  try { renderModalAudioBadges(await fetchTrackAudioStatus(id)); } catch (_) { /* silent: DB badges still shown */ }
 }
 
 // Renders a track's comma-separated tags as small chips (or a dash when empty).
@@ -1419,7 +1504,7 @@ function renderTracks() {
     <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
     <td>${lyricsStatusCell(t)}</td>
-    <td>${karaokeCell(t)}</td>
+    <td id="af-${t.id}">${audioFilesCell(t)}</td>
     <td class="actions">
       <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">✎</button>
       <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
@@ -1462,6 +1547,7 @@ function applyTrackFilters() {
   filterStatus = document.getElementById('filterStatus').value;
   filterSync = document.getElementById('filterSync').value;
   filterKaraoke = document.getElementById('filterKaraoke').value;
+  filterRingtone = document.getElementById('filterRingtone').value;
   trackPage = 1;
   renderTracks();
 }
@@ -1532,6 +1618,7 @@ function showEdit(id) {
   document.getElementById('audioStatus').textContent = t.storage_path ? 'Current: ' + (t.storage_path.split('/').pop() || t.storage_path) : '';
   document.getElementById('karaokeStatus').textContent = t.karaoke_storage_path ? 'Current: ' + (t.karaoke_storage_path.split('/').pop() || t.karaoke_storage_path) : '';
   document.getElementById('ringtoneStatus').textContent = t.ringtone_storage_path ? 'Current: ' + (t.ringtone_storage_path.split('/').pop() || t.ringtone_storage_path) : '';
+  refreshModalAudioStatus(id);
   document.getElementById('thumbPreviewContainer').innerHTML = t.thumbnail ? '<img class="preview-img" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '';
   document.getElementById('modal').style.display = 'block';
   loadSyncLyricsInto(id);
