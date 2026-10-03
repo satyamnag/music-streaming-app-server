@@ -1430,6 +1430,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
     const cleanFeatured = featured_order == null ? null
       : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     const albumIds = albumIdsFrom({ album_ids, album_id })
+    const createColors = readCardColors(req.body || {})
+    if (createColors.error) return res.status(400).json({ error: createColors.error })
     const { data, error } = await supabase.from('tracks').insert({
       title: cleanTitle,
       artist_names: cleanArtists,
@@ -1442,6 +1444,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       karaoke_storage_path: typeof karaoke_storage_path === 'string' && karaoke_storage_path.trim() ? karaoke_storage_path.trim() : null,
       ringtone_storage_path: typeof ringtone_storage_path === 'string' && ringtone_storage_path.trim() ? ringtone_storage_path.trim() : null,
       status: cleanStatus,
+      card_bg_color: createColors.colors.card_bg_color ?? null,
+      card_text_color: createColors.colors.card_text_color ?? null,
       lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
       synced_lyrics_en: typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null,
@@ -1523,6 +1527,11 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (plain_lyrics_hi_tr !== undefined) updates.plain_lyrics_hi_tr = typeof plain_lyrics_hi_tr === 'string' && plain_lyrics_hi_tr.trim() ? plain_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (tags !== undefined) updates.tags = cleanTags(tags)
+    // Optional per-track card colors (box background + text). Malformed values
+    // are rejected rather than silently dropped.
+    const colorResult = readCardColors(req.body || {})
+    if (colorResult.error) return res.status(400).json({ error: colorResult.error })
+    Object.assign(updates, colorResult.colors)
     if (featured_order !== undefined) {
       updates.featured_order = featured_order == null ? null
         : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
@@ -1596,6 +1605,46 @@ function cleanTags(v) {
   if (typeof v !== 'string') return null
   const tags = v.split(',').map((s) => s.trim()).filter(Boolean)
   return tags.length ? tags.join(', ') : null
+}
+
+// ------------------------------------------------------------------
+// Card colors (admin-configurable box + text color per track/album)
+// ------------------------------------------------------------------
+
+// Accepts only a 3- or 6-digit hex color and normalizes it to lowercase
+// `#rrggbb`, which is what the app and the web UI both parse. Returns:
+//   { ok: true,  value: '#rrggbb' }  -> a valid color
+//   { ok: true,  value: null }       -> an explicit "unset" (empty/null)
+//   { ok: false }                    -> malformed input (caller sends 400)
+// Anything that is not a string is treated as malformed rather than silently
+// ignored, so a bad admin value can never be written silently.
+function cleanHexColor(v) {
+  if (v === null || v === undefined) return { ok: true, value: null }
+  if (typeof v !== 'string') return { ok: false }
+  const raw = v.trim()
+  if (!raw) return { ok: true, value: null }
+  const m = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(raw)
+  if (!m) return { ok: false }
+  let hex = m[1].toLowerCase()
+  if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('')
+  return { ok: true, value: `#${hex}` }
+}
+
+// Reads the two optional color fields off an admin request body and returns
+// either `{ error }` (bad value -> 400) or `{ colors }` containing only the
+// keys the caller actually supplied, so a PATCH-style update never clobbers
+// a color the admin did not touch.
+function readCardColors(body) {
+  const colors = {}
+  for (const key of ['card_bg_color', 'card_text_color']) {
+    if (!(key in body)) continue
+    const res = cleanHexColor(body[key])
+    if (!res.ok) {
+      return { error: `${key} must be a hex color like #RRGGBB or #RGB` }
+    }
+    colors[key] = res.value
+  }
+  return { colors }
 }
 
 const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
@@ -1747,6 +1796,8 @@ app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
     if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' })
     const cleanFeatured = featured_order == null ? null
       : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
+    const albumColors = readCardColors(req.body || {})
+    if (albumColors.error) return res.status(400).json({ error: albumColors.error })
     const { data, error } = await supabase
       .from('albums')
       .insert({
@@ -1754,6 +1805,8 @@ app.post('/api/admin/albums', requireAdmin, async (req, res, next) => {
         cover_url: typeof cover_url === 'string' && cover_url.trim() ? cover_url.trim() : null,
         featured_order: cleanFeatured,
         status: status === 'paid' ? 'paid' : 'free',
+        card_bg_color: albumColors.colors.card_bg_color ?? null,
+        card_text_color: albumColors.colors.card_text_color ?? null,
       })
       .select()
       .single()
@@ -1777,6 +1830,10 @@ app.put('/api/admin/albums/:id', requireAdmin, async (req, res, next) => {
         : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     }
     if (status !== undefined) updates.status = status === 'paid' ? 'paid' : 'free'
+    // Optional per-album card colors (box background + text).
+    const albumColorUpdates = readCardColors(req.body || {})
+    if (albumColorUpdates.error) return res.status(400).json({ error: albumColorUpdates.error })
+    Object.assign(updates, albumColorUpdates.colors)
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
     const { data, error } = await supabase.from('albums').update(updates).eq('id', req.params.id).select().single()
     if (error) return res.status(500).json({ error: error.message })

@@ -221,6 +221,12 @@ class HomeSeeAllPage extends HookConsumerWidget {
                       title: track.name,
                       subtitle: track.album.name,
                       locked: PremiumAccess.isTrackLocked(track, ref),
+                      cardBgColor: track is SangeetFullTrackObject
+                          ? track.cardBgColor
+                          : null,
+                      cardTextColor: track is SangeetFullTrackObject
+                          ? track.cardTextColor
+                          : null,
                       onTap: () => playFrom(kind, index, filteredTracks),
                     );
                   },

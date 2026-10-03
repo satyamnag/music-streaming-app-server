@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
+import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 
@@ -57,6 +58,14 @@ class TrackCard extends StatelessWidget {
   /// (the card fills its tile); horizontal rows pass their fixed card width.
   final double? width;
 
+  /// Admin-configured card box background (`#rrggbb`), or null for the theme's
+  /// card color. Set from the admin panel and stored per track/album.
+  final String? cardBgColor;
+
+  /// Admin-configured card text color (`#rrggbb`), or null for the theme's
+  /// default foreground/muted colors.
+  final String? cardTextColor;
+
   const TrackCard({
     super.key,
     required this.imageUrl,
@@ -65,6 +74,8 @@ class TrackCard extends StatelessWidget {
     required this.onTap,
     this.locked = false,
     this.width,
+    this.cardBgColor,
+    this.cardTextColor,
   });
 
   @override
@@ -72,11 +83,25 @@ class TrackCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scale = theme.scaling;
 
+    // The admin color wins when set; otherwise the card keeps the theme look.
+    final bg = cardBackgroundColor(cardBgColor, theme.colorScheme.card);
+    final configuredText = parseCardColor(cardTextColor);
+    // When a custom background is set but no text color, pick black/white so
+    // the text stays readable instead of vanishing into the new background.
+    final titleColor = configuredText ??
+        (cardBgColor != null
+            ? readableTextOn(bg)
+            : theme.colorScheme.foreground);
+    final subtitleColor = configuredText ??
+        (cardBgColor != null
+            ? readableTextOn(bg).withValues(alpha: 0.75)
+            : theme.colorScheme.mutedForeground);
+
     return Container(
       width: width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
-        color: theme.colorScheme.card,
+        color: bg,
         boxShadow: [
           BoxShadow(
             color: theme.brightness == Brightness.light
@@ -127,7 +152,7 @@ class TrackCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.typography.small.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.foreground,
+                      color: titleColor,
                     ),
                   ),
                   SizedBox(height: 2 * scale),
@@ -136,7 +161,7 @@ class TrackCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.typography.xSmall.copyWith(
-                      color: theme.colorScheme.mutedForeground,
+                      color: subtitleColor,
                     ),
                   ),
                 ],

@@ -98,6 +98,9 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'artists': artists,
     'status': t['status'] ?? 'free',
     'language': t['language'],
+    // Admin-configurable card colors (null = use the app's default theme).
+    'cardBgColor': t['card_bg_color'],
+    'cardTextColor': t['card_text_color'],
     'album': {
       'id': _albumId(albumName),
       'name': albumName,
@@ -1290,6 +1293,9 @@ class ServerSupabaseDataRoutes {
           'albumType': 'album',
           'releaseDate': null,
           'status': a['status']?.toString() ?? 'free',
+          // Admin-configurable card colors for this album (null = default).
+          'cardBgColor': a['card_bg_color'],
+          'cardTextColor': a['card_text_color'],
           'tracks': byAlbum[id] ?? const [],
         };
       }).toList();

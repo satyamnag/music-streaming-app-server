@@ -1,4 +1,4 @@
-﻿import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -6,6 +6,7 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
+import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
@@ -131,11 +132,22 @@ class _AlbumCard extends HookConsumerWidget {
     final scale = theme.scaling;
     final locked = PremiumAccess.isAlbumLocked(album, ref);
 
+    // Admin-configured card colors (null = keep the theme defaults).
+    final bg = cardBackgroundColor(album.cardBgColor, theme.colorScheme.card);
+    final titleColor = cardTextColor(album.cardTextColor,
+        album.cardBgColor != null
+            ? readableTextOn(bg)
+            : theme.colorScheme.foreground);
+    final subtitleColor = cardTextColor(album.cardTextColor,
+        album.cardBgColor != null
+            ? readableTextOn(bg).withValues(alpha: 0.75)
+            : theme.colorScheme.mutedForeground);
+
     return Container(
       width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
-        color: theme.colorScheme.card,
+        color: bg,
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).brightness == Brightness.light
@@ -195,7 +207,7 @@ class _AlbumCard extends HookConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.typography.small.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.foreground,
+                      color: titleColor,
                     ),
                   ),
                   Gap(2 * scale),
@@ -204,7 +216,7 @@ class _AlbumCard extends HookConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.typography.xSmall.copyWith(
-                      color: theme.colorScheme.mutedForeground,
+                      color: subtitleColor,
                     ),
                   ),
                 ],

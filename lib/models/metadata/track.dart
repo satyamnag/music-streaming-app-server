@@ -30,6 +30,11 @@ class SangeetTrackObject with _$SangeetTrackObject {
     String? plainLyricsHi,
     String? plainLyricsEnTr,
     String? plainLyricsHiTr,
+    /// Admin-configurable card box background color (`#rrggbb`), or null to
+    /// keep the app's default theme color.
+    String? cardBgColor,
+    /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+    String? cardTextColor,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(

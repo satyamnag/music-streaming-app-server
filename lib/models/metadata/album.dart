@@ -24,6 +24,11 @@ class SangeetFullAlbumObject with _$SangeetFullAlbumObject {
     @Default('free') String status,
     String? recordLabel,
     List<String>? genres,
+    /// Admin-configurable card box background color (`#rrggbb`), or null to
+    /// keep the app's default theme color.
+    String? cardBgColor,
+    /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+    String? cardTextColor,
   }) = _SangeetFullAlbumObject;
 
   factory SangeetFullAlbumObject.fromJson(Map<String, dynamic> json) =>
@@ -41,6 +46,11 @@ class SangeetSimpleAlbumObject with _$SangeetSimpleAlbumObject {
     required SangeetAlbumType albumType,
     @Default('free') String status,
     String? releaseDate,
+    /// Admin-configurable card box background color (`#rrggbb`), or null to
+    /// keep the app's default theme color.
+    String? cardBgColor,
+    /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+    String? cardTextColor,
   }) = _SangeetSimpleAlbumObject;
 
   factory SangeetSimpleAlbumObject.fromJson(Map<String, dynamic> json) =>

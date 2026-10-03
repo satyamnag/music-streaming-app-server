@@ -144,6 +144,8 @@ _$SangeetFullAlbumObjectImpl _$$SangeetFullAlbumObjectImplFromJson(Map json) =>
       recordLabel: json['recordLabel'] as String?,
       genres:
           (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      cardBgColor: json['cardBgColor'] as String?,
+      cardTextColor: json['cardTextColor'] as String?,
     );
 
 Map<String, dynamic> _$$SangeetFullAlbumObjectImplToJson(
@@ -160,6 +162,8 @@ Map<String, dynamic> _$$SangeetFullAlbumObjectImplToJson(
       'status': instance.status,
       'recordLabel': instance.recordLabel,
       'genres': instance.genres,
+      'cardBgColor': instance.cardBgColor,
+      'cardTextColor': instance.cardTextColor,
     };
 
 const _$SangeetAlbumTypeEnumMap = {
@@ -186,6 +190,8 @@ _$SangeetSimpleAlbumObjectImpl _$$SangeetSimpleAlbumObjectImplFromJson(
       albumType: $enumDecode(_$SangeetAlbumTypeEnumMap, json['albumType']),
       status: json['status'] as String? ?? 'free',
       releaseDate: json['releaseDate'] as String?,
+      cardBgColor: json['cardBgColor'] as String?,
+      cardTextColor: json['cardTextColor'] as String?,
     );
 
 Map<String, dynamic> _$$SangeetSimpleAlbumObjectImplToJson(
@@ -199,6 +205,8 @@ Map<String, dynamic> _$$SangeetSimpleAlbumObjectImplToJson(
       'albumType': _$SangeetAlbumTypeEnumMap[instance.albumType]!,
       'status': instance.status,
       'releaseDate': instance.releaseDate,
+      'cardBgColor': instance.cardBgColor,
+      'cardTextColor': instance.cardTextColor,
     };
 
 _$SangeetFullArtistObjectImpl _$$SangeetFullArtistObjectImplFromJson(
@@ -511,6 +519,8 @@ _$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
       plainLyricsHi: json['plainLyricsHi'] as String?,
       plainLyricsEnTr: json['plainLyricsEnTr'] as String?,
       plainLyricsHiTr: json['plainLyricsHiTr'] as String?,
+      cardBgColor: json['cardBgColor'] as String?,
+      cardTextColor: json['cardTextColor'] as String?,
       $type: json['runtimeType'] as String?,
     );
 
@@ -534,6 +544,8 @@ Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
       'plainLyricsHi': instance.plainLyricsHi,
       'plainLyricsEnTr': instance.plainLyricsEnTr,
       'plainLyricsHiTr': instance.plainLyricsHiTr,
+      'cardBgColor': instance.cardBgColor,
+      'cardTextColor': instance.cardTextColor,
       'runtimeType': instance.$type,
     };
 

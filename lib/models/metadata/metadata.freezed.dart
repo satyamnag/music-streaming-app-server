@@ -1528,6 +1528,13 @@ mixin _$SangeetFullAlbumObject {
   String? get recordLabel => throw _privateConstructorUsedError;
   List<String>? get genres => throw _privateConstructorUsedError;
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  String? get cardBgColor => throw _privateConstructorUsedError;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  String? get cardTextColor => throw _privateConstructorUsedError;
+
   /// Serializes this SangeetFullAlbumObject to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -1555,7 +1562,9 @@ abstract class $SangeetFullAlbumObjectCopyWith<$Res> {
       SangeetAlbumType albumType,
       String status,
       String? recordLabel,
-      List<String>? genres});
+      List<String>? genres,
+      String? cardBgColor,
+      String? cardTextColor});
 }
 
 /// @nodoc
@@ -1585,6 +1594,8 @@ class _$SangeetFullAlbumObjectCopyWithImpl<$Res,
     Object? status = null,
     Object? recordLabel = freezed,
     Object? genres = freezed,
+    Object? cardBgColor = freezed,
+    Object? cardTextColor = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -1631,6 +1642,14 @@ class _$SangeetFullAlbumObjectCopyWithImpl<$Res,
           ? _value.genres
           : genres // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      cardBgColor: freezed == cardBgColor
+          ? _value.cardBgColor
+          : cardBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardTextColor: freezed == cardTextColor
+          ? _value.cardTextColor
+          : cardTextColor // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -1655,7 +1674,9 @@ abstract class _$$SangeetFullAlbumObjectImplCopyWith<$Res>
       SangeetAlbumType albumType,
       String status,
       String? recordLabel,
-      List<String>? genres});
+      List<String>? genres,
+      String? cardBgColor,
+      String? cardTextColor});
 }
 
 /// @nodoc
@@ -1684,6 +1705,8 @@ class __$$SangeetFullAlbumObjectImplCopyWithImpl<$Res>
     Object? status = null,
     Object? recordLabel = freezed,
     Object? genres = freezed,
+    Object? cardBgColor = freezed,
+    Object? cardTextColor = freezed,
   }) {
     return _then(_$SangeetFullAlbumObjectImpl(
       id: null == id
@@ -1730,6 +1753,14 @@ class __$$SangeetFullAlbumObjectImplCopyWithImpl<$Res>
           ? _value._genres
           : genres // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      cardBgColor: freezed == cardBgColor
+          ? _value.cardBgColor
+          : cardBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardTextColor: freezed == cardTextColor
+          ? _value.cardTextColor
+          : cardTextColor // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -1748,7 +1779,9 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
       required this.albumType,
       this.status = 'free',
       this.recordLabel,
-      final List<String>? genres})
+      final List<String>? genres,
+      this.cardBgColor,
+      this.cardTextColor})
       : _artists = artists,
         _images = images,
         _genres = genres;
@@ -1800,9 +1833,18 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
     return EqualUnmodifiableListView(value);
   }
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  @override
+  final String? cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  @override
+  final String? cardTextColor;
+
   @override
   String toString() {
-    return 'SangeetFullAlbumObject(id: $id, name: $name, artists: $artists, images: $images, releaseDate: $releaseDate, externalUri: $externalUri, totalTracks: $totalTracks, albumType: $albumType, status: $status, recordLabel: $recordLabel, genres: $genres)';
+    return 'SangeetFullAlbumObject(id: $id, name: $name, artists: $artists, images: $images, releaseDate: $releaseDate, externalUri: $externalUri, totalTracks: $totalTracks, albumType: $albumType, status: $status, recordLabel: $recordLabel, genres: $genres, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor)';
   }
 
   @override
@@ -1825,7 +1867,11 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.recordLabel, recordLabel) ||
                 other.recordLabel == recordLabel) &&
-            const DeepCollectionEquality().equals(other._genres, _genres));
+            const DeepCollectionEquality().equals(other._genres, _genres) &&
+            (identical(other.cardBgColor, cardBgColor) ||
+                other.cardBgColor == cardBgColor) &&
+            (identical(other.cardTextColor, cardTextColor) ||
+                other.cardTextColor == cardTextColor));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1842,7 +1888,9 @@ class _$SangeetFullAlbumObjectImpl implements _SangeetFullAlbumObject {
       albumType,
       status,
       recordLabel,
-      const DeepCollectionEquality().hash(_genres));
+      const DeepCollectionEquality().hash(_genres),
+      cardBgColor,
+      cardTextColor);
 
   /// Create a copy of SangeetFullAlbumObject
   /// with the given fields replaced by the non-null parameter values.
@@ -1873,7 +1921,9 @@ abstract class _SangeetFullAlbumObject implements SangeetFullAlbumObject {
       required final SangeetAlbumType albumType,
       final String status,
       final String? recordLabel,
-      final List<String>? genres}) = _$SangeetFullAlbumObjectImpl;
+      final List<String>? genres,
+      final String? cardBgColor,
+      final String? cardTextColor}) = _$SangeetFullAlbumObjectImpl;
 
   factory _SangeetFullAlbumObject.fromJson(Map<String, dynamic> json) =
       _$SangeetFullAlbumObjectImpl.fromJson;
@@ -1901,6 +1951,15 @@ abstract class _SangeetFullAlbumObject implements SangeetFullAlbumObject {
   @override
   List<String>? get genres;
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  @override
+  String? get cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  @override
+  String? get cardTextColor;
+
   /// Create a copy of SangeetFullAlbumObject
   /// with the given fields replaced by the non-null parameter values.
   @override
@@ -1926,6 +1985,13 @@ mixin _$SangeetSimpleAlbumObject {
   String get status => throw _privateConstructorUsedError;
   String? get releaseDate => throw _privateConstructorUsedError;
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  String? get cardBgColor => throw _privateConstructorUsedError;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  String? get cardTextColor => throw _privateConstructorUsedError;
+
   /// Serializes this SangeetSimpleAlbumObject to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -1950,7 +2016,9 @@ abstract class $SangeetSimpleAlbumObjectCopyWith<$Res> {
       List<SangeetImageObject> images,
       SangeetAlbumType albumType,
       String status,
-      String? releaseDate});
+      String? releaseDate,
+      String? cardBgColor,
+      String? cardTextColor});
 }
 
 /// @nodoc
@@ -1977,6 +2045,8 @@ class _$SangeetSimpleAlbumObjectCopyWithImpl<$Res,
     Object? albumType = null,
     Object? status = null,
     Object? releaseDate = freezed,
+    Object? cardBgColor = freezed,
+    Object? cardTextColor = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -2011,6 +2081,14 @@ class _$SangeetSimpleAlbumObjectCopyWithImpl<$Res,
           ? _value.releaseDate
           : releaseDate // ignore: cast_nullable_to_non_nullable
               as String?,
+      cardBgColor: freezed == cardBgColor
+          ? _value.cardBgColor
+          : cardBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardTextColor: freezed == cardTextColor
+          ? _value.cardTextColor
+          : cardTextColor // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -2032,7 +2110,9 @@ abstract class _$$SangeetSimpleAlbumObjectImplCopyWith<$Res>
       List<SangeetImageObject> images,
       SangeetAlbumType albumType,
       String status,
-      String? releaseDate});
+      String? releaseDate,
+      String? cardBgColor,
+      String? cardTextColor});
 }
 
 /// @nodoc
@@ -2058,6 +2138,8 @@ class __$$SangeetSimpleAlbumObjectImplCopyWithImpl<$Res>
     Object? albumType = null,
     Object? status = null,
     Object? releaseDate = freezed,
+    Object? cardBgColor = freezed,
+    Object? cardTextColor = freezed,
   }) {
     return _then(_$SangeetSimpleAlbumObjectImpl(
       id: null == id
@@ -2092,6 +2174,14 @@ class __$$SangeetSimpleAlbumObjectImplCopyWithImpl<$Res>
           ? _value.releaseDate
           : releaseDate // ignore: cast_nullable_to_non_nullable
               as String?,
+      cardBgColor: freezed == cardBgColor
+          ? _value.cardBgColor
+          : cardBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardTextColor: freezed == cardTextColor
+          ? _value.cardTextColor
+          : cardTextColor // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -2107,7 +2197,9 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
       final List<SangeetImageObject> images = const [],
       required this.albumType,
       this.status = 'free',
-      this.releaseDate})
+      this.releaseDate,
+      this.cardBgColor,
+      this.cardTextColor})
       : _artists = artists,
         _images = images;
 
@@ -2145,9 +2237,18 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
   @override
   final String? releaseDate;
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  @override
+  final String? cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  @override
+  final String? cardTextColor;
+
   @override
   String toString() {
-    return 'SangeetSimpleAlbumObject(id: $id, name: $name, externalUri: $externalUri, artists: $artists, images: $images, albumType: $albumType, status: $status, releaseDate: $releaseDate)';
+    return 'SangeetSimpleAlbumObject(id: $id, name: $name, externalUri: $externalUri, artists: $artists, images: $images, albumType: $albumType, status: $status, releaseDate: $releaseDate, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor)';
   }
 
   @override
@@ -2165,7 +2266,11 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
                 other.albumType == albumType) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.releaseDate, releaseDate) ||
-                other.releaseDate == releaseDate));
+                other.releaseDate == releaseDate) &&
+            (identical(other.cardBgColor, cardBgColor) ||
+                other.cardBgColor == cardBgColor) &&
+            (identical(other.cardTextColor, cardTextColor) ||
+                other.cardTextColor == cardTextColor));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2179,7 +2284,9 @@ class _$SangeetSimpleAlbumObjectImpl implements _SangeetSimpleAlbumObject {
       const DeepCollectionEquality().hash(_images),
       albumType,
       status,
-      releaseDate);
+      releaseDate,
+      cardBgColor,
+      cardTextColor);
 
   /// Create a copy of SangeetSimpleAlbumObject
   /// with the given fields replaced by the non-null parameter values.
@@ -2207,7 +2314,9 @@ abstract class _SangeetSimpleAlbumObject implements SangeetSimpleAlbumObject {
       final List<SangeetImageObject> images,
       required final SangeetAlbumType albumType,
       final String status,
-      final String? releaseDate}) = _$SangeetSimpleAlbumObjectImpl;
+      final String? releaseDate,
+      final String? cardBgColor,
+      final String? cardTextColor}) = _$SangeetSimpleAlbumObjectImpl;
 
   factory _SangeetSimpleAlbumObject.fromJson(Map<String, dynamic> json) =
       _$SangeetSimpleAlbumObjectImpl.fromJson;
@@ -2228,6 +2337,15 @@ abstract class _SangeetSimpleAlbumObject implements SangeetSimpleAlbumObject {
   String get status;
   @override
   String? get releaseDate;
+
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  @override
+  String? get cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  @override
+  String? get cardTextColor;
 
   /// Create a copy of SangeetSimpleAlbumObject
   /// with the given fields replaced by the non-null parameter values.
@@ -5032,7 +5150,9 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5064,7 +5184,9 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5096,7 +5218,9 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
     required TResult orElse(),
   }) =>
@@ -5394,7 +5518,9 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)
         full,
   }) {
     return local(id, name, externalUri, artists, album, durationMs, path);
@@ -5429,7 +5555,9 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
   }) {
     return local?.call(id, name, externalUri, artists, album, durationMs, path);
@@ -5464,7 +5592,9 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
     required TResult orElse(),
   }) {
@@ -5574,7 +5704,9 @@ abstract class _$$SangeetFullTrackObjectImplCopyWith<$Res>
       String? plainLyricsEn,
       String? plainLyricsHi,
       String? plainLyricsEnTr,
-      String? plainLyricsHiTr});
+      String? plainLyricsHiTr,
+      String? cardBgColor,
+      String? cardTextColor});
 
   @override
   $SangeetSimpleAlbumObjectCopyWith<$Res> get album;
@@ -5611,6 +5743,8 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
     Object? plainLyricsHi = freezed,
     Object? plainLyricsEnTr = freezed,
     Object? plainLyricsHiTr = freezed,
+    Object? cardBgColor = freezed,
+    Object? cardTextColor = freezed,
   }) {
     return _then(_$SangeetFullTrackObjectImpl(
       id: null == id
@@ -5681,6 +5815,14 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
           ? _value.plainLyricsHiTr
           : plainLyricsHiTr // ignore: cast_nullable_to_non_nullable
               as String?,
+      cardBgColor: freezed == cardBgColor
+          ? _value.cardBgColor
+          : cardBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
+      cardTextColor: freezed == cardTextColor
+          ? _value.cardTextColor
+          : cardTextColor // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -5706,6 +5848,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
       this.plainLyricsHi,
       this.plainLyricsEnTr,
       this.plainLyricsHiTr,
+      this.cardBgColor,
+      this.cardTextColor,
       final String? $type})
       : _artists = artists,
         $type = $type ?? 'full';
@@ -5756,12 +5900,21 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
   @override
   final String? plainLyricsHiTr;
 
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  @override
+  final String? cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  @override
+  final String? cardTextColor;
+
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr)';
+    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor)';
   }
 
   @override
@@ -5796,30 +5949,37 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             (identical(other.plainLyricsEnTr, plainLyricsEnTr) ||
                 other.plainLyricsEnTr == plainLyricsEnTr) &&
             (identical(other.plainLyricsHiTr, plainLyricsHiTr) ||
-                other.plainLyricsHiTr == plainLyricsHiTr));
+                other.plainLyricsHiTr == plainLyricsHiTr) &&
+            (identical(other.cardBgColor, cardBgColor) ||
+                other.cardBgColor == cardBgColor) &&
+            (identical(other.cardTextColor, cardTextColor) ||
+                other.cardTextColor == cardTextColor));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      name,
-      externalUri,
-      const DeepCollectionEquality().hash(_artists),
-      album,
-      durationMs,
-      isrc,
-      explicit,
-      status,
-      language,
-      featuredOrder,
-      karaokeStoragePath,
-      plainLyrics,
-      plainLyricsEn,
-      plainLyricsHi,
-      plainLyricsEnTr,
-      plainLyricsHiTr);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        name,
+        externalUri,
+        const DeepCollectionEquality().hash(_artists),
+        album,
+        durationMs,
+        isrc,
+        explicit,
+        status,
+        language,
+        featuredOrder,
+        karaokeStoragePath,
+        plainLyrics,
+        plainLyricsEn,
+        plainLyricsHi,
+        plainLyricsEnTr,
+        plainLyricsHiTr,
+        cardBgColor,
+        cardTextColor
+      ]);
 
   /// Create a copy of SangeetTrackObject
   /// with the given fields replaced by the non-null parameter values.
@@ -5859,7 +6019,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)
         full,
   }) {
     return full(
@@ -5879,7 +6041,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsEn,
         plainLyricsHi,
         plainLyricsEnTr,
-        plainLyricsHiTr);
+        plainLyricsHiTr,
+        cardBgColor,
+        cardTextColor);
   }
 
   @override
@@ -5911,7 +6075,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
   }) {
     return full?.call(
@@ -5931,7 +6097,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsEn,
         plainLyricsHi,
         plainLyricsEnTr,
-        plainLyricsHiTr);
+        plainLyricsHiTr,
+        cardBgColor,
+        cardTextColor);
   }
 
   @override
@@ -5963,7 +6131,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEn,
             String? plainLyricsHi,
             String? plainLyricsEnTr,
-            String? plainLyricsHiTr)?
+            String? plainLyricsHiTr,
+            String? cardBgColor,
+            String? cardTextColor)?
         full,
     required TResult orElse(),
   }) {
@@ -5985,7 +6155,9 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
           plainLyricsEn,
           plainLyricsHi,
           plainLyricsEnTr,
-          plainLyricsHiTr);
+          plainLyricsHiTr,
+          cardBgColor,
+          cardTextColor);
     }
     return orElse();
   }
@@ -6047,7 +6219,9 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
       final String? plainLyricsEn,
       final String? plainLyricsHi,
       final String? plainLyricsEnTr,
-      final String? plainLyricsHiTr}) = _$SangeetFullTrackObjectImpl;
+      final String? plainLyricsHiTr,
+      final String? cardBgColor,
+      final String? cardTextColor}) = _$SangeetFullTrackObjectImpl;
 
   factory SangeetFullTrackObject.fromJson(Map<String, dynamic> json) =
       _$SangeetFullTrackObjectImpl.fromJson;
@@ -6075,6 +6249,13 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
   String? get plainLyricsHi;
   String? get plainLyricsEnTr;
   String? get plainLyricsHiTr;
+
+  /// Admin-configurable card box background color (`#rrggbb`), or null to
+  /// keep the app's default theme color.
+  String? get cardBgColor;
+
+  /// Admin-configurable card text color (`#rrggbb`), or null for the default.
+  String? get cardTextColor;
 
   /// Create a copy of SangeetTrackObject
   /// with the given fields replaced by the non-null parameter values.
