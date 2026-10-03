@@ -14,13 +14,17 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 abstract final class HomeSectionLayout {
   /// The square artwork width/height of every home card, in logical pixels at
   /// scale == 1 (cards multiply by `theme.scaling` themselves).
+  ///
+  /// This is the *nominal* width used to size horizontal rows; the card's
+  /// artwork is fluid (see `TrackCard`) and always matches whatever width the
+  /// card actually receives, so rows stay exact at any theme scale.
   static const double imageSize = 150;
 
   /// Horizontal/vertical padding inside each card, at scale == 1.
   static const double cardPadding = 10;
 
   /// Gap between the artwork and the title, at scale == 1.
-  static const double imageTitleGap = 4;
+  static const double imageTitleGap = 6;
 
   /// Gap between the title and the subtitle, at scale == 1.
   static const double titleSubtitleGap = 2;
@@ -47,14 +51,16 @@ abstract final class HomeSectionLayout {
     return painter.height;
   }
 
-  /// The exact height a home card row needs so cards are never stretched
-  /// taller than their content. The title/subtitle line heights are measured
-  /// from the actual styles the cards use, so the row stays perfectly tight
-  /// regardless of fonts, theme scaling or platform text metrics.
+  /// Height of one home card at a given artwork width.
   ///
-  /// [withSubtitle] must be false for the card variant that omits the
-  /// subtitle line ("Recently played" cards, whose second line is empty).
-  static double rowHeight(BuildContext context, {bool withSubtitle = true}) {
+  /// The artwork is square and fluid, so its rendered height equals the card's
+  /// inner (content) width — which is what keeps title/subtitle and the 10px
+  /// inset in perfect proportion on every screen size.
+  static double _cardHeightFor(
+    BuildContext context,
+    double artworkWidth, {
+    required bool withSubtitle,
+  }) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
     final titleLine = _lineHeight(
@@ -63,14 +69,28 @@ abstract final class HomeSectionLayout {
     final subtitleLine =
         withSubtitle ? _lineHeight(theme.typography.xSmall) : 0.0;
     final subtitleGap = withSubtitle ? titleSubtitleGap : 0.0;
-    return (cardPadding +
-            imageSize +
-            imageTitleGap +
-            titleLine +
-            subtitleGap +
-            subtitleLine +
-            cardPadding) *
-        scale;
+    return (cardPadding * 2) +
+        artworkWidth +
+        (imageTitleGap * scale) +
+        titleLine +
+        (subtitleGap * scale) +
+        subtitleLine;
+  }
+
+  /// The exact height a home card row needs so cards are never stretched
+  /// taller than their content. Derived from the same fluid geometry the cards
+  /// render with, so the row stays perfectly tight regardless of fonts, theme
+  /// scaling or platform text metrics.
+  ///
+  /// [withSubtitle] must be false for the card variant that omits the
+  /// subtitle line ("Recently played" cards, whose second line is empty).
+  static double rowHeight(BuildContext context, {bool withSubtitle = true}) {
+    final scale = Theme.of(context).scaling;
+    return _cardHeightFor(
+      context,
+      imageSize * scale,
+      withSubtitle: withSubtitle,
+    );
   }
 
   /// Exact tile height for the shared 150px-art `PlaybuttonCard` grids

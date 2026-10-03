@@ -5,28 +5,51 @@ import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 
-/// Responsive count of grid columns for the 1.25x track/album cards: each
-/// column is at least a card (175 * scaling) plus one 6px gutter wide, so the
-/// fixed-size artwork never overflows its tile on any phone/tablet.
+/// Responsive count of grid columns for the track/album cards: each column is
+/// at least a card ([minCardWidth] * scaling) plus one [cardGap] gutter wide.
+///
+/// The card itself is fluid (see [TrackCard]), so this only decides how many
+/// columns fit comfortably — it can never cause artwork to overflow its tile.
 int trackGridCrossAxisCount(BuildContext context) {
   final width = MediaQuery.sizeOf(context).width;
-  final perColumn = (175 * Theme.of(context).scaling) + 6;
+  final perColumn = (minCardWidth * Theme.of(context).scaling) + cardGap;
   return math.max(2, (width / perColumn).floor());
 }
 
-/// A shared 1.25x track/album card for GRID surfaces (see-all screens, search
-/// tabs). Provider-free: the caller resolves artwork, handles taps and any
-/// premium gating, so search and see-all screens keep their own play logic.
+/// Minimum comfortable width of one track/album card at scale == 1. The card
+/// is fluid and expands to fill its grid tile, so this is only the width at
+/// which we decide a column is still readable (and thus how many columns fit).
+const double minCardWidth = 175;
+
+/// Gap between cards inside a row/grid, at scale == 1.
+const double cardGap = 6;
+
+/// A shared track/album card for GRID surfaces (see-all screens, search tabs)
+/// and horizontal home rows. Provider-free: the caller resolves artwork,
+/// handles taps and any premium gating, so search and see-all screens keep
+/// their own play logic.
 ///
-/// The card fills its grid tile horizontally (artwork stays 150 * scaling,
-/// centered) and its exact height is provided by the grid's `mainAxisExtent`
-/// via HomeSectionLayout.rowHeight — never hard-code a grid extent.
+/// ## Why the artwork is fluid
+/// This card used to lay out a hard-coded 150px artwork inside a fixed 175px
+/// box with 10px padding (170px of content in a 175px box), while the grid tile
+/// and the home row both size themselves independently of the card. Any
+/// mismatch between those independent numbers — a narrower phone, a different
+/// theme scale, or different font metrics — made the artwork touch the card's
+/// top/bottom edges, so the card read as a clipped, incomplete box.
+///
+/// The artwork now fills whatever width the card actually receives via
+/// [LayoutBuilder] + [AspectRatio], so the 10px inset on every side is
+/// guaranteed at any size and the box always renders complete.
 class TrackCard extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
   final bool locked;
+
+  /// Optional override for the card's own width. Grid surfaces pass nothing
+  /// (the card fills its tile); horizontal rows pass their fixed card width.
+  final double? width;
 
   const TrackCard({
     super.key,
@@ -35,6 +58,7 @@ class TrackCard extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.locked = false,
+    this.width,
   });
 
   @override
@@ -42,47 +66,45 @@ class TrackCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scale = theme.scaling;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12 * scale),
-          color: theme.colorScheme.card,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black.withValues(alpha: 0.12)
-                  : theme.colorScheme.primary.withValues(alpha: 0.18),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
+    return Container(
+      width: width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12 * scale),
+        color: theme.colorScheme.card,
+        boxShadow: [
+          BoxShadow(
+            color: theme.brightness == Brightness.light
+                ? Colors.black.withValues(alpha: 0.12)
+                : theme.colorScheme.primary.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
         child: Padding(
           padding: EdgeInsets.all(10 * scale),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8 * scale),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8 * scale),
+                child: AspectRatio(
+                  aspectRatio: 1,
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      UniversalImage(
-                        path: imageUrl,
-                        height: 150 * scale,
-                        width: 150 * scale,
-                        fit: BoxFit.cover,
-                      ),
+                      UniversalImage(path: imageUrl, fit: BoxFit.cover),
                       LockedBadge(locked: locked, borderRadius: 0),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 4 * scale),
+              SizedBox(height: 6 * scale),
               Text(
                 title,
                 maxLines: 1,

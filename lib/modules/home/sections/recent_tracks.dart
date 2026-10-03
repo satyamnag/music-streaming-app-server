@@ -224,16 +224,17 @@ class _RecentTrackCard extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Fluid square artwork: fills the card's inner width so the 10px
+              // inset on every side is guaranteed and the card never renders
+              // as a clipped/touching box (see TrackCard docs).
               ClipRRect(
                 borderRadius: BorderRadius.circular(8 * scale),
-                child: UniversalImage(
-                  path: imageUrl,
-                  height: 150 * scale,
-                  width: 150 * scale,
-                  fit: BoxFit.cover,
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: UniversalImage(path: imageUrl, fit: BoxFit.cover),
                 ),
               ),
-              Gap(4 * scale),
+              Gap(6 * scale),
               Text(
                 track.name,
                 maxLines: 1,

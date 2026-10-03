@@ -167,21 +167,23 @@ class _AlbumCard extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Fluid square artwork: fills the card's inner width so the 10px
+              // inset on every side is guaranteed and the card never renders
+              // as a clipped/touching box (see TrackCard docs).
               ClipRRect(
                 borderRadius: BorderRadius.circular(8 * scale),
-                child: Stack(
-                  children: [
-                    UniversalImage(
-                      path: imageUrl,
-                      height: 150 * scale,
-                      width: 150 * scale,
-                      fit: BoxFit.cover,
-                    ),
-                    LockedBadge(locked: locked, borderRadius: 0),
-                  ],
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      UniversalImage(path: imageUrl, fit: BoxFit.cover),
+                      LockedBadge(locked: locked, borderRadius: 0),
+                    ],
+                  ),
                 ),
               ),
-              Gap(4 * scale),
+              Gap(6 * scale),
               Text(
                 album.name,
                 maxLines: 1,
