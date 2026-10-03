@@ -173,8 +173,10 @@ class HomeSeeAllPage extends HookConsumerWidget {
                   itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: trackGridCrossAxisCount(context),
-                    mainAxisExtent: HomeSectionLayout.rowHeight(
+                    mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
                       context,
+                      crossAxisCount: trackGridCrossAxisCount(context),
+                      horizontalPadding: 12 * scale,
                       withSubtitle: !isAlbums,
                     ),
                     crossAxisSpacing: 6,

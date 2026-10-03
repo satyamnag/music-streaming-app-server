@@ -117,7 +117,11 @@ class SearchTracksSection extends HookConsumerWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: trackGridCrossAxisCount(context),
-                  mainAxisExtent: HomeSectionLayout.rowHeight(context),
+                  mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                    context,
+                    crossAxisCount: trackGridCrossAxisCount(context),
+                    horizontalPadding: 8,
+                  ),
                   crossAxisSpacing: 6,
                   mainAxisSpacing: 6,
                 ),
@@ -135,7 +139,11 @@ class SearchTracksSection extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: trackGridCrossAxisCount(context),
-              mainAxisExtent: HomeSectionLayout.rowHeight(context),
+              mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                context,
+                crossAxisCount: trackGridCrossAxisCount(context),
+                horizontalPadding: 8,
+              ),
               crossAxisSpacing: 6,
               mainAxisSpacing: 6,
             ),

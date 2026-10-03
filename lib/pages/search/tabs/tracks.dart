@@ -140,7 +140,11 @@ class SearchPageTracksTab extends HookConsumerWidget {
                 itemCount: shown.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: trackGridCrossAxisCount(context),
-                  mainAxisExtent: HomeSectionLayout.rowHeight(context),
+                  mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                    context,
+                    crossAxisCount: trackGridCrossAxisCount(context),
+                    horizontalPadding: 8,
+                  ),
                   crossAxisSpacing: 6,
                   mainAxisSpacing: 6,
                 ),

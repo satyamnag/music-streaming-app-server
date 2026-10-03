@@ -82,13 +82,75 @@ abstract final class HomeSectionLayout {
   /// render with, so the row stays perfectly tight regardless of fonts, theme
   /// scaling or platform text metrics.
   ///
+  /// Horizontal rows give their cards a fixed [imageSize]-wide box, and the
+  /// card's artwork is that box minus its horizontal padding. Deriving the
+  /// height from the same relationship (rather than assuming a bare
+  /// [imageSize] artwork) keeps the row from running a few pixels short, which
+  /// would stretch/overflow the card inside the row.
+  ///
   /// [withSubtitle] must be false for the card variant that omits the
   /// subtitle line ("Recently played" cards, whose second line is empty).
   static double rowHeight(BuildContext context, {bool withSubtitle = true}) {
     final scale = Theme.of(context).scaling;
     return _cardHeightFor(
       context,
-      imageSize * scale,
+      (imageSize - (cardPadding * 2)) * scale,
+      withSubtitle: withSubtitle,
+    );
+  }
+
+  /// Exact tile height for a [TrackCard] grid whose tiles are [tileWidth] wide
+  /// (in logical pixels, already scaled).
+  ///
+  /// Grid tiles are as wide as the screen allows, and the card's artwork is a
+  /// fluid square that fills the tile minus its padding — so the tile height
+  /// MUST be derived from the real tile width. Using a height measured for the
+  /// nominal card width would leave a wider tile taller than its extent and
+  /// overflow the card (and a narrower tile short, painting a dead band).
+  static double trackCardHeightFor(
+    BuildContext context,
+    double tileWidth, {
+    bool withSubtitle = true,
+  }) {
+    final scale = Theme.of(context).scaling;
+    return _cardHeightFor(
+      context,
+      tileWidth - (cardPadding * 2 * scale),
+      withSubtitle: withSubtitle,
+    );
+  }
+
+  /// Width of one tile in a [crossAxisCount]-column [TrackCard] grid that has
+  /// [horizontalPadding] on each side and [gutter] between its columns.
+  static double trackCardTileWidth(
+    BuildContext context, {
+    required int crossAxisCount,
+    required double horizontalPadding,
+    double gutter = cardGap,
+  }) {
+    final width = MediaQuery.sizeOf(context).width;
+    final usable = width - (horizontalPadding * 2) -
+        (gutter * (crossAxisCount - 1));
+    return usable / crossAxisCount;
+  }
+
+  /// Convenience: exact tile height for a [crossAxisCount]-column [TrackCard]
+  /// grid, derived from the tile width that grid will actually produce.
+  static double trackCardGridExtent(
+    BuildContext context, {
+    required int crossAxisCount,
+    required double horizontalPadding,
+    bool withSubtitle = true,
+    double gutter = cardGap,
+  }) {
+    return trackCardHeightFor(
+      context,
+      trackCardTileWidth(
+        context,
+        crossAxisCount: crossAxisCount,
+        horizontalPadding: horizontalPadding,
+        gutter: gutter,
+      ),
       withSubtitle: withSubtitle,
     );
   }
