@@ -36,19 +36,22 @@ abstract final class HomeSectionLayout {
   /// Gap between the artwork and the title, at scale == 1.
   static const double imageTitleGap = 6;
 
+  /// Gap between the cover (which now bleeds to the card's top/left/right
+  /// edges) and the title text block below it, at scale == 1.
+  static const double cardTextGap = imageTitleGap;
+
   /// Gap between the title and the subtitle, at scale == 1.
   static const double titleSubtitleGap = 2;
 
   /// Gap between cards inside a row, at scale == 1.
   static const double cardGap = 6;
 
-  /// Total width of one card box, at scale == 1: the fluid artwork plus the
-  /// card's horizontal padding on both sides.
+  /// Total width of one card box, at scale == 1.
   ///
-  /// Horizontal home rows give each card exactly this width, and the card
-  /// derives its square artwork from it, so the 10px inset is exact and the
-  /// row height can be computed from the same number.
-  static const double cardWidth = imageSize + (cardPadding * 2);
+  /// The cover bleeds to the card's left and right edges, so the box width IS
+  /// the cover width — the horizontal [cardPadding] applies only to the title
+  /// block below the cover, never to the cover itself.
+  static const double cardWidth = imageSize;
 
   /// Extra row height reserved for SKELETON rows only. The measured
   /// [rowHeight] is razor-exact against the loaded card, but Skeletonizer's
@@ -69,14 +72,15 @@ abstract final class HomeSectionLayout {
     return painter.height;
   }
 
-  /// Height of one home card at a given artwork width.
+  /// Height of one home card whose square cover is [coverWidth] wide.
   ///
-  /// The artwork is square and fluid, so its rendered height equals the card's
-  /// inner (content) width — which is what keeps title/subtitle and the 10px
-  /// inset in perfect proportion on every screen size.
+  /// The cover bleeds to the card's top/left/right edges, so the card height
+  /// is the cover plus a padded text block underneath — there is no padding
+  /// above the cover or beside it. [coverWidth] is therefore both the card's
+  /// width and the cover's height.
   static double _cardHeightFor(
     BuildContext context,
-    double artworkWidth, {
+    double coverWidth, {
     required bool withSubtitle,
   }) {
     final theme = Theme.of(context);
@@ -87,24 +91,20 @@ abstract final class HomeSectionLayout {
     final subtitleLine =
         withSubtitle ? _lineHeight(theme.typography.xSmall) : 0.0;
     final subtitleGap = withSubtitle ? titleSubtitleGap : 0.0;
-    return (cardPadding * 2) +
-        artworkWidth +
-        (imageTitleGap * scale) +
+    return coverWidth +
+        (cardTextGap * scale) +
         titleLine +
         (subtitleGap * scale) +
         subtitleLine;
   }
 
   /// The exact height a home card row needs so cards are never stretched
-  /// taller than their content. Derived from the same fluid geometry the cards
+  /// taller than their content. Derived from the same geometry the cards
   /// render with, so the row stays perfectly tight regardless of fonts, theme
   /// scaling or platform text metrics.
   ///
-  /// Horizontal rows give their cards a fixed [imageSize]-wide box, and the
-  /// card's artwork is that box minus its horizontal padding. Deriving the
-  /// height from the same relationship (rather than assuming a bare
-  /// [imageSize] artwork) keeps the row from running a few pixels short, which
-  /// would stretch/overflow the card inside the row.
+  /// Horizontal rows give their cards a fixed [cardWidth]-wide box whose cover
+  /// bleeds to the edges, so the cover is exactly [cardWidth] tall.
   ///
   /// [withSubtitle] must be false for the card variant that omits the
   /// subtitle line ("Recently played" cards, whose second line is empty).
@@ -112,7 +112,7 @@ abstract final class HomeSectionLayout {
     final scale = Theme.of(context).scaling;
     return _cardHeightFor(
       context,
-      (imageSize - (cardPadding * 2)) * scale,
+      cardWidth * scale,
       withSubtitle: withSubtitle,
     );
   }
@@ -120,20 +120,16 @@ abstract final class HomeSectionLayout {
   /// Exact tile height for a [TrackCard] grid whose tiles are [tileWidth] wide
   /// (in logical pixels, already scaled).
   ///
-  /// Grid tiles are as wide as the screen allows, and the card's artwork is a
-  /// fluid square that fills the tile minus its padding — so the tile height
-  /// MUST be derived from the real tile width. Using a height measured for the
-  /// nominal card width would leave a wider tile taller than its extent and
-  /// overflow the card (and a narrower tile short, painting a dead band).
+  /// The card's cover bleeds to the tile's full width, so the cover is exactly
+  /// [tileWidth] tall and the tile height is derived from that.
   static double trackCardHeightFor(
     BuildContext context,
     double tileWidth, {
     bool withSubtitle = true,
   }) {
-    final scale = Theme.of(context).scaling;
     return _cardHeightFor(
       context,
-      tileWidth - (cardPadding * 2 * scale),
+      tileWidth,
       withSubtitle: withSubtitle,
     );
   }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -206,49 +206,56 @@ class _TrackCard extends HookConsumerWidget {
           onTap();
         },
         behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: EdgeInsets.all(HomeSectionLayout.cardPadding * scale),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Fluid square artwork: fills the card's inner width so the 10px
-              // inset on every side is guaranteed and the card never renders
-              // as a clipped/touching box (see TrackCard docs).
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8 * scale),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      UniversalImage(path: imageUrl, fit: BoxFit.cover),
-                      LockedBadge(locked: locked, borderRadius: 0),
-                    ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The cover bleeds to the card's top/left/right edges; the card's
+            // own Clip.antiAlias gives it the outer rounded corners at the top.
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
+                  LockedBadge(locked: locked, borderRadius: 0),
+                ],
+              ),
+            ),
+            // Only the text block is padded, so the cover stays flush.
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                HomeSectionLayout.cardPadding * scale,
+                HomeSectionLayout.cardTextGap * scale,
+                HomeSectionLayout.cardPadding * scale,
+                HomeSectionLayout.cardPadding * scale,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    track.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.typography.small.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.foreground,
+                    ),
                   ),
-                ),
+                  Gap(2 * scale),
+                  Text(
+                    track.album.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.typography.xSmall.copyWith(
+                      color: theme.colorScheme.mutedForeground,
+                    ),
+                  ),
+                ],
               ),
-              Gap(6 * scale),
-              Text(
-                track.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.typography.small.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.foreground,
-                ),
-              ),
-              Gap(2 * scale),
-              Text(
-                track.album.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.typography.xSmall.copyWith(
-                  color: theme.colorScheme.mutedForeground,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -286,13 +293,14 @@ class _SeeMoreCard extends StatelessWidget {
             children: [
               Icon(
                 SangeetIcons.angleDown,
-                size: 28,
+                size: 22 * scale,
                 color: theme.colorScheme.primary,
               ),
-              Gap(8 * scale),
+              Gap(6 * scale),
               Text(
                 context.l10n.see_more,
-                style: theme.typography.base.copyWith(
+                textAlign: TextAlign.center,
+                style: theme.typography.xSmall.copyWith(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
