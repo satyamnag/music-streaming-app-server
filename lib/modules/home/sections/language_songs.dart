@@ -1,4 +1,4 @@
-import 'package:auto_route/auto_route.dart';
+﻿import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -14,7 +14,7 @@ import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
-/// Home screen components — one titled horizontal row per language (e.g.
+/// Home screen components â€” one titled horizontal row per language (e.g.
 /// "Telugu Songs", "Kannada Songs"). Each language's songs appear under its own
 /// component heading, so a catalog with several languages yields several
 /// separate components. Tapping a track plays the language's songs from that
@@ -148,7 +148,7 @@ class _TrackCard extends HookConsumerWidget {
     final locked = PremiumAccess.isTrackLocked(track, ref);
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -178,7 +178,7 @@ class _TrackCard extends HookConsumerWidget {
         },
         behavior: HitTestBehavior.opaque,
         child: Padding(
-          padding: EdgeInsets.all(10 * scale),
+          padding: EdgeInsets.all(HomeSectionLayout.cardPadding * scale),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -239,7 +239,7 @@ class _SeeMoreCard extends StatelessWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,

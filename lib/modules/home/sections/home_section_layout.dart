@@ -12,16 +12,26 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 /// typography they render with, so rows fit their cards perfectly at any theme
 /// scale or font.
 abstract final class HomeSectionLayout {
+  /// Global size multiplier for every home/grid track+album card.
+  ///
+  /// The cards were reduced to ~75% of their original footprint so a row shows
+  /// noticeably more artwork (the home rows and grids now read as a full,
+  /// deep library rather than a handful of oversized tiles). Everything that
+  /// defines the card — artwork, padding, internal gaps — is derived from
+  /// [imageSize] and [cardPadding] through this factor, so the card geometry
+  /// stays exact and self-consistent at any value.
+  static const double cardScale = 0.75;
+
   /// The square artwork width/height of every home card, in logical pixels at
   /// scale == 1 (cards multiply by `theme.scaling` themselves).
   ///
-  /// This is the *nominal* width used to size horizontal rows; the card's
-  /// artwork is fluid (see `TrackCard`) and always matches whatever width the
-  /// card actually receives, so rows stay exact at any theme scale.
-  static const double imageSize = 150;
+  /// This is the *nominal* inner width used to size horizontal rows; the
+  /// card's artwork is fluid (see `TrackCard`) and always matches whatever
+  /// width the card actually receives, so rows stay exact at any theme scale.
+  static const double imageSize = 150 * cardScale;
 
   /// Horizontal/vertical padding inside each card, at scale == 1.
-  static const double cardPadding = 10;
+  static const double cardPadding = 10 * cardScale;
 
   /// Gap between the artwork and the title, at scale == 1.
   static const double imageTitleGap = 6;
@@ -31,6 +41,14 @@ abstract final class HomeSectionLayout {
 
   /// Gap between cards inside a row, at scale == 1.
   static const double cardGap = 6;
+
+  /// Total width of one card box, at scale == 1: the fluid artwork plus the
+  /// card's horizontal padding on both sides.
+  ///
+  /// Horizontal home rows give each card exactly this width, and the card
+  /// derives its square artwork from it, so the 10px inset is exact and the
+  /// row height can be computed from the same number.
+  static const double cardWidth = imageSize + (cardPadding * 2);
 
   /// Extra row height reserved for SKELETON rows only. The measured
   /// [rowHeight] is razor-exact against the loaded card, but Skeletonizer's

@@ -4,6 +4,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 
 /// Responsive count of grid columns for the track/album cards: each column is
 /// at least a card ([minCardWidth] * scaling) plus one [cardGap] gutter wide.
@@ -19,7 +20,12 @@ int trackGridCrossAxisCount(BuildContext context) {
 /// Minimum comfortable width of one track/album card at scale == 1. The card
 /// is fluid and expands to fill its grid tile, so this is only the width at
 /// which we decide a column is still readable (and thus how many columns fit).
-const double minCardWidth = 175;
+///
+/// Derived from the shared [HomeSectionLayout.cardScale] so the smaller cards
+/// also fit more columns per row, which is what makes the library read as a
+/// large collection.
+const double minCardWidth = HomeSectionLayout.imageSize +
+    (HomeSectionLayout.cardPadding * 2);
 
 /// Gap between cards inside a row/grid, at scale == 1.
 const double cardGap = 6;
@@ -86,7 +92,9 @@ class TrackCard extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.all(10 * scale),
+          padding: EdgeInsets.all(
+            HomeSectionLayout.cardPadding * scale,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

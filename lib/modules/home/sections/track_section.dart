@@ -1,4 +1,4 @@
-import 'package:flutter_hooks/flutter_hooks.dart';
+﻿import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -177,7 +177,7 @@ class _TrackCard extends HookConsumerWidget {
     final locked = PremiumAccess.isTrackLocked(track, ref);
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -207,7 +207,7 @@ class _TrackCard extends HookConsumerWidget {
         },
         behavior: HitTestBehavior.opaque,
         child: Padding(
-          padding: EdgeInsets.all(10 * scale),
+          padding: EdgeInsets.all(HomeSectionLayout.cardPadding * scale),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -268,7 +268,7 @@ class _SeeMoreCard extends StatelessWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,

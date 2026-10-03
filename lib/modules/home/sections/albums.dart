@@ -1,4 +1,4 @@
-import 'package:auto_route/auto_route.dart';
+﻿import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -132,7 +132,7 @@ class _AlbumCard extends HookConsumerWidget {
     final locked = PremiumAccess.isAlbumLocked(album, ref);
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
@@ -162,7 +162,7 @@ class _AlbumCard extends HookConsumerWidget {
         },
         behavior: HitTestBehavior.opaque,
         child: Padding(
-          padding: EdgeInsets.all(10 * scale),
+          padding: EdgeInsets.all(HomeSectionLayout.cardPadding * scale),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -223,7 +223,7 @@ class _SeeMoreCard extends StatelessWidget {
     final scale = theme.scaling;
 
     return Container(
-      width: 175 * scale,
+      width: HomeSectionLayout.cardWidth * scale,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: theme.colorScheme.card,
