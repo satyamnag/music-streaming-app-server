@@ -66,10 +66,17 @@ class HomePage extends HookConsumerWidget {
           ],
           child: Stack(
             children: [
-              // The wallpaper sits behind everything and does not scroll with
-              // the content, so the header stays legible over it.
+              // The wallpaper is a landscape band across the top, sitting
+              // behind the header and not scrolling with the content. It is
+              // sized by HomeWallpaper itself (width / 2, capped) rather than
+              // filled to the whole body: a full-screen image was only ever
+              // visible as this strip anyway, and `Positioned.fill` is what
+              // forced the portrait-only upload rule the admin used to apply.
               if (wallpaperUrl != null)
-                Positioned.fill(
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: HomeWallpaper(url: wallpaperUrl),
                 ),
               material.RefreshIndicator.adaptive(

@@ -10,7 +10,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, Head
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
-import { readWebpSize, matchesAspectRatio } from './webp_size.js'
+import { readWebpSize, matchesAspectRatio, matchesAspectRatioRange } from './webp_size.js'
 
 dotenv.config()
 
@@ -1523,19 +1523,22 @@ const SPECIAL_BANNER_LABEL = '8:3 (2.67:1)'
 const SPECIAL_BANNER_WIDTH = 1440
 const SPECIAL_BANNER_HEIGHT = 540
 
-// The home wallpaper is a full-screen phone background, so it is PORTRAIT 9:16.
-// A portrait image avoids letterboxing or a hard crop on any phone aspect: the
-// app applies a slight cover-scale and dims it, so small deviations are safe.
+// The home wallpaper is NOT a full-screen background. The app draws it as a
+// LANDSCAPE band across the top of the home page, behind the "Soulful Bhakti"
+// header (see lib/modules/home/sections/home_wallpaper.dart) — the content
+// below paints its own surface, so a full-screen image was only ever visible as
+// that strip anyway. The upload is therefore landscape.
 //
-// 1080x1920 is the canonical export size (a standard phone resolution, crisp on
-// high-density screens without being a large file).
-const WALLPAPER_ASPECT_RATIO = 9 / 16
-const WALLPAPER_LABEL = '9:16 (0.5625:1)'
-const WALLPAPER_WIDTH = 1080
-const WALLPAPER_HEIGHT = 1920
-// Phone screens vary from 9:16 to 9:21, so accept a slightly wider band than
-// the Specials banner's 2%: a 9:19.5 phone wallpaper must not be rejected.
-const WALLPAPER_RATIO_TOLERANCE = 0.22
+// One exact ratio is deliberately NOT enforced. The band crops with
+// BoxFit.cover, which is forgiving enough that an 8:3 export and a 16:9 export
+// both land with only a small edge crop, so a range admits the artwork people
+// actually have instead of rejecting it over a few percent. 1920x1080 (16:9)
+// is the canonical export size.
+const WALLPAPER_MIN_RATIO = 1.3
+const WALLPAPER_MAX_RATIO = 3.2
+const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1'
+const WALLPAPER_WIDTH = 1920
+const WALLPAPER_HEIGHT = 1080
 
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).
@@ -2277,10 +2280,12 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
       }
     }
 
-    // The home wallpaper is a full-screen background: STRICTLY WebP and
-    // STRICTLY portrait, so it fills a phone screen without letterboxing. The
-    // ratio is enforced from the file header so the rule holds even when the
-    // API is called directly rather than through the admin panel.
+    // The home wallpaper is a landscape band across the top of the home screen
+    // (see lib/modules/home/sections/home_wallpaper.dart): STRICTLY WebP and
+    // STRICTLY landscape, so it reads as a banner instead of a squashed
+    // full-screen photo. The ratio is enforced from the file header so the rule
+    // holds even when the API is called directly rather than through the admin
+    // panel.
     if (req.body && req.body.kind === 'home_wallpaper') {
       if (ext !== 'webp') {
         return res.status(400).json({ error: 'Wallpaper must be a WebP file' })
@@ -2289,9 +2294,9 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
       if (!size) {
         return res.status(400).json({ error: 'Could not read that WebP image (is the file complete?)' })
       }
-      if (!matchesAspectRatio(size, WALLPAPER_ASPECT_RATIO, WALLPAPER_RATIO_TOLERANCE)) {
+      if (!matchesAspectRatioRange(size, WALLPAPER_MIN_RATIO, WALLPAPER_MAX_RATIO)) {
         return res.status(400).json({
-          error: `Wallpaper must be portrait ${WALLPAPER_LABEL} `
+          error: `Wallpaper must be ${WALLPAPER_LABEL} `
             + `(got ${size.width}x${size.height}). `
             + `Recommended ${WALLPAPER_WIDTH}x${WALLPAPER_HEIGHT}.`,
         })

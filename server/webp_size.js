@@ -67,3 +67,18 @@ export function matchesAspectRatio(size, targetRatio, tolerance = 0.02) {
   const actual = size.width / size.height
   return Math.abs(actual - targetRatio) / targetRatio <= tolerance
 }
+
+/**
+ * Whether [size]'s aspect ratio falls inside [minRatio]..[maxRatio], inclusive.
+ *
+ * Used for the home wallpaper, which the app draws as a landscape band across
+ * the top of the home screen rather than as a full-screen cover. A band crops so
+ * forgivingly that pinning one exact ratio would reject artwork for no visible
+ * benefit, so the rule is "landscape, within a sensible range" (1.3:1 to 3.2:1
+ * — 4:3 through wider than 3:1) instead.
+ */
+export function matchesAspectRatioRange(size, minRatio, maxRatio) {
+  if (!size || !size.width || !size.height) return false
+  const actual = size.width / size.height
+  return actual >= minRatio && actual <= maxRatio
+}

@@ -391,9 +391,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="appearancePanel" class="view">
   <h2 style="margin-bottom:4px;">Appearance</h2>
   <p style="font-size:13px;color:#666;margin-bottom:14px;">
-    The home screen wallpaper, shown behind everything on the app's home page.
-    Upload a portrait 9:16 WebP; the app fits it to the screen and dims it so
-    the headings and cards stay readable. Remove it to return to the plain
+    The home screen wallpaper: a landscape band across the top of the home page,
+    behind the &ldquo;Soulful Bhakti&rdquo; header. Upload a landscape WebP
+    (16:9, 1920&times;1080 recommended); the app crops it to that band and dims
+    it so the header text stays readable. Remove it to return to the plain
     themed background.
   </p>
   <div id="wallpaperBox"></div>
@@ -1478,13 +1479,16 @@ const FEATURED_CHIPS = [
 
 // The accepted wallpaper geometry. Must match the server constants
 // (WALLPAPER_* in server.js).
-const WALLPAPER_RATIO = 9 / 16;
-const WALLPAPER_WIDTH = 1080;
-const WALLPAPER_HEIGHT = 1920;
-const WALLPAPER_LABEL = '9:16 portrait';
-// Phone screens range from 9:16 to about 9:21, so the ratio band is wider than
-// the banner's (0.22 = ~22%), matching the server's tolerance.
-const WALLPAPER_RATIO_TOLERANCE = 0.22;
+//
+// The wallpaper is a LANDSCAPE band across the top of the home screen, not a
+// full-screen background, so the upload is landscape. The ratio is a RANGE, not
+// one exact value: the app crops the band with BoxFit.cover, which is forgiving
+// enough that 16:9 and 8:3 artwork both land with only a small edge crop.
+const WALLPAPER_MIN_RATIO = 1.3;
+const WALLPAPER_MAX_RATIO = 3.2;
+const WALLPAPER_WIDTH = 1920;
+const WALLPAPER_HEIGHT = 1080;
+const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1';
 
 let featuredRows = [];
 
@@ -1715,15 +1719,15 @@ function renderWallpaper(url) {
     '<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">' +
       '<h3 style="margin-bottom:8px;">Home wallpaper</h3>' +
       '<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">' +
-        '<div style="width:150px;height:266px;border-radius:10px;overflow:hidden;border:1px solid #ddd;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">' +
+        '<div style="width:320px;height:160px;border-radius:10px;overflow:hidden;border:1px solid #ddd;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">' +
           (url
             ? '<img src="' + esc(url) + '" alt="Home wallpaper" style="width:100%;height:100%;object-fit:cover;">'
             : '<span style="color:#9ca3af;font-size:12px;text-align:center;padding:8px;">No wallpaper<br><small>Using the plain themed background</small></span>') +
         '</div>' +
         '<div style="flex:1;min-width:260px;">' +
           '<p style="font-size:12px;color:#666;margin-bottom:10px;">' +
-            'Portrait ' + WALLPAPER_LABEL + ' WebP, ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' recommended. ' +
-            'The app fits it to the screen and dims the top and bottom so the header and mini player stay readable.' +
+            'Landscape WebP, ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' (16:9) recommended — ' + WALLPAPER_LABEL + '. ' +
+            'The app draws it as a 2:1 band across the top of the home screen and dims it so the header text stays readable.' +
           '</p>' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
             '<button class="btn btn-primary" type="button" onclick="document.getElementById(\'wallpaperInput\').click()">' +
@@ -1758,12 +1762,13 @@ async function handleWallpaperUpload(input) {
       return;
     }
 
-    // 2) Geometry: portrait 9:16 within the server's tolerance, so a 9:19.5
-    //    phone wallpaper is accepted while a landscape image is rejected.
+    // 2) Geometry: landscape, inside the server's accepted range. One exact
+    //    ratio is deliberately not required — the app crops the band with
+    //    BoxFit.cover, so 16:9 and 8:3 artwork both work.
     wallpaperHint('Checking dimensions…', 'is-busy');
     const dims = await readImageSize(file);
     const ratio = dims.width / dims.height;
-    if (Math.abs(ratio - WALLPAPER_RATIO) / WALLPAPER_RATIO > WALLPAPER_RATIO_TOLERANCE) {
+    if (ratio < WALLPAPER_MIN_RATIO || ratio > WALLPAPER_MAX_RATIO) {
       wallpaperHint(
         '✗ Wrong aspect ratio: got ' + dims.width + '×' + dims.height + ' (' + ratio.toFixed(2) + ':1). ' +
         'Wallpaper must be ' + WALLPAPER_LABEL + ' — ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' recommended.',
