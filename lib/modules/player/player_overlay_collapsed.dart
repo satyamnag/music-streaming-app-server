@@ -13,18 +13,24 @@ import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 
 class PlayerOverlayCollapsedSection extends HookConsumerWidget {
-  /// Height of the collapsed mini player, including the timeline bar.
+  /// Height of the collapsed mini player.
   ///
   /// Shared with [PlayerOverlay] (which sizes the SlidingUpPanel header and
   /// minHeight with it) so the panel geometry and the content can never drift
   /// apart — a mismatch would clip the timeline or leave dead space.
   ///
-  /// Budget: artwork/title row + [TimelineBar] (one row: the elapsed and total
-  /// labels flank the slider) + the 5px outer padding above and below.
+  /// Budget: the artwork/title row, plus the 5px outer padding above and below.
+  /// The [TimelineBar] now lives INSIDE that row (handed to
+  /// [PlayerTrackDetails.footer]) so it runs from the artwork's right edge to
+  /// the controls' left edge, directly beneath the track name. It no longer
+  /// occupies a band of its own under the artwork and the buttons.
   ///
-  /// Reduced from 104 once the timeline became a single row instead of a slider
-  /// with a second label row beneath it, so the bar sits tight under the track
-  /// name exactly as in the design.
+  /// Deliberately left at 86 instead of being tightened to the smaller content:
+  /// the row keeps its single `Expanded` child, so it always fills whatever
+  /// height it is given — no dead band, and no possibility of a RenderFlex
+  /// overflow. The artwork (its own 80px box minus 6px padding, so 68 max)
+  /// absorbs the space the bar gave up and now renders at full size. Lower this
+  /// value to shrink the artwork back; the row needs about 54 at minimum.
   static const double collapsedHeight = 86;
 
   final PanelController panelController;
@@ -78,6 +84,21 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
                                 child: PlayerTrackDetails(
                                   track: playlist.activeTrack,
                                   color: theme.colorScheme.foreground,
+                                  // The playback timeline lives inside the
+                                  // details column, so it sits directly under
+                                  // the track name and spans only the gap
+                                  // between the artwork and the controls.
+                                  footer: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 2,
+                                      right: 4,
+                                    ),
+                                    child: TimelineBar(
+                                      interactive: !isFetchingActiveTrack,
+                                      labelColor:
+                                          theme.colorScheme.mutedForeground,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -126,15 +147,6 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
                             ],
                           ),
                         ],
-                      ),
-                    ),
-                    // Horizontal playback timeline with elapsed / total time,
-                    // shown directly beneath the track name & controls.
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 2),
-                      child: TimelineBar(
-                        interactive: !isFetchingActiveTrack,
-                        labelColor: theme.colorScheme.mutedForeground,
                       ),
                     ),
                   ],

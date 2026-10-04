@@ -12,7 +12,23 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 class PlayerTrackDetails extends HookConsumerWidget {
   final Color? color;
   final SangeetTrackObject? track;
-  const PlayerTrackDetails({super.key, this.color, this.track});
+
+  /// Optional widget rendered directly BENEATH the track name, inside the same
+  /// column as it.
+  ///
+  /// Because that column already sits to the right of the artwork and to the
+  /// left of whatever follows the details, a footer here spans exactly the gap
+  /// between them. The collapsed mini player passes its [TimelineBar] this way,
+  /// which is what puts the playback timeline under the track name instead of
+  /// in a full-width band below both the artwork and the controls.
+  final Widget? footer;
+
+  const PlayerTrackDetails({
+    super.key,
+    this.color,
+    this.track,
+    this.footer,
+  });
 
   @override
   Widget build(BuildContext context, ref) {
@@ -51,6 +67,7 @@ class PlayerTrackDetails extends HookConsumerWidget {
                     color: color,
                   ),
                 ),
+                if (footer != null) footer!,
               ],
             ),
           ),
@@ -66,6 +83,7 @@ class PlayerTrackDetails extends HookConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.bold, color: color),
                 ),
+                if (footer != null) footer!,
               ],
             ),
           ),
