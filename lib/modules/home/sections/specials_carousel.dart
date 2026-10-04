@@ -172,15 +172,6 @@ class _BannerSlide extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14 * scale),
-        boxShadow: [
-          BoxShadow(
-            color: theme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.16)
-                : theme.colorScheme.primary.withValues(alpha: 0.20),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -383,15 +374,6 @@ class _SquareSlide extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(14 * scale),
-        boxShadow: [
-          BoxShadow(
-            color: theme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.12)
-                : theme.colorScheme.primary.withValues(alpha: 0.18),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(

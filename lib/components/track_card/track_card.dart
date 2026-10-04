@@ -102,15 +102,6 @@ class TrackCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12 * scale),
         color: bg,
-        boxShadow: [
-          BoxShadow(
-            color: theme.brightness == Brightness.light
-                ? Colors.black.withValues(alpha: 0.12)
-                : theme.colorScheme.primary.withValues(alpha: 0.18),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
