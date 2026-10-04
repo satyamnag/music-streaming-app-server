@@ -59,7 +59,6 @@ class PlaybuttonCard extends StatelessWidget {
                     ),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: context.theme.borderRadiusMd,
                 ),
               )
             else
@@ -67,7 +66,6 @@ class PlaybuttonCard extends StatelessWidget {
                 width: 150 * scale,
                 height: 150 * scale,
                 decoration: BoxDecoration(
-                  borderRadius: context.theme.borderRadiusMd,
                   borderRadius: context.theme.borderRadiusMd,
                 ),
                 child: ClipRRect(
