@@ -5,9 +5,12 @@ import 'package:sangeet/modules/home/sections/featured_playlists.dart';
 /// Unit tests for the "Featured Playlist" chip rules.
 ///
 /// The chips re-use the Specials shelves' proven word-start keyword rule, and
-/// this file pins that rule plus the row-parsing contract (an admin row may
-/// override a built-in chip, extra rows append, blank/whitespace values degrade
-/// to "unset" rather than producing a broken chip).
+/// this file pins that rule plus the row-parsing contract: the chips are built
+/// entirely from admin rows — there is no built-in catalogue any more — so a
+/// missing or malformed field has to degrade to a sane default instead of
+/// producing a broken or invisible chip. Membership resolution (hand-picked
+/// tracks, the optional keyword rule, de-duplication, ordering) is covered end
+/// to end in dynamic_sections_test.dart.
 void main() {
   group('chip keyword matching (shared with the Specials shelves)', () {
     test('a keyword matches at a word start, allowing suffixes', () {
@@ -84,6 +87,60 @@ void main() {
       expect(
         FeaturedPlaylistRow.fromJson(<String, dynamic>{}).isHidden,
         isFalse,
+      );
+    });
+
+    test('reads the hand-picked track list, dropping blanks', () {
+      final row = FeaturedPlaylistRow.fromJson(<String, dynamic>{
+        'trackIds': ['a', ' b ', ''],
+      });
+      expect(row.trackIds, equals(['a', 'b']));
+    });
+
+    test('a non-list trackIds is treated as "none" rather than throwing', () {
+      // The server always sends an array; a string here would mean an older or
+      // unexpected payload, and it must not take the whole chip row down.
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{'trackIds': 'a,b'})
+            .trackIds,
+        isEmpty,
+      );
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{}).trackIds,
+        isEmpty,
+      );
+    });
+
+    test('matchKeywords defaults on and only an explicit false turns it off', () {
+      // Defaulting on keeps a row whose payload predates migration 029 behaving
+      // the way it did before (keyword matching), rather than silently emptying.
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{}).matchKeywords,
+        isTrue,
+      );
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{'matchKeywords': false})
+            .matchKeywords,
+        isFalse,
+      );
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{'matchKeywords': 'false'})
+            .matchKeywords,
+        isTrue,
+        reason: 'only a real boolean false disables the rule',
+      );
+    });
+
+    test('reads the admin-uploaded icon url', () {
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{
+          'iconUrl': 'https://cdn.example.com/icon.webp',
+        }).iconUrl,
+        equals('https://cdn.example.com/icon.webp'),
+      );
+      expect(
+        FeaturedPlaylistRow.fromJson(<String, dynamic>{}).iconUrl,
+        isNull,
       );
     });
   });

@@ -1312,15 +1312,51 @@ class ServerSupabaseDataRoutes {
     }
   }
 
+  /// Reads the EXPLICIT, ordered track membership of one home catalogue
+  /// (migration 029), keyed by the owning row's id.
+  ///
+  /// [idColumn] is `special_id` for shelves and `playlist_id` for featured
+  /// playlists. A missing table (migration 029 not applied) degrades to an empty
+  /// map so the keyword rule alone still drives the catalogue.
+  Future<Map<String, List<String>>> _readTrackMembership(
+    SupabaseClient sb,
+    String table,
+    String idColumn,
+  ) async {
+    final out = <String, List<String>>{};
+    try {
+      final raw = await sb
+          .from(table)
+          .select('$idColumn, track_id, position')
+          .order('position', ascending: true);
+      for (final row in (raw as List<dynamic>).cast<Map<String, dynamic>>()) {
+        final owner = row[idColumn]?.toString();
+        final trackId = row['track_id']?.toString();
+        if (owner == null ||
+            owner.isEmpty ||
+            trackId == null ||
+            trackId.isEmpty) {
+          continue;
+        }
+        (out[owner] ??= <String>[]).add(trackId);
+      }
+    } catch (_) {
+      // Table absent or unreachable: no hand-picked tracks.
+    }
+    return out;
+  }
+
   /// GET /supabase/specials
   ///
-  /// Returns the admin-managed overrides for the curated home "Specials"
-  /// shelves: `{items: [{id, title, subtitle, bannerUrl, sortOrder,
-  /// isHidden}]}`.
+  /// Returns the home "Specials" shelves. The DATABASE is the only source of
+  /// truth — the app carries no built-in shelf list any more:
+  /// `{items: [{id, title, subtitle, bannerUrl, keywords, matchKeywords,
+  /// trackIds, sortOrder, isHidden}]}`.
   ///
-  /// The shelves themselves are derived in the app from track keywords; this
-  /// only carries per-shelf overrides. A missing table (migration 027 not yet
-  /// applied) degrades to an empty list so the home screen keeps working.
+  /// `trackIds` is the explicit, ordered list the admin picked by hand;
+  /// `keywords` is an optional rule the app applies on top when
+  /// `matchKeywords` is true. A missing table degrades to an empty list, which
+  /// simply means no shelves are configured.
   Future<Response> getSpecials(Request request) async {
     try {
       final sb = await _supabase;
@@ -1332,24 +1368,30 @@ class ServerSupabaseDataRoutes {
             .order('sort_order', ascending: true, nullsFirst: false);
         rows = (raw as List<dynamic>).cast<Map<String, dynamic>>();
       } catch (_) {
-        // Table absent or unreachable: no overrides, defaults still apply.
+        // Table absent or unreachable: no shelves configured.
         rows = const [];
+      }
+
+      final membership =
+          await _readTrackMembership(sb, 'special_tracks', 'special_id');
+
+      String? trimmed(dynamic v) {
+        final s = v?.toString().trim();
+        return (s == null || s.isEmpty) ? null : s;
       }
 
       final items = rows
           .map((r) => {
                 'id': r['id']?.toString() ?? '',
-                'title': (r['title']?.toString().trim().isNotEmpty ?? false)
-                    ? r['title'].toString().trim()
-                    : null,
-                'subtitle':
-                    (r['subtitle']?.toString().trim().isNotEmpty ?? false)
-                        ? r['subtitle'].toString().trim()
-                        : null,
-                'bannerUrl':
-                    (r['banner_url']?.toString().trim().isNotEmpty ?? false)
-                        ? r['banner_url'].toString().trim()
-                        : null,
+                'title': trimmed(r['title']),
+                'subtitle': trimmed(r['subtitle']),
+                'bannerUrl': trimmed(r['banner_url']),
+                'keywords': trimmed(r['keywords']) ?? '',
+                // Absent column (pre-029 row) is treated as "match", which is
+                // how the catalogue behaved before the flag existed.
+                'matchKeywords': r['match_keywords'] != false,
+                'trackIds':
+                    membership[r['id']?.toString() ?? ''] ?? const <String>[],
                 'sortOrder': r['sort_order'],
                 'isHidden': r['is_hidden'] == true,
               })
@@ -1400,15 +1442,16 @@ class ServerSupabaseDataRoutes {
 
   /// GET /supabase/featured-playlists
   ///
-  /// Returns the admin-managed "Featured Playlist" chips shown as round
-  /// buttons under the home carousel: `{items: [{id, title, keywords,
-  /// colorFrom, colorTo, icon, sortOrder, isHidden}]}`.
+  /// Returns the "Featured Playlist" chips shown as round buttons under the home
+  /// carousel. The DATABASE is the only source of truth — the app carries no
+  /// built-in chip list any more:
+  /// `{items: [{id, title, keywords, matchKeywords, colorFrom, colorTo, icon,
+  /// iconUrl, trackIds, sortOrder, isHidden}]}`.
   ///
-  /// The chips' TRACKS are not resolved here — the app matches `keywords`
-  /// against the catalogue with the same word-start rule the Specials shelves
-  /// use, so this endpoint stays cheap. A missing table (migration 028 not
-  /// applied) degrades to an empty list and the app falls back to its built-in
-  /// chip defaults.
+  /// `trackIds` is the explicit ordered list the admin picked; `keywords` is an
+  /// optional rule applied on top when `matchKeywords` is true. `iconUrl` is an
+  /// admin-uploaded image that wins over the `icon` glyph name. A missing table
+  /// degrades to an empty list, which simply means no chips are configured.
   Future<Response> getFeaturedPlaylists(Request request) async {
     try {
       final sb = await _supabase;
@@ -1423,6 +1466,12 @@ class ServerSupabaseDataRoutes {
         rows = const [];
       }
 
+      final membership = await _readTrackMembership(
+        sb,
+        'featured_playlist_tracks',
+        'playlist_id',
+      );
+
       String? trimmed(dynamic v) {
         final s = v?.toString().trim();
         return (s == null || s.isEmpty) ? null : s;
@@ -1433,9 +1482,15 @@ class ServerSupabaseDataRoutes {
                 'id': r['id']?.toString() ?? '',
                 'title': trimmed(r['title']),
                 'keywords': trimmed(r['keywords']) ?? '',
+                // Absent column (pre-029 row) is treated as "match", which is
+                // how the chips behaved before the flag existed.
+                'matchKeywords': r['match_keywords'] != false,
                 'colorFrom': trimmed(r['color_from']),
                 'colorTo': trimmed(r['color_to']),
                 'icon': trimmed(r['icon']),
+                'iconUrl': trimmed(r['icon_url']),
+                'trackIds':
+                    membership[r['id']?.toString() ?? ''] ?? const <String>[],
                 'sortOrder': r['sort_order'],
                 'isHidden': r['is_hidden'] == true,
               })

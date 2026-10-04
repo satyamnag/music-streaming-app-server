@@ -19,8 +19,12 @@ import 'package:flutter/material.dart' as material;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sangeet/modules/home/sections/featured_playlist_chips.dart';
 
-/// Glyph names as the built-in chips and the admin dropdown use them, plus an
-/// unknown and an empty name to cover the fallback.
+/// Glyph names as the admin dropdown offers them, plus an unknown and an empty
+/// name to cover the fallback.
+///
+/// Keep in step with `CHIP_ICON_GLYPHS` in `server/admin.html`: a name offered
+/// there but missing from the painter would render the fallback note, which is
+/// exactly what these tests exist to catch.
 const _glyphs = <String>[
   'temple',
   'flute',
@@ -28,6 +32,10 @@ const _glyphs = <String>[
   'bow',
   'lotus',
   'om',
+  'trishul',
+  'conch',
+  'diya',
+  'bell',
   'music',
   'unknown-fallback',
   '',
@@ -125,7 +133,18 @@ void main() {
       // If two names produced identical bounds, one of them is falling through
       // to the wrong case (e.g. a typo silently hitting the fallback).
       final boxes = <String, String>{};
-      for (final name in ['temple', 'flute', 'ganesha', 'bow', 'lotus', 'om']) {
+      for (final name in [
+        'temple',
+        'flute',
+        'ganesha',
+        'bow',
+        'lotus',
+        'om',
+        'trishul',
+        'conch',
+        'diya',
+        'bell',
+      ]) {
         final c = await _rasterise(name);
         boxes[name] = '${c.minX},${c.maxX},${c.minY},${c.maxY},${c.painted}';
       }

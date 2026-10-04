@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -7,15 +8,17 @@ import 'package:sangeet/modules/home/sections/featured_playlists.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// The row of round "Featured Playlist" chips shown under the home carousel,
-/// matching the reference design: a colored circle with a white glyph inside
+/// matching the reference design: a colored circle with the admin's icon inside
 /// and the name underneath. Tapping a chip plays that chip's tracks.
 ///
-/// The glyphs are drawn with a [CustomPainter] rather than pulled from an icon
-/// font. The design uses devotional symbols (a temple gopuram, a flute, a
-/// lotus, an Om) that no bundled icon set provides, and drawing them means the
-/// row renders identically offline with no extra asset weight. An unknown
-/// `icon` name falls back to a music glyph, so an admin typo can never produce
-/// an empty circle.
+/// Every chip is admin-defined. Its icon is either an image the admin uploaded
+/// (`icon_url`) or one of the glyphs the painter below knows; the glyphs are
+/// drawn with a [CustomPainter] rather than pulled from an icon font, because
+/// the design uses devotional symbols (a temple gopuram, a flute, a lotus, an
+/// Om, a trishul, a conch, a diya, a bell) that no bundled icon set provides —
+/// and drawing them means the row renders identically offline with no extra
+/// asset weight. An unknown `icon` name falls back to a music glyph, so an admin
+/// typo can never produce an empty circle.
 class FeaturedPlaylistChips extends HookConsumerWidget {
   const FeaturedPlaylistChips({super.key});
 
@@ -126,13 +129,7 @@ class _FeaturedChip extends StatelessWidget {
                   ],
                 ),
                 child: Center(
-                  child: CustomPaint(
-                    size: Size(diameter * 0.5, diameter * 0.5),
-                    painter: FeaturedChipGlyphPainter(
-                      name: chip.icon ?? '',
-                      color: glyphColor,
-                    ),
-                  ),
+                  child: _circleArtwork(diameter, glyphColor),
                 ),
               ),
               Gap(6 * scale),
@@ -152,6 +149,38 @@ class _FeaturedChip extends StatelessWidget {
       ),
     );
   }
+
+  /// The circle's inner artwork.
+  ///
+  /// An admin-uploaded [FeaturedPlaylist.iconUrl] is drawn instead of the glyph,
+  /// so the admin can put any devotional image on a chip. The image is clipped
+  /// to the circle (the same circle the admin previews) and a load failure —
+  /// offline, or the object since deleted — falls back to the glyph rather than
+  /// the shared placeholder, so the chip keeps its meaning instead of turning
+  /// into a generic image box.
+  Widget _circleArtwork(double diameter, Color glyphColor) {
+    final url = chip.iconUrl?.trim() ?? '';
+    if (url.isEmpty) return _glyph(diameter, glyphColor);
+
+    return ClipOval(
+      child: Image(
+        image: CachedNetworkImageProvider(url, cacheKey: url),
+        width: diameter,
+        height: diameter,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _glyph(diameter, glyphColor),
+      ),
+    );
+  }
+
+  /// The painted devotional glyph, used directly or as the icon's fallback.
+  Widget _glyph(double diameter, Color glyphColor) => CustomPaint(
+        size: Size(diameter * 0.5, diameter * 0.5),
+        painter: FeaturedChipGlyphPainter(
+          name: chip.icon ?? '',
+          color: glyphColor,
+        ),
+      );
 }
 
 /// WCAG relative luminance of [c].
@@ -175,6 +204,11 @@ double _contrastRatio(Color a, Color b) {
 /// Every glyph is stroke-based line art so a single painter covers all of them
 /// and each stays crisp at any size. Unknown names draw the fallback music
 /// note, which is also what an admin typo lands on.
+///
+/// The recognised names — `temple`, `flute`, `ganesha`, `bow`, `lotus`, `om`,
+/// `trishul`, `conch`, `diya`, `bell` and `music` — must stay in step with
+/// `CHIP_ICON_GLYPHS` in `server/admin.html`; a name offered there that is
+/// missing here would silently render the fallback note.
 ///
 /// Public (not private) so the glyph sheet can be rendered to an image in a
 /// test and actually looked at, rather than only asserted not to throw.
@@ -213,6 +247,18 @@ class FeaturedChipGlyphPainter extends CustomPainter {
         break;
       case 'om':
         _om(canvas, s, paint);
+        break;
+      case 'trishul':
+        _trishul(canvas, s, paint);
+        break;
+      case 'conch':
+        _conch(canvas, s, paint);
+        break;
+      case 'diya':
+        _diya(canvas, s, paint);
+        break;
+      case 'bell':
+        _bell(canvas, s, paint);
         break;
       default:
         _musicNote(canvas, s, paint);
@@ -432,6 +478,135 @@ class FeaturedChipGlyphPainter extends CustomPainter {
 
     // Bindu: the dot above the crescent.
     canvas.drawCircle(Offset(s * 0.70, s * 0.18), s * 0.075, heavy);
+  }
+
+  /// Shiva's trishul: three prongs on a shaft, rising from a crossbar.
+  void _trishul(Canvas canvas, double s, Paint p) {
+    // Shaft. Stops at 0.92 like the temple's plinth: the round cap adds half a
+    // stroke width past the end point, and 0.98 would clip at the box edge.
+    final shaft = Path()
+      ..moveTo(s * 0.50, s * 0.92)
+      ..lineTo(s * 0.50, s * 0.26);
+    canvas.drawPath(shaft, p);
+
+    // Crossbar the prongs rise from.
+    final bar = Path()
+      ..moveTo(s * 0.24, s * 0.62)
+      ..lineTo(s * 0.76, s * 0.62);
+    canvas.drawPath(bar, p);
+
+    // Centre prong: a spearhead.
+    final centre = Path()
+      ..moveTo(s * 0.42, s * 0.26)
+      ..lineTo(s * 0.50, s * 0.05)
+      ..lineTo(s * 0.58, s * 0.26);
+    canvas.drawPath(centre, p);
+
+    // Outer prongs: they bow outward, then hook inward at the top - the shape
+    // that separates a trishul from a plain three-tined fork.
+    for (final sign in [-1.0, 1.0]) {
+      final prong = Path()
+        ..moveTo(s * (0.50 + 0.26 * sign), s * 0.62)
+        ..cubicTo(
+          s * (0.50 + 0.31 * sign),
+          s * 0.44,
+          s * (0.50 + 0.31 * sign),
+          s * 0.28,
+          s * (0.50 + 0.19 * sign),
+          s * 0.20,
+        );
+      canvas.drawPath(prong, p);
+    }
+  }
+
+  /// Vishnu's shankha: a conch whose whorl is what makes it readable.
+  void _conch(Canvas canvas, double s, Paint p) {
+    // Body: a bulb at the top tapering into the tail at the lower left.
+    final body = Path()
+      ..moveTo(s * 0.46, s * 0.14)
+      ..cubicTo(s * 0.80, s * 0.16, s * 0.86, s * 0.52, s * 0.62, s * 0.68)
+      ..cubicTo(s * 0.46, s * 0.78, s * 0.32, s * 0.84, s * 0.20, s * 0.90)
+      ..cubicTo(s * 0.22, s * 0.66, s * 0.26, s * 0.30, s * 0.46, s * 0.14);
+    canvas.drawPath(body, p);
+
+    // The whorl: an open spiral in the middle of the bulb.
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(s * 0.50, s * 0.44),
+        width: s * 0.34,
+        height: s * 0.34,
+      ),
+      -math.pi * 0.20,
+      math.pi * 1.55,
+      false,
+      p,
+    );
+
+    // A second, tighter curl inside it, so the spiral reads as a spiral.
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(s * 0.50, s * 0.44),
+        width: s * 0.13,
+        height: s * 0.13,
+      ),
+      math.pi * 0.30,
+      math.pi * 1.30,
+      false,
+      p,
+    );
+  }
+
+  /// A diya: the lamp cup with its flame, for aarti-style playlists.
+  void _diya(Canvas canvas, double s, Paint p) {
+    // Flame: a teardrop floating above the cup.
+    final flame = Path()
+      ..moveTo(s * 0.50, s * 0.06)
+      ..cubicTo(s * 0.66, s * 0.22, s * 0.64, s * 0.36, s * 0.50, s * 0.42)
+      ..cubicTo(s * 0.36, s * 0.36, s * 0.34, s * 0.22, s * 0.50, s * 0.06);
+    canvas.drawPath(flame, p);
+
+    // Rim: the lip the wick sits on.
+    final rim = Path()
+      ..moveTo(s * 0.10, s * 0.58)
+      ..lineTo(s * 0.90, s * 0.58);
+    canvas.drawPath(rim, p);
+
+    // Cup: a shallow bowl under the rim.
+    final cup = Path()
+      ..moveTo(s * 0.14, s * 0.58)
+      ..cubicTo(s * 0.22, s * 0.86, s * 0.78, s * 0.86, s * 0.86, s * 0.58);
+    canvas.drawPath(cup, p);
+  }
+
+  /// A temple bell: dome, rim, crown loop and clapper.
+  void _bell(Canvas canvas, double s, Paint p) {
+    // Dome.
+    final dome = Path()
+      ..moveTo(s * 0.26, s * 0.72)
+      ..cubicTo(s * 0.26, s * 0.30, s * 0.74, s * 0.30, s * 0.74, s * 0.72);
+    canvas.drawPath(dome, p);
+
+    // Rim.
+    final rim = Path()
+      ..moveTo(s * 0.16, s * 0.72)
+      ..lineTo(s * 0.84, s * 0.72);
+    canvas.drawPath(rim, p);
+
+    // Crown loop: the handle the bell hangs from.
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: Offset(s * 0.50, s * 0.24),
+        width: s * 0.18,
+        height: s * 0.18,
+      ),
+      math.pi,
+      math.pi,
+      false,
+      p,
+    );
+
+    // Clapper, hanging below the rim.
+    canvas.drawCircle(Offset(s * 0.50, s * 0.86), s * 0.075, p);
   }
 
   /// Fallback glyph: a quaver, used for an unknown `icon` name.

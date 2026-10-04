@@ -144,7 +144,10 @@ void main() {
 
     // Includes an unknown name and an empty one: both must fall back to the
     // music glyph rather than throwing or drawing nothing.
-    final names = ['temple', 'flute', 'ganesha', 'bow', 'lotus', 'om', 'nope', ''];
+    final names = [
+      'temple', 'flute', 'ganesha', 'bow', 'lotus', 'om',
+      'trishul', 'conch', 'diya', 'bell', 'nope', '',
+    ];
     final chips = [
       for (var i = 0; i < names.length; i++)
         _chip('c$i', 'Chip $i', names[i]),
@@ -182,6 +185,34 @@ void main() {
     // IgnorePointer is what stops a full-screen image from swallowing taps
     // meant for the cards and carousel above it.
     expect(find.byType(IgnorePointer), findsWidgets);
+  });
+
+  testWidgets('an uploaded icon that cannot load falls back to the glyph',
+      (tester) async {
+    tester.view.physicalSize = const material.Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    // The admin-uploaded image is drawn instead of the glyph. In a test there is
+    // no network, so this exercises the fallback that matters in the field too:
+    // a chip whose icon 404s (or whose object was deleted) must still draw its
+    // glyph rather than an empty or broken circle.
+    final withIcon = FeaturedPlaylist(
+      id: 'uploaded',
+      title: 'Uploaded',
+      keywords: const ['uploaded'],
+      icon: 'conch',
+      iconUrl: 'https://cdn.example.com/does-not-exist.webp',
+      tracks: [_track('uploaded', 'Uploaded Track')],
+    );
+
+    await tester.pumpWidget(
+      _harness(const FeaturedPlaylistChips(), overrides: _withChips([withIcon])),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Uploaded'), findsOneWidget);
   });
 
   testWidgets('a pale chip color still picks a readable glyph', (tester) async {

@@ -202,6 +202,38 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .special-hint { font-size: 11px; color: #666; margin-top: 8px; line-height: 1.5; }
 .special-hint.is-error { color: #dc2626; font-weight: 600; }
 .special-hint.is-busy { color: #2563eb; }
+/* A row that contributes no tracks never reaches the home screen. */
+.special-warn-badge {
+  background: #fef3c7; color: #92400e; border-radius: 999px;
+  padding: 1px 8px; font-size: 11px; font-weight: 600;
+}
+.pick-count { font-size: 12px; color: #555; }
+.pick-box {
+  margin-top: 10px; padding: 10px; border: 1px solid #e5e7eb;
+  border-radius: 8px; background: #f9fafb;
+}
+.pick-list {
+  max-height: 240px; overflow-y: auto; margin-top: 8px; background: #fff;
+  border: 1px solid #e5e7eb; border-radius: 6px;
+}
+.pick-row {
+  display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+  font-size: 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer;
+}
+.pick-row:last-child { border-bottom: none; }
+.pick-row:hover { background: #f8fafc; }
+.pick-meta { color: #888; font-size: 11px; }
+.pick-chosen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pick-chip {
+  display: inline-flex; align-items: center; gap: 5px; background: #eef2ff;
+  color: #3730a3; border-radius: 999px; padding: 2px 4px 2px 8px; font-size: 11px;
+}
+.pick-chip button {
+  border: none; background: none; color: #4338ca; cursor: pointer;
+  font-size: 11px; padding: 0 2px; line-height: 1;
+}
+.pick-chip button:disabled { opacity: .3; cursor: default; }
+.pick-empty { font-size: 12px; color: #888; padding: 6px 2px; }
 .color-preview-card {
   width: 118px; border-radius: 12px; overflow: hidden; flex: none;
   background: #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,.18);
@@ -348,32 +380,50 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="specialsPanel" class="view">
   <h2 style="margin-bottom:4px;">Specials</h2>
   <p style="font-size:13px;color:#666;margin-bottom:14px;">
-    Each Special is a landscape banner carousel on the home screen. Upload a
-    banner to give a shelf its own artwork; without one it falls back to its
-    tracks' cover art. A shelf appears only when tracks match its theme.
+    This panel is the source of truth for the Specials on the home screen: the
+    app ships no built-in shelf list, so every shelf below is one you created
+    here. Each Special is a landscape banner carousel &mdash; upload a banner to
+    give a shelf its own artwork; without one it falls back to its tracks' cover
+    art. Membership is the ordered track list you pick per shelf; keywords are an
+    optional extra rule. A shelf with <b>no tracks</b> does not appear on the
+    home screen at all.
   </p>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">New shelf</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label>Id</label><input id="spNewId" placeholder="from the title" title="Optional. Lowercase letters, digits or dashes. Derived from the title when left blank."></div>
+      <div><label>Title *</label><input id="spNewTitle" placeholder="e.g. Hanuman Special"></div>
+      <div><label>Subtitle</label><input id="spNewSub" placeholder="e.g. Bajrang baan and chalisas"></div>
+      <div><label>Sort order</label><input id="spNewOrder" type="number" placeholder="lower shows first"></div>
+      <button class="btn btn-success" type="button" onclick="createSpecial()">Create shelf</button>
+    </div>
+    <div class="special-hint" id="spNewHint">
+      A new shelf starts with no tracks, so it stays off the home screen until you
+      add some. The id is derived from the title when you leave it blank.
+    </div>
+  </div>
   <div id="specialsList"></div>
 </div>
 
 <div id="featuredPanel" class="view">
   <h2 style="margin-bottom:4px;">Featured Playlists</h2>
   <p style="font-size:13px;color:#666;margin-bottom:14px;">
-    The round buttons shown in a row under the home carousel
-    ("Venkateswara", "Krishna", "Ganesha", ...). Each chip plays the tracks
-    whose title, album, artist or tags match its keywords. A chip is hidden
-    automatically when nothing matches, so the row never shows a dead button.
-    Leave a field blank to use the built-in default.
+    The round buttons shown in a row under the home carousel. This panel is the
+    source of truth: the app ships no built-in playlist list, so every chip below
+    comes from here. Each chip plays the ordered tracks you pick for it; keywords
+    are an optional extra rule. A playlist with <b>no tracks</b> does not appear
+    on the home screen at all. An uploaded icon image wins over the built-in
+    glyph, which stays as the fallback.
   </p>
-  <div id="featuredList"></div>
-  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-top:16px;">
-    <h3 style="margin-bottom:8px;">Add a custom chip</h3>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">New playlist</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-      <div><label>Id *</label><input id="fpNewId" placeholder="e.g. hanuman" title="Lowercase letters, digits or dashes. Used as the stable id."></div>
+      <div><label>Id</label><input id="fpNewId" placeholder="from the name" title="Optional. Lowercase letters, digits or dashes. Derived from the name when left blank."></div>
       <div><label>Name *</label><input id="fpNewTitle" placeholder="e.g. Hanuman"></div>
-      <div><label>Keywords (comma separated) *</label><input id="fpNewKeywords" placeholder="hanuman, bajrang, maruti"></div>
+      <div><label>Keywords (comma separated)</label><input id="fpNewKeywords" placeholder="hanuman, bajrang, maruti"></div>
       <div><label>Color from</label><input id="fpNewFrom" placeholder="#ef4444" title="Optional. Leave blank to use the app accent color."></div>
       <div><label>Color to</label><input id="fpNewTo" placeholder="#b91c1c"></div>
-      <div><label>Icon</label><select id="fpNewIcon">
+      <div><label>Glyph</label><select id="fpNewIcon">
         <option value="">(default)</option>
         <option value="temple">temple</option>
         <option value="flute">flute</option>
@@ -383,9 +433,16 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <option value="om">om</option>
         <option value="music">music</option>
       </select></div>
-      <button class="btn btn-success" onclick="createFeaturedChip()">Add chip</button>
+      <button class="btn btn-success" type="button" onclick="createFeaturedChip()">Create playlist</button>
+    </div>
+    <div class="special-hint" id="fpNewHint">
+      A new playlist starts with no tracks, so it stays off the home screen until
+      you pick some. Keywords typed here turn keyword matching on for the new
+      playlist; untick it on the row afterwards if you want hand-picked tracks
+      only.
     </div>
   </div>
+  <div id="featuredList"></div>
 </div>
 
 <div id="appearancePanel" class="view">
@@ -1215,23 +1272,18 @@ function refreshCurrent() {
 // ==================================================================
 // Specials (home carousel shelves + landscape banners)
 // ==================================================================
-// The shelf list mirrors the app's built-in definitions
-// (lib/modules/home/sections/specials.dart). The admin can override each
-// shelf's title/subtitle, upload a landscape banner, reorder shelves and hide
-// them. A shelf with no override keeps its built-in defaults.
-
-const SPECIAL_SHELVES = [
-  { id: 'soulful-bhakti', title: 'Soulful Bhakti Special', subtitle: 'Devotional favourites across every deity' },
-  { id: 'ganesha', title: 'Ganesha Special', subtitle: 'Vinayaka chants and songs' },
-  { id: 'venkateswara', title: 'Venkateswara Special', subtitle: 'Balaji and Govinda songs' },
-  { id: 'krishna', title: 'Krishna Special', subtitle: 'Krishna bhajans and kirtans' },
-  { id: 'rama', title: 'Rama Special', subtitle: 'Rama bhajans and stotras' },
-  { id: 'shiva', title: 'Shiva Special', subtitle: 'Shiva chants and stotras' },
-  { id: 'lakshmi', title: 'Lakshmi Special', subtitle: 'Lakshmi and wealth stotras' },
-  { id: 'vishnu', title: 'Vishnu Special', subtitle: 'Vishnu sahasranamam and more' },
-  { id: 'parvati', title: 'Parvati Special', subtitle: 'Devi and Shakti songs' },
-  { id: 'ganga', title: 'Ganga Special', subtitle: 'Ganga and Gange stotras' },
-];
+// This panel IS the catalogue. The app ships no built-in shelf list any more,
+// so every shelf the home screen shows was created here: the rows in the
+// `specials` table are the shelves, and each one's explicit, ordered track list
+// is its membership.
+//
+// Keywords are an OPTIONAL extra rule, not the only mechanism: a shelf adds
+// keyword matches on top of the hand-picked list only while its
+// "Also add tracks matching these keywords" box is ticked.
+//
+// A shelf with no explicit tracks and no active keyword rule contributes
+// nothing, so the app leaves it off the home screen. Those rows are flagged
+// with a warning badge below.
 
 // The accepted banner geometry. Must match the server constants
 // (SPECIAL_BANNER_RATIO / _WIDTH / _HEIGHT in server.js).
@@ -1245,7 +1297,7 @@ let specialRows = [];
 async function loadSpecials() {
   const box = document.getElementById('specialsList');
   if (!box) return;
-  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading�</div>';
+  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading&hellip;</div>';
   try {
     const res = await authedFetch('/api/admin/specials', { credentials: 'same-origin' });
     specialRows = res.ok ? (await res.json()) : [];
@@ -1259,19 +1311,31 @@ async function loadSpecials() {
 function renderSpecials() {
   const box = document.getElementById('specialsList');
   if (!box) return;
-  const byId = {};
-  specialRows.forEach(function (r) { byId[r.id] = r; });
+  // A row is rebuilt from scratch after every save, so any open track picker
+  // starts again from the saved list.
+  clearPickers('special');
 
-  box.innerHTML = SPECIAL_SHELVES.map(function (shelf) {
-    const row = byId[shelf.id] || {};
+  if (!specialRows.length) {
+    box.innerHTML = '<div class="special-hint">'
+      + 'No shelves yet. Every shelf the home screen shows is created here: use '
+      + '<strong>New shelf</strong> above, then pick its tracks.</div>';
+    return;
+  }
+
+  box.innerHTML = sortRowsByOrder(specialRows).map(function (row) {
+    const id = row.id;
+    const key = 'special-' + id;
     const banner = row.banner_url || '';
-    const title = row.title || shelf.title;
-    const subtitle = row.subtitle || shelf.subtitle;
+    const title = row.title || id;
+    const subtitle = row.subtitle || '';
+    const keywords = row.keywords || '';
+    const matchKeywords = row.match_keywords === true;
     const hidden = row.is_hidden === true;
-    const order = row.sort_order == null ? '' : row.sort_order;
+    const orderValue = row.sort_order == null ? '' : String(row.sort_order);
+    const picked = Array.isArray(row.trackIds) ? row.trackIds.length : 0;
 
     return '' +
-      '<div class="special-card" data-shelf="' + esc(shelf.id) + '">' +
+      '<div class="special-card" data-shelf="' + esc(id) + '">' +
         '<div class="special-banner-wrap">' +
           (banner
             ? '<img class="special-banner" src="' + esc(banner) + '" alt="' + esc(title) + ' banner">'
@@ -1283,77 +1347,129 @@ function renderSpecials() {
           '<div class="special-head">' +
             '<strong>' + esc(title) + '</strong>' +
             (hidden ? '<span class="special-hidden-badge">Hidden</span>' : '') +
+            (rowIsEmpty(row) ? '<span class="special-warn-badge">No tracks &mdash; hidden on the home screen</span>' : '') +
           '</div>' +
           '<label class="special-label">Title</label>' +
-          '<input class="special-input" id="spTitle-' + esc(shelf.id) + '" value="' + esc(title) + '" placeholder="' + esc(shelf.title) + '">' +
+          '<input class="special-input" id="spTitle-' + esc(id) + '" value="' + esc(title) + '" placeholder="Shelf title">' +
           '<label class="special-label">Subtitle</label>' +
-          '<input class="special-input" id="spSub-' + esc(shelf.id) + '" value="' + esc(subtitle) + '" placeholder="' + esc(shelf.subtitle) + '">' +
+          '<input class="special-input" id="spSub-' + esc(id) + '" value="' + esc(subtitle) + '" placeholder="Optional one-line subtitle">' +
           '<label class="special-label">Sort order (lower shows first)</label>' +
-          '<input class="special-input" type="number" id="spOrder-' + esc(shelf.id) + '" value="' + esc(order) + '" placeholder="default">' +
+          '<input class="special-input" type="number" id="spOrder-' + esc(id) + '" value="' + esc(orderValue) + '" placeholder="default">' +
+          '<label class="special-label">Keywords (comma separated)</label>' +
+          '<input class="special-input" id="spKeywords-' + esc(id) + '" value="' + esc(keywords) + '" placeholder="e.g. krishna, govinda" oninput="updateRuleHint(\'special\', \'' + esc(id) + '\')">' +
+          '<label class="special-toggle" style="margin-top:6px;">' +
+            '<input type="checkbox" id="spMatch-' + esc(id) + '"' + (matchKeywords ? ' checked' : '') + ' onchange="updateRuleHint(\'special\', \'' + esc(id) + '\')"> ' +
+            'Also add tracks matching these keywords' +
+          '</label>' +
+          '<div class="special-hint" id="spRule-' + esc(id) + '">' + ruleHintHtml(matchKeywords, keywords) + '</div>' +
           '<div class="special-actions">' +
-            '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'spBanner-' + esc(shelf.id) + '\').click()">Upload banner</button>' +
-            (banner ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearSpecialBanner(\'' + esc(shelf.id) + '\')">Remove banner</button>' : '') +
-            '<label class="special-toggle"><input type="checkbox" id="spHidden-' + esc(shelf.id) + '"' + (hidden ? ' checked' : '') + '> Hide shelf</label>' +
+            '<button class="btn btn-secondary btn-sm" type="button" id="pickBtn-' + esc(key) + '" onclick="togglePicker(\'special\', \'' + esc(id) + '\')">Choose tracks</button>' +
+            '<span class="pick-count" id="pickCount-' + esc(key) + '">' + trackCountLabel(picked) + '</span>' +
           '</div>' +
-          '<input type="file" id="spBanner-' + esc(shelf.id) + '" accept=".webp,image/webp" style="display:none" onchange="handleSpecialBannerUpload(this, \'' + esc(shelf.id) + '\')">' +
-          '<div class="special-hint" id="spHint-' + esc(shelf.id) + '">' +
+          pickerBoxHtml('special', id) +
+          '<div class="special-actions">' +
+            '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'spBanner-' + esc(id) + '\').click()">Upload banner</button>' +
+            (banner ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearSpecialBanner(\'' + esc(id) + '\')">Remove banner</button>' : '') +
+            '<label class="special-toggle"><input type="checkbox" id="spHidden-' + esc(id) + '"' + (hidden ? ' checked' : '') + '> Hide shelf</label>' +
+          '</div>' +
+          '<input type="file" id="spBanner-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleSpecialBannerUpload(this, \'' + esc(id) + '\')">' +
+          '<div class="special-hint" id="spHint-' + esc(id) + '">' +
             'Banner must be <strong>WebP</strong>, <strong>' + SPECIAL_BANNER_LABEL + '</strong> ' +
-            '(' + SPECIAL_BANNER_WIDTH + '�' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
+            '(' + SPECIAL_BANNER_WIDTH + '&times;' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
           '</div>' +
           '<div class="special-actions" style="margin-top:8px;">' +
-            '<button class="btn btn-success btn-sm" type="button" onclick="saveSpecial(\'' + esc(shelf.id) + '\')">Save</button>' +
-            '<button class="btn btn-secondary btn-sm" type="button" onclick="resetSpecial(\'' + esc(shelf.id) + '\')">Reset to defaults</button>' +
+            '<button class="btn btn-success btn-sm" type="button" onclick="saveSpecial(\'' + esc(id) + '\')">Save</button>' +
+            '<button class="btn btn-danger btn-sm" type="button" onclick="deleteSpecial(\'' + esc(id) + '\')">Delete</button>' +
           '</div>' +
         '</div>' +
       '</div>';
   }).join('');
 }
 
-function specialHint(id, text, cls) {
-  const el = document.getElementById('spHint-' + id);
-  if (!el) return;
-  el.innerHTML = text;
-  el.className = 'special-hint' + (cls ? ' ' + cls : '');
-}
+function specialHint(id, text, cls) { rowHint('special', id, text, cls); }
 
 async function saveSpecial(id) {
   if (!lock()) return;
   try {
     showLoading(true);
-    const body = {
+    await putRow('special', id, {
       title: document.getElementById('spTitle-' + id).value.trim() || null,
       subtitle: document.getElementById('spSub-' + id).value.trim() || null,
       sort_order: document.getElementById('spOrder-' + id).value === ''
         ? null : Number(document.getElementById('spOrder-' + id).value),
       is_hidden: document.getElementById('spHidden-' + id).checked,
-    };
-    const res = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      keywords: document.getElementById('spKeywords-' + id).value,
+      match_keywords: document.getElementById('spMatch-' + id).checked,
     });
-    if (!res.ok) { const e = await res.json().catch(function () { return {}; }); throw new Error(e.error || 'Save failed'); }
     toast('Saved');
     loadSpecials();
   } catch (e) {
-    if (e.message !== 'Session expired � sign in again.') toast('Error: ' + e.message);
+    if (!isSessionExpired(e)) toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 
-async function resetSpecial(id) {
+// Creates a shelf. The id is taken from the Id box when it is filled in,
+// otherwise it is derived from the title (suffixed -2, -3, ... when that id is
+// already used), so it always satisfies the server's ^[a-z0-9-]{1,64}$ rule.
+async function createSpecial() {
+  const title = (document.getElementById('spNewTitle').value || '').trim();
+  const subtitle = (document.getElementById('spNewSub').value || '').trim();
+  const orderRaw = (document.getElementById('spNewOrder').value || '').trim();
+  const typed = (document.getElementById('spNewId').value || '').trim().toLowerCase();
+  if (!title) return toast('A title is required');
+  if (typed && !/^[a-z0-9-]{1,64}$/.test(typed)) {
+    return toast('Id must be lowercase letters, digits or dashes');
+  }
+  const taken = knownRowIds('special');
+  if (typed && taken.indexOf(typed) !== -1) return toast('That id is already used by another shelf');
+  const id = typed || uniqueRowId(slugify(title), taken);
   if (!lock()) return;
   try {
     showLoading(true);
-    const res = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
-      method: 'DELETE', credentials: 'same-origin',
+    await putRow('special', id, {
+      title: title,
+      subtitle: subtitle || null,
+      sort_order: orderRaw === '' ? null : Number(orderRaw),
+      is_hidden: false,
+      keywords: '',
+      match_keywords: false,
     });
-    if (!res.ok) throw new Error('Reset failed');
-    toast('Reset to defaults');
+    ['spNewId', 'spNewTitle', 'spNewSub', 'spNewOrder'].forEach(function (f) {
+      document.getElementById(f).value = '';
+    });
+    toast('Shelf created with the id "' + id + '"');
     loadSpecials();
   } catch (e) {
-    if (e.message !== 'Session expired � sign in again.') toast('Error: ' + e.message);
+    if (!isSessionExpired(e)) toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
+}
+
+// Deletes the shelf (there are no built-in defaults to fall back to any more).
+function deleteSpecial(id) {
+  const row = findRow('special', id);
+  const title = (row && row.title) || id;
+  openConfirm(
+    'Delete shelf',
+    'Delete "' + title + '"? It disappears from the home screen immediately, '
+      + 'together with the track list you picked for it.',
+    async function () {
+      if (!lock()) return;
+      try {
+        showLoading(true);
+        const res = await authedFetch(rowUrl('special', id), {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const e = await res.json().catch(function () { return {}; });
+          throw new Error(e.error || 'Delete failed');
+        }
+        toast('Shelf deleted');
+        loadSpecials();
+      } catch (e) {
+        if (!isSessionExpired(e)) toast('Error: ' + e.message);
+      } finally { showLoading(false); unlock(); }
+    },
+    'Delete');
 }
 
 // Clears just the banner (keeps the title/order/hidden overrides).
@@ -1462,20 +1578,361 @@ function readImageSize(file) {
 }
 
 // ==================================================================
+// Track picker (shared by Specials and Featured Playlists)
+// ==================================================================
+// Membership of a row is the admin's explicit, ORDERED track list. The picker
+// loads the full track catalogue once (GET /api/admin/tracks), filters it with a
+// search box, and records the order tracks were ticked in. Saving calls
+// PUT /api/admin/<kind>/:id/tracks with that ordered id array.
+//
+// A row is addressed as <kind>:<id> below; the element ids it owns are prefixed
+// sp- for specials and fp- for featured playlists.
+
+// The glyphs the app can paint itself. An uploaded icon image wins over these.
+// Must stay in step with the switch in FeaturedChipGlyphPainter
+// (lib/modules/home/sections/featured_playlist_chips.dart): a name offered here
+// that the painter does not know silently renders the fallback music note.
+const CHIP_ICON_GLYPHS = [
+  '', 'temple', 'flute', 'ganesha', 'bow', 'lotus', 'om',
+  'trishul', 'conch', 'diya', 'bell', 'music',
+];
+
+let trackCatalog = null;
+let pickDrafts = {};
+let pickersOpen = {};
+
+function uiPrefix(kind) { return kind === 'featured' ? 'fp' : 'sp'; }
+function pickKey(kind, id) { return kind + ':' + id; }
+
+// One row's endpoint. The collection differs per panel; the shape does not.
+function rowUrl(kind, id) {
+  const base = kind === 'featured' ? '/api/admin/featured-playlists/' : '/api/admin/specials/';
+  return base + encodeURIComponent(id);
+}
+function reloadPanel(kind) { if (kind === 'featured') loadFeaturedChips(); else loadSpecials(); }
+function panelRows(kind) { return kind === 'featured' ? featuredRows : specialRows; }
+function findRow(kind, id) {
+  const list = panelRows(kind);
+  for (let i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+  return null;
+}
+function knownRowIds(kind) {
+  return panelRows(kind).map(function (r) { return r.id; });
+}
+
+// authedFetch has already sent the admin back to the login screen by the time it
+// throws this, so the panels stay quiet about it instead of stacking toasts.
+function isSessionExpired(e) {
+  return !!e && String(e.message || '').indexOf('Session expired') !== -1;
+}
+
+// Rows come back ordered by sort_order from the specials endpoint, and unordered
+// from the featured one; sorting here keeps both panels consistent, with rows
+// that have no sort_order last (Array#sort is stable, so those keep the order the
+// API returned them in).
+function sortRowsByOrder(rows) {
+  return rows.slice().sort(function (a, b) {
+    const ao = a.sort_order == null ? Infinity : Number(a.sort_order);
+    const bo = b.sort_order == null ? Infinity : Number(b.sort_order);
+    return ao === bo ? 0 : ao - bo;
+  });
+}
+
+function trackCountLabel(n) { return n === 1 ? '1 track selected' : n + ' tracks selected'; }
+function trackArtistText(t) {
+  return t.artist_names_text || (Array.isArray(t.artist_names) ? t.artist_names.join(', ') : '') || '';
+}
+
+// A row only reaches the home screen when it contributes at least one track:
+// either an explicit pick, or an active keyword rule with keywords filled in.
+// Everything else the app simply leaves out.
+function rowIsEmpty(row) {
+  const picked = Array.isArray(row.trackIds) ? row.trackIds.length : 0;
+  const keywords = String(row.keywords || '').trim();
+  return picked === 0 && !(row.match_keywords === true && keywords !== '');
+}
+
+// The keywords checkbox switches between "keywords ADD tracks on top of my picks"
+// and "only the tracks I picked count". The hint always spells out which one is
+// in force, so there is no doubt about what the app will show.
+function ruleHintHtml(matchKeywords, keywords) {
+  if (!matchKeywords) {
+    return 'Keyword matching is <strong>off</strong>: only the tracks you pick by '
+      + 'hand are included.';
+  }
+  if (!String(keywords || '').trim()) {
+    return 'Keyword matching is <strong>on</strong>, but no keywords are set, so '
+      + 'nothing is added automatically: only the tracks you pick by hand are included.';
+  }
+  return 'Keyword matching is <strong>on</strong>: tracks matching these keywords '
+    + 'are added on top of the tracks you pick.';
+}
+
+function updateRuleHint(kind, id) {
+  const p = uiPrefix(kind);
+  const el = document.getElementById(p + 'Rule-' + id);
+  if (!el) return;
+  const matchEl = document.getElementById(p + 'Match-' + id);
+  const kwEl = document.getElementById(p + 'Keywords-' + id);
+  el.innerHTML = ruleHintHtml(!!(matchEl && matchEl.checked), kwEl ? kwEl.value : '');
+}
+
+// The one status line per row. The banner and icon uploads report here too.
+function rowHint(kind, id, html, cls) {
+  const el = document.getElementById(uiPrefix(kind) + 'Hint-' + id);
+  if (!el) return;
+  el.innerHTML = html;
+  el.className = 'special-hint' + (cls ? ' ' + cls : '');
+}
+
+// The full track list, fetched once per page load and reused by every picker.
+async function ensureTrackCatalog() {
+  if (trackCatalog) return trackCatalog;
+  const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
+  if (!res.ok) throw new Error('Could not load the track list');
+  const list = await res.json();
+  trackCatalog = Array.isArray(list) ? list : [];
+  return trackCatalog;
+}
+
+function findTrack(id) {
+  if (!trackCatalog) return null;
+  for (let i = 0; i < trackCatalog.length; i++) {
+    if (trackCatalog[i].id === id) return trackCatalog[i];
+  }
+  return null;
+}
+function trackTitleOf(id) {
+  const t = findTrack(id);
+  return t ? (t.title || '(untitled)') : 'Unknown track';
+}
+
+// The picks being edited for one row, in the order they were ticked. Built from
+// the list saved on the server the first time the row's picker is opened.
+function draftFor(kind, id) {
+  const key = pickKey(kind, id);
+  if (!pickDrafts[key]) {
+    const row = findRow(kind, id);
+    pickDrafts[key] = row && Array.isArray(row.trackIds) ? row.trackIds.slice() : [];
+  }
+  return pickDrafts[key];
+}
+
+// A row is re-rendered after every save, so its open picker (and any unsaved
+// draft) is dropped and rebuilt from the saved list.
+function clearPickers(kind) {
+  Object.keys(pickDrafts).forEach(function (k) {
+    if (k.indexOf(kind + ':') === 0) delete pickDrafts[k];
+  });
+  Object.keys(pickersOpen).forEach(function (k) {
+    if (k.indexOf(kind + ':') === 0) delete pickersOpen[k];
+  });
+}
+
+// Collapsed by default: a checkbox per track, per row, would bury the panel.
+function pickerBoxHtml(kind, id) {
+  const key = kind + '-' + id;
+  const arg = '\'' + esc(kind) + '\', \'' + esc(id) + '\'';
+  return '' +
+    '<div class="pick-box" id="pickBox-' + esc(key) + '" style="display:none;">' +
+      '<label class="special-label">Search tracks (title, album or artist)</label>' +
+      '<input class="special-input" id="pickSearch-' + esc(key) + '" placeholder="Type to filter the track list" oninput="renderPickList(' + arg + ')">' +
+      '<div class="pick-chosen" id="pickChosen-' + esc(key) + '"></div>' +
+      '<div class="pick-list" id="pickList-' + esc(key) + '"></div>' +
+      '<div class="special-actions">' +
+        '<button class="btn btn-success btn-sm" type="button" onclick="savePickedTracks(' + arg + ')">Save tracks</button>' +
+        '<button class="btn btn-secondary btn-sm" type="button" onclick="clearPickedTracks(' + arg + ')">Clear all</button>' +
+        '<button class="btn btn-secondary btn-sm" type="button" onclick="togglePicker(' + arg + ')">Close</button>' +
+      '</div>' +
+    '</div>';
+}
+
+async function togglePicker(kind, id) {
+  const key = pickKey(kind, id);
+  const box = document.getElementById('pickBox-' + kind + '-' + id);
+  if (!box) return;
+  const open = !pickersOpen[key];
+  pickersOpen[key] = open;
+  box.style.display = open ? 'block' : 'none';
+  const btn = document.getElementById('pickBtn-' + kind + '-' + id);
+  if (btn) btn.textContent = open ? 'Hide tracks' : 'Choose tracks';
+  if (!open) return;
+
+  draftFor(kind, id); // start from the list that is actually saved
+  const listBox = document.getElementById('pickList-' + kind + '-' + id);
+  if (listBox) listBox.innerHTML = '<div class="pick-empty">Loading&hellip;</div>';
+  try {
+    await ensureTrackCatalog();
+  } catch (e) {
+    if (listBox) {
+      listBox.innerHTML = '<div class="pick-empty" style="color:#dc2626;">'
+        + esc(e.message) + '</div>';
+    }
+    return;
+  }
+  renderPickList(kind, id);
+}
+
+// The searchable checkbox list. Ticked tracks are shown with their 1-based
+// position, which is the order they will play in.
+function renderPickList(kind, id) {
+  if (!trackCatalog) return;
+  const key = kind + '-' + id;
+  const listBox = document.getElementById('pickList-' + key);
+  const searchEl = document.getElementById('pickSearch-' + key);
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+  const picks = draftFor(kind, id);
+  const arg = '\'' + esc(kind) + '\', \'' + esc(id) + '\'';
+
+  if (listBox) {
+    const matches = trackCatalog.filter(function (t) {
+      if (!q) return true;
+      return (t.title || '').toLowerCase().indexOf(q) !== -1
+        || (t.album || '').toLowerCase().indexOf(q) !== -1
+        || trackArtistText(t).toLowerCase().indexOf(q) !== -1;
+    });
+    listBox.innerHTML = matches.length === 0
+      ? '<div class="pick-empty">No tracks match that search.</div>'
+      : matches.map(function (t) {
+          const at = picks.indexOf(t.id);
+          const meta = [esc(t.album || ''), esc(trackArtistText(t))]
+            .filter(Boolean).join(' &middot; ');
+          return '<label class="pick-row">' +
+            '<input type="checkbox" value="' + esc(t.id) + '"' + (at === -1 ? '' : ' checked') +
+              ' onchange="togglePick(' + arg + ', this.value)">' +
+            '<span>' + esc(t.title || '(untitled)') +
+              (meta ? '<br><span class="pick-meta">' + meta + '</span>' : '') +
+            '</span>' +
+            '<span class="pick-meta" style="margin-left:auto;">' +
+              (at === -1 ? '' : '#' + (at + 1)) +
+            '</span>' +
+          '</label>';
+        }).join('');
+  }
+  renderChosen(kind, id);
+}
+
+// The ordered list of picks, with per-entry remove / move and the live count.
+function renderChosen(kind, id) {
+  const key = kind + '-' + id;
+  const box = document.getElementById('pickChosen-' + key);
+  const picks = draftFor(kind, id);
+  const arg = '\'' + esc(kind) + '\', \'' + esc(id) + '\'';
+  if (box) {
+    box.innerHTML = picks.length === 0
+      ? '<div class="pick-empty">No tracks picked yet. Tick tracks in the list below: '
+        + 'the order you tick them in is the order they play.</div>'
+      : picks.map(function (trackId, i) {
+          const one = arg + ', \'' + esc(trackId) + '\'';
+          return '<span class="pick-chip">' +
+            '<strong>' + (i + 1) + '.</strong>' +
+            '<span>' + esc(trackTitleOf(trackId)) + '</span>' +
+            '<button type="button" title="Remove from the list" onclick="removePick(' + one + ')">&times;</button>' +
+            '<button type="button" title="Move up" ' + (i === 0 ? 'disabled' : '') +
+              ' onclick="movePick(' + one + ',-1)">&#9650;</button>' +
+            '<button type="button" title="Move down" ' + (i === picks.length - 1 ? 'disabled' : '') +
+              ' onclick="movePick(' + one + ',1)">&#9660;</button>' +
+          '</span>';
+        }).join('');
+  }
+  const countEl = document.getElementById('pickCount-' + key);
+  if (countEl) countEl.textContent = trackCountLabel(picks.length);
+}
+
+// Ticking appends to the end of the ordered list; unticking takes the entry out.
+function togglePick(kind, id, trackId) {
+  const picks = draftFor(kind, id);
+  const at = picks.indexOf(trackId);
+  if (at === -1) picks.push(trackId); else picks.splice(at, 1);
+  renderPickList(kind, id);
+}
+function removePick(kind, id, trackId) {
+  const picks = draftFor(kind, id);
+  const at = picks.indexOf(trackId);
+  if (at !== -1) picks.splice(at, 1);
+  renderPickList(kind, id);
+}
+function movePick(kind, id, trackId, delta) {
+  const picks = draftFor(kind, id);
+  const at = picks.indexOf(trackId);
+  const to = at + delta;
+  if (at === -1 || to < 0 || to >= picks.length) return;
+  picks.splice(at, 1);
+  picks.splice(to, 0, trackId);
+  renderPickList(kind, id);
+}
+// Emptying the form is not saved until Save tracks is pressed, so say so.
+function clearPickedTracks(kind, id) {
+  pickDrafts[pickKey(kind, id)] = [];
+  renderPickList(kind, id);
+  toast('Cleared the picks in this form - press Save tracks to apply');
+}
+
+async function savePickedTracks(kind, id) {
+  if (!lock()) return;
+  const picks = draftFor(kind, id).slice();
+  rowHint(kind, id, 'Saving the track list&hellip;', 'is-busy');
+  try {
+    showLoading(true);
+    const res = await authedFetch(rowUrl(kind, id) + '/tracks', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trackIds: picks }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Could not save the track list');
+    }
+    toast('Saved ' + trackCountLabel(picks.length));
+    reloadPanel(kind);
+  } catch (e) {
+    if (!isSessionExpired(e)) rowHint(kind, id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally { showLoading(false); unlock(); }
+}
+
+// One PUT used by every save path (metadata and icon_url).
+async function putRow(kind, id, body) {
+  const res = await authedFetch(rowUrl(kind, id), {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(function () { return {}; });
+    throw new Error(e.error || 'Save failed');
+  }
+  return res.json().catch(function () { return {}; });
+}
+
+// A server-valid id (^[a-z0-9-]{1,64}$) derived from a human title.
+function slugify(value) {
+  const slug = String(value || '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64)
+    .replace(/-+$/g, '');
+  return slug || 'row';
+}
+// The id itself when it is free, otherwise -2, -3, ... (kept inside the 64
+// character limit the server enforces).
+function uniqueRowId(base, taken) {
+  if (taken.indexOf(base) === -1) return base;
+  const stem = base.slice(0, 60).replace(/-+$/g, '');
+  let n = 2;
+  while (taken.indexOf(stem + '-' + n) !== -1) n++;
+  return stem + '-' + n;
+}
+
+// ==================================================================
 // Featured Playlists (the round chips under the home carousel)
 // ==================================================================
-// Mirrors the app's built-in chip defaults
-// (lib/modules/home/sections/featured_playlists.dart). The admin can override
-// any built-in chip's name/keywords/colors/icon, reorder or hide it, and add
-// extra chips. A chip with no row keeps its built-in defaults.
-const FEATURED_CHIPS = [
-  { id: 'venkateswara', title: 'Venkateswara', keywords: 'venkateswara, venkateshwara, balaji, govinda, tirupati, srinivasa, niluvadu', colorFrom: '#f2a33c', colorTo: '#d97706', icon: 'temple' },
-  { id: 'krishna', title: 'Krishna', keywords: 'krishna, govardhan, radha, murali, gopala, madhav, keshav, gopika', colorFrom: '#3b82f6', colorTo: '#1d4ed8', icon: 'flute' },
-  { id: 'ganesha', title: 'Ganesha', keywords: 'ganesh, ganapati, ganapathi, vinayaka, vighnesh, gajanana, vakratunda, lambodara', colorFrom: '#ef4444', colorTo: '#b91c1c', icon: 'ganesha' },
-  { id: 'rama', title: 'Rama', keywords: 'rama, sita, hanuman, ayodhya, raghu', colorFrom: '#fb923c', colorTo: '#ea580c', icon: 'bow' },
-  { id: 'devi', title: 'Devi', keywords: 'devi, durga, lakshmi, laxmi, parvati, shakti, ambika, bhavani, mahalakshmi', colorFrom: '#ec4899', colorTo: '#be185d', icon: 'lotus' },
-  { id: 'chants', title: 'Chants', keywords: 'mantra, stotram, stotra, ashtakam, sahasranama, suprabhatam, sloka, chants', colorFrom: '#8b5cf6', colorTo: '#6d28d9', icon: 'om' },
-];
+// This panel IS the catalogue: the app ships no built-in chip list any more, so
+// every chip on the home screen comes from the `featured_playlists` table and is
+// created, edited and deleted here. Membership is the ordered track list picked
+// for each chip; keywords are an optional extra rule. An uploaded icon image
+// wins over the built-in glyph.
 
 // The accepted wallpaper geometry. Must match the server constants
 // (WALLPAPER_* in server.js).
@@ -1509,186 +1966,263 @@ async function loadFeaturedChips() {
 function renderFeaturedChips() {
   const box = document.getElementById('featuredList');
   if (!box) return;
-  const byId = {};
-  featuredRows.forEach(function (r) { byId[r.id] = r; });
+  // A row is rebuilt from scratch after every save, so any open track picker
+  // starts again from the saved list.
+  clearPickers('featured');
 
-  // Built-in chips first (in curated order), then any extra admin-only chips,
-  // exactly how the app composes the row.
-  const known = FEATURED_CHIPS.map(function (c) { return c.id; });
-  const extras = featuredRows.filter(function (r) { return known.indexOf(r.id) === -1; })
-    .map(function (r) { return { id: r.id, title: r.title, keywords: '', colorFrom: '', colorTo: '', icon: '' }; });
-  const all = FEATURED_CHIPS.concat(extras);
+  if (!featuredRows.length) {
+    box.innerHTML = '<div class="special-hint">'
+      + 'No playlists yet. Every chip the home screen shows is created here: use '
+      + '<strong>New playlist</strong> above, then pick its tracks.</div>';
+    return;
+  }
 
-  box.innerHTML = all.map(function (chip) {
-    const row = byId[chip.id] || {};
-    const title = row.title || chip.title;
-    const keywords = row.keywords != null && row.keywords !== '' ? row.keywords : chip.keywords;
-    const from = row.color_from || chip.colorFrom || '';
-    const to = row.color_to || chip.colorTo || '';
-    const icon = row.icon || chip.icon || '';
+  box.innerHTML = sortRowsByOrder(featuredRows).map(function (row) {
+    const id = row.id;
+    const key = 'featured-' + id;
+    const title = row.title || id;
+    const keywords = row.keywords || '';
+    const matchKeywords = row.match_keywords === true;
+    const from = row.color_from || '';
+    const to = row.color_to || '';
+    const icon = row.icon || '';
+    const iconUrl = row.icon_url || '';
     const hidden = row.is_hidden === true;
-    const order = row.sort_order == null ? '' : row.sort_order;
-    const isBuiltIn = known.indexOf(chip.id) !== -1;
+    const orderValue = row.sort_order == null ? '' : String(row.sort_order);
+    const picked = Array.isArray(row.trackIds) ? row.trackIds.length : 0;
     const grad = (from && to)
       ? 'background:linear-gradient(135deg,' + esc(from) + ',' + esc(to) + ');'
       : 'background:#9ca3af;';
 
     return '' +
-      '<div class="special-card" data-chip="' + esc(chip.id) + '">' +
+      '<div class="special-card" data-chip="' + esc(id) + '">' +
         '<div class="special-banner-wrap" style="display:flex;align-items:center;justify-content:center;background:#f3f4f6;">' +
-          '<div style="width:86px;height:86px;border-radius:50%;' + grad + 'display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;">' +
-            esc(icon || 'music') +
-          '</div>' +
+          (iconUrl
+            // An uploaded image wins; the glyph below is only the fallback.
+            ? '<img src="' + esc(iconUrl) + '" alt="' + esc(title) + ' icon" ' +
+                'style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;display:block;">'
+            : '<div style="width:86px;height:86px;border-radius:50%;' + grad + 'display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;">' +
+                esc(icon || 'music') +
+              '</div>') +
         '</div>' +
         '<div class="special-body">' +
           '<div class="special-head">' +
             '<strong>' + esc(title) + '</strong>' +
             (hidden ? '<span class="special-hidden-badge">Hidden</span>' : '') +
-            (isBuiltIn ? '' : '<span class="special-hidden-badge" style="background:#e0e7ff;color:#3730a3;">Custom</span>') +
+            (rowIsEmpty(row) ? '<span class="special-warn-badge">No tracks &mdash; hidden on the home screen</span>' : '') +
           '</div>' +
           '<label class="special-label">Name</label>' +
-          '<input class="special-input" id="fpTitle-' + esc(chip.id) + '" value="' + esc(title) + '" placeholder="' + esc(chip.title) + '">' +
+          '<input class="special-input" id="fpTitle-' + esc(id) + '" value="' + esc(title) + '" placeholder="Playlist name">' +
           '<label class="special-label">Keywords (comma separated)</label>' +
-          '<input class="special-input" id="fpKeywords-' + esc(chip.id) + '" value="' + esc(keywords) + '" placeholder="e.g. krishna, govinda">' +
+          '<input class="special-input" id="fpKeywords-' + esc(id) + '" value="' + esc(keywords) + '" placeholder="e.g. krishna, govinda" oninput="updateRuleHint(\'featured\', \'' + esc(id) + '\')">' +
+          '<label class="special-toggle" style="margin-top:6px;">' +
+            '<input type="checkbox" id="fpMatch-' + esc(id) + '"' + (matchKeywords ? ' checked' : '') + ' onchange="updateRuleHint(\'featured\', \'' + esc(id) + '\')"> ' +
+            'Also add tracks matching these keywords' +
+          '</label>' +
+          '<div class="special-hint" id="fpRule-' + esc(id) + '">' + ruleHintHtml(matchKeywords, keywords) + '</div>' +
           '<div style="display:flex;gap:8px;">' +
             '<div style="flex:1;"><label class="special-label">Color from</label>' +
-            '<input class="special-input" id="fpFrom-' + esc(chip.id) + '" value="' + esc(from) + '" placeholder="#ef4444"></div>' +
+            '<input class="special-input" id="fpFrom-' + esc(id) + '" value="' + esc(from) + '" placeholder="#ef4444"></div>' +
             '<div style="flex:1;"><label class="special-label">Color to</label>' +
-            '<input class="special-input" id="fpTo-' + esc(chip.id) + '" value="' + esc(to) + '" placeholder="#b91c1c"></div>' +
+            '<input class="special-input" id="fpTo-' + esc(id) + '" value="' + esc(to) + '" placeholder="#b91c1c"></div>' +
           '</div>' +
-          '<label class="special-label">Icon</label>' +
-          '<select class="special-input" id="fpIcon-' + esc(chip.id) + '">' +
-            ['', 'temple', 'flute', 'ganesha', 'bow', 'lotus', 'om', 'music'].map(function (v) {
-              return '<option value="' + v + '"' + (v === icon ? ' selected' : '') + '>' + (v || '(default)') + '</option>';
+          '<label class="special-label">Glyph (fallback when no icon image is uploaded)</label>' +
+          '<select class="special-input" id="fpIcon-' + esc(id) + '">' +
+            CHIP_ICON_GLYPHS.map(function (v) {
+              // The stored value stays the lowercase painter name; only the
+              // label is prettified for the admin.
+              const label = v ? v.charAt(0).toUpperCase() + v.slice(1) : '(default)';
+              return '<option value="' + v + '"' + (v === icon ? ' selected' : '') + '>' + label + '</option>';
             }).join('') +
           '</select>' +
-          '<label class="special-label">Sort order (lower shows first)</label>' +
-          '<input class="special-input" type="number" id="fpOrder-' + esc(chip.id) + '" value="' + esc(order) + '" placeholder="default">' +
-          '<div class="special-actions">' +
-            '<button class="btn btn-success btn-sm" type="button" onclick="saveFeaturedChip(\'' + esc(chip.id) + '\')">Save</button>' +
-            (isBuiltIn ? '<button class="btn btn-secondary btn-sm" type="button" onclick="resetFeaturedChip(\'' + esc(chip.id) + '\')">Reset to defaults</button>' : '') +
-            '<button class="btn btn-danger btn-sm" type="button" onclick="deleteFeaturedChip(\'' + esc(chip.id) + '\')">Delete</button>' +
-            '<label class="special-toggle"><input type="checkbox" id="fpHidden-' + esc(chip.id) + '"' + (hidden ? ' checked' : '') + '> Hide chip</label>' +
+          '<label class="special-label">Icon image (square WebP)</label>' +
+          '<div class="special-actions" style="margin-top:0;">' +
+            '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'fpIconInput-' + esc(id) + '\').click()">Upload icon</button>' +
+            (iconUrl ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearChipIcon(\'' + esc(id) + '\')">Remove icon</button>' : '') +
+            '<span class="special-hint" style="margin-top:0;">' +
+              (iconUrl
+                ? 'Uploaded image in use: it is drawn instead of the glyph.'
+                : 'No image uploaded, so the glyph above is drawn on the gradient.') +
+            '</span>' +
           '</div>' +
-          '<div class="special-hint" id="fpHint-' + esc(chip.id) + '"></div>' +
+          '<input type="file" id="fpIconInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipIconUpload(this, \'' + esc(id) + '\')">' +
+          '<label class="special-label">Sort order (lower shows first)</label>' +
+          '<input class="special-input" type="number" id="fpOrder-' + esc(id) + '" value="' + esc(orderValue) + '" placeholder="default">' +
+          '<div class="special-actions">' +
+            '<button class="btn btn-secondary btn-sm" type="button" id="pickBtn-' + esc(key) + '" onclick="togglePicker(\'featured\', \'' + esc(id) + '\')">Choose tracks</button>' +
+            '<span class="pick-count" id="pickCount-' + esc(key) + '">' + trackCountLabel(picked) + '</span>' +
+          '</div>' +
+          pickerBoxHtml('featured', id) +
+          '<div class="special-actions">' +
+            '<button class="btn btn-success btn-sm" type="button" onclick="saveFeaturedChip(\'' + esc(id) + '\')">Save</button>' +
+            '<button class="btn btn-danger btn-sm" type="button" onclick="deleteFeaturedChip(\'' + esc(id) + '\')">Delete</button>' +
+            '<label class="special-toggle"><input type="checkbox" id="fpHidden-' + esc(id) + '"' + (hidden ? ' checked' : '') + '> Hide playlist</label>' +
+          '</div>' +
+          '<div class="special-hint" id="fpHint-' + esc(id) + '"></div>' +
         '</div>' +
       '</div>';
   }).join('');
 }
 
-function featuredHint(id, message, cls) {
-  const el = document.getElementById('fpHint-' + id);
-  if (!el) return;
-  el.textContent = message;
-  el.className = 'special-hint' + (cls ? ' ' + cls : '');
-}
-
 async function saveFeaturedChip(id) {
-  const payload = {
-    title: document.getElementById('fpTitle-' + id).value,
-    keywords: document.getElementById('fpKeywords-' + id).value,
-    color_from: document.getElementById('fpFrom-' + id).value,
-    color_to: document.getElementById('fpTo-' + id).value,
-    icon: document.getElementById('fpIcon-' + id).value,
-    sort_order: document.getElementById('fpOrder-' + id).value,
-    is_hidden: document.getElementById('fpHidden-' + id).checked,
-  };
-  featuredHint(id, 'Saving…', 'is-busy');
+  const title = document.getElementById('fpTitle-' + id).value.trim();
+  if (!title) {
+    rowHint('featured', id, 'A name is required', 'is-error');
+    return;
+  }
+  if (!lock()) return;
+  rowHint('featured', id, 'Saving&hellip;', 'is-busy');
   try {
-    const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    showLoading(true);
+    await putRow('featured', id, {
+      title: title,
+      keywords: document.getElementById('fpKeywords-' + id).value,
+      color_from: document.getElementById('fpFrom-' + id).value,
+      color_to: document.getElementById('fpTo-' + id).value,
+      icon: document.getElementById('fpIcon-' + id).value,
+      sort_order: document.getElementById('fpOrder-' + id).value === ''
+        ? null : Number(document.getElementById('fpOrder-' + id).value),
+      is_hidden: document.getElementById('fpHidden-' + id).checked,
+      match_keywords: document.getElementById('fpMatch-' + id).checked,
     });
-    if (!res.ok) {
-      const e = await res.json().catch(function () { return {}; });
-      throw new Error(e.error || 'Save failed');
-    }
-    toast('Chip saved');
+    toast('Playlist saved');
     loadFeaturedChips();
   } catch (e) {
-    featuredHint(id, '✗ ' + e.message, 'is-error');
-  }
+    if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally { showLoading(false); unlock(); }
 }
 
-async function resetFeaturedChip(id) {
-  openConfirm('Reset chip', 'Reset this chip to its built-in defaults?', async function () {
-    try {
-      const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
-        method: 'DELETE', credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const e = await res.json().catch(function () { return {}; });
-        throw new Error(e.error || 'Reset failed');
-      }
-      toast('Chip reset');
-      loadFeaturedChips();
-    } catch (e) {
-      featuredHint(id, '✗ ' + e.message, 'is-error');
-    }
-  }, 'Reset');
-}
-
-async function deleteFeaturedChip(id) {
-  const isBuiltIn = FEATURED_CHIPS.some(function (c) { return c.id === id; });
+// Deletes the playlist (there are no built-in chips to fall back to any more).
+function deleteFeaturedChip(id) {
+  const row = findRow('featured', id);
+  const title = (row && row.title) || id;
   openConfirm(
-    'Delete chip',
-    isBuiltIn
-      ? 'Delete this chip? The built-in default returns until you hide it instead.'
-      : 'Delete this custom chip?',
+    'Delete playlist',
+    'Delete "' + title + '"? It disappears from the home screen immediately, '
+      + 'together with the track list you picked for it.',
     async function () {
+      if (!lock()) return;
       try {
-        const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
+        showLoading(true);
+        const res = await authedFetch(rowUrl('featured', id), {
           method: 'DELETE', credentials: 'same-origin',
         });
         if (!res.ok) {
           const e = await res.json().catch(function () { return {}; });
           throw new Error(e.error || 'Delete failed');
         }
-        toast('Chip deleted');
+        toast('Playlist deleted');
         loadFeaturedChips();
       } catch (e) {
-        featuredHint(id, '✗ ' + e.message, 'is-error');
-      }
+        if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+      } finally { showLoading(false); unlock(); }
     },
     'Delete');
 }
 
+// Creates a playlist. The id is taken from the Id box when it is filled in,
+// otherwise it is derived from the name (suffixed -2, -3, ... when that id is
+// already used), so it always satisfies the server's ^[a-z0-9-]{1,64}$ rule.
+// Keywords are optional: tracks can be picked by hand afterwards instead.
 async function createFeaturedChip() {
-  const id = (document.getElementById('fpNewId').value || '').trim().toLowerCase();
   const title = (document.getElementById('fpNewTitle').value || '').trim();
+  const typed = (document.getElementById('fpNewId').value || '').trim().toLowerCase();
   const keywords = (document.getElementById('fpNewKeywords').value || '').trim();
-  if (!id) return toast('An id is required');
-  if (!/^[a-z0-9-]{1,64}$/.test(id)) return toast('Id must be lowercase letters, digits or dashes');
   if (!title) return toast('A name is required');
-  if (!keywords) return toast('At least one keyword is required');
-
+  if (typed && !/^[a-z0-9-]{1,64}$/.test(typed)) {
+    return toast('Id must be lowercase letters, digits or dashes');
+  }
+  const taken = knownRowIds('featured');
+  if (typed && taken.indexOf(typed) !== -1) return toast('That id is already used by another playlist');
+  const id = typed || uniqueRowId(slugify(title), taken);
+  if (!lock()) return;
   try {
-    const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
-      method: 'PUT',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: title,
-        keywords: keywords,
-        color_from: document.getElementById('fpNewFrom').value,
-        color_to: document.getElementById('fpNewTo').value,
-        icon: document.getElementById('fpNewIcon').value,
-      }),
+    showLoading(true);
+    await putRow('featured', id, {
+      title: title,
+      keywords: keywords,
+      color_from: document.getElementById('fpNewFrom').value,
+      color_to: document.getElementById('fpNewTo').value,
+      icon: document.getElementById('fpNewIcon').value,
+      sort_order: null,
+      is_hidden: false,
+      // Keywords typed at creation time are used straight away; the row's
+      // checkbox turns the rule back off.
+      match_keywords: keywords !== '',
     });
-    if (!res.ok) {
-      const e = await res.json().catch(function () { return {}; });
-      throw new Error(e.error || 'Could not add the chip');
-    }
     ['fpNewId', 'fpNewTitle', 'fpNewKeywords', 'fpNewFrom', 'fpNewTo'].forEach(function (f) {
       document.getElementById(f).value = '';
     });
-    toast('Chip added');
+    toast('Playlist created with the id "' + id + '"');
     loadFeaturedChips();
   } catch (e) {
-    toast('✗ ' + e.message);
+    if (!isSessionExpired(e)) toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+// Uploads one playlist's chip icon (kind=chip_icon, which the server accepts as
+// WebP only) and stores the URL on the row. The app draws the icon inside a
+// circle with BoxFit.cover, so a square export is what we ask for but a slightly
+// off-square one is cropped rather than rejected - exactly like the server.
+async function handleChipIconUpload(input, id) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    const isWebp = file.type === 'image/webp' || /\.webp$/i.test(file.name);
+    if (!isWebp) {
+      rowHint('featured', id, '&#10007; That is not a WebP file. Export the icon as WebP and try again.', 'is-error');
+      input.value = '';
+      return;
+    }
+
+    rowHint('featured', id, 'Uploading&hellip;', 'is-busy');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('kind', 'chip_icon');
+
+    const up = await authedFetch('/api/admin/upload', {
+      method: 'POST', credentials: 'same-origin', body: form,
+    });
+    if (!up.ok) {
+      const e = await up.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Upload failed');
+    }
+    const uploaded = await up.json();
+    const url = uploaded.thumbnail_url;
+    if (!url) throw new Error('Upload returned no URL');
+
+    await putRow('featured', id, { icon_url: url });
+
+    // Square is recommended, not required: warn, do not undo the upload.
+    let note = 'Icon uploaded.';
+    try {
+      const dims = await readImageSize(file);
+      const ratio = dims.width / dims.height;
+      if (ratio < 0.9 || ratio > 1.1) {
+        note += ' It is ' + dims.width + 'x' + dims.height
+          + ', so the app crops it to the centre of the circle.';
+      }
+    } catch (_) { /* the size check is a nicety, never a failure */ }
+    toast(note);
+    loadFeaturedChips();
+  } catch (e) {
+    if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally {
+    input.value = '';
   }
+}
+
+// Clears the uploaded icon so the glyph is drawn again.
+async function clearChipIcon(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    await putRow('featured', id, { icon_url: null });
+    toast('Icon removed - the glyph is used again');
+    loadFeaturedChips();
+  } catch (e) {
+    if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally { showLoading(false); unlock(); }
 }
 
 // ==================================================================

@@ -10,9 +10,9 @@ import 'package:sangeet/services/dio/dio.dart';
 /// One "Featured Playlist" chip shown as a round button under the home
 /// carousel (e.g. "Venkateswara", "Krishna", "Ganesha").
 ///
-/// Mirrors the design's row of circular deity buttons: a colored circle with a
-/// glyph inside and the name underneath. Tapping one plays the tracks whose
-/// text matches the chip's keywords.
+/// Mirrors the design's row of circular deity buttons: a colored circle with an
+/// admin-chosen icon inside and the name underneath. Tapping one plays the
+/// tracks the admin put in it (plus, optionally, tracks its keywords match).
 class FeaturedPlaylist {
   /// Stable id, also the row's primary key in `featured_playlists`.
   final String id;
@@ -21,7 +21,8 @@ class FeaturedPlaylist {
   final String title;
 
   /// Keywords matched against a track's name/album/artists/tags. Any single
-  /// hit qualifies the track. Empty means "no tracks"; such a chip is dropped.
+  /// hit qualifies the track. Only used when the admin left `match_keywords`
+  /// on; an empty list simply contributes no keyword matches.
   final List<String> keywords;
 
   /// Gradient endpoints for the circle. Null means "use the theme primary".
@@ -31,6 +32,11 @@ class FeaturedPlaylist {
   /// Name of the glyph drawn inside the circle. Unknown names fall back to a
   /// generic music glyph, so a typo can never render an empty circle.
   final String? icon;
+
+  /// Admin-uploaded icon image for the circle. When set it is drawn instead of
+  /// [icon], so the admin can put any artwork on a chip; [icon] remains the
+  /// fallback, which means the circle is never blank.
+  final String? iconUrl;
 
   /// The chip's tracks, most played first. Never empty (empty chips are
   /// dropped by the provider).
@@ -43,6 +49,7 @@ class FeaturedPlaylist {
     this.colorFrom,
     this.colorTo,
     this.icon,
+    this.iconUrl,
     required this.tracks,
   });
 
@@ -54,7 +61,7 @@ class FeaturedPlaylist {
   Color colorToOr(Color fallback) => colorTo ?? colorFrom ?? fallback;
 }
 
-/// An admin-managed chip row from `featured_playlists` (migration 028).
+/// An admin-managed chip row from `featured_playlists` (migrations 028 + 029).
 class FeaturedPlaylistRow {
   final String id;
   final String title;
@@ -62,6 +69,17 @@ class FeaturedPlaylistRow {
   final String? colorFrom;
   final String? colorTo;
   final String? icon;
+
+  /// Admin-uploaded icon image URL (029). Wins over [icon] when set.
+  final String? iconUrl;
+
+  /// Whether [keywords] add matching tracks on top of [trackIds]. False means
+  /// the admin controls membership entirely by hand.
+  final bool matchKeywords;
+
+  /// The explicit, ordered track ids the admin picked in the admin panel (029).
+  final List<String> trackIds;
+
   final int? sortOrder;
   final bool isHidden;
 
@@ -72,12 +90,16 @@ class FeaturedPlaylistRow {
     this.colorFrom,
     this.colorTo,
     this.icon,
+    this.iconUrl,
+    this.matchKeywords = true,
+    this.trackIds = const [],
     this.sortOrder,
     this.isHidden = false,
   });
 
   factory FeaturedPlaylistRow.fromJson(Map<String, dynamic> json) {
     final rawKeywords = json['keywords']?.toString() ?? '';
+    final rawTracks = json['trackIds'];
     return FeaturedPlaylistRow(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString().trim() ?? '',
@@ -89,6 +111,16 @@ class FeaturedPlaylistRow {
       colorFrom: json['colorFrom']?.toString(),
       colorTo: json['colorTo']?.toString(),
       icon: json['icon']?.toString(),
+      iconUrl: json['iconUrl']?.toString(),
+      // Only an explicit false turns the rule off, so a missing field from an
+      // older server keeps the pre-migration behaviour of matching by keyword.
+      matchKeywords: json['matchKeywords'] != false,
+      trackIds: rawTracks is List
+          ? rawTracks
+              .map((t) => t.toString().trim())
+              .where((t) => t.isNotEmpty)
+              .toList()
+          : const [],
       sortOrder: json['sortOrder'] is int
           ? json['sortOrder'] as int
           : int.tryParse(json['sortOrder']?.toString() ?? ''),
@@ -97,86 +129,11 @@ class FeaturedPlaylistRow {
   }
 }
 
-/// A built-in chip definition, used when `featured_playlists` is empty.
-class _ChipDefinition {
-  final String id;
-  final String title;
-  final List<String> keywords;
-  final String colorFrom;
-  final String colorTo;
-  final String icon;
-
-  const _ChipDefinition({
-    required this.id,
-    required this.title,
-    required this.keywords,
-    required this.colorFrom,
-    required this.colorTo,
-    required this.icon,
-  });
-}
-
-/// The default chips, matching the design's row and the devotional catalogue.
-///
-/// These are only a fallback: any admin row in `featured_playlists` with the
-/// same id overrides the title, keywords, colors and icon, and additional
-/// admin rows append after these. Keywords follow the Specials shelves' proven
-/// word-start rule, so a deity chip does not collect unrelated tracks.
-const List<_ChipDefinition> _defaultChips = [
-  _ChipDefinition(
-    id: 'venkateswara',
-    title: 'Venkateswara',
-    keywords: ['venkateswara', 'venkateshwara', 'balaji', 'govinda', 'govind', 'tirupati', 'srinivasa', 'niluvadu'],
-    colorFrom: '#f2a33c',
-    colorTo: '#d97706',
-    icon: 'temple',
-  ),
-  _ChipDefinition(
-    id: 'krishna',
-    title: 'Krishna',
-    keywords: ['krishna', 'govardhan', 'radha', 'murali', 'gopala', 'madhav', 'keshav', 'gopika'],
-    colorFrom: '#3b82f6',
-    colorTo: '#1d4ed8',
-    icon: 'flute',
-  ),
-  _ChipDefinition(
-    id: 'ganesha',
-    title: 'Ganesha',
-    keywords: ['ganesh', 'ganesha', 'ganapati', 'ganapathi', 'vinayaka', 'vighnesh', 'vignesh', 'gajanana', 'gajanand', 'vakratunda', 'ekadanta', 'lambodara'],
-    colorFrom: '#ef4444',
-    colorTo: '#b91c1c',
-    icon: 'ganesha',
-  ),
-  _ChipDefinition(
-    id: 'rama',
-    title: 'Rama',
-    keywords: ['rama', 'sita', 'hanuman', 'ayodhya', 'raghu', 'rama raksha'],
-    colorFrom: '#fb923c',
-    colorTo: '#ea580c',
-    icon: 'bow',
-  ),
-  _ChipDefinition(
-    id: 'devi',
-    title: 'Devi',
-    keywords: ['devi', 'durga', 'lakshmi', 'laxmi', 'parvati', 'shakti', 'ambika', 'bhavani', 'kaali', 'kali', 'mahalakshmi', 'mahalaxmi'],
-    colorFrom: '#ec4899',
-    colorTo: '#be185d',
-    icon: 'lotus',
-  ),
-  _ChipDefinition(
-    id: 'chants',
-    title: 'Chants',
-    keywords: ['mantra', 'mantram', 'stotram', 'stotra', 'ashtakam', 'sahasranama', 'sahasranamam', 'suprabhatam', 'sloka', 'shloka', 'om ', 'chants'],
-    colorFrom: '#8b5cf6',
-    colorTo: '#6d28d9',
-    icon: 'om',
-  ),
-];
-
 /// The admin-managed chip rows, read through the app's own local server.
 ///
-/// A failure (server not up yet, table absent because migration 028 was not
-/// applied) resolves to an empty list so the built-in defaults apply.
+/// A failure (server not up yet, or the table missing because migration 028 was
+/// not applied) resolves to an empty list, which means no chips rather than an
+/// error on the home screen.
 final featuredPlaylistRowsProvider =
     FutureProvider<List<FeaturedPlaylistRow>>((ref) async {
   await ref.watch(serverProvider.future);
@@ -205,6 +162,18 @@ final featuredPlaylistRowsProvider =
   }
 });
 
+/// Admin order for chips: an explicit `sort_order` first (ascending), then
+/// unordered rows by title. Without the title tiebreak the chip row's order
+/// would depend on whatever order the rows happened to come back in.
+int _byAdminOrder(FeaturedPlaylistRow a, FeaturedPlaylistRow b) {
+  final ao = a.sortOrder;
+  final bo = b.sortOrder;
+  if (ao != null && bo != null && ao != bo) return ao.compareTo(bo);
+  if (ao != null && bo == null) return -1;
+  if (ao == null && bo != null) return 1;
+  return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+}
+
 /// Whether [keyword] occurs in [haystack] as a whole word or the start of one.
 ///
 /// Identical to the Specials rule: a word-start match lets suffixed devotional
@@ -215,75 +184,73 @@ bool matchesKeyword(String haystack, String keyword) {
   return RegExp('\\b${RegExp.escape(keyword)}').hasMatch(haystack);
 }
 
-/// Builds the Featured Playlist chips from the catalogue plus admin rows.
+/// Builds the Featured Playlist chips from the admin's rows.
 ///
-/// Admin rows win over the built-in defaults for the same id (title, keywords,
-/// colors, icon), extra admin rows append in `sort_order`, and chips that end
-/// up with no matching tracks are dropped so the row never shows a dead button.
+/// There is no built-in chip list any more: an empty `featured_playlists` table
+/// means no chips. For each row the admin has not hidden, membership is the
+/// union of:
+///   * the EXPLICIT track list ([FeaturedPlaylistRow.trackIds]), in the admin's
+///     own order, and
+///   * tracks matching the row's keywords, when
+///     [FeaturedPlaylistRow.matchKeywords] is on.
+/// Keyword-matched tracks are ordered by global play count (most played first),
+/// then by name. A chip that ends up with no tracks is dropped, so the row never
+/// shows a dead button.
 final featuredPlaylistsProvider =
     FutureProvider<List<FeaturedPlaylist>>((ref) async {
   final tracks = await ref.watch(homeTracksProvider.future);
   final playCounts = await ref.watch(globalPlayCountsProvider.future);
   final rows = await ref.watch(featuredPlaylistRowsProvider.future);
 
+  if (tracks.isEmpty || rows.isEmpty) return const [];
+
+  final byId = <String, SangeetTrackObject>{
+    for (final t in tracks) t.id: t,
+  };
   // Lowercase searchable text per track, computed once and reused per chip.
   final haystacks = <String, String>{
     for (final t in tracks) t.id: _haystackFor(t),
   };
 
-  final rowById = {for (final r in rows) r.id: r};
-  final hidden = <String>{
-    for (final r in rows)
-      if (r.isHidden) r.id,
-  };
-
-  // Built-in chips first, in their curated order, then any extra admin chips.
-  final definitions = <_ChipDefinition>[
-    ..._defaultChips.where((d) => !hidden.contains(d.id)),
-    ...rows
-        .where((r) =>
-            !r.isHidden && !_defaultChips.any((d) => d.id == r.id))
-        .map((r) => _ChipDefinition(
-              id: r.id,
-              title: r.title,
-              keywords: r.keywords,
-              colorFrom: r.colorFrom ?? '',
-              colorTo: r.colorTo ?? '',
-              icon: r.icon ?? '',
-            )),
-  ];
-
   final result = <FeaturedPlaylist>[];
-  for (final def in definitions) {
-    final row = rowById[def.id];
+  // Admin order, so the row reads the way the admin arranged it.
+  final ordered = [...rows]..sort(_byAdminOrder);
+  for (final row in ordered) {
+    // An admin-hidden chip is dropped regardless of how many tracks it holds.
+    if (row.isHidden || row.title.isEmpty) continue;
 
-    // An admin row replaces the built-in title/keywords/colors/icon outright.
-    final title = row?.title.isNotEmpty == true ? row!.title : def.title;
-    final keywords = row != null && row.keywords.isNotEmpty
-        ? row.keywords
-        : def.keywords;
-    // A chip with no keywords has nothing to match, so it is skipped.
-    if (keywords.isEmpty) continue;
+    final matched = <SangeetTrackObject>[];
+    final seen = <String>{};
+    for (final id in row.trackIds) {
+      final track = byId[id];
+      if (track == null || !seen.add(id)) continue;
+      matched.add(track);
+    }
 
-    final matched = tracks.where((t) {
-      final haystack = haystacks[t.id] ?? '';
-      return keywords.any((k) => matchesKeyword(haystack, k));
-    }).toList();
+    if (row.matchKeywords && row.keywords.isNotEmpty) {
+      final extra = tracks.where((t) {
+        if (seen.contains(t.id)) return false;
+        final haystack = haystacks[t.id] ?? '';
+        return row.keywords.any((k) => matchesKeyword(haystack, k));
+      }).toList()
+        ..sort((a, b) {
+          final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
+          if (cmp != 0) return cmp;
+          return a.name.compareTo(b.name);
+        });
+      matched.addAll(extra);
+    }
+
     if (matched.isEmpty) continue;
 
-    matched.sort((a, b) {
-      final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
-      if (cmp != 0) return cmp;
-      return a.name.compareTo(b.name);
-    });
-
     result.add(FeaturedPlaylist(
-      id: def.id,
-      title: title,
-      keywords: keywords,
-      colorFrom: _parseChipColor(row?.colorFrom ?? def.colorFrom),
-      colorTo: _parseChipColor(row?.colorTo ?? def.colorTo),
-      icon: (row?.icon?.isNotEmpty ?? false) ? row!.icon : def.icon,
+      id: row.id,
+      title: row.title,
+      keywords: row.keywords,
+      colorFrom: _parseChipColor(row.colorFrom),
+      colorTo: _parseChipColor(row.colorTo),
+      icon: row.icon,
+      iconUrl: row.iconUrl,
       tracks: matched,
     ));
   }

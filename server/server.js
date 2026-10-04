@@ -1198,7 +1198,107 @@ const R2_BUCKET = process.env.R2_BUCKET_NAME || 'soulful-bhakti-music'
 // yet: a missing table degrades to "no overrides" rather than a 500, so the
 // home screen keeps working and the admin panel can still show its editor.
 
-// Reads special override rows, returning [] when the table is absent.
+// ------------------------------------------------------------------
+// Explicit track membership (migration 029)
+//
+// `special_tracks` and `featured_playlist_tracks` hold the ordered list of
+// tracks the admin picked by hand, mirroring `album_songs`. Reads attach
+// `trackIds` to each row; writes replace one row's list.
+//
+// A missing table (migration 029 not applied) degrades to "no explicit
+// membership" rather than a 500, so an un-migrated project keeps working on
+// keywords alone.
+// ------------------------------------------------------------------
+async function readMembership(table, idColumn) {
+  try {
+    const { data, error } = await supabase
+      .from(table)
+      .select(`${idColumn}, track_id, position`)
+      .order('position', { ascending: true })
+    if (error || !Array.isArray(data)) return {}
+    const out = {}
+    for (const row of data) {
+      const key = row[idColumn]
+      if (!key) continue
+      ;(out[key] = out[key] || []).push(row.track_id)
+    }
+    return out
+  } catch (_) {
+    return {}
+  }
+}
+
+// Validates a membership payload: { trackIds: [uuid, ...] }. Duplicates are
+// dropped with order preserved, and every entry must be a UUID, so a stray
+// value cannot reach the database as an opaque driver error.
+function readTrackIdList(body) {
+  const raw = body.trackIds
+  if (!Array.isArray(raw)) return { error: 'trackIds must be an array' }
+  if (raw.length > 1000) return { error: 'trackIds is limited to 1000 entries' }
+  const seen = new Set()
+  const trackIds = []
+  for (const value of raw) {
+    const id = String(value ?? '').trim().toLowerCase()
+    if (!id) continue
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
+      return { error: `not a track id: ${String(value).slice(0, 40)}` }
+    }
+    if (seen.has(id)) continue
+    seen.add(id)
+    trackIds.push(id)
+  }
+  return { trackIds }
+}
+
+// Replaces one row's membership with [trackIds], in that order.
+//
+// Insert-then-prune rather than delete-then-insert: an upsert that fails (a
+// track id that no longer exists, which the foreign key rejects) leaves the
+// existing membership untouched instead of wiping it. The prune list is derived
+// from the ids actually read back, so a bad filter can never delete wrong rows.
+async function writeMembership(table, idColumn, id, trackIds) {
+  if (trackIds.length) {
+    const rows = trackIds.map((trackId, index) => ({
+      [idColumn]: id,
+      track_id: trackId,
+      position: index,
+    }))
+    const { error } = await supabase
+      .from(table)
+      .upsert(rows, { onConflict: `${idColumn},track_id` })
+    if (error) {
+      // 23503 = foreign key violation, i.e. not a track in this project. That is
+      // the caller's mistake, not a server fault.
+      if (error.code === '23503') {
+        return { badRequest: 'one of those track ids no longer exists' }
+      }
+      return { error: error.message }
+    }
+  }
+
+  const { data: current, error: readError } = await supabase
+    .from(table)
+    .select('track_id')
+    .eq(idColumn, id)
+  if (readError) return { error: readError.message }
+
+  const keep = new Set(trackIds)
+  const stale = (Array.isArray(current) ? current : [])
+    .map(r => r.track_id)
+    .filter(t => !keep.has(t))
+  if (stale.length) {
+    const { error } = await supabase
+      .from(table)
+      .delete()
+      .eq(idColumn, id)
+      .in('track_id', stale)
+    if (error) return { error: error.message }
+  }
+  return {}
+}
+
+// Reads special rows, returning [] when the table is absent. Each row carries
+// its explicit `trackIds` (empty when nothing was picked by hand).
 async function readSpecialRows() {
   try {
     const { data, error } = await supabase
@@ -1206,7 +1306,9 @@ async function readSpecialRows() {
       .select('*')
       .order('sort_order', { ascending: true, nullsFirst: false })
     if (error) return []
-    return data || []
+    const rows = Array.isArray(data) ? data : []
+    const membership = await readMembership('special_tracks', 'special_id')
+    return rows.map(row => ({ ...row, trackIds: membership[row.id] || [] }))
   } catch (_) {
     return []
   }
@@ -1224,7 +1326,7 @@ app.put('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
   try {
     const id = String(req.params.id || '').trim()
     if (!id) return res.status(400).json({ error: 'id is required' })
-    const { title, subtitle, banner_url, sort_order, is_hidden } = req.body || {}
+    const { title, subtitle, banner_url, sort_order, is_hidden, keywords, match_keywords } = req.body || {}
     const updates = {}
     if (title !== undefined) {
       updates.title = typeof title === 'string' && title.trim() ? title.trim() : null
@@ -1240,6 +1342,16 @@ app.put('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
         : (Number.isFinite(Number(sort_order)) ? Math.floor(Number(sort_order)) : null)
     }
     if (is_hidden !== undefined) updates.is_hidden = Boolean(is_hidden)
+    // The shelf's automatic matching rule is data now, not the app's hardcoded
+    // list (migration 029). Empty means "match nothing by keyword".
+    if (keywords !== undefined) {
+      const list = Array.isArray(keywords) ? keywords : String(keywords ?? '').split(',')
+      updates.keywords = list
+        .map(k => String(k).trim().toLowerCase())
+        .filter(Boolean)
+        .join(',')
+    }
+    if (match_keywords !== undefined) updates.match_keywords = Boolean(match_keywords)
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
     updates.updated_at = new Date().toISOString()
 
@@ -1259,6 +1371,22 @@ app.delete('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
     const { error } = await supabase.from('specials').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
     res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// Admin: replace one shelf's EXPLICIT track list. The body is
+// { trackIds: [...] } in display order; an empty array clears the list.
+// The rows in `specials` are the shelf; this is the membership.
+app.put('/api/admin/specials/:id/tracks', requireAdmin, async (req, res, next) => {
+  try {
+    const id = String(req.params.id || '').trim()
+    if (!id) return res.status(400).json({ error: 'id is required' })
+    const { error: listError, trackIds } = readTrackIdList(req.body || {})
+    if (listError) return res.status(400).json({ error: listError })
+    const { error, badRequest } = await writeMembership('special_tracks', 'special_id', id, trackIds)
+    if (badRequest) return res.status(400).json({ error: badRequest })
+    if (error) return res.status(500).json({ error })
+    res.json({ id, trackIds })
   } catch (err) { next(err) }
 })
 
@@ -1311,7 +1439,8 @@ async function readFeaturedPlaylistRows() {
   try {
     const { data, error } = await supabase.from('featured_playlists').select('*')
     if (error || !Array.isArray(data)) return []
-    return data
+    const membership = await readMembership('featured_playlist_tracks', 'playlist_id')
+    return data.map(row => ({ ...row, trackIds: membership[row.id] || [] }))
   } catch (_) {
     return []
   }
@@ -1361,6 +1490,18 @@ function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
     row.icon = typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : null
   }
 
+  // An admin-uploaded icon wins over the glyph name in the app; the glyph stays
+  // as the fallback so clearing the image never leaves an empty circle.
+  if (body.icon_url !== undefined) {
+    row.icon_url = typeof body.icon_url === 'string' && body.icon_url.trim()
+      ? body.icon_url.trim()
+      : null
+  }
+
+  // Whether the keywords above add matching tracks on top of the explicit list.
+  // false = the admin controls membership entirely by hand.
+  if (body.match_keywords !== undefined) row.match_keywords = Boolean(body.match_keywords)
+
   if (body.sort_order !== undefined) {
     row.sort_order = body.sort_order == null ? null
       : (Number.isFinite(Number(body.sort_order)) ? Math.floor(Number(body.sort_order)) : null)
@@ -1394,13 +1535,27 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
   } catch (err) { next(err) }
 })
 
-// Admin: delete one featured playlist (it reverts to the built-in default when
-// its id matches one, otherwise it simply disappears).
+// Admin: delete one featured playlist (and, by cascade, its track list).
 app.delete('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next) => {
   try {
     const { error } = await supabase.from('featured_playlists').delete().eq('id', req.params.id)
     if (error) return res.status(500).json({ error: error.message })
     res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+// Admin: replace one featured playlist's EXPLICIT track list. The body is
+// { trackIds: [...] } in display order; an empty array clears the list.
+app.put('/api/admin/featured-playlists/:id/tracks', requireAdmin, async (req, res, next) => {
+  try {
+    const id = String(req.params.id || '').trim()
+    if (!id) return res.status(400).json({ error: 'id is required' })
+    const { error: listError, trackIds } = readTrackIdList(req.body || {})
+    if (listError) return res.status(400).json({ error: listError })
+    const { error, badRequest } = await writeMembership('featured_playlist_tracks', 'playlist_id', id, trackIds)
+    if (badRequest) return res.status(400).json({ error: badRequest })
+    if (error) return res.status(500).json({ error })
+    res.json({ id, trackIds })
   } catch (err) { next(err) }
 })
 
@@ -2258,6 +2413,15 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     // unaffected (they omit the kind flag).
     if (req.body && req.body.kind === 'track_thumb' && ext !== 'webp') {
       return res.status(400).json({ error: 'Track thumbnail must be a WebP file' })
+    }
+
+    // Featured Playlist chip icons: STRICTLY WebP as well. No aspect ratio is
+    // enforced on purpose — the app draws the icon inside a circle with
+    // BoxFit.cover, so a slightly non-square export is cropped to its centre
+    // rather than distorted, and rejecting it would be friction with no benefit.
+    // A square export is still what the admin panel asks for.
+    if (req.body && req.body.kind === 'chip_icon' && ext !== 'webp') {
+      return res.status(400).json({ error: 'Chip icon must be a WebP file' })
     }
 
     // Specials carousel banners are STRICTLY WebP AND strictly landscape at

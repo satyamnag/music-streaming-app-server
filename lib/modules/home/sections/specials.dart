@@ -41,30 +41,65 @@ class HomeSpecial {
   });
 }
 
-/// An admin-managed override for one shelf, from the `specials` table.
-class HomeSpecialOverride {
+/// One shelf row from the `specials` table.
+///
+/// The table is the ONLY source of truth for the home carousel — the app no
+/// longer carries a built-in shelf list. The admin decides each shelf's title,
+/// subtitle, banner, order and visibility, which tracks it holds by hand
+/// ([trackIds]), and whether its [keywords] add matching tracks on top.
+class HomeSpecialRow {
   final String id;
   final String? title;
   final String? subtitle;
   final String? bannerUrl;
+
+  /// Matching rule, already split and lowercased.
+  final List<String> keywords;
+
+  /// Whether [keywords] add matching tracks on top of [trackIds]. False means
+  /// the admin controls membership entirely by hand.
+  final bool matchKeywords;
+
+  /// The explicit, ordered track ids the admin picked in the admin panel.
+  final List<String> trackIds;
+
   final int? sortOrder;
   final bool isHidden;
 
-  const HomeSpecialOverride({
+  const HomeSpecialRow({
     required this.id,
     this.title,
     this.subtitle,
     this.bannerUrl,
+    this.keywords = const [],
+    this.matchKeywords = true,
+    this.trackIds = const [],
     this.sortOrder,
     this.isHidden = false,
   });
 
-  factory HomeSpecialOverride.fromJson(Map<String, dynamic> json) {
-    return HomeSpecialOverride(
+  factory HomeSpecialRow.fromJson(Map<String, dynamic> json) {
+    final rawKeywords = json['keywords']?.toString() ?? '';
+    final rawTracks = json['trackIds'];
+    return HomeSpecialRow(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString(),
       subtitle: json['subtitle']?.toString(),
       bannerUrl: json['bannerUrl']?.toString(),
+      keywords: rawKeywords
+          .split(',')
+          .map((k) => k.trim().toLowerCase())
+          .where((k) => k.isNotEmpty)
+          .toList(),
+      // Only an explicit false turns the rule off, so a missing field from an
+      // older server keeps the pre-migration behaviour of matching by keyword.
+      matchKeywords: json['matchKeywords'] != false,
+      trackIds: rawTracks is List
+          ? rawTracks
+              .map((t) => t.toString().trim())
+              .where((t) => t.isNotEmpty)
+              .toList()
+          : const [],
       sortOrder: json['sortOrder'] is int
           ? json['sortOrder'] as int
           : int.tryParse(json['sortOrder']?.toString() ?? ''),
@@ -72,94 +107,6 @@ class HomeSpecialOverride {
     );
   }
 }
-
-/// A curated shelf definition: the deity/theme, how to match tracks for it,
-/// and the artwork fallback when no track in the shelf has a cover.
-class _SpecialDefinition {
-  final String id;
-  final String title;
-  final String subtitle;
-
-  /// Keywords matched case-insensitively against a track's name, album name,
-  /// artist names and admin tags. Any single hit qualifies the track.
-  final List<String> keywords;
-
-  const _SpecialDefinition({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.keywords,
-  });
-}
-
-/// The curated shelves, in display order.
-///
-/// Keywords are deliberately specific (e.g. "ganesha" plus its common
-/// synonyms like "vinayaka"/"vighneshwara") so a track is not pulled into a
-/// shelf it does not belong to. Matching is substring-based against the
-/// track's own text, which is how devotional catalogues are actually named.
-const List<_SpecialDefinition> _specialDefinitions = [
-  _SpecialDefinition(
-    id: 'soulful-bhakti',
-    title: 'Soulful Bhakti Special',
-    subtitle: 'Devotional favourites across every deity',
-    keywords: ['bhakti', 'bhajan', 'devotional', 'soulful'],
-  ),
-  _SpecialDefinition(
-    id: 'ganesha',
-    title: 'Ganesha Special',
-    subtitle: 'Vinayaka chants and songs',
-    keywords: ['ganesh', 'ganesha', 'ganapati', 'ganapathi', 'vinayaka', 'vighnesh', 'vignesh', 'gajanana', 'gajanand', 'vakratunda', 'ekadanta', 'lambodara'],
-  ),
-  _SpecialDefinition(
-    id: 'venkateswara',
-    title: 'Venkateswara Special',
-    subtitle: 'Balaji and Govinda songs',
-    keywords: ['venkateswara', 'venkateshwara', 'balaji', 'govinda', 'tirupati', 'srinivasa', 'govind'],
-  ),
-  _SpecialDefinition(
-    id: 'krishna',
-    title: 'Krishna Special',
-    subtitle: 'Krishna bhajans and kirtans',
-    keywords: ['krishna', 'krishna', 'govardhan', 'radha', 'murali', 'gopala', 'madhav', 'keshav'],
-  ),
-  _SpecialDefinition(
-    id: 'rama',
-    title: 'Rama Special',
-    subtitle: 'Rama bhajans and stotras',
-    keywords: ['rama', 'sita', 'hanuman', 'ayodhya', 'raghu', 'rama raksha'],
-  ),
-  _SpecialDefinition(
-    id: 'shiva',
-    title: 'Shiva Special',
-    subtitle: 'Shiva chants and stotras',
-    keywords: ['shiva', 'siva', 'mahadev', 'parvati', 'rudra', 'linga', 'kailash', 'shankar'],
-  ),
-  _SpecialDefinition(
-    id: 'lakshmi',
-    title: 'Lakshmi Special',
-    subtitle: 'Lakshmi and wealth stotras',
-    keywords: ['lakshmi', 'laxmi', 'ashtalakshmi', 'kanakadhara', 'wealth', 'shree', 'mahalakshmi', 'mahalaxmi', 'sri lakshmi', 'dhana'],
-  ),
-  _SpecialDefinition(
-    id: 'vishnu',
-    title: 'Vishnu Special',
-    subtitle: 'Vishnu sahasranamam and more',
-    keywords: ['vishnu', 'narayana', 'hari', 'sahasranama', 'sahasranamam', 'anantha', 'padmanabha'],
-  ),
-  _SpecialDefinition(
-    id: 'parvati',
-    title: 'Parvati Special',
-    subtitle: 'Devi and Shakti songs',
-    keywords: ['parvati', 'durga', 'devi', 'shakti', 'ambika', 'bhavani', 'mata', 'kaali', 'kali'],
-  ),
-  _SpecialDefinition(
-    id: 'ganga',
-    title: 'Ganga Special',
-    subtitle: 'Ganga and Gange stotras',
-    keywords: ['ganga', 'gange', 'ganges', 'bhagirathi', 'ganga maiya'],
-  ),
-];
 
 /// Whether [keyword] occurs in [haystack] as a whole word, or as the start of
 /// one (with at least [minPrefix] characters of the keyword present).
@@ -185,19 +132,29 @@ bool _keywordMatches(String haystack, String keyword) {
   return RegExp('\\b$escaped').hasMatch(haystack);
 }
 
-/// Builds the "Special" shelves from the full catalogue.
+/// Builds the "Special" shelves from the admin's rows.
 ///
-/// A shelf is included only when it actually has tracks, so the home screen
-/// never shows an empty carousel. Within a shelf, tracks are ordered by global
-/// play count (most played first) so the slide's cover is the most popular
-/// track's artwork, then by name for stability.
+/// There is no built-in shelf list any more: an empty `specials` table means
+/// no carousels. For each row the admin has not hidden, membership is the union
+/// of:
+///   * the EXPLICIT track list ([HomeSpecialRow.trackIds]), in the admin's own
+///     order, and
+///   * tracks matching the row's keywords, when [HomeSpecialRow.matchKeywords]
+///     is on.
+/// Keyword-matched tracks are ordered by global play count (most played first),
+/// then by name, so the slide's cover is the shelf's most popular artwork. A
+/// shelf that ends up with no tracks is dropped, so the home screen never shows
+/// an empty carousel.
 List<HomeSpecial> _buildSpecials(
   List<SangeetTrackObject> tracks,
-  Map<String, int> playCounts, {
-  Map<String, HomeSpecialOverride> overrides = const {},
-}) {
-  if (tracks.isEmpty) return const [];
+  Map<String, int> playCounts,
+  List<HomeSpecialRow> rows,
+) {
+  if (tracks.isEmpty || rows.isEmpty) return const [];
 
+  final byId = <String, SangeetTrackObject>{
+    for (final t in tracks) t.id: t,
+  };
   // Pre-compute one lowercase haystack per track (name + album + artists +
   // tags) so matching is a single pass per shelf rather than re-joining
   // strings for every keyword.
@@ -209,53 +166,52 @@ List<HomeSpecial> _buildSpecials(
   // Covers already claimed by an earlier shelf, so no two shelves show the same
   // artwork when they have no admin banner of their own.
   final usedCovers = <String>{};
-  for (final def in _specialDefinitions) {
-    final override = overrides[def.id];
+  // Admin order, so the carousel reads the way the admin arranged it.
+  final ordered = [...rows]..sort(_byAdminOrder);
+  for (final row in ordered) {
+    // An admin-hidden shelf is dropped regardless of how many tracks it holds.
+    if (row.isHidden) continue;
 
-    // An admin-hidden shelf is dropped regardless of how many tracks match.
-    if (override?.isHidden == true) continue;
+    final title = row.title?.trim() ?? '';
+    if (title.isEmpty) continue;
 
-    final matched = tracks.where((t) {
-      final haystack = haystacks[t.id] ?? '';
-      return def.keywords.any((k) => _keywordMatches(haystack, k));
-    }).toList();
+    final matched = <SangeetTrackObject>[];
+    final seen = <String>{};
+    for (final id in row.trackIds) {
+      final track = byId[id];
+      if (track == null || !seen.add(id)) continue;
+      matched.add(track);
+    }
+
+    if (row.matchKeywords && row.keywords.isNotEmpty) {
+      final extra = tracks.where((t) {
+        if (seen.contains(t.id)) return false;
+        final haystack = haystacks[t.id] ?? '';
+        return row.keywords.any((k) => _keywordMatches(haystack, k));
+      }).toList()
+        ..sort((a, b) {
+          final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
+          if (cmp != 0) return cmp;
+          return a.name.compareTo(b.name);
+        });
+      matched.addAll(extra);
+    }
 
     if (matched.isEmpty) continue;
 
-    matched.sort((a, b) {
-      final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
-      if (cmp != 0) return cmp;
-      return a.name.compareTo(b.name);
-    });
-
     // The admin banner (if any) wins; otherwise the shelf's own track art.
-    final overrideTitle = override?.title?.trim();
-    final overrideSubtitle = override?.subtitle?.trim();
-    final bannerUrl = override?.bannerUrl?.trim();
-    final hasBanner = bannerUrl != null && bannerUrl.isNotEmpty;
+    final bannerUrl = row.bannerUrl?.trim() ?? '';
+    final hasBanner = bannerUrl.isNotEmpty;
 
     specials.add(HomeSpecial(
-      id: def.id,
-      title: (overrideTitle?.isNotEmpty ?? false) ? overrideTitle! : def.title,
-      subtitle: (overrideSubtitle?.isNotEmpty ?? false)
-          ? overrideSubtitle!
-          : def.subtitle,
+      id: row.id,
+      title: title,
+      subtitle: row.subtitle?.trim() ?? '',
       imageUrl: hasBanner ? bannerUrl : _coverFor(matched, usedCovers),
       hasBanner: hasBanner,
       tracks: matched,
     ));
   }
-
-  // Admin-defined ordering first (shelves without an explicit order keep their
-  // curated default position, stably, after the ordered ones).
-  specials.sort((a, b) {
-    final ao = overrides[a.id]?.sortOrder;
-    final bo = overrides[b.id]?.sortOrder;
-    if (ao != null && bo != null && ao != bo) return ao.compareTo(bo);
-    if (ao != null && bo == null) return -1;
-    if (ao == null && bo != null) return 1;
-    return 0;
-  });
 
   return specials;
 }
@@ -295,14 +251,15 @@ String _coverFor(List<SangeetTrackObject> tracks, Set<String> used) {
   return '';
 }
 
-/// The admin-managed shelf overrides (title/subtitle/banner/order/hidden).
+/// The admin-managed shelf rows: title, subtitle, banner, order, hidden flag,
+/// the hand-picked track list and the optional keyword rule.
 ///
-/// Reads them through the app's own local server (`/supabase/specials`) like
-/// every other catalogue call. A failure (server not up yet, or migration 027
-/// not applied) resolves to an empty map, so the shelves simply fall back to
-/// their built-in defaults instead of disappearing.
-final homeSpecialOverridesProvider =
-    FutureProvider<Map<String, HomeSpecialOverride>>((ref) async {
+/// Read through the app's own local server (`/supabase/specials`) like every
+/// other catalogue call. A failure (server not up yet, or migration 029 not
+/// applied) resolves to an empty list — no carousels — rather than an error
+/// screen.
+final homeSpecialRowsProvider =
+    FutureProvider<List<HomeSpecialRow>>((ref) async {
   await ref.watch(serverProvider.future);
   await SangeetMedia.ensurePortReady();
 
@@ -314,25 +271,36 @@ final homeSpecialOverridesProvider =
         headers: {'accept': 'application/json'},
       ),
     );
-    if (response.statusCode != 200) return const {};
+    if (response.statusCode != 200) return const [];
     final data = response.data as Map<String, dynamic>;
-    final items = (data['items'] as List<dynamic>? ?? const [])
+    return (data['items'] as List<dynamic>? ?? const [])
         .map((e) =>
-            HomeSpecialOverride.fromJson(Map<String, dynamic>.from(e as Map)))
-        .where((o) => o.id.isNotEmpty);
-    return {for (final o in items) o.id: o};
+            HomeSpecialRow.fromJson(Map<String, dynamic>.from(e as Map)))
+        .where((r) => r.id.isNotEmpty)
+        .toList();
   } catch (_) {
-    return const {};
+    return const [];
   }
 });
 
-/// The home "Specials" carousels: curated deity/theme shelves built from the
-/// same catalogue the rest of the home screen uses, so they always reflect
-/// what the admin has published.
+/// Admin order for shelves: an explicit `sort_order` first (ascending), then
+/// unordered rows by title. Without the title tiebreak the carousel order would
+/// depend on whatever order the rows happened to come back from the server.
+int _byAdminOrder(HomeSpecialRow a, HomeSpecialRow b) {
+  final ao = a.sortOrder;
+  final bo = b.sortOrder;
+  if (ao != null && bo != null && ao != bo) return ao.compareTo(bo);
+  if (ao != null && bo == null) return -1;
+  if (ao == null && bo != null) return 1;
+  return (a.title ?? '').toLowerCase().compareTo((b.title ?? '').toLowerCase());
+}
+
+/// The home "Specials" carousels, built from the admin's rows over the same
+/// catalogue the rest of the home screen uses, so they always reflect what the
+/// admin has published.
 final homeSpecialsProvider = Provider<List<HomeSpecial>>((ref) {
   final tracks = ref.watch(homeTracksProvider).valueOrNull ?? const [];
   final playCounts = ref.watch(globalPlayCountsProvider).valueOrNull ?? const {};
-  final overrides =
-      ref.watch(homeSpecialOverridesProvider).valueOrNull ?? const {};
-  return _buildSpecials(tracks, playCounts, overrides: overrides);
+  final rows = ref.watch(homeSpecialRowsProvider).valueOrNull ?? const [];
+  return _buildSpecials(tracks, playCounts, rows);
 });
