@@ -12,130 +12,131 @@ class AppLocalizationsTr extends AppLocalizations {
   String get guest => 'Misafir';
 
   @override
-  String get browse => 'Göz at';
+  String get browse => 'GÃ¶z at';
 
   @override
   String get search => 'Ara';
 
   @override
-  String get library => 'Kütüphane';
+  String get library => 'KÃ¼tÃ¼phane';
 
   @override
-  String get lyrics => 'Şarkı sözleri';
+  String get lyrics => 'ÅžarkÄ± sÃ¶zleri';
 
   @override
   String get settings => 'Ayarlar';
 
   @override
-  String get settings_subtitle => 'Soulful Bhakti\'yi zevkine göre özelleştir';
+  String get settings_subtitle =>
+      'Soulful Bhakti\'yi zevkine gÃ¶re Ã¶zelleÅŸtir';
 
   @override
   String get genre_categories_filter =>
-      'Kategorileri veya türleri filtreleyin...';
+      'Kategorileri veya tÃ¼rleri filtreleyin...';
 
   @override
-  String get genre => 'Tür';
+  String get genre => 'TÃ¼r';
 
   @override
-  String get personalized => 'Kişiselleştirilmiş';
+  String get personalized => 'KiÅŸiselleÅŸtirilmiÅŸ';
 
   @override
-  String get featured => 'Öne çıkanlar';
+  String get featured => 'Ã–ne Ã§Ä±kanlar';
 
   @override
-  String get new_releases => 'Yeni çıkanlar';
+  String get new_releases => 'Yeni Ã§Ä±kanlar';
 
   @override
-  String get songs => 'Şarkılar';
+  String get songs => 'ÅžarkÄ±lar';
 
   @override
   String get newest_arrivals => 'Yeni Eklenenler';
 
   @override
-  String get top_trending => 'Gündemdekiler';
+  String get top_trending => 'GÃ¼ndemdekiler';
 
   @override
-  String get see_more => 'Daha Fazla Gör';
+  String get see_more => 'Daha Fazla GÃ¶r';
 
   @override
   String playing_track(Object track) {
-    return '$track oynatılıyor';
+    return '$track oynatÄ±lÄ±yor';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Bu, mevcut kuyruğu temizleyecektir. $track_length parça kaldırılacak\nDevam etmek istiyor musunuz?';
+    return 'Bu, mevcut kuyruÄŸu temizleyecektir. $track_length parÃ§a kaldÄ±rÄ±lacak\nDevam etmek istiyor musunuz?';
   }
 
   @override
-  String get load_more => 'Daha fazlasını yükle';
+  String get load_more => 'Daha fazlasÄ±nÄ± yÃ¼kle';
 
   @override
   String get playlists => 'Oynatma listeleri';
 
   @override
-  String get artists => 'Sanatçılar';
+  String get artists => 'SanatÃ§Ä±lar';
 
   @override
-  String get albums => 'Albümler';
+  String get albums => 'AlbÃ¼mler';
 
   @override
-  String get tracks => 'Parçalar';
+  String get tracks => 'ParÃ§alar';
 
   @override
-  String get downloads => 'İndirilenler';
+  String get downloads => 'Ä°ndirilenler';
 
   @override
   String get filter_playlists => 'Oynatma listelerinizi filtreleyin...';
 
   @override
-  String get liked_tracks => 'Beğenilen parçalar';
+  String get liked_tracks => 'BeÄŸenilen parÃ§alar';
 
   @override
-  String get liked_tracks_description => 'Beğendiğiniz tüm parçalar';
+  String get liked_tracks_description => 'BeÄŸendiÄŸiniz tÃ¼m parÃ§alar';
 
   @override
-  String get playlist => 'Çalma Listesi';
+  String get playlist => 'Ã‡alma Listesi';
 
   @override
-  String get create_a_playlist => 'Bir oynatma listesi oluştur';
+  String get create_a_playlist => 'Bir oynatma listesi oluÅŸtur';
 
   @override
-  String get new_playlist => 'Yeni çalma listesi';
+  String get new_playlist => 'Yeni Ã§alma listesi';
 
   @override
-  String get playlist_name => 'Oynatma listesi adı';
+  String get playlist_name => 'Oynatma listesi adÄ±';
 
   @override
   String get no_playlists_yet =>
-      'Henüz çalma listesi yok. Seçilen şarkılardan bir tane oluştur.';
+      'HenÃ¼z Ã§alma listesi yok. SeÃ§ilen ÅŸarkÄ±lardan bir tane oluÅŸtur.';
 
   @override
-  String get update_playlist => 'Oynatma listesini güncelle';
+  String get update_playlist => 'Oynatma listesini gÃ¼ncelle';
 
   @override
-  String get create => 'Oluştur';
+  String get create => 'OluÅŸtur';
 
   @override
-  String get cancel => 'İptal';
+  String get cancel => 'Ä°ptal';
 
   @override
-  String get update => 'Güncelle';
+  String get update => 'GÃ¼ncelle';
 
   @override
-  String get name_of_playlist => 'Oynatma listesinin adı';
+  String get name_of_playlist => 'Oynatma listesinin adÄ±';
 
   @override
-  String get description => 'Açıklama';
+  String get description => 'AÃ§Ä±klama';
 
   @override
-  String get public => 'Halka açık';
+  String get public => 'Halka aÃ§Ä±k';
 
   @override
-  String get collaborative => 'İşbirliği';
+  String get collaborative => 'Ä°ÅŸbirliÄŸi';
 
   @override
-  String get search_local_tracks => 'Yerel parçaları ara...';
+  String get search_local_tracks => 'Yerel parÃ§alarÄ± ara...';
 
   @override
   String get play => 'Oynat';
@@ -147,56 +148,56 @@ class AppLocalizationsTr extends AppLocalizations {
   String get none => 'Yok';
 
   @override
-  String get sort_a_z => 'A - Z\'ye göre sırala';
+  String get sort_a_z => 'A - Z\'ye gÃ¶re sÄ±rala';
 
   @override
-  String get sort_z_a => 'Z - A\'ya göre sırala';
+  String get sort_z_a => 'Z - A\'ya gÃ¶re sÄ±rala';
 
   @override
-  String get sort_artist => 'Sanatçıya göre sırala';
+  String get sort_artist => 'SanatÃ§Ä±ya gÃ¶re sÄ±rala';
 
   @override
-  String get sort_album => 'Albüme göre sırala';
+  String get sort_album => 'AlbÃ¼me gÃ¶re sÄ±rala';
 
   @override
-  String get sort_duration => 'Süreye göre sırala';
+  String get sort_duration => 'SÃ¼reye gÃ¶re sÄ±rala';
 
   @override
-  String get sort_tracks => 'Parçaları sırala';
+  String get sort_tracks => 'ParÃ§alarÄ± sÄ±rala';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'Şu anda indirilenler ($tracks_length)';
+    return 'Åžu anda indirilenler ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'Tümünü iptal et';
+  String get cancel_all => 'TÃ¼mÃ¼nÃ¼ iptal et';
 
   @override
-  String get filter_artist => 'Sanatçıları filtreleyin...';
+  String get filter_artist => 'SanatÃ§Ä±larÄ± filtreleyin...';
 
   @override
   String followers(Object followers) {
-    return '$followers Takipçiler';
+    return '$followers TakipÃ§iler';
   }
 
   @override
-  String get add_artist_to_blacklist => 'Sanatçıyı kara listeye ekle';
+  String get add_artist_to_blacklist => 'SanatÃ§Ä±yÄ± kara listeye ekle';
 
   @override
-  String get top_tracks => 'En iyi parçalar';
+  String get top_tracks => 'En iyi parÃ§alar';
 
   @override
-  String get fans_also_like => 'Hayranlar ayrıca şunları da beğendi';
+  String get fans_also_like => 'Hayranlar ayrÄ±ca ÅŸunlarÄ± da beÄŸendi';
 
   @override
-  String get loading => 'Yükleniyor...';
+  String get loading => 'YÃ¼kleniyor...';
 
   @override
-  String get artist => 'Sanatçı';
+  String get artist => 'SanatÃ§Ä±';
 
   @override
-  String get blacklisted => 'Kara listeye alındı';
+  String get blacklisted => 'Kara listeye alÄ±ndÄ±';
 
   @override
   String get following => 'Takip ediliyor';
@@ -205,15 +206,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get follow => 'Takip et';
 
   @override
-  String get artist_url_copied => 'Sanatçı bağlantısı panoya kopyalandı';
+  String get artist_url_copied => 'SanatÃ§Ä± baÄŸlantÄ±sÄ± panoya kopyalandÄ±';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'Kuyruğa $tracks parçası eklendi';
+    return 'KuyruÄŸa $tracks parÃ§asÄ± eklendi';
   }
 
   @override
-  String get filter_albums => 'Albümleri filtreleyin...';
+  String get filter_albums => 'AlbÃ¼mleri filtreleyin...';
 
   @override
   String get synced => 'Senkronize edildi';
@@ -222,13 +223,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get plain => 'Sade';
 
   @override
-  String get shuffle => 'Karıştır';
+  String get shuffle => 'KarÄ±ÅŸtÄ±r';
 
   @override
-  String get search_tracks => 'Parça ara...';
+  String get search_tracks => 'ParÃ§a ara...';
 
   @override
-  String get released => 'Yayınlandı';
+  String get released => 'YayÄ±nlandÄ±';
 
   @override
   String error(Object error) {
@@ -236,7 +237,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get title => 'Başlık';
+  String get title => 'BaÅŸlÄ±k';
 
   @override
   String get time => 'Zaman';
@@ -251,7 +252,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String add_count_to_queue(Object count) {
-    return 'Kuyruğa ekle ($count)';
+    return 'KuyruÄŸa ekle ($count)';
   }
 
   @override
@@ -260,16 +261,16 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get album => 'Albüm';
+  String get album => 'AlbÃ¼m';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '$data panoya kopyalandı';
+    return '$data panoya kopyalandÄ±';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '$track parçasını aşağıdaki oynatma listelerine ekle';
+    return '$track parÃ§asÄ±nÄ± aÅŸaÄŸÄ±daki oynatma listelerine ekle';
   }
 
   @override
@@ -277,15 +278,15 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String added_track_to_queue(Object track) {
-    return '$track kuyruğa eklendi';
+    return '$track kuyruÄŸa eklendi';
   }
 
   @override
-  String get add_to_queue => 'Kuyruğa ekle';
+  String get add_to_queue => 'KuyruÄŸa ekle';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track bir sonraki çalacak';
+    return '$track bir sonraki Ã§alacak';
   }
 
   @override
@@ -293,14 +294,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String removed_track_from_queue(Object track) {
-    return '$track kuyruktan kaldırıldı';
+    return '$track kuyruktan kaldÄ±rÄ±ldÄ±';
   }
 
   @override
-  String get remove_from_queue => 'Kuyruktan kaldır';
+  String get remove_from_queue => 'Kuyruktan kaldÄ±r';
 
   @override
-  String get remove_from_favorites => 'Favorilerden kaldır';
+  String get remove_from_favorites => 'Favorilerden kaldÄ±r';
 
   @override
   String get save_as_favorite => 'Favori olarak kaydet';
@@ -309,46 +310,47 @@ class AppLocalizationsTr extends AppLocalizations {
   String get add_to_playlist => 'Oynatma listesine ekle';
 
   @override
-  String get remove_from_playlist => 'Oynatma listesinden kaldır';
+  String get remove_from_playlist => 'Oynatma listesinden kaldÄ±r';
 
   @override
   String get add_to_blacklist => 'Kara listeye ekle';
 
   @override
-  String get remove_from_blacklist => 'Kara listeden kaldır';
+  String get remove_from_blacklist => 'Kara listeden kaldÄ±r';
 
   @override
-  String get share => 'Paylaş';
+  String get share => 'PaylaÅŸ';
 
   @override
-  String get mini_player => 'Mini oynatıcı';
+  String get mini_player => 'Mini oynatÄ±cÄ±';
 
   @override
-  String get slide_to_seek => 'İleri veya geri arama yapmak için kaydırın';
+  String get slide_to_seek => 'Ä°leri veya geri arama yapmak iÃ§in kaydÄ±rÄ±n';
 
   @override
-  String get shuffle_playlist => 'Oynatma listesini karıştır';
+  String get shuffle_playlist => 'Oynatma listesini karÄ±ÅŸtÄ±r';
 
   @override
-  String get unshuffle_playlist => 'Oynatma listesinin karışıklığını kaldır';
+  String get unshuffle_playlist =>
+      'Oynatma listesinin karÄ±ÅŸÄ±klÄ±ÄŸÄ±nÄ± kaldÄ±r';
 
   @override
-  String get previous_track => 'Önceki parça';
+  String get previous_track => 'Ã–nceki parÃ§a';
 
   @override
-  String get next_track => 'Sonraki parça';
+  String get next_track => 'Sonraki parÃ§a';
 
   @override
-  String get pause_playback => 'Oynatmayı duraklat';
+  String get pause_playback => 'OynatmayÄ± duraklat';
 
   @override
-  String get resume_playback => 'Oynatmayı sürdür';
+  String get resume_playback => 'OynatmayÄ± sÃ¼rdÃ¼r';
 
   @override
-  String get loop_track => 'Döngü parçası';
+  String get loop_track => 'DÃ¶ngÃ¼ parÃ§asÄ±';
 
   @override
-  String get no_loop => 'Dönüş Yok';
+  String get no_loop => 'DÃ¶nÃ¼ÅŸ Yok';
 
   @override
   String get repeat_playlist => 'Oynatma listesini tekrarla';
@@ -357,77 +359,77 @@ class AppLocalizationsTr extends AppLocalizations {
   String get queue => 'Kuyruk';
 
   @override
-  String get alternative_track_sources => 'Alternatif parça kaynakları';
+  String get alternative_track_sources => 'Alternatif parÃ§a kaynaklarÄ±';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks parça kuyrukta';
+    return '$tracks parÃ§a kuyrukta';
   }
 
   @override
-  String get clear_all => 'Tümünü temizle';
+  String get clear_all => 'TÃ¼mÃ¼nÃ¼ temizle';
 
   @override
   String get show_hide_ui_on_hover =>
-      'Fareyle üzerine gelindiğinde kullanıcı arayüzünü göster/gizle';
+      'Fareyle Ã¼zerine gelindiÄŸinde kullanÄ±cÄ± arayÃ¼zÃ¼nÃ¼ gÃ¶ster/gizle';
 
   @override
-  String get always_on_top => 'Her zaman üstte';
+  String get always_on_top => 'Her zaman Ã¼stte';
 
   @override
-  String get exit_mini_player => 'Mini oynatıcıdan çık';
+  String get exit_mini_player => 'Mini oynatÄ±cÄ±dan Ã§Ä±k';
 
   @override
-  String get local_library => 'Yerel kütüphane';
+  String get local_library => 'Yerel kÃ¼tÃ¼phane';
 
   @override
-  String get add_library_location => 'Kütüphaneye ekle';
+  String get add_library_location => 'KÃ¼tÃ¼phaneye ekle';
 
   @override
-  String get remove_library_location => 'Kütüphaneden çıkar';
+  String get remove_library_location => 'KÃ¼tÃ¼phaneden Ã§Ä±kar';
 
   @override
   String get account => 'Hesap';
 
   @override
-  String get logout => 'Çıkış yap';
+  String get logout => 'Ã‡Ä±kÄ±ÅŸ yap';
 
   @override
-  String get logout_of_this_account => 'Hesaptan çıkış yap';
+  String get logout_of_this_account => 'Hesaptan Ã§Ä±kÄ±ÅŸ yap';
 
   @override
-  String get language_region => 'Dil ve bölge';
+  String get language_region => 'Dil ve bÃ¶lge';
 
   @override
   String get language => 'Tercih edilen dil';
 
   @override
-  String get system_default => 'Sistem varsayılanı';
+  String get system_default => 'Sistem varsayÄ±lanÄ±';
 
   @override
-  String get market_place_region => 'Tercih edilen bölge';
+  String get market_place_region => 'Tercih edilen bÃ¶lge';
 
   @override
-  String get recommendation_country => 'Tavsiye edilen ülke';
+  String get recommendation_country => 'Tavsiye edilen Ã¼lke';
 
   @override
-  String get appearance => 'Görünüm';
+  String get appearance => 'GÃ¶rÃ¼nÃ¼m';
 
   @override
-  String get layout_mode => 'Düzen modu';
+  String get layout_mode => 'DÃ¼zen modu';
 
   @override
   String get override_layout_settings =>
-      'Duyarlı düzen modu ayarlarını geçersiz kıl';
+      'DuyarlÄ± dÃ¼zen modu ayarlarÄ±nÄ± geÃ§ersiz kÄ±l';
 
   @override
   String get adaptive => 'Uyarlanabilir';
 
   @override
-  String get compact => 'Sıkıştırılmış';
+  String get compact => 'SÄ±kÄ±ÅŸtÄ±rÄ±lmÄ±ÅŸ';
 
   @override
-  String get extended => 'Genişletilmiş';
+  String get extended => 'GeniÅŸletilmiÅŸ';
 
   @override
   String get theme => 'Tema';
@@ -436,7 +438,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dark => 'Koyu';
 
   @override
-  String get light => 'Açık';
+  String get light => 'AÃ§Ä±k';
 
   @override
   String get system => 'Sistem';
@@ -445,11 +447,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get accent_color => 'Vurgu rengi';
 
   @override
-  String get sync_album_color => 'Albüm rengini senkronize et';
+  String get sync_album_color => 'AlbÃ¼m rengini senkronize et';
 
   @override
   String get sync_album_color_description =>
-      'Vurgu rengi olarak albüm resminin baskın rengini kullanır';
+      'Vurgu rengi olarak albÃ¼m resminin baskÄ±n rengini kullanÄ±r';
 
   @override
   String get playback => 'Oynatma';
@@ -458,74 +460,75 @@ class AppLocalizationsTr extends AppLocalizations {
   String get audio_quality => 'Ses kalitesi';
 
   @override
-  String get high => 'Yüksek';
+  String get high => 'YÃ¼ksek';
 
   @override
-  String get low => 'Düşük';
+  String get low => 'DÃ¼ÅŸÃ¼k';
 
   @override
-  String get pre_download_play => 'Önceden indir ve oynat';
+  String get pre_download_play => 'Ã–nceden indir ve oynat';
 
   @override
   String get pre_download_play_description =>
-      'Ses akışı yerine baytları indir ve oynat (Daha yüksek bant genişliğine sahip kullanıcılar için önerilir)';
+      'Ses akÄ±ÅŸÄ± yerine baytlarÄ± indir ve oynat (Daha yÃ¼ksek bant geniÅŸliÄŸine sahip kullanÄ±cÄ±lar iÃ§in Ã¶nerilir)';
 
   @override
-  String get skip_non_music => 'Müzik olmayan bölümleri atlat (SponsorBlock)';
+  String get skip_non_music =>
+      'MÃ¼zik olmayan bÃ¶lÃ¼mleri atlat (SponsorBlock)';
 
   @override
   String get blacklist_description =>
-      'Kara listeye alınan parçalar ve sanatçılar';
+      'Kara listeye alÄ±nan parÃ§alar ve sanatÃ§Ä±lar';
 
   @override
   String get wait_for_download_to_finish =>
-      'Lütfen mevcut indirme işleminin tamamlanmasını bekleyin';
+      'LÃ¼tfen mevcut indirme iÅŸleminin tamamlanmasÄ±nÄ± bekleyin';
 
   @override
-  String get desktop => 'Masaüstü';
+  String get desktop => 'MasaÃ¼stÃ¼';
 
   @override
-  String get close_behavior => 'Kapatma davranışı';
+  String get close_behavior => 'Kapatma davranÄ±ÅŸÄ±';
 
   @override
   String get close => 'Kapat';
 
   @override
-  String get minimize_to_tray => 'Tepsiye küçült';
+  String get minimize_to_tray => 'Tepsiye kÃ¼Ã§Ã¼lt';
 
   @override
-  String get show_tray_icon => 'Sistem tepsisi simgesini göster';
+  String get show_tray_icon => 'Sistem tepsisi simgesini gÃ¶ster';
 
   @override
-  String get about => 'Hakkında';
+  String get about => 'HakkÄ±nda';
 
   @override
-  String get u_love_spotube => 'Soulful Bhakti\'u sevdiğinizi biliyoruz';
+  String get u_love_spotube => 'Soulful Bhakti\'u sevdiÄŸinizi biliyoruz';
 
   @override
-  String get check_for_updates => 'Güncellemeleri kontrol et';
+  String get check_for_updates => 'GÃ¼ncellemeleri kontrol et';
 
   @override
-  String get about_spotube => 'Soulful Bhakti hakkında';
+  String get about_spotube => 'Soulful Bhakti hakkÄ±nda';
 
   @override
   String get blacklist => 'Kara liste';
 
   @override
-  String get please_sponsor => 'Sponsor Ol/Bağış Yap';
+  String get please_sponsor => 'Sponsor Ol/BaÄŸÄ±ÅŸ Yap';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti, hafif, platformlar arası uyumlu ve herkes için ücretsiz bir Spotify istemcisidir.';
+      'Soulful Bhakti, hafif, platformlar arasÄ± uyumlu ve herkes iÃ§in Ã¼cretsiz bir Spotify istemcisidir.';
 
   @override
-  String get version => 'Sürüm';
+  String get version => 'SÃ¼rÃ¼m';
 
   @override
-  String get build_number => 'Derleme numarası';
+  String get build_number => 'Derleme numarasÄ±';
 
   @override
-  String get founder => 'Geliştirici';
+  String get founder => 'GeliÅŸtirici';
 
   @override
   String get repository => 'Depo';
@@ -534,14 +537,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get bug_issues => 'Hata + Sorunlar';
 
   @override
-  String get made_with => '❤️ ile Bangladeş\'te yapıldı';
+  String get made_with => 'â¤ï¸ ile BangladeÅŸ\'te yapÄ±ldÄ±';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -549,30 +552,31 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'Endişelenmeyin, kimlik bilgilerinizden hiçbiri toplanmayacak veya kimseyle paylaşılmayacak';
+      'EndiÅŸelenmeyin, kimlik bilgilerinizden hiÃ§biri toplanmayacak veya kimseyle paylaÅŸÄ±lmayacak';
 
   @override
-  String get know_how_to_login => 'Bunu nasıl yapacağınızı bilmiyor musunuz?';
+  String get know_how_to_login =>
+      'Bunu nasÄ±l yapacaÄŸÄ±nÄ±zÄ± bilmiyor musunuz?';
 
   @override
-  String get follow_step_by_step_guide => 'Adım adım kılavuzu takip edin';
+  String get follow_step_by_step_guide => 'AdÄ±m adÄ±m kÄ±lavuzu takip edin';
 
   @override
   String cookie_name_cookie(Object name) {
-    return '$name çerezi';
+    return '$name Ã§erezi';
   }
 
   @override
-  String get fill_in_all_fields => 'Lütfen tüm alanları doldurun';
+  String get fill_in_all_fields => 'LÃ¼tfen tÃ¼m alanlarÄ± doldurun';
 
   @override
-  String get submit => 'Başvur';
+  String get submit => 'BaÅŸvur';
 
   @override
-  String get exit => 'Çık';
+  String get exit => 'Ã‡Ä±k';
 
   @override
-  String get previous => 'Önceki';
+  String get previous => 'Ã–nceki';
 
   @override
   String get next => 'Sonraki';
@@ -581,66 +585,66 @@ class AppLocalizationsTr extends AppLocalizations {
   String get done => 'Bitti';
 
   @override
-  String get step_1 => '1. Adım';
+  String get step_1 => '1. AdÄ±m';
 
   @override
-  String get first_go_to => 'İlk olarak şuraya gidin:';
+  String get first_go_to => 'Ä°lk olarak ÅŸuraya gidin:';
 
   @override
-  String get something_went_wrong => 'Bir hata oluştu';
+  String get something_went_wrong => 'Bir hata oluÅŸtu';
 
   @override
-  String get piped_instance => 'Piped sunucu örneği';
+  String get piped_instance => 'Piped sunucu Ã¶rneÄŸi';
 
   @override
   String get piped_description =>
-      'Parça eşleştirme için kullanılacak Piped sunucu örneği';
+      'ParÃ§a eÅŸleÅŸtirme iÃ§in kullanÄ±lacak Piped sunucu Ã¶rneÄŸi';
 
   @override
   String get piped_warning =>
-      'Bazıları iyi çalışmayabilir. Yani riski size ait olmak üzere kullanın';
+      'BazÄ±larÄ± iyi Ã§alÄ±ÅŸmayabilir. Yani riski size ait olmak Ã¼zere kullanÄ±n';
 
   @override
-  String get invidious_instance => 'Invidious Sunucu Örneği';
+  String get invidious_instance => 'Invidious Sunucu Ã–rneÄŸi';
 
   @override
   String get invidious_description =>
-      'Parça eşleştirmesi için kullanılacak Invidious sunucu örneği';
+      'ParÃ§a eÅŸleÅŸtirmesi iÃ§in kullanÄ±lacak Invidious sunucu Ã¶rneÄŸi';
 
   @override
   String get invidious_warning =>
-      'Bazıları iyi çalışmayabilir. Kendi riskinizde kullanın';
+      'BazÄ±larÄ± iyi Ã§alÄ±ÅŸmayabilir. Kendi riskinizde kullanÄ±n';
 
   @override
-  String get generate => 'Oluştur';
+  String get generate => 'OluÅŸtur';
 
   @override
   String track_exists(Object track) {
-    return '$track parçası zaten var';
+    return '$track parÃ§asÄ± zaten var';
   }
 
   @override
-  String get replace => 'Değiştir';
+  String get replace => 'DeÄŸiÅŸtir';
 
   @override
   String get skip => 'Atla';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'En fazla $count $type seçin';
+    return 'En fazla $count $type seÃ§in';
   }
 
   @override
-  String get select_genres => 'Türleri seç';
+  String get select_genres => 'TÃ¼rleri seÃ§';
 
   @override
-  String get add_genres => 'Tür ekle';
+  String get add_genres => 'TÃ¼r ekle';
 
   @override
-  String get country => 'Ülke';
+  String get country => 'Ãœlke';
 
   @override
-  String get number_of_tracks_generate => 'Oluşturulacak parça sayısı';
+  String get number_of_tracks_generate => 'OluÅŸturulacak parÃ§a sayÄ±sÄ±';
 
   @override
   String get acousticness => 'Akustiklik';
@@ -652,28 +656,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get energy => 'Enerji';
 
   @override
-  String get instrumentalness => 'Araçsallık';
+  String get instrumentalness => 'AraÃ§sallÄ±k';
 
   @override
-  String get liveness => 'Canlılık';
+  String get liveness => 'CanlÄ±lÄ±k';
 
   @override
-  String get loudness => 'Ses yüksekliği';
+  String get loudness => 'Ses yÃ¼ksekliÄŸi';
 
   @override
-  String get speechiness => 'Konuşkanlık';
+  String get speechiness => 'KonuÅŸkanlÄ±k';
 
   @override
-  String get valence => 'Değerlik';
+  String get valence => 'DeÄŸerlik';
 
   @override
-  String get popularity => 'Popülerlik';
+  String get popularity => 'PopÃ¼lerlik';
 
   @override
   String get key => 'Anahtar';
 
   @override
-  String get duration => 'Süre (sn)';
+  String get duration => 'SÃ¼re (sn)';
 
   @override
   String get tempo => 'Tempo (BPM)';
@@ -682,10 +686,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get mode => 'Mod';
 
   @override
-  String get time_signature => 'Zaman imzası';
+  String get time_signature => 'Zaman imzasÄ±';
 
   @override
-  String get short => 'Kısa';
+  String get short => 'KÄ±sa';
 
   @override
   String get medium => 'Orta';
@@ -706,45 +710,45 @@ class AppLocalizationsTr extends AppLocalizations {
   String get moderate => 'Orta';
 
   @override
-  String get deselect_all => 'Tüm seçimleri kaldır';
+  String get deselect_all => 'TÃ¼m seÃ§imleri kaldÄ±r';
 
   @override
-  String get select_all => 'Tümünü seç';
+  String get select_all => 'TÃ¼mÃ¼nÃ¼ seÃ§';
 
   @override
   String get are_you_sure => 'Emin misiniz?';
 
   @override
-  String get generating_playlist => 'Özel oynatma listeniz oluşturuluyor...';
+  String get generating_playlist => 'Ã–zel oynatma listeniz oluÅŸturuluyor...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '$count parça seçildi';
+    return '$count parÃ§a seÃ§ildi';
   }
 
   @override
   String get download_warning =>
-      'Tüm şarkıları toplu olarak indiriyorsanız, açıkça müzik korsanlığı yapıyorsunuz ve müzik dünyasının yaratıcı topluluğuna zarar veriyorsunuz demektir. Umuyorum bunun farkındasınızdır. Her zaman, sanatçıların emeğine saygı göstermeyi ve desteklemeyi deneyin.';
+      'TÃ¼m ÅŸarkÄ±larÄ± toplu olarak indiriyorsanÄ±z, aÃ§Ä±kÃ§a mÃ¼zik korsanlÄ±ÄŸÄ± yapÄ±yorsunuz ve mÃ¼zik dÃ¼nyasÄ±nÄ±n yaratÄ±cÄ± topluluÄŸuna zarar veriyorsunuz demektir. Umuyorum bunun farkÄ±ndasÄ±nÄ±zdÄ±r. Her zaman, sanatÃ§Ä±larÄ±n emeÄŸine saygÄ± gÃ¶stermeyi ve desteklemeyi deneyin.';
 
   @override
   String get download_ip_ban_warning =>
-      'Ayrıca, normalden fazla indirme istekleri nedeniyle YouTube\'da IP\'niz engellenebilir. IP engeli, en az 2-3 ay boyunca YouTube\'u (hatta oturum açmış olsanız bile) o IP cihazından kullanamayacağınız anlamına gelir. Ve eğer böyle bir durum yaşanırsa, Soulful Bhakti bundan hiçbir sorumluluk kabul etmez.';
+      'AyrÄ±ca, normalden fazla indirme istekleri nedeniyle YouTube\'da IP\'niz engellenebilir. IP engeli, en az 2-3 ay boyunca YouTube\'u (hatta oturum aÃ§mÄ±ÅŸ olsanÄ±z bile) o IP cihazÄ±ndan kullanamayacaÄŸÄ±nÄ±z anlamÄ±na gelir. Ve eÄŸer bÃ¶yle bir durum yaÅŸanÄ±rsa, Soulful Bhakti bundan hiÃ§bir sorumluluk kabul etmez.';
 
   @override
   String get by_clicking_accept_terms =>
-      '\"Kabul et\" e tıklayarak aşağıdaki şartları kabul etmiş olursunuz:';
+      '\"Kabul et\" e tÄ±klayarak aÅŸaÄŸÄ±daki ÅŸartlarÄ± kabul etmiÅŸ olursunuz:';
 
   @override
   String get download_agreement_1 =>
-      'Müzik korsanlığı yaptığımı biliyorum. Ben fakir biriyim.';
+      'MÃ¼zik korsanlÄ±ÄŸÄ± yaptÄ±ÄŸÄ±mÄ± biliyorum. Ben fakir biriyim.';
 
   @override
   String get download_agreement_2 =>
-      'Sanatçıyı elimden geldiğince destekleyeceğim ve bunu sadece sanatını satın alacak param olmadığı için yapıyorum';
+      'SanatÃ§Ä±yÄ± elimden geldiÄŸince destekleyeceÄŸim ve bunu sadece sanatÄ±nÄ± satÄ±n alacak param olmadÄ±ÄŸÄ± iÃ§in yapÄ±yorum';
 
   @override
   String get download_agreement_3 =>
-      'YouTube\'da IP\'min engellenebileceğinin tamamen farkındayım ve mevcut eylemlerimden kaynaklanan herhangi bir kaza için Soulful Bhakti\'u veya sahiplerini/katkıda bulunanları sorumlu tutmuyorum.';
+      'YouTube\'da IP\'min engellenebileceÄŸinin tamamen farkÄ±ndayÄ±m ve mevcut eylemlerimden kaynaklanan herhangi bir kaza iÃ§in Soulful Bhakti\'u veya sahiplerini/katkÄ±da bulunanlarÄ± sorumlu tutmuyorum.';
 
   @override
   String get decline => 'Reddet';
@@ -762,28 +766,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get channel => 'Kanal';
 
   @override
-  String get likes => 'Beğenenler';
+  String get likes => 'BeÄŸenenler';
 
   @override
-  String get dislikes => 'Beğenmeyenler';
+  String get dislikes => 'BeÄŸenmeyenler';
 
   @override
-  String get views => 'İzlenmeler';
+  String get views => 'Ä°zlenmeler';
 
   @override
-  String get streamUrl => 'Akış bağlantısı';
+  String get streamUrl => 'AkÄ±ÅŸ baÄŸlantÄ±sÄ±';
 
   @override
   String get stop => 'Durdur';
 
   @override
-  String get sort_newest => 'En yeni eklenene göre sırala.';
+  String get sort_newest => 'En yeni eklenene gÃ¶re sÄ±rala.';
 
   @override
-  String get sort_oldest => 'En eski eklenene göre sırala';
+  String get sort_oldest => 'En eski eklenene gÃ¶re sÄ±rala';
 
   @override
-  String get sleep_timer => 'Uyku Zamanlayıcısı';
+  String get sleep_timer => 'Uyku ZamanlayÄ±cÄ±sÄ±';
 
   @override
   String mins(Object minutes) {
@@ -801,167 +805,168 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get custom_hours => 'Özel Saatler';
+  String get custom_hours => 'Ã–zel Saatler';
 
   @override
-  String get logs => 'Günlükler';
+  String get logs => 'GÃ¼nlÃ¼kler';
 
   @override
-  String get developers => 'Geliştiriciler';
+  String get developers => 'GeliÅŸtiriciler';
 
   @override
-  String get not_logged_in => 'Giriş yapmadınız';
+  String get not_logged_in => 'GiriÅŸ yapmadÄ±nÄ±z';
 
   @override
   String get search_mode => 'Arama modu';
 
   @override
-  String get audio_source => 'Ses kaynağı';
+  String get audio_source => 'Ses kaynaÄŸÄ±';
 
   @override
   String get ok => 'Tamam';
 
   @override
-  String get failed_to_encrypt => 'Şifreleme başarısız oldu';
+  String get failed_to_encrypt => 'Åžifreleme baÅŸarÄ±sÄ±z oldu';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti, verilerinizi güvenli bir şekilde depolamak için şifreleme kullanır. Ancak bunu başaramadı. Bu nedenle, güvensiz depolamaya geri dönecektir\nLinux kullanıyorsanız, lütfen gnome-keyring, kde-wallet, keepassxc vb. herhangi bir gizli servisin yüklü olduğundan emin olun.';
+      'Soulful Bhakti, verilerinizi gÃ¼venli bir ÅŸekilde depolamak iÃ§in ÅŸifreleme kullanÄ±r. Ancak bunu baÅŸaramadÄ±. Bu nedenle, gÃ¼vensiz depolamaya geri dÃ¶necektir\nLinux kullanÄ±yorsanÄ±z, lÃ¼tfen gnome-keyring, kde-wallet, keepassxc vb. herhangi bir gizli servisin yÃ¼klÃ¼ olduÄŸundan emin olun.';
 
   @override
-  String get querying_info => 'Bilgi sorgulanıyor...';
+  String get querying_info => 'Bilgi sorgulanÄ±yor...';
 
   @override
-  String get piped_api_down => 'Piped API kapalı';
+  String get piped_api_down => 'Piped API kapalÄ±';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Piped örneği $pipedInstance şu anda kapalı\n\nÖrneği değiştirin veya \'API türünü\' resmi YouTube API\'si olarak değiştirin\n\nDeğişiklikten sonra uygulamayı yeniden başlattığınızdan emin olun';
+    return 'Piped Ã¶rneÄŸi $pipedInstance ÅŸu anda kapalÄ±\n\nÃ–rneÄŸi deÄŸiÅŸtirin veya \'API tÃ¼rÃ¼nÃ¼\' resmi YouTube API\'si olarak deÄŸiÅŸtirin\n\nDeÄŸiÅŸiklikten sonra uygulamayÄ± yeniden baÅŸlattÄ±ÄŸÄ±nÄ±zdan emin olun';
   }
 
   @override
-  String get you_are_offline => 'Şu anda çevrimdışısınız';
+  String get you_are_offline => 'Åžu anda Ã§evrimdÄ±ÅŸÄ±sÄ±nÄ±z';
 
   @override
-  String get connection_restored => 'İnternet bağlantınız geri yüklendi';
+  String get connection_restored => 'Ä°nternet baÄŸlantÄ±nÄ±z geri yÃ¼klendi';
 
   @override
-  String get use_system_title_bar => 'Sistem başlık çubuğunu kullan';
+  String get use_system_title_bar => 'Sistem baÅŸlÄ±k Ã§ubuÄŸunu kullan';
 
   @override
-  String get crunching_results => 'Sonuçlar...';
+  String get crunching_results => 'SonuÃ§lar...';
 
   @override
-  String get search_to_get_results => 'Sonuç almak için arayın';
+  String get search_to_get_results => 'SonuÃ§ almak iÃ§in arayÄ±n';
 
   @override
   String get use_amoled_mode => 'AMOLED modu kullan';
 
   @override
-  String get pitch_dark_theme => 'Zifiri karanlık koyu tema';
+  String get pitch_dark_theme => 'Zifiri karanlÄ±k koyu tema';
 
   @override
-  String get normalize_audio => 'Sesi normalleştir';
+  String get normalize_audio => 'Sesi normalleÅŸtir';
 
   @override
-  String get change_cover => 'Kapağı değiştir';
+  String get change_cover => 'KapaÄŸÄ± deÄŸiÅŸtir';
 
   @override
   String get add_cover => 'Kapak ekle';
 
   @override
-  String get restore_defaults => 'Varsayılanları geri yükle';
+  String get restore_defaults => 'VarsayÄ±lanlarÄ± geri yÃ¼kle';
 
   @override
   String get restore_defaults_confirmation =>
-      'Bu, tüm ayarlarını varsayılan değerlerine sıfırlayacak. Bu işlem geri alınamaz.';
+      'Bu, tÃ¼m ayarlarÄ±nÄ± varsayÄ±lan deÄŸerlerine sÄ±fÄ±rlayacak. Bu iÅŸlem geri alÄ±namaz.';
 
   @override
-  String get streaming_music_format => 'Müzik akış formatı';
+  String get streaming_music_format => 'MÃ¼zik akÄ±ÅŸ formatÄ±';
 
   @override
-  String get streaming_music_quality => 'Yayınlanan müzik kalitesi';
+  String get streaming_music_quality => 'YayÄ±nlanan mÃ¼zik kalitesi';
 
   @override
-  String get connect => 'Bağlan';
+  String get connect => 'BaÄŸlan';
 
   @override
-  String get disconnect => 'Bağlantıyı kes';
+  String get disconnect => 'BaÄŸlantÄ±yÄ± kes';
 
   @override
-  String get username => 'Kullanıcı adı';
+  String get username => 'KullanÄ±cÄ± adÄ±';
 
   @override
-  String get password => 'Şifre';
+  String get password => 'Åžifre';
 
   @override
-  String get login => 'Giriş yap';
+  String get login => 'GiriÅŸ yap';
 
   @override
-  String get sign_in => 'Giriş yap';
+  String get sign_in => 'GiriÅŸ yap';
 
   @override
-  String get sign_up => 'Kayıt ol';
+  String get sign_up => 'KayÄ±t ol';
 
   @override
-  String get sign_out => 'Çıkış yap';
+  String get sign_out => 'Ã‡Ä±kÄ±ÅŸ yap';
 
   @override
-  String get verify => 'Doğrula';
+  String get verify => 'DoÄŸrula';
 
   @override
-  String get create_account => 'Hesabını oluştur';
+  String get create_account => 'HesabÄ±nÄ± oluÅŸtur';
 
   @override
-  String get already_have_account => 'Zaten hesabın var mı? Giriş yap';
+  String get already_have_account => 'Zaten hesabÄ±n var mÄ±? GiriÅŸ yap';
 
   @override
-  String get dont_have_account => 'Hesabın yok mu? Kayıt ol';
+  String get dont_have_account => 'HesabÄ±n yok mu? KayÄ±t ol';
 
   @override
   String signed_in_as(Object userId) {
-    return '$userId olarak giriş yapıldı';
+    return '$userId olarak giriÅŸ yapÄ±ldÄ±';
   }
 
   @override
-  String get verification_code => 'Doğrulama kodu';
+  String get verification_code => 'DoÄŸrulama kodu';
 
   @override
-  String get verification_code_hint => 'E-postana gönderilen kodu gir';
+  String get verification_code_hint => 'E-postana gÃ¶nderilen kodu gir';
 
   @override
-  String get verify_email_code => 'E-postana bir doğrulama kodu gönderdik';
+  String get verify_email_code => 'E-postana bir doÄŸrulama kodu gÃ¶nderdik';
 
   @override
-  String get go_to_album => 'Albüme git';
+  String get go_to_album => 'AlbÃ¼me git';
 
   @override
-  String get discord_rich_presence => 'Discord zengin varlığı';
+  String get discord_rich_presence => 'Discord zengin varlÄ±ÄŸÄ±';
 
   @override
-  String get browse_all => 'Tümüne göz at';
+  String get browse_all => 'TÃ¼mÃ¼ne gÃ¶z at';
 
   @override
-  String get genres => 'Müzik türleri';
+  String get genres => 'MÃ¼zik tÃ¼rleri';
 
   @override
-  String get explore_genres => 'Türleri keşfet';
+  String get explore_genres => 'TÃ¼rleri keÅŸfet';
 
   @override
-  String get friends => 'Arkadaşlar';
+  String get friends => 'ArkadaÅŸlar';
 
   @override
-  String get no_lyrics_available => 'Üzgünüz, bu parçanın sözleri bulunamıyor';
+  String get no_lyrics_available =>
+      'ÃœzgÃ¼nÃ¼z, bu parÃ§anÄ±n sÃ¶zleri bulunamÄ±yor';
 
   @override
-  String get start_a_radio => 'Radyo başlat';
+  String get start_a_radio => 'Radyo baÅŸlat';
 
   @override
-  String get how_to_start_radio => 'Radyoyu nasıl başlatmak istersiniz?';
+  String get how_to_start_radio => 'Radyoyu nasÄ±l baÅŸlatmak istersiniz?';
 
   @override
   String get replace_queue_question =>
-      'Mevcut kuyruğu değiştirmek mi yoksa eklemek mi istersiniz?';
+      'Mevcut kuyruÄŸu deÄŸiÅŸtirmek mi yoksa eklemek mi istersiniz?';
 
   @override
   String get endless_playback => 'Sonsuz olarak oynat';
@@ -971,108 +976,110 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get delete_playlist_confirmation =>
-      'Bu oynatma listesini silmek istediğinizden emin misiniz?';
+      'Bu oynatma listesini silmek istediÄŸinizden emin misiniz?';
 
   @override
-  String get local_tracks => 'Yerel parçalar';
+  String get local_tracks => 'Yerel parÃ§alar';
 
   @override
   String get local_tab => 'Yerel';
 
   @override
-  String get song_link => 'Şarkı bağlantısı';
+  String get song_link => 'ÅžarkÄ± baÄŸlantÄ±sÄ±';
 
   @override
-  String get skip_this_nonsense => 'Bu saçmalığı atla';
+  String get skip_this_nonsense => 'Bu saÃ§malÄ±ÄŸÄ± atla';
 
   @override
-  String get freedom_of_music => '“Müzik özgürlüğü”';
+  String get freedom_of_music => 'â€œMÃ¼zik Ã¶zgÃ¼rlÃ¼ÄŸÃ¼â€';
 
   @override
-  String get freedom_of_music_palm => '“Müzik özgürlüğü avucunuzun içinde”';
+  String get freedom_of_music_palm =>
+      'â€œMÃ¼zik Ã¶zgÃ¼rlÃ¼ÄŸÃ¼ avucunuzun iÃ§indeâ€';
 
   @override
-  String get get_started => 'Haydi başlayalım';
+  String get get_started => 'Haydi baÅŸlayalÄ±m';
 
   @override
   String get youtube_source_description =>
-      'Tavsiye edilir ve en iyi şekilde çalışır.';
+      'Tavsiye edilir ve en iyi ÅŸekilde Ã§alÄ±ÅŸÄ±r.';
 
   @override
   String get piped_source_description =>
-      'Özgür hissediyor musunuz? YouTube ile aynı, ama çok daha özgür.';
+      'Ã–zgÃ¼r hissediyor musunuz? YouTube ile aynÄ±, ama Ã§ok daha Ã¶zgÃ¼r.';
 
   @override
-  String get jiosaavn_source_description => 'Güney Asya bölgesi için en iyisi.';
+  String get jiosaavn_source_description =>
+      'GÃ¼ney Asya bÃ¶lgesi iÃ§in en iyisi.';
 
   @override
   String get invidious_source_description =>
-      'Piped\'a benzer, ancak daha yüksek kullanılabilirliğe sahip.';
+      'Piped\'a benzer, ancak daha yÃ¼ksek kullanÄ±labilirliÄŸe sahip.';
 
   @override
   String highest_quality(Object quality) {
-    return 'En yüksek kalite: $quality';
+    return 'En yÃ¼ksek kalite: $quality';
   }
 
   @override
-  String get select_audio_source => 'Ses kaynağını seçin';
+  String get select_audio_source => 'Ses kaynaÄŸÄ±nÄ± seÃ§in';
 
   @override
   String get endless_playback_description =>
-      'Yeni şarkıları otomatik olarak\nkuyruğun sonuna ekle';
+      'Yeni ÅŸarkÄ±larÄ± otomatik olarak\nkuyruÄŸun sonuna ekle';
 
   @override
-  String get choose_your_region => 'Bölgenizi seçin';
+  String get choose_your_region => 'BÃ¶lgenizi seÃ§in';
 
   @override
   String get choose_your_region_description =>
-      'Bu, Soulful Bhakti\'un konumunuza uygun içerikleri göstermesine yardımcı olacaktır.';
+      'Bu, Soulful Bhakti\'un konumunuza uygun iÃ§erikleri gÃ¶stermesine yardÄ±mcÄ± olacaktÄ±r.';
 
   @override
-  String get choose_your_language => 'Dilinizi seçin';
+  String get choose_your_language => 'Dilinizi seÃ§in';
 
   @override
-  String get help_project_grow => 'Bu projenin büyümesine yardımcı olun';
+  String get help_project_grow => 'Bu projenin bÃ¼yÃ¼mesine yardÄ±mcÄ± olun';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti açık kaynaklı bir projedir. Projeye katkıda bulunarak, hataları bildirerek veya yeni özellikler önererek bu projenin büyümesine yardımcı olabilirsiniz.';
+      'Soulful Bhakti aÃ§Ä±k kaynaklÄ± bir projedir. Projeye katkÄ±da bulunarak, hatalarÄ± bildirerek veya yeni Ã¶zellikler Ã¶nererek bu projenin bÃ¼yÃ¼mesine yardÄ±mcÄ± olabilirsiniz.';
 
   @override
-  String get contribute_on_github => 'GitHub\'da katkıda bulun';
+  String get contribute_on_github => 'GitHub\'da katkÄ±da bulun';
 
   @override
-  String get donate_on_open_collective => 'Open Collective\'de bağış yap';
+  String get donate_on_open_collective => 'Open Collective\'de baÄŸÄ±ÅŸ yap';
 
   @override
-  String get browse_anonymously => 'Anonim olarak giriş yap';
+  String get browse_anonymously => 'Anonim olarak giriÅŸ yap';
 
   @override
-  String get enable_connect => 'Bağlanmayı etkinleştir';
+  String get enable_connect => 'BaÄŸlanmayÄ± etkinleÅŸtir';
 
   @override
   String get enable_connect_description =>
-      'Soulful Bhakti\'u diğer cihazlardan kontrol edin';
+      'Soulful Bhakti\'u diÄŸer cihazlardan kontrol edin';
 
   @override
   String get devices => 'Cihazlar';
 
   @override
-  String get select => 'Seç';
+  String get select => 'SeÃ§';
 
   @override
   String connect_client_alert(Object client) {
-    return '$client tarafından kontrol ediliyorsun.';
+    return '$client tarafÄ±ndan kontrol ediliyorsun.';
   }
 
   @override
   String get this_device => 'Bu cihaz';
 
   @override
-  String get remote => 'Yönet';
+  String get remote => 'YÃ¶net';
 
   @override
-  String get stats => 'İstatistikler';
+  String get stats => 'Ä°statistikler';
 
   @override
   String and_n_more(Object count) {
@@ -1080,71 +1087,71 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get recently_played => 'Son Çalınanlar';
+  String get recently_played => 'Son Ã‡alÄ±nanlar';
 
   @override
-  String get browse_more => 'Daha Fazla Göz At';
+  String get browse_more => 'Daha Fazla GÃ¶z At';
 
   @override
-  String get no_title => 'Başlık Yok';
+  String get no_title => 'BaÅŸlÄ±k Yok';
 
   @override
-  String get not_playing => 'Çalmıyor';
+  String get not_playing => 'Ã‡almÄ±yor';
 
   @override
-  String get epic_failure => 'Efsanevi başarısızlık!';
+  String get epic_failure => 'Efsanevi baÅŸarÄ±sÄ±zlÄ±k!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '$tracks_length şarkı sıraya eklendi';
+    return '$tracks_length ÅŸarkÄ± sÄ±raya eklendi';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti bir güncelleme aldı';
+  String get spotube_has_an_update => 'Soulful Bhakti bir gÃ¼ncelleme aldÄ±';
 
   @override
-  String get download_now => 'Şimdi İndir';
+  String get download_now => 'Åžimdi Ä°ndir';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum yayımlandı';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum yayÄ±mlandÄ±';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version yayımlandı';
+    return 'Soulful Bhakti v$version yayÄ±mlandÄ±';
   }
 
   @override
   String get read_the_latest => 'Son haberleri oku';
 
   @override
-  String get release_notes => 'sürüm notları';
+  String get release_notes => 'sÃ¼rÃ¼m notlarÄ±';
 
   @override
-  String get pick_color_scheme => 'Renk şeması seç';
+  String get pick_color_scheme => 'Renk ÅŸemasÄ± seÃ§';
 
   @override
   String get save => 'Kaydet';
 
   @override
-  String get choose_the_device => 'Cihazı seçin:';
+  String get choose_the_device => 'CihazÄ± seÃ§in:';
 
   @override
   String get multiple_device_connected =>
-      'Birden fazla cihaz bağlı.\nBu işlemi gerçekleştirmek istediğiniz cihazı seçin';
+      'Birden fazla cihaz baÄŸlÄ±.\nBu iÅŸlemi gerÃ§ekleÅŸtirmek istediÄŸiniz cihazÄ± seÃ§in';
 
   @override
-  String get nothing_found => 'Hiçbir şey bulunamadı';
+  String get nothing_found => 'HiÃ§bir ÅŸey bulunamadÄ±';
 
   @override
-  String get the_box_is_empty => 'Kutu boş';
+  String get the_box_is_empty => 'Kutu boÅŸ';
 
   @override
-  String get top_artists => 'En İyi Sanatçılar';
+  String get top_artists => 'En Ä°yi SanatÃ§Ä±lar';
 
   @override
-  String get top_albums => 'En İyi Albümler';
+  String get top_albums => 'En Ä°yi AlbÃ¼mler';
 
   @override
   String get this_week => 'Bu hafta';
@@ -1156,56 +1163,56 @@ class AppLocalizationsTr extends AppLocalizations {
   String get last_6_months => 'Son 6 ay';
 
   @override
-  String get this_year => 'Bu yıl';
+  String get this_year => 'Bu yÄ±l';
 
   @override
-  String get last_2_years => 'Son 2 yıl';
+  String get last_2_years => 'Son 2 yÄ±l';
 
   @override
-  String get all_time => 'Tüm zamanlar';
+  String get all_time => 'TÃ¼m zamanlar';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '$providerName tarafından desteklenmektedir';
+    return '$providerName tarafÄ±ndan desteklenmektedir';
   }
 
   @override
   String get email => 'E-posta';
 
   @override
-  String get send_code => 'Kod gönder';
+  String get send_code => 'Kod gÃ¶nder';
 
   @override
-  String get change_identifier => 'Farklı bir e-posta kullan';
+  String get change_identifier => 'FarklÄ± bir e-posta kullan';
 
   @override
-  String get sign_in_with_otp => 'Tek kullanımlık kodla giriş yap';
+  String get sign_in_with_otp => 'Tek kullanÄ±mlÄ±k kodla giriÅŸ yap';
 
   @override
-  String get enter_otp_sent => 'Sana gönderdiğimiz kodu gir';
+  String get enter_otp_sent => 'Sana gÃ¶nderdiÄŸimiz kodu gir';
 
   @override
   String get verify_email_reminder =>
-      'Hesabını güvence altına almak için lütfen e-posta adresini doğrula';
+      'HesabÄ±nÄ± gÃ¼vence altÄ±na almak iÃ§in lÃ¼tfen e-posta adresini doÄŸrula';
 
   @override
-  String get verify_now => 'Şimdi doğrula';
+  String get verify_now => 'Åžimdi doÄŸrula';
 
   @override
   String get enter_email_to_verify =>
-      'Doğrulama kodu almak için e-posta adresini gir';
+      'DoÄŸrulama kodu almak iÃ§in e-posta adresini gir';
 
   @override
-  String get profile_followers => 'Takipçiler';
+  String get profile_followers => 'TakipÃ§iler';
 
   @override
-  String get birthday => 'Doğum Günü';
+  String get birthday => 'DoÄŸum GÃ¼nÃ¼';
 
   @override
   String get subscription => 'Abonelik';
 
   @override
-  String get not_born => 'Henüz doğmadı';
+  String get not_born => 'HenÃ¼z doÄŸmadÄ±';
 
   @override
   String get hacker => 'Hacker';
@@ -1214,45 +1221,45 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profile => 'Profil';
 
   @override
-  String get no_name => 'İsim Yok';
+  String get no_name => 'Ä°sim Yok';
 
   @override
-  String get edit => 'Düzenle';
+  String get edit => 'DÃ¼zenle';
 
   @override
-  String get user_profile => 'Kullanıcı Profili';
+  String get user_profile => 'KullanÄ±cÄ± Profili';
 
   @override
   String count_plays(Object count) {
-    return '$count çalma';
+    return '$count Ã§alma';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*Spotify\'ın akış başına ödeme miktarına\n\$0.003 ile \$0.005 arasında hesaplanmıştır. Bu, kullanıcıya\nSpotify\'da şarkılarını dinlerse sanatçılara ne kadar ödeme\nyapmış olabileceğini göstermek için hipotetik bir hesaplamadır.';
+      '*Spotify\'Ä±n akÄ±ÅŸ baÅŸÄ±na Ã¶deme miktarÄ±na\n\$0.003 ile \$0.005 arasÄ±nda hesaplanmÄ±ÅŸtÄ±r. Bu, kullanÄ±cÄ±ya\nSpotify\'da ÅŸarkÄ±larÄ±nÄ± dinlerse sanatÃ§Ä±lara ne kadar Ã¶deme\nyapmÄ±ÅŸ olabileceÄŸini gÃ¶stermek iÃ§in hipotetik bir hesaplamadÄ±r.';
 
   @override
   String get minutes_listened => 'Dinlenilen Dakikalar';
 
   @override
-  String get streamed_songs => 'Yayınlanan Şarkılar';
+  String get streamed_songs => 'YayÄ±nlanan ÅžarkÄ±lar';
 
   @override
   String count_streams(Object count) {
-    return '$count yayın';
+    return '$count yayÄ±n';
   }
 
   @override
-  String get owned_by_you => 'Sahip olduğunuz';
+  String get owned_by_you => 'Sahip olduÄŸunuz';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl panoya kopyalandı';
+    return '$shareUrl panoya kopyalandÄ±';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*Bu, çevrimiçi müzik akışı platformlarının ortalama akış başına \$0,003 ile \$0,005 arasındaki ödemesine göre hesaplanmıştır. Bu, kullanıcının farklı müzik akışı platformlarında şarkılarını dinleselerdi sanatçılara ne kadar ödeme yapacaklarına dair fikir vermek için yapılan varsayımsal bir hesaplamadır.';
+      '*Bu, Ã§evrimiÃ§i mÃ¼zik akÄ±ÅŸÄ± platformlarÄ±nÄ±n ortalama akÄ±ÅŸ baÅŸÄ±na \$0,003 ile \$0,005 arasÄ±ndaki Ã¶demesine gÃ¶re hesaplanmÄ±ÅŸtÄ±r. Bu, kullanÄ±cÄ±nÄ±n farklÄ± mÃ¼zik akÄ±ÅŸÄ± platformlarÄ±nda ÅŸarkÄ±larÄ±nÄ± dinleselerdi sanatÃ§Ä±lara ne kadar Ã¶deme yapacaklarÄ±na dair fikir vermek iÃ§in yapÄ±lan varsayÄ±msal bir hesaplamadÄ±r.';
 
   @override
   String count_mins(Object minutes) {
@@ -1263,48 +1270,48 @@ class AppLocalizationsTr extends AppLocalizations {
   String get summary_minutes => 'dakika';
 
   @override
-  String get summary_listened_to_music => 'Dinlenen müzik';
+  String get summary_listened_to_music => 'Dinlenen mÃ¼zik';
 
   @override
-  String get summary_songs => 'şarkılar';
+  String get summary_songs => 'ÅŸarkÄ±lar';
 
   @override
-  String get summary_streamed_overall => 'Genel olarak akış';
+  String get summary_streamed_overall => 'Genel olarak akÄ±ÅŸ';
 
   @override
-  String get summary_owed_to_artists => 'Sanatçılara borç\nbu ay';
+  String get summary_owed_to_artists => 'SanatÃ§Ä±lara borÃ§\nbu ay';
 
   @override
-  String get summary_top_artist => 'En iyi sanatçı\nbu dönem';
+  String get summary_top_artist => 'En iyi sanatÃ§Ä±\nbu dÃ¶nem';
 
   @override
-  String get summary_artists => 'sanatçının';
+  String get summary_artists => 'sanatÃ§Ä±nÄ±n';
 
   @override
-  String get summary_music_reached_you => 'Müzik sana ulaştı';
+  String get summary_music_reached_you => 'MÃ¼zik sana ulaÅŸtÄ±';
 
   @override
-  String get summary_full_albums => 'tam albümler';
+  String get summary_full_albums => 'tam albÃ¼mler';
 
   @override
-  String get summary_got_your_love => 'Sevgini aldı';
+  String get summary_got_your_love => 'Sevgini aldÄ±';
 
   @override
-  String get summary_playlists => 'çalma listeleri';
+  String get summary_playlists => 'Ã§alma listeleri';
 
   @override
-  String get summary_were_on_repeat => 'Tekrarda vardı';
+  String get summary_were_on_repeat => 'Tekrarda vardÄ±';
 
   @override
-  String get summary_listening_share => 'Dinleme payı';
+  String get summary_listening_share => 'Dinleme payÄ±';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'En çok çaldığın ilk $tracks_length parçanın dağılımı';
+    return 'En Ã§ok Ã§aldÄ±ÄŸÄ±n ilk $tracks_length parÃ§anÄ±n daÄŸÄ±lÄ±mÄ±';
   }
 
   @override
-  String get summary_plays => 'çalma';
+  String get summary_plays => 'Ã§alma';
 
   @override
   String get insights => 'Insights';
@@ -1330,36 +1337,37 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get webview_not_found => 'Webview bulunamadı';
+  String get webview_not_found => 'Webview bulunamadÄ±';
 
   @override
   String get webview_not_found_description =>
-      'Cihazınızda herhangi bir Webview çalışma zamanı yüklü değil.\nEğer kuruluysa, ortam YOLUNDA olduğundan emin olun\n\nKurulumdan sonra uygulamayı yeniden başlatın';
+      'CihazÄ±nÄ±zda herhangi bir Webview Ã§alÄ±ÅŸma zamanÄ± yÃ¼klÃ¼ deÄŸil.\nEÄŸer kuruluysa, ortam YOLUNDA olduÄŸundan emin olun\n\nKurulumdan sonra uygulamayÄ± yeniden baÅŸlatÄ±n';
 
   @override
   String get unsupported_platform => 'Desteklenmeyen platform';
 
   @override
-  String get cache_music => 'Müziği önbellekle';
+  String get cache_music => 'MÃ¼ziÄŸi Ã¶nbellekle';
 
   @override
-  String get open => 'Aç';
+  String get open => 'AÃ§';
 
   @override
-  String get cache_folder => 'Önbellek klasörü';
+  String get cache_folder => 'Ã–nbellek klasÃ¶rÃ¼';
 
   @override
-  String get export => 'Dışa aktar';
+  String get export => 'DÄ±ÅŸa aktar';
 
   @override
-  String get clear_cache => 'Önbelleği temizle';
+  String get clear_cache => 'Ã–nbelleÄŸi temizle';
 
   @override
   String get clear_cache_confirmation =>
-      'Önbelleği temizlemek istiyor musunuz?';
+      'Ã–nbelleÄŸi temizlemek istiyor musunuz?';
 
   @override
-  String get export_cache_files => 'Önbelleğe Alınmış Dosyaları Dışa Aktar';
+  String get export_cache_files =>
+      'Ã–nbelleÄŸe AlÄ±nmÄ±ÅŸ DosyalarÄ± DÄ±ÅŸa Aktar';
 
   @override
   String found_n_files(Object count) {
@@ -1368,138 +1376,139 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get export_cache_confirmation =>
-      'Bu dosyaları dışa aktarmak istiyor musunuz';
+      'Bu dosyalarÄ± dÄ±ÅŸa aktarmak istiyor musunuz';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$filesExported / $files dosya dışa aktarıldı';
+    return '$filesExported / $files dosya dÄ±ÅŸa aktarÄ±ldÄ±';
   }
 
   @override
   String get undo => 'Geri Al';
 
   @override
-  String get add_all_to_playlist => 'Hepsini çalma listesine ekle';
+  String get add_all_to_playlist => 'Hepsini Ã§alma listesine ekle';
 
   @override
-  String get add_all_to_queue => 'Hepsini kuyruğa ekle';
+  String get add_all_to_queue => 'Hepsini kuyruÄŸa ekle';
 
   @override
-  String get play_all_next => 'Hepsini bir sonraki çal';
+  String get play_all_next => 'Hepsini bir sonraki Ã§al';
 
   @override
   String get pause => 'Duraklat';
 
   @override
-  String get view_all => 'Tümünü Gör';
+  String get view_all => 'TÃ¼mÃ¼nÃ¼ GÃ¶r';
 
   @override
   String get no_tracks_added_yet =>
-      'Henüz hiçbir şarkı eklemediniz gibi görünüyor';
+      'HenÃ¼z hiÃ§bir ÅŸarkÄ± eklemediniz gibi gÃ¶rÃ¼nÃ¼yor';
 
   @override
-  String get no_tracks => 'Burada hiç şarkı yok gibi görünüyor';
+  String get no_tracks => 'Burada hiÃ§ ÅŸarkÄ± yok gibi gÃ¶rÃ¼nÃ¼yor';
 
   @override
   String get no_tracks_listened_yet =>
-      'Henüz hiçbir şey dinlemediniz gibi görünüyor';
+      'HenÃ¼z hiÃ§bir ÅŸey dinlemediniz gibi gÃ¶rÃ¼nÃ¼yor';
 
   @override
-  String get not_following_artists => 'Hiçbir sanatçıyı takip etmiyorsunuz';
+  String get not_following_artists => 'HiÃ§bir sanatÃ§Ä±yÄ± takip etmiyorsunuz';
 
   @override
   String get no_favorite_albums_yet =>
-      'Henüz favorilerinize herhangi bir albüm eklemediniz gibi görünüyor';
+      'HenÃ¼z favorilerinize herhangi bir albÃ¼m eklemediniz gibi gÃ¶rÃ¼nÃ¼yor';
 
   @override
-  String get no_logs_found => 'Log bulunamadı';
+  String get no_logs_found => 'Log bulunamadÄ±';
 
   @override
   String get youtube_engine => 'YouTube Motoru';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine Yüklü değil';
+    return '$engine YÃ¼klÃ¼ deÄŸil';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine sisteminizde yüklü değil.';
+    return '$engine sisteminizde yÃ¼klÃ¼ deÄŸil.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'PATH değişkeninde kullanılabilir olduğundan emin olun veya\n$engine çalıştırılabilir dosyasının mutlak yolunu aşağıda ayarlayın';
+    return 'PATH deÄŸiÅŸkeninde kullanÄ±labilir olduÄŸundan emin olun veya\n$engine Ã§alÄ±ÅŸtÄ±rÄ±labilir dosyasÄ±nÄ±n mutlak yolunu aÅŸaÄŸÄ±da ayarlayÄ±n';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/Unix benzeri işletim sistemlerinde, .zshrc/.bashrc/.bash_profile gibi dosyalarda yol ayarlamak işe yaramaz.\nYolunuzu kabuk yapılandırma dosyasına ayarlamanız gerekir';
+      'macOS/Linux/Unix benzeri iÅŸletim sistemlerinde, .zshrc/.bashrc/.bash_profile gibi dosyalarda yol ayarlamak iÅŸe yaramaz.\nYolunuzu kabuk yapÄ±landÄ±rma dosyasÄ±na ayarlamanÄ±z gerekir';
 
   @override
-  String get download => 'İndir';
+  String get download => 'Ä°ndir';
 
   @override
-  String get file_not_found => 'Dosya bulunamadı';
+  String get file_not_found => 'Dosya bulunamadÄ±';
 
   @override
-  String get custom => 'Özel';
+  String get custom => 'Ã–zel';
 
   @override
-  String get add_custom_url => 'Özel URL ekle';
+  String get add_custom_url => 'Ã–zel URL ekle';
 
   @override
-  String get edit_port => 'Portu düzenle';
+  String get edit_port => 'Portu dÃ¼zenle';
 
   @override
   String get port_helper_msg =>
-      'Varsayılan -1\'dir, bu da rastgele bir sayıyı gösterir. Bir güvenlik duvarınız varsa, bunu ayarlamanız önerilir.';
+      'VarsayÄ±lan -1\'dir, bu da rastgele bir sayÄ±yÄ± gÃ¶sterir. Bir gÃ¼venlik duvarÄ±nÄ±z varsa, bunu ayarlamanÄ±z Ã¶nerilir.';
 
   @override
   String connect_request(Object client) {
-    return '$client bağlantısına izin verilsin mi?';
+    return '$client baÄŸlantÄ±sÄ±na izin verilsin mi?';
   }
 
   @override
   String get connection_request_denied =>
-      'Bağlantı reddedildi. Kullanıcı erişimi reddetti.';
+      'BaÄŸlantÄ± reddedildi. KullanÄ±cÄ± eriÅŸimi reddetti.';
 
   @override
-  String get an_error_occurred => 'Bir hata oluştu';
+  String get an_error_occurred => 'Bir hata oluÅŸtu';
 
   @override
   String get copy_to_clipboard => 'Panoya kopyala';
 
   @override
-  String get view_logs => 'Günlükleri görüntüle';
+  String get view_logs => 'GÃ¼nlÃ¼kleri gÃ¶rÃ¼ntÃ¼le';
 
   @override
   String get retry => 'Tekrar dene';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'Varsayılan bir meta veri sağlayıcısı ayarlanmadı';
+      'VarsayÄ±lan bir meta veri saÄŸlayÄ±cÄ±sÄ± ayarlanmadÄ±';
 
   @override
-  String get manage_metadata_providers => 'Meta veri sağlayıcılarını yönet';
+  String get manage_metadata_providers =>
+      'Meta veri saÄŸlayÄ±cÄ±larÄ±nÄ± yÃ¶net';
 
   @override
-  String get open_link_in_browser => 'Bağlantıyı Tarayıcıda Aç?';
+  String get open_link_in_browser => 'BaÄŸlantÄ±yÄ± TarayÄ±cÄ±da AÃ§?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'Aşağıdaki bağlantıyı açmak istiyor musunuz';
+      'AÅŸaÄŸÄ±daki baÄŸlantÄ±yÄ± aÃ§mak istiyor musunuz';
 
   @override
   String get unsafe_url_warning =>
-      'Güvenilmeyen kaynaklardan bağlantı açmak güvensiz olabilir. Dikkatli olun!\nBağlantıyı panonuza da kopyalayabilirsiniz.';
+      'GÃ¼venilmeyen kaynaklardan baÄŸlantÄ± aÃ§mak gÃ¼vensiz olabilir. Dikkatli olun!\nBaÄŸlantÄ±yÄ± panonuza da kopyalayabilirsiniz.';
 
   @override
-  String get copy_link => 'Bağlantıyı Kopyala';
+  String get copy_link => 'BaÄŸlantÄ±yÄ± Kopyala';
 
   @override
   String get building_your_timeline =>
-      'Dinlemelerinize göre zaman çizelgeniz oluşturuluyor...';
+      'Dinlemelerinize gÃ¶re zaman Ã§izelgeniz oluÅŸturuluyor...';
 
   @override
   String get official => 'Resmi';
@@ -1510,103 +1519,105 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get third_party => 'Üçüncü taraf';
+  String get third_party => 'ÃœÃ§Ã¼ncÃ¼ taraf';
 
   @override
   String get plugin_requires_authentication =>
-      'Eklenti kimlik doğrulama gerektirir';
+      'Eklenti kimlik doÄŸrulama gerektirir';
 
   @override
-  String get update_available => 'Güncelleme mevcut';
+  String get update_available => 'GÃ¼ncelleme mevcut';
 
   @override
   String get supports_scrobbling => 'Scrobbling\'i destekler';
 
   @override
   String get plugin_scrobbling_info =>
-      'Bu eklenti, dinleme geçmişinizi oluşturmak için müziğinizi scrobble eder.';
+      'Bu eklenti, dinleme geÃ§miÅŸinizi oluÅŸturmak iÃ§in mÃ¼ziÄŸinizi scrobble eder.';
 
   @override
-  String get default_metadata_source => 'Varsayılan meta veri kaynağı';
+  String get default_metadata_source => 'VarsayÄ±lan meta veri kaynaÄŸÄ±';
 
   @override
   String get set_default_metadata_source =>
-      'Varsayılan meta veri kaynağını ayarla';
+      'VarsayÄ±lan meta veri kaynaÄŸÄ±nÄ± ayarla';
 
   @override
-  String get default_audio_source => 'Varsayılan ses kaynağı';
+  String get default_audio_source => 'VarsayÄ±lan ses kaynaÄŸÄ±';
 
   @override
-  String get set_default_audio_source => 'Varsayılan ses kaynağını ayarla';
+  String get set_default_audio_source => 'VarsayÄ±lan ses kaynaÄŸÄ±nÄ± ayarla';
 
   @override
-  String get set_default => 'Varsayılan olarak ayarla';
+  String get set_default => 'VarsayÄ±lan olarak ayarla';
 
   @override
   String get support => 'Destek';
 
   @override
-  String get support_plugin_development => 'Eklenti geliştirmeyi destekle';
+  String get support_plugin_development => 'Eklenti geliÅŸtirmeyi destekle';
 
   @override
   String can_access_name_api(Object name) {
-    return '- **$name** API\'ye erişebilir';
+    return '- **$name** API\'ye eriÅŸebilir';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'Bu eklentiyi yüklemek istiyor musunuz?';
+      'Bu eklentiyi yÃ¼klemek istiyor musunuz?';
 
   @override
   String get third_party_plugin_warning =>
-      'Bu eklenti üçüncü taraf bir depodan gelmektedir. Lütfen yüklemeden önce kaynağa güvendiğinizden emin olun.';
+      'Bu eklenti Ã¼Ã§Ã¼ncÃ¼ taraf bir depodan gelmektedir. LÃ¼tfen yÃ¼klemeden Ã¶nce kaynaÄŸa gÃ¼vendiÄŸinizden emin olun.';
 
   @override
   String get author => 'Yazar';
 
   @override
   String get this_plugin_can_do_following =>
-      'Bu eklenti aşağıdakileri yapabilir';
+      'Bu eklenti aÅŸaÄŸÄ±dakileri yapabilir';
 
   @override
-  String get install => 'Yükle';
+  String get install => 'YÃ¼kle';
 
   @override
-  String get install_a_metadata_provider => 'Bir Meta Veri Sağlayıcısı Yükle';
+  String get install_a_metadata_provider =>
+      'Bir Meta Veri SaÄŸlayÄ±cÄ±sÄ± YÃ¼kle';
 
   @override
-  String get no_tracks_playing => 'Şu anda çalınan bir Parça yok';
+  String get no_tracks_playing => 'Åžu anda Ã§alÄ±nan bir ParÃ§a yok';
 
   @override
   String get synced_lyrics_not_available =>
-      'Bu şarkı için senkronize şarkı sözleri mevcut değil. Lütfen';
+      'Bu ÅŸarkÄ± iÃ§in senkronize ÅŸarkÄ± sÃ¶zleri mevcut deÄŸil. LÃ¼tfen';
 
   @override
-  String get plain_lyrics => 'Düz Şarkı Sözleri';
+  String get plain_lyrics => 'DÃ¼z ÅžarkÄ± SÃ¶zleri';
 
   @override
-  String get tab_instead => 'sekmesini kullanın.';
+  String get tab_instead => 'sekmesini kullanÄ±n.';
 
   @override
   String get disclaimer => 'Sorumluluk Reddi';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti ekibi, herhangi bir \"Üçüncü taraf\" eklentisi için herhangi bir sorumluluk (yasal olanlar dahil) kabul etmez.\nLütfen bunları kendi riskinizde kullanın. Herhangi bir hata/sorun için lütfen bunları eklenti deposuna bildirin.\n\nHerhangi bir \"Üçüncü taraf\" eklentisi bir hizmetin/yasal varlığın ToS/DMCA\'sını ihlal ediyorsa, lütfen \"Üçüncü taraf\" eklenti yazarından veya barındırma platformundan, örneğin GitHub/Codeberg\'den harekete geçmesini isteyin. Yukarıda listelenen (\"Üçüncü taraf\" olarak etiketlenen) eklentilerin tümü genel/topluluk tarafından sürdürülen eklentilerdir. Biz bunları küratörlüğünü yapmıyoruz, bu yüzden onlar üzerinde herhangi bir işlem yapamayız.\n\n';
+      'Soulful Bhakti ekibi, herhangi bir \"ÃœÃ§Ã¼ncÃ¼ taraf\" eklentisi iÃ§in herhangi bir sorumluluk (yasal olanlar dahil) kabul etmez.\nLÃ¼tfen bunlarÄ± kendi riskinizde kullanÄ±n. Herhangi bir hata/sorun iÃ§in lÃ¼tfen bunlarÄ± eklenti deposuna bildirin.\n\nHerhangi bir \"ÃœÃ§Ã¼ncÃ¼ taraf\" eklentisi bir hizmetin/yasal varlÄ±ÄŸÄ±n ToS/DMCA\'sÄ±nÄ± ihlal ediyorsa, lÃ¼tfen \"ÃœÃ§Ã¼ncÃ¼ taraf\" eklenti yazarÄ±ndan veya barÄ±ndÄ±rma platformundan, Ã¶rneÄŸin GitHub/Codeberg\'den harekete geÃ§mesini isteyin. YukarÄ±da listelenen (\"ÃœÃ§Ã¼ncÃ¼ taraf\" olarak etiketlenen) eklentilerin tÃ¼mÃ¼ genel/topluluk tarafÄ±ndan sÃ¼rdÃ¼rÃ¼len eklentilerdir. Biz bunlarÄ± kÃ¼ratÃ¶rlÃ¼ÄŸÃ¼nÃ¼ yapmÄ±yoruz, bu yÃ¼zden onlar Ã¼zerinde herhangi bir iÅŸlem yapamayÄ±z.\n\n';
 
   @override
-  String get input_does_not_match_format => 'Girdi, gerekli biçimle eşleşmiyor';
+  String get input_does_not_match_format =>
+      'Girdi, gerekli biÃ§imle eÅŸleÅŸmiyor';
 
   @override
   String get plugins => 'Eklentiler';
 
   @override
   String get paste_plugin_download_url =>
-      'İndirme url\'sini veya GitHub/Codeberg repo url\'sini veya .smplug dosyasına doğrudan bağlantıyı yapıştırın';
+      'Ä°ndirme url\'sini veya GitHub/Codeberg repo url\'sini veya .smplug dosyasÄ±na doÄŸrudan baÄŸlantÄ±yÄ± yapÄ±ÅŸtÄ±rÄ±n';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'url\'den eklentiyi indir ve yükle';
+      'url\'den eklentiyi indir ve yÃ¼kle';
 
   @override
   String failed_to_add_plugin_error(Object error) {
@@ -1614,30 +1625,30 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get upload_plugin_from_file => 'Dosyadan eklenti yükle';
+  String get upload_plugin_from_file => 'Dosyadan eklenti yÃ¼kle';
 
   @override
-  String get installed => 'Yüklü';
+  String get installed => 'YÃ¼klÃ¼';
 
   @override
   String get available_plugins => 'Mevcut eklentiler';
 
   @override
   String get configure_plugins =>
-      'Kendi meta veri sağlayıcı ve ses kaynağı eklentilerinizi yapılandırın';
+      'Kendi meta veri saÄŸlayÄ±cÄ± ve ses kaynaÄŸÄ± eklentilerinizi yapÄ±landÄ±rÄ±n';
 
   @override
   String get source => 'Kaynak: ';
 
   @override
-  String get uncompressed => 'Sıkıştırılmamış';
+  String get uncompressed => 'SÄ±kÄ±ÅŸtÄ±rÄ±lmamÄ±ÅŸ';
 
   @override
   String get dab_music_source_description =>
-      'Audiophile\'ler için. Yüksek kaliteli/kayıpsız ses akışları sağlar. Doğru ISRC tabanlı parça eşleştirme.';
+      'Audiophile\'ler iÃ§in. YÃ¼ksek kaliteli/kayÄ±psÄ±z ses akÄ±ÅŸlarÄ± saÄŸlar. DoÄŸru ISRC tabanlÄ± parÃ§a eÅŸleÅŸtirme.';
 
   @override
-  String get summary_top_track => 'En iyi parça\nbu dönem';
+  String get summary_top_track => 'En iyi parÃ§a\nbu dÃ¶nem';
 
   @override
   String get local => 'Yerel';
@@ -1650,4 +1661,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

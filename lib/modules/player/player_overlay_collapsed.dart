@@ -6,12 +6,23 @@ import 'package:sangeet/collections/intents.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/modules/player/player_track_details.dart';
 import 'package:sangeet/modules/player/ringtone_action_button.dart';
+import 'package:sangeet/modules/player/timeline_bar.dart';
 import 'package:sangeet/modules/root/spotube_navigation_bar.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 
 class PlayerOverlayCollapsedSection extends HookConsumerWidget {
+  /// Height of the collapsed mini player, including the timeline bar.
+  ///
+  /// Shared with [PlayerOverlay] (which sizes the SlidingUpPanel header and
+  /// minHeight with it) so the panel geometry and the content can never drift
+  /// apart — a mismatch would clip the timeline or leave dead space.
+  ///
+  /// Budget: artwork/title row + [TimelineBar] (~20px slider + ~17px label row)
+  /// + the 5px outer padding above and below.
+  static const double collapsedHeight = 104;
+
   final PanelController panelController;
   const PlayerOverlayCollapsedSection({
     super.key,
@@ -111,6 +122,15 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
                             ],
                           ),
                         ],
+                      ),
+                    ),
+                    // Horizontal playback timeline with elapsed / total time,
+                    // shown directly beneath the track name & controls.
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 2),
+                      child: TimelineBar(
+                        interactive: !isFetchingActiveTrack,
+                        labelColor: theme.colorScheme.mutedForeground,
                       ),
                     ),
                   ],

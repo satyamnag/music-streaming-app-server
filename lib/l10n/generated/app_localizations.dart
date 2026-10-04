@@ -1128,7 +1128,7 @@ abstract class AppLocalizations {
   /// No description provided for @made_with.
   ///
   /// In en, this message translates to:
-  /// **'Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©'**
+  /// **'Made with Ã¢ÂÂ¤Ã¯Â¸Â in BangladeshÃ°Å¸â€¡Â§Ã°Å¸â€¡Â©'**
   String get made_with;
 
   /// No description provided for @kingkor_roy_tirtho.
@@ -1140,7 +1140,7 @@ abstract class AppLocalizations {
   /// No description provided for @copyright.
   ///
   /// In en, this message translates to:
-  /// **'Â© 2021-{current_year} Kingkor Roy Tirtho'**
+  /// **'Ã‚Â© 2021-{current_year} Kingkor Roy Tirtho'**
   String copyright(Object current_year);
 
   /// No description provided for @license.
@@ -1962,13 +1962,13 @@ abstract class AppLocalizations {
   /// No description provided for @freedom_of_music.
   ///
   /// In en, this message translates to:
-  /// **'â€œFreedom of Musicâ€'**
+  /// **'Ã¢â‚¬Å“Freedom of MusicÃ¢â‚¬Â'**
   String get freedom_of_music;
 
   /// No description provided for @freedom_of_music_palm.
   ///
   /// In en, this message translates to:
-  /// **'â€œFreedom of Music in the palm of your handâ€'**
+  /// **'Ã¢â‚¬Å“Freedom of Music in the palm of your handÃ¢â‚¬Â'**
   String get freedom_of_music_palm;
 
   /// No description provided for @get_started.
@@ -3128,6 +3128,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not set ringtone'**
   String get ringtone_failed;
+
+  /// No description provided for @specials.
+  ///
+  /// In en, this message translates to:
+  /// **'Specials'**
+  String get specials;
+
+  /// No description provided for @play_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Now'**
+  String get play_now;
+
+  /// No description provided for @songs_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 song} other{{count} songs}}'**
+  String songs_count(int count);
 }
 
 class _AppLocalizationsDelegate

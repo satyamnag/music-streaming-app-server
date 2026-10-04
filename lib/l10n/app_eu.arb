@@ -1,4 +1,4 @@
-{
+﻿{
   "guest": "Gonbidatua",
   "browse": "Arakatu",
   "search": "Bilatu",
@@ -159,9 +159,9 @@
   "founder": "Sortzailea",
   "repository": "Errepositorioa",
   "bug_issues": "Erroreak eta arazoak",
-  "made_with": "Bangladesh🇧🇩-en ❤️-z egina",
+  "made_with": "BangladeshðŸ‡§ðŸ‡©-en â¤ï¸-z egina",
   "kingkor_roy_tirtho": "Kingkor Roy Tirtho",
-  "copyright": "© 2021-{current_year} Kingkor Roy Tirtho",
+  "copyright": "Â© 2021-{current_year} Kingkor Roy Tirtho",
   "license": "Lizentzia",
   "add_spotify_credentials": "Gehitu zure Spotify kredentzialak hasi ahal izateko",
   "credentials_will_not_be_shared_disclaimer": "Ez arduratu, zure kredentzialak ez ditugu bilduko edo inorekin elkarbanatuko",
@@ -182,7 +182,7 @@
   "step_2_steps": "1. Saioa hasita duzularik, sakatu F12 edo saguaren eskuineko botoia klikatu > Ikuskatu nabigatzaileko garapen tresnak irekitzeko.\n2. Joan \"Aplikazio\" (Chrome, Edge, Brave, etab.) edo \"Biltegiratzea\" (Firefox, Palemoon, etab.)\n3. Joan \"Cookieak\" atalera eta gero \"https://accounts.spotify.com\" azpiatalera",
   "step_3": "3. pausua",
   "step_3_steps": "Kopiatu \"sp_dc\" cookiearen balioa",
-  "success_emoji": "Eginda! 🥳",
+  "success_emoji": "Eginda! ðŸ¥³",
   "success_message": "Ongi hasi duzu zure Spotify kontua. Lan bikaina, lagun!",
   "step_4": "4. pausua",
   "step_4_steps": "Itsatsi \"sp_dc\"-tik kopiatutako balioa",
@@ -301,8 +301,8 @@
   "local_tab": "Lokalean",
   "song_link": "Kantaren lotura",
   "skip_this_nonsense": "Utzi txorakeria hau",
-  "freedom_of_music": "“Musika Askatasuna”",
-  "freedom_of_music_palm": "“Musika Askatasuna zure eskuetan”",
+  "freedom_of_music": "â€œMusika Askatasunaâ€",
+  "freedom_of_music_palm": "â€œMusika Askatasuna zure eskuetanâ€",
   "get_started": "Has gaitezen",
   "youtube_source_description": "Gomendatua eta hobekien dabilena.",
   "piped_source_description": "Aske zara? YouTube bezala, baino askeago.",
@@ -431,7 +431,7 @@
   "port_helper_msg": "Lehenetsitako balioa -1 da, zenbaki aleatorioa adierazten duena. Su firewall konfiguratu baduzu, gomendatzen da hau ezartzea.",
   "connect_request": "{client} konektatzea baimendu?",
   "connection_request_denied": "Konektatzea ukatu da. Erabiltzaileak sarbidea ukatu du.",
-  "hipotetical_calculation": "*Kalkulu hau online musika-streaming plataformetako batez besteko irteerako ordainari (0,003–0,005 USD) oinarrituta dago. Hipotetikoa da eta erabiltzaileari ideia bat ematen laguntzen dio artista nork zenbat kobratu zuen jakiteko, bere abestia plataform desberdinetan entzungo balu.",
+  "hipotetical_calculation": "*Kalkulu hau online musika-streaming plataformetako batez besteko irteerako ordainari (0,003â€“0,005 USD) oinarrituta dago. Hipotetikoa da eta erabiltzaileari ideia bat ematen laguntzen dio artista nork zenbat kobratu zuen jakiteko, bere abestia plataform desberdinetan entzungo balu.",
   "an_error_occurred": "Errore bat gertatu da",
   "copy_to_clipboard": "Hiztegiraino kopiatzea",
   "view_logs": "Erregistroak ikusi",
@@ -442,7 +442,7 @@
   "do_you_want_to_open_the_following_link": "Hurrengo esteka irekiko duzu?",
   "unsafe_url_warning": "Iturri seguru gabeko estekak irekiz gero, ez da seguru suerta daiteke. Arduratu zaitez!\nEsteka ere hiztegirainokoan kopiatu dezakezu.",
   "copy_link": "Esteka kopiatu",
-  "building_your_timeline": "Zure entzuteen arabera zure kronologia eraikitzen…",
+  "building_your_timeline": "Zure entzuteen arabera zure kronologia eraikitzenâ€¦",
   "official": "Ofiziala",
   "author_name": "Egilea: {author}",
   "third_party": "Hirugarrena",
@@ -466,7 +466,7 @@
   "plain_lyrics": "Letra arrunta",
   "tab_instead": "horren ordez, Tab teklatxaza erabili.",
   "disclaimer": "Aldez aurreko oharra",
-  "third_party_plugin_dmca_notice": "Soulful Bhakti taldea ezin da arduratu (“hirugarrenen”) plugin-en>gatik (barne legala). Erabili zure arriskuarekin. Erroreak/ arazoak dituzu, jakinarazi pluginaren biltegiari.\n\nPlugin batek edozein zerbitzu/legalki entitate baten ToS/DMCA hautsi baditu, eska iezaiozu pluginaren egileari edo hosting plataformari (adibidez GitHub/Codeberg) neurriak har ditzaten. “Hirugarrena” etiketatutako plugin guztiak komunitate publikoaren bidez mantentzen dira; ez ditugu kuratoriatu, beraz ezin dugu inplikatu.\n\n",
+  "third_party_plugin_dmca_notice": "Soulful Bhakti taldea ezin da arduratu (â€œhirugarrenenâ€) plugin-en>gatik (barne legala). Erabili zure arriskuarekin. Erroreak/ arazoak dituzu, jakinarazi pluginaren biltegiari.\n\nPlugin batek edozein zerbitzu/legalki entitate baten ToS/DMCA hautsi baditu, eska iezaiozu pluginaren egileari edo hosting plataformari (adibidez GitHub/Codeberg) neurriak har ditzaten. â€œHirugarrenaâ€ etiketatutako plugin guztiak komunitate publikoaren bidez mantentzen dira; ez ditugu kuratoriatu, beraz ezin dugu inplikatu.\n\n",
   "input_does_not_match_format": "Sarrera ezin da beharrezko formatutik desberdina izan",
   "metadata_provider_plugins": "Metadaten hornitzailearen pluginak",
   "paste_plugin_download_url": "Kopiatu deskarga-URLa, GitHub/Codeberg biltegi-URLa edo .smplug fitxategiaren esteka zuzena",
@@ -521,5 +521,13 @@
   "verify_email_reminder": "Mesedez, egiaztatu zure helbide elektronikoa zure kontua ziurtatzeko",
   "verify_now": "Egiaztatu orain",
   "summary_top_track": "Abesti nagusia\naldi honetan",
-  "local": "Tokikoa"
+  "local": "Tokikoa",
+  "specials": "Specials",
+  "play_now": "Play Now",
+  "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
+  "@songs_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

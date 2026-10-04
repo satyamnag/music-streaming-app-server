@@ -533,14 +533,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get bug_issues => 'Bug+Masalah';
 
   @override
-  String get made_with => 'Dibuat dengan ❤️ di Bangladesh🇧🇩';
+  String get made_with => 'Dibuat dengan â¤ï¸ di BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -987,11 +987,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get skip_this_nonsense => 'Lewati omong kosong ini';
 
   @override
-  String get freedom_of_music => '“Kebebasan Musik”';
+  String get freedom_of_music => 'â€œKebebasan Musikâ€';
 
   @override
   String get freedom_of_music_palm =>
-      '“Kebebasan Musik di telapak tangan Anda”';
+      'â€œKebebasan Musik di telapak tangan Andaâ€';
 
   @override
   String get get_started => 'Mari kita mulai';
@@ -1650,4 +1650,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

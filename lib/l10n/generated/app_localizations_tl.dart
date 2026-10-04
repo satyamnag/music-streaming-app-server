@@ -535,14 +535,14 @@ class AppLocalizationsTl extends AppLocalizations {
   String get bug_issues => 'Bug+Mga Isyu';
 
   @override
-  String get made_with => 'Ginawa nang may ❤️ sa Bangladesh🇧🇩';
+  String get made_with => 'Ginawa nang may â¤ï¸ sa BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -1658,4 +1658,21 @@ class AppLocalizationsTl extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

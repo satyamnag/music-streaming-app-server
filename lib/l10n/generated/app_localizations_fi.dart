@@ -30,7 +30,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get settings_subtitle => 'Muokkaa Soulful Bhakti mieleiseksesi';
 
   @override
-  String get genre_categories_filter => 'Suodata kategorioita tai genrejä';
+  String get genre_categories_filter => 'Suodata kategorioita tai genrejÃ¤';
 
   @override
   String get genre => 'Genre';
@@ -39,7 +39,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get personalized => 'Personoidut';
 
   @override
-  String get featured => 'Esittelyssä';
+  String get featured => 'EsittelyssÃ¤';
 
   @override
   String get new_releases => 'Uusi julkaisu';
@@ -54,7 +54,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get top_trending => 'Suosituimmat';
 
   @override
-  String get see_more => 'Näytä lisää';
+  String get see_more => 'NÃ¤ytÃ¤ lisÃ¤Ã¤';
 
   @override
   String playing_track(Object track) {
@@ -63,11 +63,11 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Tämä tulee tyhjentämään jonon. $track_length Kappaleita poistetaan\nHaluatko jatkaa?';
+    return 'TÃ¤mÃ¤ tulee tyhjentÃ¤mÃ¤Ã¤n jonon. $track_length Kappaleita poistetaan\nHaluatko jatkaa?';
   }
 
   @override
-  String get load_more => 'Lataa lisää';
+  String get load_more => 'Lataa lisÃ¤Ã¤';
 
   @override
   String get playlists => 'Soittolistat';
@@ -88,10 +88,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get filter_playlists => 'Suodata soittolistasi...';
 
   @override
-  String get liked_tracks => 'Tykätyt kappaleet';
+  String get liked_tracks => 'TykÃ¤tyt kappaleet';
 
   @override
-  String get liked_tracks_description => 'Kaikki tykättysi kappaleet';
+  String get liked_tracks_description => 'Kaikki tykÃ¤ttysi kappaleet';
 
   @override
   String get playlist => 'Soittolista';
@@ -107,10 +107,10 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get no_playlists_yet =>
-      'Ei vielä soittolistoja. Luo sellainen valituista kappaleista.';
+      'Ei vielÃ¤ soittolistoja. Luo sellainen valituista kappaleista.';
 
   @override
-  String get update_playlist => 'Päivitä soittolista';
+  String get update_playlist => 'PÃ¤ivitÃ¤ soittolista';
 
   @override
   String get create => 'Luo';
@@ -119,7 +119,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get cancel => 'Peruuta';
 
   @override
-  String get update => 'Päivitä';
+  String get update => 'PÃ¤ivitÃ¤';
 
   @override
   String get name_of_playlist => 'Soittolistan nimi';
@@ -143,7 +143,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get delete => 'Poista';
 
   @override
-  String get none => 'Ei mitään';
+  String get none => 'Ei mitÃ¤Ã¤n';
 
   @override
   String get sort_a_z => 'Suodata A-Z';
@@ -180,13 +180,13 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get add_artist_to_blacklist => 'Lisää artisti mustalle listalle';
+  String get add_artist_to_blacklist => 'LisÃ¤Ã¤ artisti mustalle listalle';
 
   @override
   String get top_tracks => 'Suosituimmat kappaleet';
 
   @override
-  String get fans_also_like => 'Fanit myös tykkäsivät';
+  String get fans_also_like => 'Fanit myÃ¶s tykkÃ¤sivÃ¤t';
 
   @override
   String get loading => 'Ladataan...';
@@ -204,11 +204,11 @@ class AppLocalizationsFi extends AppLocalizations {
   String get follow => 'Seuraa';
 
   @override
-  String get artist_url_copied => 'Aristin URL kopioitiin leikepöytään';
+  String get artist_url_copied => 'Aristin URL kopioitiin leikepÃ¶ytÃ¤Ã¤n';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'Lisättiin $tracks kappaletta jonoon';
+    return 'LisÃ¤ttiin $tracks kappaletta jonoon';
   }
 
   @override
@@ -241,16 +241,16 @@ class AppLocalizationsFi extends AppLocalizations {
   String get time => 'Aika';
 
   @override
-  String get more_actions => 'Lisää toimintoja';
+  String get more_actions => 'LisÃ¤Ã¤ toimintoja';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'Lisää ($count) Soittolistaasi';
+    return 'LisÃ¤Ã¤ ($count) Soittolistaasi';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'Lisää ($count) Jonoon';
+    return 'LisÃ¤Ã¤ ($count) Jonoon';
   }
 
   @override
@@ -263,24 +263,24 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'Kopioitiin $data leikepöytään';
+    return 'Kopioitiin $data leikepÃ¶ytÃ¤Ã¤n';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'Lisää $track seuraaviin soittolistoihin';
+    return 'LisÃ¤Ã¤ $track seuraaviin soittolistoihin';
   }
 
   @override
-  String get add => 'Lisää';
+  String get add => 'LisÃ¤Ã¤';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'Lisättiin $track jonoon';
+    return 'LisÃ¤ttiin $track jonoon';
   }
 
   @override
-  String get add_to_queue => 'Lisää jonoon';
+  String get add_to_queue => 'LisÃ¤Ã¤ jonoon';
 
   @override
   String track_will_play_next(Object track) {
@@ -305,13 +305,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get save_as_favorite => 'Tallenna soittolistana';
 
   @override
-  String get add_to_playlist => 'Lisää soittolistaan';
+  String get add_to_playlist => 'LisÃ¤Ã¤ soittolistaan';
 
   @override
   String get remove_from_playlist => 'Poista soittolistasta';
 
   @override
-  String get add_to_blacklist => 'Lisää mustalle listalle';
+  String get add_to_blacklist => 'LisÃ¤Ã¤ mustalle listalle';
 
   @override
   String get remove_from_blacklist => 'Poista mustalistalta';
@@ -323,7 +323,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get mini_player => 'Minisoitin';
 
   @override
-  String get slide_to_seek => 'Liu\'uta mennäkseen eteenpäin tai taaksepäin';
+  String get slide_to_seek => 'Liu\'uta mennÃ¤kseen eteenpÃ¤in tai taaksepÃ¤in';
 
   @override
   String get shuffle_playlist => 'Sekoita soittolista';
@@ -332,13 +332,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get unshuffle_playlist => 'Poista sekoitus soittolistasta';
 
   @override
-  String get previous_track => 'Äskeinen kappale';
+  String get previous_track => 'Ã„skeinen kappale';
 
   @override
   String get next_track => 'Seuraava kappale';
 
   @override
-  String get pause_playback => 'Pysäytä soittolistan toisto';
+  String get pause_playback => 'PysÃ¤ytÃ¤ soittolistan toisto';
 
   @override
   String get resume_playback => 'Jatka soittolistan toistoa';
@@ -356,7 +356,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get queue => 'Jono';
 
   @override
-  String get alternative_track_sources => 'Toinen kappale lähde';
+  String get alternative_track_sources => 'Toinen kappale lÃ¤hde';
 
   @override
   String tracks_in_queue(Object tracks) {
@@ -364,34 +364,34 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get clear_all => 'Tyhjennä kaikki';
+  String get clear_all => 'TyhjennÃ¤ kaikki';
 
   @override
-  String get show_hide_ui_on_hover => 'Näytä/Piilota UI leijumalla';
+  String get show_hide_ui_on_hover => 'NÃ¤ytÃ¤/Piilota UI leijumalla';
 
   @override
-  String get always_on_top => 'Aina päällimmäisenä';
+  String get always_on_top => 'Aina pÃ¤Ã¤llimmÃ¤isenÃ¤';
 
   @override
-  String get exit_mini_player => 'Lähde minisoittimesta';
+  String get exit_mini_player => 'LÃ¤hde minisoittimesta';
 
   @override
   String get local_library => 'Paikallinen kirjasto';
 
   @override
-  String get add_library_location => 'Lisää kirjastoon';
+  String get add_library_location => 'LisÃ¤Ã¤ kirjastoon';
 
   @override
   String get remove_library_location => 'Poista kirjastosta';
 
   @override
-  String get account => 'Käyttäjä';
+  String get account => 'KÃ¤yttÃ¤jÃ¤';
 
   @override
   String get logout => 'Kirjaudu ulos';
 
   @override
-  String get logout_of_this_account => 'Kirjaudu ulos tältä käyttäjältä';
+  String get logout_of_this_account => 'Kirjaudu ulos tÃ¤ltÃ¤ kÃ¤yttÃ¤jÃ¤ltÃ¤';
 
   @override
   String get language_region => 'Kieli ja Maa';
@@ -400,7 +400,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get language => 'Kieli';
 
   @override
-  String get system_default => 'Järjestelmän oletus';
+  String get system_default => 'JÃ¤rjestelmÃ¤n oletus';
 
   @override
   String get market_place_region => 'Markkina-alue';
@@ -416,7 +416,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get override_layout_settings =>
-      'Jätä reagoiva asettelutila huomioimatta';
+      'JÃ¤tÃ¤ reagoiva asettelutila huomioimatta';
 
   @override
   String get adaptive => 'Mukautuva';
@@ -437,23 +437,23 @@ class AppLocalizationsFi extends AppLocalizations {
   String get light => 'Vaalea';
 
   @override
-  String get system => 'Järjestelmä';
+  String get system => 'JÃ¤rjestelmÃ¤';
 
   @override
-  String get accent_color => 'Korostusväri';
+  String get accent_color => 'KorostusvÃ¤ri';
 
   @override
-  String get sync_album_color => 'Synkronoi albumin väri';
+  String get sync_album_color => 'Synkronoi albumin vÃ¤ri';
 
   @override
   String get sync_album_color_description =>
-      'Käyttää albumin kansitaiteen vallitsevaa väirä korostuvärinä';
+      'KÃ¤yttÃ¤Ã¤ albumin kansitaiteen vallitsevaa vÃ¤irÃ¤ korostuvÃ¤rinÃ¤';
 
   @override
   String get playback => 'Toisto';
 
   @override
-  String get audio_quality => 'Äänenlaatu';
+  String get audio_quality => 'Ã„Ã¤nenlaatu';
 
   @override
   String get high => 'Korkea';
@@ -466,7 +466,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get pre_download_play_description =>
-      'Audion suoratoiston sijaan, lataa tavut ja soita ne (Suositeltu korkeamman kaistanleveyden käyttäjille)';
+      'Audion suoratoiston sijaan, lataa tavut ja soita ne (Suositeltu korkeamman kaistanleveyden kÃ¤yttÃ¤jille)';
 
   @override
   String get skip_non_music => 'Ohita ei-musiikki kohdat (SponsorBlock)';
@@ -479,28 +479,28 @@ class AppLocalizationsFi extends AppLocalizations {
       'Odota nykyisen latauksen lopetteluun';
 
   @override
-  String get desktop => 'Työpöytä';
+  String get desktop => 'TyÃ¶pÃ¶ytÃ¤';
 
   @override
-  String get close_behavior => 'Sulkemisen käyttäytyminen';
+  String get close_behavior => 'Sulkemisen kÃ¤yttÃ¤ytyminen';
 
   @override
   String get close => 'Sulje';
 
   @override
-  String get minimize_to_tray => 'Minimisoi tehtäväpalkkiin';
+  String get minimize_to_tray => 'Minimisoi tehtÃ¤vÃ¤palkkiin';
 
   @override
-  String get show_tray_icon => 'Näytä järjestelmäkuvake';
+  String get show_tray_icon => 'NÃ¤ytÃ¤ jÃ¤rjestelmÃ¤kuvake';
 
   @override
   String get about => 'Tietoa';
 
   @override
-  String get u_love_spotube => 'Tiedämme että rakastat Soulful Bhaktia';
+  String get u_love_spotube => 'TiedÃ¤mme ettÃ¤ rakastat Soulful Bhaktia';
 
   @override
-  String get check_for_updates => 'Tarkista päivitykset';
+  String get check_for_updates => 'Tarkista pÃ¤ivitykset';
 
   @override
   String get about_spotube => 'Tietoa Soulful Bhakti:sta';
@@ -531,14 +531,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get bug_issues => 'Bugit+Ongelmat';
 
   @override
-  String get made_with => 'Tehty ❤️ Bangladeshista 🇧🇩';
+  String get made_with => 'Tehty â¤ï¸ Bangladeshista ðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -546,10 +546,10 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'Älä huoli, tunnuksiasi ei talleteta tai jaeta kenenkään kanssa';
+      'Ã„lÃ¤ huoli, tunnuksiasi ei talleteta tai jaeta kenenkÃ¤Ã¤n kanssa';
 
   @override
-  String get know_how_to_login => 'Etkö tiedä miten tehdä tämä?';
+  String get know_how_to_login => 'EtkÃ¶ tiedÃ¤ miten tehdÃ¤ tÃ¤mÃ¤?';
 
   @override
   String get follow_step_by_step_guide => 'Seuraa askel askeleelta opasta';
@@ -560,10 +560,10 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => 'Täytä kaikki kentät';
+  String get fill_in_all_fields => 'TÃ¤ytÃ¤ kaikki kentÃ¤t';
 
   @override
-  String get submit => 'Lähetä';
+  String get submit => 'LÃ¤hetÃ¤';
 
   @override
   String get exit => 'Poistu';
@@ -587,26 +587,26 @@ class AppLocalizationsFi extends AppLocalizations {
   String get something_went_wrong => 'Jotain meni pieleen';
 
   @override
-  String get piped_instance => 'Johdettu palvelinesiintymä';
+  String get piped_instance => 'Johdettu palvelinesiintymÃ¤';
 
   @override
   String get piped_description =>
-      'Johdettu palvelinesiintymä Kappale täsmäyksiin';
+      'Johdettu palvelinesiintymÃ¤ Kappale tÃ¤smÃ¤yksiin';
 
   @override
   String get piped_warning =>
-      'Jotkut niistä eivät toimi hyvin, käytä siis omalla vastuullasi';
+      'Jotkut niistÃ¤ eivÃ¤t toimi hyvin, kÃ¤ytÃ¤ siis omalla vastuullasi';
 
   @override
-  String get invidious_instance => 'Invidious-palvelinesiintymä';
+  String get invidious_instance => 'Invidious-palvelinesiintymÃ¤';
 
   @override
   String get invidious_description =>
-      'Invidious-palvelinesiintymä raitojen yhteensovittamiseen';
+      'Invidious-palvelinesiintymÃ¤ raitojen yhteensovittamiseen';
 
   @override
   String get invidious_warning =>
-      'Jotkin esiintymät eivät välttämättä toimi hyvin. Käytä omalla vastuullasi';
+      'Jotkin esiintymÃ¤t eivÃ¤t vÃ¤lttÃ¤mÃ¤ttÃ¤ toimi hyvin. KÃ¤ytÃ¤ omalla vastuullasi';
 
   @override
   String get generate => 'Luo';
@@ -624,14 +624,14 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'Valitse enintään $count $type';
+    return 'Valitse enintÃ¤Ã¤n $count $type';
   }
 
   @override
   String get select_genres => 'Valitse Genret';
 
   @override
-  String get add_genres => 'Lisää Genrejä';
+  String get add_genres => 'LisÃ¤Ã¤ GenrejÃ¤';
 
   @override
   String get country => 'Maa';
@@ -652,10 +652,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get instrumentalness => 'Instrumentaalisuus';
 
   @override
-  String get liveness => 'Elävyyttä';
+  String get liveness => 'ElÃ¤vyyttÃ¤';
 
   @override
-  String get loudness => 'Äänekkyys';
+  String get loudness => 'Ã„Ã¤nekkyys';
 
   @override
   String get speechiness => 'Puheisuus';
@@ -667,7 +667,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get popularity => 'Suosio';
 
   @override
-  String get key => 'Sävellaji';
+  String get key => 'SÃ¤vellaji';
 
   @override
   String get duration => 'Pituus (s)';
@@ -688,7 +688,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get medium => 'Keskikokoinen';
 
   @override
-  String get long => 'Pitkä';
+  String get long => 'PitkÃ¤';
 
   @override
   String get min => 'Minimi';
@@ -721,33 +721,33 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get download_warning =>
-      'Jos lataat kaikki laulut kerrällä olet selkeästi Piratoimassa ja aiheuttamassa vahinkoa musiikin luovaan yhteiskuntaan. Toivottavasti olet tietoinen tästä. Yritä aina kunnioittaa ja tukea Artistin kovaa työtä.';
+      'Jos lataat kaikki laulut kerrÃ¤llÃ¤ olet selkeÃ¤sti Piratoimassa ja aiheuttamassa vahinkoa musiikin luovaan yhteiskuntaan. Toivottavasti olet tietoinen tÃ¤stÃ¤. YritÃ¤ aina kunnioittaa ja tukea Artistin kovaa tyÃ¶tÃ¤.';
 
   @override
   String get download_ip_ban_warning =>
-      'BTW, YouTube voi estää IP-Osoitteesi tavallista liiallisten latauspyyntöjen takia. IP-Osoitteen esto tarkoittaa sitä, ettet voi käyttää YouTubea (vaikka olisit kirjautunut) vähintään 2-3kk aikana kyseiseltä laitteelta. Soulful Bhakti ei kanna yhtään vastuuta jos se tapahtuu.';
+      'BTW, YouTube voi estÃ¤Ã¤ IP-Osoitteesi tavallista liiallisten latauspyyntÃ¶jen takia. IP-Osoitteen esto tarkoittaa sitÃ¤, ettet voi kÃ¤yttÃ¤Ã¤ YouTubea (vaikka olisit kirjautunut) vÃ¤hintÃ¤Ã¤n 2-3kk aikana kyseiseltÃ¤ laitteelta. Soulful Bhakti ei kanna yhtÃ¤Ã¤n vastuuta jos se tapahtuu.';
 
   @override
   String get by_clicking_accept_terms =>
-      'Painamalla \'hyväksy\' hyväksyt seuraaviin ehtoihin:';
+      'Painamalla \'hyvÃ¤ksy\' hyvÃ¤ksyt seuraaviin ehtoihin:';
 
   @override
   String get download_agreement_1 =>
-      'Tiedän että Piratoin musiikkia. Olen paha.';
+      'TiedÃ¤n ettÃ¤ Piratoin musiikkia. Olen paha.';
 
   @override
   String get download_agreement_2 =>
-      'Tuen Artisteja silloin kun pystyn, ja teen tämän vain koska minulla ei ole rahaa ostaa heidän taidetta';
+      'Tuen Artisteja silloin kun pystyn, ja teen tÃ¤mÃ¤n vain koska minulla ei ole rahaa ostaa heidÃ¤n taidetta';
 
   @override
   String get download_agreement_3 =>
-      'Ymmärrän että minun YouTube voi estää IP-Osoitteeni ja en pidä Soulful Bhaktia tai omistajiinsa/avustajia vastuullisena mistään omista teoistsani';
+      'YmmÃ¤rrÃ¤n ettÃ¤ minun YouTube voi estÃ¤Ã¤ IP-Osoitteeni ja en pidÃ¤ Soulful Bhaktia tai omistajiinsa/avustajia vastuullisena mistÃ¤Ã¤n omista teoistsani';
 
   @override
-  String get decline => 'Hylkää';
+  String get decline => 'HylkÃ¤Ã¤';
 
   @override
-  String get accept => 'Hyväksy';
+  String get accept => 'HyvÃ¤ksy';
 
   @override
   String get details => 'Yksityiskohdat';
@@ -759,13 +759,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get channel => 'Kanava';
 
   @override
-  String get likes => 'Tykkäykset';
+  String get likes => 'TykkÃ¤ykset';
 
   @override
-  String get dislikes => 'Epä-tykkäykset';
+  String get dislikes => 'EpÃ¤-tykkÃ¤ykset';
 
   @override
-  String get views => 'Näyttökerrat';
+  String get views => 'NÃ¤yttÃ¶kerrat';
 
   @override
   String get streamUrl => 'Suoratoiston URL';
@@ -804,36 +804,36 @@ class AppLocalizationsFi extends AppLocalizations {
   String get logs => 'Lokit';
 
   @override
-  String get developers => 'Kehittäjät';
+  String get developers => 'KehittÃ¤jÃ¤t';
 
   @override
-  String get not_logged_in => 'Et ole kirjautunut sisään.';
+  String get not_logged_in => 'Et ole kirjautunut sisÃ¤Ã¤n.';
 
   @override
   String get search_mode => 'Hakutila';
 
   @override
-  String get audio_source => 'Äänilähde';
+  String get audio_source => 'Ã„Ã¤nilÃ¤hde';
 
   @override
   String get ok => 'Ok';
 
   @override
-  String get failed_to_encrypt => 'Salaaminen epäonnistui';
+  String get failed_to_encrypt => 'Salaaminen epÃ¤onnistui';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti käyttää salausta tallentaakseen tietosi, mutta epäonnistui, joten se palaa epäturvalliseen tallennukseen\nJos käytät Linuxia, varmista että sinulla on turvallisuuspalvelu (gnome-keyring, kde-wallet, keepassxc jne) asennettu';
+      'Soulful Bhakti kÃ¤yttÃ¤Ã¤ salausta tallentaakseen tietosi, mutta epÃ¤onnistui, joten se palaa epÃ¤turvalliseen tallennukseen\nJos kÃ¤ytÃ¤t Linuxia, varmista ettÃ¤ sinulla on turvallisuuspalvelu (gnome-keyring, kde-wallet, keepassxc jne) asennettu';
 
   @override
   String get querying_info => 'Hankitaan tietoa...';
 
   @override
-  String get piped_api_down => 'Johdettu palvelinesiintymä on alhaalla';
+  String get piped_api_down => 'Johdettu palvelinesiintymÃ¤ on alhaalla';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Johdettu palvelinesiintymä $pipedInstance on alhaalla.\n\nVaihda joko ilmeytymä tia vahda \'API tyyppi\' YouTuben viralliseen API\n\nKäynnistä sovellus uudestaan vaihdon jälkeen';
+    return 'Johdettu palvelinesiintymÃ¤ $pipedInstance on alhaalla.\n\nVaihda joko ilmeytymÃ¤ tia vahda \'API tyyppi\' YouTuben viralliseen API\n\nKÃ¤ynnistÃ¤ sovellus uudestaan vaihdon jÃ¤lkeen';
   }
 
   @override
@@ -843,7 +843,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get connection_restored => 'Verkkoyhteys palautettu';
 
   @override
-  String get use_system_title_bar => 'Käytä järjestelmäpalkkia';
+  String get use_system_title_bar => 'KÃ¤ytÃ¤ jÃ¤rjestelmÃ¤palkkia';
 
   @override
   String get crunching_results => 'Paloitellaan tuloksia...';
@@ -852,7 +852,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get search_to_get_results => 'Hae saadakseen tuloksia';
 
   @override
-  String get use_amoled_mode => 'Pilkkopimeä tumma teema';
+  String get use_amoled_mode => 'PilkkopimeÃ¤ tumma teema';
 
   @override
   String get pitch_dark_theme => 'AMOLED Tila';
@@ -864,14 +864,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get change_cover => 'Vaihda koveri';
 
   @override
-  String get add_cover => 'Lisää koveri';
+  String get add_cover => 'LisÃ¤Ã¤ koveri';
 
   @override
   String get restore_defaults => 'Palauta oletukset';
 
   @override
   String get restore_defaults_confirmation =>
-      'Tämä palauttaa kaikki asetuksesi oletusarvoihin. Tätä toimintoa ei voi kumota.';
+      'TÃ¤mÃ¤ palauttaa kaikki asetuksesi oletusarvoihin. TÃ¤tÃ¤ toimintoa ei voi kumota.';
 
   @override
   String get streaming_music_format => 'Musiikin suoratoistomuoto';
@@ -880,13 +880,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get streaming_music_quality => 'Musiikin suoratoistolaadun';
 
   @override
-  String get connect => 'Yhdistä';
+  String get connect => 'YhdistÃ¤';
 
   @override
   String get disconnect => 'Katkaise';
 
   @override
-  String get username => 'Käyttäjänimi';
+  String get username => 'KÃ¤yttÃ¤jÃ¤nimi';
 
   @override
   String get password => 'Salasana';
@@ -895,10 +895,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get login => 'Kirjaudu';
 
   @override
-  String get sign_in => 'Kirjaudu sisään';
+  String get sign_in => 'Kirjaudu sisÃ¤Ã¤n';
 
   @override
-  String get sign_up => 'Rekisteröidy';
+  String get sign_up => 'RekisterÃ¶idy';
 
   @override
   String get sign_out => 'Kirjaudu ulos';
@@ -910,10 +910,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get create_account => 'Luo tilisi';
 
   @override
-  String get already_have_account => 'Onko sinulla jo tili? Kirjaudu sisään';
+  String get already_have_account => 'Onko sinulla jo tili? Kirjaudu sisÃ¤Ã¤n';
 
   @override
-  String get dont_have_account => 'Ei tiliä? Rekisteröidy';
+  String get dont_have_account => 'Ei tiliÃ¤? RekisterÃ¶idy';
 
   @override
   String signed_in_as(Object userId) {
@@ -924,10 +924,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get verification_code => 'Vahvistuskoodi';
 
   @override
-  String get verification_code_hint => 'Anna sähköpostiisi lähetetty koodi';
+  String get verification_code_hint => 'Anna sÃ¤hkÃ¶postiisi lÃ¤hetetty koodi';
 
   @override
-  String get verify_email_code => 'Lähetimme vahvistuskoodin sähköpostiisi';
+  String get verify_email_code => 'LÃ¤hetimme vahvistuskoodin sÃ¤hkÃ¶postiisi';
 
   @override
   String get go_to_album => 'Mene albumiin';
@@ -942,14 +942,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get genres => 'Genret';
 
   @override
-  String get explore_genres => 'Seikkaile genrejä';
+  String get explore_genres => 'Seikkaile genrejÃ¤';
 
   @override
   String get friends => 'Kaverit';
 
   @override
   String get no_lyrics_available =>
-      'Anteeksi, emme löytäneet lyriikoita tälle laululle';
+      'Anteeksi, emme lÃ¶ytÃ¤neet lyriikoita tÃ¤lle laululle';
 
   @override
   String get start_a_radio => 'Aloita Radio';
@@ -959,7 +959,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get replace_queue_question =>
-      'Haluatko korvata nykyisen jonon vai lisätä siihen?';
+      'Haluatko korvata nykyisen jonon vai lisÃ¤tÃ¤ siihen?';
 
   @override
   String get endless_playback => 'Loputon toisto';
@@ -969,7 +969,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get delete_playlist_confirmation =>
-      'Oletko varma että haluat poistaa tämän soittolistan?';
+      'Oletko varma ettÃ¤ haluat poistaa tÃ¤mÃ¤n soittolistan?';
 
   @override
   String get local_tracks => 'Paikalliset kappaleet';
@@ -981,13 +981,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get song_link => 'Laulun linkki';
 
   @override
-  String get skip_this_nonsense => 'Ohita tämä hölynpöly';
+  String get skip_this_nonsense => 'Ohita tÃ¤mÃ¤ hÃ¶lynpÃ¶ly';
 
   @override
-  String get freedom_of_music => '“Musiikin vapaus”';
+  String get freedom_of_music => 'â€œMusiikin vapausâ€';
 
   @override
-  String get freedom_of_music_palm => '“Musiikin vapaus käsissäsi”';
+  String get freedom_of_music_palm => 'â€œMusiikin vapaus kÃ¤sissÃ¤siâ€';
 
   @override
   String get get_started => 'Aloitetaan';
@@ -1000,7 +1000,7 @@ class AppLocalizationsFi extends AppLocalizations {
       'Tuntuuko vapaalta? Sama kuin YouTube mutta paljon vapautta';
 
   @override
-  String get jiosaavn_source_description => 'Paras Etelä-Aasian alueelle.';
+  String get jiosaavn_source_description => 'Paras EtelÃ¤-Aasian alueelle.';
 
   @override
   String get invidious_source_description =>
@@ -1012,28 +1012,28 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get select_audio_source => 'Valitse äänilähde';
+  String get select_audio_source => 'Valitse Ã¤Ã¤nilÃ¤hde';
 
   @override
   String get endless_playback_description =>
-      'Lisää automaattisesti uusia lauluja\njonon perään';
+      'LisÃ¤Ã¤ automaattisesti uusia lauluja\njonon perÃ¤Ã¤n';
 
   @override
   String get choose_your_region => 'Valitse alueesi';
 
   @override
   String get choose_your_region_description =>
-      'Tämä auttaa Soulful Bhakti näyttämään sinulle oikeaa sisältöä\nsijaintiasi varten.';
+      'TÃ¤mÃ¤ auttaa Soulful Bhakti nÃ¤yttÃ¤mÃ¤Ã¤n sinulle oikeaa sisÃ¤ltÃ¶Ã¤\nsijaintiasi varten.';
 
   @override
   String get choose_your_language => 'Valitse kielesi';
 
   @override
-  String get help_project_grow => 'Auta tätä projektia kasvamaan';
+  String get help_project_grow => 'Auta tÃ¤tÃ¤ projektia kasvamaan';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti projekti minkä lähdekoodi on julkisesti saatavilla. Voit autta tätä projektia kasvamaan muutoksilla, ilmoittamalla bugeista, tai ehdottamalla uusia ominaisuuksia.';
+      'Soulful Bhakti projekti minkÃ¤ lÃ¤hdekoodi on julkisesti saatavilla. Voit autta tÃ¤tÃ¤ projektia kasvamaan muutoksilla, ilmoittamalla bugeista, tai ehdottamalla uusia ominaisuuksia.';
 
   @override
   String get contribute_on_github => 'Auta GitHub:ssa';
@@ -1042,10 +1042,10 @@ class AppLocalizationsFi extends AppLocalizations {
   String get donate_on_open_collective => 'Lahjoita avoimessa kollektiivissa';
 
   @override
-  String get browse_anonymously => 'Selaa anonyyminä';
+  String get browse_anonymously => 'Selaa anonyyminÃ¤';
 
   @override
-  String get enable_connect => 'Ota käyttöön yhdistäminen';
+  String get enable_connect => 'Ota kÃ¤yttÃ¶Ã¶n yhdistÃ¤minen';
 
   @override
   String get enable_connect_description =>
@@ -1063,24 +1063,24 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get this_device => 'Tämä laite';
+  String get this_device => 'TÃ¤mÃ¤ laite';
 
   @override
-  String get remote => 'Etä';
+  String get remote => 'EtÃ¤';
 
   @override
   String get stats => 'Tilastot';
 
   @override
   String and_n_more(Object count) {
-    return 'ja $count lisää';
+    return 'ja $count lisÃ¤Ã¤';
   }
 
   @override
-  String get recently_played => 'Äskettäin soitetut';
+  String get recently_played => 'Ã„skettÃ¤in soitetut';
 
   @override
-  String get browse_more => 'Selaa lisää';
+  String get browse_more => 'Selaa lisÃ¤Ã¤';
 
   @override
   String get no_title => 'Ei otsikkoa';
@@ -1089,15 +1089,15 @@ class AppLocalizationsFi extends AppLocalizations {
   String get not_playing => 'Ei soi';
 
   @override
-  String get epic_failure => 'Epäonnistuminen!';
+  String get epic_failure => 'EpÃ¤onnistuminen!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'Lisätty $tracks_length kappaletta jonoon';
+    return 'LisÃ¤tty $tracks_length kappaletta jonoon';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhaktilla on päivitys';
+  String get spotube_has_an_update => 'Soulful Bhaktilla on pÃ¤ivitys';
 
   @override
   String get download_now => 'Lataa nyt';
@@ -1113,13 +1113,13 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get read_the_latest => 'Lue viimeisimmät';
+  String get read_the_latest => 'Lue viimeisimmÃ¤t';
 
   @override
   String get release_notes => 'julkaisumuistiinpanot';
 
   @override
-  String get pick_color_scheme => 'Valitse värimaailma';
+  String get pick_color_scheme => 'Valitse vÃ¤rimaailma';
 
   @override
   String get save => 'Tallenna';
@@ -1135,7 +1135,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get nothing_found => 'Ei tuloksia';
 
   @override
-  String get the_box_is_empty => 'Laatikko on tyhjä';
+  String get the_box_is_empty => 'Laatikko on tyhjÃ¤';
 
   @override
   String get top_artists => 'Suosituimmat artistit';
@@ -1144,16 +1144,16 @@ class AppLocalizationsFi extends AppLocalizations {
   String get top_albums => 'Suosituimmat albumit';
 
   @override
-  String get this_week => 'Tällä viikolla';
+  String get this_week => 'TÃ¤llÃ¤ viikolla';
 
   @override
-  String get this_month => 'Tässä kuussa';
+  String get this_month => 'TÃ¤ssÃ¤ kuussa';
 
   @override
   String get last_6_months => 'Viimeiset 6 kuukautta';
 
   @override
-  String get this_year => 'Tänä vuonna';
+  String get this_year => 'TÃ¤nÃ¤ vuonna';
 
   @override
   String get last_2_years => 'Viimeiset 2 vuotta';
@@ -1167,36 +1167,36 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get email => 'Sähköposti';
+  String get email => 'SÃ¤hkÃ¶posti';
 
   @override
-  String get send_code => 'Lähetä koodi';
+  String get send_code => 'LÃ¤hetÃ¤ koodi';
 
   @override
-  String get change_identifier => 'Käytä eri sähköpostiosoitetta';
+  String get change_identifier => 'KÃ¤ytÃ¤ eri sÃ¤hkÃ¶postiosoitetta';
 
   @override
-  String get sign_in_with_otp => 'Kirjaudu sisään kertakoodilla';
+  String get sign_in_with_otp => 'Kirjaudu sisÃ¤Ã¤n kertakoodilla';
 
   @override
-  String get enter_otp_sent => 'Anna koodi, jonka lähetimme sinulle';
+  String get enter_otp_sent => 'Anna koodi, jonka lÃ¤hetimme sinulle';
 
   @override
   String get verify_email_reminder =>
-      'Vahvista sähköpostiosoitteesi suojataksesi tilisi';
+      'Vahvista sÃ¤hkÃ¶postiosoitteesi suojataksesi tilisi';
 
   @override
   String get verify_now => 'Vahvista nyt';
 
   @override
   String get enter_email_to_verify =>
-      'Anna sähköpostiosoitteesi vastaanottaaksesi vahvistuskoodin';
+      'Anna sÃ¤hkÃ¶postiosoitteesi vastaanottaaksesi vahvistuskoodin';
 
   @override
   String get profile_followers => 'Seuraajat';
 
   @override
-  String get birthday => 'Syntymäpäivä';
+  String get birthday => 'SyntymÃ¤pÃ¤ivÃ¤';
 
   @override
   String get subscription => 'Tilaus';
@@ -1211,13 +1211,13 @@ class AppLocalizationsFi extends AppLocalizations {
   String get profile => 'Profiili';
 
   @override
-  String get no_name => 'Ei nimeä';
+  String get no_name => 'Ei nimeÃ¤';
 
   @override
   String get edit => 'Muokkaa';
 
   @override
-  String get user_profile => 'Käyttäjäprofiili';
+  String get user_profile => 'KÃ¤yttÃ¤jÃ¤profiili';
 
   @override
   String count_plays(Object count) {
@@ -1244,12 +1244,12 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl kopioitu leikepöydälle';
+    return '$shareUrl kopioitu leikepÃ¶ydÃ¤lle';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*Tämä on laskettu keskimääräisen musiikin suoratoistopalvelun 0,003–0,005 dollarin kappalekohtaisen maksun perusteella. Tämä on hypoteettinen laskelma, joka antaa käyttäjälle käsityksen siitä, kuinka paljon he olisivat maksaneet artisteille, jos he kuuntelisivat heidän kappaleitaan eri musiikin suoratoistopalveluissa.';
+      '*TÃ¤mÃ¤ on laskettu keskimÃ¤Ã¤rÃ¤isen musiikin suoratoistopalvelun 0,003â€“0,005 dollarin kappalekohtaisen maksun perusteella. TÃ¤mÃ¤ on hypoteettinen laskelma, joka antaa kÃ¤yttÃ¤jÃ¤lle kÃ¤sityksen siitÃ¤, kuinka paljon he olisivat maksaneet artisteille, jos he kuuntelisivat heidÃ¤n kappaleitaan eri musiikin suoratoistopalveluissa.';
 
   @override
   String count_mins(Object minutes) {
@@ -1266,13 +1266,14 @@ class AppLocalizationsFi extends AppLocalizations {
   String get summary_songs => 'kappaletta';
 
   @override
-  String get summary_streamed_overall => 'Suoratoistettu yhteensä';
+  String get summary_streamed_overall => 'Suoratoistettu yhteensÃ¤';
 
   @override
-  String get summary_owed_to_artists => 'Maksettava artisteille\nTässä kuussa';
+  String get summary_owed_to_artists =>
+      'Maksettava artisteille\nTÃ¤ssÃ¤ kuussa';
 
   @override
-  String get summary_top_artist => 'Suosituin artisti\ntällä kaudella';
+  String get summary_top_artist => 'Suosituin artisti\ntÃ¤llÃ¤ kaudella';
 
   @override
   String get summary_artists => 'artisti';
@@ -1281,7 +1282,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get summary_music_reached_you => 'Musiikki saavutti sinut';
 
   @override
-  String get summary_full_albums => 'täydet albumit';
+  String get summary_full_albums => 'tÃ¤ydet albumit';
 
   @override
   String get summary_got_your_love => 'Sai rakkautesi';
@@ -1323,47 +1324,47 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'Yhteensä $money';
+    return 'YhteensÃ¤ $money';
   }
 
   @override
-  String get webview_not_found => 'Webview ei löydy';
+  String get webview_not_found => 'Webview ei lÃ¶ydy';
 
   @override
   String get webview_not_found_description =>
-      'Laitteellasi ei ole asennettua Webview-ajonaikaa.\nJos se on asennettu, varmista, että se on environment PATH:ssa\n\nAsennuksen jälkeen käynnistä sovellus uudelleen';
+      'Laitteellasi ei ole asennettua Webview-ajonaikaa.\nJos se on asennettu, varmista, ettÃ¤ se on environment PATH:ssa\n\nAsennuksen jÃ¤lkeen kÃ¤ynnistÃ¤ sovellus uudelleen';
 
   @override
   String get unsupported_platform => 'Ei tuettu alusta';
 
   @override
-  String get cache_music => 'Musiikki välimuistissa';
+  String get cache_music => 'Musiikki vÃ¤limuistissa';
 
   @override
   String get open => 'Avaa';
 
   @override
-  String get cache_folder => 'Välimuistikansio';
+  String get cache_folder => 'VÃ¤limuistikansio';
 
   @override
   String get export => 'Vie';
 
   @override
-  String get clear_cache => 'Tyhjennä välimuisti';
+  String get clear_cache => 'TyhjennÃ¤ vÃ¤limuisti';
 
   @override
-  String get clear_cache_confirmation => 'Haluatko tyhjentää välimuistin?';
+  String get clear_cache_confirmation => 'Haluatko tyhjentÃ¤Ã¤ vÃ¤limuistin?';
 
   @override
-  String get export_cache_files => 'Vie välimuistitiedostot';
+  String get export_cache_files => 'Vie vÃ¤limuistitiedostot';
 
   @override
   String found_n_files(Object count) {
-    return 'Löydettiin $count tiedostoa';
+    return 'LÃ¶ydettiin $count tiedostoa';
   }
 
   @override
-  String get export_cache_confirmation => 'Haluatko viedä nämä tiedostot';
+  String get export_cache_confirmation => 'Haluatko viedÃ¤ nÃ¤mÃ¤ tiedostot';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
@@ -1374,40 +1375,41 @@ class AppLocalizationsFi extends AppLocalizations {
   String get undo => 'Peruuta';
 
   @override
-  String get add_all_to_playlist => 'Lisää kaikki soittolistalle';
+  String get add_all_to_playlist => 'LisÃ¤Ã¤ kaikki soittolistalle';
 
   @override
-  String get add_all_to_queue => 'Lisää kaikki jonoon';
+  String get add_all_to_queue => 'LisÃ¤Ã¤ kaikki jonoon';
 
   @override
   String get play_all_next => 'Toista kaikki seuraavaksi';
 
   @override
-  String get pause => 'Pysäytä';
+  String get pause => 'PysÃ¤ytÃ¤';
 
   @override
-  String get view_all => 'Näytä kaikki';
+  String get view_all => 'NÃ¤ytÃ¤ kaikki';
 
   @override
   String get no_tracks_added_yet =>
-      'Näyttää siltä, että et ole lisännyt vielä mitään kappaleita.';
+      'NÃ¤yttÃ¤Ã¤ siltÃ¤, ettÃ¤ et ole lisÃ¤nnyt vielÃ¤ mitÃ¤Ã¤n kappaleita.';
 
   @override
-  String get no_tracks => 'Näyttää siltä, että täällä ei ole kappaleita.';
+  String get no_tracks =>
+      'NÃ¤yttÃ¤Ã¤ siltÃ¤, ettÃ¤ tÃ¤Ã¤llÃ¤ ei ole kappaleita.';
 
   @override
   String get no_tracks_listened_yet =>
-      'Näyttää siltä, että et ole kuunnellut mitään vielä.';
+      'NÃ¤yttÃ¤Ã¤ siltÃ¤, ettÃ¤ et ole kuunnellut mitÃ¤Ã¤n vielÃ¤.';
 
   @override
-  String get not_following_artists => 'Et seuraa yhtään artistia.';
+  String get not_following_artists => 'Et seuraa yhtÃ¤Ã¤n artistia.';
 
   @override
   String get no_favorite_albums_yet =>
-      'Näyttää siltä, että et ole lisännyt yhtään albumia suosikkeihisi.';
+      'NÃ¤yttÃ¤Ã¤ siltÃ¤, ettÃ¤ et ole lisÃ¤nnyt yhtÃ¤Ã¤n albumia suosikkeihisi.';
 
   @override
-  String get no_logs_found => 'Ei lokitietoja löydetty';
+  String get no_logs_found => 'Ei lokitietoja lÃ¶ydetty';
 
   @override
   String get youtube_engine => 'YouTube-moottori';
@@ -1419,57 +1421,57 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine ei ole asennettu järjestelmääsi.';
+    return '$engine ei ole asennettu jÃ¤rjestelmÃ¤Ã¤si.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'Varmista, että se on saatavilla PATH-muuttujassa tai\nasetetaan $engine suoritettavan tiedoston absoluuttinen polku alla.';
+    return 'Varmista, ettÃ¤ se on saatavilla PATH-muuttujassa tai\nasetetaan $engine suoritettavan tiedoston absoluuttinen polku alla.';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/unix-tyyppisissä käyttöjärjestelmissä polun asettaminen .zshrc/.bashrc/.bash_profile jne. ei toimi.\nSinun täytyy asettaa polku shellin asetustiedostoon.';
+      'macOS/Linux/unix-tyyppisissÃ¤ kÃ¤yttÃ¶jÃ¤rjestelmissÃ¤ polun asettaminen .zshrc/.bashrc/.bash_profile jne. ei toimi.\nSinun tÃ¤ytyy asettaa polku shellin asetustiedostoon.';
 
   @override
   String get download => 'Lataa';
 
   @override
-  String get file_not_found => 'Tiedostoa ei löydy';
+  String get file_not_found => 'Tiedostoa ei lÃ¶ydy';
 
   @override
   String get custom => 'Mukautettu';
 
   @override
-  String get add_custom_url => 'Lisää mukautettu URL';
+  String get add_custom_url => 'LisÃ¤Ã¤ mukautettu URL';
 
   @override
   String get edit_port => 'Muokkaa porttia';
 
   @override
   String get port_helper_msg =>
-      'Oletusarvo on -1, mikä tarkoittaa satunnaista numeroa. Jos sinulla on palomuuri määritetty, tämän asettamista suositellaan.';
+      'Oletusarvo on -1, mikÃ¤ tarkoittaa satunnaista numeroa. Jos sinulla on palomuuri mÃ¤Ã¤ritetty, tÃ¤mÃ¤n asettamista suositellaan.';
 
   @override
   String connect_request(Object client) {
-    return 'Salli $client yhdistää?';
+    return 'Salli $client yhdistÃ¤Ã¤?';
   }
 
   @override
   String get connection_request_denied =>
-      'Yhteys evätty. Käyttäjä eväsi pääsyn.';
+      'Yhteys evÃ¤tty. KÃ¤yttÃ¤jÃ¤ evÃ¤si pÃ¤Ã¤syn.';
 
   @override
   String get an_error_occurred => 'Tapahtui virhe';
 
   @override
-  String get copy_to_clipboard => 'Kopioi leikepöydälle';
+  String get copy_to_clipboard => 'Kopioi leikepÃ¶ydÃ¤lle';
 
   @override
-  String get view_logs => 'Näytä lokit';
+  String get view_logs => 'NÃ¤ytÃ¤ lokit';
 
   @override
-  String get retry => 'Yritä uudelleen';
+  String get retry => 'YritÃ¤ uudelleen';
 
   @override
   String get no_default_metadata_provider_selected =>
@@ -1487,7 +1489,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get unsafe_url_warning =>
-      'Linkkien avaaminen epäluotettavista lähteistä voi olla vaarallista. Ole varovainen!\nVoit myös kopioida linkin leikepöydälle.';
+      'Linkkien avaaminen epÃ¤luotettavista lÃ¤hteistÃ¤ voi olla vaarallista. Ole varovainen!\nVoit myÃ¶s kopioida linkin leikepÃ¶ydÃ¤lle.';
 
   @override
   String get copy_link => 'Kopioi linkki';
@@ -1501,36 +1503,36 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String author_name(Object author) {
-    return 'Tekijä: $author';
+    return 'TekijÃ¤: $author';
   }
 
   @override
   String get third_party => 'Kolmannen osapuolen';
 
   @override
-  String get plugin_requires_authentication => 'Lisäosa vaatii todentamisen';
+  String get plugin_requires_authentication => 'LisÃ¤osa vaatii todentamisen';
 
   @override
-  String get update_available => 'Päivitys saatavilla';
+  String get update_available => 'PÃ¤ivitys saatavilla';
 
   @override
   String get supports_scrobbling => 'Tukee scrobblingia';
 
   @override
   String get plugin_scrobbling_info =>
-      'Tämä lisäosa scrobblaa musiikkisi luodakseen kuunteluhistoriasi.';
+      'TÃ¤mÃ¤ lisÃ¤osa scrobblaa musiikkisi luodakseen kuunteluhistoriasi.';
 
   @override
-  String get default_metadata_source => 'Oletusarvoinen metatietolähde';
+  String get default_metadata_source => 'Oletusarvoinen metatietolÃ¤hde';
 
   @override
-  String get set_default_metadata_source => 'Aseta oletusmetatietolähde';
+  String get set_default_metadata_source => 'Aseta oletusmetatietolÃ¤hde';
 
   @override
-  String get default_audio_source => 'Oletusarvoinen äänilähde';
+  String get default_audio_source => 'Oletusarvoinen Ã¤Ã¤nilÃ¤hde';
 
   @override
-  String get set_default_audio_source => 'Aseta oletusäänilähde';
+  String get set_default_audio_source => 'Aseta oletusÃ¤Ã¤nilÃ¤hde';
 
   @override
   String get set_default => 'Aseta oletukseksi';
@@ -1539,26 +1541,27 @@ class AppLocalizationsFi extends AppLocalizations {
   String get support => 'Tuki';
 
   @override
-  String get support_plugin_development => 'Tue lisäosan kehitystä';
+  String get support_plugin_development => 'Tue lisÃ¤osan kehitystÃ¤';
 
   @override
   String can_access_name_api(Object name) {
-    return '- Voi käyttää **$name** APIa';
+    return '- Voi kÃ¤yttÃ¤Ã¤ **$name** APIa';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'Haluatko asentaa tämän lisäosan?';
+      'Haluatko asentaa tÃ¤mÃ¤n lisÃ¤osan?';
 
   @override
   String get third_party_plugin_warning =>
-      'Tämä lisäosa on kolmannen osapuolen arkistosta. Varmista, että luotat lähteeseen ennen asennusta.';
+      'TÃ¤mÃ¤ lisÃ¤osa on kolmannen osapuolen arkistosta. Varmista, ettÃ¤ luotat lÃ¤hteeseen ennen asennusta.';
 
   @override
-  String get author => 'Tekijä';
+  String get author => 'TekijÃ¤';
 
   @override
-  String get this_plugin_can_do_following => 'Tämä lisäosa voi tehdä seuraavaa';
+  String get this_plugin_can_do_following =>
+      'TÃ¤mÃ¤ lisÃ¤osa voi tehdÃ¤ seuraavaa';
 
   @override
   String get install => 'Asenna';
@@ -1567,69 +1570,69 @@ class AppLocalizationsFi extends AppLocalizations {
   String get install_a_metadata_provider => 'Asenna metatietojen tarjoaja';
 
   @override
-  String get no_tracks_playing => 'Ei kappaletta toistossa tällä hetkellä';
+  String get no_tracks_playing => 'Ei kappaletta toistossa tÃ¤llÃ¤ hetkellÃ¤';
 
   @override
   String get synced_lyrics_not_available =>
-      'Synkronoidut sanoitukset eivät ole saatavilla tälle kappaleelle. Käytä sen sijaan';
+      'Synkronoidut sanoitukset eivÃ¤t ole saatavilla tÃ¤lle kappaleelle. KÃ¤ytÃ¤ sen sijaan';
 
   @override
-  String get plain_lyrics => 'Pelkät sanoitukset';
+  String get plain_lyrics => 'PelkÃ¤t sanoitukset';
 
   @override
-  String get tab_instead => 'välilehteä.';
+  String get tab_instead => 'vÃ¤lilehteÃ¤.';
 
   @override
   String get disclaimer => 'Vastuuvapauslauseke';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti-tiimi ei ota mitään vastuuta (mukaan lukien oikeudellinen) mistään \"kolmannen osapuolen\" lisäosista.\nKäytä niitä omalla vastuullasi. Ilmoita kaikista virheistä/ongelmista lisäosan arkistoon.\n\nJos jokin \"kolmannen osapuolen\" lisäosa rikkoo jonkin palvelun/oikeushenkilön käyttöehtoja/DMCA:ta, pyydä \"kolmannen osapuolen\" lisäosan tekijää tai isännöintialustaa, esim. GitHubia/Codebergiä, ryhtymään toimiin. Yllä luetellut (\"kolmannen osapuolen\" merkityt) ovat kaikki julkisia/yhteisön ylläpitämiä lisäosia. Emme kuratoi niitä, joten emme voi ryhtyä niihin toimiin.\n\n';
+      'Soulful Bhakti-tiimi ei ota mitÃ¤Ã¤n vastuuta (mukaan lukien oikeudellinen) mistÃ¤Ã¤n \"kolmannen osapuolen\" lisÃ¤osista.\nKÃ¤ytÃ¤ niitÃ¤ omalla vastuullasi. Ilmoita kaikista virheistÃ¤/ongelmista lisÃ¤osan arkistoon.\n\nJos jokin \"kolmannen osapuolen\" lisÃ¤osa rikkoo jonkin palvelun/oikeushenkilÃ¶n kÃ¤yttÃ¶ehtoja/DMCA:ta, pyydÃ¤ \"kolmannen osapuolen\" lisÃ¤osan tekijÃ¤Ã¤ tai isÃ¤nnÃ¶intialustaa, esim. GitHubia/CodebergiÃ¤, ryhtymÃ¤Ã¤n toimiin. YllÃ¤ luetellut (\"kolmannen osapuolen\" merkityt) ovat kaikki julkisia/yhteisÃ¶n yllÃ¤pitÃ¤miÃ¤ lisÃ¤osia. Emme kuratoi niitÃ¤, joten emme voi ryhtyÃ¤ niihin toimiin.\n\n';
 
   @override
-  String get input_does_not_match_format => 'Syöte ei vastaa vaadittua muotoa';
+  String get input_does_not_match_format => 'SyÃ¶te ei vastaa vaadittua muotoa';
 
   @override
   String get plugins => 'Laajennukset';
 
   @override
   String get paste_plugin_download_url =>
-      'Liitä lataus-URL-osoite tai GitHub/Codeberg-arkiston URL-osoite tai suora linkki .smplug-tiedostoon';
+      'LiitÃ¤ lataus-URL-osoite tai GitHub/Codeberg-arkiston URL-osoite tai suora linkki .smplug-tiedostoon';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'Lataa ja asenna lisäosa URL-osoitteesta';
+      'Lataa ja asenna lisÃ¤osa URL-osoitteesta';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'Lisäosan lisääminen epäonnistui: $error';
+    return 'LisÃ¤osan lisÃ¤Ã¤minen epÃ¤onnistui: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'Lataa lisäosa tiedostosta';
+  String get upload_plugin_from_file => 'Lataa lisÃ¤osa tiedostosta';
 
   @override
   String get installed => 'Asennettu';
 
   @override
-  String get available_plugins => 'Saatavilla olevat lisäosat';
+  String get available_plugins => 'Saatavilla olevat lisÃ¤osat';
 
   @override
   String get configure_plugins =>
-      'Määritä omat metatietojen tarjoaja- ja äänilähdelaajennukset';
+      'MÃ¤Ã¤ritÃ¤ omat metatietojen tarjoaja- ja Ã¤Ã¤nilÃ¤hdelaajennukset';
 
   @override
-  String get source => 'Lähde: ';
+  String get source => 'LÃ¤hde: ';
 
   @override
   String get uncompressed => 'Pakkaamaton';
 
   @override
   String get dab_music_source_description =>
-      'Audiofiileille. Tarjoaa korkealaatuisia/häviöttömiä äänivirtoja. Tarkka ISRC-pohjainen kappaleiden tunnistus.';
+      'Audiofiileille. Tarjoaa korkealaatuisia/hÃ¤viÃ¶ttÃ¶miÃ¤ Ã¤Ã¤nivirtoja. Tarkka ISRC-pohjainen kappaleiden tunnistus.';
 
   @override
-  String get summary_top_track => 'Paras kappale\ntällä kaudella';
+  String get summary_top_track => 'Paras kappale\ntÃ¤llÃ¤ kaudella';
 
   @override
   String get local => 'Paikallinen';
@@ -1642,4 +1645,21 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

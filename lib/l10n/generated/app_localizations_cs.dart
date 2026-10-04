@@ -12,7 +12,7 @@ class AppLocalizationsCs extends AppLocalizations {
   String get guest => 'Host';
 
   @override
-  String get browse => 'Procházet';
+  String get browse => 'ProchÃ¡zet';
 
   @override
   String get search => 'Hledat';
@@ -24,38 +24,38 @@ class AppLocalizationsCs extends AppLocalizations {
   String get lyrics => 'Texty';
 
   @override
-  String get settings => 'Nastavení';
+  String get settings => 'NastavenÃ­';
 
   @override
   String get settings_subtitle =>
-      'Přizpůsobte si Soulful Bhakti podle svých představ';
+      'PÅ™izpÅ¯sobte si Soulful Bhakti podle svÃ½ch pÅ™edstav';
 
   @override
-  String get genre_categories_filter => 'Filtrovat kategorie nebo žánry...';
+  String get genre_categories_filter => 'Filtrovat kategorie nebo Å¾Ã¡nry...';
 
   @override
-  String get genre => 'Žánr';
+  String get genre => 'Å½Ã¡nr';
 
   @override
-  String get personalized => 'Personalizované';
+  String get personalized => 'PersonalizovanÃ©';
 
   @override
-  String get featured => 'Doporučené';
+  String get featured => 'DoporuÄenÃ©';
 
   @override
-  String get new_releases => 'Nově vydané';
+  String get new_releases => 'NovÄ› vydanÃ©';
 
   @override
   String get songs => 'Skladby';
 
   @override
-  String get newest_arrivals => 'Nejnovější přírůstky';
+  String get newest_arrivals => 'NejnovÄ›jÅ¡Ã­ pÅ™Ã­rÅ¯stky';
 
   @override
-  String get top_trending => 'Nejvíce trendující';
+  String get top_trending => 'NejvÃ­ce trendujÃ­cÃ­';
 
   @override
-  String get see_more => 'Zobrazit více';
+  String get see_more => 'Zobrazit vÃ­ce';
 
   @override
   String playing_track(Object track) {
@@ -64,17 +64,17 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Toto vymaže aktuální frontu. $track_length skladeb bude odstraněno\nChcete pokračovat?';
+    return 'Toto vymaÅ¾e aktuÃ¡lnÃ­ frontu. $track_length skladeb bude odstranÄ›no\nChcete pokraÄovat?';
   }
 
   @override
-  String get load_more => 'Načíst více';
+  String get load_more => 'NaÄÃ­st vÃ­ce';
 
   @override
   String get playlists => 'Playlisty';
 
   @override
-  String get artists => 'Umělci';
+  String get artists => 'UmÄ›lci';
 
   @override
   String get albums => 'Alba';
@@ -83,120 +83,120 @@ class AppLocalizationsCs extends AppLocalizations {
   String get tracks => 'Skladby';
 
   @override
-  String get downloads => 'Stahování';
+  String get downloads => 'StahovÃ¡nÃ­';
 
   @override
   String get filter_playlists => 'Filtrovat playlisty...';
 
   @override
-  String get liked_tracks => 'Oblíbené skladby';
+  String get liked_tracks => 'OblÃ­benÃ© skladby';
 
   @override
-  String get liked_tracks_description => 'Všechny vaše oblíbené skladby';
+  String get liked_tracks_description => 'VÅ¡echny vaÅ¡e oblÃ­benÃ© skladby';
 
   @override
   String get playlist => 'Seznam skladeb';
 
   @override
-  String get create_a_playlist => 'Vytvořit playlist';
+  String get create_a_playlist => 'VytvoÅ™it playlist';
 
   @override
-  String get new_playlist => 'Nový playlist';
+  String get new_playlist => 'NovÃ½ playlist';
 
   @override
-  String get playlist_name => 'Název playlistu';
+  String get playlist_name => 'NÃ¡zev playlistu';
 
   @override
   String get no_playlists_yet =>
-      'Zatím žádné playlisty. Vytvořte jeden z vybraných skladeb.';
+      'ZatÃ­m Å¾Ã¡dnÃ© playlisty. VytvoÅ™te jeden z vybranÃ½ch skladeb.';
 
   @override
   String get update_playlist => 'Aktualizovat playlist';
 
   @override
-  String get create => 'Vytvořit';
+  String get create => 'VytvoÅ™it';
 
   @override
-  String get cancel => 'Zrušit';
+  String get cancel => 'ZruÅ¡it';
 
   @override
   String get update => 'Aktualizovat';
 
   @override
-  String get name_of_playlist => 'Název playlistu';
+  String get name_of_playlist => 'NÃ¡zev playlistu';
 
   @override
   String get description => 'Popis';
 
   @override
-  String get public => 'Veřejné';
+  String get public => 'VeÅ™ejnÃ©';
 
   @override
-  String get collaborative => 'Společný';
+  String get collaborative => 'SpoleÄnÃ½';
 
   @override
-  String get search_local_tracks => 'Hledat místní skladby...';
+  String get search_local_tracks => 'Hledat mÃ­stnÃ­ skladby...';
 
   @override
-  String get play => 'Přehrát';
+  String get play => 'PÅ™ehrÃ¡t';
 
   @override
   String get delete => 'Smazat';
 
   @override
-  String get none => 'Žádné';
+  String get none => 'Å½Ã¡dnÃ©';
 
   @override
-  String get sort_a_z => 'Seřadit od A-Z';
+  String get sort_a_z => 'SeÅ™adit od A-Z';
 
   @override
-  String get sort_z_a => 'Seřadit od Z-A';
+  String get sort_z_a => 'SeÅ™adit od Z-A';
 
   @override
-  String get sort_artist => 'Seřadit podle umělce';
+  String get sort_artist => 'SeÅ™adit podle umÄ›lce';
 
   @override
-  String get sort_album => 'Seřadit podle alba';
+  String get sort_album => 'SeÅ™adit podle alba';
 
   @override
-  String get sort_duration => 'Seřadit podle délky';
+  String get sort_duration => 'SeÅ™adit podle dÃ©lky';
 
   @override
-  String get sort_tracks => 'Seřadit skladby';
+  String get sort_tracks => 'SeÅ™adit skladby';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'Právě se stahuje ($tracks_length)';
+    return 'PrÃ¡vÄ› se stahuje ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'Zrušit vše';
+  String get cancel_all => 'ZruÅ¡it vÅ¡e';
 
   @override
-  String get filter_artist => 'Filtrovat umělce...';
+  String get filter_artist => 'Filtrovat umÄ›lce...';
 
   @override
   String followers(Object followers) {
-    return '$followers Sledující';
+    return '$followers SledujÃ­cÃ­';
   }
 
   @override
-  String get add_artist_to_blacklist => 'Přidat umělce na černou listinu';
+  String get add_artist_to_blacklist => 'PÅ™idat umÄ›lce na Äernou listinu';
 
   @override
   String get top_tracks => 'Top skladby';
 
   @override
-  String get fans_also_like => 'Fanoušci mají také rádi';
+  String get fans_also_like => 'FanouÅ¡ci majÃ­ takÃ© rÃ¡di';
 
   @override
-  String get loading => 'Načítání...';
+  String get loading => 'NaÄÃ­tÃ¡nÃ­...';
 
   @override
-  String get artist => 'Umělec';
+  String get artist => 'UmÄ›lec';
 
   @override
-  String get blacklisted => 'Na černé listině';
+  String get blacklisted => 'Na ÄernÃ© listinÄ›';
 
   @override
   String get following => 'Sleduje';
@@ -205,30 +205,30 @@ class AppLocalizationsCs extends AppLocalizations {
   String get follow => 'Sledovat';
 
   @override
-  String get artist_url_copied => 'URL umělce zkopírována do schránky';
+  String get artist_url_copied => 'URL umÄ›lce zkopÃ­rovÃ¡na do schrÃ¡nky';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'Přidáno $tracks skladeb do fronty';
+    return 'PÅ™idÃ¡no $tracks skladeb do fronty';
   }
 
   @override
   String get filter_albums => 'Filtrovat alba...';
 
   @override
-  String get synced => 'Synchronizováno';
+  String get synced => 'SynchronizovÃ¡no';
 
   @override
-  String get plain => 'Jednoduché';
+  String get plain => 'JednoduchÃ©';
 
   @override
-  String get shuffle => 'Zamíchat';
+  String get shuffle => 'ZamÃ­chat';
 
   @override
   String get search_tracks => 'Hledat skladby...';
 
   @override
-  String get released => 'Vydáno';
+  String get released => 'VydÃ¡no';
 
   @override
   String error(Object error) {
@@ -236,27 +236,27 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get title => 'Název';
+  String get title => 'NÃ¡zev';
 
   @override
-  String get time => 'Čas';
+  String get time => 'ÄŒas';
 
   @override
-  String get more_actions => 'Více akcí';
+  String get more_actions => 'VÃ­ce akcÃ­';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'Přidat ($count) do playlistu';
+    return 'PÅ™idat ($count) do playlistu';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'Přidat ($count) do fronty';
+    return 'PÅ™idat ($count) do fronty';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'Přehrát ($count) dalších';
+    return 'PÅ™ehrÃ¡t ($count) dalÅ¡Ã­ch';
   }
 
   @override
@@ -264,91 +264,91 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'Zkopírováno $data do schránky';
+    return 'ZkopÃ­rovÃ¡no $data do schrÃ¡nky';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'Přidat $track do následujících playlistů';
+    return 'PÅ™idat $track do nÃ¡sledujÃ­cÃ­ch playlistÅ¯';
   }
 
   @override
-  String get add => 'Přidat';
+  String get add => 'PÅ™idat';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'Přidána skladba $track do fronty';
+    return 'PÅ™idÃ¡na skladba $track do fronty';
   }
 
   @override
-  String get add_to_queue => 'Přidat do fronty';
+  String get add_to_queue => 'PÅ™idat do fronty';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track se přehraje jako další';
+    return '$track se pÅ™ehraje jako dalÅ¡Ã­';
   }
 
   @override
-  String get play_next => 'Přehrát další';
+  String get play_next => 'PÅ™ehrÃ¡t dalÅ¡Ã­';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'Odstraněna skladba $track z fronty';
+    return 'OdstranÄ›na skladba $track z fronty';
   }
 
   @override
   String get remove_from_queue => 'Odstranit z fronty';
 
   @override
-  String get remove_from_favorites => 'Odstranit z oblíbených';
+  String get remove_from_favorites => 'Odstranit z oblÃ­benÃ½ch';
 
   @override
-  String get save_as_favorite => 'Uložit jako oblíbené';
+  String get save_as_favorite => 'UloÅ¾it jako oblÃ­benÃ©';
 
   @override
-  String get add_to_playlist => 'Přidat do playlistu';
+  String get add_to_playlist => 'PÅ™idat do playlistu';
 
   @override
   String get remove_from_playlist => 'Odstranit z playlistu';
 
   @override
-  String get add_to_blacklist => 'Přidat na černou listinu';
+  String get add_to_blacklist => 'PÅ™idat na Äernou listinu';
 
   @override
-  String get remove_from_blacklist => 'Odstranit z černé listiny';
+  String get remove_from_blacklist => 'Odstranit z ÄernÃ© listiny';
 
   @override
-  String get share => 'Sdílet';
+  String get share => 'SdÃ­let';
 
   @override
-  String get mini_player => 'Mini přehrávač';
+  String get mini_player => 'Mini pÅ™ehrÃ¡vaÄ';
 
   @override
-  String get slide_to_seek => 'Táhněte pro posunutí vpřed nebo vzad';
+  String get slide_to_seek => 'TÃ¡hnÄ›te pro posunutÃ­ vpÅ™ed nebo vzad';
 
   @override
-  String get shuffle_playlist => 'Zamíchat playlist';
+  String get shuffle_playlist => 'ZamÃ­chat playlist';
 
   @override
-  String get unshuffle_playlist => 'Zrušit zamíchání playlistu';
+  String get unshuffle_playlist => 'ZruÅ¡it zamÃ­chÃ¡nÃ­ playlistu';
 
   @override
-  String get previous_track => 'Předchozí skladba';
+  String get previous_track => 'PÅ™edchozÃ­ skladba';
 
   @override
-  String get next_track => 'Další skladba';
+  String get next_track => 'DalÅ¡Ã­ skladba';
 
   @override
-  String get pause_playback => 'Pozastavit přehrávání';
+  String get pause_playback => 'Pozastavit pÅ™ehrÃ¡vÃ¡nÃ­';
 
   @override
-  String get resume_playback => 'Pokračovat v přehrávání';
+  String get resume_playback => 'PokraÄovat v pÅ™ehrÃ¡vÃ¡nÃ­';
 
   @override
   String get loop_track => 'Opakovat skladbu';
 
   @override
-  String get no_loop => 'Žádné opakování';
+  String get no_loop => 'Å½Ã¡dnÃ© opakovÃ¡nÃ­';
 
   @override
   String get repeat_playlist => 'Opakovat playlist';
@@ -357,42 +357,42 @@ class AppLocalizationsCs extends AppLocalizations {
   String get queue => 'Fronta';
 
   @override
-  String get alternative_track_sources => 'Alternativní zdroje skladeb';
+  String get alternative_track_sources => 'AlternativnÃ­ zdroje skladeb';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks skladeb ve frontě';
+    return '$tracks skladeb ve frontÄ›';
   }
 
   @override
-  String get clear_all => 'Vymazat vše';
+  String get clear_all => 'Vymazat vÅ¡e';
 
   @override
-  String get show_hide_ui_on_hover => 'Zobrazit/Skrýt UI při najetí';
+  String get show_hide_ui_on_hover => 'Zobrazit/SkrÃ½t UI pÅ™i najetÃ­';
 
   @override
-  String get always_on_top => 'Vždy nahoře';
+  String get always_on_top => 'VÅ¾dy nahoÅ™e';
 
   @override
-  String get exit_mini_player => 'Zavřít mini přehrávač';
+  String get exit_mini_player => 'ZavÅ™Ã­t mini pÅ™ehrÃ¡vaÄ';
 
   @override
-  String get local_library => 'Místní knihovna';
+  String get local_library => 'MÃ­stnÃ­ knihovna';
 
   @override
-  String get add_library_location => 'Přidat do knihovny';
+  String get add_library_location => 'PÅ™idat do knihovny';
 
   @override
   String get remove_library_location => 'Odebrat z knihovny';
 
   @override
-  String get account => 'Účet';
+  String get account => 'ÃšÄet';
 
   @override
-  String get logout => 'Odhlásit se';
+  String get logout => 'OdhlÃ¡sit se';
 
   @override
-  String get logout_of_this_account => 'Odhlásit se z tohoto účtu';
+  String get logout_of_this_account => 'OdhlÃ¡sit se z tohoto ÃºÄtu';
 
   @override
   String get language_region => 'Jazyk a region';
@@ -401,43 +401,43 @@ class AppLocalizationsCs extends AppLocalizations {
   String get language => 'Jazyk';
 
   @override
-  String get system_default => 'Systém';
+  String get system_default => 'SystÃ©m';
 
   @override
   String get market_place_region => 'Region';
 
   @override
-  String get recommendation_country => 'Země pro doporučení';
+  String get recommendation_country => 'ZemÄ› pro doporuÄenÃ­';
 
   @override
   String get appearance => 'Vzhled';
 
   @override
-  String get layout_mode => 'Režim rozložení';
+  String get layout_mode => 'ReÅ¾im rozloÅ¾enÃ­';
 
   @override
-  String get override_layout_settings => 'Přepsat režim rozložení';
+  String get override_layout_settings => 'PÅ™epsat reÅ¾im rozloÅ¾enÃ­';
 
   @override
-  String get adaptive => 'Adaptivní';
+  String get adaptive => 'AdaptivnÃ­';
 
   @override
-  String get compact => 'Kompaktní';
+  String get compact => 'KompaktnÃ­';
 
   @override
-  String get extended => 'Rozšířený';
+  String get extended => 'RozÅ¡Ã­Å™enÃ½';
 
   @override
-  String get theme => 'Téma';
+  String get theme => 'TÃ©ma';
 
   @override
-  String get dark => 'Tmavé';
+  String get dark => 'TmavÃ©';
 
   @override
-  String get light => 'Světlé';
+  String get light => 'SvÄ›tlÃ©';
 
   @override
-  String get system => 'Systém';
+  String get system => 'SystÃ©m';
 
   @override
   String get accent_color => 'Barva akcentu';
@@ -447,56 +447,57 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get sync_album_color_description =>
-      'Používá dominantní barvu obalu alba jako barvu akcentu';
+      'PouÅ¾Ã­vÃ¡ dominantnÃ­ barvu obalu alba jako barvu akcentu';
 
   @override
-  String get playback => 'Přehrávání';
+  String get playback => 'PÅ™ehrÃ¡vÃ¡nÃ­';
 
   @override
   String get audio_quality => 'Kvalita zvuku';
 
   @override
-  String get high => 'Vysoká';
+  String get high => 'VysokÃ¡';
 
   @override
-  String get low => 'Nízká';
+  String get low => 'NÃ­zkÃ¡';
 
   @override
-  String get pre_download_play => 'Předstáhnout a přehrát';
+  String get pre_download_play => 'PÅ™edstÃ¡hnout a pÅ™ehrÃ¡t';
 
   @override
   String get pre_download_play_description =>
-      'Místo streamování audia stáhnout skladbu a přehrát (doporučeno pro uživatele s rychlejším internetem)';
+      'MÃ­sto streamovÃ¡nÃ­ audia stÃ¡hnout skladbu a pÅ™ehrÃ¡t (doporuÄeno pro uÅ¾ivatele s rychlejÅ¡Ã­m internetem)';
 
   @override
-  String get skip_non_music => 'Přeskočit nehudební segmenty (SponsorBlock)';
+  String get skip_non_music => 'PÅ™eskoÄit nehudebnÃ­ segmenty (SponsorBlock)';
 
   @override
-  String get blacklist_description => 'Zakázané skladby a umělci';
+  String get blacklist_description => 'ZakÃ¡zanÃ© skladby a umÄ›lci';
 
   @override
-  String get wait_for_download_to_finish => 'Počkejte, až se dokončí stahování';
+  String get wait_for_download_to_finish =>
+      'PoÄkejte, aÅ¾ se dokonÄÃ­ stahovÃ¡nÃ­';
 
   @override
   String get desktop => 'Desktop';
 
   @override
-  String get close_behavior => 'Chování při zavření';
+  String get close_behavior => 'ChovÃ¡nÃ­ pÅ™i zavÅ™enÃ­';
 
   @override
-  String get close => 'Zavřít';
+  String get close => 'ZavÅ™Ã­t';
 
   @override
-  String get minimize_to_tray => 'Minimalizovat do lišty';
+  String get minimize_to_tray => 'Minimalizovat do liÅ¡ty';
 
   @override
-  String get show_tray_icon => 'Zobrazit ikonu v systémové liště';
+  String get show_tray_icon => 'Zobrazit ikonu v systÃ©movÃ© liÅ¡tÄ›';
 
   @override
   String get about => 'O aplikaci';
 
   @override
-  String get u_love_spotube => 'Víme, že milujete Soulful Bhakti';
+  String get u_love_spotube => 'VÃ­me, Å¾e milujete Soulful Bhakti';
 
   @override
   String get check_for_updates => 'Zkontrolovat aktualizace';
@@ -505,39 +506,39 @@ class AppLocalizationsCs extends AppLocalizations {
   String get about_spotube => 'O Soulful Bhakti';
 
   @override
-  String get blacklist => 'Černá listina';
+  String get blacklist => 'ÄŒernÃ¡ listina';
 
   @override
   String get please_sponsor => 'Sponzorovat/darovat';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti, rychlý, multiplatformní, bezplatný Spotify klient';
+      'Soulful Bhakti, rychlÃ½, multiplatformnÃ­, bezplatnÃ½ Spotify klient';
 
   @override
   String get version => 'Verze';
 
   @override
-  String get build_number => 'Číslo sestavení';
+  String get build_number => 'ÄŒÃ­slo sestavenÃ­';
 
   @override
   String get founder => 'Zakladatel';
 
   @override
-  String get repository => 'Repozitář';
+  String get repository => 'RepozitÃ¡Å™';
 
   @override
-  String get bug_issues => 'Chyby+Problémy';
+  String get bug_issues => 'Chyby+ProblÃ©my';
 
   @override
-  String get made_with => 'Vytvořeno s ❤️ v Bangladéši🇧🇩';
+  String get made_with => 'VytvoÅ™eno s â¤ï¸ v BangladÃ©Å¡iðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -545,13 +546,13 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'Nebojte, žádné z vašich údajů nebudou shromažďovány ani s nikým sdíleny';
+      'Nebojte, Å¾Ã¡dnÃ© z vaÅ¡ich ÃºdajÅ¯ nebudou shromaÅ¾ÄovÃ¡ny ani s nikÃ½m sdÃ­leny';
 
   @override
-  String get know_how_to_login => 'Nevíte, jak na to?';
+  String get know_how_to_login => 'NevÃ­te, jak na to?';
 
   @override
-  String get follow_step_by_step_guide => 'Postupujte podle návodu';
+  String get follow_step_by_step_guide => 'Postupujte podle nÃ¡vodu';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -559,19 +560,19 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => 'Vyplňte prosím všechna pole';
+  String get fill_in_all_fields => 'VyplÅˆte prosÃ­m vÅ¡echna pole';
 
   @override
   String get submit => 'Odeslat';
 
   @override
-  String get exit => 'Ukončit';
+  String get exit => 'UkonÄit';
 
   @override
-  String get previous => 'Předchozí';
+  String get previous => 'PÅ™edchozÃ­';
 
   @override
-  String get next => 'Další';
+  String get next => 'DalÅ¡Ã­';
 
   @override
   String get done => 'Hotovo';
@@ -580,78 +581,78 @@ class AppLocalizationsCs extends AppLocalizations {
   String get step_1 => 'Krok 1';
 
   @override
-  String get first_go_to => 'Nejprve jděte na';
+  String get first_go_to => 'Nejprve jdÄ›te na';
 
   @override
-  String get something_went_wrong => 'Něco se pokazilo';
+  String get something_went_wrong => 'NÄ›co se pokazilo';
 
   @override
   String get piped_instance => 'Instance serveru Piped';
 
   @override
   String get piped_description =>
-      'Instance serveru Piped, kterou použít pro hledání skladeb';
+      'Instance serveru Piped, kterou pouÅ¾Ã­t pro hledÃ¡nÃ­ skladeb';
 
   @override
   String get piped_warning =>
-      'Některé z nich nemusí dobře fungovat. Používejte na vlastní riziko';
+      'NÄ›kterÃ© z nich nemusÃ­ dobÅ™e fungovat. PouÅ¾Ã­vejte na vlastnÃ­ riziko';
 
   @override
   String get invidious_instance => 'Instance serveru Invidious';
 
   @override
   String get invidious_description =>
-      'Instance serveru Invidious pro párování stop';
+      'Instance serveru Invidious pro pÃ¡rovÃ¡nÃ­ stop';
 
   @override
   String get invidious_warning =>
-      'Některé instance nemusí fungovat správně. Používejte na vlastní riziko';
+      'NÄ›kterÃ© instance nemusÃ­ fungovat sprÃ¡vnÄ›. PouÅ¾Ã­vejte na vlastnÃ­ riziko';
 
   @override
   String get generate => 'Generovat';
 
   @override
   String track_exists(Object track) {
-    return 'Skladba $track již existuje';
+    return 'Skladba $track jiÅ¾ existuje';
   }
 
   @override
   String get replace => 'Nahradit';
 
   @override
-  String get skip => 'Přeskočit';
+  String get skip => 'PÅ™eskoÄit';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'Vyberte až $count $type';
+    return 'Vyberte aÅ¾ $count $type';
   }
 
   @override
-  String get select_genres => 'Vyberte žánry';
+  String get select_genres => 'Vyberte Å¾Ã¡nry';
 
   @override
-  String get add_genres => 'Přidat žánry';
+  String get add_genres => 'PÅ™idat Å¾Ã¡nry';
 
   @override
-  String get country => 'Země';
+  String get country => 'ZemÄ›';
 
   @override
-  String get number_of_tracks_generate => 'Počet skladeb k vygenerování';
+  String get number_of_tracks_generate => 'PoÄet skladeb k vygenerovÃ¡nÃ­';
 
   @override
-  String get acousticness => 'Akustičnost';
+  String get acousticness => 'AkustiÄnost';
 
   @override
-  String get danceability => 'Tanečnost';
+  String get danceability => 'TaneÄnost';
 
   @override
   String get energy => 'Energie';
 
   @override
-  String get instrumentalness => 'Instrumentálnost';
+  String get instrumentalness => 'InstrumentÃ¡lnost';
 
   @override
-  String get liveness => 'Živost';
+  String get liveness => 'Å½ivost';
 
   @override
   String get loudness => 'Hlasitost';
@@ -666,28 +667,28 @@ class AppLocalizationsCs extends AppLocalizations {
   String get popularity => 'Popularita';
 
   @override
-  String get key => 'Klíč';
+  String get key => 'KlÃ­Ä';
 
   @override
-  String get duration => 'Délka (s)';
+  String get duration => 'DÃ©lka (s)';
 
   @override
   String get tempo => 'Tempo (BPM)';
 
   @override
-  String get mode => 'Režim';
+  String get mode => 'ReÅ¾im';
 
   @override
-  String get time_signature => 'Udání taktu';
+  String get time_signature => 'UdÃ¡nÃ­ taktu';
 
   @override
-  String get short => 'Krátký';
+  String get short => 'KrÃ¡tkÃ½';
 
   @override
-  String get medium => 'Střední';
+  String get medium => 'StÅ™ednÃ­';
 
   @override
-  String get long => 'Dlouhý';
+  String get long => 'DlouhÃ½';
 
   @override
   String get min => 'Min';
@@ -696,56 +697,57 @@ class AppLocalizationsCs extends AppLocalizations {
   String get max => 'Max';
 
   @override
-  String get target => 'Cíl';
+  String get target => 'CÃ­l';
 
   @override
-  String get moderate => 'Mírný';
+  String get moderate => 'MÃ­rnÃ½';
 
   @override
-  String get deselect_all => 'Zrušit výběr';
+  String get deselect_all => 'ZruÅ¡it vÃ½bÄ›r';
 
   @override
-  String get select_all => 'Vybrat vše';
+  String get select_all => 'Vybrat vÅ¡e';
 
   @override
   String get are_you_sure => 'Jste si jisti?';
 
   @override
-  String get generating_playlist => 'Generování vašeho vlastního playlistu...';
+  String get generating_playlist =>
+      'GenerovÃ¡nÃ­ vaÅ¡eho vlastnÃ­ho playlistu...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'Vybráno $count skladeb';
+    return 'VybrÃ¡no $count skladeb';
   }
 
   @override
   String get download_warning =>
-      'Pokud stáhnete všechny skladby najednou, pirátíte tím hudbu a škodíte kreativní společnosti hudby. Doufám, že jste si toho vědomi. Vždy se snažte respektovat a podporovat tvrdou práci umělců';
+      'Pokud stÃ¡hnete vÅ¡echny skladby najednou, pirÃ¡tÃ­te tÃ­m hudbu a Å¡kodÃ­te kreativnÃ­ spoleÄnosti hudby. DoufÃ¡m, Å¾e jste si toho vÄ›domi. VÅ¾dy se snaÅ¾te respektovat a podporovat tvrdou prÃ¡ci umÄ›lcÅ¯';
 
   @override
   String get download_ip_ban_warning =>
-      'Mimochodem, vaše IP může být na YouTube zablokována kvůli nadměrným požadavkům na stahování. Blokování IP znamená, že nemůžete používat YouTube (i když jste přihlášeni) alespoň 2-3 měsíce ze zařízení s touto IP. A Soulful Bhakti nenese žádnou odpovědnost, pokud se to někdy stane';
+      'Mimochodem, vaÅ¡e IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na kvÅ¯li nadmÄ›rnÃ½m poÅ¾adavkÅ¯m na stahovÃ¡nÃ­. BlokovÃ¡nÃ­ IP znamenÃ¡, Å¾e nemÅ¯Å¾ete pouÅ¾Ã­vat YouTube (i kdyÅ¾ jste pÅ™ihlÃ¡Å¡eni) alespoÅˆ 2-3 mÄ›sÃ­ce ze zaÅ™Ã­zenÃ­ s touto IP. A Soulful Bhakti nenese Å¾Ã¡dnou odpovÄ›dnost, pokud se to nÄ›kdy stane';
 
   @override
   String get by_clicking_accept_terms =>
-      'Kliknutím na \'přijmout\' souhlasíte s následujícími podmínkami:';
+      'KliknutÃ­m na \'pÅ™ijmout\' souhlasÃ­te s nÃ¡sledujÃ­cÃ­mi podmÃ­nkami:';
 
   @override
-  String get download_agreement_1 => 'Vím, že pirátím hudbu. Jsem špatný';
+  String get download_agreement_1 => 'VÃ­m, Å¾e pirÃ¡tÃ­m hudbu. Jsem Å¡patnÃ½';
 
   @override
   String get download_agreement_2 =>
-      'Budu podporovat umělce, kdekoliv to bude možné, a dělám to jen proto, že nemám peníze na koupi jejich umění';
+      'Budu podporovat umÄ›lce, kdekoliv to bude moÅ¾nÃ©, a dÄ›lÃ¡m to jen proto, Å¾e nemÃ¡m penÃ­ze na koupi jejich umÄ›nÃ­';
 
   @override
   String get download_agreement_3 =>
-      'Jsem si naprosto vědom toho, že moje IP může být na YouTube zablokována a nenesu žádnou odpovědnost za nehody způsobené mým současným jednáním';
+      'Jsem si naprosto vÄ›dom toho, Å¾e moje IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na a nenesu Å¾Ã¡dnou odpovÄ›dnost za nehody zpÅ¯sobenÃ© mÃ½m souÄasnÃ½m jednÃ¡nÃ­m';
 
   @override
-  String get decline => 'Odmítnout';
+  String get decline => 'OdmÃ­tnout';
 
   @override
-  String get accept => 'Přijmout';
+  String get accept => 'PÅ™ijmout';
 
   @override
   String get details => 'Podrobnosti';
@@ -754,16 +756,16 @@ class AppLocalizationsCs extends AppLocalizations {
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'Kanál';
+  String get channel => 'KanÃ¡l';
 
   @override
-  String get likes => 'Líbí se';
+  String get likes => 'LÃ­bÃ­ se';
 
   @override
-  String get dislikes => 'Nelíbí se';
+  String get dislikes => 'NelÃ­bÃ­ se';
 
   @override
-  String get views => 'Zobrazení';
+  String get views => 'ZobrazenÃ­';
 
   @override
   String get streamUrl => 'URL streamu';
@@ -772,13 +774,13 @@ class AppLocalizationsCs extends AppLocalizations {
   String get stop => 'Zastavit';
 
   @override
-  String get sort_newest => 'Seřadit od nejnovějších';
+  String get sort_newest => 'SeÅ™adit od nejnovÄ›jÅ¡Ã­ch';
 
   @override
-  String get sort_oldest => 'Seřadit od nejstarších';
+  String get sort_oldest => 'SeÅ™adit od nejstarÅ¡Ã­ch';
 
   @override
-  String get sleep_timer => 'Časovač spánku';
+  String get sleep_timer => 'ÄŒasovaÄ spÃ¡nku';
 
   @override
   String mins(Object minutes) {
@@ -796,19 +798,19 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get custom_hours => 'Vlastní hodiny';
+  String get custom_hours => 'VlastnÃ­ hodiny';
 
   @override
   String get logs => 'Protokoly';
 
   @override
-  String get developers => 'Vývojáři';
+  String get developers => 'VÃ½vojÃ¡Å™i';
 
   @override
-  String get not_logged_in => 'Nejste přihlášeni';
+  String get not_logged_in => 'Nejste pÅ™ihlÃ¡Å¡eni';
 
   @override
-  String get search_mode => 'Režim hledání';
+  String get search_mode => 'ReÅ¾im hledÃ¡nÃ­';
 
   @override
   String get audio_source => 'Zdroj zvuku';
@@ -817,196 +819,199 @@ class AppLocalizationsCs extends AppLocalizations {
   String get ok => 'Ok';
 
   @override
-  String get failed_to_encrypt => 'Šifrování selhalo';
+  String get failed_to_encrypt => 'Å ifrovÃ¡nÃ­ selhalo';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti používá šifrování k bezpečnému ukládání vašich dat. Ale selhalo. Takže se vrátí k nezabezpečenému úložišti\nPokud používáte linux, ujistěte se, že máte nainstalovanou jakoukoli službu k ukládání bezpečnostních pověření (gnome-keyring, kde-wallet, keepassxc atd.)';
+      'Soulful Bhakti pouÅ¾Ã­vÃ¡ Å¡ifrovÃ¡nÃ­ k bezpeÄnÃ©mu uklÃ¡dÃ¡nÃ­ vaÅ¡ich dat. Ale selhalo. TakÅ¾e se vrÃ¡tÃ­ k nezabezpeÄenÃ©mu ÃºloÅ¾iÅ¡ti\nPokud pouÅ¾Ã­vÃ¡te linux, ujistÄ›te se, Å¾e mÃ¡te nainstalovanou jakoukoli sluÅ¾bu k uklÃ¡dÃ¡nÃ­ bezpeÄnostnÃ­ch povÄ›Å™enÃ­ (gnome-keyring, kde-wallet, keepassxc atd.)';
 
   @override
-  String get querying_info => 'Získávání informací...';
+  String get querying_info => 'ZÃ­skÃ¡vÃ¡nÃ­ informacÃ­...';
 
   @override
   String get piped_api_down => 'Piped API je mimo provoz';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Instance Piped $pipedInstance je momentálně mimo provoz\n\nBuď změňte instanci nebo změňte \'Typ API\' na oficiální YouTube API\n\nPo změně se ujistěte, že aplikaci restartujete';
+    return 'Instance Piped $pipedInstance je momentÃ¡lnÄ› mimo provoz\n\nBuÄ zmÄ›Åˆte instanci nebo zmÄ›Åˆte \'Typ API\' na oficiÃ¡lnÃ­ YouTube API\n\nPo zmÄ›nÄ› se ujistÄ›te, Å¾e aplikaci restartujete';
   }
 
   @override
-  String get you_are_offline => 'Momentálně jste offline';
+  String get you_are_offline => 'MomentÃ¡lnÄ› jste offline';
 
   @override
-  String get connection_restored => 'Vaše internetové připojení bylo obnoveno';
+  String get connection_restored =>
+      'VaÅ¡e internetovÃ© pÅ™ipojenÃ­ bylo obnoveno';
 
   @override
-  String get use_system_title_bar => 'Použít systémové záhlaví okna';
+  String get use_system_title_bar => 'PouÅ¾Ã­t systÃ©movÃ© zÃ¡hlavÃ­ okna';
 
   @override
-  String get crunching_results => 'Zpracovávání výsledků...';
+  String get crunching_results => 'ZpracovÃ¡vÃ¡nÃ­ vÃ½sledkÅ¯...';
 
   @override
-  String get search_to_get_results => 'Hledejte pro získání výsledků';
+  String get search_to_get_results => 'Hledejte pro zÃ­skÃ¡nÃ­ vÃ½sledkÅ¯';
 
   @override
-  String get use_amoled_mode => 'Úplně černé téma';
+  String get use_amoled_mode => 'ÃšplnÄ› ÄernÃ© tÃ©ma';
 
   @override
-  String get pitch_dark_theme => 'AMOLED režim';
+  String get pitch_dark_theme => 'AMOLED reÅ¾im';
 
   @override
   String get normalize_audio => 'Normalizovat audio';
 
   @override
-  String get change_cover => 'Změnit obal';
+  String get change_cover => 'ZmÄ›nit obal';
 
   @override
-  String get add_cover => 'Přidat obal';
+  String get add_cover => 'PÅ™idat obal';
 
   @override
-  String get restore_defaults => 'Obnovit výchozí';
+  String get restore_defaults => 'Obnovit vÃ½chozÃ­';
 
   @override
   String get restore_defaults_confirmation =>
-      'Tím se všechna vaše nastavení vrátí na výchozí hodnoty. Tuto akci nelze vrátit zpět.';
+      'TÃ­m se vÅ¡echna vaÅ¡e nastavenÃ­ vrÃ¡tÃ­ na vÃ½chozÃ­ hodnoty. Tuto akci nelze vrÃ¡tit zpÄ›t.';
 
   @override
-  String get streaming_music_format => 'Formát streamování hudby';
+  String get streaming_music_format => 'FormÃ¡t streamovÃ¡nÃ­ hudby';
 
   @override
-  String get streaming_music_quality => 'Kvalita streamování hudby';
+  String get streaming_music_quality => 'Kvalita streamovÃ¡nÃ­ hudby';
 
   @override
-  String get connect => 'Připojit';
+  String get connect => 'PÅ™ipojit';
 
   @override
   String get disconnect => 'Odpojit';
 
   @override
-  String get username => 'Uživatelské jméno';
+  String get username => 'UÅ¾ivatelskÃ© jmÃ©no';
 
   @override
   String get password => 'Heslo';
 
   @override
-  String get login => 'Přihlásit se';
+  String get login => 'PÅ™ihlÃ¡sit se';
 
   @override
-  String get sign_in => 'Přihlásit se';
+  String get sign_in => 'PÅ™ihlÃ¡sit se';
 
   @override
   String get sign_up => 'Zaregistrovat se';
 
   @override
-  String get sign_out => 'Odhlásit se';
+  String get sign_out => 'OdhlÃ¡sit se';
 
   @override
-  String get verify => 'Ověřit';
+  String get verify => 'OvÄ›Å™it';
 
   @override
-  String get create_account => 'Vytvořte si účet';
+  String get create_account => 'VytvoÅ™te si ÃºÄet';
 
   @override
-  String get already_have_account => 'Už máte účet? Přihlaste se';
+  String get already_have_account => 'UÅ¾ mÃ¡te ÃºÄet? PÅ™ihlaste se';
 
   @override
-  String get dont_have_account => 'Nemáte účet? Zaregistrujte se';
+  String get dont_have_account => 'NemÃ¡te ÃºÄet? Zaregistrujte se';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Přihlášen jako $userId';
+    return 'PÅ™ihlÃ¡Å¡en jako $userId';
   }
 
   @override
-  String get verification_code => 'Ověřovací kód';
+  String get verification_code => 'OvÄ›Å™ovacÃ­ kÃ³d';
 
   @override
-  String get verification_code_hint => 'Zadejte kód zaslaný na váš e-mail';
+  String get verification_code_hint => 'Zadejte kÃ³d zaslanÃ½ na vÃ¡Å¡ e-mail';
 
   @override
-  String get verify_email_code => 'Poslali jsme ověřovací kód na váš e-mail';
+  String get verify_email_code =>
+      'Poslali jsme ovÄ›Å™ovacÃ­ kÃ³d na vÃ¡Å¡ e-mail';
 
   @override
-  String get go_to_album => 'Přejít na album';
+  String get go_to_album => 'PÅ™ejÃ­t na album';
 
   @override
   String get discord_rich_presence => 'Discord Rich Presence';
 
   @override
-  String get browse_all => 'Procházet vše';
+  String get browse_all => 'ProchÃ¡zet vÅ¡e';
 
   @override
-  String get genres => 'Žánry';
+  String get genres => 'Å½Ã¡nry';
 
   @override
-  String get explore_genres => 'Prozkoumat žánry';
+  String get explore_genres => 'Prozkoumat Å¾Ã¡nry';
 
   @override
-  String get friends => 'Přátelé';
+  String get friends => 'PÅ™Ã¡telÃ©';
 
   @override
   String get no_lyrics_available =>
-      'Omlouváme se, není možné najít texty pro tuto skladbu';
+      'OmlouvÃ¡me se, nenÃ­ moÅ¾nÃ© najÃ­t texty pro tuto skladbu';
 
   @override
-  String get start_a_radio => 'Vytvořit rádio';
+  String get start_a_radio => 'VytvoÅ™it rÃ¡dio';
 
   @override
-  String get how_to_start_radio => 'Jak chcete vytvořit rádio?';
+  String get how_to_start_radio => 'Jak chcete vytvoÅ™it rÃ¡dio?';
 
   @override
   String get replace_queue_question =>
-      'Chcete nahradit aktuální frontu nebo k ní přidat?';
+      'Chcete nahradit aktuÃ¡lnÃ­ frontu nebo k nÃ­ pÅ™idat?';
 
   @override
-  String get endless_playback => 'Nekonečné přehrávání';
+  String get endless_playback => 'NekoneÄnÃ© pÅ™ehrÃ¡vÃ¡nÃ­';
 
   @override
   String get delete_playlist => 'Smazat playlist';
 
   @override
   String get delete_playlist_confirmation =>
-      'Jste si jisti, že chcete smazat tento playlist?';
+      'Jste si jisti, Å¾e chcete smazat tento playlist?';
 
   @override
-  String get local_tracks => 'Místní skladby';
+  String get local_tracks => 'MÃ­stnÃ­ skladby';
 
   @override
-  String get local_tab => 'Místní';
+  String get local_tab => 'MÃ­stnÃ­';
 
   @override
   String get song_link => 'Odkaz na skladbu';
 
   @override
-  String get skip_this_nonsense => 'Přeskočit tenhle nesmysl';
+  String get skip_this_nonsense => 'PÅ™eskoÄit tenhle nesmysl';
 
   @override
-  String get freedom_of_music => '“Svobodná hudba”';
+  String get freedom_of_music => 'â€œSvobodnÃ¡ hudbaâ€';
 
   @override
-  String get freedom_of_music_palm => '“Svobodná hudba ve vaší dlani”';
+  String get freedom_of_music_palm => 'â€œSvobodnÃ¡ hudba ve vaÅ¡Ã­ dlaniâ€';
 
   @override
-  String get get_started => 'Začít';
+  String get get_started => 'ZaÄÃ­t';
 
   @override
-  String get youtube_source_description => 'Doporučeno a funguje nejlépe.';
+  String get youtube_source_description => 'DoporuÄeno a funguje nejlÃ©pe.';
 
   @override
   String get piped_source_description =>
-      'Nechcete být sledováni? Stejné jako YouTube, ale respektuje soukromí.';
+      'Nechcete bÃ½t sledovÃ¡ni? StejnÃ© jako YouTube, ale respektuje soukromÃ­.';
 
   @override
-  String get jiosaavn_source_description => 'Nejlepší pro jihoasijský region.';
+  String get jiosaavn_source_description =>
+      'NejlepÅ¡Ã­ pro jihoasijskÃ½ region.';
 
   @override
   String get invidious_source_description =>
-      'Podobné Piped, ale s vyšší dostupností';
+      'PodobnÃ© Piped, ale s vyÅ¡Å¡Ã­ dostupnostÃ­';
 
   @override
   String highest_quality(Object quality) {
-    return 'Nejvyšší kvalita: $quality';
+    return 'NejvyÅ¡Å¡Ã­ kvalita: $quality';
   }
 
   @override
@@ -1014,190 +1019,190 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get endless_playback_description =>
-      'Automaticky přidávat nové skladby\nna konec fronty';
+      'Automaticky pÅ™idÃ¡vat novÃ© skladby\nna konec fronty';
 
   @override
-  String get choose_your_region => 'Vyberte svůj region';
+  String get choose_your_region => 'Vyberte svÅ¯j region';
 
   @override
   String get choose_your_region_description =>
-      'To pomůže Soulful Bhakti ukázat vám správný obsah\npro vaši lokalitu.';
+      'To pomÅ¯Å¾e Soulful Bhakti ukÃ¡zat vÃ¡m sprÃ¡vnÃ½ obsah\npro vaÅ¡i lokalitu.';
 
   @override
-  String get choose_your_language => 'Vyberte svůj jazyk';
+  String get choose_your_language => 'Vyberte svÅ¯j jazyk';
 
   @override
-  String get help_project_grow => 'Pomozte tomuto projektu růst';
+  String get help_project_grow => 'Pomozte tomuto projektu rÅ¯st';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti je open-source projekt. Můžete pomoci tomuto projektu růst tím, že přispějete do projektu, nahlásíte chyby nebo navrhnete nové funkce.';
+      'Soulful Bhakti je open-source projekt. MÅ¯Å¾ete pomoci tomuto projektu rÅ¯st tÃ­m, Å¾e pÅ™ispÄ›jete do projektu, nahlÃ¡sÃ­te chyby nebo navrhnete novÃ© funkce.';
 
   @override
-  String get contribute_on_github => 'Přispějte na GitHub';
+  String get contribute_on_github => 'PÅ™ispÄ›jte na GitHub';
 
   @override
   String get donate_on_open_collective => 'Darujte na Open Collective';
 
   @override
-  String get browse_anonymously => 'Procházet anonymně';
+  String get browse_anonymously => 'ProchÃ¡zet anonymnÄ›';
 
   @override
-  String get enable_connect => 'Povolit ovládání';
+  String get enable_connect => 'Povolit ovlÃ¡dÃ¡nÃ­';
 
   @override
   String get enable_connect_description =>
-      'Ovládejte Soulful Bhakti z jiného zařízení';
+      'OvlÃ¡dejte Soulful Bhakti z jinÃ©ho zaÅ™Ã­zenÃ­';
 
   @override
-  String get devices => 'Zařízení';
+  String get devices => 'ZaÅ™Ã­zenÃ­';
 
   @override
   String get select => 'Vybrat';
 
   @override
   String connect_client_alert(Object client) {
-    return 'Zařízení je ovládáno z $client';
+    return 'ZaÅ™Ã­zenÃ­ je ovlÃ¡dÃ¡no z $client';
   }
 
   @override
-  String get this_device => 'Toto zařízení';
+  String get this_device => 'Toto zaÅ™Ã­zenÃ­';
 
   @override
-  String get remote => 'Ovladač';
+  String get remote => 'OvladaÄ';
 
   @override
   String get stats => 'Statistiky';
 
   @override
   String and_n_more(Object count) {
-    return 'a dalších $count';
+    return 'a dalÅ¡Ã­ch $count';
   }
 
   @override
-  String get recently_played => 'Nedávno přehráno';
+  String get recently_played => 'NedÃ¡vno pÅ™ehrÃ¡no';
 
   @override
-  String get browse_more => 'Procházet více';
+  String get browse_more => 'ProchÃ¡zet vÃ­ce';
 
   @override
-  String get no_title => 'Bez názvu';
+  String get no_title => 'Bez nÃ¡zvu';
 
   @override
-  String get not_playing => 'Nepřehrává se';
+  String get not_playing => 'NepÅ™ehrÃ¡vÃ¡ se';
 
   @override
-  String get epic_failure => 'Epické selhání!';
+  String get epic_failure => 'EpickÃ© selhÃ¡nÃ­!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'Přidáno $tracks_length skladeb do fronty';
+    return 'PÅ™idÃ¡no $tracks_length skladeb do fronty';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti má aktualizaci';
+  String get spotube_has_an_update => 'Soulful Bhakti mÃ¡ aktualizaci';
 
   @override
-  String get download_now => 'Stáhnout nyní';
+  String get download_now => 'StÃ¡hnout nynÃ­';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Byla vydána noční verze Soulful Bhakti $nightlyBuildNum';
+    return 'Byla vydÃ¡na noÄnÃ­ verze Soulful Bhakti $nightlyBuildNum';
   }
 
   @override
   String release_version(Object version) {
-    return 'Byla vydána verze Soulful Bhakti v$version';
+    return 'Byla vydÃ¡na verze Soulful Bhakti v$version';
   }
 
   @override
-  String get read_the_latest => 'Přečtěte si nejnovější ';
+  String get read_the_latest => 'PÅ™eÄtÄ›te si nejnovÄ›jÅ¡Ã­ ';
 
   @override
-  String get release_notes => 'poznámky k vydání';
+  String get release_notes => 'poznÃ¡mky k vydÃ¡nÃ­';
 
   @override
-  String get pick_color_scheme => 'Vyberte barevné schéma';
+  String get pick_color_scheme => 'Vyberte barevnÃ© schÃ©ma';
 
   @override
-  String get save => 'Uložit';
+  String get save => 'UloÅ¾it';
 
   @override
-  String get choose_the_device => 'Vyberte zařízení:';
+  String get choose_the_device => 'Vyberte zaÅ™Ã­zenÃ­:';
 
   @override
   String get multiple_device_connected =>
-      'Je připojeno více zařízení.\nVyberte zařízení, na kterém chcete provést tuto akci';
+      'Je pÅ™ipojeno vÃ­ce zaÅ™Ã­zenÃ­.\nVyberte zaÅ™Ã­zenÃ­, na kterÃ©m chcete provÃ©st tuto akci';
 
   @override
   String get nothing_found => 'Nic nenalezeno';
 
   @override
-  String get the_box_is_empty => 'Krabice je prázdná';
+  String get the_box_is_empty => 'Krabice je prÃ¡zdnÃ¡';
 
   @override
-  String get top_artists => 'Nejlepší umělci';
+  String get top_artists => 'NejlepÅ¡Ã­ umÄ›lci';
 
   @override
-  String get top_albums => 'Nejlepší alba';
+  String get top_albums => 'NejlepÅ¡Ã­ alba';
 
   @override
-  String get this_week => 'Tento týden';
+  String get this_week => 'Tento tÃ½den';
 
   @override
-  String get this_month => 'Tento měsíc';
+  String get this_month => 'Tento mÄ›sÃ­c';
 
   @override
-  String get last_6_months => 'Posledních 6 měsíců';
+  String get last_6_months => 'PoslednÃ­ch 6 mÄ›sÃ­cÅ¯';
 
   @override
   String get this_year => 'Tento rok';
 
   @override
-  String get last_2_years => 'Poslední 2 roky';
+  String get last_2_years => 'PoslednÃ­ 2 roky';
 
   @override
-  String get all_time => 'Všechny časy';
+  String get all_time => 'VÅ¡echny Äasy';
 
   @override
   String powered_by_provider(Object providerName) {
-    return 'Pohání $providerName';
+    return 'PohÃ¡nÃ­ $providerName';
   }
 
   @override
   String get email => 'Email';
 
   @override
-  String get send_code => 'Odeslat kód';
+  String get send_code => 'Odeslat kÃ³d';
 
   @override
-  String get change_identifier => 'Použít jiný e-mail';
+  String get change_identifier => 'PouÅ¾Ã­t jinÃ½ e-mail';
 
   @override
-  String get sign_in_with_otp => 'Přihlásit se jednorázovým kódem';
+  String get sign_in_with_otp => 'PÅ™ihlÃ¡sit se jednorÃ¡zovÃ½m kÃ³dem';
 
   @override
-  String get enter_otp_sent => 'Zadejte kód, který jsme vám poslali';
+  String get enter_otp_sent => 'Zadejte kÃ³d, kterÃ½ jsme vÃ¡m poslali';
 
   @override
   String get verify_email_reminder =>
-      'Pro zabezpečení svého účtu ověřte prosím svou e-mailovou adresu';
+      'Pro zabezpeÄenÃ­ svÃ©ho ÃºÄtu ovÄ›Å™te prosÃ­m svou e-mailovou adresu';
 
   @override
-  String get verify_now => 'Ověřit nyní';
+  String get verify_now => 'OvÄ›Å™it nynÃ­';
 
   @override
   String get enter_email_to_verify =>
-      'Zadejte svou e-mailovou adresu pro obdržení ověřovacího kódu';
+      'Zadejte svou e-mailovou adresu pro obdrÅ¾enÃ­ ovÄ›Å™ovacÃ­ho kÃ³du';
 
   @override
-  String get profile_followers => 'Sledující';
+  String get profile_followers => 'SledujÃ­cÃ­';
 
   @override
   String get birthday => 'Narozeniny';
 
   @override
-  String get subscription => 'Předplatné';
+  String get subscription => 'PÅ™edplatnÃ©';
 
   @override
   String get not_born => 'Nenarozen';
@@ -1209,45 +1214,45 @@ class AppLocalizationsCs extends AppLocalizations {
   String get profile => 'Profil';
 
   @override
-  String get no_name => 'Bez jména';
+  String get no_name => 'Bez jmÃ©na';
 
   @override
   String get edit => 'Upravit';
 
   @override
-  String get user_profile => 'Uživatelský profil';
+  String get user_profile => 'UÅ¾ivatelskÃ½ profil';
 
   @override
   String count_plays(Object count) {
-    return '$count přehrání';
+    return '$count pÅ™ehrÃ¡nÃ­';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      'Poplatky za streamování (hypotetické)';
+      'Poplatky za streamovÃ¡nÃ­ (hypotetickÃ©)';
 
   @override
-  String get minutes_listened => 'Poslouchané minuty';
+  String get minutes_listened => 'PoslouchanÃ© minuty';
 
   @override
-  String get streamed_songs => 'Streamované skladby';
+  String get streamed_songs => 'StreamovanÃ© skladby';
 
   @override
   String count_streams(Object count) {
-    return '$count streamů';
+    return '$count streamÅ¯';
   }
 
   @override
-  String get owned_by_you => 'Vlastněno vámi';
+  String get owned_by_you => 'VlastnÄ›no vÃ¡mi';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return 'Zkopírováno $shareUrl do schránky';
+    return 'ZkopÃ­rovÃ¡no $shareUrl do schrÃ¡nky';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*Toto je vypočítáno na základě průměrného výplatu za přehrání 0,003–0,005 USD na online hudebních streamovacích platformách. Jedná se o hypotetický výpočet, který má uživateli ukázat, kolik by umělci dostali, pokud by jeho píseň poslouchal na jiné platformě.';
+      '*Toto je vypoÄÃ­tÃ¡no na zÃ¡kladÄ› prÅ¯mÄ›rnÃ©ho vÃ½platu za pÅ™ehrÃ¡nÃ­ 0,003â€“0,005 USD na online hudebnÃ­ch streamovacÃ­ch platformÃ¡ch. JednÃ¡ se o hypotetickÃ½ vÃ½poÄet, kterÃ½ mÃ¡ uÅ¾ivateli ukÃ¡zat, kolik by umÄ›lci dostali, pokud by jeho pÃ­seÅˆ poslouchal na jinÃ© platformÄ›.';
 
   @override
   String count_mins(Object minutes) {
@@ -1261,45 +1266,45 @@ class AppLocalizationsCs extends AppLocalizations {
   String get summary_listened_to_music => 'Poslouchal(a) hudbu';
 
   @override
-  String get summary_songs => 'písně';
+  String get summary_songs => 'pÃ­snÄ›';
 
   @override
-  String get summary_streamed_overall => 'Streamováno celkově';
+  String get summary_streamed_overall => 'StreamovÃ¡no celkovÄ›';
 
   @override
-  String get summary_owed_to_artists => 'Dluženo umělcům\nTento měsíc';
+  String get summary_owed_to_artists => 'DluÅ¾eno umÄ›lcÅ¯m\nTento mÄ›sÃ­c';
 
   @override
-  String get summary_top_artist => 'Nejlepší umělec\ntoto období';
+  String get summary_top_artist => 'NejlepÅ¡Ã­ umÄ›lec\ntoto obdobÃ­';
 
   @override
-  String get summary_artists => 'umělců';
+  String get summary_artists => 'umÄ›lcÅ¯';
 
   @override
-  String get summary_music_reached_you => 'Hudba vás oslovila';
+  String get summary_music_reached_you => 'Hudba vÃ¡s oslovila';
 
   @override
-  String get summary_full_albums => 'plná alba';
+  String get summary_full_albums => 'plnÃ¡ alba';
 
   @override
-  String get summary_got_your_love => 'Získal vaši lásku';
+  String get summary_got_your_love => 'ZÃ­skal vaÅ¡i lÃ¡sku';
 
   @override
   String get summary_playlists => 'playlisty';
 
   @override
-  String get summary_were_on_repeat => 'Byly na opakování';
+  String get summary_were_on_repeat => 'Byly na opakovÃ¡nÃ­';
 
   @override
-  String get summary_listening_share => 'Podíl poslechu';
+  String get summary_listening_share => 'PodÃ­l poslechu';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Rozložení nejposlouchanějších $tracks_length skladeb';
+    return 'RozloÅ¾enÃ­ nejposlouchanÄ›jÅ¡Ã­ch $tracks_length skladeb';
   }
 
   @override
-  String get summary_plays => 'přehrání';
+  String get summary_plays => 'pÅ™ehrÃ¡nÃ­';
 
   @override
   String get insights => 'Insights';
@@ -1329,35 +1334,35 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get webview_not_found_description =>
-      'Na vašem zařízení není nainstalováno žádné runtime prostředí Webview.\nPokud je nainstalováno, ujistěte se, že je v environment PATH\n\nPo instalaci restartujte aplikaci';
+      'Na vaÅ¡em zaÅ™Ã­zenÃ­ nenÃ­ nainstalovÃ¡no Å¾Ã¡dnÃ© runtime prostÅ™edÃ­ Webview.\nPokud je nainstalovÃ¡no, ujistÄ›te se, Å¾e je v environment PATH\n\nPo instalaci restartujte aplikaci';
 
   @override
-  String get unsupported_platform => 'Nepodporovaná platforma';
+  String get unsupported_platform => 'NepodporovanÃ¡ platforma';
 
   @override
-  String get cache_music => 'Hudba v mezipaměti';
+  String get cache_music => 'Hudba v mezipamÄ›ti';
 
   @override
-  String get open => 'Otevřít';
+  String get open => 'OtevÅ™Ã­t';
 
   @override
-  String get cache_folder => 'Složka mezipaměti';
+  String get cache_folder => 'SloÅ¾ka mezipamÄ›ti';
 
   @override
   String get export => 'Exportovat';
 
   @override
-  String get clear_cache => 'Vymazat mezipaměť';
+  String get clear_cache => 'Vymazat mezipamÄ›Å¥';
 
   @override
-  String get clear_cache_confirmation => 'Opravdu chcete vymazat mezipaměť?';
+  String get clear_cache_confirmation => 'Opravdu chcete vymazat mezipamÄ›Å¥?';
 
   @override
-  String get export_cache_files => 'Exportovat soubory z mezipaměti';
+  String get export_cache_files => 'Exportovat soubory z mezipamÄ›ti';
 
   @override
   String found_n_files(Object count) {
-    return 'Nalezeno $count souborů';
+    return 'Nalezeno $count souborÅ¯';
   }
 
   @override
@@ -1365,103 +1370,103 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return 'Exportováno $filesExported z $files souborů';
+    return 'ExportovÃ¡no $filesExported z $files souborÅ¯';
   }
 
   @override
-  String get undo => 'Zpět';
+  String get undo => 'ZpÄ›t';
 
   @override
-  String get add_all_to_playlist => 'Přidat vše do seznamu skladeb';
+  String get add_all_to_playlist => 'PÅ™idat vÅ¡e do seznamu skladeb';
 
   @override
-  String get add_all_to_queue => 'Přidat vše do fronty';
+  String get add_all_to_queue => 'PÅ™idat vÅ¡e do fronty';
 
   @override
-  String get play_all_next => 'Přehrát vše následně';
+  String get play_all_next => 'PÅ™ehrÃ¡t vÅ¡e nÃ¡slednÄ›';
 
   @override
   String get pause => 'Pauza';
 
   @override
-  String get view_all => 'Zobrazit vše';
+  String get view_all => 'Zobrazit vÅ¡e';
 
   @override
   String get no_tracks_added_yet =>
-      'Zdá se, že jste ještě nepřidali žádné skladby';
+      'ZdÃ¡ se, Å¾e jste jeÅ¡tÄ› nepÅ™idali Å¾Ã¡dnÃ© skladby';
 
   @override
-  String get no_tracks => 'Zdá se, že zde nejsou žádné skladby';
+  String get no_tracks => 'ZdÃ¡ se, Å¾e zde nejsou Å¾Ã¡dnÃ© skladby';
 
   @override
   String get no_tracks_listened_yet =>
-      'Zdá se, že jste ještě nic neposlouchali';
+      'ZdÃ¡ se, Å¾e jste jeÅ¡tÄ› nic neposlouchali';
 
   @override
-  String get not_following_artists => 'Nezajímáte se o žádné umělce';
+  String get not_following_artists => 'NezajÃ­mÃ¡te se o Å¾Ã¡dnÃ© umÄ›lce';
 
   @override
   String get no_favorite_albums_yet =>
-      'Zdá se, že jste ještě nepřidali žádné alba mezi oblíbené';
+      'ZdÃ¡ se, Å¾e jste jeÅ¡tÄ› nepÅ™idali Å¾Ã¡dnÃ© alba mezi oblÃ­benÃ©';
 
   @override
-  String get no_logs_found => 'Žádné záznamy nenalezeny';
+  String get no_logs_found => 'Å½Ã¡dnÃ© zÃ¡znamy nenalezeny';
 
   @override
   String get youtube_engine => 'YouTube Engine';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine není nainstalován';
+    return '$engine nenÃ­ nainstalovÃ¡n';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine není nainstalován ve vašem systému.';
+    return '$engine nenÃ­ nainstalovÃ¡n ve vaÅ¡em systÃ©mu.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'Ujistěte se, že je k dispozici v proměnné PATH nebo\nnastavte absolutní cestu k $engine spustitelnému souboru níže';
+    return 'UjistÄ›te se, Å¾e je k dispozici v promÄ›nnÃ© PATH nebo\nnastavte absolutnÃ­ cestu k $engine spustitelnÃ©mu souboru nÃ­Å¾e';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'V macOS/Linux/Unixových systémech nebude fungovat nastavení cesty v .zshrc/.bashrc/.bash_profile atd.\nMusíte nastavit cestu v konfiguračním souboru shellu';
+      'V macOS/Linux/UnixovÃ½ch systÃ©mech nebude fungovat nastavenÃ­ cesty v .zshrc/.bashrc/.bash_profile atd.\nMusÃ­te nastavit cestu v konfiguraÄnÃ­m souboru shellu';
 
   @override
-  String get download => 'Stáhnout';
+  String get download => 'StÃ¡hnout';
 
   @override
   String get file_not_found => 'Soubor nenalezen';
 
   @override
-  String get custom => 'Vlastní';
+  String get custom => 'VlastnÃ­';
 
   @override
-  String get add_custom_url => 'Přidat vlastní URL';
+  String get add_custom_url => 'PÅ™idat vlastnÃ­ URL';
 
   @override
   String get edit_port => 'Upravit port';
 
   @override
   String get port_helper_msg =>
-      'Výchozí hodnota je -1, což znamená náhodné číslo. Pokud máte nakonfigurován firewall, doporučuje se to nastavit.';
+      'VÃ½chozÃ­ hodnota je -1, coÅ¾ znamenÃ¡ nÃ¡hodnÃ© ÄÃ­slo. Pokud mÃ¡te nakonfigurovÃ¡n firewall, doporuÄuje se to nastavit.';
 
   @override
   String connect_request(Object client) {
-    return 'Povolit $client připojení?';
+    return 'Povolit $client pÅ™ipojenÃ­?';
   }
 
   @override
   String get connection_request_denied =>
-      'Připojení bylo zamítnuto. Uživatel odmítl přístup.';
+      'PÅ™ipojenÃ­ bylo zamÃ­tnuto. UÅ¾ivatel odmÃ­tl pÅ™Ã­stup.';
 
   @override
-  String get an_error_occurred => 'Došlo k chybě';
+  String get an_error_occurred => 'DoÅ¡lo k chybÄ›';
 
   @override
-  String get copy_to_clipboard => 'Kopírovat do schránky';
+  String get copy_to_clipboard => 'KopÃ­rovat do schrÃ¡nky';
 
   @override
   String get view_logs => 'Zobrazit protokoly';
@@ -1471,31 +1476,31 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get no_default_metadata_provider_selected =>
-      'Nemáte nastaven výchozí poskytovatel metadat';
+      'NemÃ¡te nastaven vÃ½chozÃ­ poskytovatel metadat';
 
   @override
   String get manage_metadata_providers => 'Spravovat poskytovatele metadat';
 
   @override
-  String get open_link_in_browser => 'Otevřít odkaz v prohlížeči?';
+  String get open_link_in_browser => 'OtevÅ™Ã­t odkaz v prohlÃ­Å¾eÄi?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'Chcete otevřít následující odkaz?';
+      'Chcete otevÅ™Ã­t nÃ¡sledujÃ­cÃ­ odkaz?';
 
   @override
   String get unsafe_url_warning =>
-      'Odkazy z nedůvěryhodných zdrojů mohou být nebezpečné. Buďte opatrní!\nOdkaz si také můžete zkopírovat do schránky.';
+      'Odkazy z nedÅ¯vÄ›ryhodnÃ½ch zdrojÅ¯ mohou bÃ½t nebezpeÄnÃ©. BuÄte opatrnÃ­!\nOdkaz si takÃ© mÅ¯Å¾ete zkopÃ­rovat do schrÃ¡nky.';
 
   @override
-  String get copy_link => 'Zkopírovat odkaz';
+  String get copy_link => 'ZkopÃ­rovat odkaz';
 
   @override
   String get building_your_timeline =>
-      'Vytváří se váš časový přehled podle poslechů...';
+      'VytvÃ¡Å™Ã­ se vÃ¡Å¡ ÄasovÃ½ pÅ™ehled podle poslechÅ¯...';
 
   @override
-  String get official => 'Oficiální';
+  String get official => 'OficiÃ¡lnÃ­';
 
   @override
   String author_name(Object author) {
@@ -1503,45 +1508,45 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get third_party => 'Třetí strana';
+  String get third_party => 'TÅ™etÃ­ strana';
 
   @override
-  String get plugin_requires_authentication => 'Plugin vyžaduje ověření';
+  String get plugin_requires_authentication => 'Plugin vyÅ¾aduje ovÄ›Å™enÃ­';
 
   @override
-  String get update_available => 'Aktualizace dostupná';
+  String get update_available => 'Aktualizace dostupnÃ¡';
 
   @override
-  String get supports_scrobbling => 'Podpora scrobblování';
+  String get supports_scrobbling => 'Podpora scrobblovÃ¡nÃ­';
 
   @override
   String get plugin_scrobbling_info =>
-      'Tento plugin scrobbles vaši hudbu pro vytvoření historie poslechů.';
+      'Tento plugin scrobbles vaÅ¡i hudbu pro vytvoÅ™enÃ­ historie poslechÅ¯.';
 
   @override
-  String get default_metadata_source => 'Výchozí zdroj metadat';
+  String get default_metadata_source => 'VÃ½chozÃ­ zdroj metadat';
 
   @override
-  String get set_default_metadata_source => 'Nastavit výchozí zdroj metadat';
+  String get set_default_metadata_source => 'Nastavit vÃ½chozÃ­ zdroj metadat';
 
   @override
-  String get default_audio_source => 'Výchozí zdroj zvuku';
+  String get default_audio_source => 'VÃ½chozÃ­ zdroj zvuku';
 
   @override
-  String get set_default_audio_source => 'Nastavit výchozí zdroj zvuku';
+  String get set_default_audio_source => 'Nastavit vÃ½chozÃ­ zdroj zvuku';
 
   @override
-  String get set_default => 'Nastavit jako výchozí';
+  String get set_default => 'Nastavit jako vÃ½chozÃ­';
 
   @override
   String get support => 'Podpora';
 
   @override
-  String get support_plugin_development => 'Podpořit vývoj pluginu';
+  String get support_plugin_development => 'PodpoÅ™it vÃ½voj pluginu';
 
   @override
   String can_access_name_api(Object name) {
-    return '- Může přistupovat k API **$name**';
+    return '- MÅ¯Å¾e pÅ™istupovat k API **$name**';
   }
 
   @override
@@ -1550,14 +1555,14 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get third_party_plugin_warning =>
-      'Tento plugin pochází z repozitáře třetí strany. Ujistěte se, že důvěřujete zdroji, než ho nainstalujete.';
+      'Tento plugin pochÃ¡zÃ­ z repozitÃ¡Å™e tÅ™etÃ­ strany. UjistÄ›te se, Å¾e dÅ¯vÄ›Å™ujete zdroji, neÅ¾ ho nainstalujete.';
 
   @override
   String get author => 'Autor';
 
   @override
   String get this_plugin_can_do_following =>
-      'Tento plugin může provádět následující úkony';
+      'Tento plugin mÅ¯Å¾e provÃ¡dÄ›t nÃ¡sledujÃ­cÃ­ Ãºkony';
 
   @override
   String get install => 'Instalovat';
@@ -1567,73 +1572,74 @@ class AppLocalizationsCs extends AppLocalizations {
       'Nainstalovat poskytovatele metadat';
 
   @override
-  String get no_tracks_playing => 'Momentálně není přehrávána žádná skladba';
+  String get no_tracks_playing =>
+      'MomentÃ¡lnÄ› nenÃ­ pÅ™ehrÃ¡vÃ¡na Å¾Ã¡dnÃ¡ skladba';
 
   @override
   String get synced_lyrics_not_available =>
-      'Synchronizované texty nejsou k dispozici k této písni. Prosím použijte';
+      'SynchronizovanÃ© texty nejsou k dispozici k tÃ©to pÃ­sni. ProsÃ­m pouÅ¾ijte';
 
   @override
-  String get plain_lyrics => 'Prostý text';
+  String get plain_lyrics => 'ProstÃ½ text';
 
   @override
-  String get tab_instead => 'místo toho použijte tabulátor.';
+  String get tab_instead => 'mÃ­sto toho pouÅ¾ijte tabulÃ¡tor.';
 
   @override
-  String get disclaimer => 'Prohlášení';
+  String get disclaimer => 'ProhlÃ¡Å¡enÃ­';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Tým Soulful Bhakti nenese žádnou odpovědnost (včetně právní) za pluginy „třetích stran“.\nPoužívejte je na vlastní riziko. Pro chyby/problémy je nahlaste do repozitáře pluginu.\n\nPokud jakýkoli plugin „třetí strany“ porušuje podmínky služby nebo DMCA kteréhokoli poskytovatele či právního subjektu, požádejte autora pluginu nebo hostingovou platformu (např. GitHub/Codeberg), aby podnikla kroky. Pluginy označené jako „třetí strana“ jsou otevřené a spravovány komunitou; nespravujeme je, tudíž nemůžeme jednat.\n\n';
+      'TÃ½m Soulful Bhakti nenese Å¾Ã¡dnou odpovÄ›dnost (vÄetnÄ› prÃ¡vnÃ­) za pluginy â€žtÅ™etÃ­ch stranâ€œ.\nPouÅ¾Ã­vejte je na vlastnÃ­ riziko. Pro chyby/problÃ©my je nahlaste do repozitÃ¡Å™e pluginu.\n\nPokud jakÃ½koli plugin â€žtÅ™etÃ­ stranyâ€œ poruÅ¡uje podmÃ­nky sluÅ¾by nebo DMCA kterÃ©hokoli poskytovatele Äi prÃ¡vnÃ­ho subjektu, poÅ¾Ã¡dejte autora pluginu nebo hostingovou platformu (napÅ™. GitHub/Codeberg), aby podnikla kroky. Pluginy oznaÄenÃ© jako â€žtÅ™etÃ­ stranaâ€œ jsou otevÅ™enÃ© a spravovÃ¡ny komunitou; nespravujeme je, tudÃ­Å¾ nemÅ¯Å¾eme jednat.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'Vstup neodpovídá požadovanému formátu';
+      'Vstup neodpovÃ­dÃ¡ poÅ¾adovanÃ©mu formÃ¡tu';
 
   @override
   String get plugins => 'Pluginy';
 
   @override
   String get paste_plugin_download_url =>
-      'Vložte URL ke stažení nebo GitHub/Codeberg repozitář či přímý odkaz na soubor .smplug';
+      'VloÅ¾te URL ke staÅ¾enÃ­ nebo GitHub/Codeberg repozitÃ¡Å™ Äi pÅ™Ã­mÃ½ odkaz na soubor .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'Stáhnout a nainstalovat plugin z URL';
+      'StÃ¡hnout a nainstalovat plugin z URL';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'Nepodařilo se přidat plugin: $error';
+    return 'NepodaÅ™ilo se pÅ™idat plugin: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'Nahrát plugin ze souboru';
+  String get upload_plugin_from_file => 'NahrÃ¡t plugin ze souboru';
 
   @override
-  String get installed => 'Nainstalováno';
+  String get installed => 'NainstalovÃ¡no';
 
   @override
-  String get available_plugins => 'Dostupné pluginy';
+  String get available_plugins => 'DostupnÃ© pluginy';
 
   @override
   String get configure_plugins =>
-      'Konfigurujte své vlastní pluginy poskytovatele metadat a zdroje zvuku';
+      'Konfigurujte svÃ© vlastnÃ­ pluginy poskytovatele metadat a zdroje zvuku';
 
   @override
   String get source => 'Zdroj: ';
 
   @override
-  String get uncompressed => 'Nekomprimováno';
+  String get uncompressed => 'NekomprimovÃ¡no';
 
   @override
   String get dab_music_source_description =>
-      'Pro audiofily. Poskytuje vysoce kvalitní/bezztrátové zvukové toky. Přesná shoda skladeb na základě ISRC.';
+      'Pro audiofily. Poskytuje vysoce kvalitnÃ­/bezztrÃ¡tovÃ© zvukovÃ© toky. PÅ™esnÃ¡ shoda skladeb na zÃ¡kladÄ› ISRC.';
 
   @override
-  String get summary_top_track => 'Nejlepší skladba\ntoto období';
+  String get summary_top_track => 'NejlepÅ¡Ã­ skladba\ntoto obdobÃ­';
 
   @override
-  String get local => 'Místní';
+  String get local => 'MÃ­stnÃ­';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1643,4 +1649,21 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

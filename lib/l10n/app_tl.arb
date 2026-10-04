@@ -1,4 +1,4 @@
-{
+﻿{
   "guest": "Bisita",
   "browse": "Mag-browse",
   "search": "Maghanap",
@@ -160,9 +160,9 @@
   "founder": "Nagtatag",
   "repository": "Repository",
   "bug_issues": "Bug+Mga Isyu",
-  "made_with": "Ginawa nang may ❤️ sa Bangladesh🇧🇩",
+  "made_with": "Ginawa nang may â¤ï¸ sa BangladeshðŸ‡§ðŸ‡©",
   "kingkor_roy_tirtho": "Kingkor Roy Tirtho",
-  "copyright": "© 2021-{current_year} Kingkor Roy Tirtho",
+  "copyright": "Â© 2021-{current_year} Kingkor Roy Tirtho",
   "license": "Lisensya",
   "add_spotify_credentials": "Idagdag ang iyong mga kredensyal sa spotify para makapagsimula",
   "credentials_will_not_be_shared_disclaimer": "Huwag mag-alala, ang alinman sa iyong mga kredensyal ay hindi kokolektahin o ibabahagi sa sinuman",
@@ -183,7 +183,7 @@
   "step_2_steps": "1. Kapag naka-log in ka na, pindutin ang F12 o i-right click ang Mouse > Inspect para Buksan ang Browser devtools.\n2. Pagkatapos ay pumunta sa \"Application\" Tab (Chrome, Edge, Brave atbp..) o \"Storage\" Tab (Firefox, Palemoon atbp..)\n3. Pumunta sa \"Cookies\" na seksyon at pagkatapos sa \"https://accounts.spotify.com\" na subseksyon",
   "step_3": "Hakbang 3",
   "step_3_steps": "Kopyahin ang halaga ng \"sp_dc\" Cookie",
-  "success_emoji": "Tagumpay🥳",
+  "success_emoji": "TagumpayðŸ¥³",
   "success_message": "Ngayon ay matagumpay kang Naka-log in gamit ang iyong Spotify account. Magaling, kaibigan!",
   "step_4": "Hakbang 4",
   "step_4_steps": "I-paste ang na-kopyang halaga ng \"sp_dc\"",
@@ -519,5 +519,13 @@
   "verify_email_reminder": "Mangyaring i-verify ang iyong email address para ma-secure ang iyong account",
   "verify_now": "I-verify ngayon",
   "summary_top_track": "Nangungunang track\nngayong panahon",
-  "local": "Lokal"
+  "local": "Lokal",
+  "specials": "Specials",
+  "play_now": "Play Now",
+  "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
+  "@songs_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

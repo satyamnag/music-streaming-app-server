@@ -31,7 +31,7 @@ class PlayerOverlay extends HookConsumerWidget {
     return SlidingUpPanel(
       maxHeight: screenSize.height,
       backdropEnabled: false,
-      minHeight: canShow ? 63 : 0,
+      minHeight: canShow ? PlayerOverlayCollapsedSection.collapsedHeight : 0,
       onPanelSlide: (position) {
         final invertedPosition = 1 - position;
         ref.read(navigationPanelHeight.notifier).state = 50 * invertedPosition;
@@ -41,7 +41,7 @@ class PlayerOverlay extends HookConsumerWidget {
       parallaxEnabled: true,
       renderPanelSheet: false,
       header: SizedBox(
-        height: 63,
+        height: PlayerOverlayCollapsedSection.collapsedHeight,
         width: screenSize.width,
         child: PlayerOverlayCollapsedSection(panelController: panelController),
       ),

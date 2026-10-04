@@ -35,6 +35,9 @@ class SangeetTrackObject with _$SangeetTrackObject {
     String? cardBgColor,
     /// Admin-configurable card text color (`#rrggbb`), or null for the default.
     String? cardTextColor,
+    /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
+    /// the home "Specials" shelves to group tracks by deity/theme.
+    String? tags,
   }) = SangeetFullTrackObject;
 
   factory SangeetTrackObject.localTrackFromFile(

@@ -9,546 +9,557 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
-  String get guest => '게스트';
+  String get guest => 'ê²ŒìŠ¤íŠ¸';
 
   @override
-  String get browse => '찾아보기';
+  String get browse => 'ì°¾ì•„ë³´ê¸°';
 
   @override
-  String get search => '검색';
+  String get search => 'ê²€ìƒ‰';
 
   @override
-  String get library => '라이브러리';
+  String get library => 'ë¼ì´ë¸ŒëŸ¬ë¦¬';
 
   @override
-  String get lyrics => '가사';
+  String get lyrics => 'ê°€ì‚¬';
 
   @override
-  String get settings => '설정';
+  String get settings => 'ì„¤ì •';
 
   @override
-  String get settings_subtitle => 'Soulful Bhakti를 원하는 대로 맞춤 설정하세요';
+  String get settings_subtitle =>
+      'Soulful Bhaktië¥¼ ì›í•˜ëŠ” ëŒ€ë¡œ ë§žì¶¤ ì„¤ì •í•˜ì„¸ìš”';
 
   @override
-  String get genre_categories_filter => '카테고리 혹은 장르별로 불러오기';
+  String get genre_categories_filter =>
+      'ì¹´í…Œê³ ë¦¬ í˜¹ì€ ìž¥ë¥´ë³„ë¡œ ë¶ˆëŸ¬ì˜¤ê¸°';
 
   @override
-  String get genre => '장르';
+  String get genre => 'ìž¥ë¥´';
 
   @override
-  String get personalized => '맞춤 추천';
+  String get personalized => 'ë§žì¶¤ ì¶”ì²œ';
 
   @override
-  String get featured => '인기';
+  String get featured => 'ì¸ê¸°';
 
   @override
-  String get new_releases => '신곡';
+  String get new_releases => 'ì‹ ê³¡';
 
   @override
-  String get songs => '노래';
+  String get songs => 'ë…¸ëž˜';
 
   @override
-  String get newest_arrivals => '최신 추가';
+  String get newest_arrivals => 'ìµœì‹  ì¶”ê°€';
 
   @override
-  String get top_trending => '인기 급상승';
+  String get top_trending => 'ì¸ê¸° ê¸‰ìƒìŠ¹';
 
   @override
-  String get see_more => '더 보기';
+  String get see_more => 'ë” ë³´ê¸°';
 
   @override
   String playing_track(Object track) {
-    return '$track 을 재생';
+    return '$track ì„ ìž¬ìƒ';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return '현재 재생 대기열을 없앱니다。$track_length 곡이 제거됩니다。\n계속 진행할까요？';
+    return 'í˜„ìž¬ ìž¬ìƒ ëŒ€ê¸°ì—´ì„ ì—†ì•±ë‹ˆë‹¤ã€‚$track_length ê³¡ì´ ì œê±°ë©ë‹ˆë‹¤ã€‚\nê³„ì† ì§„í–‰í• ê¹Œìš”ï¼Ÿ';
   }
 
   @override
-  String get load_more => '더 불러오기';
+  String get load_more => 'ë” ë¶ˆëŸ¬ì˜¤ê¸°';
 
   @override
-  String get playlists => '플레이리스트';
+  String get playlists => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get artists => '아티스트';
+  String get artists => 'ì•„í‹°ìŠ¤íŠ¸';
 
   @override
-  String get albums => '앨범';
+  String get albums => 'ì•¨ë²”';
 
   @override
-  String get tracks => '곡';
+  String get tracks => 'ê³¡';
 
   @override
-  String get downloads => '다운로드한 곡';
+  String get downloads => 'ë‹¤ìš´ë¡œë“œí•œ ê³¡';
 
   @override
-  String get filter_playlists => '플레이리스트를 필터링';
+  String get filter_playlists => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ í•„í„°ë§';
 
   @override
-  String get liked_tracks => '좋아하는 곡';
+  String get liked_tracks => 'ì¢‹ì•„í•˜ëŠ” ê³¡';
 
   @override
-  String get liked_tracks_description => '좋아요를 남긴 곡들';
+  String get liked_tracks_description => 'ì¢‹ì•„ìš”ë¥¼ ë‚¨ê¸´ ê³¡ë“¤';
 
   @override
-  String get playlist => '재생 목록';
+  String get playlist => 'ìž¬ìƒ ëª©ë¡';
 
   @override
-  String get create_a_playlist => '플레이리스트를 생성';
+  String get create_a_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ ìƒì„±';
 
   @override
-  String get new_playlist => '새 플레이리스트';
+  String get new_playlist => 'ìƒˆ í”Œë ˆì´ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get playlist_name => '플레이리스트명';
+  String get playlist_name => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ëª…';
 
   @override
-  String get no_playlists_yet => '아직 플레이리스트가 없습니다. 선택한 노래로 하나를 만드세요.';
+  String get no_playlists_yet =>
+      'ì•„ì§ í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤. ì„ íƒí•œ ë…¸ëž˜ë¡œ í•˜ë‚˜ë¥¼ ë§Œë“œì„¸ìš”.';
 
   @override
-  String get update_playlist => '플레이리스트를 업데이트';
+  String get update_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ ì—…ë°ì´íŠ¸';
 
   @override
-  String get create => '생성';
+  String get create => 'ìƒì„±';
 
   @override
-  String get cancel => '취소';
+  String get cancel => 'ì·¨ì†Œ';
 
   @override
-  String get update => '업데이트';
+  String get update => 'ì—…ë°ì´íŠ¸';
 
   @override
-  String get name_of_playlist => '플레이리스트의 이름';
+  String get name_of_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ì˜ ì´ë¦„';
 
   @override
-  String get description => '설명';
+  String get description => 'ì„¤ëª…';
 
   @override
-  String get public => '공개';
+  String get public => 'ê³µê°œ';
 
   @override
-  String get collaborative => '공유 플레이리스트';
+  String get collaborative => 'ê³µìœ  í”Œë ˆì´ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get search_local_tracks => '기기에 저장된 곡을 검색하기';
+  String get search_local_tracks => 'ê¸°ê¸°ì— ì €ìž¥ëœ ê³¡ì„ ê²€ìƒ‰í•˜ê¸°';
 
   @override
-  String get play => '재생';
+  String get play => 'ìž¬ìƒ';
 
   @override
-  String get delete => '삭제';
+  String get delete => 'ì‚­ì œ';
 
   @override
-  String get none => '없음';
+  String get none => 'ì—†ìŒ';
 
   @override
-  String get sort_a_z => 'A-Z 순으로 정렬';
+  String get sort_a_z => 'A-Z ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sort_z_a => 'Z-A 순으로 정렬';
+  String get sort_z_a => 'Z-A ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sort_artist => '아티스트 순으로 정렬';
+  String get sort_artist => 'ì•„í‹°ìŠ¤íŠ¸ ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sort_album => '앨범 순으로 정렬';
+  String get sort_album => 'ì•¨ë²” ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sort_duration => '시간순 정렬';
+  String get sort_duration => 'ì‹œê°„ìˆœ ì •ë ¬';
 
   @override
-  String get sort_tracks => '곡명 순으로 정렬';
+  String get sort_tracks => 'ê³¡ëª… ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return '현재 ($tracks_length) 곡 다운로드 중';
+    return 'í˜„ìž¬ ($tracks_length) ê³¡ ë‹¤ìš´ë¡œë“œ ì¤‘';
   }
 
   @override
-  String get cancel_all => '모두 취소';
+  String get cancel_all => 'ëª¨ë‘ ì·¨ì†Œ';
 
   @override
-  String get filter_artist => '아티스트 필터링';
+  String get filter_artist => 'ì•„í‹°ìŠ¤íŠ¸ í•„í„°ë§';
 
   @override
   String followers(Object followers) {
-    return '$followers 팔로워';
+    return '$followers íŒ”ë¡œì›Œ';
   }
 
   @override
-  String get add_artist_to_blacklist => '이 아티스트를 블랙리스트에 추가';
+  String get add_artist_to_blacklist =>
+      'ì´ ì•„í‹°ìŠ¤íŠ¸ë¥¼ ë¸”ëž™ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€';
 
   @override
-  String get top_tracks => '인기곡';
+  String get top_tracks => 'ì¸ê¸°ê³¡';
 
   @override
-  String get fans_also_like => '애청자들이 좋아하는 곡';
+  String get fans_also_like => 'ì• ì²­ìžë“¤ì´ ì¢‹ì•„í•˜ëŠ” ê³¡';
 
   @override
-  String get loading => '불러오는 중...';
+  String get loading => 'ë¶ˆëŸ¬ì˜¤ëŠ” ì¤‘...';
 
   @override
-  String get artist => '아티스트';
+  String get artist => 'ì•„í‹°ìŠ¤íŠ¸';
 
   @override
-  String get blacklisted => '블랙리스트';
+  String get blacklisted => 'ë¸”ëž™ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get following => '팔로우 중';
+  String get following => 'íŒ”ë¡œìš° ì¤‘';
 
   @override
-  String get follow => '팔로우하기';
+  String get follow => 'íŒ”ë¡œìš°í•˜ê¸°';
 
   @override
-  String get artist_url_copied => '아티스트의 URL 주소를 클립보드에 복사함';
+  String get artist_url_copied =>
+      'ì•„í‹°ìŠ¤íŠ¸ì˜ URL ì£¼ì†Œë¥¼ í´ë¦½ë³´ë“œì— ë³µì‚¬í•¨';
 
   @override
   String added_to_queue(Object tracks) {
-    return '$tracks 곡을 대기열에 추가함';
+    return '$tracks ê³¡ì„ ëŒ€ê¸°ì—´ì— ì¶”ê°€í•¨';
   }
 
   @override
-  String get filter_albums => '앨범 필터링';
+  String get filter_albums => 'ì•¨ë²” í•„í„°ë§';
 
   @override
-  String get synced => '동기화됨';
+  String get synced => 'ë™ê¸°í™”ë¨';
 
   @override
-  String get plain => '그대로';
+  String get plain => 'ê·¸ëŒ€ë¡œ';
 
   @override
-  String get shuffle => '셔플';
+  String get shuffle => 'ì…”í”Œ';
 
   @override
-  String get search_tracks => '곡 검색하기';
+  String get search_tracks => 'ê³¡ ê²€ìƒ‰í•˜ê¸°';
 
   @override
-  String get released => '공개일';
+  String get released => 'ê³µê°œì¼';
 
   @override
   String error(Object error) {
-    return '에러';
+    return 'ì—ëŸ¬';
   }
 
   @override
-  String get title => '타이틀';
+  String get title => 'íƒ€ì´í‹€';
 
   @override
-  String get time => '길이';
+  String get time => 'ê¸¸ì´';
 
   @override
-  String get more_actions => '다른 작업';
+  String get more_actions => 'ë‹¤ë¥¸ ìž‘ì—…';
 
   @override
   String add_count_to_playlist(Object count) {
-    return '플레이리스트에 ($count) 곡을 추가';
+    return 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ì— ($count) ê³¡ì„ ì¶”ê°€';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return '대기열에 ($count) 곡을 추가';
+    return 'ëŒ€ê¸°ì—´ì— ($count) ê³¡ì„ ì¶”ê°€';
   }
 
   @override
   String play_count_next(Object count) {
-    return '이 다음에 ($count) 곡을 재생';
+    return 'ì´ ë‹¤ìŒì— ($count) ê³¡ì„ ìž¬ìƒ';
   }
 
   @override
-  String get album => '앨범';
+  String get album => 'ì•¨ë²”';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '$data 를 클립보드에 복사함';
+    return '$data ë¥¼ í´ë¦½ë³´ë“œì— ë³µì‚¬í•¨';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '$track 을 이 플레이리스트에 추가';
+    return '$track ì„ ì´ í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€';
   }
 
   @override
-  String get add => '추가';
+  String get add => 'ì¶”ê°€';
 
   @override
   String added_track_to_queue(Object track) {
-    return '대기열에 $track 을 추가함';
+    return 'ëŒ€ê¸°ì—´ì— $track ì„ ì¶”ê°€í•¨';
   }
 
   @override
-  String get add_to_queue => '대기열에 추가';
+  String get add_to_queue => 'ëŒ€ê¸°ì—´ì— ì¶”ê°€';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track 을 이 다음에 재생';
+    return '$track ì„ ì´ ë‹¤ìŒì— ìž¬ìƒ';
   }
 
   @override
-  String get play_next => '이 다음에 재생';
+  String get play_next => 'ì´ ë‹¤ìŒì— ìž¬ìƒ';
 
   @override
   String removed_track_from_queue(Object track) {
-    return '대기열에서 $track 를 제거함';
+    return 'ëŒ€ê¸°ì—´ì—ì„œ $track ë¥¼ ì œê±°í•¨';
   }
 
   @override
-  String get remove_from_queue => '대기열에서 제거';
+  String get remove_from_queue => 'ëŒ€ê¸°ì—´ì—ì„œ ì œê±°';
 
   @override
-  String get remove_from_favorites => '즐겨찾기에서 제거';
+  String get remove_from_favorites => 'ì¦ê²¨ì°¾ê¸°ì—ì„œ ì œê±°';
 
   @override
-  String get save_as_favorite => '즐겨찾기에 추가';
+  String get save_as_favorite => 'ì¦ê²¨ì°¾ê¸°ì— ì¶”ê°€';
 
   @override
-  String get add_to_playlist => '플레이리스트에 추가';
+  String get add_to_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€';
 
   @override
-  String get remove_from_playlist => '플레이리스트에서 제거';
+  String get remove_from_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°';
 
   @override
-  String get add_to_blacklist => '블랙리스트에 추가';
+  String get add_to_blacklist => 'ë¸”ëž™ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€';
 
   @override
-  String get remove_from_blacklist => '블랙리스트에서 제거';
+  String get remove_from_blacklist => 'ë¸”ëž™ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°';
 
   @override
-  String get share => '공유';
+  String get share => 'ê³µìœ ';
 
   @override
-  String get mini_player => '미니 플레이어';
+  String get mini_player => 'ë¯¸ë‹ˆ í”Œë ˆì´ì–´';
 
   @override
-  String get slide_to_seek => '앞뒤로 슬라이드하여 탐색';
+  String get slide_to_seek => 'ì•žë’¤ë¡œ ìŠ¬ë¼ì´ë“œí•˜ì—¬ íƒìƒ‰';
 
   @override
-  String get shuffle_playlist => '플레이리스트를 섞기';
+  String get shuffle_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ ì„žê¸°';
 
   @override
-  String get unshuffle_playlist => '플레이리스트를 섞지 않기';
+  String get unshuffle_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ ì„žì§€ ì•Šê¸°';
 
   @override
-  String get previous_track => '이전 곡';
+  String get previous_track => 'ì´ì „ ê³¡';
 
   @override
-  String get next_track => '다음 곡';
+  String get next_track => 'ë‹¤ìŒ ê³¡';
 
   @override
-  String get pause_playback => '일시정지';
+  String get pause_playback => 'ì¼ì‹œì •ì§€';
 
   @override
-  String get resume_playback => '재개';
+  String get resume_playback => 'ìž¬ê°œ';
 
   @override
-  String get loop_track => '반복 재생';
+  String get loop_track => 'ë°˜ë³µ ìž¬ìƒ';
 
   @override
-  String get no_loop => '반복 없음';
+  String get no_loop => 'ë°˜ë³µ ì—†ìŒ';
 
   @override
-  String get repeat_playlist => '플레이리스트 반복';
+  String get repeat_playlist => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ ë°˜ë³µ';
 
   @override
-  String get queue => '재생 대기열';
+  String get queue => 'ìž¬ìƒ ëŒ€ê¸°ì—´';
 
   @override
-  String get alternative_track_sources => '대체가능한 음악 서버';
+  String get alternative_track_sources => 'ëŒ€ì²´ê°€ëŠ¥í•œ ìŒì•… ì„œë²„';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '대기열에 $tracks 곡이 있음';
+    return 'ëŒ€ê¸°ì—´ì— $tracks ê³¡ì´ ìžˆìŒ';
   }
 
   @override
-  String get clear_all => '모두 제거';
+  String get clear_all => 'ëª¨ë‘ ì œê±°';
 
   @override
-  String get show_hide_ui_on_hover => '마우스를 올리면 UI를 표시/숨김';
+  String get show_hide_ui_on_hover =>
+      'ë§ˆìš°ìŠ¤ë¥¼ ì˜¬ë¦¬ë©´ UIë¥¼ í‘œì‹œ/ìˆ¨ê¹€';
 
   @override
-  String get always_on_top => '항상 위에 표시';
+  String get always_on_top => 'í•­ìƒ ìœ„ì— í‘œì‹œ';
 
   @override
-  String get exit_mini_player => '미니 플레이어 닫기';
+  String get exit_mini_player => 'ë¯¸ë‹ˆ í”Œë ˆì´ì–´ ë‹«ê¸°';
 
   @override
-  String get local_library => '로컬 도서관';
+  String get local_library => 'ë¡œì»¬ ë„ì„œê´€';
 
   @override
-  String get add_library_location => '도서관에 추가';
+  String get add_library_location => 'ë„ì„œê´€ì— ì¶”ê°€';
 
   @override
-  String get remove_library_location => '도서관에서 제거';
+  String get remove_library_location => 'ë„ì„œê´€ì—ì„œ ì œê±°';
 
   @override
-  String get account => '계정';
+  String get account => 'ê³„ì •';
 
   @override
-  String get logout => '로그아웃';
+  String get logout => 'ë¡œê·¸ì•„ì›ƒ';
 
   @override
-  String get logout_of_this_account => '이 계정에서 로그아웃';
+  String get logout_of_this_account => 'ì´ ê³„ì •ì—ì„œ ë¡œê·¸ì•„ì›ƒ';
 
   @override
-  String get language_region => '언어 & 지역';
+  String get language_region => 'ì–¸ì–´ & ì§€ì—­';
 
   @override
-  String get language => '언어';
+  String get language => 'ì–¸ì–´';
 
   @override
-  String get system_default => '시스템 기본설정';
+  String get system_default => 'ì‹œìŠ¤í…œ ê¸°ë³¸ì„¤ì •';
 
   @override
-  String get market_place_region => '마켓플레이스 지역';
+  String get market_place_region => 'ë§ˆì¼“í”Œë ˆì´ìŠ¤ ì§€ì—­';
 
   @override
-  String get recommendation_country => '추천 국가';
+  String get recommendation_country => 'ì¶”ì²œ êµ­ê°€';
 
   @override
-  String get appearance => '디자인';
+  String get appearance => 'ë””ìžì¸';
 
   @override
-  String get layout_mode => '레이아웃 모드';
+  String get layout_mode => 'ë ˆì´ì•„ì›ƒ ëª¨ë“œ';
 
   @override
-  String get override_layout_settings => '반응형 레이아웃 모드 설정 덮어씌우기';
+  String get override_layout_settings =>
+      'ë°˜ì‘í˜• ë ˆì´ì•„ì›ƒ ëª¨ë“œ ì„¤ì • ë®ì–´ì”Œìš°ê¸°';
 
   @override
-  String get adaptive => '적응형';
+  String get adaptive => 'ì ì‘í˜•';
 
   @override
-  String get compact => '컴팩트';
+  String get compact => 'ì»´íŒ©íŠ¸';
 
   @override
-  String get extended => '확장';
+  String get extended => 'í™•ìž¥';
 
   @override
-  String get theme => '테마';
+  String get theme => 'í…Œë§ˆ';
 
   @override
-  String get dark => '다크';
+  String get dark => 'ë‹¤í¬';
 
   @override
-  String get light => '라이트';
+  String get light => 'ë¼ì´íŠ¸';
 
   @override
-  String get system => '시스템과 동일';
+  String get system => 'ì‹œìŠ¤í…œê³¼ ë™ì¼';
 
   @override
-  String get accent_color => '보조색';
+  String get accent_color => 'ë³´ì¡°ìƒ‰';
 
   @override
-  String get sync_album_color => '앨범 색상';
+  String get sync_album_color => 'ì•¨ë²” ìƒ‰ìƒ';
 
   @override
-  String get sync_album_color_description => '앨범아트의 주요 색상을 보조색으로 사용';
+  String get sync_album_color_description =>
+      'ì•¨ë²”ì•„íŠ¸ì˜ ì£¼ìš” ìƒ‰ìƒì„ ë³´ì¡°ìƒ‰ìœ¼ë¡œ ì‚¬ìš©';
 
   @override
-  String get playback => '재생';
+  String get playback => 'ìž¬ìƒ';
 
   @override
-  String get audio_quality => '음질';
+  String get audio_quality => 'ìŒì§ˆ';
 
   @override
-  String get high => '높음';
+  String get high => 'ë†’ìŒ';
 
   @override
-  String get low => '낮음';
+  String get low => 'ë‚®ìŒ';
 
   @override
-  String get pre_download_play => '재생할 곡을 미리 다운로드';
+  String get pre_download_play => 'ìž¬ìƒí•  ê³¡ì„ ë¯¸ë¦¬ ë‹¤ìš´ë¡œë“œ';
 
   @override
   String get pre_download_play_description =>
-      '스트리밍 방식을 쓰는 대신 파일 단위로 다운로드 받고 재생 (인터넷 대역폭이 높은 환경에서 추천)';
+      'ìŠ¤íŠ¸ë¦¬ë° ë°©ì‹ì„ ì“°ëŠ” ëŒ€ì‹  íŒŒì¼ ë‹¨ìœ„ë¡œ ë‹¤ìš´ë¡œë“œ ë°›ê³  ìž¬ìƒ (ì¸í„°ë„· ëŒ€ì—­í­ì´ ë†’ì€ í™˜ê²½ì—ì„œ ì¶”ì²œ)';
 
   @override
-  String get skip_non_music => '음악이 아닌 부분을 스킵 (SponsorBlock)';
+  String get skip_non_music =>
+      'ìŒì•…ì´ ì•„ë‹Œ ë¶€ë¶„ì„ ìŠ¤í‚µ (SponsorBlock)';
 
   @override
-  String get blacklist_description => '블랙리스트에 추가된 곡과 아티스트';
+  String get blacklist_description =>
+      'ë¸”ëž™ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€ëœ ê³¡ê³¼ ì•„í‹°ìŠ¤íŠ¸';
 
   @override
-  String get wait_for_download_to_finish => '현재 진행중인 다운로드가 끝날 때까지 기다려주세요';
+  String get wait_for_download_to_finish =>
+      'í˜„ìž¬ ì§„í–‰ì¤‘ì¸ ë‹¤ìš´ë¡œë“œê°€ ëë‚  ë•Œê¹Œì§€ ê¸°ë‹¤ë ¤ì£¼ì„¸ìš”';
 
   @override
-  String get desktop => '데스크톱';
+  String get desktop => 'ë°ìŠ¤í¬í†±';
 
   @override
-  String get close_behavior => '닫을 때의 동작';
+  String get close_behavior => 'ë‹«ì„ ë•Œì˜ ë™ìž‘';
 
   @override
-  String get close => '닫기';
+  String get close => 'ë‹«ê¸°';
 
   @override
-  String get minimize_to_tray => '트레이로 최소화';
+  String get minimize_to_tray => 'íŠ¸ë ˆì´ë¡œ ìµœì†Œí™”';
 
   @override
-  String get show_tray_icon => '시스템 트레이 아이콘 표시';
+  String get show_tray_icon => 'ì‹œìŠ¤í…œ íŠ¸ë ˆì´ ì•„ì´ì½˜ í‘œì‹œ';
 
   @override
-  String get about => '앱 정보';
+  String get about => 'ì•± ì •ë³´';
 
   @override
-  String get u_love_spotube => 'Soulful Bhakti... 사랑하시죠?';
+  String get u_love_spotube => 'Soulful Bhakti... ì‚¬ëž‘í•˜ì‹œì£ ?';
 
   @override
-  String get check_for_updates => '업데이트 확인';
+  String get check_for_updates => 'ì—…ë°ì´íŠ¸ í™•ì¸';
 
   @override
-  String get about_spotube => 'Soulful Bhakti에 관해';
+  String get about_spotube => 'Soulful Bhaktiì— ê´€í•´';
 
   @override
-  String get blacklist => '블랙리스트';
+  String get blacklist => 'ë¸”ëž™ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get please_sponsor => '후원해주시면 감사하겠습니다.';
+  String get please_sponsor => 'í›„ì›í•´ì£¼ì‹œë©´ ê°ì‚¬í•˜ê² ìŠµë‹ˆë‹¤.';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti는, 경량에 크로스플랫폼인데다 무료이기까지한 스포티파이 클라이언트입니다';
+      'Soulful BhaktiëŠ”, ê²½ëŸ‰ì— í¬ë¡œìŠ¤í”Œëž«í¼ì¸ë°ë‹¤ ë¬´ë£Œì´ê¸°ê¹Œì§€í•œ ìŠ¤í¬í‹°íŒŒì´ í´ë¼ì´ì–¸íŠ¸ìž…ë‹ˆë‹¤';
 
   @override
-  String get version => '버전';
+  String get version => 'ë²„ì „';
 
   @override
-  String get build_number => '빌드 번호';
+  String get build_number => 'ë¹Œë“œ ë²ˆí˜¸';
 
   @override
-  String get founder => '창시자';
+  String get founder => 'ì°½ì‹œìž';
 
   @override
-  String get repository => '리포지토리';
+  String get repository => 'ë¦¬í¬ì§€í† ë¦¬';
 
   @override
-  String get bug_issues => '버그 및 이슈';
+  String get bug_issues => 'ë²„ê·¸ ë° ì´ìŠˆ';
 
   @override
-  String get made_with => '❤️을 담아 방글라데시에서 만듦';
+  String get made_with => 'â¤ï¸ì„ ë‹´ì•„ ë°©ê¸€ë¼ë°ì‹œì—ì„œ ë§Œë“¦';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => '라이선스';
+  String get license => 'ë¼ì´ì„ ìŠ¤';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      '걱정마세요. 개인정보를 수집하거나 공유하지 않습니다.';
+      'ê±±ì •ë§ˆì„¸ìš”. ê°œì¸ì •ë³´ë¥¼ ìˆ˜ì§‘í•˜ê±°ë‚˜ ê³µìœ í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.';
 
   @override
-  String get know_how_to_login => '어떻게 하는건지 모르겠나요?';
+  String get know_how_to_login => 'ì–´ë–»ê²Œ í•˜ëŠ”ê±´ì§€ ëª¨ë¥´ê² ë‚˜ìš”?';
 
   @override
-  String get follow_step_by_step_guide => '사용법 확인하기';
+  String get follow_step_by_step_guide => 'ì‚¬ìš©ë²• í™•ì¸í•˜ê¸°';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -556,734 +567,761 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => '모든 필드에 정보를 입력해주세요';
+  String get fill_in_all_fields =>
+      'ëª¨ë“  í•„ë“œì— ì •ë³´ë¥¼ ìž…ë ¥í•´ì£¼ì„¸ìš”';
 
   @override
-  String get submit => '제출';
+  String get submit => 'ì œì¶œ';
 
   @override
-  String get exit => '종료';
+  String get exit => 'ì¢…ë£Œ';
 
   @override
-  String get previous => '이전으로';
+  String get previous => 'ì´ì „ìœ¼ë¡œ';
 
   @override
-  String get next => '다음으로';
+  String get next => 'ë‹¤ìŒìœ¼ë¡œ';
 
   @override
-  String get done => '완료';
+  String get done => 'ì™„ë£Œ';
 
   @override
-  String get step_1 => '1단계';
+  String get step_1 => '1ë‹¨ê³„';
 
   @override
-  String get first_go_to => '가장 먼저 먼저 들어갈 곳은 ';
+  String get first_go_to => 'ê°€ìž¥ ë¨¼ì € ë¨¼ì € ë“¤ì–´ê°ˆ ê³³ì€ ';
 
   @override
-  String get something_went_wrong => '알 수 없는 이유로 동작에 실패했습니다.';
+  String get something_went_wrong =>
+      'ì•Œ ìˆ˜ ì—†ëŠ” ì´ìœ ë¡œ ë™ìž‘ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.';
 
   @override
-  String get piped_instance => 'Piped 서버의 인스턴스';
+  String get piped_instance => 'Piped ì„œë²„ì˜ ì¸ìŠ¤í„´ìŠ¤';
 
   @override
-  String get piped_description => '곡 탐색에 사용할 Piped 서버 인스턴스';
+  String get piped_description =>
+      'ê³¡ íƒìƒ‰ì— ì‚¬ìš©í•  Piped ì„œë²„ ì¸ìŠ¤í„´ìŠ¤';
 
   @override
-  String get piped_warning => '몇몇 서버는 제대로 동작하지 않을 수 있습니다. 본인 책임 하에 이용해주세요.';
+  String get piped_warning =>
+      'ëª‡ëª‡ ì„œë²„ëŠ” ì œëŒ€ë¡œ ë™ìž‘í•˜ì§€ ì•Šì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ë³¸ì¸ ì±…ìž„ í•˜ì— ì´ìš©í•´ì£¼ì„¸ìš”.';
 
   @override
-  String get invidious_instance => 'Invidious 서버 인스턴스';
+  String get invidious_instance => 'Invidious ì„œë²„ ì¸ìŠ¤í„´ìŠ¤';
 
   @override
-  String get invidious_description => '트랙 매칭에 사용할 Invidious 서버 인스턴스';
+  String get invidious_description =>
+      'íŠ¸ëž™ ë§¤ì¹­ì— ì‚¬ìš©í•  Invidious ì„œë²„ ì¸ìŠ¤í„´ìŠ¤';
 
   @override
-  String get invidious_warning => '일부는 제대로 작동하지 않을 수 있습니다. 자신의 책임 하에 사용하세요';
+  String get invidious_warning =>
+      'ì¼ë¶€ëŠ” ì œëŒ€ë¡œ ìž‘ë™í•˜ì§€ ì•Šì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ìžì‹ ì˜ ì±…ìž„ í•˜ì— ì‚¬ìš©í•˜ì„¸ìš”';
 
   @override
-  String get generate => '생성';
+  String get generate => 'ìƒì„±';
 
   @override
   String track_exists(Object track) {
-    return '곡 $track 은 이미 리스트에 있습니다';
+    return 'ê³¡ $track ì€ ì´ë¯¸ ë¦¬ìŠ¤íŠ¸ì— ìžˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get replace => '교체';
+  String get replace => 'êµì²´';
 
   @override
-  String get skip => '건너뛰기';
+  String get skip => 'ê±´ë„ˆë›°ê¸°';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return '$type을 $count개까지 선택';
+    return '$typeì„ $countê°œê¹Œì§€ ì„ íƒ';
   }
 
   @override
-  String get select_genres => '장르 선택';
+  String get select_genres => 'ìž¥ë¥´ ì„ íƒ';
 
   @override
-  String get add_genres => '장르 추가';
+  String get add_genres => 'ìž¥ë¥´ ì¶”ê°€';
 
   @override
-  String get country => '국가';
+  String get country => 'êµ­ê°€';
 
   @override
-  String get number_of_tracks_generate => '생성할 곡 수';
+  String get number_of_tracks_generate => 'ìƒì„±í•  ê³¡ ìˆ˜';
 
   @override
-  String get acousticness => '반주 구간 (Acousticness)';
+  String get acousticness => 'ë°˜ì£¼ êµ¬ê°„ (Acousticness)';
 
   @override
-  String get danceability => '흥겨운 정도 (Danceability)';
+  String get danceability => 'í¥ê²¨ìš´ ì •ë„ (Danceability)';
 
   @override
-  String get energy => '에너지 (Energy)';
+  String get energy => 'ì—ë„ˆì§€ (Energy)';
 
   @override
-  String get instrumentalness => '기악성 (Instrumentalness)';
+  String get instrumentalness => 'ê¸°ì•…ì„± (Instrumentalness)';
 
   @override
-  String get liveness => '생동감 (Liveness)';
+  String get liveness => 'ìƒë™ê° (Liveness)';
 
   @override
-  String get loudness => '라우드니스 (Loudness)';
+  String get loudness => 'ë¼ìš°ë“œë‹ˆìŠ¤ (Loudness)';
 
   @override
-  String get speechiness => '회화성 (Speechniss)';
+  String get speechiness => 'íšŒí™”ì„± (Speechniss)';
 
   @override
-  String get valence => '감정가 (Valence)';
+  String get valence => 'ê°ì •ê°€ (Valence)';
 
   @override
-  String get popularity => '인기도 (Popularity)';
+  String get popularity => 'ì¸ê¸°ë„ (Popularity)';
 
   @override
-  String get key => '조성 (키)';
+  String get key => 'ì¡°ì„± (í‚¤)';
 
   @override
-  String get duration => '길이 (초)';
+  String get duration => 'ê¸¸ì´ (ì´ˆ)';
 
   @override
-  String get tempo => '템포 (BPM)';
+  String get tempo => 'í…œí¬ (BPM)';
 
   @override
-  String get mode => '장조';
+  String get mode => 'ìž¥ì¡°';
 
   @override
-  String get time_signature => '박자';
+  String get time_signature => 'ë°•ìž';
 
   @override
-  String get short => '짧음';
+  String get short => 'ì§§ìŒ';
 
   @override
-  String get medium => '중간';
+  String get medium => 'ì¤‘ê°„';
 
   @override
-  String get long => '긺';
+  String get long => 'ê¸º';
 
   @override
-  String get min => '최소';
+  String get min => 'ìµœì†Œ';
 
   @override
-  String get max => '최대';
+  String get max => 'ìµœëŒ€';
 
   @override
-  String get target => '목표';
+  String get target => 'ëª©í‘œ';
 
   @override
-  String get moderate => '보통';
+  String get moderate => 'ë³´í†µ';
 
   @override
-  String get deselect_all => '모두 선택해제';
+  String get deselect_all => 'ëª¨ë‘ ì„ íƒí•´ì œ';
 
   @override
-  String get select_all => '모두 선택';
+  String get select_all => 'ëª¨ë‘ ì„ íƒ';
 
   @override
-  String get are_you_sure => '괜찮겠습니까?';
+  String get are_you_sure => 'ê´œì°®ê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get generating_playlist => '커스텀 플레이리스트를 생성하는 중...';
+  String get generating_playlist =>
+      'ì»¤ìŠ¤í…€ í”Œë ˆì´ë¦¬ìŠ¤íŠ¸ë¥¼ ìƒì„±í•˜ëŠ” ì¤‘...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '$count 곡이 선택되었습니다.';
+    return '$count ê³¡ì´ ì„ íƒë˜ì—ˆìŠµë‹ˆë‹¤.';
   }
 
   @override
   String get download_warning =>
-      '모든 트랙을 대량으로 다운로드하는 것은 명백한 불법 복제이며 음악 창작 사회에 피해를 입히는 행위입니다. 이 점을 알아주셨으면 합니다. 항상 아티스트의 노력을 존중하고 응원해 주세요.';
+      'ëª¨ë“  íŠ¸ëž™ì„ ëŒ€ëŸ‰ìœ¼ë¡œ ë‹¤ìš´ë¡œë“œí•˜ëŠ” ê²ƒì€ ëª…ë°±í•œ ë¶ˆë²• ë³µì œì´ë©° ìŒì•… ì°½ìž‘ ì‚¬íšŒì— í”¼í•´ë¥¼ ìž…ížˆëŠ” í–‰ìœ„ìž…ë‹ˆë‹¤. ì´ ì ì„ ì•Œì•„ì£¼ì…¨ìœ¼ë©´ í•©ë‹ˆë‹¤. í•­ìƒ ì•„í‹°ìŠ¤íŠ¸ì˜ ë…¸ë ¥ì„ ì¡´ì¤‘í•˜ê³  ì‘ì›í•´ ì£¼ì„¸ìš”.';
 
   @override
   String get download_ip_ban_warning =>
-      '참고로, 평소보다 과도한 다운로드 요청으로 인해 YouTube에서 IP가 차단될 수 있습니다. IP 차단은 해당 IP 기기에서 최소 2~3개월 동안 (로그인한 상태에서도) YouTube를 사용할 수 없음을 의미합니다. 그리고 이런 일이 발생하더라도 스포튜브는 어떠한 책임도 지지 않습니다.';
+      'ì°¸ê³ ë¡œ, í‰ì†Œë³´ë‹¤ ê³¼ë„í•œ ë‹¤ìš´ë¡œë“œ ìš”ì²­ìœ¼ë¡œ ì¸í•´ YouTubeì—ì„œ IPê°€ ì°¨ë‹¨ë  ìˆ˜ ìžˆìŠµë‹ˆë‹¤. IP ì°¨ë‹¨ì€ í•´ë‹¹ IP ê¸°ê¸°ì—ì„œ ìµœì†Œ 2~3ê°œì›” ë™ì•ˆ (ë¡œê·¸ì¸í•œ ìƒíƒœì—ì„œë„) YouTubeë¥¼ ì‚¬ìš©í•  ìˆ˜ ì—†ìŒì„ ì˜ë¯¸í•©ë‹ˆë‹¤. ê·¸ë¦¬ê³  ì´ëŸ° ì¼ì´ ë°œìƒí•˜ë”ë¼ë„ ìŠ¤í¬íŠœë¸ŒëŠ” ì–´ë– í•œ ì±…ìž„ë„ ì§€ì§€ ì•ŠìŠµë‹ˆë‹¤.';
 
   @override
-  String get by_clicking_accept_terms => '\'동의\'를 클릭하면 다음 약관에 동의하는 것입니다:';
+  String get by_clicking_accept_terms =>
+      '\'ë™ì˜\'ë¥¼ í´ë¦­í•˜ë©´ ë‹¤ìŒ ì•½ê´€ì— ë™ì˜í•˜ëŠ” ê²ƒìž…ë‹ˆë‹¤:';
 
   @override
-  String get download_agreement_1 => '알고 있습니다. 전 나쁜 사람입니다.';
+  String get download_agreement_1 =>
+      'ì•Œê³  ìžˆìŠµë‹ˆë‹¤. ì „ ë‚˜ìœ ì‚¬ëžŒìž…ë‹ˆë‹¤.';
 
   @override
   String get download_agreement_2 =>
-      '제가 할 수 있는 모든 곳에서 아티스트를 지원할 것이며, 저는 그들의 작품을 살 돈이 없기 때문에 이렇게 하는 것뿐입니다.';
+      'ì œê°€ í•  ìˆ˜ ìžˆëŠ” ëª¨ë“  ê³³ì—ì„œ ì•„í‹°ìŠ¤íŠ¸ë¥¼ ì§€ì›í•  ê²ƒì´ë©°, ì €ëŠ” ê·¸ë“¤ì˜ ìž‘í’ˆì„ ì‚´ ëˆì´ ì—†ê¸° ë•Œë¬¸ì— ì´ë ‡ê²Œ í•˜ëŠ” ê²ƒë¿ìž…ë‹ˆë‹¤.';
 
   @override
   String get download_agreement_3 =>
-      '본인은 YouTube에서 내 IP가 차단될 수 있음을 완전히 알고 있으며, 현재 내 행동으로 인해 발생하는 사고에 대해 Soulful Bhakti 또는 그 소유자/기여자에게 책임을 묻지 않습니다.';
+      'ë³¸ì¸ì€ YouTubeì—ì„œ ë‚´ IPê°€ ì°¨ë‹¨ë  ìˆ˜ ìžˆìŒì„ ì™„ì „ížˆ ì•Œê³  ìžˆìœ¼ë©°, í˜„ìž¬ ë‚´ í–‰ë™ìœ¼ë¡œ ì¸í•´ ë°œìƒí•˜ëŠ” ì‚¬ê³ ì— ëŒ€í•´ Soulful Bhakti ë˜ëŠ” ê·¸ ì†Œìœ ìž/ê¸°ì—¬ìžì—ê²Œ ì±…ìž„ì„ ë¬»ì§€ ì•ŠìŠµë‹ˆë‹¤.';
 
   @override
-  String get decline => '거절';
+  String get decline => 'ê±°ì ˆ';
 
   @override
-  String get accept => '동의';
+  String get accept => 'ë™ì˜';
 
   @override
-  String get details => '상세';
+  String get details => 'ìƒì„¸';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => '채널';
+  String get channel => 'ì±„ë„';
 
   @override
-  String get likes => '좋아요';
+  String get likes => 'ì¢‹ì•„ìš”';
 
   @override
-  String get dislikes => '싫어요';
+  String get dislikes => 'ì‹«ì–´ìš”';
 
   @override
-  String get views => '조회수';
+  String get views => 'ì¡°íšŒìˆ˜';
 
   @override
-  String get streamUrl => '스트림 URL';
+  String get streamUrl => 'ìŠ¤íŠ¸ë¦¼ URL';
 
   @override
-  String get stop => '중지';
+  String get stop => 'ì¤‘ì§€';
 
   @override
-  String get sort_newest => '최근에 추가된 순으로 정렬';
+  String get sort_newest => 'ìµœê·¼ì— ì¶”ê°€ëœ ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sort_oldest => '예전에 추가된 순으로 정렬';
+  String get sort_oldest => 'ì˜ˆì „ì— ì¶”ê°€ëœ ìˆœìœ¼ë¡œ ì •ë ¬';
 
   @override
-  String get sleep_timer => '취침 타이머';
+  String get sleep_timer => 'ì·¨ì¹¨ íƒ€ì´ë¨¸';
 
   @override
   String mins(Object minutes) {
-    return '$minutes 분';
+    return '$minutes ë¶„';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours 시간';
+    return '$hours ì‹œê°„';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours 시간';
+    return '$hours ì‹œê°„';
   }
 
   @override
-  String get custom_hours => '시간 설정';
+  String get custom_hours => 'ì‹œê°„ ì„¤ì •';
 
   @override
-  String get logs => '로그';
+  String get logs => 'ë¡œê·¸';
 
   @override
-  String get developers => '개발';
+  String get developers => 'ê°œë°œ';
 
   @override
-  String get not_logged_in => '로그인하지 않았습니다';
+  String get not_logged_in => 'ë¡œê·¸ì¸í•˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤';
 
   @override
-  String get search_mode => '검색 모드';
+  String get search_mode => 'ê²€ìƒ‰ ëª¨ë“œ';
 
   @override
-  String get audio_source => '오디오 출처';
+  String get audio_source => 'ì˜¤ë””ì˜¤ ì¶œì²˜';
 
   @override
-  String get ok => '알겠습니다';
+  String get ok => 'ì•Œê² ìŠµë‹ˆë‹¤';
 
   @override
-  String get failed_to_encrypt => '암호화에 실패했습니다';
+  String get failed_to_encrypt => 'ì•”í˜¸í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti는 암호화를 사용하여 데이터를 안전하게 저장합니다. 하지만 그렇게 하지 못했습니다. 따라서 안전하지 않은 저장소로 대체됩니다.\n리눅스를 사용하는 경우, 비밀 서비스(gnome-keyring, kde-wallet, keepassxc 등)가 설치되어 있는지 확인하세요.';
+      'Soulful BhaktiëŠ” ì•”í˜¸í™”ë¥¼ ì‚¬ìš©í•˜ì—¬ ë°ì´í„°ë¥¼ ì•ˆì „í•˜ê²Œ ì €ìž¥í•©ë‹ˆë‹¤. í•˜ì§€ë§Œ ê·¸ë ‡ê²Œ í•˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. ë”°ë¼ì„œ ì•ˆì „í•˜ì§€ ì•Šì€ ì €ìž¥ì†Œë¡œ ëŒ€ì²´ë©ë‹ˆë‹¤.\në¦¬ëˆ…ìŠ¤ë¥¼ ì‚¬ìš©í•˜ëŠ” ê²½ìš°, ë¹„ë°€ ì„œë¹„ìŠ¤(gnome-keyring, kde-wallet, keepassxc ë“±)ê°€ ì„¤ì¹˜ë˜ì–´ ìžˆëŠ”ì§€ í™•ì¸í•˜ì„¸ìš”.';
 
   @override
-  String get querying_info => '정보를 얻는 중...';
+  String get querying_info => 'ì •ë³´ë¥¼ ì–»ëŠ” ì¤‘...';
 
   @override
-  String get piped_api_down => 'Piped API가 응답하지 않습니다';
+  String get piped_api_down => 'Piped APIê°€ ì‘ë‹µí•˜ì§€ ì•ŠìŠµë‹ˆë‹¤';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Piped 인스턴스 $pipedInstance가 현재 다운되었습니다.\n\n인스턴스를 변경하거나 \'API 유형\'을 공식 YouTube API로 변경하세요.\n\n변경 후 앱을 다시 시작해야 합니다.';
+    return 'Piped ì¸ìŠ¤í„´ìŠ¤ $pipedInstanceê°€ í˜„ìž¬ ë‹¤ìš´ë˜ì—ˆìŠµë‹ˆë‹¤.\n\nì¸ìŠ¤í„´ìŠ¤ë¥¼ ë³€ê²½í•˜ê±°ë‚˜ \'API ìœ í˜•\'ì„ ê³µì‹ YouTube APIë¡œ ë³€ê²½í•˜ì„¸ìš”.\n\në³€ê²½ í›„ ì•±ì„ ë‹¤ì‹œ ì‹œìž‘í•´ì•¼ í•©ë‹ˆë‹¤.';
   }
 
   @override
-  String get you_are_offline => '현재 오프라인입니다';
+  String get you_are_offline => 'í˜„ìž¬ ì˜¤í”„ë¼ì¸ìž…ë‹ˆë‹¤';
 
   @override
-  String get connection_restored => '인터넷에 다시 연결되었습니다';
+  String get connection_restored => 'ì¸í„°ë„·ì— ë‹¤ì‹œ ì—°ê²°ë˜ì—ˆìŠµë‹ˆë‹¤';
 
   @override
-  String get use_system_title_bar => '시스템 타이틀바를 사용';
+  String get use_system_title_bar => 'ì‹œìŠ¤í…œ íƒ€ì´í‹€ë°”ë¥¼ ì‚¬ìš©';
 
   @override
-  String get crunching_results => '결과를 처리하는 중...';
+  String get crunching_results => 'ê²°ê³¼ë¥¼ ì²˜ë¦¬í•˜ëŠ” ì¤‘...';
 
   @override
-  String get search_to_get_results => '결과를 얻으려면 검색해주세요';
+  String get search_to_get_results =>
+      'ê²°ê³¼ë¥¼ ì–»ìœ¼ë ¤ë©´ ê²€ìƒ‰í•´ì£¼ì„¸ìš”';
 
   @override
-  String get use_amoled_mode => 'AMOLED모드를 사용';
+  String get use_amoled_mode => 'AMOLEDëª¨ë“œë¥¼ ì‚¬ìš©';
 
   @override
-  String get pitch_dark_theme => '검정색 기반의 어두운 테마';
+  String get pitch_dark_theme => 'ê²€ì •ìƒ‰ ê¸°ë°˜ì˜ ì–´ë‘ìš´ í…Œë§ˆ';
 
   @override
-  String get normalize_audio => '오디오 노멀라이즈';
+  String get normalize_audio => 'ì˜¤ë””ì˜¤ ë…¸ë©€ë¼ì´ì¦ˆ';
 
   @override
-  String get change_cover => '커버 변경';
+  String get change_cover => 'ì»¤ë²„ ë³€ê²½';
 
   @override
-  String get add_cover => '커버 추가';
+  String get add_cover => 'ì»¤ë²„ ì¶”ê°€';
 
   @override
-  String get restore_defaults => '기본값으로 복원';
+  String get restore_defaults => 'ê¸°ë³¸ê°’ìœ¼ë¡œ ë³µì›';
 
   @override
   String get restore_defaults_confirmation =>
-      '모든 설정이 기본값으로 재설정됩니다. 이 작업은 취소할 수 없습니다.';
+      'ëª¨ë“  ì„¤ì •ì´ ê¸°ë³¸ê°’ìœ¼ë¡œ ìž¬ì„¤ì •ë©ë‹ˆë‹¤. ì´ ìž‘ì—…ì€ ì·¨ì†Œí•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.';
 
   @override
-  String get streaming_music_format => '스트리밍 음악 포맷';
+  String get streaming_music_format => 'ìŠ¤íŠ¸ë¦¬ë° ìŒì•… í¬ë§·';
 
   @override
-  String get streaming_music_quality => '스트리밍 음질';
+  String get streaming_music_quality => 'ìŠ¤íŠ¸ë¦¬ë° ìŒì§ˆ';
 
   @override
-  String get connect => '연결';
+  String get connect => 'ì—°ê²°';
 
   @override
-  String get disconnect => '연결 해제';
+  String get disconnect => 'ì—°ê²° í•´ì œ';
 
   @override
-  String get username => '사용자명';
+  String get username => 'ì‚¬ìš©ìžëª…';
 
   @override
-  String get password => '비밀번호';
+  String get password => 'ë¹„ë°€ë²ˆí˜¸';
 
   @override
-  String get login => '로그인';
+  String get login => 'ë¡œê·¸ì¸';
 
   @override
-  String get sign_in => '로그인';
+  String get sign_in => 'ë¡œê·¸ì¸';
 
   @override
-  String get sign_up => '가입하기';
+  String get sign_up => 'ê°€ìž…í•˜ê¸°';
 
   @override
-  String get sign_out => '로그아웃';
+  String get sign_out => 'ë¡œê·¸ì•„ì›ƒ';
 
   @override
-  String get verify => '확인';
+  String get verify => 'í™•ì¸';
 
   @override
-  String get create_account => '계정 만들기';
+  String get create_account => 'ê³„ì • ë§Œë“¤ê¸°';
 
   @override
-  String get already_have_account => '이미 계정이 있으신가요? 로그인';
+  String get already_have_account =>
+      'ì´ë¯¸ ê³„ì •ì´ ìžˆìœ¼ì‹ ê°€ìš”? ë¡œê·¸ì¸';
 
   @override
-  String get dont_have_account => '계정이 없으신가요? 가입하기';
+  String get dont_have_account => 'ê³„ì •ì´ ì—†ìœ¼ì‹ ê°€ìš”? ê°€ìž…í•˜ê¸°';
 
   @override
   String signed_in_as(Object userId) {
-    return '$userId(으)로 로그인됨';
+    return '$userId(ìœ¼)ë¡œ ë¡œê·¸ì¸ë¨';
   }
 
   @override
-  String get verification_code => '인증 코드';
+  String get verification_code => 'ì¸ì¦ ì½”ë“œ';
 
   @override
-  String get verification_code_hint => '이메일로 전송된 코드를 입력하세요';
+  String get verification_code_hint =>
+      'ì´ë©”ì¼ë¡œ ì „ì†¡ëœ ì½”ë“œë¥¼ ìž…ë ¥í•˜ì„¸ìš”';
 
   @override
-  String get verify_email_code => '이메일로 인증 코드를 보냈습니다';
+  String get verify_email_code =>
+      'ì´ë©”ì¼ë¡œ ì¸ì¦ ì½”ë“œë¥¼ ë³´ëƒˆìŠµë‹ˆë‹¤';
 
   @override
-  String get go_to_album => '앨범으로 이동';
+  String get go_to_album => 'ì•¨ë²”ìœ¼ë¡œ ì´ë™';
 
   @override
   String get discord_rich_presence => 'Discord Rich Presence';
 
   @override
-  String get browse_all => '모두 탐색';
+  String get browse_all => 'ëª¨ë‘ íƒìƒ‰';
 
   @override
-  String get genres => '장르';
+  String get genres => 'ìž¥ë¥´';
 
   @override
-  String get explore_genres => '장르 탐색';
+  String get explore_genres => 'ìž¥ë¥´ íƒìƒ‰';
 
   @override
-  String get friends => '친구';
+  String get friends => 'ì¹œêµ¬';
 
   @override
-  String get no_lyrics_available => '죄송하지만 이 곡의 가사를 찾지 못했습니다';
+  String get no_lyrics_available =>
+      'ì£„ì†¡í•˜ì§€ë§Œ ì´ ê³¡ì˜ ê°€ì‚¬ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤';
 
   @override
-  String get start_a_radio => '라디오 시작';
+  String get start_a_radio => 'ë¼ë””ì˜¤ ì‹œìž‘';
 
   @override
-  String get how_to_start_radio => '라디오를 어떻게 시작하시겠습니까?';
+  String get how_to_start_radio =>
+      'ë¼ë””ì˜¤ë¥¼ ì–´ë–»ê²Œ ì‹œìž‘í•˜ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get replace_queue_question => '현재 큐를 대체하시겠습니까 아니면 추가하시겠습니까?';
+  String get replace_queue_question =>
+      'í˜„ìž¬ íë¥¼ ëŒ€ì²´í•˜ì‹œê² ìŠµë‹ˆê¹Œ ì•„ë‹ˆë©´ ì¶”ê°€í•˜ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get endless_playback => '끝없는 재생';
+  String get endless_playback => 'ëì—†ëŠ” ìž¬ìƒ';
 
   @override
-  String get delete_playlist => '재생 목록 삭제';
+  String get delete_playlist => 'ìž¬ìƒ ëª©ë¡ ì‚­ì œ';
 
   @override
-  String get delete_playlist_confirmation => '이 재생 목록을 삭제하시겠습니까?';
+  String get delete_playlist_confirmation =>
+      'ì´ ìž¬ìƒ ëª©ë¡ì„ ì‚­ì œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get local_tracks => '로컬 트랙';
+  String get local_tracks => 'ë¡œì»¬ íŠ¸ëž™';
 
   @override
-  String get local_tab => '로컬';
+  String get local_tab => 'ë¡œì»¬';
 
   @override
-  String get song_link => '곡 링크';
+  String get song_link => 'ê³¡ ë§í¬';
 
   @override
-  String get skip_this_nonsense => '이 허튼소리 건너뛰기';
+  String get skip_this_nonsense => 'ì´ í—ˆíŠ¼ì†Œë¦¬ ê±´ë„ˆë›°ê¸°';
 
   @override
-  String get freedom_of_music => '“음악의 자유”';
+  String get freedom_of_music => 'â€œìŒì•…ì˜ ìžìœ â€';
 
   @override
-  String get freedom_of_music_palm => '“손바닥 안의 음악의 자유”';
+  String get freedom_of_music_palm => 'â€œì†ë°”ë‹¥ ì•ˆì˜ ìŒì•…ì˜ ìžìœ â€';
 
   @override
-  String get get_started => '시작합시다';
+  String get get_started => 'ì‹œìž‘í•©ì‹œë‹¤';
 
   @override
-  String get youtube_source_description => '추천되며 가장 잘 작동합니다.';
+  String get youtube_source_description =>
+      'ì¶”ì²œë˜ë©° ê°€ìž¥ ìž˜ ìž‘ë™í•©ë‹ˆë‹¤.';
 
   @override
   String get piped_source_description =>
-      '자유로운 기분이 듭니까? YouTube와 같지만 훨씬 더 무료합니다.';
+      'ìžìœ ë¡œìš´ ê¸°ë¶„ì´ ë“­ë‹ˆê¹Œ? YouTubeì™€ ê°™ì§€ë§Œ í›¨ì”¬ ë” ë¬´ë£Œí•©ë‹ˆë‹¤.';
 
   @override
-  String get jiosaavn_source_description => '남아시아 지역에 최적입니다.';
+  String get jiosaavn_source_description =>
+      'ë‚¨ì•„ì‹œì•„ ì§€ì—­ì— ìµœì ìž…ë‹ˆë‹¤.';
 
   @override
-  String get invidious_source_description => 'Piped와 비슷하지만 가용성이 높습니다.';
+  String get invidious_source_description =>
+      'Pipedì™€ ë¹„ìŠ·í•˜ì§€ë§Œ ê°€ìš©ì„±ì´ ë†’ìŠµë‹ˆë‹¤.';
 
   @override
   String highest_quality(Object quality) {
-    return '최고 품질: $quality';
+    return 'ìµœê³  í’ˆì§ˆ: $quality';
   }
 
   @override
-  String get select_audio_source => '오디오 소스 선택';
+  String get select_audio_source => 'ì˜¤ë””ì˜¤ ì†ŒìŠ¤ ì„ íƒ';
 
   @override
-  String get endless_playback_description => '자동으로 새로운 노래를 대기열의 끝에 추가';
+  String get endless_playback_description =>
+      'ìžë™ìœ¼ë¡œ ìƒˆë¡œìš´ ë…¸ëž˜ë¥¼ ëŒ€ê¸°ì—´ì˜ ëì— ì¶”ê°€';
 
   @override
-  String get choose_your_region => '지역 선택';
+  String get choose_your_region => 'ì§€ì—­ ì„ íƒ';
 
   @override
   String get choose_your_region_description =>
-      '이것은 Soulful Bhakti가 위치에 맞는 콘텐츠를 표시하는 데 도움이 됩니다.';
+      'ì´ê²ƒì€ Soulful Bhaktiê°€ ìœ„ì¹˜ì— ë§žëŠ” ì½˜í…ì¸ ë¥¼ í‘œì‹œí•˜ëŠ” ë° ë„ì›€ì´ ë©ë‹ˆë‹¤.';
 
   @override
-  String get choose_your_language => '언어 선택';
+  String get choose_your_language => 'ì–¸ì–´ ì„ íƒ';
 
   @override
-  String get help_project_grow => '이 프로젝트 성장에 도움을 주세요';
+  String get help_project_grow =>
+      'ì´ í”„ë¡œì íŠ¸ ì„±ìž¥ì— ë„ì›€ì„ ì£¼ì„¸ìš”';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti는 오픈 소스 프로젝트입니다. 프로젝트에 기여하거나 버그를 보고하거나 새로운 기능을 제안하여이 프로젝트의 성장에 도움을 줄 수 있습니다.';
+      'Soulful BhaktiëŠ” ì˜¤í”ˆ ì†ŒìŠ¤ í”„ë¡œì íŠ¸ìž…ë‹ˆë‹¤. í”„ë¡œì íŠ¸ì— ê¸°ì—¬í•˜ê±°ë‚˜ ë²„ê·¸ë¥¼ ë³´ê³ í•˜ê±°ë‚˜ ìƒˆë¡œìš´ ê¸°ëŠ¥ì„ ì œì•ˆí•˜ì—¬ì´ í”„ë¡œì íŠ¸ì˜ ì„±ìž¥ì— ë„ì›€ì„ ì¤„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤.';
 
   @override
-  String get contribute_on_github => 'GitHub에서 기여하기';
+  String get contribute_on_github => 'GitHubì—ì„œ ê¸°ì—¬í•˜ê¸°';
 
   @override
-  String get donate_on_open_collective => 'Open Collective에 기부하기';
+  String get donate_on_open_collective => 'Open Collectiveì— ê¸°ë¶€í•˜ê¸°';
 
   @override
-  String get browse_anonymously => '익명으로 둘러보기';
+  String get browse_anonymously => 'ìµëª…ìœ¼ë¡œ ë‘˜ëŸ¬ë³´ê¸°';
 
   @override
-  String get enable_connect => '연결 활성화';
+  String get enable_connect => 'ì—°ê²° í™œì„±í™”';
 
   @override
-  String get enable_connect_description => '다른 장치에서 Soulful Bhakti 제어';
+  String get enable_connect_description =>
+      'ë‹¤ë¥¸ ìž¥ì¹˜ì—ì„œ Soulful Bhakti ì œì–´';
 
   @override
-  String get devices => '장치';
+  String get devices => 'ìž¥ì¹˜';
 
   @override
-  String get select => '선택';
+  String get select => 'ì„ íƒ';
 
   @override
   String connect_client_alert(Object client) {
-    return '$client님에 의해 제어되고 있습니다';
+    return '$clientë‹˜ì— ì˜í•´ ì œì–´ë˜ê³  ìžˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get this_device => '이 장치';
+  String get this_device => 'ì´ ìž¥ì¹˜';
 
   @override
-  String get remote => '원격';
+  String get remote => 'ì›ê²©';
 
   @override
-  String get stats => '통계';
+  String get stats => 'í†µê³„';
 
   @override
   String and_n_more(Object count) {
-    return '그리고 $count개 더';
+    return 'ê·¸ë¦¬ê³  $countê°œ ë”';
   }
 
   @override
-  String get recently_played => '최근 재생';
+  String get recently_played => 'ìµœê·¼ ìž¬ìƒ';
 
   @override
-  String get browse_more => '더 보기';
+  String get browse_more => 'ë” ë³´ê¸°';
 
   @override
-  String get no_title => '제목 없음';
+  String get no_title => 'ì œëª© ì—†ìŒ';
 
   @override
-  String get not_playing => '재생 중이 아님';
+  String get not_playing => 'ìž¬ìƒ ì¤‘ì´ ì•„ë‹˜';
 
   @override
-  String get epic_failure => '서사적 실패!';
+  String get epic_failure => 'ì„œì‚¬ì  ì‹¤íŒ¨!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '$tracks_length 곡을 대기열에 추가했습니다';
+    return '$tracks_length ê³¡ì„ ëŒ€ê¸°ì—´ì— ì¶”ê°€í–ˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti에 업데이트가 있습니다';
+  String get spotube_has_an_update =>
+      'Soulful Bhaktiì— ì—…ë°ì´íŠ¸ê°€ ìžˆìŠµë‹ˆë‹¤';
 
   @override
-  String get download_now => '지금 다운로드';
+  String get download_now => 'ì§€ê¸ˆ ë‹¤ìš´ë¡œë“œ';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum이 출시되었습니다';
+    return 'Soulful Bhakti Nightly $nightlyBuildNumì´ ì¶œì‹œë˜ì—ˆìŠµë‹ˆë‹¤';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version이 출시되었습니다';
+    return 'Soulful Bhakti v$versionì´ ì¶œì‹œë˜ì—ˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get read_the_latest => '최신 ';
+  String get read_the_latest => 'ìµœì‹  ';
 
   @override
-  String get release_notes => '릴리스 노트';
+  String get release_notes => 'ë¦´ë¦¬ìŠ¤ ë…¸íŠ¸';
 
   @override
-  String get pick_color_scheme => '색상 테마 선택';
+  String get pick_color_scheme => 'ìƒ‰ìƒ í…Œë§ˆ ì„ íƒ';
 
   @override
-  String get save => '저장';
+  String get save => 'ì €ìž¥';
 
   @override
-  String get choose_the_device => '디바이스 선택:';
+  String get choose_the_device => 'ë””ë°”ì´ìŠ¤ ì„ íƒ:';
 
   @override
   String get multiple_device_connected =>
-      '여러 디바이스가 연결되어 있습니다.\n이 작업을 실행할 디바이스를 선택하세요';
+      'ì—¬ëŸ¬ ë””ë°”ì´ìŠ¤ê°€ ì—°ê²°ë˜ì–´ ìžˆìŠµë‹ˆë‹¤.\nì´ ìž‘ì—…ì„ ì‹¤í–‰í•  ë””ë°”ì´ìŠ¤ë¥¼ ì„ íƒí•˜ì„¸ìš”';
 
   @override
-  String get nothing_found => '찾을 수 없음';
+  String get nothing_found => 'ì°¾ì„ ìˆ˜ ì—†ìŒ';
 
   @override
-  String get the_box_is_empty => '상자가 비어 있습니다';
+  String get the_box_is_empty => 'ìƒìžê°€ ë¹„ì–´ ìžˆìŠµë‹ˆë‹¤';
 
   @override
-  String get top_artists => '톱 아티스트';
+  String get top_artists => 'í†± ì•„í‹°ìŠ¤íŠ¸';
 
   @override
-  String get top_albums => '톱 앨범';
+  String get top_albums => 'í†± ì•¨ë²”';
 
   @override
-  String get this_week => '이번 주';
+  String get this_week => 'ì´ë²ˆ ì£¼';
 
   @override
-  String get this_month => '이번 달';
+  String get this_month => 'ì´ë²ˆ ë‹¬';
 
   @override
-  String get last_6_months => '지난 6개월';
+  String get last_6_months => 'ì§€ë‚œ 6ê°œì›”';
 
   @override
-  String get this_year => '올해';
+  String get this_year => 'ì˜¬í•´';
 
   @override
-  String get last_2_years => '지난 2년';
+  String get last_2_years => 'ì§€ë‚œ 2ë…„';
 
   @override
-  String get all_time => '모든 시간';
+  String get all_time => 'ëª¨ë“  ì‹œê°„';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '$providerName 제공';
+    return '$providerName ì œê³µ';
   }
 
   @override
-  String get email => '이메일';
+  String get email => 'ì´ë©”ì¼';
 
   @override
-  String get send_code => '코드 보내기';
+  String get send_code => 'ì½”ë“œ ë³´ë‚´ê¸°';
 
   @override
-  String get change_identifier => '다른 이메일 사용';
+  String get change_identifier => 'ë‹¤ë¥¸ ì´ë©”ì¼ ì‚¬ìš©';
 
   @override
-  String get sign_in_with_otp => '일회용 코드로 로그인';
+  String get sign_in_with_otp => 'ì¼íšŒìš© ì½”ë“œë¡œ ë¡œê·¸ì¸';
 
   @override
-  String get enter_otp_sent => '보내드린 코드를 입력하세요';
+  String get enter_otp_sent => 'ë³´ë‚´ë“œë¦° ì½”ë“œë¥¼ ìž…ë ¥í•˜ì„¸ìš”';
 
   @override
-  String get verify_email_reminder => '계정을 안전하게 보호하려면 이메일 주소를 인증하세요';
+  String get verify_email_reminder =>
+      'ê³„ì •ì„ ì•ˆì „í•˜ê²Œ ë³´í˜¸í•˜ë ¤ë©´ ì´ë©”ì¼ ì£¼ì†Œë¥¼ ì¸ì¦í•˜ì„¸ìš”';
 
   @override
-  String get verify_now => '지금 인증하기';
+  String get verify_now => 'ì§€ê¸ˆ ì¸ì¦í•˜ê¸°';
 
   @override
-  String get enter_email_to_verify => '인증 코드를 받으려면 이메일 주소를 입력하세요';
+  String get enter_email_to_verify =>
+      'ì¸ì¦ ì½”ë“œë¥¼ ë°›ìœ¼ë ¤ë©´ ì´ë©”ì¼ ì£¼ì†Œë¥¼ ìž…ë ¥í•˜ì„¸ìš”';
 
   @override
-  String get profile_followers => '팔로워';
+  String get profile_followers => 'íŒ”ë¡œì›Œ';
 
   @override
-  String get birthday => '생일';
+  String get birthday => 'ìƒì¼';
 
   @override
-  String get subscription => '구독';
+  String get subscription => 'êµ¬ë…';
 
   @override
-  String get not_born => '태어나지 않음';
+  String get not_born => 'íƒœì–´ë‚˜ì§€ ì•ŠìŒ';
 
   @override
-  String get hacker => '해커';
+  String get hacker => 'í•´ì»¤';
 
   @override
-  String get profile => '프로필';
+  String get profile => 'í”„ë¡œí•„';
 
   @override
-  String get no_name => '이름 없음';
+  String get no_name => 'ì´ë¦„ ì—†ìŒ';
 
   @override
-  String get edit => '편집';
+  String get edit => 'íŽ¸ì§‘';
 
   @override
-  String get user_profile => '사용자 프로필';
+  String get user_profile => 'ì‚¬ìš©ìž í”„ë¡œí•„';
 
   @override
   String count_plays(Object count) {
-    return '$count 재생';
+    return '$count ìž¬ìƒ';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*이것은 Spotify의 스트림당 지급액\n\$0.003에서 \$0.005를 기준으로 계산된 것입니다.\n이것은 사용자가 Spotify에서 곡을 들었을 때\n아티스트에게 지불했을 금액에 대한 통찰을 제공하기 위한\n가상의 계산입니다.';
+      '*ì´ê²ƒì€ Spotifyì˜ ìŠ¤íŠ¸ë¦¼ë‹¹ ì§€ê¸‰ì•¡\n\$0.003ì—ì„œ \$0.005ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ê³„ì‚°ëœ ê²ƒìž…ë‹ˆë‹¤.\nì´ê²ƒì€ ì‚¬ìš©ìžê°€ Spotifyì—ì„œ ê³¡ì„ ë“¤ì—ˆì„ ë•Œ\nì•„í‹°ìŠ¤íŠ¸ì—ê²Œ ì§€ë¶ˆí–ˆì„ ê¸ˆì•¡ì— ëŒ€í•œ í†µì°°ì„ ì œê³µí•˜ê¸° ìœ„í•œ\nê°€ìƒì˜ ê³„ì‚°ìž…ë‹ˆë‹¤.';
 
   @override
-  String get minutes_listened => '청취한 시간';
+  String get minutes_listened => 'ì²­ì·¨í•œ ì‹œê°„';
 
   @override
-  String get streamed_songs => '스트리밍된 곡';
+  String get streamed_songs => 'ìŠ¤íŠ¸ë¦¬ë°ëœ ê³¡';
 
   @override
   String count_streams(Object count) {
-    return '$count 스트림';
+    return '$count ìŠ¤íŠ¸ë¦¼';
   }
 
   @override
-  String get owned_by_you => '당신이 소유';
+  String get owned_by_you => 'ë‹¹ì‹ ì´ ì†Œìœ ';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl를 클립보드에 복사했습니다';
+    return '$shareUrlë¥¼ í´ë¦½ë³´ë“œì— ë³µì‚¬í–ˆìŠµë‹ˆë‹¤';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*이것은 온라인 음악 스트리밍 플랫폼의 스트림당 평균 지불액인 \$0.003에서 \$0.005를 기준으로 계산됩니다. 이것은 사용자가 다른 음악 스트리밍 플랫폼에서 노래를 들었다면 아티스트에게 얼마를 지불했을지에 대한 통찰력을 제공하기 위한 가상 계산입니다.';
+      '*ì´ê²ƒì€ ì˜¨ë¼ì¸ ìŒì•… ìŠ¤íŠ¸ë¦¬ë° í”Œëž«í¼ì˜ ìŠ¤íŠ¸ë¦¼ë‹¹ í‰ê·  ì§€ë¶ˆì•¡ì¸ \$0.003ì—ì„œ \$0.005ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ê³„ì‚°ë©ë‹ˆë‹¤. ì´ê²ƒì€ ì‚¬ìš©ìžê°€ ë‹¤ë¥¸ ìŒì•… ìŠ¤íŠ¸ë¦¬ë° í”Œëž«í¼ì—ì„œ ë…¸ëž˜ë¥¼ ë“¤ì—ˆë‹¤ë©´ ì•„í‹°ìŠ¤íŠ¸ì—ê²Œ ì–¼ë§ˆë¥¼ ì§€ë¶ˆí–ˆì„ì§€ì— ëŒ€í•œ í†µì°°ë ¥ì„ ì œê³µí•˜ê¸° ìœ„í•œ ê°€ìƒ ê³„ì‚°ìž…ë‹ˆë‹¤.';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes 분';
+    return '$minutes ë¶„';
   }
 
   @override
-  String get summary_minutes => '분';
+  String get summary_minutes => 'ë¶„';
 
   @override
-  String get summary_listened_to_music => '듣는 음악';
+  String get summary_listened_to_music => 'ë“£ëŠ” ìŒì•…';
 
   @override
-  String get summary_songs => '곡';
+  String get summary_songs => 'ê³¡';
 
   @override
-  String get summary_streamed_overall => '전체 스트리밍';
+  String get summary_streamed_overall => 'ì „ì²´ ìŠ¤íŠ¸ë¦¬ë°';
 
   @override
-  String get summary_owed_to_artists => '이번 달 아티스트에게 지급해야 할 금액';
+  String get summary_owed_to_artists =>
+      'ì´ë²ˆ ë‹¬ ì•„í‹°ìŠ¤íŠ¸ì—ê²Œ ì§€ê¸‰í•´ì•¼ í•  ê¸ˆì•¡';
 
   @override
-  String get summary_top_artist => '최고 아티스트\n이 기간';
+  String get summary_top_artist => 'ìµœê³  ì•„í‹°ìŠ¤íŠ¸\nì´ ê¸°ê°„';
 
   @override
-  String get summary_artists => '아티스트의';
+  String get summary_artists => 'ì•„í‹°ìŠ¤íŠ¸ì˜';
 
   @override
-  String get summary_music_reached_you => '음악이 도달함';
+  String get summary_music_reached_you => 'ìŒì•…ì´ ë„ë‹¬í•¨';
 
   @override
-  String get summary_full_albums => '전체 앨범';
+  String get summary_full_albums => 'ì „ì²´ ì•¨ë²”';
 
   @override
-  String get summary_got_your_love => '당신의 사랑을 받음';
+  String get summary_got_your_love => 'ë‹¹ì‹ ì˜ ì‚¬ëž‘ì„ ë°›ìŒ';
 
   @override
-  String get summary_playlists => '플레이리스트';
+  String get summary_playlists => 'í”Œë ˆì´ë¦¬ìŠ¤íŠ¸';
 
   @override
-  String get summary_were_on_repeat => '반복 재생됨';
+  String get summary_were_on_repeat => 'ë°˜ë³µ ìž¬ìƒë¨';
 
   @override
-  String get summary_listening_share => '청취 점유율';
+  String get summary_listening_share => 'ì²­ì·¨ ì ìœ ìœ¨';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return '가장 많이 재생한 상위 $tracks_length개 트랙의 분포';
+    return 'ê°€ìž¥ ë§Žì´ ìž¬ìƒí•œ ìƒìœ„ $tracks_lengthê°œ íŠ¸ëž™ì˜ ë¶„í¬';
   }
 
   @override
-  String get summary_plays => '재생';
+  String get summary_plays => 'ìž¬ìƒ';
 
   @override
   String get insights => 'Insights';
@@ -1305,305 +1343,323 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return '총 $money';
+    return 'ì´ $money';
   }
 
   @override
-  String get webview_not_found => '웹뷰를 찾을 수 없음';
+  String get webview_not_found => 'ì›¹ë·°ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ';
 
   @override
   String get webview_not_found_description =>
-      '기기에 웹뷰 런타임이 설치되지 않았습니다.\n설치되어 있으면 environment PATH에 있는지 확인하십시오\n\n설치 후 앱을 다시 시작하세요';
+      'ê¸°ê¸°ì— ì›¹ë·° ëŸ°íƒ€ìž„ì´ ì„¤ì¹˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.\nì„¤ì¹˜ë˜ì–´ ìžˆìœ¼ë©´ environment PATHì— ìžˆëŠ”ì§€ í™•ì¸í•˜ì‹­ì‹œì˜¤\n\nì„¤ì¹˜ í›„ ì•±ì„ ë‹¤ì‹œ ì‹œìž‘í•˜ì„¸ìš”';
 
   @override
-  String get unsupported_platform => '지원되지 않는 플랫폼';
+  String get unsupported_platform => 'ì§€ì›ë˜ì§€ ì•ŠëŠ” í”Œëž«í¼';
 
   @override
-  String get cache_music => '음악 캐시';
+  String get cache_music => 'ìŒì•… ìºì‹œ';
 
   @override
-  String get open => '열기';
+  String get open => 'ì—´ê¸°';
 
   @override
-  String get cache_folder => '캐시 폴더';
+  String get cache_folder => 'ìºì‹œ í´ë”';
 
   @override
-  String get export => '내보내기';
+  String get export => 'ë‚´ë³´ë‚´ê¸°';
 
   @override
-  String get clear_cache => '캐시 지우기';
+  String get clear_cache => 'ìºì‹œ ì§€ìš°ê¸°';
 
   @override
-  String get clear_cache_confirmation => '캐시를 지우시겠습니까?';
+  String get clear_cache_confirmation => 'ìºì‹œë¥¼ ì§€ìš°ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get export_cache_files => '캐시된 파일 내보내기';
+  String get export_cache_files => 'ìºì‹œëœ íŒŒì¼ ë‚´ë³´ë‚´ê¸°';
 
   @override
   String found_n_files(Object count) {
-    return '$count개의 파일을 찾았습니다';
+    return '$countê°œì˜ íŒŒì¼ì„ ì°¾ì•˜ìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get export_cache_confirmation => '이 파일들을 내보내시겠습니까';
+  String get export_cache_confirmation =>
+      'ì´ íŒŒì¼ë“¤ì„ ë‚´ë³´ë‚´ì‹œê² ìŠµë‹ˆê¹Œ';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$files개 중 $filesExported개 파일을 내보냈습니다';
+    return '$filesê°œ ì¤‘ $filesExportedê°œ íŒŒì¼ì„ ë‚´ë³´ëƒˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get undo => '실행 취소';
+  String get undo => 'ì‹¤í–‰ ì·¨ì†Œ';
 
   @override
-  String get add_all_to_playlist => '모두 재생 목록에 추가';
+  String get add_all_to_playlist => 'ëª¨ë‘ ìž¬ìƒ ëª©ë¡ì— ì¶”ê°€';
 
   @override
-  String get add_all_to_queue => '모두 큐에 추가';
+  String get add_all_to_queue => 'ëª¨ë‘ íì— ì¶”ê°€';
 
   @override
-  String get play_all_next => '모두 다음에 재생';
+  String get play_all_next => 'ëª¨ë‘ ë‹¤ìŒì— ìž¬ìƒ';
 
   @override
-  String get pause => '일시 정지';
+  String get pause => 'ì¼ì‹œ ì •ì§€';
 
   @override
-  String get view_all => '모두 보기';
+  String get view_all => 'ëª¨ë‘ ë³´ê¸°';
 
   @override
-  String get no_tracks_added_yet => '아직 트랙을 추가하지 않은 것 같습니다';
+  String get no_tracks_added_yet =>
+      'ì•„ì§ íŠ¸ëž™ì„ ì¶”ê°€í•˜ì§€ ì•Šì€ ê²ƒ ê°™ìŠµë‹ˆë‹¤';
 
   @override
-  String get no_tracks => '여기에 트랙이 없는 것 같습니다';
+  String get no_tracks => 'ì—¬ê¸°ì— íŠ¸ëž™ì´ ì—†ëŠ” ê²ƒ ê°™ìŠµë‹ˆë‹¤';
 
   @override
-  String get no_tracks_listened_yet => '아직 아무 것도 듣지 않은 것 같습니다';
+  String get no_tracks_listened_yet =>
+      'ì•„ì§ ì•„ë¬´ ê²ƒë„ ë“£ì§€ ì•Šì€ ê²ƒ ê°™ìŠµë‹ˆë‹¤';
 
   @override
-  String get not_following_artists => '아티스트를 팔로우하지 않고 있습니다';
+  String get not_following_artists =>
+      'ì•„í‹°ìŠ¤íŠ¸ë¥¼ íŒ”ë¡œìš°í•˜ì§€ ì•Šê³  ìžˆìŠµë‹ˆë‹¤';
 
   @override
-  String get no_favorite_albums_yet => '아직 즐겨찾기 앨범을 추가하지 않은 것 같습니다';
+  String get no_favorite_albums_yet =>
+      'ì•„ì§ ì¦ê²¨ì°¾ê¸° ì•¨ë²”ì„ ì¶”ê°€í•˜ì§€ ì•Šì€ ê²ƒ ê°™ìŠµë‹ˆë‹¤';
 
   @override
-  String get no_logs_found => '로그를 찾을 수 없습니다';
+  String get no_logs_found => 'ë¡œê·¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤';
 
   @override
-  String get youtube_engine => 'YouTube 엔진';
+  String get youtube_engine => 'YouTube ì—”ì§„';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine가 설치되지 않았습니다';
+    return '$engineê°€ ì„¤ì¹˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine가 시스템에 설치되지 않았습니다.';
+    return '$engineê°€ ì‹œìŠ¤í…œì— ì„¤ì¹˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'PATH 변수에서 사용할 수 있는지 확인하거나\n아래에 $engine 실행 파일의 절대 경로를 설정하세요';
+    return 'PATH ë³€ìˆ˜ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìžˆëŠ”ì§€ í™•ì¸í•˜ê±°ë‚˜\nì•„ëž˜ì— $engine ì‹¤í–‰ íŒŒì¼ì˜ ì ˆëŒ€ ê²½ë¡œë¥¼ ì„¤ì •í•˜ì„¸ìš”';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/unix와 같은 운영 체제에서는 .zshrc/.bashrc/.bash_profile 등에 경로 설정이 작동하지 않습니다.\n셸 구성 파일에 경로를 설정해야 합니다';
+      'macOS/Linux/unixì™€ ê°™ì€ ìš´ì˜ ì²´ì œì—ì„œëŠ” .zshrc/.bashrc/.bash_profile ë“±ì— ê²½ë¡œ ì„¤ì •ì´ ìž‘ë™í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.\nì…¸ êµ¬ì„± íŒŒì¼ì— ê²½ë¡œë¥¼ ì„¤ì •í•´ì•¼ í•©ë‹ˆë‹¤';
 
   @override
-  String get download => '다운로드';
+  String get download => 'ë‹¤ìš´ë¡œë“œ';
 
   @override
-  String get file_not_found => '파일을 찾을 수 없습니다';
+  String get file_not_found => 'íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤';
 
   @override
-  String get custom => '사용자 정의';
+  String get custom => 'ì‚¬ìš©ìž ì •ì˜';
 
   @override
-  String get add_custom_url => '사용자 정의 URL 추가';
+  String get add_custom_url => 'ì‚¬ìš©ìž ì •ì˜ URL ì¶”ê°€';
 
   @override
-  String get edit_port => '포트 편집';
+  String get edit_port => 'í¬íŠ¸ íŽ¸ì§‘';
 
   @override
   String get port_helper_msg =>
-      '기본값은 -1로 무작위 숫자를 나타냅니다. 방화벽이 구성된 경우 이를 설정하는 것이 좋습니다.';
+      'ê¸°ë³¸ê°’ì€ -1ë¡œ ë¬´ìž‘ìœ„ ìˆ«ìžë¥¼ ë‚˜íƒ€ëƒ…ë‹ˆë‹¤. ë°©í™”ë²½ì´ êµ¬ì„±ëœ ê²½ìš° ì´ë¥¼ ì„¤ì •í•˜ëŠ” ê²ƒì´ ì¢‹ìŠµë‹ˆë‹¤.';
 
   @override
   String connect_request(Object client) {
-    return '$client의 연결을 허용하시겠습니까?';
+    return '$clientì˜ ì—°ê²°ì„ í—ˆìš©í•˜ì‹œê² ìŠµë‹ˆê¹Œ?';
   }
 
   @override
-  String get connection_request_denied => '연결이 거부되었습니다. 사용자가 액세스를 거부했습니다.';
+  String get connection_request_denied =>
+      'ì—°ê²°ì´ ê±°ë¶€ë˜ì—ˆìŠµë‹ˆë‹¤. ì‚¬ìš©ìžê°€ ì•¡ì„¸ìŠ¤ë¥¼ ê±°ë¶€í–ˆìŠµë‹ˆë‹¤.';
 
   @override
-  String get an_error_occurred => '오류가 발생했습니다';
+  String get an_error_occurred => 'ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤';
 
   @override
-  String get copy_to_clipboard => '클립보드에 복사';
+  String get copy_to_clipboard => 'í´ë¦½ë³´ë“œì— ë³µì‚¬';
 
   @override
-  String get view_logs => '로그 보기';
+  String get view_logs => 'ë¡œê·¸ ë³´ê¸°';
 
   @override
-  String get retry => '다시 시도';
+  String get retry => 'ë‹¤ì‹œ ì‹œë„';
 
   @override
   String get no_default_metadata_provider_selected =>
-      '기본 메타데이터 제공자가 설정되지 않았습니다';
+      'ê¸°ë³¸ ë©”íƒ€ë°ì´í„° ì œê³µìžê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤';
 
   @override
-  String get manage_metadata_providers => '메타데이터 제공자 관리';
+  String get manage_metadata_providers => 'ë©”íƒ€ë°ì´í„° ì œê³µìž ê´€ë¦¬';
 
   @override
-  String get open_link_in_browser => '브라우저에서 링크를 여시겠습니까?';
+  String get open_link_in_browser =>
+      'ë¸Œë¼ìš°ì €ì—ì„œ ë§í¬ë¥¼ ì—¬ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
-  String get do_you_want_to_open_the_following_link => '다음 링크를 여시겠습니까';
+  String get do_you_want_to_open_the_following_link =>
+      'ë‹¤ìŒ ë§í¬ë¥¼ ì—¬ì‹œê² ìŠµë‹ˆê¹Œ';
 
   @override
   String get unsafe_url_warning =>
-      '신뢰할 수 없는 출처의 링크를 여는 것은 안전하지 않을 수 있습니다. 주의하세요!\n링크를 클립보드에 복사할 수도 있습니다.';
+      'ì‹ ë¢°í•  ìˆ˜ ì—†ëŠ” ì¶œì²˜ì˜ ë§í¬ë¥¼ ì—¬ëŠ” ê²ƒì€ ì•ˆì „í•˜ì§€ ì•Šì„ ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ì£¼ì˜í•˜ì„¸ìš”!\në§í¬ë¥¼ í´ë¦½ë³´ë“œì— ë³µì‚¬í•  ìˆ˜ë„ ìžˆìŠµë‹ˆë‹¤.';
 
   @override
-  String get copy_link => '링크 복사';
+  String get copy_link => 'ë§í¬ ë³µì‚¬';
 
   @override
-  String get building_your_timeline => '청취 기록을 기반으로 타임라인을 구축하고 있습니다...';
+  String get building_your_timeline =>
+      'ì²­ì·¨ ê¸°ë¡ì„ ê¸°ë°˜ìœ¼ë¡œ íƒ€ìž„ë¼ì¸ì„ êµ¬ì¶•í•˜ê³  ìžˆìŠµë‹ˆë‹¤...';
 
   @override
-  String get official => '공식';
+  String get official => 'ê³µì‹';
 
   @override
   String author_name(Object author) {
-    return '저자: $author';
+    return 'ì €ìž: $author';
   }
 
   @override
-  String get third_party => '타사';
+  String get third_party => 'íƒ€ì‚¬';
 
   @override
-  String get plugin_requires_authentication => '플러그인에 인증이 필요합니다';
+  String get plugin_requires_authentication =>
+      'í”ŒëŸ¬ê·¸ì¸ì— ì¸ì¦ì´ í•„ìš”í•©ë‹ˆë‹¤';
 
   @override
-  String get update_available => '업데이트 사용 가능';
+  String get update_available => 'ì—…ë°ì´íŠ¸ ì‚¬ìš© ê°€ëŠ¥';
 
   @override
-  String get supports_scrobbling => '스크로블링 지원';
+  String get supports_scrobbling => 'ìŠ¤í¬ë¡œë¸”ë§ ì§€ì›';
 
   @override
-  String get plugin_scrobbling_info => '이 플러그인은 음악을 스크로블하여 청취 기록을 생성합니다.';
+  String get plugin_scrobbling_info =>
+      'ì´ í”ŒëŸ¬ê·¸ì¸ì€ ìŒì•…ì„ ìŠ¤í¬ë¡œë¸”í•˜ì—¬ ì²­ì·¨ ê¸°ë¡ì„ ìƒì„±í•©ë‹ˆë‹¤.';
 
   @override
-  String get default_metadata_source => '기본 메타데이터 소스';
+  String get default_metadata_source => 'ê¸°ë³¸ ë©”íƒ€ë°ì´í„° ì†ŒìŠ¤';
 
   @override
-  String get set_default_metadata_source => '기본 메타데이터 소스 설정';
+  String get set_default_metadata_source =>
+      'ê¸°ë³¸ ë©”íƒ€ë°ì´í„° ì†ŒìŠ¤ ì„¤ì •';
 
   @override
-  String get default_audio_source => '기본 오디오 소스';
+  String get default_audio_source => 'ê¸°ë³¸ ì˜¤ë””ì˜¤ ì†ŒìŠ¤';
 
   @override
-  String get set_default_audio_source => '기본 오디오 소스 설정';
+  String get set_default_audio_source => 'ê¸°ë³¸ ì˜¤ë””ì˜¤ ì†ŒìŠ¤ ì„¤ì •';
 
   @override
-  String get set_default => '기본값으로 설정';
+  String get set_default => 'ê¸°ë³¸ê°’ìœ¼ë¡œ ì„¤ì •';
 
   @override
-  String get support => '지원';
+  String get support => 'ì§€ì›';
 
   @override
-  String get support_plugin_development => '플러그인 개발 지원';
+  String get support_plugin_development => 'í”ŒëŸ¬ê·¸ì¸ ê°œë°œ ì§€ì›';
 
   @override
   String can_access_name_api(Object name) {
-    return '- **$name** API에 액세스할 수 있습니다';
+    return '- **$name** APIì— ì•¡ì„¸ìŠ¤í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤';
   }
 
   @override
-  String get do_you_want_to_install_this_plugin => '이 플러그인을 설치하시겠습니까?';
+  String get do_you_want_to_install_this_plugin =>
+      'ì´ í”ŒëŸ¬ê·¸ì¸ì„ ì„¤ì¹˜í•˜ì‹œê² ìŠµë‹ˆê¹Œ?';
 
   @override
   String get third_party_plugin_warning =>
-      '이 플러그인은 타사 리포지토리에서 제공됩니다. 설치하기 전에 출처를 신뢰하는지 확인하세요.';
+      'ì´ í”ŒëŸ¬ê·¸ì¸ì€ íƒ€ì‚¬ ë¦¬í¬ì§€í† ë¦¬ì—ì„œ ì œê³µë©ë‹ˆë‹¤. ì„¤ì¹˜í•˜ê¸° ì „ì— ì¶œì²˜ë¥¼ ì‹ ë¢°í•˜ëŠ”ì§€ í™•ì¸í•˜ì„¸ìš”.';
 
   @override
-  String get author => '저자';
+  String get author => 'ì €ìž';
 
   @override
-  String get this_plugin_can_do_following => '이 플러그인은 다음을 수행할 수 있습니다';
+  String get this_plugin_can_do_following =>
+      'ì´ í”ŒëŸ¬ê·¸ì¸ì€ ë‹¤ìŒì„ ìˆ˜í–‰í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤';
 
   @override
-  String get install => '설치';
+  String get install => 'ì„¤ì¹˜';
 
   @override
-  String get install_a_metadata_provider => '메타데이터 제공자 설치';
+  String get install_a_metadata_provider => 'ë©”íƒ€ë°ì´í„° ì œê³µìž ì„¤ì¹˜';
 
   @override
-  String get no_tracks_playing => '현재 재생 중인 트랙이 없습니다';
+  String get no_tracks_playing => 'í˜„ìž¬ ìž¬ìƒ ì¤‘ì¸ íŠ¸ëž™ì´ ì—†ìŠµë‹ˆë‹¤';
 
   @override
-  String get synced_lyrics_not_available => '이 노래에 대한 동기화된 가사를 사용할 수 없습니다. 대신';
+  String get synced_lyrics_not_available =>
+      'ì´ ë…¸ëž˜ì— ëŒ€í•œ ë™ê¸°í™”ëœ ê°€ì‚¬ë¥¼ ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ëŒ€ì‹ ';
 
   @override
-  String get plain_lyrics => '일반 가사';
+  String get plain_lyrics => 'ì¼ë°˜ ê°€ì‚¬';
 
   @override
-  String get tab_instead => '탭을 사용하세요.';
+  String get tab_instead => 'íƒ­ì„ ì‚¬ìš©í•˜ì„¸ìš”.';
 
   @override
-  String get disclaimer => '면책 조항';
+  String get disclaimer => 'ë©´ì±… ì¡°í•­';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti 팀은 어떠한 \"타사\" 플러그인에 대해서도 (법적 포함) 어떠한 책임도 지지 않습니다.\n사용자 자신의 책임하에 사용하시기 바랍니다. 버그/문제에 대해서는 플러그인 리포지토리에 보고해 주세요.\n\n만약 \"타사\" 플러그인이 서비스/법인의 ToS/DMCA를 위반하는 경우, \"타사\" 플러그인 저자 또는 호스팅 플랫폼(예: GitHub/Codeberg)에 조치를 취하도록 요청해 주세요. 위에 나열된 (\"타사\"로 표시된) 플러그인은 모두 공개/커뮤니티에서 유지 관리하는 플러그인입니다. 저희는 이를 큐레이션하지 않으므로 어떠한 조치도 취할 수 없습니다.\n\n';
+      'Soulful Bhakti íŒ€ì€ ì–´ë– í•œ \"íƒ€ì‚¬\" í”ŒëŸ¬ê·¸ì¸ì— ëŒ€í•´ì„œë„ (ë²•ì  í¬í•¨) ì–´ë– í•œ ì±…ìž„ë„ ì§€ì§€ ì•ŠìŠµë‹ˆë‹¤.\nì‚¬ìš©ìž ìžì‹ ì˜ ì±…ìž„í•˜ì— ì‚¬ìš©í•˜ì‹œê¸° ë°”ëžë‹ˆë‹¤. ë²„ê·¸/ë¬¸ì œì— ëŒ€í•´ì„œëŠ” í”ŒëŸ¬ê·¸ì¸ ë¦¬í¬ì§€í† ë¦¬ì— ë³´ê³ í•´ ì£¼ì„¸ìš”.\n\në§Œì•½ \"íƒ€ì‚¬\" í”ŒëŸ¬ê·¸ì¸ì´ ì„œë¹„ìŠ¤/ë²•ì¸ì˜ ToS/DMCAë¥¼ ìœ„ë°˜í•˜ëŠ” ê²½ìš°, \"íƒ€ì‚¬\" í”ŒëŸ¬ê·¸ì¸ ì €ìž ë˜ëŠ” í˜¸ìŠ¤íŒ… í”Œëž«í¼(ì˜ˆ: GitHub/Codeberg)ì— ì¡°ì¹˜ë¥¼ ì·¨í•˜ë„ë¡ ìš”ì²­í•´ ì£¼ì„¸ìš”. ìœ„ì— ë‚˜ì—´ëœ (\"íƒ€ì‚¬\"ë¡œ í‘œì‹œëœ) í”ŒëŸ¬ê·¸ì¸ì€ ëª¨ë‘ ê³µê°œ/ì»¤ë®¤ë‹ˆí‹°ì—ì„œ ìœ ì§€ ê´€ë¦¬í•˜ëŠ” í”ŒëŸ¬ê·¸ì¸ìž…ë‹ˆë‹¤. ì €í¬ëŠ” ì´ë¥¼ íë ˆì´ì…˜í•˜ì§€ ì•Šìœ¼ë¯€ë¡œ ì–´ë– í•œ ì¡°ì¹˜ë„ ì·¨í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n\n';
 
   @override
-  String get input_does_not_match_format => '입력이 필요한 형식과 일치하지 않습니다';
+  String get input_does_not_match_format =>
+      'ìž…ë ¥ì´ í•„ìš”í•œ í˜•ì‹ê³¼ ì¼ì¹˜í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤';
 
   @override
-  String get plugins => '플러그인';
+  String get plugins => 'í”ŒëŸ¬ê·¸ì¸';
 
   @override
   String get paste_plugin_download_url =>
-      '다운로드 URL, GitHub/Codeberg 리포지토리 URL 또는 .smplug 파일에 대한 직접 링크를 붙여넣으세요';
+      'ë‹¤ìš´ë¡œë“œ URL, GitHub/Codeberg ë¦¬í¬ì§€í† ë¦¬ URL ë˜ëŠ” .smplug íŒŒì¼ì— ëŒ€í•œ ì§ì ‘ ë§í¬ë¥¼ ë¶™ì—¬ë„£ìœ¼ì„¸ìš”';
 
   @override
-  String get download_and_install_plugin_from_url => 'URL에서 플러그인 다운로드 및 설치';
+  String get download_and_install_plugin_from_url =>
+      'URLì—ì„œ í”ŒëŸ¬ê·¸ì¸ ë‹¤ìš´ë¡œë“œ ë° ì„¤ì¹˜';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return '플러그인 추가 실패: $error';
+    return 'í”ŒëŸ¬ê·¸ì¸ ì¶”ê°€ ì‹¤íŒ¨: $error';
   }
 
   @override
-  String get upload_plugin_from_file => '파일에서 플러그인 업로드';
+  String get upload_plugin_from_file => 'íŒŒì¼ì—ì„œ í”ŒëŸ¬ê·¸ì¸ ì—…ë¡œë“œ';
 
   @override
-  String get installed => '설치됨';
+  String get installed => 'ì„¤ì¹˜ë¨';
 
   @override
-  String get available_plugins => '사용 가능한 플러그인';
+  String get available_plugins => 'ì‚¬ìš© ê°€ëŠ¥í•œ í”ŒëŸ¬ê·¸ì¸';
 
   @override
-  String get configure_plugins => '직접 메타데이터 제공자와 오디오 소스 플러그인을 구성하세요';
+  String get configure_plugins =>
+      'ì§ì ‘ ë©”íƒ€ë°ì´í„° ì œê³µìžì™€ ì˜¤ë””ì˜¤ ì†ŒìŠ¤ í”ŒëŸ¬ê·¸ì¸ì„ êµ¬ì„±í•˜ì„¸ìš”';
 
   @override
-  String get source => '출처: ';
+  String get source => 'ì¶œì²˜: ';
 
   @override
-  String get uncompressed => '비압축';
+  String get uncompressed => 'ë¹„ì••ì¶•';
 
   @override
   String get dab_music_source_description =>
-      '오디오파일을 위한 소스입니다. 고음질/무손실 오디오 스트림을 제공하며 ISRC 기반으로 정확한 트랙 매칭을 지원합니다.';
+      'ì˜¤ë””ì˜¤íŒŒì¼ì„ ìœ„í•œ ì†ŒìŠ¤ìž…ë‹ˆë‹¤. ê³ ìŒì§ˆ/ë¬´ì†ì‹¤ ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì œê³µí•˜ë©° ISRC ê¸°ë°˜ìœ¼ë¡œ ì •í™•í•œ íŠ¸ëž™ ë§¤ì¹­ì„ ì§€ì›í•©ë‹ˆë‹¤.';
 
   @override
-  String get summary_top_track => '최고 트랙\n이 기간';
+  String get summary_top_track => 'ìµœê³  íŠ¸ëž™\nì´ ê¸°ê°„';
 
   @override
-  String get local => '로컬';
+  String get local => 'ë¡œì»¬';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1613,4 +1669,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

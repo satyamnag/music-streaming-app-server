@@ -9,545 +9,549 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get guest => '访客';
+  String get guest => 'è®¿å®¢';
 
   @override
-  String get browse => '浏览';
+  String get browse => 'æµè§ˆ';
 
   @override
-  String get search => '搜索';
+  String get search => 'æœç´¢';
 
   @override
-  String get library => '音乐库';
+  String get library => 'éŸ³ä¹åº“';
 
   @override
-  String get lyrics => '歌词';
+  String get lyrics => 'æ­Œè¯';
 
   @override
-  String get settings => '设置';
+  String get settings => 'è®¾ç½®';
 
   @override
-  String get settings_subtitle => '按照您的喜好自定义 Soulful Bhakti';
+  String get settings_subtitle => 'æŒ‰ç…§æ‚¨çš„å–œå¥½è‡ªå®šä¹‰ Soulful Bhakti';
 
   @override
-  String get genre_categories_filter => '筛选类别...';
+  String get genre_categories_filter => 'ç­›é€‰ç±»åˆ«...';
 
   @override
-  String get genre => '探索歌单';
+  String get genre => 'æŽ¢ç´¢æ­Œå•';
 
   @override
-  String get personalized => '为你打造';
+  String get personalized => 'ä¸ºä½ æ‰“é€ ';
 
   @override
-  String get featured => '推荐';
+  String get featured => 'æŽ¨è';
 
   @override
-  String get new_releases => '新歌热播';
+  String get new_releases => 'æ–°æ­Œçƒ­æ’­';
 
   @override
-  String get songs => '歌曲';
+  String get songs => 'æ­Œæ›²';
 
   @override
-  String get newest_arrivals => '最新上架';
+  String get newest_arrivals => 'æœ€æ–°ä¸Šæž¶';
 
   @override
-  String get top_trending => '热门趋势';
+  String get top_trending => 'çƒ­é—¨è¶‹åŠ¿';
 
   @override
-  String get see_more => '查看更多';
+  String get see_more => 'æŸ¥çœ‹æ›´å¤š';
 
   @override
   String playing_track(Object track) {
-    return '播放 $track';
+    return 'æ’­æ”¾ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return '这将清空当前的播放队列。$track_length 首歌曲将被移除\n你确定要继续吗?';
+    return 'è¿™å°†æ¸…ç©ºå½“å‰çš„æ’­æ”¾é˜Ÿåˆ—ã€‚$track_length é¦–æ­Œæ›²å°†è¢«ç§»é™¤\nä½ ç¡®å®šè¦ç»§ç»­å—?';
   }
 
   @override
-  String get load_more => '加载更多';
+  String get load_more => 'åŠ è½½æ›´å¤š';
 
   @override
-  String get playlists => '歌单';
+  String get playlists => 'æ­Œå•';
 
   @override
-  String get artists => '艺人';
+  String get artists => 'è‰ºäºº';
 
   @override
-  String get albums => '专辑';
+  String get albums => 'ä¸“è¾‘';
 
   @override
-  String get tracks => '歌曲';
+  String get tracks => 'æ­Œæ›²';
 
   @override
-  String get downloads => '下载';
+  String get downloads => 'ä¸‹è½½';
 
   @override
-  String get filter_playlists => '筛选歌单...';
+  String get filter_playlists => 'ç­›é€‰æ­Œå•...';
 
   @override
-  String get liked_tracks => '已点赞的歌曲';
+  String get liked_tracks => 'å·²ç‚¹èµžçš„æ­Œæ›²';
 
   @override
-  String get liked_tracks_description => '你点赞过的所有歌曲';
+  String get liked_tracks_description => 'ä½ ç‚¹èµžè¿‡çš„æ‰€æœ‰æ­Œæ›²';
 
   @override
-  String get playlist => '播放列表';
+  String get playlist => 'æ’­æ”¾åˆ—è¡¨';
 
   @override
-  String get create_a_playlist => '创建一个歌单';
+  String get create_a_playlist => 'åˆ›å»ºä¸€ä¸ªæ­Œå•';
 
   @override
-  String get new_playlist => '新建歌单';
+  String get new_playlist => 'æ–°å»ºæ­Œå•';
 
   @override
-  String get playlist_name => '歌单名称';
+  String get playlist_name => 'æ­Œå•åç§°';
 
   @override
-  String get no_playlists_yet => '暂无歌单。从所选歌曲创建一个。';
+  String get no_playlists_yet =>
+      'æš‚æ— æ­Œå•ã€‚ä»Žæ‰€é€‰æ­Œæ›²åˆ›å»ºä¸€ä¸ªã€‚';
 
   @override
-  String get update_playlist => '更新播放列表';
+  String get update_playlist => 'æ›´æ–°æ’­æ”¾åˆ—è¡¨';
 
   @override
-  String get create => '创建';
+  String get create => 'åˆ›å»º';
 
   @override
-  String get cancel => '取消';
+  String get cancel => 'å–æ¶ˆ';
 
   @override
-  String get update => '更新';
+  String get update => 'æ›´æ–°';
 
   @override
-  String get name_of_playlist => '歌单的名称';
+  String get name_of_playlist => 'æ­Œå•çš„åç§°';
 
   @override
-  String get description => '描述';
+  String get description => 'æè¿°';
 
   @override
-  String get public => '公开';
+  String get public => 'å…¬å¼€';
 
   @override
-  String get collaborative => '共享协作';
+  String get collaborative => 'å…±äº«åä½œ';
 
   @override
-  String get search_local_tracks => '搜索本地歌曲...';
+  String get search_local_tracks => 'æœç´¢æœ¬åœ°æ­Œæ›²...';
 
   @override
-  String get play => '播放';
+  String get play => 'æ’­æ”¾';
 
   @override
-  String get delete => '删除';
+  String get delete => 'åˆ é™¤';
 
   @override
-  String get none => '无';
+  String get none => 'æ— ';
 
   @override
-  String get sort_a_z => '按字母正序';
+  String get sort_a_z => 'æŒ‰å­—æ¯æ­£åº';
 
   @override
-  String get sort_z_a => '按字母倒序';
+  String get sort_z_a => 'æŒ‰å­—æ¯å€’åº';
 
   @override
-  String get sort_artist => '按艺人';
+  String get sort_artist => 'æŒ‰è‰ºäºº';
 
   @override
-  String get sort_album => '按专辑';
+  String get sort_album => 'æŒ‰ä¸“è¾‘';
 
   @override
-  String get sort_duration => '按时长排序';
+  String get sort_duration => 'æŒ‰æ—¶é•¿æŽ’åº';
 
   @override
-  String get sort_tracks => '排序方式';
+  String get sort_tracks => 'æŽ’åºæ–¹å¼';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return '正在下载 ($tracks_length)';
+    return 'æ­£åœ¨ä¸‹è½½ ($tracks_length)';
   }
 
   @override
-  String get cancel_all => '取消全部';
+  String get cancel_all => 'å–æ¶ˆå…¨éƒ¨';
 
   @override
-  String get filter_artist => '筛选艺人...';
+  String get filter_artist => 'ç­›é€‰è‰ºäºº...';
 
   @override
   String followers(Object followers) {
-    return '$followers 名关注者';
+    return '$followers åå…³æ³¨è€…';
   }
 
   @override
-  String get add_artist_to_blacklist => '屏蔽该艺人';
+  String get add_artist_to_blacklist => 'å±è”½è¯¥è‰ºäºº';
 
   @override
-  String get top_tracks => '热门歌曲';
+  String get top_tracks => 'çƒ­é—¨æ­Œæ›²';
 
   @override
-  String get fans_also_like => '粉丝也喜欢';
+  String get fans_also_like => 'ç²‰ä¸ä¹Ÿå–œæ¬¢';
 
   @override
-  String get loading => '加载中...';
+  String get loading => 'åŠ è½½ä¸­...';
 
   @override
-  String get artist => '艺人';
+  String get artist => 'è‰ºäºº';
 
   @override
-  String get blacklisted => '已屏蔽';
+  String get blacklisted => 'å·²å±è”½';
 
   @override
-  String get following => '关注中';
+  String get following => 'å…³æ³¨ä¸­';
 
   @override
-  String get follow => '关注';
+  String get follow => 'å…³æ³¨';
 
   @override
-  String get artist_url_copied => '艺人的分享链接已复制至剪贴板';
+  String get artist_url_copied => 'è‰ºäººçš„åˆ†äº«é“¾æŽ¥å·²å¤åˆ¶è‡³å‰ªè´´æ¿';
 
   @override
   String added_to_queue(Object tracks) {
-    return '已添加 $tracks 首歌曲到播放队列';
+    return 'å·²æ·»åŠ  $tracks é¦–æ­Œæ›²åˆ°æ’­æ”¾é˜Ÿåˆ—';
   }
 
   @override
-  String get filter_albums => '筛选专辑...';
+  String get filter_albums => 'ç­›é€‰ä¸“è¾‘...';
 
   @override
-  String get synced => '同步';
+  String get synced => 'åŒæ­¥';
 
   @override
-  String get plain => '无同步';
+  String get plain => 'æ— åŒæ­¥';
 
   @override
-  String get shuffle => '随机播放';
+  String get shuffle => 'éšæœºæ’­æ”¾';
 
   @override
-  String get search_tracks => '搜索歌曲...';
+  String get search_tracks => 'æœç´¢æ­Œæ›²...';
 
   @override
-  String get released => '发行时间';
+  String get released => 'å‘è¡Œæ—¶é—´';
 
   @override
   String error(Object error) {
-    return '错误 $error';
+    return 'é”™è¯¯ $error';
   }
 
   @override
-  String get title => '标题';
+  String get title => 'æ ‡é¢˜';
 
   @override
-  String get time => '时长';
+  String get time => 'æ—¶é•¿';
 
   @override
-  String get more_actions => '更多操作';
+  String get more_actions => 'æ›´å¤šæ“ä½œ';
 
   @override
   String add_count_to_playlist(Object count) {
-    return '添加 ($count) 首歌曲到歌单中';
+    return 'æ·»åŠ  ($count) é¦–æ­Œæ›²åˆ°æ­Œå•ä¸­';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return '添加 ($count) 首歌曲到播放队列中';
+    return 'æ·»åŠ  ($count) é¦–æ­Œæ›²åˆ°æ’­æ”¾é˜Ÿåˆ—ä¸­';
   }
 
   @override
   String play_count_next(Object count) {
-    return '接下来播放 ($count) 首歌曲';
+    return 'æŽ¥ä¸‹æ¥æ’­æ”¾ ($count) é¦–æ­Œæ›²';
   }
 
   @override
-  String get album => '专辑';
+  String get album => 'ä¸“è¾‘';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '已将 $data 复制至剪贴板';
+    return 'å·²å°† $data å¤åˆ¶è‡³å‰ªè´´æ¿';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '添加 $track 到以下播放列表';
+    return 'æ·»åŠ  $track åˆ°ä»¥ä¸‹æ’­æ”¾åˆ—è¡¨';
   }
 
   @override
-  String get add => '添加';
+  String get add => 'æ·»åŠ ';
 
   @override
   String added_track_to_queue(Object track) {
-    return '添加 $track 到播放队列';
+    return 'æ·»åŠ  $track åˆ°æ’­æ”¾é˜Ÿåˆ—';
   }
 
   @override
-  String get add_to_queue => '添加到播放队列';
+  String get add_to_queue => 'æ·»åŠ åˆ°æ’­æ”¾é˜Ÿåˆ—';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track 将在下一首播放';
+    return '$track å°†åœ¨ä¸‹ä¸€é¦–æ’­æ”¾';
   }
 
   @override
-  String get play_next => '下一首播放';
+  String get play_next => 'ä¸‹ä¸€é¦–æ’­æ”¾';
 
   @override
   String removed_track_from_queue(Object track) {
-    return '将 $track 从播放队列中移除';
+    return 'å°† $track ä»Žæ’­æ”¾é˜Ÿåˆ—ä¸­ç§»é™¤';
   }
 
   @override
-  String get remove_from_queue => '从播放队列移除';
+  String get remove_from_queue => 'ä»Žæ’­æ”¾é˜Ÿåˆ—ç§»é™¤';
 
   @override
-  String get remove_from_favorites => '取消点赞';
+  String get remove_from_favorites => 'å–æ¶ˆç‚¹èµž';
 
   @override
-  String get save_as_favorite => '点赞';
+  String get save_as_favorite => 'ç‚¹èµž';
 
   @override
-  String get add_to_playlist => '添加到歌单';
+  String get add_to_playlist => 'æ·»åŠ åˆ°æ­Œå•';
 
   @override
-  String get remove_from_playlist => '从歌单中移除';
+  String get remove_from_playlist => 'ä»Žæ­Œå•ä¸­ç§»é™¤';
 
   @override
-  String get add_to_blacklist => '添加到屏蔽列表';
+  String get add_to_blacklist => 'æ·»åŠ åˆ°å±è”½åˆ—è¡¨';
 
   @override
-  String get remove_from_blacklist => '从屏蔽列表中移除';
+  String get remove_from_blacklist => 'ä»Žå±è”½åˆ—è¡¨ä¸­ç§»é™¤';
 
   @override
-  String get share => '分享';
+  String get share => 'åˆ†äº«';
 
   @override
-  String get mini_player => '小窗模式';
+  String get mini_player => 'å°çª—æ¨¡å¼';
 
   @override
-  String get slide_to_seek => '滑动以前进或后退';
+  String get slide_to_seek => 'æ»‘åŠ¨ä»¥å‰è¿›æˆ–åŽé€€';
 
   @override
-  String get shuffle_playlist => '随机播放歌单';
+  String get shuffle_playlist => 'éšæœºæ’­æ”¾æ­Œå•';
 
   @override
-  String get unshuffle_playlist => '取消随机播放歌单';
+  String get unshuffle_playlist => 'å–æ¶ˆéšæœºæ’­æ”¾æ­Œå•';
 
   @override
-  String get previous_track => '上一首歌曲';
+  String get previous_track => 'ä¸Šä¸€é¦–æ­Œæ›²';
 
   @override
-  String get next_track => '下一首歌曲';
+  String get next_track => 'ä¸‹ä¸€é¦–æ­Œæ›²';
 
   @override
-  String get pause_playback => '暂停播放';
+  String get pause_playback => 'æš‚åœæ’­æ”¾';
 
   @override
-  String get resume_playback => '恢复播放';
+  String get resume_playback => 'æ¢å¤æ’­æ”¾';
 
   @override
-  String get loop_track => '单曲循环';
+  String get loop_track => 'å•æ›²å¾ªçŽ¯';
 
   @override
-  String get no_loop => '无循环';
+  String get no_loop => 'æ— å¾ªçŽ¯';
 
   @override
-  String get repeat_playlist => '歌单循环';
+  String get repeat_playlist => 'æ­Œå•å¾ªçŽ¯';
 
   @override
-  String get queue => '播放队列';
+  String get queue => 'æ’­æ”¾é˜Ÿåˆ—';
 
   @override
-  String get alternative_track_sources => '其它音源';
+  String get alternative_track_sources => 'å…¶å®ƒéŸ³æº';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks 首歌曲在播放队列中';
+    return '$tracks é¦–æ­Œæ›²åœ¨æ’­æ”¾é˜Ÿåˆ—ä¸­';
   }
 
   @override
-  String get clear_all => '清除全部';
+  String get clear_all => 'æ¸…é™¤å…¨éƒ¨';
 
   @override
-  String get show_hide_ui_on_hover => '悬停时显示/隐藏控制栏';
+  String get show_hide_ui_on_hover => 'æ‚¬åœæ—¶æ˜¾ç¤º/éšè—æŽ§åˆ¶æ ';
 
   @override
-  String get always_on_top => '置顶';
+  String get always_on_top => 'ç½®é¡¶';
 
   @override
-  String get exit_mini_player => '退出小窗模式';
+  String get exit_mini_player => 'é€€å‡ºå°çª—æ¨¡å¼';
 
   @override
-  String get local_library => '本地图书馆';
+  String get local_library => 'æœ¬åœ°å›¾ä¹¦é¦†';
 
   @override
-  String get add_library_location => '添加到图书馆';
+  String get add_library_location => 'æ·»åŠ åˆ°å›¾ä¹¦é¦†';
 
   @override
-  String get remove_library_location => '从图书馆中删除';
+  String get remove_library_location => 'ä»Žå›¾ä¹¦é¦†ä¸­åˆ é™¤';
 
   @override
-  String get account => '账户';
+  String get account => 'è´¦æˆ·';
 
   @override
-  String get logout => '退出';
+  String get logout => 'é€€å‡º';
 
   @override
-  String get logout_of_this_account => '退出该账户';
+  String get logout_of_this_account => 'é€€å‡ºè¯¥è´¦æˆ·';
 
   @override
-  String get language_region => '语言和地区';
+  String get language_region => 'è¯­è¨€å’Œåœ°åŒº';
 
   @override
-  String get language => '语言';
+  String get language => 'è¯­è¨€';
 
   @override
-  String get system_default => '系统默认';
+  String get system_default => 'ç³»ç»Ÿé»˜è®¤';
 
   @override
-  String get market_place_region => '市场地区';
+  String get market_place_region => 'å¸‚åœºåœ°åŒº';
 
   @override
-  String get recommendation_country => '选择国家与地区以获取对应推荐';
+  String get recommendation_country =>
+      'é€‰æ‹©å›½å®¶ä¸Žåœ°åŒºä»¥èŽ·å–å¯¹åº”æŽ¨è';
 
   @override
-  String get appearance => '外观';
+  String get appearance => 'å¤–è§‚';
 
   @override
-  String get layout_mode => '布局类型';
+  String get layout_mode => 'å¸ƒå±€ç±»åž‹';
 
   @override
-  String get override_layout_settings => '将覆盖响应式布局设置';
+  String get override_layout_settings => 'å°†è¦†ç›–å“åº”å¼å¸ƒå±€è®¾ç½®';
 
   @override
-  String get adaptive => '自适应';
+  String get adaptive => 'è‡ªé€‚åº”';
 
   @override
-  String get compact => '紧凑';
+  String get compact => 'ç´§å‡‘';
 
   @override
-  String get extended => '宽广';
+  String get extended => 'å®½å¹¿';
 
   @override
-  String get theme => '主题';
+  String get theme => 'ä¸»é¢˜';
 
   @override
-  String get dark => '深色';
+  String get dark => 'æ·±è‰²';
 
   @override
-  String get light => '浅色';
+  String get light => 'æµ…è‰²';
 
   @override
-  String get system => '系统';
+  String get system => 'ç³»ç»Ÿ';
 
   @override
-  String get accent_color => '主色调';
+  String get accent_color => 'ä¸»è‰²è°ƒ';
 
   @override
-  String get sync_album_color => '匹配封面颜色';
+  String get sync_album_color => 'åŒ¹é…å°é¢é¢œè‰²';
 
   @override
-  String get sync_album_color_description => '选取专辑封面主题色作为主色调';
+  String get sync_album_color_description =>
+      'é€‰å–ä¸“è¾‘å°é¢ä¸»é¢˜è‰²ä½œä¸ºä¸»è‰²è°ƒ';
 
   @override
-  String get playback => '播放';
+  String get playback => 'æ’­æ”¾';
 
   @override
-  String get audio_quality => '音质';
+  String get audio_quality => 'éŸ³è´¨';
 
   @override
-  String get high => '高';
+  String get high => 'é«˜';
 
   @override
-  String get low => '低';
+  String get low => 'ä½Ž';
 
   @override
-  String get pre_download_play => '先下后播';
+  String get pre_download_play => 'å…ˆä¸‹åŽæ’­';
 
   @override
-  String get pre_download_play_description => '先下载歌曲后再播放而非流式播放（推荐带宽较高用户使用）';
+  String get pre_download_play_description =>
+      'å…ˆä¸‹è½½æ­Œæ›²åŽå†æ’­æ”¾è€Œéžæµå¼æ’­æ”¾ï¼ˆæŽ¨èå¸¦å®½è¾ƒé«˜ç”¨æˆ·ä½¿ç”¨ï¼‰';
 
   @override
-  String get skip_non_music => '跳过非音乐片段（屏蔽赞助商）';
+  String get skip_non_music => 'è·³è¿‡éžéŸ³ä¹ç‰‡æ®µï¼ˆå±è”½èµžåŠ©å•†ï¼‰';
 
   @override
-  String get blacklist_description => '已屏蔽的歌曲与艺人';
+  String get blacklist_description => 'å·²å±è”½çš„æ­Œæ›²ä¸Žè‰ºäºº';
 
   @override
-  String get wait_for_download_to_finish => '请等待当前下载任务完成';
+  String get wait_for_download_to_finish => 'è¯·ç­‰å¾…å½“å‰ä¸‹è½½ä»»åŠ¡å®Œæˆ';
 
   @override
-  String get desktop => '桌面端设置';
+  String get desktop => 'æ¡Œé¢ç«¯è®¾ç½®';
 
   @override
-  String get close_behavior => '点击关闭按钮行为';
+  String get close_behavior => 'ç‚¹å‡»å…³é—­æŒ‰é’®è¡Œä¸º';
 
   @override
-  String get close => '关闭';
+  String get close => 'å…³é—­';
 
   @override
-  String get minimize_to_tray => '最小化到托盘';
+  String get minimize_to_tray => 'æœ€å°åŒ–åˆ°æ‰˜ç›˜';
 
   @override
-  String get show_tray_icon => '显示托盘图标';
+  String get show_tray_icon => 'æ˜¾ç¤ºæ‰˜ç›˜å›¾æ ‡';
 
   @override
-  String get about => '关于';
+  String get about => 'å…³äºŽ';
 
   @override
-  String get u_love_spotube => '我们明白你喜欢 Soulful Bhakti';
+  String get u_love_spotube => 'æˆ‘ä»¬æ˜Žç™½ä½ å–œæ¬¢ Soulful Bhakti';
 
   @override
-  String get check_for_updates => '检查更新';
+  String get check_for_updates => 'æ£€æŸ¥æ›´æ–°';
 
   @override
-  String get about_spotube => '关于 Soulful Bhakti';
+  String get about_spotube => 'å…³äºŽ Soulful Bhakti';
 
   @override
-  String get blacklist => '屏蔽列表';
+  String get blacklist => 'å±è”½åˆ—è¡¨';
 
   @override
-  String get please_sponsor => '请赞助/捐赠';
+  String get please_sponsor => 'è¯·èµžåŠ©/æèµ ';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti，一个轻量、跨平台且完全免费的 Spotify 客户端。';
+      'Soulful Bhaktiï¼Œä¸€ä¸ªè½»é‡ã€è·¨å¹³å°ä¸”å®Œå…¨å…è´¹çš„ Spotify å®¢æˆ·ç«¯ã€‚';
 
   @override
-  String get version => '版本';
+  String get version => 'ç‰ˆæœ¬';
 
   @override
-  String get build_number => '构建代码';
+  String get build_number => 'æž„å»ºä»£ç ';
 
   @override
-  String get founder => '发起人';
+  String get founder => 'å‘èµ·äºº';
 
   @override
-  String get repository => '源码';
+  String get repository => 'æºç ';
 
   @override
-  String get bug_issues => '缺陷和问题报告';
+  String get bug_issues => 'ç¼ºé™·å’Œé—®é¢˜æŠ¥å‘Š';
 
   @override
-  String get made_with => '于孟加拉🇧🇩用 ❤️ 发电';
+  String get made_with => 'äºŽå­ŸåŠ æ‹‰ðŸ‡§ðŸ‡©ç”¨ â¤ï¸ å‘ç”µ';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => '许可证';
+  String get license => 'è®¸å¯è¯';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      '不用担心，软件不会收集或分享任何个人数据给第三方';
+      'ä¸ç”¨æ‹…å¿ƒï¼Œè½¯ä»¶ä¸ä¼šæ”¶é›†æˆ–åˆ†äº«ä»»ä½•ä¸ªäººæ•°æ®ç»™ç¬¬ä¸‰æ–¹';
 
   @override
-  String get know_how_to_login => '不知道该怎么做？';
+  String get know_how_to_login => 'ä¸çŸ¥é“è¯¥æ€Žä¹ˆåšï¼Ÿ';
 
   @override
-  String get follow_step_by_step_guide => '请按照以下指南进行';
+  String get follow_step_by_step_guide => 'è¯·æŒ‰ç…§ä»¥ä¸‹æŒ‡å—è¿›è¡Œ';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -555,730 +559,748 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => '请填写所有栏目';
+  String get fill_in_all_fields => 'è¯·å¡«å†™æ‰€æœ‰æ ç›®';
 
   @override
-  String get submit => '提交';
+  String get submit => 'æäº¤';
 
   @override
-  String get exit => '退出';
+  String get exit => 'é€€å‡º';
 
   @override
-  String get previous => '上一步';
+  String get previous => 'ä¸Šä¸€æ­¥';
 
   @override
-  String get next => '下一步';
+  String get next => 'ä¸‹ä¸€æ­¥';
 
   @override
-  String get done => '完成';
+  String get done => 'å®Œæˆ';
 
   @override
-  String get step_1 => '步骤 1';
+  String get step_1 => 'æ­¥éª¤ 1';
 
   @override
-  String get first_go_to => '首先，前往';
+  String get first_go_to => 'é¦–å…ˆï¼Œå‰å¾€';
 
   @override
-  String get something_went_wrong => '某些地方出现了问题';
+  String get something_went_wrong => 'æŸäº›åœ°æ–¹å‡ºçŽ°äº†é—®é¢˜';
 
   @override
-  String get piped_instance => 'Piped 服务器实例';
+  String get piped_instance => 'Piped æœåŠ¡å™¨å®žä¾‹';
 
   @override
-  String get piped_description => 'Piped 服务器实例用于匹配歌曲';
+  String get piped_description => 'Piped æœåŠ¡å™¨å®žä¾‹ç”¨äºŽåŒ¹é…æ­Œæ›²';
 
   @override
-  String get piped_warning => '它们中的一部分可能并不能正常工作。使用时请自行承担风险';
+  String get piped_warning =>
+      'å®ƒä»¬ä¸­çš„ä¸€éƒ¨åˆ†å¯èƒ½å¹¶ä¸èƒ½æ­£å¸¸å·¥ä½œã€‚ä½¿ç”¨æ—¶è¯·è‡ªè¡Œæ‰¿æ‹…é£Žé™©';
 
   @override
-  String get invidious_instance => 'Invidious服务器实例';
+  String get invidious_instance => 'InvidiousæœåŠ¡å™¨å®žä¾‹';
 
   @override
-  String get invidious_description => '用于音轨匹配的Invidious服务器实例';
+  String get invidious_description =>
+      'ç”¨äºŽéŸ³è½¨åŒ¹é…çš„InvidiousæœåŠ¡å™¨å®žä¾‹';
 
   @override
-  String get invidious_warning => '有些可能无法正常工作。请自行承担风险';
+  String get invidious_warning =>
+      'æœ‰äº›å¯èƒ½æ— æ³•æ­£å¸¸å·¥ä½œã€‚è¯·è‡ªè¡Œæ‰¿æ‹…é£Žé™©';
 
   @override
-  String get generate => '生成';
+  String get generate => 'ç”Ÿæˆ';
 
   @override
   String track_exists(Object track) {
-    return '歌曲 $track 已存在';
+    return 'æ­Œæ›² $track å·²å­˜åœ¨';
   }
 
   @override
-  String get replace => '替换';
+  String get replace => 'æ›¿æ¢';
 
   @override
-  String get skip => '跳过';
+  String get skip => 'è·³è¿‡';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return '选择多达 $count 种的类型 $type';
+    return 'é€‰æ‹©å¤šè¾¾ $count ç§çš„ç±»åž‹ $type';
   }
 
   @override
-  String get select_genres => '选择曲风';
+  String get select_genres => 'é€‰æ‹©æ›²é£Ž';
 
   @override
-  String get add_genres => '添加曲风';
+  String get add_genres => 'æ·»åŠ æ›²é£Ž';
 
   @override
-  String get country => '国家和地区';
+  String get country => 'å›½å®¶å’Œåœ°åŒº';
 
   @override
-  String get number_of_tracks_generate => '生成歌曲的数目';
+  String get number_of_tracks_generate => 'ç”Ÿæˆæ­Œæ›²çš„æ•°ç›®';
 
   @override
-  String get acousticness => '原声程度';
+  String get acousticness => 'åŽŸå£°ç¨‹åº¦';
 
   @override
-  String get danceability => '律动感';
+  String get danceability => 'å¾‹åŠ¨æ„Ÿ';
 
   @override
-  String get energy => '冲击感';
+  String get energy => 'å†²å‡»æ„Ÿ';
 
   @override
-  String get instrumentalness => '歌唱部分占比';
+  String get instrumentalness => 'æ­Œå”±éƒ¨åˆ†å æ¯”';
 
   @override
-  String get liveness => '现场感';
+  String get liveness => 'çŽ°åœºæ„Ÿ';
 
   @override
-  String get loudness => '响度';
+  String get loudness => 'å“åº¦';
 
   @override
-  String get speechiness => '朗诵比例';
+  String get speechiness => 'æœ—è¯µæ¯”ä¾‹';
 
   @override
-  String get valence => '心理感受';
+  String get valence => 'å¿ƒç†æ„Ÿå—';
 
   @override
-  String get popularity => '流行度';
+  String get popularity => 'æµè¡Œåº¦';
 
   @override
-  String get key => '曲调';
+  String get key => 'æ›²è°ƒ';
 
   @override
-  String get duration => '歌曲时长 (s)';
+  String get duration => 'æ­Œæ›²æ—¶é•¿ (s)';
 
   @override
-  String get tempo => '分钟节拍数 (BPM)';
+  String get tempo => 'åˆ†é’ŸèŠ‚æ‹æ•° (BPM)';
 
   @override
-  String get mode => '旋律重复度';
+  String get mode => 'æ—‹å¾‹é‡å¤åº¦';
 
   @override
-  String get time_signature => '音符时值';
+  String get time_signature => 'éŸ³ç¬¦æ—¶å€¼';
 
   @override
-  String get short => '短';
+  String get short => 'çŸ­';
 
   @override
-  String get medium => '中';
+  String get medium => 'ä¸­';
 
   @override
-  String get long => '长';
+  String get long => 'é•¿';
 
   @override
-  String get min => '最低';
+  String get min => 'æœ€ä½Ž';
 
   @override
-  String get max => '最高';
+  String get max => 'æœ€é«˜';
 
   @override
-  String get target => '目标';
+  String get target => 'ç›®æ ‡';
 
   @override
-  String get moderate => '中';
+  String get moderate => 'ä¸­';
 
   @override
-  String get deselect_all => '取消全选';
+  String get deselect_all => 'å–æ¶ˆå…¨é€‰';
 
   @override
-  String get select_all => '全选';
+  String get select_all => 'å…¨é€‰';
 
   @override
-  String get are_you_sure => '你确定吗？';
+  String get are_you_sure => 'ä½ ç¡®å®šå—ï¼Ÿ';
 
   @override
-  String get generating_playlist => '正在生成你的自定义歌单...';
+  String get generating_playlist => 'æ­£åœ¨ç”Ÿæˆä½ çš„è‡ªå®šä¹‰æ­Œå•...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '已选择 $count 首歌曲';
+    return 'å·²é€‰æ‹© $count é¦–æ­Œæ›²';
   }
 
   @override
   String get download_warning =>
-      '如果你大量下载这些歌曲，你显然在侵犯音乐的版权并对音乐创作社区造成了伤害。我希望你能意识到这一点。永远要尊重并支持艺术家们的辛勤工作';
+      'å¦‚æžœä½ å¤§é‡ä¸‹è½½è¿™äº›æ­Œæ›²ï¼Œä½ æ˜¾ç„¶åœ¨ä¾µçŠ¯éŸ³ä¹çš„ç‰ˆæƒå¹¶å¯¹éŸ³ä¹åˆ›ä½œç¤¾åŒºé€ æˆäº†ä¼¤å®³ã€‚æˆ‘å¸Œæœ›ä½ èƒ½æ„è¯†åˆ°è¿™ä¸€ç‚¹ã€‚æ°¸è¿œè¦å°Šé‡å¹¶æ”¯æŒè‰ºæœ¯å®¶ä»¬çš„è¾›å‹¤å·¥ä½œ';
 
   @override
   String get download_ip_ban_warning =>
-      '小心，如果出现超出正常的下载请求那你的 IP 可能会被 YouTube 封禁，这意味着你的设备将在长达 2-3 个月的时间内无法使用该 IP 访问 YouTube（即使你没登录）。Soulful Bhakti 对此不承担任何责任';
+      'å°å¿ƒï¼Œå¦‚æžœå‡ºçŽ°è¶…å‡ºæ­£å¸¸çš„ä¸‹è½½è¯·æ±‚é‚£ä½ çš„ IP å¯èƒ½ä¼šè¢« YouTube å°ç¦ï¼Œè¿™æ„å‘³ç€ä½ çš„è®¾å¤‡å°†åœ¨é•¿è¾¾ 2-3 ä¸ªæœˆçš„æ—¶é—´å†…æ— æ³•ä½¿ç”¨è¯¥ IP è®¿é—® YouTubeï¼ˆå³ä½¿ä½ æ²¡ç™»å½•ï¼‰ã€‚Soulful Bhakti å¯¹æ­¤ä¸æ‰¿æ‹…ä»»ä½•è´£ä»»';
 
   @override
-  String get by_clicking_accept_terms => '点击 \'同意\' 代表着你同意以下的条款';
+  String get by_clicking_accept_terms =>
+      'ç‚¹å‡» \'åŒæ„\' ä»£è¡¨ç€ä½ åŒæ„ä»¥ä¸‹çš„æ¡æ¬¾';
 
   @override
-  String get download_agreement_1 => '我明白侵犯音乐版权是一件不好的事情';
+  String get download_agreement_1 =>
+      'æˆ‘æ˜Žç™½ä¾µçŠ¯éŸ³ä¹ç‰ˆæƒæ˜¯ä¸€ä»¶ä¸å¥½çš„äº‹æƒ…';
 
   @override
-  String get download_agreement_2 => '我将尽可能支持艺术家的工作。我现在之所以做不到是因为缺乏资金来购买正版';
+  String get download_agreement_2 =>
+      'æˆ‘å°†å°½å¯èƒ½æ”¯æŒè‰ºæœ¯å®¶çš„å·¥ä½œã€‚æˆ‘çŽ°åœ¨ä¹‹æ‰€ä»¥åšä¸åˆ°æ˜¯å› ä¸ºç¼ºä¹èµ„é‡‘æ¥è´­ä¹°æ­£ç‰ˆ';
 
   @override
   String get download_agreement_3 =>
-      '我完全了解我的 IP 存在被 YouTube的风险。我同意 Soulful Bhakti 的所有者与贡献者们无须对我目前的行为所导致的任何后果负责';
+      'æˆ‘å®Œå…¨äº†è§£æˆ‘çš„ IP å­˜åœ¨è¢« YouTubeçš„é£Žé™©ã€‚æˆ‘åŒæ„ Soulful Bhakti çš„æ‰€æœ‰è€…ä¸Žè´¡çŒ®è€…ä»¬æ— é¡»å¯¹æˆ‘ç›®å‰çš„è¡Œä¸ºæ‰€å¯¼è‡´çš„ä»»ä½•åŽæžœè´Ÿè´£';
 
   @override
-  String get decline => '拒绝';
+  String get decline => 'æ‹’ç»';
 
   @override
-  String get accept => '同意';
+  String get accept => 'åŒæ„';
 
   @override
-  String get details => '详情';
+  String get details => 'è¯¦æƒ…';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => '频道';
+  String get channel => 'é¢‘é“';
 
   @override
-  String get likes => '赞';
+  String get likes => 'èµž';
 
   @override
-  String get dislikes => '踩';
+  String get dislikes => 'è¸©';
 
   @override
-  String get views => '浏览次数';
+  String get views => 'æµè§ˆæ¬¡æ•°';
 
   @override
-  String get streamUrl => '播放流 URL';
+  String get streamUrl => 'æ’­æ”¾æµ URL';
 
   @override
-  String get stop => '停止';
+  String get stop => 'åœæ­¢';
 
   @override
-  String get sort_newest => '按添加日期正序';
+  String get sort_newest => 'æŒ‰æ·»åŠ æ—¥æœŸæ­£åº';
 
   @override
-  String get sort_oldest => '按添加日期倒序';
+  String get sort_oldest => 'æŒ‰æ·»åŠ æ—¥æœŸå€’åº';
 
   @override
-  String get sleep_timer => '睡眠定时器';
+  String get sleep_timer => 'ç¡çœ å®šæ—¶å™¨';
 
   @override
   String mins(Object minutes) {
-    return '$minutes 分';
+    return '$minutes åˆ†';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours 时';
+    return '$hours æ—¶';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours 时';
+    return '$hours æ—¶';
   }
 
   @override
-  String get custom_hours => '自定义时间';
+  String get custom_hours => 'è‡ªå®šä¹‰æ—¶é—´';
 
   @override
-  String get logs => '日志';
+  String get logs => 'æ—¥å¿—';
 
   @override
-  String get developers => '开发者';
+  String get developers => 'å¼€å‘è€…';
 
   @override
-  String get not_logged_in => '你尚未登录';
+  String get not_logged_in => 'ä½ å°šæœªç™»å½•';
 
   @override
-  String get search_mode => '搜索模式';
+  String get search_mode => 'æœç´¢æ¨¡å¼';
 
   @override
-  String get audio_source => '音频源';
+  String get audio_source => 'éŸ³é¢‘æº';
 
   @override
-  String get ok => '确定';
+  String get ok => 'ç¡®å®š';
 
   @override
-  String get failed_to_encrypt => '加密失败';
+  String get failed_to_encrypt => 'åŠ å¯†å¤±è´¥';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti使用加密来安全地存储您的数据。但是失败了。因此，它将回退到不安全的存储\n如果您使用Linux，请确保已安装gnome-keyring、kde-wallet和keepassxc等秘密服务';
+      'Soulful Bhaktiä½¿ç”¨åŠ å¯†æ¥å®‰å…¨åœ°å­˜å‚¨æ‚¨çš„æ•°æ®ã€‚ä½†æ˜¯å¤±è´¥äº†ã€‚å› æ­¤ï¼Œå®ƒå°†å›žé€€åˆ°ä¸å®‰å…¨çš„å­˜å‚¨\nå¦‚æžœæ‚¨ä½¿ç”¨Linuxï¼Œè¯·ç¡®ä¿å·²å®‰è£…gnome-keyringã€kde-walletå’Œkeepassxcç­‰ç§˜å¯†æœåŠ¡';
 
   @override
-  String get querying_info => '正在查询信息...';
+  String get querying_info => 'æ­£åœ¨æŸ¥è¯¢ä¿¡æ¯...';
 
   @override
-  String get piped_api_down => 'Piped API不可用';
+  String get piped_api_down => 'Piped APIä¸å¯ç”¨';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return '当前Piped实例$pipedInstance不可用\n\n请更改实例或将\'API类型\'更改为官方YouTube API\n\n更改后请确保重新启动应用程序';
+    return 'å½“å‰Pipedå®žä¾‹$pipedInstanceä¸å¯ç”¨\n\nè¯·æ›´æ”¹å®žä¾‹æˆ–å°†\'APIç±»åž‹\'æ›´æ”¹ä¸ºå®˜æ–¹YouTube API\n\næ›´æ”¹åŽè¯·ç¡®ä¿é‡æ–°å¯åŠ¨åº”ç”¨ç¨‹åº';
   }
 
   @override
-  String get you_are_offline => '您当前处于离线状态';
+  String get you_are_offline => 'æ‚¨å½“å‰å¤„äºŽç¦»çº¿çŠ¶æ€';
 
   @override
-  String get connection_restored => '您的互联网连接已恢复';
+  String get connection_restored => 'æ‚¨çš„äº’è”ç½‘è¿žæŽ¥å·²æ¢å¤';
 
   @override
-  String get use_system_title_bar => '使用系统标题栏';
+  String get use_system_title_bar => 'ä½¿ç”¨ç³»ç»Ÿæ ‡é¢˜æ ';
 
   @override
-  String get crunching_results => '处理结果中...';
+  String get crunching_results => 'å¤„ç†ç»“æžœä¸­...';
 
   @override
-  String get search_to_get_results => '搜索以获取结果';
+  String get search_to_get_results => 'æœç´¢ä»¥èŽ·å–ç»“æžœ';
 
   @override
-  String get use_amoled_mode => '使用 AMOLED 模式';
+  String get use_amoled_mode => 'ä½¿ç”¨ AMOLED æ¨¡å¼';
 
   @override
-  String get pitch_dark_theme => '深色主题';
+  String get pitch_dark_theme => 'æ·±è‰²ä¸»é¢˜';
 
   @override
-  String get normalize_audio => '标准化音频';
+  String get normalize_audio => 'æ ‡å‡†åŒ–éŸ³é¢‘';
 
   @override
-  String get change_cover => '更改封面';
+  String get change_cover => 'æ›´æ”¹å°é¢';
 
   @override
-  String get add_cover => '添加封面';
+  String get add_cover => 'æ·»åŠ å°é¢';
 
   @override
-  String get restore_defaults => '恢复默认值';
+  String get restore_defaults => 'æ¢å¤é»˜è®¤å€¼';
 
   @override
-  String get restore_defaults_confirmation => '这会将您的所有设置重置为默认值。此操作无法撤销。';
+  String get restore_defaults_confirmation =>
+      'è¿™ä¼šå°†æ‚¨çš„æ‰€æœ‰è®¾ç½®é‡ç½®ä¸ºé»˜è®¤å€¼ã€‚æ­¤æ“ä½œæ— æ³•æ’¤é”€ã€‚';
 
   @override
-  String get streaming_music_format => '流媒体音乐格式';
+  String get streaming_music_format => 'æµåª’ä½“éŸ³ä¹æ ¼å¼';
 
   @override
-  String get streaming_music_quality => '流媒体音乐质量';
+  String get streaming_music_quality => 'æµåª’ä½“éŸ³ä¹è´¨é‡';
 
   @override
-  String get connect => '连接';
+  String get connect => 'è¿žæŽ¥';
 
   @override
-  String get disconnect => '断开连接';
+  String get disconnect => 'æ–­å¼€è¿žæŽ¥';
 
   @override
-  String get username => '用户名';
+  String get username => 'ç”¨æˆ·å';
 
   @override
-  String get password => '密码';
+  String get password => 'å¯†ç ';
 
   @override
-  String get login => '登录';
+  String get login => 'ç™»å½•';
 
   @override
-  String get sign_in => '登录';
+  String get sign_in => 'ç™»å½•';
 
   @override
-  String get sign_up => '注册';
+  String get sign_up => 'æ³¨å†Œ';
 
   @override
-  String get sign_out => '退出登录';
+  String get sign_out => 'é€€å‡ºç™»å½•';
 
   @override
-  String get verify => '验证';
+  String get verify => 'éªŒè¯';
 
   @override
-  String get create_account => '创建您的账户';
+  String get create_account => 'åˆ›å»ºæ‚¨çš„è´¦æˆ·';
 
   @override
-  String get already_have_account => '已有账户？登录';
+  String get already_have_account => 'å·²æœ‰è´¦æˆ·ï¼Ÿç™»å½•';
 
   @override
-  String get dont_have_account => '没有账户？注册';
+  String get dont_have_account => 'æ²¡æœ‰è´¦æˆ·ï¼Ÿæ³¨å†Œ';
 
   @override
   String signed_in_as(Object userId) {
-    return '已以 $userId 身份登录';
+    return 'å·²ä»¥ $userId èº«ä»½ç™»å½•';
   }
 
   @override
-  String get verification_code => '验证码';
+  String get verification_code => 'éªŒè¯ç ';
 
   @override
-  String get verification_code_hint => '输入发送到您电子邮件的验证码';
+  String get verification_code_hint =>
+      'è¾“å…¥å‘é€åˆ°æ‚¨ç”µå­é‚®ä»¶çš„éªŒè¯ç ';
 
   @override
-  String get verify_email_code => '我们已向您的电子邮件发送了验证码';
+  String get verify_email_code =>
+      'æˆ‘ä»¬å·²å‘æ‚¨çš„ç”µå­é‚®ä»¶å‘é€äº†éªŒè¯ç ';
 
   @override
-  String get go_to_album => '前往专辑';
+  String get go_to_album => 'å‰å¾€ä¸“è¾‘';
 
   @override
-  String get discord_rich_presence => 'Discord 丰富展现';
+  String get discord_rich_presence => 'Discord ä¸°å¯Œå±•çŽ°';
 
   @override
-  String get browse_all => '浏览全部';
+  String get browse_all => 'æµè§ˆå…¨éƒ¨';
 
   @override
-  String get genres => '音乐类型';
+  String get genres => 'éŸ³ä¹ç±»åž‹';
 
   @override
-  String get explore_genres => '探索音乐类型';
+  String get explore_genres => 'æŽ¢ç´¢éŸ³ä¹ç±»åž‹';
 
   @override
-  String get friends => '朋友';
+  String get friends => 'æœ‹å‹';
 
   @override
-  String get no_lyrics_available => '抱歉，无法找到此曲的歌词';
+  String get no_lyrics_available => 'æŠ±æ­‰ï¼Œæ— æ³•æ‰¾åˆ°æ­¤æ›²çš„æ­Œè¯';
 
   @override
-  String get start_a_radio => '开始收听电台';
+  String get start_a_radio => 'å¼€å§‹æ”¶å¬ç”µå°';
 
   @override
-  String get how_to_start_radio => '您想如何开始收听电台？';
+  String get how_to_start_radio => 'æ‚¨æƒ³å¦‚ä½•å¼€å§‹æ”¶å¬ç”µå°ï¼Ÿ';
 
   @override
-  String get replace_queue_question => '您想要替换当前队列还是追加到队列？';
+  String get replace_queue_question =>
+      'æ‚¨æƒ³è¦æ›¿æ¢å½“å‰é˜Ÿåˆ—è¿˜æ˜¯è¿½åŠ åˆ°é˜Ÿåˆ—ï¼Ÿ';
 
   @override
-  String get endless_playback => '无尽播放';
+  String get endless_playback => 'æ— å°½æ’­æ”¾';
 
   @override
-  String get delete_playlist => '删除播放列表';
+  String get delete_playlist => 'åˆ é™¤æ’­æ”¾åˆ—è¡¨';
 
   @override
-  String get delete_playlist_confirmation => '您确定要删除此播放列表吗？';
+  String get delete_playlist_confirmation =>
+      'æ‚¨ç¡®å®šè¦åˆ é™¤æ­¤æ’­æ”¾åˆ—è¡¨å—ï¼Ÿ';
 
   @override
-  String get local_tracks => '本地音轨';
+  String get local_tracks => 'æœ¬åœ°éŸ³è½¨';
 
   @override
-  String get local_tab => '本地';
+  String get local_tab => 'æœ¬åœ°';
 
   @override
-  String get song_link => '歌曲链接';
+  String get song_link => 'æ­Œæ›²é“¾æŽ¥';
 
   @override
-  String get skip_this_nonsense => '跳过此无聊内容';
+  String get skip_this_nonsense => 'è·³è¿‡æ­¤æ— èŠå†…å®¹';
 
   @override
-  String get freedom_of_music => '“音乐的自由”';
+  String get freedom_of_music => 'â€œéŸ³ä¹çš„è‡ªç”±â€';
 
   @override
-  String get freedom_of_music_palm => '“音乐的自由掌握在您手中”';
+  String get freedom_of_music_palm => 'â€œéŸ³ä¹çš„è‡ªç”±æŽŒæ¡åœ¨æ‚¨æ‰‹ä¸­â€';
 
   @override
-  String get get_started => '让我们开始吧';
+  String get get_started => 'è®©æˆ‘ä»¬å¼€å§‹å§';
 
   @override
-  String get youtube_source_description => '推荐并且效果最佳。';
+  String get youtube_source_description => 'æŽ¨èå¹¶ä¸”æ•ˆæžœæœ€ä½³ã€‚';
 
   @override
-  String get piped_source_description => '感觉自由？与YouTube一样但更自由。';
+  String get piped_source_description =>
+      'æ„Ÿè§‰è‡ªç”±ï¼Ÿä¸ŽYouTubeä¸€æ ·ä½†æ›´è‡ªç”±ã€‚';
 
   @override
-  String get jiosaavn_source_description => '最适合南亚地区。';
+  String get jiosaavn_source_description => 'æœ€é€‚åˆå—äºšåœ°åŒºã€‚';
 
   @override
-  String get invidious_source_description => '类似于Piped，但可用性更高。';
+  String get invidious_source_description =>
+      'ç±»ä¼¼äºŽPipedï¼Œä½†å¯ç”¨æ€§æ›´é«˜ã€‚';
 
   @override
   String highest_quality(Object quality) {
-    return '最高音质：$quality';
+    return 'æœ€é«˜éŸ³è´¨ï¼š$quality';
   }
 
   @override
-  String get select_audio_source => '选择音频源';
+  String get select_audio_source => 'é€‰æ‹©éŸ³é¢‘æº';
 
   @override
-  String get endless_playback_description => '自动将新歌曲添加到队列的末尾';
+  String get endless_playback_description =>
+      'è‡ªåŠ¨å°†æ–°æ­Œæ›²æ·»åŠ åˆ°é˜Ÿåˆ—çš„æœ«å°¾';
 
   @override
-  String get choose_your_region => '选择您的地区';
+  String get choose_your_region => 'é€‰æ‹©æ‚¨çš„åœ°åŒº';
 
   @override
   String get choose_your_region_description =>
-      '这将帮助Soulful Bhakti为您的位置显示正确的内容。';
+      'è¿™å°†å¸®åŠ©Soulful Bhaktiä¸ºæ‚¨çš„ä½ç½®æ˜¾ç¤ºæ­£ç¡®çš„å†…å®¹ã€‚';
 
   @override
-  String get choose_your_language => '选择您的语言';
+  String get choose_your_language => 'é€‰æ‹©æ‚¨çš„è¯­è¨€';
 
   @override
-  String get help_project_grow => '帮助这个项目成长';
+  String get help_project_grow => 'å¸®åŠ©è¿™ä¸ªé¡¹ç›®æˆé•¿';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti是一个开源项目。您可以通过为项目做出贡献、报告错误或建议新功能来帮助该项目成长。';
+      'Soulful Bhaktiæ˜¯ä¸€ä¸ªå¼€æºé¡¹ç›®ã€‚æ‚¨å¯ä»¥é€šè¿‡ä¸ºé¡¹ç›®åšå‡ºè´¡çŒ®ã€æŠ¥å‘Šé”™è¯¯æˆ–å»ºè®®æ–°åŠŸèƒ½æ¥å¸®åŠ©è¯¥é¡¹ç›®æˆé•¿ã€‚';
 
   @override
-  String get contribute_on_github => '在GitHub上做出贡献';
+  String get contribute_on_github => 'åœ¨GitHubä¸Šåšå‡ºè´¡çŒ®';
 
   @override
-  String get donate_on_open_collective => '在Open Collective上捐款';
+  String get donate_on_open_collective => 'åœ¨Open Collectiveä¸Šææ¬¾';
 
   @override
-  String get browse_anonymously => '匿名浏览';
+  String get browse_anonymously => 'åŒ¿åæµè§ˆ';
 
   @override
-  String get enable_connect => '启用连接';
+  String get enable_connect => 'å¯ç”¨è¿žæŽ¥';
 
   @override
-  String get enable_connect_description => '从其他设备控制Soulful Bhakti';
+  String get enable_connect_description =>
+      'ä»Žå…¶ä»–è®¾å¤‡æŽ§åˆ¶Soulful Bhakti';
 
   @override
-  String get devices => '设备';
+  String get devices => 'è®¾å¤‡';
 
   @override
-  String get select => '选择';
+  String get select => 'é€‰æ‹©';
 
   @override
   String connect_client_alert(Object client) {
-    return '您正在被 $client 控制';
+    return 'æ‚¨æ­£åœ¨è¢« $client æŽ§åˆ¶';
   }
 
   @override
-  String get this_device => '此设备';
+  String get this_device => 'æ­¤è®¾å¤‡';
 
   @override
-  String get remote => '远程';
+  String get remote => 'è¿œç¨‹';
 
   @override
-  String get stats => '统计';
+  String get stats => 'ç»Ÿè®¡';
 
   @override
   String and_n_more(Object count) {
-    return '和 $count 更多';
+    return 'å’Œ $count æ›´å¤š';
   }
 
   @override
-  String get recently_played => '最近播放';
+  String get recently_played => 'æœ€è¿‘æ’­æ”¾';
 
   @override
-  String get browse_more => '浏览更多';
+  String get browse_more => 'æµè§ˆæ›´å¤š';
 
   @override
-  String get no_title => '没有标题';
+  String get no_title => 'æ²¡æœ‰æ ‡é¢˜';
 
   @override
-  String get not_playing => '未播放';
+  String get not_playing => 'æœªæ’­æ”¾';
 
   @override
-  String get epic_failure => '史诗级失败！';
+  String get epic_failure => 'å²è¯—çº§å¤±è´¥ï¼';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '已将 $tracks_length 首曲目添加到队列';
+    return 'å·²å°† $tracks_length é¦–æ›²ç›®æ·»åŠ åˆ°é˜Ÿåˆ—';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti 有更新';
+  String get spotube_has_an_update => 'Soulful Bhakti æœ‰æ›´æ–°';
 
   @override
-  String get download_now => '立即下载';
+  String get download_now => 'ç«‹å³ä¸‹è½½';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum 已发布';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum å·²å‘å¸ƒ';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version 已发布';
+    return 'Soulful Bhakti v$version å·²å‘å¸ƒ';
   }
 
   @override
-  String get read_the_latest => '阅读最新';
+  String get read_the_latest => 'é˜…è¯»æœ€æ–°';
 
   @override
-  String get release_notes => '版本说明';
+  String get release_notes => 'ç‰ˆæœ¬è¯´æ˜Ž';
 
   @override
-  String get pick_color_scheme => '选择配色方案';
+  String get pick_color_scheme => 'é€‰æ‹©é…è‰²æ–¹æ¡ˆ';
 
   @override
-  String get save => '保存';
+  String get save => 'ä¿å­˜';
 
   @override
-  String get choose_the_device => '选择设备：';
+  String get choose_the_device => 'é€‰æ‹©è®¾å¤‡ï¼š';
 
   @override
-  String get multiple_device_connected => '已连接多个设备。\n选择您希望执行此操作的设备';
+  String get multiple_device_connected =>
+      'å·²è¿žæŽ¥å¤šä¸ªè®¾å¤‡ã€‚\né€‰æ‹©æ‚¨å¸Œæœ›æ‰§è¡Œæ­¤æ“ä½œçš„è®¾å¤‡';
 
   @override
-  String get nothing_found => '未找到任何内容';
+  String get nothing_found => 'æœªæ‰¾åˆ°ä»»ä½•å†…å®¹';
 
   @override
-  String get the_box_is_empty => '箱子为空';
+  String get the_box_is_empty => 'ç®±å­ä¸ºç©º';
 
   @override
-  String get top_artists => '热门艺术家';
+  String get top_artists => 'çƒ­é—¨è‰ºæœ¯å®¶';
 
   @override
-  String get top_albums => '热门专辑';
+  String get top_albums => 'çƒ­é—¨ä¸“è¾‘';
 
   @override
-  String get this_week => '本周';
+  String get this_week => 'æœ¬å‘¨';
 
   @override
-  String get this_month => '本月';
+  String get this_month => 'æœ¬æœˆ';
 
   @override
-  String get last_6_months => '过去6个月';
+  String get last_6_months => 'è¿‡åŽ»6ä¸ªæœˆ';
 
   @override
-  String get this_year => '今年';
+  String get this_year => 'ä»Šå¹´';
 
   @override
-  String get last_2_years => '过去2年';
+  String get last_2_years => 'è¿‡åŽ»2å¹´';
 
   @override
-  String get all_time => '所有时间';
+  String get all_time => 'æ‰€æœ‰æ—¶é—´';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '由 $providerName 提供支持';
+    return 'ç”± $providerName æä¾›æ”¯æŒ';
   }
 
   @override
-  String get email => '电子邮件';
+  String get email => 'ç”µå­é‚®ä»¶';
 
   @override
-  String get send_code => '发送验证码';
+  String get send_code => 'å‘é€éªŒè¯ç ';
 
   @override
-  String get change_identifier => '使用其他电子邮件';
+  String get change_identifier => 'ä½¿ç”¨å…¶ä»–ç”µå­é‚®ä»¶';
 
   @override
-  String get sign_in_with_otp => '使用一次性验证码登录';
+  String get sign_in_with_otp => 'ä½¿ç”¨ä¸€æ¬¡æ€§éªŒè¯ç ç™»å½•';
 
   @override
-  String get enter_otp_sent => '输入我们发送给您的验证码';
+  String get enter_otp_sent => 'è¾“å…¥æˆ‘ä»¬å‘é€ç»™æ‚¨çš„éªŒè¯ç ';
 
   @override
-  String get verify_email_reminder => '请验证您的电子邮件地址以保护您的账户';
+  String get verify_email_reminder =>
+      'è¯·éªŒè¯æ‚¨çš„ç”µå­é‚®ä»¶åœ°å€ä»¥ä¿æŠ¤æ‚¨çš„è´¦æˆ·';
 
   @override
-  String get verify_now => '立即验证';
+  String get verify_now => 'ç«‹å³éªŒè¯';
 
   @override
-  String get enter_email_to_verify => '输入您的电子邮件地址以接收验证码';
+  String get enter_email_to_verify =>
+      'è¾“å…¥æ‚¨çš„ç”µå­é‚®ä»¶åœ°å€ä»¥æŽ¥æ”¶éªŒè¯ç ';
 
   @override
-  String get profile_followers => '关注者';
+  String get profile_followers => 'å…³æ³¨è€…';
 
   @override
-  String get birthday => '生日';
+  String get birthday => 'ç”Ÿæ—¥';
 
   @override
-  String get subscription => '订阅';
+  String get subscription => 'è®¢é˜…';
 
   @override
-  String get not_born => '尚未出生';
+  String get not_born => 'å°šæœªå‡ºç”Ÿ';
 
   @override
-  String get hacker => '黑客';
+  String get hacker => 'é»‘å®¢';
 
   @override
-  String get profile => '个人资料';
+  String get profile => 'ä¸ªäººèµ„æ–™';
 
   @override
-  String get no_name => '无名';
+  String get no_name => 'æ— å';
 
   @override
-  String get edit => '编辑';
+  String get edit => 'ç¼–è¾‘';
 
   @override
-  String get user_profile => '用户资料';
+  String get user_profile => 'ç”¨æˆ·èµ„æ–™';
 
   @override
   String count_plays(Object count) {
-    return '$count 次播放';
+    return '$count æ¬¡æ’­æ”¾';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*基于 Spotify 每次播放的支付金额\n从 \$0.003 到 \$0.005 计算。这是一个假设性的\n计算，旨在让用户了解如果他们在 Spotify 上收听\n这些歌曲，可能会付给艺术家的金额。';
+      '*åŸºäºŽ Spotify æ¯æ¬¡æ’­æ”¾çš„æ”¯ä»˜é‡‘é¢\nä»Ž \$0.003 åˆ° \$0.005 è®¡ç®—ã€‚è¿™æ˜¯ä¸€ä¸ªå‡è®¾æ€§çš„\nè®¡ç®—ï¼Œæ—¨åœ¨è®©ç”¨æˆ·äº†è§£å¦‚æžœä»–ä»¬åœ¨ Spotify ä¸Šæ”¶å¬\nè¿™äº›æ­Œæ›²ï¼Œå¯èƒ½ä¼šä»˜ç»™è‰ºæœ¯å®¶çš„é‡‘é¢ã€‚';
 
   @override
-  String get minutes_listened => '听的分钟数';
+  String get minutes_listened => 'å¬çš„åˆ†é’Ÿæ•°';
 
   @override
-  String get streamed_songs => '已流媒体歌曲';
+  String get streamed_songs => 'å·²æµåª’ä½“æ­Œæ›²';
 
   @override
   String count_streams(Object count) {
-    return '$count 次流媒体';
+    return '$count æ¬¡æµåª’ä½“';
   }
 
   @override
-  String get owned_by_you => '由您拥有';
+  String get owned_by_you => 'ç”±æ‚¨æ‹¥æœ‰';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl 已复制到剪贴板';
+    return '$shareUrl å·²å¤åˆ¶åˆ°å‰ªè´´æ¿';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*这是根据在线音乐流媒体平台每流平均支付0.003美元至0.005美元计算得出的。这是一个假设性的计算，旨在让用户了解如果他们在不同的音乐流媒体平台上收听歌曲，他们将需要向艺人支付多少费用。';
+      '*è¿™æ˜¯æ ¹æ®åœ¨çº¿éŸ³ä¹æµåª’ä½“å¹³å°æ¯æµå¹³å‡æ”¯ä»˜0.003ç¾Žå…ƒè‡³0.005ç¾Žå…ƒè®¡ç®—å¾—å‡ºçš„ã€‚è¿™æ˜¯ä¸€ä¸ªå‡è®¾æ€§çš„è®¡ç®—ï¼Œæ—¨åœ¨è®©ç”¨æˆ·äº†è§£å¦‚æžœä»–ä»¬åœ¨ä¸åŒçš„éŸ³ä¹æµåª’ä½“å¹³å°ä¸Šæ”¶å¬æ­Œæ›²ï¼Œä»–ä»¬å°†éœ€è¦å‘è‰ºäººæ”¯ä»˜å¤šå°‘è´¹ç”¨ã€‚';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes 分钟';
+    return '$minutes åˆ†é’Ÿ';
   }
 
   @override
-  String get summary_minutes => '分钟';
+  String get summary_minutes => 'åˆ†é’Ÿ';
 
   @override
-  String get summary_listened_to_music => '听音乐';
+  String get summary_listened_to_music => 'å¬éŸ³ä¹';
 
   @override
-  String get summary_songs => '歌曲';
+  String get summary_songs => 'æ­Œæ›²';
 
   @override
-  String get summary_streamed_overall => '总体流媒体';
+  String get summary_streamed_overall => 'æ€»ä½“æµåª’ä½“';
 
   @override
-  String get summary_owed_to_artists => '本月欠艺术家的';
+  String get summary_owed_to_artists => 'æœ¬æœˆæ¬ è‰ºæœ¯å®¶çš„';
 
   @override
-  String get summary_top_artist => '热门艺术家\n本时期';
+  String get summary_top_artist => 'çƒ­é—¨è‰ºæœ¯å®¶\næœ¬æ—¶æœŸ';
 
   @override
-  String get summary_artists => '艺术家的';
+  String get summary_artists => 'è‰ºæœ¯å®¶çš„';
 
   @override
-  String get summary_music_reached_you => '音乐触及了你';
+  String get summary_music_reached_you => 'éŸ³ä¹è§¦åŠäº†ä½ ';
 
   @override
-  String get summary_full_albums => '完整专辑';
+  String get summary_full_albums => 'å®Œæ•´ä¸“è¾‘';
 
   @override
-  String get summary_got_your_love => '获得了你的爱';
+  String get summary_got_your_love => 'èŽ·å¾—äº†ä½ çš„çˆ±';
 
   @override
-  String get summary_playlists => '播放列表';
+  String get summary_playlists => 'æ’­æ”¾åˆ—è¡¨';
 
   @override
-  String get summary_were_on_repeat => '已重复播放';
+  String get summary_were_on_repeat => 'å·²é‡å¤æ’­æ”¾';
 
   @override
-  String get summary_listening_share => '收听份额';
+  String get summary_listening_share => 'æ”¶å¬ä»½é¢';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return '您播放最多的前 $tracks_length 首歌曲的分布';
+    return 'æ‚¨æ’­æ”¾æœ€å¤šçš„å‰ $tracks_length é¦–æ­Œæ›²çš„åˆ†å¸ƒ';
   }
 
   @override
-  String get summary_plays => '次播放';
+  String get summary_plays => 'æ¬¡æ’­æ”¾';
 
   @override
   String get insights => 'Insights';
@@ -1300,301 +1322,315 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return '总计 $money';
+    return 'æ€»è®¡ $money';
   }
 
   @override
-  String get webview_not_found => '未找到 Webview';
+  String get webview_not_found => 'æœªæ‰¾åˆ° Webview';
 
   @override
   String get webview_not_found_description =>
-      '您的设备中未安装 Webview 运行时。\n如果已安装，请确保它在 environment PATH 中\n\n安装后，重新启动应用程序';
+      'æ‚¨çš„è®¾å¤‡ä¸­æœªå®‰è£… Webview è¿è¡Œæ—¶ã€‚\nå¦‚æžœå·²å®‰è£…ï¼Œè¯·ç¡®ä¿å®ƒåœ¨ environment PATH ä¸­\n\nå®‰è£…åŽï¼Œé‡æ–°å¯åŠ¨åº”ç”¨ç¨‹åº';
 
   @override
-  String get unsupported_platform => '不支持的平台';
+  String get unsupported_platform => 'ä¸æ”¯æŒçš„å¹³å°';
 
   @override
-  String get cache_music => '缓存音乐';
+  String get cache_music => 'ç¼“å­˜éŸ³ä¹';
 
   @override
-  String get open => '打开';
+  String get open => 'æ‰“å¼€';
 
   @override
-  String get cache_folder => '缓存文件夹';
+  String get cache_folder => 'ç¼“å­˜æ–‡ä»¶å¤¹';
 
   @override
-  String get export => '导出';
+  String get export => 'å¯¼å‡º';
 
   @override
-  String get clear_cache => '清除缓存';
+  String get clear_cache => 'æ¸…é™¤ç¼“å­˜';
 
   @override
-  String get clear_cache_confirmation => '您要清除缓存吗？';
+  String get clear_cache_confirmation => 'æ‚¨è¦æ¸…é™¤ç¼“å­˜å—ï¼Ÿ';
 
   @override
-  String get export_cache_files => '导出缓存文件';
+  String get export_cache_files => 'å¯¼å‡ºç¼“å­˜æ–‡ä»¶';
 
   @override
   String found_n_files(Object count) {
-    return '找到 $count 个文件';
+    return 'æ‰¾åˆ° $count ä¸ªæ–‡ä»¶';
   }
 
   @override
-  String get export_cache_confirmation => '您要导出这些文件到';
+  String get export_cache_confirmation => 'æ‚¨è¦å¯¼å‡ºè¿™äº›æ–‡ä»¶åˆ°';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '导出了 $filesExported / $files 个文件';
+    return 'å¯¼å‡ºäº† $filesExported / $files ä¸ªæ–‡ä»¶';
   }
 
   @override
-  String get undo => '撤销';
+  String get undo => 'æ’¤é”€';
 
   @override
-  String get add_all_to_playlist => '将全部添加到播放列表';
+  String get add_all_to_playlist => 'å°†å…¨éƒ¨æ·»åŠ åˆ°æ’­æ”¾åˆ—è¡¨';
 
   @override
-  String get add_all_to_queue => '将全部添加到队列';
+  String get add_all_to_queue => 'å°†å…¨éƒ¨æ·»åŠ åˆ°é˜Ÿåˆ—';
 
   @override
-  String get play_all_next => '播放全部下一首';
+  String get play_all_next => 'æ’­æ”¾å…¨éƒ¨ä¸‹ä¸€é¦–';
 
   @override
-  String get pause => '暂停';
+  String get pause => 'æš‚åœ';
 
   @override
-  String get view_all => '查看所有';
+  String get view_all => 'æŸ¥çœ‹æ‰€æœ‰';
 
   @override
-  String get no_tracks_added_yet => '看起来你还没有添加任何曲目';
+  String get no_tracks_added_yet => 'çœ‹èµ·æ¥ä½ è¿˜æ²¡æœ‰æ·»åŠ ä»»ä½•æ›²ç›®';
 
   @override
-  String get no_tracks => '看起来这里没有任何曲目';
+  String get no_tracks => 'çœ‹èµ·æ¥è¿™é‡Œæ²¡æœ‰ä»»ä½•æ›²ç›®';
 
   @override
-  String get no_tracks_listened_yet => '看起来你还没有听任何东西';
+  String get no_tracks_listened_yet => 'çœ‹èµ·æ¥ä½ è¿˜æ²¡æœ‰å¬ä»»ä½•ä¸œè¥¿';
 
   @override
-  String get not_following_artists => '你没有关注任何艺术家';
+  String get not_following_artists => 'ä½ æ²¡æœ‰å…³æ³¨ä»»ä½•è‰ºæœ¯å®¶';
 
   @override
-  String get no_favorite_albums_yet => '看起来你还没有将任何专辑添加到收藏夹';
+  String get no_favorite_albums_yet =>
+      'çœ‹èµ·æ¥ä½ è¿˜æ²¡æœ‰å°†ä»»ä½•ä¸“è¾‘æ·»åŠ åˆ°æ”¶è—å¤¹';
 
   @override
-  String get no_logs_found => '未找到日志';
+  String get no_logs_found => 'æœªæ‰¾åˆ°æ—¥å¿—';
 
   @override
-  String get youtube_engine => 'YouTube 引擎';
+  String get youtube_engine => 'YouTube å¼•æ“Ž';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine 未安装';
+    return '$engine æœªå®‰è£…';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine 未在您的系统中安装。';
+    return '$engine æœªåœ¨æ‚¨çš„ç³»ç»Ÿä¸­å®‰è£…ã€‚';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return '确保它可用在 PATH 变量中，或\n设置 $engine 可执行文件的绝对路径';
+    return 'ç¡®ä¿å®ƒå¯ç”¨åœ¨ PATH å˜é‡ä¸­ï¼Œæˆ–\nè®¾ç½® $engine å¯æ‰§è¡Œæ–‡ä»¶çš„ç»å¯¹è·¯å¾„';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      '在 macOS/Linux/Unix 类操作系统中，在 .zshrc/.bashrc/.bash_profile 等文件中设置路径无效。\n您需要在 shell 配置文件中设置路径';
+      'åœ¨ macOS/Linux/Unix ç±»æ“ä½œç³»ç»Ÿä¸­ï¼Œåœ¨ .zshrc/.bashrc/.bash_profile ç­‰æ–‡ä»¶ä¸­è®¾ç½®è·¯å¾„æ— æ•ˆã€‚\næ‚¨éœ€è¦åœ¨ shell é…ç½®æ–‡ä»¶ä¸­è®¾ç½®è·¯å¾„';
 
   @override
-  String get download => '下载';
+  String get download => 'ä¸‹è½½';
 
   @override
-  String get file_not_found => '文件未找到';
+  String get file_not_found => 'æ–‡ä»¶æœªæ‰¾åˆ°';
 
   @override
-  String get custom => '自定义';
+  String get custom => 'è‡ªå®šä¹‰';
 
   @override
-  String get add_custom_url => '添加自定义 URL';
+  String get add_custom_url => 'æ·»åŠ è‡ªå®šä¹‰ URL';
 
   @override
-  String get edit_port => '编辑端口';
+  String get edit_port => 'ç¼–è¾‘ç«¯å£';
 
   @override
-  String get port_helper_msg => '默认值为-1，表示随机数。如果您已配置防火墙，建议设置此项。';
+  String get port_helper_msg =>
+      'é»˜è®¤å€¼ä¸º-1ï¼Œè¡¨ç¤ºéšæœºæ•°ã€‚å¦‚æžœæ‚¨å·²é…ç½®é˜²ç«å¢™ï¼Œå»ºè®®è®¾ç½®æ­¤é¡¹ã€‚';
 
   @override
   String connect_request(Object client) {
-    return '允许 $client 连接吗？';
+    return 'å…è®¸ $client è¿žæŽ¥å—ï¼Ÿ';
   }
 
   @override
-  String get connection_request_denied => '连接被拒绝。用户拒绝访问。';
+  String get connection_request_denied =>
+      'è¿žæŽ¥è¢«æ‹’ç»ã€‚ç”¨æˆ·æ‹’ç»è®¿é—®ã€‚';
 
   @override
-  String get an_error_occurred => '发生错误';
+  String get an_error_occurred => 'å‘ç”Ÿé”™è¯¯';
 
   @override
-  String get copy_to_clipboard => '复制到剪贴板';
+  String get copy_to_clipboard => 'å¤åˆ¶åˆ°å‰ªè´´æ¿';
 
   @override
-  String get view_logs => '查看日志';
+  String get view_logs => 'æŸ¥çœ‹æ—¥å¿—';
 
   @override
-  String get retry => '重试';
+  String get retry => 'é‡è¯•';
 
   @override
-  String get no_default_metadata_provider_selected => '您未设置默认元数据提供者';
+  String get no_default_metadata_provider_selected =>
+      'æ‚¨æœªè®¾ç½®é»˜è®¤å…ƒæ•°æ®æä¾›è€…';
 
   @override
-  String get manage_metadata_providers => '管理元数据提供者';
+  String get manage_metadata_providers => 'ç®¡ç†å…ƒæ•°æ®æä¾›è€…';
 
   @override
-  String get open_link_in_browser => '在浏览器中打开链接？';
+  String get open_link_in_browser => 'åœ¨æµè§ˆå™¨ä¸­æ‰“å¼€é“¾æŽ¥ï¼Ÿ';
 
   @override
-  String get do_you_want_to_open_the_following_link => '您想打开以下链接吗';
+  String get do_you_want_to_open_the_following_link =>
+      'æ‚¨æƒ³æ‰“å¼€ä»¥ä¸‹é“¾æŽ¥å—';
 
   @override
-  String get unsafe_url_warning => '从不受信任的来源打开链接可能不安全。请谨慎！\n您也可以将链接复制到剪贴板。';
+  String get unsafe_url_warning =>
+      'ä»Žä¸å—ä¿¡ä»»çš„æ¥æºæ‰“å¼€é“¾æŽ¥å¯èƒ½ä¸å®‰å…¨ã€‚è¯·è°¨æ…Žï¼\næ‚¨ä¹Ÿå¯ä»¥å°†é“¾æŽ¥å¤åˆ¶åˆ°å‰ªè´´æ¿ã€‚';
 
   @override
-  String get copy_link => '复制链接';
+  String get copy_link => 'å¤åˆ¶é“¾æŽ¥';
 
   @override
-  String get building_your_timeline => '正在根据您的收听记录构建您的时间线...';
+  String get building_your_timeline =>
+      'æ­£åœ¨æ ¹æ®æ‚¨çš„æ”¶å¬è®°å½•æž„å»ºæ‚¨çš„æ—¶é—´çº¿...';
 
   @override
-  String get official => '官方';
+  String get official => 'å®˜æ–¹';
 
   @override
   String author_name(Object author) {
-    return '作者：$author';
+    return 'ä½œè€…ï¼š$author';
   }
 
   @override
-  String get third_party => '第三方';
+  String get third_party => 'ç¬¬ä¸‰æ–¹';
 
   @override
-  String get plugin_requires_authentication => '插件需要身份验证';
+  String get plugin_requires_authentication => 'æ’ä»¶éœ€è¦èº«ä»½éªŒè¯';
 
   @override
-  String get update_available => '有可用更新';
+  String get update_available => 'æœ‰å¯ç”¨æ›´æ–°';
 
   @override
-  String get supports_scrobbling => '支持 Scrobbling';
+  String get supports_scrobbling => 'æ”¯æŒ Scrobbling';
 
   @override
-  String get plugin_scrobbling_info => '此插件会 scrobble 您的音乐以生成您的收听历史记录。';
+  String get plugin_scrobbling_info =>
+      'æ­¤æ’ä»¶ä¼š scrobble æ‚¨çš„éŸ³ä¹ä»¥ç”Ÿæˆæ‚¨çš„æ”¶å¬åŽ†å²è®°å½•ã€‚';
 
   @override
-  String get default_metadata_source => '默认元数据源';
+  String get default_metadata_source => 'é»˜è®¤å…ƒæ•°æ®æº';
 
   @override
-  String get set_default_metadata_source => '设置默认元数据源';
+  String get set_default_metadata_source => 'è®¾ç½®é»˜è®¤å…ƒæ•°æ®æº';
 
   @override
-  String get default_audio_source => '默认音频源';
+  String get default_audio_source => 'é»˜è®¤éŸ³é¢‘æº';
 
   @override
-  String get set_default_audio_source => '设置默认音频源';
+  String get set_default_audio_source => 'è®¾ç½®é»˜è®¤éŸ³é¢‘æº';
 
   @override
-  String get set_default => '设为默认';
+  String get set_default => 'è®¾ä¸ºé»˜è®¤';
 
   @override
-  String get support => '支持';
+  String get support => 'æ”¯æŒ';
 
   @override
-  String get support_plugin_development => '支持插件开发';
+  String get support_plugin_development => 'æ”¯æŒæ’ä»¶å¼€å‘';
 
   @override
   String can_access_name_api(Object name) {
-    return '- 可以访问 **$name** API';
+    return '- å¯ä»¥è®¿é—® **$name** API';
   }
 
   @override
-  String get do_you_want_to_install_this_plugin => '您想安装此插件吗？';
+  String get do_you_want_to_install_this_plugin =>
+      'æ‚¨æƒ³å®‰è£…æ­¤æ’ä»¶å—ï¼Ÿ';
 
   @override
-  String get third_party_plugin_warning => '此插件来自第三方存储库。请在安装前确保您信任此来源。';
+  String get third_party_plugin_warning =>
+      'æ­¤æ’ä»¶æ¥è‡ªç¬¬ä¸‰æ–¹å­˜å‚¨åº“ã€‚è¯·åœ¨å®‰è£…å‰ç¡®ä¿æ‚¨ä¿¡ä»»æ­¤æ¥æºã€‚';
 
   @override
-  String get author => '作者';
+  String get author => 'ä½œè€…';
 
   @override
-  String get this_plugin_can_do_following => '此插件可以执行以下操作';
+  String get this_plugin_can_do_following =>
+      'æ­¤æ’ä»¶å¯ä»¥æ‰§è¡Œä»¥ä¸‹æ“ä½œ';
 
   @override
-  String get install => '安装';
+  String get install => 'å®‰è£…';
 
   @override
-  String get install_a_metadata_provider => '安装元数据提供者';
+  String get install_a_metadata_provider => 'å®‰è£…å…ƒæ•°æ®æä¾›è€…';
 
   @override
-  String get no_tracks_playing => '当前没有播放任何曲目';
+  String get no_tracks_playing => 'å½“å‰æ²¡æœ‰æ’­æ”¾ä»»ä½•æ›²ç›®';
 
   @override
-  String get synced_lyrics_not_available => '此歌曲的同步歌词不可用。请使用';
+  String get synced_lyrics_not_available =>
+      'æ­¤æ­Œæ›²çš„åŒæ­¥æ­Œè¯ä¸å¯ç”¨ã€‚è¯·ä½¿ç”¨';
 
   @override
-  String get plain_lyrics => '纯歌词';
+  String get plain_lyrics => 'çº¯æ­Œè¯';
 
   @override
-  String get tab_instead => '选项卡。';
+  String get tab_instead => 'é€‰é¡¹å¡ã€‚';
 
   @override
-  String get disclaimer => '免责声明';
+  String get disclaimer => 'å…è´£å£°æ˜Ž';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti 团队对任何“第三方”插件不承担任何责任（包括法律责任）。\n请自行承担风险使用。对于任何错误/问题，请向插件存储库报告。\n\n如果任何“第三方”插件违反了任何服务/法律实体的服务条款/DMCA，请要求该“第三方”插件作者或托管平台（例如 GitHub/Codeberg）采取行动。上面列出的（标记为“第三方”）都是公共/社区维护的插件。我们不对此类插件进行管理，因此无法对其采取任何行动。\n\n';
+      'Soulful Bhakti å›¢é˜Ÿå¯¹ä»»ä½•â€œç¬¬ä¸‰æ–¹â€æ’ä»¶ä¸æ‰¿æ‹…ä»»ä½•è´£ä»»ï¼ˆåŒ…æ‹¬æ³•å¾‹è´£ä»»ï¼‰ã€‚\nè¯·è‡ªè¡Œæ‰¿æ‹…é£Žé™©ä½¿ç”¨ã€‚å¯¹äºŽä»»ä½•é”™è¯¯/é—®é¢˜ï¼Œè¯·å‘æ’ä»¶å­˜å‚¨åº“æŠ¥å‘Šã€‚\n\nå¦‚æžœä»»ä½•â€œç¬¬ä¸‰æ–¹â€æ’ä»¶è¿åäº†ä»»ä½•æœåŠ¡/æ³•å¾‹å®žä½“çš„æœåŠ¡æ¡æ¬¾/DMCAï¼Œè¯·è¦æ±‚è¯¥â€œç¬¬ä¸‰æ–¹â€æ’ä»¶ä½œè€…æˆ–æ‰˜ç®¡å¹³å°ï¼ˆä¾‹å¦‚ GitHub/Codebergï¼‰é‡‡å–è¡ŒåŠ¨ã€‚ä¸Šé¢åˆ—å‡ºçš„ï¼ˆæ ‡è®°ä¸ºâ€œç¬¬ä¸‰æ–¹â€ï¼‰éƒ½æ˜¯å…¬å…±/ç¤¾åŒºç»´æŠ¤çš„æ’ä»¶ã€‚æˆ‘ä»¬ä¸å¯¹æ­¤ç±»æ’ä»¶è¿›è¡Œç®¡ç†ï¼Œå› æ­¤æ— æ³•å¯¹å…¶é‡‡å–ä»»ä½•è¡ŒåŠ¨ã€‚\n\n';
 
   @override
-  String get input_does_not_match_format => '输入与所需格式不匹配';
+  String get input_does_not_match_format => 'è¾“å…¥ä¸Žæ‰€éœ€æ ¼å¼ä¸åŒ¹é…';
 
   @override
-  String get plugins => '插件';
+  String get plugins => 'æ’ä»¶';
 
   @override
   String get paste_plugin_download_url =>
-      '粘贴下载 URL、GitHub/Codeberg 存储库 URL 或 .smplug 文件的直接链接';
+      'ç²˜è´´ä¸‹è½½ URLã€GitHub/Codeberg å­˜å‚¨åº“ URL æˆ– .smplug æ–‡ä»¶çš„ç›´æŽ¥é“¾æŽ¥';
 
   @override
-  String get download_and_install_plugin_from_url => '从 URL 下载并安装插件';
+  String get download_and_install_plugin_from_url =>
+      'ä»Ž URL ä¸‹è½½å¹¶å®‰è£…æ’ä»¶';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return '添加插件失败：$error';
+    return 'æ·»åŠ æ’ä»¶å¤±è´¥ï¼š$error';
   }
 
   @override
-  String get upload_plugin_from_file => '从文件上传插件';
+  String get upload_plugin_from_file => 'ä»Žæ–‡ä»¶ä¸Šä¼ æ’ä»¶';
 
   @override
-  String get installed => '已安装';
+  String get installed => 'å·²å®‰è£…';
 
   @override
-  String get available_plugins => '可用插件';
+  String get available_plugins => 'å¯ç”¨æ’ä»¶';
 
   @override
-  String get configure_plugins => '配置您自己的元数据提供者和音频源插件';
+  String get configure_plugins =>
+      'é…ç½®æ‚¨è‡ªå·±çš„å…ƒæ•°æ®æä¾›è€…å’ŒéŸ³é¢‘æºæ’ä»¶';
 
   @override
-  String get source => '来源：';
+  String get source => 'æ¥æºï¼š';
 
   @override
-  String get uncompressed => '无损';
+  String get uncompressed => 'æ— æŸ';
 
   @override
   String get dab_music_source_description =>
-      '适合发烧友。提供高质量/无损音频流。基于 ISRC 的精确曲目匹配。';
+      'é€‚åˆå‘çƒ§å‹ã€‚æä¾›é«˜è´¨é‡/æ— æŸéŸ³é¢‘æµã€‚åŸºäºŽ ISRC çš„ç²¾ç¡®æ›²ç›®åŒ¹é…ã€‚';
 
   @override
-  String get summary_top_track => '最佳曲目\n本时期';
+  String get summary_top_track => 'æœ€ä½³æ›²ç›®\næœ¬æ—¶æœŸ';
 
   @override
-  String get local => '本地';
+  String get local => 'æœ¬åœ°';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1604,6 +1640,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1611,545 +1664,551 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   AppLocalizationsZhTw() : super('zh_TW');
 
   @override
-  String get guest => '訪客';
+  String get guest => 'è¨ªå®¢';
 
   @override
-  String get browse => '瀏覽';
+  String get browse => 'ç€è¦½';
 
   @override
-  String get search => '搜尋';
+  String get search => 'æœå°‹';
 
   @override
-  String get library => '音樂庫';
+  String get library => 'éŸ³æ¨‚åº«';
 
   @override
-  String get lyrics => '歌詞';
+  String get lyrics => 'æ­Œè©ž';
 
   @override
-  String get settings => '設定';
+  String get settings => 'è¨­å®š';
 
   @override
-  String get settings_subtitle => '依照您的喜好自訂 Soulful Bhakti';
+  String get settings_subtitle => 'ä¾ç…§æ‚¨çš„å–œå¥½è‡ªè¨‚ Soulful Bhakti';
 
   @override
-  String get genre_categories_filter => '過濾分類...';
+  String get genre_categories_filter => 'éŽæ¿¾åˆ†é¡ž...';
 
   @override
-  String get genre => '探索歌單';
+  String get genre => 'æŽ¢ç´¢æ­Œå–®';
 
   @override
-  String get personalized => '為你打造';
+  String get personalized => 'ç‚ºä½ æ‰“é€ ';
 
   @override
-  String get featured => '推薦';
+  String get featured => 'æŽ¨è–¦';
 
   @override
-  String get new_releases => '新歌熱播';
+  String get new_releases => 'æ–°æ­Œç†±æ’­';
 
   @override
-  String get songs => '歌曲';
+  String get songs => 'æ­Œæ›²';
 
   @override
-  String get newest_arrivals => '最新上架';
+  String get newest_arrivals => 'æœ€æ–°ä¸Šæž¶';
 
   @override
-  String get top_trending => '熱門趨勢';
+  String get top_trending => 'ç†±é–€è¶¨å‹¢';
 
   @override
-  String get see_more => '查看更多';
+  String get see_more => 'æŸ¥çœ‹æ›´å¤š';
 
   @override
   String playing_track(Object track) {
-    return '播放 $track';
+    return 'æ’­æ”¾ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return '這將清空目前的播放清單。$track_length 首歌曲將被移除\n你確定要繼續嗎?';
+    return 'é€™å°‡æ¸…ç©ºç›®å‰çš„æ’­æ”¾æ¸…å–®ã€‚$track_length é¦–æ­Œæ›²å°‡è¢«ç§»é™¤\nä½ ç¢ºå®šè¦ç¹¼çºŒå—Ž?';
   }
 
   @override
-  String get load_more => '載入更多';
+  String get load_more => 'è¼‰å…¥æ›´å¤š';
 
   @override
-  String get playlists => '歌單';
+  String get playlists => 'æ­Œå–®';
 
   @override
-  String get artists => '藝人';
+  String get artists => 'è—äºº';
 
   @override
-  String get albums => '專輯';
+  String get albums => 'å°ˆè¼¯';
 
   @override
-  String get tracks => '歌曲';
+  String get tracks => 'æ­Œæ›²';
 
   @override
-  String get downloads => '下載';
+  String get downloads => 'ä¸‹è¼‰';
 
   @override
-  String get filter_playlists => '過濾歌單...';
+  String get filter_playlists => 'éŽæ¿¾æ­Œå–®...';
 
   @override
-  String get liked_tracks => '已按讚的歌曲';
+  String get liked_tracks => 'å·²æŒ‰è®šçš„æ­Œæ›²';
 
   @override
-  String get liked_tracks_description => '你按過讚的所有歌曲';
+  String get liked_tracks_description => 'ä½ æŒ‰éŽè®šçš„æ‰€æœ‰æ­Œæ›²';
 
   @override
-  String get playlist => '播放清單';
+  String get playlist => 'æ’­æ”¾æ¸…å–®';
 
   @override
-  String get create_a_playlist => '建立一個歌單';
+  String get create_a_playlist => 'å»ºç«‹ä¸€å€‹æ­Œå–®';
 
   @override
-  String get new_playlist => '建立新歌單';
+  String get new_playlist => 'å»ºç«‹æ–°æ­Œå–®';
 
   @override
-  String get playlist_name => '歌單名稱';
+  String get playlist_name => 'æ­Œå–®åç¨±';
 
   @override
-  String get no_playlists_yet => '尚無歌單。從所選歌曲建立一個。';
+  String get no_playlists_yet =>
+      'å°šç„¡æ­Œå–®ã€‚å¾žæ‰€é¸æ­Œæ›²å»ºç«‹ä¸€å€‹ã€‚';
 
   @override
-  String get update_playlist => '更新播放清單';
+  String get update_playlist => 'æ›´æ–°æ’­æ”¾æ¸…å–®';
 
   @override
-  String get create => '建立';
+  String get create => 'å»ºç«‹';
 
   @override
-  String get cancel => '取消';
+  String get cancel => 'å–æ¶ˆ';
 
   @override
-  String get update => '更新';
+  String get update => 'æ›´æ–°';
 
   @override
-  String get name_of_playlist => '歌單的名稱';
+  String get name_of_playlist => 'æ­Œå–®çš„åç¨±';
 
   @override
-  String get description => '說明';
+  String get description => 'èªªæ˜Ž';
 
   @override
-  String get public => '公開';
+  String get public => 'å…¬é–‹';
 
   @override
-  String get collaborative => '共享協作';
+  String get collaborative => 'å…±äº«å”ä½œ';
 
   @override
-  String get search_local_tracks => '搜尋本地歌曲...';
+  String get search_local_tracks => 'æœå°‹æœ¬åœ°æ­Œæ›²...';
 
   @override
-  String get play => '播放';
+  String get play => 'æ’­æ”¾';
 
   @override
-  String get delete => '刪除';
+  String get delete => 'åˆªé™¤';
 
   @override
-  String get none => '無';
+  String get none => 'ç„¡';
 
   @override
-  String get sort_a_z => '依字母順序';
+  String get sort_a_z => 'ä¾å­—æ¯é †åº';
 
   @override
-  String get sort_z_a => '依字母倒序';
+  String get sort_z_a => 'ä¾å­—æ¯å€’åº';
 
   @override
-  String get sort_artist => '按藝人';
+  String get sort_artist => 'æŒ‰è—äºº';
 
   @override
-  String get sort_album => '按專輯';
+  String get sort_album => 'æŒ‰å°ˆè¼¯';
 
   @override
-  String get sort_duration => '依長度排序';
+  String get sort_duration => 'ä¾é•·åº¦æŽ’åº';
 
   @override
-  String get sort_tracks => '排序方式';
+  String get sort_tracks => 'æŽ’åºæ–¹å¼';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return '正在下載 ($tracks_length)';
+    return 'æ­£åœ¨ä¸‹è¼‰ ($tracks_length)';
   }
 
   @override
-  String get cancel_all => '取消全部';
+  String get cancel_all => 'å–æ¶ˆå…¨éƒ¨';
 
   @override
-  String get filter_artist => '過濾藝人...';
+  String get filter_artist => 'éŽæ¿¾è—äºº...';
 
   @override
   String followers(Object followers) {
-    return '$followers 名追蹤者';
+    return '$followers åè¿½è¹¤è€…';
   }
 
   @override
-  String get add_artist_to_blacklist => '封鎖該藝人';
+  String get add_artist_to_blacklist => 'å°éŽ–è©²è—äºº';
 
   @override
-  String get top_tracks => '熱門歌曲';
+  String get top_tracks => 'ç†±é–€æ­Œæ›²';
 
   @override
-  String get fans_also_like => '粉絲也喜歡';
+  String get fans_also_like => 'ç²‰çµ²ä¹Ÿå–œæ­¡';
 
   @override
-  String get loading => '載入中...';
+  String get loading => 'è¼‰å…¥ä¸­...';
 
   @override
-  String get artist => '藝人';
+  String get artist => 'è—äºº';
 
   @override
-  String get blacklisted => '已封鎖';
+  String get blacklisted => 'å·²å°éŽ–';
 
   @override
-  String get following => '關注中';
+  String get following => 'é—œæ³¨ä¸­';
 
   @override
-  String get follow => '關注';
+  String get follow => 'é—œæ³¨';
 
   @override
-  String get artist_url_copied => '此名藝人的分享連結已複製至剪貼簿';
+  String get artist_url_copied =>
+      'æ­¤åè—äººçš„åˆ†äº«é€£çµå·²è¤‡è£½è‡³å‰ªè²¼ç°¿';
 
   @override
   String added_to_queue(Object tracks) {
-    return '已新增 $tracks 首歌曲到播放清單';
+    return 'å·²æ–°å¢ž $tracks é¦–æ­Œæ›²åˆ°æ’­æ”¾æ¸…å–®';
   }
 
   @override
-  String get filter_albums => '過濾專輯...';
+  String get filter_albums => 'éŽæ¿¾å°ˆè¼¯...';
 
   @override
-  String get synced => '同步';
+  String get synced => 'åŒæ­¥';
 
   @override
-  String get plain => '未同步';
+  String get plain => 'æœªåŒæ­¥';
 
   @override
-  String get shuffle => '隨機播放';
+  String get shuffle => 'éš¨æ©Ÿæ’­æ”¾';
 
   @override
-  String get search_tracks => '搜尋歌曲...';
+  String get search_tracks => 'æœå°‹æ­Œæ›²...';
 
   @override
-  String get released => '發表時間';
+  String get released => 'ç™¼è¡¨æ™‚é–“';
 
   @override
   String error(Object error) {
-    return '發生錯誤： $error';
+    return 'ç™¼ç”ŸéŒ¯èª¤ï¼š $error';
   }
 
   @override
-  String get title => '標題';
+  String get title => 'æ¨™é¡Œ';
 
   @override
-  String get time => '時長';
+  String get time => 'æ™‚é•·';
 
   @override
-  String get more_actions => '更多動作';
+  String get more_actions => 'æ›´å¤šå‹•ä½œ';
 
   @override
   String add_count_to_playlist(Object count) {
-    return '將 ($count) 首歌曲新增到歌單中';
+    return 'å°‡ ($count) é¦–æ­Œæ›²æ–°å¢žåˆ°æ­Œå–®ä¸­';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return '新增 ($count) 首歌曲到播放清單';
+    return 'æ–°å¢ž ($count) é¦–æ­Œæ›²åˆ°æ’­æ”¾æ¸…å–®';
   }
 
   @override
   String play_count_next(Object count) {
-    return '接下來將播放 ($count) 首歌曲';
+    return 'æŽ¥ä¸‹ä¾†å°‡æ’­æ”¾ ($count) é¦–æ­Œæ›²';
   }
 
   @override
-  String get album => '專輯';
+  String get album => 'å°ˆè¼¯';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '已將 $data 複製至剪貼簿';
+    return 'å·²å°‡ $data è¤‡è£½è‡³å‰ªè²¼ç°¿';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '新增 $track 到以下播放清單';
+    return 'æ–°å¢ž $track åˆ°ä»¥ä¸‹æ’­æ”¾æ¸…å–®';
   }
 
   @override
-  String get add => '新增';
+  String get add => 'æ–°å¢ž';
 
   @override
   String added_track_to_queue(Object track) {
-    return '新增 $track 到播放清單';
+    return 'æ–°å¢ž $track åˆ°æ’­æ”¾æ¸…å–®';
   }
 
   @override
-  String get add_to_queue => '新增至播放清單';
+  String get add_to_queue => 'æ–°å¢žè‡³æ’­æ”¾æ¸…å–®';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track 將在下一首播放';
+    return '$track å°‡åœ¨ä¸‹ä¸€é¦–æ’­æ”¾';
   }
 
   @override
-  String get play_next => '下一首播放';
+  String get play_next => 'ä¸‹ä¸€é¦–æ’­æ”¾';
 
   @override
   String removed_track_from_queue(Object track) {
-    return '將 $track 從播放清單移除';
+    return 'å°‡ $track å¾žæ’­æ”¾æ¸…å–®ç§»é™¤';
   }
 
   @override
-  String get remove_from_queue => '從播放清單移除';
+  String get remove_from_queue => 'å¾žæ’­æ”¾æ¸…å–®ç§»é™¤';
 
   @override
-  String get remove_from_favorites => '取消按讚';
+  String get remove_from_favorites => 'å–æ¶ˆæŒ‰è®š';
 
   @override
-  String get save_as_favorite => '按讚';
+  String get save_as_favorite => 'æŒ‰è®š';
 
   @override
-  String get add_to_playlist => '新增到歌單';
+  String get add_to_playlist => 'æ–°å¢žåˆ°æ­Œå–®';
 
   @override
-  String get remove_from_playlist => '從歌單移除';
+  String get remove_from_playlist => 'å¾žæ­Œå–®ç§»é™¤';
 
   @override
-  String get add_to_blacklist => '新增到已封鎖清單';
+  String get add_to_blacklist => 'æ–°å¢žåˆ°å·²å°éŽ–æ¸…å–®';
 
   @override
-  String get remove_from_blacklist => '從已封鎖清單移除';
+  String get remove_from_blacklist => 'å¾žå·²å°éŽ–æ¸…å–®ç§»é™¤';
 
   @override
-  String get share => '分享';
+  String get share => 'åˆ†äº«';
 
   @override
-  String get mini_player => '小窗模式';
+  String get mini_player => 'å°çª—æ¨¡å¼';
 
   @override
-  String get slide_to_seek => '滑動以前進或後退';
+  String get slide_to_seek => 'æ»‘å‹•ä»¥å‰é€²æˆ–å¾Œé€€';
 
   @override
-  String get shuffle_playlist => '隨機播放歌單';
+  String get shuffle_playlist => 'éš¨æ©Ÿæ’­æ”¾æ­Œå–®';
 
   @override
-  String get unshuffle_playlist => '取消隨機播放歌單';
+  String get unshuffle_playlist => 'å–æ¶ˆéš¨æ©Ÿæ’­æ”¾æ­Œå–®';
 
   @override
-  String get previous_track => '上一首歌曲';
+  String get previous_track => 'ä¸Šä¸€é¦–æ­Œæ›²';
 
   @override
-  String get next_track => '下一首歌';
+  String get next_track => 'ä¸‹ä¸€é¦–æ­Œ';
 
   @override
-  String get pause_playback => '暫停播放';
+  String get pause_playback => 'æš«åœæ’­æ”¾';
 
   @override
-  String get resume_playback => '恢復播放';
+  String get resume_playback => 'æ¢å¾©æ’­æ”¾';
 
   @override
-  String get loop_track => '單曲循環';
+  String get loop_track => 'å–®æ›²å¾ªç’°';
 
   @override
-  String get no_loop => '無循環';
+  String get no_loop => 'ç„¡å¾ªç’°';
 
   @override
-  String get repeat_playlist => '歌單循環';
+  String get repeat_playlist => 'æ­Œå–®å¾ªç’°';
 
   @override
-  String get queue => '播放清單';
+  String get queue => 'æ’­æ”¾æ¸…å–®';
 
   @override
-  String get alternative_track_sources => '其它音源';
+  String get alternative_track_sources => 'å…¶å®ƒéŸ³æº';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks 首歌曲在播放清單中';
+    return '$tracks é¦–æ­Œæ›²åœ¨æ’­æ”¾æ¸…å–®ä¸­';
   }
 
   @override
-  String get clear_all => '清除全部';
+  String get clear_all => 'æ¸…é™¤å…¨éƒ¨';
 
   @override
-  String get show_hide_ui_on_hover => '游標暫留時顯示 / 隱藏控制列';
+  String get show_hide_ui_on_hover => 'æ¸¸æ¨™æš«ç•™æ™‚é¡¯ç¤º / éš±è—æŽ§åˆ¶åˆ—';
 
   @override
-  String get always_on_top => '置頂';
+  String get always_on_top => 'ç½®é ‚';
 
   @override
-  String get exit_mini_player => '退出小窗模式';
+  String get exit_mini_player => 'é€€å‡ºå°çª—æ¨¡å¼';
 
   @override
-  String get local_library => '本地媒體庫';
+  String get local_library => 'æœ¬åœ°åª’é«”åº«';
 
   @override
-  String get add_library_location => '新增至媒體庫';
+  String get add_library_location => 'æ–°å¢žè‡³åª’é«”åº«';
 
   @override
-  String get remove_library_location => '從媒體庫移除';
+  String get remove_library_location => 'å¾žåª’é«”åº«ç§»é™¤';
 
   @override
-  String get account => '帳戶';
+  String get account => 'å¸³æˆ¶';
 
   @override
-  String get logout => '退出';
+  String get logout => 'é€€å‡º';
 
   @override
-  String get logout_of_this_account => '退出該帳戶';
+  String get logout_of_this_account => 'é€€å‡ºè©²å¸³æˆ¶';
 
   @override
-  String get language_region => '語言與地區';
+  String get language_region => 'èªžè¨€èˆ‡åœ°å€';
 
   @override
-  String get language => '語言';
+  String get language => 'èªžè¨€';
 
   @override
-  String get system_default => '系統預設';
+  String get system_default => 'ç³»çµ±é è¨­';
 
   @override
-  String get market_place_region => '市集地區';
+  String get market_place_region => 'å¸‚é›†åœ°å€';
 
   @override
-  String get recommendation_country => '請選擇國家與地區以取得對應的音樂推薦';
+  String get recommendation_country =>
+      'è«‹é¸æ“‡åœ‹å®¶èˆ‡åœ°å€ä»¥å–å¾—å°æ‡‰çš„éŸ³æ¨‚æŽ¨è–¦';
 
   @override
-  String get appearance => '外觀';
+  String get appearance => 'å¤–è§€';
 
   @override
-  String get layout_mode => '佈局類型';
+  String get layout_mode => 'ä½ˆå±€é¡žåž‹';
 
   @override
-  String get override_layout_settings => '將覆寫響應式佈局設定';
+  String get override_layout_settings => 'å°‡è¦†å¯«éŸ¿æ‡‰å¼ä½ˆå±€è¨­å®š';
 
   @override
-  String get adaptive => '響應式';
+  String get adaptive => 'éŸ¿æ‡‰å¼';
 
   @override
-  String get compact => '緊湊';
+  String get compact => 'ç·Šæ¹Š';
 
   @override
-  String get extended => '寬闊';
+  String get extended => 'å¯¬é—Š';
 
   @override
-  String get theme => '主題';
+  String get theme => 'ä¸»é¡Œ';
 
   @override
-  String get dark => '深色';
+  String get dark => 'æ·±è‰²';
 
   @override
-  String get light => '淺色';
+  String get light => 'æ·ºè‰²';
 
   @override
-  String get system => '依循系統';
+  String get system => 'ä¾å¾ªç³»çµ±';
 
   @override
-  String get accent_color => '主色調';
+  String get accent_color => 'ä¸»è‰²èª¿';
 
   @override
-  String get sync_album_color => '符合封面顏色';
+  String get sync_album_color => 'ç¬¦åˆå°é¢é¡è‰²';
 
   @override
-  String get sync_album_color_description => '選取專輯封面主題色為主色調';
+  String get sync_album_color_description =>
+      'é¸å–å°ˆè¼¯å°é¢ä¸»é¡Œè‰²ç‚ºä¸»è‰²èª¿';
 
   @override
-  String get playback => '播放';
+  String get playback => 'æ’­æ”¾';
 
   @override
-  String get audio_quality => '音質';
+  String get audio_quality => 'éŸ³è³ª';
 
   @override
-  String get high => '高';
+  String get high => 'é«˜';
 
   @override
-  String get low => '低';
+  String get low => 'ä½Ž';
 
   @override
-  String get pre_download_play => '下載後播放';
+  String get pre_download_play => 'ä¸‹è¼‰å¾Œæ’­æ”¾';
 
   @override
-  String get pre_download_play_description => '先下載歌曲後再播放而非串流播放（建議頻寬較高使用者使用）';
+  String get pre_download_play_description =>
+      'å…ˆä¸‹è¼‰æ­Œæ›²å¾Œå†æ’­æ”¾è€Œéžä¸²æµæ’­æ”¾ï¼ˆå»ºè­°é »å¯¬è¼ƒé«˜ä½¿ç”¨è€…ä½¿ç”¨ï¼‰';
 
   @override
-  String get skip_non_music => '跳過非音樂片段（跳過贊助商廣告）';
+  String get skip_non_music =>
+      'è·³éŽéžéŸ³æ¨‚ç‰‡æ®µï¼ˆè·³éŽè´ŠåŠ©å•†å»£å‘Šï¼‰';
 
   @override
-  String get blacklist_description => '已封鎖的歌曲與藝人';
+  String get blacklist_description => 'å·²å°éŽ–çš„æ­Œæ›²èˆ‡è—äºº';
 
   @override
-  String get wait_for_download_to_finish => '請等待目前下載工作完成';
+  String get wait_for_download_to_finish => 'è«‹ç­‰å¾…ç›®å‰ä¸‹è¼‰å·¥ä½œå®Œæˆ';
 
   @override
-  String get desktop => '桌面版設定';
+  String get desktop => 'æ¡Œé¢ç‰ˆè¨­å®š';
 
   @override
-  String get close_behavior => '點選關閉按鈕行為';
+  String get close_behavior => 'é»žé¸é—œé–‰æŒ‰éˆ•è¡Œç‚º';
 
   @override
-  String get close => '關閉';
+  String get close => 'é—œé–‰';
 
   @override
-  String get minimize_to_tray => '最小化到工作列';
+  String get minimize_to_tray => 'æœ€å°åŒ–åˆ°å·¥ä½œåˆ—';
 
   @override
-  String get show_tray_icon => '顯示工作列圖示';
+  String get show_tray_icon => 'é¡¯ç¤ºå·¥ä½œåˆ—åœ–ç¤º';
 
   @override
-  String get about => '關於';
+  String get about => 'é—œæ–¼';
 
   @override
-  String get u_love_spotube => '我們明白你喜歡 Soulful Bhakti';
+  String get u_love_spotube => 'æˆ‘å€‘æ˜Žç™½ä½ å–œæ­¡ Soulful Bhakti';
 
   @override
-  String get check_for_updates => '檢查更新';
+  String get check_for_updates => 'æª¢æŸ¥æ›´æ–°';
 
   @override
-  String get about_spotube => '關於 Soulful Bhakti';
+  String get about_spotube => 'é—œæ–¼ Soulful Bhakti';
 
   @override
-  String get blacklist => '黑名單';
+  String get blacklist => 'é»‘åå–®';
 
   @override
-  String get please_sponsor => '請考慮贊助或捐款';
+  String get please_sponsor => 'è«‹è€ƒæ…®è´ŠåŠ©æˆ–ææ¬¾';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti，一款輕量、跨平台且完全免費的 Spotify 用戶端。';
+      'Soulful Bhaktiï¼Œä¸€æ¬¾è¼•é‡ã€è·¨å¹³å°ä¸”å®Œå…¨å…è²»çš„ Spotify ç”¨æˆ¶ç«¯ã€‚';
 
   @override
-  String get version => '版本';
+  String get version => 'ç‰ˆæœ¬';
 
   @override
-  String get build_number => '建置編號';
+  String get build_number => 'å»ºç½®ç·¨è™Ÿ';
 
   @override
-  String get founder => '發起人';
+  String get founder => 'ç™¼èµ·äºº';
 
   @override
-  String get repository => '專案儲存庫';
+  String get repository => 'å°ˆæ¡ˆå„²å­˜åº«';
 
   @override
-  String get bug_issues => '缺陷與問題報告';
+  String get bug_issues => 'ç¼ºé™·èˆ‡å•é¡Œå ±å‘Š';
 
   @override
-  String get made_with => '於孟加拉🇧🇩用 ❤️ 發電';
+  String get made_with => 'æ–¼å­ŸåŠ æ‹‰ðŸ‡§ðŸ‡©ç”¨ â¤ï¸ ç™¼é›»';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => '授權';
+  String get license => 'æŽˆæ¬Š';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      '您大可放心，軟體不會收集或分享任何個人資料給第三方';
+      'æ‚¨å¤§å¯æ”¾å¿ƒï¼Œè»Ÿé«”ä¸æœƒæ”¶é›†æˆ–åˆ†äº«ä»»ä½•å€‹äººè³‡æ–™çµ¦ç¬¬ä¸‰æ–¹';
 
   @override
-  String get know_how_to_login => '不知道該怎麼辦？';
+  String get know_how_to_login => 'ä¸çŸ¥é“è©²æ€Žéº¼è¾¦ï¼Ÿ';
 
   @override
-  String get follow_step_by_step_guide => '請依照以下說明進行';
+  String get follow_step_by_step_guide => 'è«‹ä¾ç…§ä»¥ä¸‹èªªæ˜Žé€²è¡Œ';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -2157,1026 +2216,1077 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get fill_in_all_fields => '請填入所有欄位';
+  String get fill_in_all_fields => 'è«‹å¡«å…¥æ‰€æœ‰æ¬„ä½';
 
   @override
-  String get submit => '提交';
+  String get submit => 'æäº¤';
 
   @override
-  String get exit => '退出';
+  String get exit => 'é€€å‡º';
 
   @override
-  String get previous => '上一步';
+  String get previous => 'ä¸Šä¸€æ­¥';
 
   @override
-  String get next => '下一步';
+  String get next => 'ä¸‹ä¸€æ­¥';
 
   @override
-  String get done => '完成';
+  String get done => 'å®Œæˆ';
 
   @override
-  String get step_1 => '步驟 1';
+  String get step_1 => 'æ­¥é©Ÿ 1';
 
   @override
-  String get first_go_to => '首先，前往';
+  String get first_go_to => 'é¦–å…ˆï¼Œå‰å¾€';
 
   @override
-  String get something_went_wrong => '某些地方出現了問題';
+  String get something_went_wrong => 'æŸäº›åœ°æ–¹å‡ºç¾äº†å•é¡Œ';
 
   @override
-  String get piped_instance => 'Piped 伺服器實例';
+  String get piped_instance => 'Piped ä¼ºæœå™¨å¯¦ä¾‹';
 
   @override
-  String get piped_description => 'Piped 伺服器實例用於匹配歌曲';
+  String get piped_description => 'Piped ä¼ºæœå™¨å¯¦ä¾‹ç”¨æ–¼åŒ¹é…æ­Œæ›²';
 
   @override
-  String get piped_warning => '它們之中的一部分可能無法正常運作。使用時請自行承擔風險';
+  String get piped_warning =>
+      'å®ƒå€‘ä¹‹ä¸­çš„ä¸€éƒ¨åˆ†å¯èƒ½ç„¡æ³•æ­£å¸¸é‹ä½œã€‚ä½¿ç”¨æ™‚è«‹è‡ªè¡Œæ‰¿æ“”é¢¨éšª';
 
   @override
-  String get invidious_instance => 'Invidious 伺服器實例';
+  String get invidious_instance => 'Invidious ä¼ºæœå™¨å¯¦ä¾‹';
 
   @override
-  String get invidious_description => '用於音軌匹配的 Invidious 伺服器實例';
+  String get invidious_description =>
+      'ç”¨æ–¼éŸ³è»ŒåŒ¹é…çš„ Invidious ä¼ºæœå™¨å¯¦ä¾‹';
 
   @override
-  String get invidious_warning => '有些可能無法正常運作。請自行承擔風險';
+  String get invidious_warning =>
+      'æœ‰äº›å¯èƒ½ç„¡æ³•æ­£å¸¸é‹ä½œã€‚è«‹è‡ªè¡Œæ‰¿æ“”é¢¨éšª';
 
   @override
-  String get generate => '生成';
+  String get generate => 'ç”Ÿæˆ';
 
   @override
   String track_exists(Object track) {
-    return '曲目 $track 已存在';
+    return 'æ›²ç›® $track å·²å­˜åœ¨';
   }
 
   @override
-  String get replace => '取代';
+  String get replace => 'å–ä»£';
 
   @override
-  String get skip => '跳過';
+  String get skip => 'è·³éŽ';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return '選擇最多 $count 種的類型 $type';
+    return 'é¸æ“‡æœ€å¤š $count ç¨®çš„é¡žåž‹ $type';
   }
 
   @override
-  String get select_genres => '選擇曲風';
+  String get select_genres => 'é¸æ“‡æ›²é¢¨';
 
   @override
-  String get add_genres => '新增曲風';
+  String get add_genres => 'æ–°å¢žæ›²é¢¨';
 
   @override
-  String get country => '國家和地區';
+  String get country => 'åœ‹å®¶å’Œåœ°å€';
 
   @override
-  String get number_of_tracks_generate => '產生歌曲的數目';
+  String get number_of_tracks_generate => 'ç”¢ç”Ÿæ­Œæ›²çš„æ•¸ç›®';
 
   @override
-  String get acousticness => '原聲程度';
+  String get acousticness => 'åŽŸè²ç¨‹åº¦';
 
   @override
-  String get danceability => '律動感';
+  String get danceability => 'å¾‹å‹•æ„Ÿ';
 
   @override
-  String get energy => '衝擊感';
+  String get energy => 'è¡æ“Šæ„Ÿ';
 
   @override
-  String get instrumentalness => '歌唱部分佔比';
+  String get instrumentalness => 'æ­Œå”±éƒ¨åˆ†ä½”æ¯”';
 
   @override
-  String get liveness => '現場感';
+  String get liveness => 'ç¾å ´æ„Ÿ';
 
   @override
-  String get loudness => '響度';
+  String get loudness => 'éŸ¿åº¦';
 
   @override
-  String get speechiness => '朗誦比例';
+  String get speechiness => 'æœ—èª¦æ¯”ä¾‹';
 
   @override
-  String get valence => '心理感受';
+  String get valence => 'å¿ƒç†æ„Ÿå—';
 
   @override
-  String get popularity => '流行度';
+  String get popularity => 'æµè¡Œåº¦';
 
   @override
-  String get key => '曲調';
+  String get key => 'æ›²èª¿';
 
   @override
-  String get duration => '歌曲長度 (s)';
+  String get duration => 'æ­Œæ›²é•·åº¦ (s)';
 
   @override
-  String get tempo => '每分鐘拍數 (BPM)';
+  String get tempo => 'æ¯åˆ†é˜æ‹æ•¸ (BPM)';
 
   @override
-  String get mode => '旋律重複度';
+  String get mode => 'æ—‹å¾‹é‡è¤‡åº¦';
 
   @override
-  String get time_signature => '音符時值';
+  String get time_signature => 'éŸ³ç¬¦æ™‚å€¼';
 
   @override
-  String get short => '短';
+  String get short => 'çŸ­';
 
   @override
-  String get medium => '中';
+  String get medium => 'ä¸­';
 
   @override
-  String get long => '長';
+  String get long => 'é•·';
 
   @override
-  String get min => '最低';
+  String get min => 'æœ€ä½Ž';
 
   @override
-  String get max => '最高';
+  String get max => 'æœ€é«˜';
 
   @override
-  String get target => '目標';
+  String get target => 'ç›®æ¨™';
 
   @override
-  String get moderate => '中';
+  String get moderate => 'ä¸­';
 
   @override
-  String get deselect_all => '取消全選';
+  String get deselect_all => 'å–æ¶ˆå…¨é¸';
 
   @override
-  String get select_all => '全選';
+  String get select_all => 'å…¨é¸';
 
   @override
-  String get are_you_sure => '你確定嗎？';
+  String get are_you_sure => 'ä½ ç¢ºå®šå—Žï¼Ÿ';
 
   @override
-  String get generating_playlist => '正在產生你的自訂歌單...';
+  String get generating_playlist => 'æ­£åœ¨ç”¢ç”Ÿä½ çš„è‡ªè¨‚æ­Œå–®...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '已選取 $count 首歌曲';
+    return 'å·²é¸å– $count é¦–æ­Œæ›²';
   }
 
   @override
   String get download_warning =>
-      '如果你大量下載這些歌曲，你顯然在侵犯音樂的版權並對音樂創作社區造成了傷害。我希望你能意識到這一點。永遠要尊重並支持藝術家們的辛勤工作';
+      'å¦‚æžœä½ å¤§é‡ä¸‹è¼‰é€™äº›æ­Œæ›²ï¼Œä½ é¡¯ç„¶åœ¨ä¾µçŠ¯éŸ³æ¨‚çš„ç‰ˆæ¬Šä¸¦å°éŸ³æ¨‚å‰µä½œç¤¾å€é€ æˆäº†å‚·å®³ã€‚æˆ‘å¸Œæœ›ä½ èƒ½æ„è­˜åˆ°é€™ä¸€é»žã€‚æ°¸é è¦å°Šé‡ä¸¦æ”¯æŒè—è¡“å®¶å€‘çš„è¾›å‹¤å·¥ä½œ';
 
   @override
   String get download_ip_ban_warning =>
-      '小心，如果出現超出正常的下載請求，那你的 IP 可能會被 YouTube 封鎖，這意味著你的裝置將在長達 2-3 個月的時間內無法使用該 IP 訪問 YouTube（即使你沒登入）。Soulful Bhakti 不會因而承擔任何責任';
+      'å°å¿ƒï¼Œå¦‚æžœå‡ºç¾è¶…å‡ºæ­£å¸¸çš„ä¸‹è¼‰è«‹æ±‚ï¼Œé‚£ä½ çš„ IP å¯èƒ½æœƒè¢« YouTube å°éŽ–ï¼Œé€™æ„å‘³è‘—ä½ çš„è£ç½®å°‡åœ¨é•·é” 2-3 å€‹æœˆçš„æ™‚é–“å…§ç„¡æ³•ä½¿ç”¨è©² IP è¨ªå• YouTubeï¼ˆå³ä½¿ä½ æ²’ç™»å…¥ï¼‰ã€‚Soulful Bhakti ä¸æœƒå› è€Œæ‰¿æ“”ä»»ä½•è²¬ä»»';
 
   @override
-  String get by_clicking_accept_terms => '點擊 \'同意\' 代表你同意以下的條款';
+  String get by_clicking_accept_terms =>
+      'é»žæ“Š \'åŒæ„\' ä»£è¡¨ä½ åŒæ„ä»¥ä¸‹çš„æ¢æ¬¾';
 
   @override
-  String get download_agreement_1 => '我明白侵害音樂版權是一件不好的事';
+  String get download_agreement_1 =>
+      'æˆ‘æ˜Žç™½ä¾µå®³éŸ³æ¨‚ç‰ˆæ¬Šæ˜¯ä¸€ä»¶ä¸å¥½çš„äº‹';
 
   @override
-  String get download_agreement_2 => '我將盡可能支持藝術家的工作。我現在之所以做不到是因為缺乏資金來購買正版';
+  String get download_agreement_2 =>
+      'æˆ‘å°‡ç›¡å¯èƒ½æ”¯æŒè—è¡“å®¶çš„å·¥ä½œã€‚æˆ‘ç¾åœ¨ä¹‹æ‰€ä»¥åšä¸åˆ°æ˜¯å› ç‚ºç¼ºä¹è³‡é‡‘ä¾†è³¼è²·æ­£ç‰ˆ';
 
   @override
   String get download_agreement_3 =>
-      '我完全了解我的 IP 存在被 YouTube 封鎖的風險。並且我明白 Soulful Bhakti 的擁有者與貢獻者們無須對我目前的行為所導致的任何後果負責';
+      'æˆ‘å®Œå…¨äº†è§£æˆ‘çš„ IP å­˜åœ¨è¢« YouTube å°éŽ–çš„é¢¨éšªã€‚ä¸¦ä¸”æˆ‘æ˜Žç™½ Soulful Bhakti çš„æ“æœ‰è€…èˆ‡è²¢ç»è€…å€‘ç„¡é ˆå°æˆ‘ç›®å‰çš„è¡Œç‚ºæ‰€å°Žè‡´çš„ä»»ä½•å¾Œæžœè² è²¬';
 
   @override
-  String get decline => '拒絕';
+  String get decline => 'æ‹’çµ•';
 
   @override
-  String get accept => '同意';
+  String get accept => 'åŒæ„';
 
   @override
-  String get details => '詳細資訊';
+  String get details => 'è©³ç´°è³‡è¨Š';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => '頻道';
+  String get channel => 'é »é“';
 
   @override
-  String get likes => '讚';
+  String get likes => 'è®š';
 
   @override
-  String get dislikes => '倒讚';
+  String get dislikes => 'å€’è®š';
 
   @override
-  String get views => '瀏覽次數';
+  String get views => 'ç€è¦½æ¬¡æ•¸';
 
   @override
-  String get streamUrl => '播放串流 URL';
+  String get streamUrl => 'æ’­æ”¾ä¸²æµ URL';
 
   @override
-  String get stop => '停止';
+  String get stop => 'åœæ­¢';
 
   @override
-  String get sort_newest => '依新增日期順序';
+  String get sort_newest => 'ä¾æ–°å¢žæ—¥æœŸé †åº';
 
   @override
-  String get sort_oldest => '依新增日期倒序';
+  String get sort_oldest => 'ä¾æ–°å¢žæ—¥æœŸå€’åº';
 
   @override
-  String get sleep_timer => '睡眠計時器';
+  String get sleep_timer => 'ç¡çœ è¨ˆæ™‚å™¨';
 
   @override
   String mins(Object minutes) {
-    return '$minutes 分';
+    return '$minutes åˆ†';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours 時';
+    return '$hours æ™‚';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours 時';
+    return '$hours æ™‚';
   }
 
   @override
-  String get custom_hours => '自訂時長';
+  String get custom_hours => 'è‡ªè¨‚æ™‚é•·';
 
   @override
-  String get logs => '記錄檔（Log）';
+  String get logs => 'è¨˜éŒ„æª”ï¼ˆLogï¼‰';
 
   @override
-  String get developers => '開發者';
+  String get developers => 'é–‹ç™¼è€…';
 
   @override
-  String get not_logged_in => '你尚未登入';
+  String get not_logged_in => 'ä½ å°šæœªç™»å…¥';
 
   @override
-  String get search_mode => '搜尋模式';
+  String get search_mode => 'æœå°‹æ¨¡å¼';
 
   @override
-  String get audio_source => '音訊來源';
+  String get audio_source => 'éŸ³è¨Šä¾†æº';
 
   @override
-  String get ok => '確定';
+  String get ok => 'ç¢ºå®š';
 
   @override
-  String get failed_to_encrypt => '加密失敗';
+  String get failed_to_encrypt => 'åŠ å¯†å¤±æ•—';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti使用加密來安全地儲存您的資料。但是失敗了。因此，它將回退到不安全的儲存空間\n如果您使用Linux，請確保已安裝gnome-keyring、kde-wallet和keepassxc等加密服務';
+      'Soulful Bhaktiä½¿ç”¨åŠ å¯†ä¾†å®‰å…¨åœ°å„²å­˜æ‚¨çš„è³‡æ–™ã€‚ä½†æ˜¯å¤±æ•—äº†ã€‚å› æ­¤ï¼Œå®ƒå°‡å›žé€€åˆ°ä¸å®‰å…¨çš„å„²å­˜ç©ºé–“\nå¦‚æžœæ‚¨ä½¿ç”¨Linuxï¼Œè«‹ç¢ºä¿å·²å®‰è£gnome-keyringã€kde-walletå’Œkeepassxcç­‰åŠ å¯†æœå‹™';
 
   @override
-  String get querying_info => '正在查詢資訊...';
+  String get querying_info => 'æ­£åœ¨æŸ¥è©¢è³‡è¨Š...';
 
   @override
-  String get piped_api_down => 'Piped API 無法使用';
+  String get piped_api_down => 'Piped API ç„¡æ³•ä½¿ç”¨';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return '當前Piped實例 $pipedInstance 不可用\n\n請更改實例或將\'API類型\'更改為官方YouTube API\n\n更改後請確保重新啟動應用程式';
+    return 'ç•¶å‰Pipedå¯¦ä¾‹ $pipedInstance ä¸å¯ç”¨\n\nè«‹æ›´æ”¹å¯¦ä¾‹æˆ–å°‡\'APIé¡žåž‹\'æ›´æ”¹ç‚ºå®˜æ–¹YouTube API\n\næ›´æ”¹å¾Œè«‹ç¢ºä¿é‡æ–°å•Ÿå‹•æ‡‰ç”¨ç¨‹å¼';
   }
 
   @override
-  String get you_are_offline => '您目前處於離線狀態';
+  String get you_are_offline => 'æ‚¨ç›®å‰è™•æ–¼é›¢ç·šç‹€æ…‹';
 
   @override
-  String get connection_restored => '您的網路連線已恢復';
+  String get connection_restored => 'æ‚¨çš„ç¶²è·¯é€£ç·šå·²æ¢å¾©';
 
   @override
-  String get use_system_title_bar => '使用作業系統的預設視窗標題列';
+  String get use_system_title_bar =>
+      'ä½¿ç”¨ä½œæ¥­ç³»çµ±çš„é è¨­è¦–çª—æ¨™é¡Œåˆ—';
 
   @override
-  String get crunching_results => '處理結果中...';
+  String get crunching_results => 'è™•ç†çµæžœä¸­...';
 
   @override
-  String get search_to_get_results => '搜尋以取得結果';
+  String get search_to_get_results => 'æœå°‹ä»¥å–å¾—çµæžœ';
 
   @override
-  String get use_amoled_mode => '使用 AMOLED 模式';
+  String get use_amoled_mode => 'ä½¿ç”¨ AMOLED æ¨¡å¼';
 
   @override
-  String get pitch_dark_theme => '漆黑主題';
+  String get pitch_dark_theme => 'æ¼†é»‘ä¸»é¡Œ';
 
   @override
-  String get normalize_audio => '標準化音訊';
+  String get normalize_audio => 'æ¨™æº–åŒ–éŸ³è¨Š';
 
   @override
-  String get change_cover => '更改封面';
+  String get change_cover => 'æ›´æ”¹å°é¢';
 
   @override
-  String get add_cover => '新增封面';
+  String get add_cover => 'æ–°å¢žå°é¢';
 
   @override
-  String get restore_defaults => '恢復預設值';
+  String get restore_defaults => 'æ¢å¾©é è¨­å€¼';
 
   @override
-  String get restore_defaults_confirmation => '這會將您的所有設定重設為預設值。此操作無法復原。';
+  String get restore_defaults_confirmation =>
+      'é€™æœƒå°‡æ‚¨çš„æ‰€æœ‰è¨­å®šé‡è¨­ç‚ºé è¨­å€¼ã€‚æ­¤æ“ä½œç„¡æ³•å¾©åŽŸã€‚';
 
   @override
-  String get streaming_music_format => '串流音樂格式';
+  String get streaming_music_format => 'ä¸²æµéŸ³æ¨‚æ ¼å¼';
 
   @override
-  String get streaming_music_quality => '串流音樂品質';
+  String get streaming_music_quality => 'ä¸²æµéŸ³æ¨‚å“è³ª';
 
   @override
-  String get connect => '連線';
+  String get connect => 'é€£ç·š';
 
   @override
-  String get disconnect => '斷開連線';
+  String get disconnect => 'æ–·é–‹é€£ç·š';
 
   @override
-  String get username => '帳號';
+  String get username => 'å¸³è™Ÿ';
 
   @override
-  String get password => '密碼';
+  String get password => 'å¯†ç¢¼';
 
   @override
-  String get login => '登入';
+  String get login => 'ç™»å…¥';
 
   @override
-  String get sign_in => '登入';
+  String get sign_in => 'ç™»å…¥';
 
   @override
-  String get sign_up => '註冊';
+  String get sign_up => 'è¨»å†Š';
 
   @override
-  String get sign_out => '登出';
+  String get sign_out => 'ç™»å‡º';
 
   @override
-  String get verify => '驗證';
+  String get verify => 'é©—è­‰';
 
   @override
-  String get create_account => '建立您的帳戶';
+  String get create_account => 'å»ºç«‹æ‚¨çš„å¸³æˆ¶';
 
   @override
-  String get already_have_account => '已有帳戶？登入';
+  String get already_have_account => 'å·²æœ‰å¸³æˆ¶ï¼Ÿç™»å…¥';
 
   @override
-  String get dont_have_account => '沒有帳戶？註冊';
+  String get dont_have_account => 'æ²’æœ‰å¸³æˆ¶ï¼Ÿè¨»å†Š';
 
   @override
   String signed_in_as(Object userId) {
-    return '已以 $userId 身分登入';
+    return 'å·²ä»¥ $userId èº«åˆ†ç™»å…¥';
   }
 
   @override
-  String get verification_code => '驗證碼';
+  String get verification_code => 'é©—è­‰ç¢¼';
 
   @override
-  String get verification_code_hint => '輸入傳送到您電子郵件的驗證碼';
+  String get verification_code_hint =>
+      'è¼¸å…¥å‚³é€åˆ°æ‚¨é›»å­éƒµä»¶çš„é©—è­‰ç¢¼';
 
   @override
-  String get verify_email_code => '我們已將驗證碼傳送到您的電子郵件';
+  String get verify_email_code =>
+      'æˆ‘å€‘å·²å°‡é©—è­‰ç¢¼å‚³é€åˆ°æ‚¨çš„é›»å­éƒµä»¶';
 
   @override
-  String get go_to_album => '前往專輯';
+  String get go_to_album => 'å‰å¾€å°ˆè¼¯';
 
   @override
-  String get discord_rich_presence => 'Discord Rick Presence（Discord 狀態）';
+  String get discord_rich_presence =>
+      'Discord Rick Presenceï¼ˆDiscord ç‹€æ…‹ï¼‰';
 
   @override
-  String get browse_all => '瀏覽全部';
+  String get browse_all => 'ç€è¦½å…¨éƒ¨';
 
   @override
-  String get genres => '音樂類型';
+  String get genres => 'éŸ³æ¨‚é¡žåž‹';
 
   @override
-  String get explore_genres => '探索音樂類型';
+  String get explore_genres => 'æŽ¢ç´¢éŸ³æ¨‚é¡žåž‹';
 
   @override
-  String get friends => '好友';
+  String get friends => 'å¥½å‹';
 
   @override
-  String get no_lyrics_available => '抱歉，無法找到這首歌的歌詞';
+  String get no_lyrics_available => 'æŠ±æ­‰ï¼Œç„¡æ³•æ‰¾åˆ°é€™é¦–æ­Œçš„æ­Œè©ž';
 
   @override
-  String get start_a_radio => '開始收聽電台';
+  String get start_a_radio => 'é–‹å§‹æ”¶è½é›»å°';
 
   @override
-  String get how_to_start_radio => '您想如何開始收聽電台？';
+  String get how_to_start_radio => 'æ‚¨æƒ³å¦‚ä½•é–‹å§‹æ”¶è½é›»å°ï¼Ÿ';
 
   @override
-  String get replace_queue_question => '您想要取代目前清單還是追加到清單？';
+  String get replace_queue_question =>
+      'æ‚¨æƒ³è¦å–ä»£ç›®å‰æ¸…å–®é‚„æ˜¯è¿½åŠ åˆ°æ¸…å–®ï¼Ÿ';
 
   @override
-  String get endless_playback => '無限播放';
+  String get endless_playback => 'ç„¡é™æ’­æ”¾';
 
   @override
-  String get delete_playlist => '刪除播放清單';
+  String get delete_playlist => 'åˆªé™¤æ’­æ”¾æ¸…å–®';
 
   @override
-  String get delete_playlist_confirmation => '您確定要刪除此播放清單嗎？';
+  String get delete_playlist_confirmation =>
+      'æ‚¨ç¢ºå®šè¦åˆªé™¤æ­¤æ’­æ”¾æ¸…å–®å—Žï¼Ÿ';
 
   @override
-  String get local_tracks => '本地音訊';
+  String get local_tracks => 'æœ¬åœ°éŸ³è¨Š';
 
   @override
-  String get local_tab => '本地';
+  String get local_tab => 'æœ¬åœ°';
 
   @override
-  String get song_link => '歌曲連結';
+  String get song_link => 'æ­Œæ›²é€£çµ';
 
   @override
-  String get skip_this_nonsense => '跳過這個無聊內容';
+  String get skip_this_nonsense => 'è·³éŽé€™å€‹ç„¡èŠå…§å®¹';
 
   @override
-  String get freedom_of_music => '“音樂的自由”';
+  String get freedom_of_music => 'â€œéŸ³æ¨‚çš„è‡ªç”±â€';
 
   @override
-  String get freedom_of_music_palm => '「音樂的自由掌握在您手中」';
+  String get freedom_of_music_palm => 'ã€ŒéŸ³æ¨‚çš„è‡ªç”±æŽŒæ¡åœ¨æ‚¨æ‰‹ä¸­ã€';
 
   @override
-  String get get_started => '我們開始吧';
+  String get get_started => 'æˆ‘å€‘é–‹å§‹å§';
 
   @override
-  String get youtube_source_description => '建議且效果最佳。';
+  String get youtube_source_description => 'å»ºè­°ä¸”æ•ˆæžœæœ€ä½³ã€‚';
 
   @override
-  String get piped_source_description => '感覺自由？與 YouTube 一樣，但更自由。';
+  String get piped_source_description =>
+      'æ„Ÿè¦ºè‡ªç”±ï¼Ÿèˆ‡ YouTube ä¸€æ¨£ï¼Œä½†æ›´è‡ªç”±ã€‚';
 
   @override
-  String get jiosaavn_source_description => '最適合南亞地區。';
+  String get jiosaavn_source_description => 'æœ€é©åˆå—äºžåœ°å€ã€‚';
 
   @override
-  String get invidious_source_description => '類似 Piped，但可用性更高。';
+  String get invidious_source_description =>
+      'é¡žä¼¼ Pipedï¼Œä½†å¯ç”¨æ€§æ›´é«˜ã€‚';
 
   @override
   String highest_quality(Object quality) {
-    return '最高音質：$quality';
+    return 'æœ€é«˜éŸ³è³ªï¼š$quality';
   }
 
   @override
-  String get select_audio_source => '選擇音訊來源';
+  String get select_audio_source => 'é¸æ“‡éŸ³è¨Šä¾†æº';
 
   @override
-  String get endless_playback_description => '自動將新歌曲加入清單的結尾';
+  String get endless_playback_description =>
+      'è‡ªå‹•å°‡æ–°æ­Œæ›²åŠ å…¥æ¸…å–®çš„çµå°¾';
 
   @override
-  String get choose_your_region => '選擇您的所在地區';
+  String get choose_your_region => 'é¸æ“‡æ‚¨çš„æ‰€åœ¨åœ°å€';
 
   @override
   String get choose_your_region_description =>
-      '這能幫助 Soulful Bhakti 為您的所在位置顯示正確的內容。';
+      'é€™èƒ½å¹«åŠ© Soulful Bhakti ç‚ºæ‚¨çš„æ‰€åœ¨ä½ç½®é¡¯ç¤ºæ­£ç¢ºçš„å…§å®¹ã€‚';
 
   @override
-  String get choose_your_language => '選擇您的語言';
+  String get choose_your_language => 'é¸æ“‡æ‚¨çš„èªžè¨€';
 
   @override
-  String get help_project_grow => '幫助這個專案成長';
+  String get help_project_grow => 'å¹«åŠ©é€™å€‹å°ˆæ¡ˆæˆé•·';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti是一個開源專案。您可以透過為專案做出貢獻、回報錯誤或建議新功能來幫助專案成長。';
+      'Soulful Bhaktiæ˜¯ä¸€å€‹é–‹æºå°ˆæ¡ˆã€‚æ‚¨å¯ä»¥é€éŽç‚ºå°ˆæ¡ˆåšå‡ºè²¢ç»ã€å›žå ±éŒ¯èª¤æˆ–å»ºè­°æ–°åŠŸèƒ½ä¾†å¹«åŠ©å°ˆæ¡ˆæˆé•·ã€‚';
 
   @override
-  String get contribute_on_github => '在GitHub上做出貢獻';
+  String get contribute_on_github => 'åœ¨GitHubä¸Šåšå‡ºè²¢ç»';
 
   @override
-  String get donate_on_open_collective => '在Open Collective上捐款';
+  String get donate_on_open_collective => 'åœ¨Open Collectiveä¸Šææ¬¾';
 
   @override
-  String get browse_anonymously => '匿名瀏覽';
+  String get browse_anonymously => 'åŒ¿åç€è¦½';
 
   @override
-  String get enable_connect => '啟用連線';
+  String get enable_connect => 'å•Ÿç”¨é€£ç·š';
 
   @override
-  String get enable_connect_description => '從其他裝置控制Soulful Bhakti';
+  String get enable_connect_description =>
+      'å¾žå…¶ä»–è£ç½®æŽ§åˆ¶Soulful Bhakti';
 
   @override
-  String get devices => '裝置';
+  String get devices => 'è£ç½®';
 
   @override
-  String get select => '選擇';
+  String get select => 'é¸æ“‡';
 
   @override
   String connect_client_alert(Object client) {
-    return '您正在被 $client 控制';
+    return 'æ‚¨æ­£åœ¨è¢« $client æŽ§åˆ¶';
   }
 
   @override
-  String get this_device => '此裝置';
+  String get this_device => 'æ­¤è£ç½®';
 
   @override
-  String get remote => '遠端';
+  String get remote => 'é ç«¯';
 
   @override
-  String get stats => '統計';
+  String get stats => 'çµ±è¨ˆ';
 
   @override
   String and_n_more(Object count) {
-    return '還有 $count 個';
+    return 'é‚„æœ‰ $count å€‹';
   }
 
   @override
-  String get recently_played => '最近播放';
+  String get recently_played => 'æœ€è¿‘æ’­æ”¾';
 
   @override
-  String get browse_more => '瀏覽更多';
+  String get browse_more => 'ç€è¦½æ›´å¤š';
 
   @override
-  String get no_title => '無標題';
+  String get no_title => 'ç„¡æ¨™é¡Œ';
 
   @override
-  String get not_playing => '未播放';
+  String get not_playing => 'æœªæ’­æ”¾';
 
   @override
-  String get epic_failure => '史詩級的失敗！';
+  String get epic_failure => 'å²è©©ç´šçš„å¤±æ•—ï¼';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '已將 $tracks_length 首曲目新增至清單';
+    return 'å·²å°‡ $tracks_length é¦–æ›²ç›®æ–°å¢žè‡³æ¸…å–®';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti 有更新版本';
+  String get spotube_has_an_update => 'Soulful Bhakti æœ‰æ›´æ–°ç‰ˆæœ¬';
 
   @override
-  String get download_now => '立即下載';
+  String get download_now => 'ç«‹å³ä¸‹è¼‰';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum 已發佈';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum å·²ç™¼ä½ˆ';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version 已發布';
+    return 'Soulful Bhakti v$version å·²ç™¼å¸ƒ';
   }
 
   @override
-  String get read_the_latest => '閱讀最新';
+  String get read_the_latest => 'é–±è®€æœ€æ–°';
 
   @override
-  String get release_notes => '版本說明';
+  String get release_notes => 'ç‰ˆæœ¬èªªæ˜Ž';
 
   @override
-  String get pick_color_scheme => '選擇配色方案';
+  String get pick_color_scheme => 'é¸æ“‡é…è‰²æ–¹æ¡ˆ';
 
   @override
-  String get save => '儲存';
+  String get save => 'å„²å­˜';
 
   @override
-  String get choose_the_device => '選擇裝置：';
+  String get choose_the_device => 'é¸æ“‡è£ç½®ï¼š';
 
   @override
-  String get multiple_device_connected => '已連接多個裝置。\n選擇您希望執行此操作的裝置';
+  String get multiple_device_connected =>
+      'å·²é€£æŽ¥å¤šå€‹è£ç½®ã€‚\né¸æ“‡æ‚¨å¸Œæœ›åŸ·è¡Œæ­¤æ“ä½œçš„è£ç½®';
 
   @override
-  String get nothing_found => '未找到任何內容';
+  String get nothing_found => 'æœªæ‰¾åˆ°ä»»ä½•å…§å®¹';
 
   @override
-  String get the_box_is_empty => '箱子為空';
+  String get the_box_is_empty => 'ç®±å­ç‚ºç©º';
 
   @override
-  String get top_artists => '熱門藝人';
+  String get top_artists => 'ç†±é–€è—äºº';
 
   @override
-  String get top_albums => '熱門專輯';
+  String get top_albums => 'ç†±é–€å°ˆè¼¯';
 
   @override
-  String get this_week => '本週';
+  String get this_week => 'æœ¬é€±';
 
   @override
-  String get this_month => '本月';
+  String get this_month => 'æœ¬æœˆ';
 
   @override
-  String get last_6_months => '過去6個月';
+  String get last_6_months => 'éŽåŽ»6å€‹æœˆ';
 
   @override
-  String get this_year => '今年';
+  String get this_year => 'ä»Šå¹´';
 
   @override
-  String get last_2_years => '過去2年';
+  String get last_2_years => 'éŽåŽ»2å¹´';
 
   @override
-  String get all_time => '所有時間';
+  String get all_time => 'æ‰€æœ‰æ™‚é–“';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '由 $providerName 提供支援';
+    return 'ç”± $providerName æä¾›æ”¯æ´';
   }
 
   @override
-  String get email => '電子郵件';
+  String get email => 'é›»å­éƒµä»¶';
 
   @override
-  String get send_code => '傳送驗證碼';
+  String get send_code => 'å‚³é€é©—è­‰ç¢¼';
 
   @override
-  String get change_identifier => '使用其他電子郵件';
+  String get change_identifier => 'ä½¿ç”¨å…¶ä»–é›»å­éƒµä»¶';
 
   @override
-  String get sign_in_with_otp => '使用一次性驗證碼登入';
+  String get sign_in_with_otp => 'ä½¿ç”¨ä¸€æ¬¡æ€§é©—è­‰ç¢¼ç™»å…¥';
 
   @override
-  String get enter_otp_sent => '輸入我們寄給您的驗證碼';
+  String get enter_otp_sent => 'è¼¸å…¥æˆ‘å€‘å¯„çµ¦æ‚¨çš„é©—è­‰ç¢¼';
 
   @override
-  String get verify_email_reminder => '請驗證您的電子郵件地址以保護您的帳戶';
+  String get verify_email_reminder =>
+      'è«‹é©—è­‰æ‚¨çš„é›»å­éƒµä»¶åœ°å€ä»¥ä¿è­·æ‚¨çš„å¸³æˆ¶';
 
   @override
-  String get verify_now => '立即驗證';
+  String get verify_now => 'ç«‹å³é©—è­‰';
 
   @override
-  String get enter_email_to_verify => '輸入您的電子郵件地址以接收驗證碼';
+  String get enter_email_to_verify =>
+      'è¼¸å…¥æ‚¨çš„é›»å­éƒµä»¶åœ°å€ä»¥æŽ¥æ”¶é©—è­‰ç¢¼';
 
   @override
-  String get profile_followers => '追蹤者';
+  String get profile_followers => 'è¿½è¹¤è€…';
 
   @override
-  String get birthday => '生日';
+  String get birthday => 'ç”Ÿæ—¥';
 
   @override
-  String get subscription => '訂閱';
+  String get subscription => 'è¨‚é–±';
 
   @override
-  String get not_born => '尚未建立';
+  String get not_born => 'å°šæœªå»ºç«‹';
 
   @override
-  String get hacker => '駭客';
+  String get hacker => 'é§­å®¢';
 
   @override
-  String get profile => '個人資訊';
+  String get profile => 'å€‹äººè³‡è¨Š';
 
   @override
-  String get no_name => '沒有名字';
+  String get no_name => 'æ²’æœ‰åå­—';
 
   @override
-  String get edit => '編輯';
+  String get edit => 'ç·¨è¼¯';
 
   @override
-  String get user_profile => '使用者資料';
+  String get user_profile => 'ä½¿ç”¨è€…è³‡æ–™';
 
   @override
   String count_plays(Object count) {
-    return '$count 次播放';
+    return '$count æ¬¡æ’­æ”¾';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*基於 Spotify 每次播放的支付金額\n從 \$0.003 到 \$0.005 計算。這是一個假設性的\n計算，旨在讓用戶了解如果他們在 Spotify 上收聽\n這些歌曲，可能會付給作者的金額。';
+      '*åŸºæ–¼ Spotify æ¯æ¬¡æ’­æ”¾çš„æ”¯ä»˜é‡‘é¡\nå¾ž \$0.003 åˆ° \$0.005 è¨ˆç®—ã€‚é€™æ˜¯ä¸€å€‹å‡è¨­æ€§çš„\nè¨ˆç®—ï¼Œæ—¨åœ¨è®“ç”¨æˆ¶äº†è§£å¦‚æžœä»–å€‘åœ¨ Spotify ä¸Šæ”¶è½\né€™äº›æ­Œæ›²ï¼Œå¯èƒ½æœƒä»˜çµ¦ä½œè€…çš„é‡‘é¡ã€‚';
 
   @override
-  String get minutes_listened => '聽的分鐘數';
+  String get minutes_listened => 'è½çš„åˆ†é˜æ•¸';
 
   @override
-  String get streamed_songs => '已串流歌曲';
+  String get streamed_songs => 'å·²ä¸²æµæ­Œæ›²';
 
   @override
   String count_streams(Object count) {
-    return '$count 次串流';
+    return '$count æ¬¡ä¸²æµ';
   }
 
   @override
-  String get owned_by_you => '由您所有';
+  String get owned_by_you => 'ç”±æ‚¨æ‰€æœ‰';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl 已複製到剪貼簿';
+    return '$shareUrl å·²è¤‡è£½åˆ°å‰ªè²¼ç°¿';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*此為根據線上音樂串流平台平均每次播放 \$0.003 至 \$0.005 的收益所計算的假設值。此為一個假設性計算，旨在讓使用者了解若他們在不同的音樂串流平台上收聽同一首歌曲，他們將會支付給藝人多少費用。';
+      '*æ­¤ç‚ºæ ¹æ“šç·šä¸ŠéŸ³æ¨‚ä¸²æµå¹³å°å¹³å‡æ¯æ¬¡æ’­æ”¾ \$0.003 è‡³ \$0.005 çš„æ”¶ç›Šæ‰€è¨ˆç®—çš„å‡è¨­å€¼ã€‚æ­¤ç‚ºä¸€å€‹å‡è¨­æ€§è¨ˆç®—ï¼Œæ—¨åœ¨è®“ä½¿ç”¨è€…äº†è§£è‹¥ä»–å€‘åœ¨ä¸åŒçš„éŸ³æ¨‚ä¸²æµå¹³å°ä¸Šæ”¶è½åŒä¸€é¦–æ­Œæ›²ï¼Œä»–å€‘å°‡æœƒæ”¯ä»˜çµ¦è—äººå¤šå°‘è²»ç”¨ã€‚';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes 分鐘';
+    return '$minutes åˆ†é˜';
   }
 
   @override
-  String get summary_minutes => '分鐘';
+  String get summary_minutes => 'åˆ†é˜';
 
   @override
-  String get summary_listened_to_music => '聽音樂';
+  String get summary_listened_to_music => 'è½éŸ³æ¨‚';
 
   @override
-  String get summary_songs => '歌曲';
+  String get summary_songs => 'æ­Œæ›²';
 
   @override
-  String get summary_streamed_overall => '整體串流媒體';
+  String get summary_streamed_overall => 'æ•´é«”ä¸²æµåª’é«”';
 
   @override
-  String get summary_owed_to_artists => '本月欠藝術家的';
+  String get summary_owed_to_artists => 'æœ¬æœˆæ¬ è—è¡“å®¶çš„';
 
   @override
-  String get summary_top_artist => '熱門藝人\n本時期';
+  String get summary_top_artist => 'ç†±é–€è—äºº\næœ¬æ™‚æœŸ';
 
   @override
-  String get summary_artists => '藝術家的';
+  String get summary_artists => 'è—è¡“å®¶çš„';
 
   @override
-  String get summary_music_reached_you => '音樂接觸到你';
+  String get summary_music_reached_you => 'éŸ³æ¨‚æŽ¥è§¸åˆ°ä½ ';
 
   @override
-  String get summary_full_albums => '完整專輯';
+  String get summary_full_albums => 'å®Œæ•´å°ˆè¼¯';
 
   @override
-  String get summary_got_your_love => '獲得了你的愛心';
+  String get summary_got_your_love => 'ç²å¾—äº†ä½ çš„æ„›å¿ƒ';
 
   @override
-  String get summary_playlists => '播放清單';
+  String get summary_playlists => 'æ’­æ”¾æ¸…å–®';
 
   @override
-  String get summary_were_on_repeat => '已經重複播放';
+  String get summary_were_on_repeat => 'å·²ç¶“é‡è¤‡æ’­æ”¾';
 
   @override
-  String get summary_listening_share => '收聽佔比';
+  String get summary_listening_share => 'æ”¶è½ä½”æ¯”';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return '您播放最多的前 $tracks_length 首歌曲的分布';
+    return 'æ‚¨æ’­æ”¾æœ€å¤šçš„å‰ $tracks_length é¦–æ­Œæ›²çš„åˆ†å¸ƒ';
   }
 
   @override
-  String get summary_plays => '次播放';
+  String get summary_plays => 'æ¬¡æ’­æ”¾';
 
   @override
   String total_money(Object money) {
-    return '總計 $money';
+    return 'ç¸½è¨ˆ $money';
   }
 
   @override
-  String get webview_not_found => '未找到 Webview 框架';
+  String get webview_not_found => 'æœªæ‰¾åˆ° Webview æ¡†æž¶';
 
   @override
   String get webview_not_found_description =>
-      '您的裝置中未安裝 Webview Runtime。\n如果已安裝，請確保它的位置在系統環境變數（PATH）中\n\n安裝後，重新啟動應用程式';
+      'æ‚¨çš„è£ç½®ä¸­æœªå®‰è£ Webview Runtimeã€‚\nå¦‚æžœå·²å®‰è£ï¼Œè«‹ç¢ºä¿å®ƒçš„ä½ç½®åœ¨ç³»çµ±ç’°å¢ƒè®Šæ•¸ï¼ˆPATHï¼‰ä¸­\n\nå®‰è£å¾Œï¼Œé‡æ–°å•Ÿå‹•æ‡‰ç”¨ç¨‹å¼';
 
   @override
-  String get unsupported_platform => '不支援的平台';
+  String get unsupported_platform => 'ä¸æ”¯æ´çš„å¹³å°';
 
   @override
-  String get cache_music => '快取音樂';
+  String get cache_music => 'å¿«å–éŸ³æ¨‚';
 
   @override
-  String get open => '開啟';
+  String get open => 'é–‹å•Ÿ';
 
   @override
-  String get cache_folder => '快取資料夾';
+  String get cache_folder => 'å¿«å–è³‡æ–™å¤¾';
 
   @override
-  String get export => '導出';
+  String get export => 'å°Žå‡º';
 
   @override
-  String get clear_cache => '清除快取';
+  String get clear_cache => 'æ¸…é™¤å¿«å–';
 
   @override
-  String get clear_cache_confirmation => '您要清除快取嗎？';
+  String get clear_cache_confirmation => 'æ‚¨è¦æ¸…é™¤å¿«å–å—Žï¼Ÿ';
 
   @override
-  String get export_cache_files => '匯出快取檔案';
+  String get export_cache_files => 'åŒ¯å‡ºå¿«å–æª”æ¡ˆ';
 
   @override
   String found_n_files(Object count) {
-    return '找到 $count 個檔案';
+    return 'æ‰¾åˆ° $count å€‹æª”æ¡ˆ';
   }
 
   @override
-  String get export_cache_confirmation => '您要匯出這些檔案到';
+  String get export_cache_confirmation => 'æ‚¨è¦åŒ¯å‡ºé€™äº›æª”æ¡ˆåˆ°';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '匯出了 $filesExported / $files 個檔案';
+    return 'åŒ¯å‡ºäº† $filesExported / $files å€‹æª”æ¡ˆ';
   }
 
   @override
-  String get undo => '取消';
+  String get undo => 'å–æ¶ˆ';
 
   @override
-  String get add_all_to_playlist => '全部加入到播放清單';
+  String get add_all_to_playlist => 'å…¨éƒ¨åŠ å…¥åˆ°æ’­æ”¾æ¸…å–®';
 
   @override
-  String get add_all_to_queue => '全部加入清單';
+  String get add_all_to_queue => 'å…¨éƒ¨åŠ å…¥æ¸…å–®';
 
   @override
-  String get play_all_next => '播放全部下一首';
+  String get play_all_next => 'æ’­æ”¾å…¨éƒ¨ä¸‹ä¸€é¦–';
 
   @override
-  String get pause => '暫停';
+  String get pause => 'æš«åœ';
 
   @override
-  String get view_all => '檢視全部';
+  String get view_all => 'æª¢è¦–å…¨éƒ¨';
 
   @override
-  String get no_tracks_added_yet => '看起來你還沒有加入任何歌曲';
+  String get no_tracks_added_yet => 'çœ‹èµ·ä¾†ä½ é‚„æ²’æœ‰åŠ å…¥ä»»ä½•æ­Œæ›²';
 
   @override
-  String get no_tracks => '看起來這裡沒有任何歌曲';
+  String get no_tracks => 'çœ‹èµ·ä¾†é€™è£¡æ²’æœ‰ä»»ä½•æ­Œæ›²';
 
   @override
-  String get no_tracks_listened_yet => '看起來你還沒聽任何歌曲';
+  String get no_tracks_listened_yet => 'çœ‹èµ·ä¾†ä½ é‚„æ²’è½ä»»ä½•æ­Œæ›²';
 
   @override
-  String get not_following_artists => '你沒有關注任何藝術家';
+  String get not_following_artists => 'ä½ æ²’æœ‰é—œæ³¨ä»»ä½•è—è¡“å®¶';
 
   @override
-  String get no_favorite_albums_yet => '看起來你還沒有將任何專輯加入到收藏夾';
+  String get no_favorite_albums_yet =>
+      'çœ‹èµ·ä¾†ä½ é‚„æ²’æœ‰å°‡ä»»ä½•å°ˆè¼¯åŠ å…¥åˆ°æ”¶è—å¤¾';
 
   @override
-  String get no_logs_found => '未找到日誌';
+  String get no_logs_found => 'æœªæ‰¾åˆ°æ—¥èªŒ';
 
   @override
-  String get youtube_engine => 'YouTube 引擎';
+  String get youtube_engine => 'YouTube å¼•æ“Ž';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine 未安裝';
+    return '$engine æœªå®‰è£';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine 未在您的系統中安裝。';
+    return '$engine æœªåœ¨æ‚¨çš„ç³»çµ±ä¸­å®‰è£ã€‚';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return '確保它可用在 PATH 變數中，或\n設定 $engine 執行檔的絕對路徑';
+    return 'ç¢ºä¿å®ƒå¯ç”¨åœ¨ PATH è®Šæ•¸ä¸­ï¼Œæˆ–\nè¨­å®š $engine åŸ·è¡Œæª”çš„çµ•å°è·¯å¾‘';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      '在類 Unix 作業系統（如 macOS/Linux/Unix）中，請在 .zshrc/.bashrc/.bash_profile 等檔案中設定路徑無效。\n您需要在 shell 設定檔中設定路徑';
+      'åœ¨é¡ž Unix ä½œæ¥­ç³»çµ±ï¼ˆå¦‚ macOS/Linux/Unixï¼‰ä¸­ï¼Œè«‹åœ¨ .zshrc/.bashrc/.bash_profile ç­‰æª”æ¡ˆä¸­è¨­å®šè·¯å¾‘ç„¡æ•ˆã€‚\næ‚¨éœ€è¦åœ¨ shell è¨­å®šæª”ä¸­è¨­å®šè·¯å¾‘';
 
   @override
-  String get download => '下載';
+  String get download => 'ä¸‹è¼‰';
 
   @override
-  String get file_not_found => '找不到檔案';
+  String get file_not_found => 'æ‰¾ä¸åˆ°æª”æ¡ˆ';
 
   @override
-  String get custom => '自訂';
+  String get custom => 'è‡ªè¨‚';
 
   @override
-  String get add_custom_url => '新增自訂 URL';
+  String get add_custom_url => 'æ–°å¢žè‡ªè¨‚ URL';
 
   @override
-  String get edit_port => '編輯端口';
+  String get edit_port => 'ç·¨è¼¯ç«¯å£';
 
   @override
-  String get port_helper_msg => '預設值為 -1，表示隨機數。如果您已配置防火牆，建議設定此項目。';
+  String get port_helper_msg =>
+      'é è¨­å€¼ç‚º -1ï¼Œè¡¨ç¤ºéš¨æ©Ÿæ•¸ã€‚å¦‚æžœæ‚¨å·²é…ç½®é˜²ç«ç‰†ï¼Œå»ºè­°è¨­å®šæ­¤é …ç›®ã€‚';
 
   @override
   String connect_request(Object client) {
-    return '允許 $client 連線嗎？';
+    return 'å…è¨± $client é€£ç·šå—Žï¼Ÿ';
   }
 
   @override
-  String get connection_request_denied => '連線被拒絕。請求被使用者拒絕。';
+  String get connection_request_denied =>
+      'é€£ç·šè¢«æ‹’çµ•ã€‚è«‹æ±‚è¢«ä½¿ç”¨è€…æ‹’çµ•ã€‚';
 
   @override
-  String get an_error_occurred => '發生錯誤';
+  String get an_error_occurred => 'ç™¼ç”ŸéŒ¯èª¤';
 
   @override
-  String get copy_to_clipboard => '複製到剪貼簿';
+  String get copy_to_clipboard => 'è¤‡è£½åˆ°å‰ªè²¼ç°¿';
 
   @override
-  String get view_logs => '檢視日誌';
+  String get view_logs => 'æª¢è¦–æ—¥èªŒ';
 
   @override
-  String get retry => '重試';
+  String get retry => 'é‡è©¦';
 
   @override
-  String get no_default_metadata_provider_selected => '您沒有設定預設的中繼資料供應商';
+  String get no_default_metadata_provider_selected =>
+      'æ‚¨æ²’æœ‰è¨­å®šé è¨­çš„ä¸­ç¹¼è³‡æ–™ä¾›æ‡‰å•†';
 
   @override
-  String get manage_metadata_providers => '管理中繼資料供應商';
+  String get manage_metadata_providers => 'ç®¡ç†ä¸­ç¹¼è³‡æ–™ä¾›æ‡‰å•†';
 
   @override
-  String get open_link_in_browser => '要在瀏覽器中開啟連結嗎？';
+  String get open_link_in_browser => 'è¦åœ¨ç€è¦½å™¨ä¸­é–‹å•Ÿé€£çµå—Žï¼Ÿ';
 
   @override
-  String get do_you_want_to_open_the_following_link => '您想開啟以下連結嗎';
+  String get do_you_want_to_open_the_following_link =>
+      'æ‚¨æƒ³é–‹å•Ÿä»¥ä¸‹é€£çµå—Ž';
 
   @override
-  String get unsafe_url_warning => '從不受信任的來源開啟連結可能不安全。請務必小心！\n您也可以將連結複製到剪貼簿。';
+  String get unsafe_url_warning =>
+      'å¾žä¸å—ä¿¡ä»»çš„ä¾†æºé–‹å•Ÿé€£çµå¯èƒ½ä¸å®‰å…¨ã€‚è«‹å‹™å¿…å°å¿ƒï¼\næ‚¨ä¹Ÿå¯ä»¥å°‡é€£çµè¤‡è£½åˆ°å‰ªè²¼ç°¿ã€‚';
 
   @override
-  String get copy_link => '複製連結';
+  String get copy_link => 'è¤‡è£½é€£çµ';
 
   @override
-  String get building_your_timeline => '正在根據您的收聽記錄建立您的時間軸...';
+  String get building_your_timeline =>
+      'æ­£åœ¨æ ¹æ“šæ‚¨çš„æ”¶è½è¨˜éŒ„å»ºç«‹æ‚¨çš„æ™‚é–“è»¸...';
 
   @override
-  String get official => '官方';
+  String get official => 'å®˜æ–¹';
 
   @override
   String author_name(Object author) {
-    return '作者：$author';
+    return 'ä½œè€…ï¼š$author';
   }
 
   @override
-  String get third_party => '第三方';
+  String get third_party => 'ç¬¬ä¸‰æ–¹';
 
   @override
-  String get plugin_requires_authentication => '此外掛程式需要驗證';
+  String get plugin_requires_authentication => 'æ­¤å¤–æŽ›ç¨‹å¼éœ€è¦é©—è­‰';
 
   @override
-  String get update_available => '有可用的更新';
+  String get update_available => 'æœ‰å¯ç”¨çš„æ›´æ–°';
 
   @override
-  String get supports_scrobbling => '支援 Scrobbling';
+  String get supports_scrobbling => 'æ”¯æ´ Scrobbling';
 
   @override
-  String get plugin_scrobbling_info => '此外掛程式會 Scrobble 您的音樂以產生您的收聽記錄。';
+  String get plugin_scrobbling_info =>
+      'æ­¤å¤–æŽ›ç¨‹å¼æœƒ Scrobble æ‚¨çš„éŸ³æ¨‚ä»¥ç”¢ç”Ÿæ‚¨çš„æ”¶è½è¨˜éŒ„ã€‚';
 
   @override
-  String get default_metadata_source => '預設中繼資料來源';
+  String get default_metadata_source => 'é è¨­ä¸­ç¹¼è³‡æ–™ä¾†æº';
 
   @override
-  String get set_default_metadata_source => '設定預設中繼資料來源';
+  String get set_default_metadata_source => 'è¨­å®šé è¨­ä¸­ç¹¼è³‡æ–™ä¾†æº';
 
   @override
-  String get default_audio_source => '預設音訊來源';
+  String get default_audio_source => 'é è¨­éŸ³è¨Šä¾†æº';
 
   @override
-  String get set_default_audio_source => '設定預設音訊來源';
+  String get set_default_audio_source => 'è¨­å®šé è¨­éŸ³è¨Šä¾†æº';
 
   @override
-  String get set_default => '設為預設';
+  String get set_default => 'è¨­ç‚ºé è¨­';
 
   @override
-  String get support => '支援';
+  String get support => 'æ”¯æ´';
 
   @override
-  String get support_plugin_development => '支援外掛程式開發';
+  String get support_plugin_development => 'æ”¯æ´å¤–æŽ›ç¨‹å¼é–‹ç™¼';
 
   @override
   String can_access_name_api(Object name) {
-    return '- 可以存取 **$name** API';
+    return '- å¯ä»¥å­˜å– **$name** API';
   }
 
   @override
-  String get do_you_want_to_install_this_plugin => '您想安裝此外掛程式嗎？';
+  String get do_you_want_to_install_this_plugin =>
+      'æ‚¨æƒ³å®‰è£æ­¤å¤–æŽ›ç¨‹å¼å—Žï¼Ÿ';
 
   @override
-  String get third_party_plugin_warning => '此外掛程式來自第三方儲存庫。請在安裝前確認您信任該來源。';
+  String get third_party_plugin_warning =>
+      'æ­¤å¤–æŽ›ç¨‹å¼ä¾†è‡ªç¬¬ä¸‰æ–¹å„²å­˜åº«ã€‚è«‹åœ¨å®‰è£å‰ç¢ºèªæ‚¨ä¿¡ä»»è©²ä¾†æºã€‚';
 
   @override
-  String get author => '作者';
+  String get author => 'ä½œè€…';
 
   @override
-  String get this_plugin_can_do_following => '此外掛程式可以執行以下操作';
+  String get this_plugin_can_do_following =>
+      'æ­¤å¤–æŽ›ç¨‹å¼å¯ä»¥åŸ·è¡Œä»¥ä¸‹æ“ä½œ';
 
   @override
-  String get install => '安裝';
+  String get install => 'å®‰è£';
 
   @override
-  String get install_a_metadata_provider => '安裝中繼資料供應商';
+  String get install_a_metadata_provider => 'å®‰è£ä¸­ç¹¼è³‡æ–™ä¾›æ‡‰å•†';
 
   @override
-  String get no_tracks_playing => '目前沒有正在播放的曲目';
+  String get no_tracks_playing => 'ç›®å‰æ²’æœ‰æ­£åœ¨æ’­æ”¾çš„æ›²ç›®';
 
   @override
-  String get synced_lyrics_not_available => '此歌曲沒有同步歌詞。請改用';
+  String get synced_lyrics_not_available =>
+      'æ­¤æ­Œæ›²æ²’æœ‰åŒæ­¥æ­Œè©žã€‚è«‹æ”¹ç”¨';
 
   @override
-  String get plain_lyrics => '純歌詞';
+  String get plain_lyrics => 'ç´”æ­Œè©ž';
 
   @override
-  String get tab_instead => '分頁。';
+  String get tab_instead => 'åˆ†é ã€‚';
 
   @override
-  String get disclaimer => '免責聲明';
+  String get disclaimer => 'å…è²¬è²æ˜Ž';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti 團隊對任何「第三方」外掛程式不負任何責任（包括法律責任）。\n請自行承擔使用風險。如有任何錯誤/問題，請向該外掛程式的儲存庫回報。\n\n若有任何「第三方」外掛程式違反任何服務/法律實體的服務條款/DMCA，請向「第三方」外掛程式作者或託管平台（如 GitHub/Codeberg）要求採取行動。以上列出的（標記為「第三方」）外掛程式均為公開/社群維護的外掛程式。我們沒有對其進行審核，因此無法對其採取任何行動。\n\n';
+      'Soulful Bhakti åœ˜éšŠå°ä»»ä½•ã€Œç¬¬ä¸‰æ–¹ã€å¤–æŽ›ç¨‹å¼ä¸è² ä»»ä½•è²¬ä»»ï¼ˆåŒ…æ‹¬æ³•å¾‹è²¬ä»»ï¼‰ã€‚\nè«‹è‡ªè¡Œæ‰¿æ“”ä½¿ç”¨é¢¨éšªã€‚å¦‚æœ‰ä»»ä½•éŒ¯èª¤/å•é¡Œï¼Œè«‹å‘è©²å¤–æŽ›ç¨‹å¼çš„å„²å­˜åº«å›žå ±ã€‚\n\nè‹¥æœ‰ä»»ä½•ã€Œç¬¬ä¸‰æ–¹ã€å¤–æŽ›ç¨‹å¼é•åä»»ä½•æœå‹™/æ³•å¾‹å¯¦é«”çš„æœå‹™æ¢æ¬¾/DMCAï¼Œè«‹å‘ã€Œç¬¬ä¸‰æ–¹ã€å¤–æŽ›ç¨‹å¼ä½œè€…æˆ–è¨—ç®¡å¹³å°ï¼ˆå¦‚ GitHub/Codebergï¼‰è¦æ±‚æŽ¡å–è¡Œå‹•ã€‚ä»¥ä¸Šåˆ—å‡ºçš„ï¼ˆæ¨™è¨˜ç‚ºã€Œç¬¬ä¸‰æ–¹ã€ï¼‰å¤–æŽ›ç¨‹å¼å‡ç‚ºå…¬é–‹/ç¤¾ç¾¤ç¶­è­·çš„å¤–æŽ›ç¨‹å¼ã€‚æˆ‘å€‘æ²’æœ‰å°å…¶é€²è¡Œå¯©æ ¸ï¼Œå› æ­¤ç„¡æ³•å°å…¶æŽ¡å–ä»»ä½•è¡Œå‹•ã€‚\n\n';
 
   @override
-  String get input_does_not_match_format => '輸入不符合所需格式';
+  String get input_does_not_match_format => 'è¼¸å…¥ä¸ç¬¦åˆæ‰€éœ€æ ¼å¼';
 
   @override
-  String get plugins => '外掛程式';
+  String get plugins => 'å¤–æŽ›ç¨‹å¼';
 
   @override
   String get paste_plugin_download_url =>
-      '貼上下載網址、GitHub/Codeberg 儲存庫網址或 .smplug 檔案的直接連結';
+      'è²¼ä¸Šä¸‹è¼‰ç¶²å€ã€GitHub/Codeberg å„²å­˜åº«ç¶²å€æˆ– .smplug æª”æ¡ˆçš„ç›´æŽ¥é€£çµ';
 
   @override
-  String get download_and_install_plugin_from_url => '從網址下載並安裝外掛程式';
+  String get download_and_install_plugin_from_url =>
+      'å¾žç¶²å€ä¸‹è¼‰ä¸¦å®‰è£å¤–æŽ›ç¨‹å¼';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return '新增外掛程式失敗：$error';
+    return 'æ–°å¢žå¤–æŽ›ç¨‹å¼å¤±æ•—ï¼š$error';
   }
 
   @override
-  String get upload_plugin_from_file => '從檔案上傳外掛程式';
+  String get upload_plugin_from_file => 'å¾žæª”æ¡ˆä¸Šå‚³å¤–æŽ›ç¨‹å¼';
 
   @override
-  String get installed => '已安裝';
+  String get installed => 'å·²å®‰è£';
 
   @override
-  String get available_plugins => '可用的外掛程式';
+  String get available_plugins => 'å¯ç”¨çš„å¤–æŽ›ç¨‹å¼';
 
   @override
-  String get configure_plugins => '配置您自己的中繼資料提供者和音訊來源外掛程式';
+  String get configure_plugins =>
+      'é…ç½®æ‚¨è‡ªå·±çš„ä¸­ç¹¼è³‡æ–™æä¾›è€…å’ŒéŸ³è¨Šä¾†æºå¤–æŽ›ç¨‹å¼';
 
   @override
-  String get source => '來源：';
+  String get source => 'ä¾†æºï¼š';
 
   @override
-  String get uncompressed => '未壓縮';
+  String get uncompressed => 'æœªå£“ç¸®';
 
   @override
   String get dab_music_source_description =>
-      '適合音響發燒友。提供高品質/無損音訊串流。精確的 ISRC 曲目比對。';
+      'é©åˆéŸ³éŸ¿ç™¼ç‡’å‹ã€‚æä¾›é«˜å“è³ª/ç„¡æéŸ³è¨Šä¸²æµã€‚ç²¾ç¢ºçš„ ISRC æ›²ç›®æ¯”å°ã€‚';
 
   @override
-  String get summary_top_track => '最佳曲目\n本時期';
+  String get summary_top_track => 'æœ€ä½³æ›²ç›®\næœ¬æ™‚æœŸ';
 
   @override
-  String get local => '本機';
+  String get local => 'æœ¬æ©Ÿ';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

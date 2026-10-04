@@ -9,1308 +9,1423 @@ class AppLocalizationsNe extends AppLocalizations {
   AppLocalizationsNe([String locale = 'ne']) : super(locale);
 
   @override
-  String get guest => 'अतिथि';
+  String get guest => 'à¤…à¤¤à¤¿à¤¥à¤¿';
 
   @override
-  String get browse => 'ब्राउज़ गर्नुहोस्';
+  String get browse => 'à¤¬à¥à¤°à¤¾à¤‰à¤œà¤¼ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get search => 'खोजी गर्नुहोस्';
+  String get search => 'à¤–à¥‹à¤œà¥€ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get library => 'पुस्तकालय';
+  String get library => 'à¤ªà¥à¤¸à¥à¤¤à¤•à¤¾à¤²à¤¯';
 
   @override
-  String get lyrics => 'गीतको शब्द';
+  String get lyrics => 'à¤—à¥€à¤¤à¤•à¥‹ à¤¶à¤¬à¥à¤¦';
 
   @override
-  String get settings => 'सेटिङ';
+  String get settings => 'à¤¸à¥‡à¤Ÿà¤¿à¤™';
 
   @override
   String get settings_subtitle =>
-      'Soulful Bhakti लाई आफ्नो रुचि अनुसार अनुकूलित गर्नुहोस्';
+      'Soulful Bhakti à¤²à¤¾à¤ˆ à¤†à¤«à¥à¤¨à¥‹ à¤°à¥à¤šà¤¿ à¤…à¤¨à¥à¤¸à¤¾à¤° à¤…à¤¨à¥à¤•à¥‚à¤²à¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get genre_categories_filter => 'शैली वा शैलीहरू फिल्टर गर्नुहोस्...';
+  String get genre_categories_filter =>
+      'à¤¶à¥ˆà¤²à¥€ à¤µà¤¾ à¤¶à¥ˆà¤²à¥€à¤¹à¤°à¥‚ à¤«à¤¿à¤²à¥à¤Ÿà¤° à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
-  String get genre => 'शैली';
+  String get genre => 'à¤¶à¥ˆà¤²à¥€';
 
   @override
-  String get personalized => 'व्यक्तिगत';
+  String get personalized => 'à¤µà¥à¤¯à¤•à¥à¤¤à¤¿à¤—à¤¤';
 
   @override
-  String get featured => 'विशेष';
+  String get featured => 'à¤µà¤¿à¤¶à¥‡à¤·';
 
   @override
-  String get new_releases => 'नयाँ रिलिज';
+  String get new_releases => 'à¤¨à¤¯à¤¾à¤ à¤°à¤¿à¤²à¤¿à¤œ';
 
   @override
-  String get songs => 'गीतहरू';
+  String get songs => 'à¤—à¥€à¤¤à¤¹à¤°à¥‚';
 
   @override
-  String get newest_arrivals => 'नयाँ आगमनहरू';
+  String get newest_arrivals => 'à¤¨à¤¯à¤¾à¤ à¤†à¤—à¤®à¤¨à¤¹à¤°à¥‚';
 
   @override
-  String get top_trending => 'ट्रेन्डिङ';
+  String get top_trending => 'à¤Ÿà¥à¤°à¥‡à¤¨à¥à¤¡à¤¿à¤™';
 
   @override
-  String get see_more => 'थप हेर्नुहोस्';
+  String get see_more => 'à¤¥à¤ª à¤¹à¥‡à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String playing_track(Object track) {
-    return '$track बज्यो';
+    return '$track à¤¬à¤œà¥à¤¯à¥‹';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'यो हालको कतारलाई हटाउँछ। $track_length ट्र्याकहरू हटाईन्छ\nके तपाईं जारी राख्न चाहनुहुन्छ?';
+    return 'à¤¯à¥‹ à¤¹à¤¾à¤²à¤•à¥‹ à¤•à¤¤à¤¾à¤°à¤²à¤¾à¤ˆ à¤¹à¤Ÿà¤¾à¤‰à¤à¤›à¥¤ $track_length à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚ à¤¹à¤Ÿà¤¾à¤ˆà¤¨à¥à¤›\nà¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤œà¤¾à¤°à¥€ à¤°à¤¾à¤–à¥à¤¨ à¤šà¤¾à¤¹à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
   }
 
   @override
-  String get load_more => 'थप लोड गर्नुहोस्';
+  String get load_more => 'à¤¥à¤ª à¤²à¥‹à¤¡ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get playlists => 'प्लेलिस्टहरू';
+  String get playlists => 'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤¹à¤°à¥‚';
 
   @override
-  String get artists => 'कलाकारहरू';
+  String get artists => 'à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚';
 
   @override
-  String get albums => 'आल्बमहरू';
+  String get albums => 'à¤†à¤²à¥à¤¬à¤®à¤¹à¤°à¥‚';
 
   @override
-  String get tracks => 'ट्र्याकहरू';
+  String get tracks => 'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get downloads => 'डाउनलोडहरू';
+  String get downloads => 'à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡à¤¹à¤°à¥‚';
 
   @override
-  String get filter_playlists => 'तपाईंको प्लेलिस्टहरू फिल्टर गर्नुहोस्...';
+  String get filter_playlists =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤¹à¤°à¥‚ à¤«à¤¿à¤²à¥à¤Ÿà¤° à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
-  String get liked_tracks => 'मन परेका ट्र्याकहरू';
+  String get liked_tracks =>
+      'à¤®à¤¨ à¤ªà¤°à¥‡à¤•à¤¾ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get liked_tracks_description => 'तपाईंको मन परेका सबै ट्र्याकहरू';
+  String get liked_tracks_description =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤®à¤¨ à¤ªà¤°à¥‡à¤•à¤¾ à¤¸à¤¬à¥ˆ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get playlist => 'प्लेलिस्ट';
+  String get playlist => 'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ';
 
   @override
-  String get create_a_playlist => 'प्लेलिस्ट बनाउनुहोस्';
+  String get create_a_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤¬à¤¨à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get new_playlist => 'नयाँ प्लेलिस्ट';
+  String get new_playlist => 'à¤¨à¤¯à¤¾à¤ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ';
 
   @override
-  String get playlist_name => 'प्लेलिस्टको नाम';
+  String get playlist_name => 'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤•à¥‹ à¤¨à¤¾à¤®';
 
   @override
   String get no_playlists_yet =>
-      'अहिलेसम्म कुनै प्लेलिस्ट छैन। चयन गरिएका गीतहरूबाट एउटा सिर्जना गर्नुहोस्।';
+      'à¤…à¤¹à¤¿à¤²à¥‡à¤¸à¤®à¥à¤® à¤•à¥à¤¨à¥ˆ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤›à¥ˆà¤¨à¥¤ à¤šà¤¯à¤¨ à¤—à¤°à¤¿à¤à¤•à¤¾ à¤—à¥€à¤¤à¤¹à¤°à¥‚à¤¬à¤¾à¤Ÿ à¤à¤‰à¤Ÿà¤¾ à¤¸à¤¿à¤°à¥à¤œà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤';
 
   @override
-  String get update_playlist => 'प्लेलिस्ट अपडेट गर्नुहोस्';
+  String get update_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤…à¤ªà¤¡à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get create => 'बनाउनुहोस्';
+  String get create => 'à¤¬à¤¨à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get cancel => 'रद्द गर्नुहोस्';
+  String get cancel => 'à¤°à¤¦à¥à¤¦ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get update => 'अपडेट गर्नुहोस्';
+  String get update => 'à¤…à¤ªà¤¡à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get name_of_playlist => 'प्लेलिस्टको नाम';
+  String get name_of_playlist => 'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤•à¥‹ à¤¨à¤¾à¤®';
 
   @override
-  String get description => 'विवरण';
+  String get description => 'à¤µà¤¿à¤µà¤°à¤£';
 
   @override
-  String get public => 'सार्वजनिक';
+  String get public => 'à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤•';
 
   @override
-  String get collaborative => 'सहकारी';
+  String get collaborative => 'à¤¸à¤¹à¤•à¤¾à¤°à¥€';
 
   @override
-  String get search_local_tracks => 'स्थानीय ट्र्याकहरू खोजी गर्नुहोस्...';
+  String get search_local_tracks =>
+      'à¤¸à¥à¤¥à¤¾à¤¨à¥€à¤¯ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚ à¤–à¥‹à¤œà¥€ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
-  String get play => 'बजाउनुहोस्';
+  String get play => 'à¤¬à¤œà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get delete => 'मेटाउनुहोस्';
+  String get delete => 'à¤®à¥‡à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get none => 'कुनै पनि होइन';
+  String get none => 'à¤•à¥à¤¨à¥ˆ à¤ªà¤¨à¤¿ à¤¹à¥‹à¤‡à¤¨';
 
   @override
-  String get sort_a_z => 'A-Zमा क्रमबद्ध गर्नुहोस्';
+  String get sort_a_z =>
+      'A-Zà¤®à¤¾ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_z_a => 'Z-Aमा क्रमबद्ध गर्नुहोस्';
+  String get sort_z_a =>
+      'Z-Aà¤®à¤¾ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_artist => 'कलाकारबाट क्रमबद्ध गर्नुहोस्';
+  String get sort_artist =>
+      'à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¬à¤¾à¤Ÿ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_album => 'आल्बमबाट क्रमबद्ध गर्नुहोस्';
+  String get sort_album =>
+      'à¤†à¤²à¥à¤¬à¤®à¤¬à¤¾à¤Ÿ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_duration => 'अवधिको अनुसार क्रमबद्ध गर्नुहोस्';
+  String get sort_duration =>
+      'à¤…à¤µà¤§à¤¿à¤•à¥‹ à¤…à¤¨à¥à¤¸à¤¾à¤° à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_tracks => 'ट्र्याकहरूलाई क्रमबद्ध गर्नुहोस्';
+  String get sort_tracks =>
+      'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'हाल डाउनलोड गर्दैछ ($tracks_length)';
+    return 'à¤¹à¤¾à¤² à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤—à¤°à¥à¤¦à¥ˆà¤› ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'सब रद्द गर्नुहोस्';
+  String get cancel_all => 'à¤¸à¤¬ à¤°à¤¦à¥à¤¦ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get filter_artist => 'कलाकारहरूलाई फिल्टर गर्नुहोस्...';
+  String get filter_artist =>
+      'à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤«à¤¿à¤²à¥à¤Ÿà¤° à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
   String followers(Object followers) {
-    return '$followers अनुयायीहरू';
+    return '$followers à¤…à¤¨à¥à¤¯à¤¾à¤¯à¥€à¤¹à¤°à¥‚';
   }
 
   @override
-  String get add_artist_to_blacklist => 'कलाकारलाई कालोसूचीमा थप्नुहोस्';
+  String get add_artist_to_blacklist =>
+      'à¤•à¤²à¤¾à¤•à¤¾à¤°à¤²à¤¾à¤ˆ à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€à¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get top_tracks => 'शीर्ष ट्र्याकहरू';
+  String get top_tracks => 'à¤¶à¥€à¤°à¥à¤· à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get fans_also_like => 'अनुयायीहरू पनि लाइक गर्छन्';
+  String get fans_also_like =>
+      'à¤…à¤¨à¥à¤¯à¤¾à¤¯à¥€à¤¹à¤°à¥‚ à¤ªà¤¨à¤¿ à¤²à¤¾à¤‡à¤• à¤—à¤°à¥à¤›à¤¨à¥';
 
   @override
-  String get loading => 'लोड हुँदैछ...';
+  String get loading => 'à¤²à¥‹à¤¡ à¤¹à¥à¤à¤¦à¥ˆà¤›...';
 
   @override
-  String get artist => 'कलाकार';
+  String get artist => 'à¤•à¤²à¤¾à¤•à¤¾à¤°';
 
   @override
-  String get blacklisted => 'कालोसूचीमा';
+  String get blacklisted => 'à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€à¤®à¤¾';
 
   @override
-  String get following => 'फल्लो गर्दै';
+  String get following => 'à¤«à¤²à¥à¤²à¥‹ à¤—à¤°à¥à¤¦à¥ˆ';
 
   @override
-  String get follow => 'फल्लो गर्नुहोस्';
+  String get follow => 'à¤«à¤²à¥à¤²à¥‹ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get artist_url_copied => 'कलाकार URL क्लिपबोर्डमा प्रतिलिपि गरिएको छ';
+  String get artist_url_copied =>
+      'à¤•à¤²à¤¾à¤•à¤¾à¤° URL à¤•à¥à¤²à¤¿à¤ªà¤¬à¥‹à¤°à¥à¤¡à¤®à¤¾ à¤ªà¥à¤°à¤¤à¤¿à¤²à¤¿à¤ªà¤¿ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›';
 
   @override
   String added_to_queue(Object tracks) {
-    return '$tracks ट्र्याकहरूलाई कतारमा थपिएको छ';
+    return '$tracks à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤•à¤¤à¤¾à¤°à¤®à¤¾ à¤¥à¤ªà¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
-  String get filter_albums => 'आल्बमहरूलाई फिल्टर गर्नुहोस्...';
+  String get filter_albums =>
+      'à¤†à¤²à¥à¤¬à¤®à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤«à¤¿à¤²à¥à¤Ÿà¤° à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
-  String get synced => 'सिङ्क गरिएको';
+  String get synced => 'à¤¸à¤¿à¤™à¥à¤• à¤—à¤°à¤¿à¤à¤•à¥‹';
 
   @override
-  String get plain => 'साधा';
+  String get plain => 'à¤¸à¤¾à¤§à¤¾';
 
   @override
-  String get shuffle => 'शफल';
+  String get shuffle => 'à¤¶à¤«à¤²';
 
   @override
-  String get search_tracks => 'ट्र्याकहरू खोजी गर्नुहोस्...';
+  String get search_tracks =>
+      'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚ à¤–à¥‹à¤œà¥€ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥...';
 
   @override
-  String get released => 'रिलिज गरिएको';
+  String get released => 'à¤°à¤¿à¤²à¤¿à¤œ à¤—à¤°à¤¿à¤à¤•à¥‹';
 
   @override
   String error(Object error) {
-    return 'त्रुटि $error';
+    return 'à¤¤à¥à¤°à¥à¤Ÿà¤¿ $error';
   }
 
   @override
-  String get title => 'शीर्षक';
+  String get title => 'à¤¶à¥€à¤°à¥à¤·à¤•';
 
   @override
-  String get time => 'समय';
+  String get time => 'à¤¸à¤®à¤¯';
 
   @override
-  String get more_actions => 'थप कार्यहरू';
+  String get more_actions => 'à¤¥à¤ª à¤•à¤¾à¤°à¥à¤¯à¤¹à¤°à¥‚';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'प्लेलिस्टमा थप्नुहोस् ($count)';
+    return 'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥ ($count)';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'कतारमा थप्नुहोस् ($count)';
+    return 'à¤•à¤¤à¤¾à¤°à¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥ ($count)';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'प्लेगरी गर्नुहोस् ($count)';
+    return 'à¤ªà¥à¤²à¥‡à¤—à¤°à¥€ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥ ($count)';
   }
 
   @override
-  String get album => 'आल्बम';
+  String get album => 'à¤†à¤²à¥à¤¬à¤®';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '$data क्लिपबोर्डमा प्रतिलिपि गरिएको छ';
+    return '$data à¤•à¥à¤²à¤¿à¤ªà¤¬à¥‹à¤°à¥à¤¡à¤®à¤¾ à¤ªà¥à¤°à¤¤à¤¿à¤²à¤¿à¤ªà¤¿ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '$track लाई तलका प्लेलिस्टमा थप्नुहोस्';
+    return '$track à¤²à¤¾à¤ˆ à¤¤à¤²à¤•à¤¾ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
   }
 
   @override
-  String get add => 'थप्नुहोस्';
+  String get add => 'à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String added_track_to_queue(Object track) {
-    return '$track लाई कतारमा थपिएको छ';
+    return '$track à¤²à¤¾à¤ˆ à¤•à¤¤à¤¾à¤°à¤®à¤¾ à¤¥à¤ªà¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
-  String get add_to_queue => 'कतारमा थप्नुहोस्';
+  String get add_to_queue => 'à¤•à¤¤à¤¾à¤°à¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track अरूलाई पहिलोमा बज्नेछ';
+    return '$track à¤…à¤°à¥‚à¤²à¤¾à¤ˆ à¤ªà¤¹à¤¿à¤²à¥‹à¤®à¤¾ à¤¬à¤œà¥à¤¨à¥‡à¤›';
   }
 
   @override
-  String get play_next => 'पछिबजाउनुहोस्';
+  String get play_next => 'à¤ªà¤›à¤¿à¤¬à¤œà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String removed_track_from_queue(Object track) {
-    return '$track लाई कतारबाट हटाइएको छ';
+    return '$track à¤²à¤¾à¤ˆ à¤•à¤¤à¤¾à¤°à¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‡à¤à¤•à¥‹ à¤›';
   }
 
   @override
-  String get remove_from_queue => 'कतारबाट हटाउनुहोस्';
+  String get remove_from_queue =>
+      'à¤•à¤¤à¤¾à¤°à¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get remove_from_favorites => 'पसन्दीदामा बाट हटाउनुहोस्';
+  String get remove_from_favorites =>
+      'à¤ªà¤¸à¤¨à¥à¤¦à¥€à¤¦à¤¾à¤®à¤¾ à¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get save_as_favorite => 'पसन्दीदा बनाउनुहोस्';
+  String get save_as_favorite =>
+      'à¤ªà¤¸à¤¨à¥à¤¦à¥€à¤¦à¤¾ à¤¬à¤¨à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get add_to_playlist => 'प्लेलिस्टमा थप्नुहोस्';
+  String get add_to_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get remove_from_playlist => 'प्लेलिस्टबाट हटाउनुहोस्';
+  String get remove_from_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿà¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get add_to_blacklist => 'कालोसूचीमा थप्नुहोस्';
+  String get add_to_blacklist =>
+      'à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€à¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get remove_from_blacklist => 'कालोसूचीबाट हटाउनुहोस्';
+  String get remove_from_blacklist =>
+      'à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€à¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get share => 'साझा गर्नुहोस्';
+  String get share => 'à¤¸à¤¾à¤à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get mini_player => 'मिनि प्लेयर';
+  String get mini_player => 'à¤®à¤¿à¤¨à¤¿ à¤ªà¥à¤²à¥‡à¤¯à¤°';
 
   @override
   String get slide_to_seek =>
-      'अगाडि वा पछाडि खोजी गर्नका लागि स्लाइड गर्नुहोस्';
+      'à¤…à¤—à¤¾à¤¡à¤¿ à¤µà¤¾ à¤ªà¤›à¤¾à¤¡à¤¿ à¤–à¥‹à¤œà¥€ à¤—à¤°à¥à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤¸à¥à¤²à¤¾à¤‡à¤¡ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get shuffle_playlist => 'प्लेलिस्ट शफल गर्नुहोस्';
+  String get shuffle_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤¶à¤«à¤² à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get unshuffle_playlist => 'प्लेलिस्ट शफल नगर्नुहोस्';
+  String get unshuffle_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤¶à¤«à¤² à¤¨à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get previous_track => 'पूर्व ट्र्याक';
+  String get previous_track => 'à¤ªà¥‚à¤°à¥à¤µ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•';
 
   @override
-  String get next_track => 'अरू ट्र्याक';
+  String get next_track => 'à¤…à¤°à¥‚ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•';
 
   @override
-  String get pause_playback => 'प्लेब्याक रोक्नुहोस्';
+  String get pause_playback =>
+      'à¤ªà¥à¤²à¥‡à¤¬à¥à¤¯à¤¾à¤• à¤°à¥‹à¤•à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get resume_playback => 'प्लेब्याक पुनः सुरु गर्नुहोस्';
+  String get resume_playback =>
+      'à¤ªà¥à¤²à¥‡à¤¬à¥à¤¯à¤¾à¤• à¤ªà¥à¤¨à¤ƒ à¤¸à¥à¤°à¥ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get loop_track => 'ट्र्याकलाई दोहोरोपट्टी बजाउनुहोस्';
+  String get loop_track =>
+      'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤²à¤¾à¤ˆ à¤¦à¥‹à¤¹à¥‹à¤°à¥‹à¤ªà¤Ÿà¥à¤Ÿà¥€ à¤¬à¤œà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get no_loop => 'कोई लूप नहीं';
+  String get no_loop => 'à¤•à¥‹à¤ˆ à¤²à¥‚à¤ª à¤¨à¤¹à¥€à¤‚';
 
   @override
-  String get repeat_playlist => 'प्लेलिस्ट पुनः बजाउनुहोस्';
+  String get repeat_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤ªà¥à¤¨à¤ƒ à¤¬à¤œà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get queue => 'कतार';
+  String get queue => 'à¤•à¤¤à¤¾à¤°';
 
   @override
-  String get alternative_track_sources => 'वैकल्पिक ट्र्याक स्रोतहरू';
+  String get alternative_track_sources =>
+      'à¤µà¥ˆà¤•à¤²à¥à¤ªà¤¿à¤• à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤• à¤¸à¥à¤°à¥‹à¤¤à¤¹à¤°à¥‚';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return 'कतारमा $tracks ट्र्याकहरू';
+    return 'à¤•à¤¤à¤¾à¤°à¤®à¤¾ $tracks à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
   }
 
   @override
-  String get clear_all => 'सब मेटाउनुहोस्';
+  String get clear_all => 'à¤¸à¤¬ à¤®à¥‡à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get show_hide_ui_on_hover => 'हवर गरेपछि UI देखाउनुहोस्/लुकाउनुहोस्';
+  String get show_hide_ui_on_hover =>
+      'à¤¹à¤µà¤° à¤—à¤°à¥‡à¤ªà¤›à¤¿ UI à¤¦à¥‡à¤–à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥/à¤²à¥à¤•à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get always_on_top => 'सधैं टपमा राख्नुहोस्';
+  String get always_on_top =>
+      'à¤¸à¤§à¥ˆà¤‚ à¤Ÿà¤ªà¤®à¤¾ à¤°à¤¾à¤–à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get exit_mini_player => 'मिनि प्लेयर बाट बाहिर निस्कनुहोस्';
+  String get exit_mini_player =>
+      'à¤®à¤¿à¤¨à¤¿ à¤ªà¥à¤²à¥‡à¤¯à¤° à¤¬à¤¾à¤Ÿ à¤¬à¤¾à¤¹à¤¿à¤° à¤¨à¤¿à¤¸à¥à¤•à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get local_library => 'स्थानिय पुस्तकालय';
+  String get local_library =>
+      'à¤¸à¥à¤¥à¤¾à¤¨à¤¿à¤¯ à¤ªà¥à¤¸à¥à¤¤à¤•à¤¾à¤²à¤¯';
 
   @override
-  String get add_library_location => 'पुस्तकालयमा थप्नुहोस्';
+  String get add_library_location =>
+      'à¤ªà¥à¤¸à¥à¤¤à¤•à¤¾à¤²à¤¯à¤®à¤¾ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get remove_library_location => 'पुस्तकालयबाट हटाउनुहोस्';
+  String get remove_library_location =>
+      'à¤ªà¥à¤¸à¥à¤¤à¤•à¤¾à¤²à¤¯à¤¬à¤¾à¤Ÿ à¤¹à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get account => 'खाता';
+  String get account => 'à¤–à¤¾à¤¤à¤¾';
 
   @override
-  String get logout => 'बाहिर निस्कनुहोस्';
+  String get logout => 'à¤¬à¤¾à¤¹à¤¿à¤° à¤¨à¤¿à¤¸à¥à¤•à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get logout_of_this_account => 'यो खाताबाट बाहिर निस्कनुहोस्';
+  String get logout_of_this_account =>
+      'à¤¯à¥‹ à¤–à¤¾à¤¤à¤¾à¤¬à¤¾à¤Ÿ à¤¬à¤¾à¤¹à¤¿à¤° à¤¨à¤¿à¤¸à¥à¤•à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get language_region => 'भाषा र क्षेत्र';
+  String get language_region => 'à¤­à¤¾à¤·à¤¾ à¤° à¤•à¥à¤·à¥‡à¤¤à¥à¤°';
 
   @override
-  String get language => 'भाषा';
+  String get language => 'à¤­à¤¾à¤·à¤¾';
 
   @override
-  String get system_default => 'सिस्टम पूर्वनिर्धारित';
+  String get system_default =>
+      'à¤¸à¤¿à¤¸à¥à¤Ÿà¤® à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤';
 
   @override
-  String get market_place_region => 'बजार स्थान';
+  String get market_place_region => 'à¤¬à¤œà¤¾à¤° à¤¸à¥à¤¥à¤¾à¤¨';
 
   @override
-  String get recommendation_country => 'सिफारिस गरिएको देश';
+  String get recommendation_country =>
+      'à¤¸à¤¿à¤«à¤¾à¤°à¤¿à¤¸ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤¦à¥‡à¤¶';
 
   @override
-  String get appearance => 'दृष्टिकोण';
+  String get appearance => 'à¤¦à¥ƒà¤·à¥à¤Ÿà¤¿à¤•à¥‹à¤£';
 
   @override
-  String get layout_mode => 'लेआउट मोड';
+  String get layout_mode => 'à¤²à¥‡à¤†à¤‰à¤Ÿ à¤®à¥‹à¤¡';
 
   @override
   String get override_layout_settings =>
-      'अनुकूलित प्रतिकृयात्मक लेआउट मोड सेटिङ्गहरू';
+      'à¤…à¤¨à¥à¤•à¥‚à¤²à¤¿à¤¤ à¤ªà¥à¤°à¤¤à¤¿à¤•à¥ƒà¤¯à¤¾à¤¤à¥à¤®à¤• à¤²à¥‡à¤†à¤‰à¤Ÿ à¤®à¥‹à¤¡ à¤¸à¥‡à¤Ÿà¤¿à¤™à¥à¤—à¤¹à¤°à¥‚';
 
   @override
-  String get adaptive => 'अनुकूलित';
+  String get adaptive => 'à¤…à¤¨à¥à¤•à¥‚à¤²à¤¿à¤¤';
 
   @override
-  String get compact => 'संकुचित';
+  String get compact => 'à¤¸à¤‚à¤•à¥à¤šà¤¿à¤¤';
 
   @override
-  String get extended => 'बढाइएको';
+  String get extended => 'à¤¬à¤¢à¤¾à¤‡à¤à¤•à¥‹';
 
   @override
-  String get theme => 'थिम';
+  String get theme => 'à¤¥à¤¿à¤®';
 
   @override
-  String get dark => 'गाढा';
+  String get dark => 'à¤—à¤¾à¤¢à¤¾';
 
   @override
-  String get light => 'प्रकाश';
+  String get light => 'à¤ªà¥à¤°à¤•à¤¾à¤¶';
 
   @override
-  String get system => 'सिस्टम';
+  String get system => 'à¤¸à¤¿à¤¸à¥à¤Ÿà¤®';
 
   @override
-  String get accent_color => 'एक्सेन्ट रङ्ग';
+  String get accent_color => 'à¤à¤•à¥à¤¸à¥‡à¤¨à¥à¤Ÿ à¤°à¤™à¥à¤—';
 
   @override
-  String get sync_album_color => 'एल्बम रङ्ग सिङ्क गर्नुहोस्';
+  String get sync_album_color =>
+      'à¤à¤²à¥à¤¬à¤® à¤°à¤™à¥à¤— à¤¸à¤¿à¤™à¥à¤• à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get sync_album_color_description =>
-      'एल्बम कला को प्रमुख रङ्गलाई एक्सेन्ट रङ्गको रूपमा प्रयोग गर्दछ';
+      'à¤à¤²à¥à¤¬à¤® à¤•à¤²à¤¾ à¤•à¥‹ à¤ªà¥à¤°à¤®à¥à¤– à¤°à¤™à¥à¤—à¤²à¤¾à¤ˆ à¤à¤•à¥à¤¸à¥‡à¤¨à¥à¤Ÿ à¤°à¤™à¥à¤—à¤•à¥‹ à¤°à¥‚à¤ªà¤®à¤¾ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¦à¤›';
 
   @override
-  String get playback => 'प्लेब्याक';
+  String get playback => 'à¤ªà¥à¤²à¥‡à¤¬à¥à¤¯à¤¾à¤•';
 
   @override
-  String get audio_quality => 'आडियो गुणस्तर';
+  String get audio_quality => 'à¤†à¤¡à¤¿à¤¯à¥‹ à¤—à¥à¤£à¤¸à¥à¤¤à¤°';
 
   @override
-  String get high => 'उच्च';
+  String get high => 'à¤‰à¤šà¥à¤š';
 
   @override
-  String get low => 'न्यून';
+  String get low => 'à¤¨à¥à¤¯à¥‚à¤¨';
 
   @override
-  String get pre_download_play => 'पूर्व-डाउनलोड र प्ले गर्नुहोस्';
+  String get pre_download_play =>
+      'à¤ªà¥‚à¤°à¥à¤µ-à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤° à¤ªà¥à¤²à¥‡ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get pre_download_play_description =>
-      'आडियो स्ट्रिम गर्नु नगरी बाइटहरू डाउनलोड गरी बजाउँछ (उच्च ब्यान्डविथ उपयोगकर्ताहरूको लागि सिफारिस गरिएको)';
+      'à¤†à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤® à¤—à¤°à¥à¤¨à¥ à¤¨à¤—à¤°à¥€ à¤¬à¤¾à¤‡à¤Ÿà¤¹à¤°à¥‚ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤—à¤°à¥€ à¤¬à¤œà¤¾à¤‰à¤à¤› (à¤‰à¤šà¥à¤š à¤¬à¥à¤¯à¤¾à¤¨à¥à¤¡à¤µà¤¿à¤¥ à¤‰à¤ªà¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾à¤¹à¤°à¥‚à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤¸à¤¿à¤«à¤¾à¤°à¤¿à¤¸ à¤—à¤°à¤¿à¤à¤•à¥‹)';
 
   @override
   String get skip_non_music =>
-      'गीतहरू बाहेक कुनै अनुष्ठान छोड्नुहोस् (स्पन्सरब्लक)';
+      'à¤—à¥€à¤¤à¤¹à¤°à¥‚ à¤¬à¤¾à¤¹à¥‡à¤• à¤•à¥à¤¨à¥ˆ à¤…à¤¨à¥à¤·à¥à¤ à¤¾à¤¨ à¤›à¥‹à¤¡à¥à¤¨à¥à¤¹à¥‹à¤¸à¥ (à¤¸à¥à¤ªà¤¨à¥à¤¸à¤°à¤¬à¥à¤²à¤•)';
 
   @override
-  String get blacklist_description => 'कालोसूची गीत र कलाकारहरू';
+  String get blacklist_description =>
+      'à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€ à¤—à¥€à¤¤ à¤° à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚';
 
   @override
   String get wait_for_download_to_finish =>
-      'कृपया हालको डाउनलोड समाप्त हुन लागि पर्खनुहोस्';
+      'à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¹à¤¾à¤²à¤•à¥‹ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤¸à¤®à¤¾à¤ªà¥à¤¤ à¤¹à¥à¤¨ à¤²à¤¾à¤—à¤¿ à¤ªà¤°à¥à¤–à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get desktop => 'डेस्कटप';
+  String get desktop => 'à¤¡à¥‡à¤¸à¥à¤•à¤Ÿà¤ª';
 
   @override
-  String get close_behavior => 'बन्द व्यवहार';
+  String get close_behavior => 'à¤¬à¤¨à¥à¤¦ à¤µà¥à¤¯à¤µà¤¹à¤¾à¤°';
 
   @override
-  String get close => 'बन्द गर्नुहोस्';
+  String get close => 'à¤¬à¤¨à¥à¤¦ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get minimize_to_tray => 'ट्रेमा कम गर्नुहोस्';
+  String get minimize_to_tray =>
+      'à¤Ÿà¥à¤°à¥‡à¤®à¤¾ à¤•à¤® à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get show_tray_icon => 'सिस्टम ट्रे आइकन देखाउनुहोस्';
+  String get show_tray_icon =>
+      'à¤¸à¤¿à¤¸à¥à¤Ÿà¤® à¤Ÿà¥à¤°à¥‡ à¤†à¤‡à¤•à¤¨ à¤¦à¥‡à¤–à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get about => 'बारेमा';
+  String get about => 'à¤¬à¤¾à¤°à¥‡à¤®à¤¾';
 
   @override
   String get u_love_spotube =>
-      'हामीले थाहा पारेका छौं तपाईंलाई Soulful Bhakti मन पर्छ';
+      'à¤¹à¤¾à¤®à¥€à¤²à¥‡ à¤¥à¤¾à¤¹à¤¾ à¤ªà¤¾à¤°à¥‡à¤•à¤¾ à¤›à¥Œà¤‚ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¤¾à¤ˆ Soulful Bhakti à¤®à¤¨ à¤ªà¤°à¥à¤›';
 
   @override
-  String get check_for_updates => 'अपडेटहरूको लागि जाँच गर्नुहोस्';
+  String get check_for_updates =>
+      'à¤…à¤ªà¤¡à¥‡à¤Ÿà¤¹à¤°à¥‚à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤œà¤¾à¤à¤š à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get about_spotube => 'Soulful Bhakti को बारेमा';
+  String get about_spotube => 'Soulful Bhakti à¤•à¥‹ à¤¬à¤¾à¤°à¥‡à¤®à¤¾';
 
   @override
-  String get blacklist => 'कालोसूची';
+  String get blacklist => 'à¤•à¤¾à¤²à¥‹à¤¸à¥‚à¤šà¥€';
 
   @override
-  String get please_sponsor => 'कृपया स्पन्सर/डोनेट गर्नुहोस्';
+  String get please_sponsor =>
+      'à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¥à¤ªà¤¨à¥à¤¸à¤°/à¤¡à¥‹à¤¨à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti, एक हल्का, समृद्ध, स्वतन्त्र Spotify क्लाइयन';
+      'Soulful Bhakti, à¤à¤• à¤¹à¤²à¥à¤•à¤¾, à¤¸à¤®à¥ƒà¤¦à¥à¤§, à¤¸à¥à¤µà¤¤à¤¨à¥à¤¤à¥à¤° Spotify à¤•à¥à¤²à¤¾à¤‡à¤¯à¤¨';
 
   @override
-  String get version => 'संस्करण';
+  String get version => 'à¤¸à¤‚à¤¸à¥à¤•à¤°à¤£';
 
   @override
-  String get build_number => 'निर्माण नम्बर';
+  String get build_number => 'à¤¨à¤¿à¤°à¥à¤®à¤¾à¤£ à¤¨à¤®à¥à¤¬à¤°';
 
   @override
-  String get founder => 'संस्थापक';
+  String get founder => 'à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤ªà¤•';
 
   @override
-  String get repository => 'पुनरावलोकन स्थल';
+  String get repository => 'à¤ªà¥à¤¨à¤°à¤¾à¤µà¤²à¥‹à¤•à¤¨ à¤¸à¥à¤¥à¤²';
 
   @override
-  String get bug_issues => 'त्रुटि + समस्याहरू';
+  String get bug_issues => 'à¤¤à¥à¤°à¥à¤Ÿà¤¿ + à¤¸à¤®à¤¸à¥à¤¯à¤¾à¤¹à¤°à¥‚';
 
   @override
-  String get made_with => '❤️ 2021-2024 बाट बनाइएको';
+  String get made_with => 'â¤ï¸ 2021-2024 à¤¬à¤¾à¤Ÿ à¤¬à¤¨à¤¾à¤‡à¤à¤•à¥‹';
 
   @override
-  String get kingkor_roy_tirtho => 'किङ्कोर राय तिर्थो';
+  String get kingkor_roy_tirtho =>
+      'à¤•à¤¿à¤™à¥à¤•à¥‹à¤° à¤°à¤¾à¤¯ à¤¤à¤¿à¤°à¥à¤¥à¥‹';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year किङ्कोर राय तिर्थो';
+    return 'Â© 2021-$current_year à¤•à¤¿à¤™à¥à¤•à¥‹à¤° à¤°à¤¾à¤¯ à¤¤à¤¿à¤°à¥à¤¥à¥‹';
   }
 
   @override
-  String get license => 'लाइसेन्स';
+  String get license => 'à¤²à¤¾à¤‡à¤¸à¥‡à¤¨à¥à¤¸';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'चिन्ता नगर्नुहोस्, तपाईंको कुनै पनि क्रेडेन्शियलहरूले कसैले संग्रह वा साझा गर्नेछैन';
+      'à¤šà¤¿à¤¨à¥à¤¤à¤¾ à¤¨à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥, à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤•à¥à¤¨à¥ˆ à¤ªà¤¨à¤¿ à¤•à¥à¤°à¥‡à¤¡à¥‡à¤¨à¥à¤¶à¤¿à¤¯à¤²à¤¹à¤°à¥‚à¤²à¥‡ à¤•à¤¸à¥ˆà¤²à¥‡ à¤¸à¤‚à¤—à¥à¤°à¤¹ à¤µà¤¾ à¤¸à¤¾à¤à¤¾ à¤—à¤°à¥à¤¨à¥‡à¤›à¥ˆà¤¨';
 
   @override
-  String get know_how_to_login => 'कसरी लगिन गर्ने भन्ने थाहा छैन?';
+  String get know_how_to_login =>
+      'à¤•à¤¸à¤°à¥€ à¤²à¤—à¤¿à¤¨ à¤—à¤°à¥à¤¨à¥‡ à¤­à¤¨à¥à¤¨à¥‡ à¤¥à¤¾à¤¹à¤¾ à¤›à¥ˆà¤¨?';
 
   @override
   String get follow_step_by_step_guide =>
-      'चरणबद्ध मार्गदर्शनमा साथी बनाउनुहोस्';
+      'à¤šà¤°à¤£à¤¬à¤¦à¥à¤§ à¤®à¤¾à¤°à¥à¤—à¤¦à¤°à¥à¤¶à¤¨à¤®à¤¾ à¤¸à¤¾à¤¥à¥€ à¤¬à¤¨à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String cookie_name_cookie(Object name) {
-    return '$name कुकी';
+    return '$name à¤•à¥à¤•à¥€';
   }
 
   @override
-  String get fill_in_all_fields => 'कृपया सबै क्षेत्रहरू भर्नुहोस्';
+  String get fill_in_all_fields =>
+      'à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¤¬à¥ˆ à¤•à¥à¤·à¥‡à¤¤à¥à¤°à¤¹à¤°à¥‚ à¤­à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get submit => 'पेश गर्नुहोस्';
+  String get submit => 'à¤ªà¥‡à¤¶ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get exit => 'बाहिर निस्कनुहोस्';
+  String get exit => 'à¤¬à¤¾à¤¹à¤¿à¤° à¤¨à¤¿à¤¸à¥à¤•à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get previous => 'पूर्ववत';
+  String get previous => 'à¤ªà¥‚à¤°à¥à¤µà¤µà¤¤';
 
   @override
-  String get next => 'अरू';
+  String get next => 'à¤…à¤°à¥‚';
 
   @override
-  String get done => 'गरिएको';
+  String get done => 'à¤—à¤°à¤¿à¤à¤•à¥‹';
 
   @override
-  String get step_1 => 'कदम 1';
+  String get step_1 => 'à¤•à¤¦à¤® 1';
 
   @override
-  String get first_go_to => 'पहिलो, जानुहोस्';
+  String get first_go_to => 'à¤ªà¤¹à¤¿à¤²à¥‹, à¤œà¤¾à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get something_went_wrong => 'केहि गल्ति भएको छ';
+  String get something_went_wrong =>
+      'à¤•à¥‡à¤¹à¤¿ à¤—à¤²à¥à¤¤à¤¿ à¤­à¤à¤•à¥‹ à¤›';
 
   @override
-  String get piped_instance => 'पाइपड सर्भर इन्स्ट्यान्स';
+  String get piped_instance =>
+      'à¤ªà¤¾à¤‡à¤ªà¤¡ à¤¸à¤°à¥à¤­à¤° à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥à¤¯à¤¾à¤¨à¥à¤¸';
 
   @override
   String get piped_description =>
-      'गीत मिलाउको लागि प्रयोग गर्ने पाइपड सर्भर इन्स्ट्यान्स';
+      'à¤—à¥€à¤¤ à¤®à¤¿à¤²à¤¾à¤‰à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥‡ à¤ªà¤¾à¤‡à¤ªà¤¡ à¤¸à¤°à¥à¤­à¤° à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥à¤¯à¤¾à¤¨à¥à¤¸';
 
   @override
   String get piped_warning =>
-      'तिनीहरूमध्ये केहि ठिक गर्न सक्छ। यसलाई आफ्नो जोखिममा प्रयोग गर्नुहोस्';
+      'à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤®à¤§à¥à¤¯à¥‡ à¤•à¥‡à¤¹à¤¿ à¤ à¤¿à¤• à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤›à¥¤ à¤¯à¤¸à¤²à¤¾à¤ˆ à¤†à¤«à¥à¤¨à¥‹ à¤œà¥‹à¤–à¤¿à¤®à¤®à¤¾ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get invidious_instance => 'Invidious सर्भर इन्स्टेन्स';
+  String get invidious_instance =>
+      'Invidious à¤¸à¤°à¥à¤­à¤° à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥‡à¤¨à¥à¤¸';
 
   @override
   String get invidious_description =>
-      'ट्र्याक मिलाउनका लागि प्रयोग हुने Invidious सर्भर इन्स्टेन्स';
+      'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤• à¤®à¤¿à¤²à¤¾à¤‰à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤¹à¥à¤¨à¥‡ Invidious à¤¸à¤°à¥à¤­à¤° à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥‡à¤¨à¥à¤¸';
 
   @override
   String get invidious_warning =>
-      'केहीले राम्रोसँग काम नगर्न सक्छ। आफ्नो जोखिममा प्रयोग गर्नुहोस्';
+      'à¤•à¥‡à¤¹à¥€à¤²à¥‡ à¤°à¤¾à¤®à¥à¤°à¥‹à¤¸à¤à¤— à¤•à¤¾à¤® à¤¨à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤›à¥¤ à¤†à¤«à¥à¤¨à¥‹ à¤œà¥‹à¤–à¤¿à¤®à¤®à¤¾ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get generate => 'जनरेट';
+  String get generate => 'à¤œà¤¨à¤°à¥‡à¤Ÿ';
 
   @override
   String track_exists(Object track) {
-    return 'ट्र्याक $track पहिले नै छ';
+    return 'à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤• $track à¤ªà¤¹à¤¿à¤²à¥‡ à¤¨à¥ˆ à¤›';
   }
 
   @override
-  String get replace => 'परिवर्तन गर्नुहोस्';
+  String get replace => 'à¤ªà¤°à¤¿à¤µà¤°à¥à¤¤à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get skip => 'छोड्नुहोस्';
+  String get skip => 'à¤›à¥‹à¤¡à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return '$count $type सम्म चयन गर्नुहोस्';
+    return '$count $type à¤¸à¤®à¥à¤® à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
   }
 
   @override
-  String get select_genres => 'जनरहरू चयन गर्नुहोस्';
+  String get select_genres =>
+      'à¤œà¤¨à¤°à¤¹à¤°à¥‚ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get add_genres => 'जनरहरू थप्नुहोस्';
+  String get add_genres => 'à¤œà¤¨à¤°à¤¹à¤°à¥‚ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get country => 'देश';
+  String get country => 'à¤¦à¥‡à¤¶';
 
   @override
-  String get number_of_tracks_generate => 'बनाउनका लागि ट्र्याकहरूको संख्या';
+  String get number_of_tracks_generate =>
+      'à¤¬à¤¨à¤¾à¤‰à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚à¤•à¥‹ à¤¸à¤‚à¤–à¥à¤¯à¤¾';
 
   @override
-  String get acousticness => 'एकोस्टिकनेस';
+  String get acousticness => 'à¤à¤•à¥‹à¤¸à¥à¤Ÿà¤¿à¤•à¤¨à¥‡à¤¸';
 
   @override
-  String get danceability => 'नृत्यक्षमता';
+  String get danceability => 'à¤¨à¥ƒà¤¤à¥à¤¯à¤•à¥à¤·à¤®à¤¤à¤¾';
 
   @override
-  String get energy => 'ऊर्जा';
+  String get energy => 'à¤Šà¤°à¥à¤œà¤¾';
 
   @override
-  String get instrumentalness => 'साजा रहेकोता';
+  String get instrumentalness => 'à¤¸à¤¾à¤œà¤¾ à¤°à¤¹à¥‡à¤•à¥‹à¤¤à¤¾';
 
   @override
-  String get liveness => 'प्राणिकता';
+  String get liveness => 'à¤ªà¥à¤°à¤¾à¤£à¤¿à¤•à¤¤à¤¾';
 
   @override
-  String get loudness => 'शोर';
+  String get loudness => 'à¤¶à¥‹à¤°';
 
   @override
-  String get speechiness => 'भाषण';
+  String get speechiness => 'à¤­à¤¾à¤·à¤£';
 
   @override
-  String get valence => 'मानसिक स्वभाव';
+  String get valence => 'à¤®à¤¾à¤¨à¤¸à¤¿à¤• à¤¸à¥à¤µà¤­à¤¾à¤µ';
 
   @override
-  String get popularity => 'लोकप्रियता';
+  String get popularity => 'à¤²à¥‹à¤•à¤ªà¥à¤°à¤¿à¤¯à¤¤à¤¾';
 
   @override
-  String get key => 'कुञ्जी';
+  String get key => 'à¤•à¥à¤žà¥à¤œà¥€';
 
   @override
-  String get duration => 'अवधि (सेकेण्ड)';
+  String get duration => 'à¤…à¤µà¤§à¤¿ (à¤¸à¥‡à¤•à¥‡à¤£à¥à¤¡)';
 
   @override
-  String get tempo => 'गति (बीपीएम)';
+  String get tempo => 'à¤—à¤¤à¤¿ (à¤¬à¥€à¤ªà¥€à¤à¤®)';
 
   @override
-  String get mode => 'मोड';
+  String get mode => 'à¤®à¥‹à¤¡';
 
   @override
-  String get time_signature => 'समय हस्ताक्षर';
+  String get time_signature => 'à¤¸à¤®à¤¯ à¤¹à¤¸à¥à¤¤à¤¾à¤•à¥à¤·à¤°';
 
   @override
-  String get short => 'सानो';
+  String get short => 'à¤¸à¤¾à¤¨à¥‹';
 
   @override
-  String get medium => 'मध्यम';
+  String get medium => 'à¤®à¤§à¥à¤¯à¤®';
 
   @override
-  String get long => 'लामो';
+  String get long => 'à¤²à¤¾à¤®à¥‹';
 
   @override
-  String get min => 'न्यून';
+  String get min => 'à¤¨à¥à¤¯à¥‚à¤¨';
 
   @override
-  String get max => 'अधिक';
+  String get max => 'à¤…à¤§à¤¿à¤•';
 
   @override
-  String get target => 'लक्ष्य';
+  String get target => 'à¤²à¤•à¥à¤·à¥à¤¯';
 
   @override
-  String get moderate => 'मध्यस्थ';
+  String get moderate => 'à¤®à¤§à¥à¤¯à¤¸à¥à¤¥';
 
   @override
-  String get deselect_all => 'सबै छान्नुहोस्';
+  String get deselect_all => 'à¤¸à¤¬à¥ˆ à¤›à¤¾à¤¨à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get select_all => 'सबै चयन गर्नुहोस्';
+  String get select_all => 'à¤¸à¤¬à¥ˆ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get are_you_sure => 'के तपाईं सुनिश्चित हुनुहुन्छ?';
+  String get are_you_sure =>
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤¹à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
-  String get generating_playlist => 'तपाईंको विशेष प्लेलिस्ट बनाइएको छ...';
+  String get generating_playlist =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤µà¤¿à¤¶à¥‡à¤· à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤¬à¤¨à¤¾à¤‡à¤à¤•à¥‹ à¤›...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '$count ट्र्याकहरू छन् चयन गरिएका';
+    return '$count à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚ à¤›à¤¨à¥ à¤šà¤¯à¤¨ à¤—à¤°à¤¿à¤à¤•à¤¾';
   }
 
   @override
   String get download_warning =>
-      'यदि तपाईं सबै ट्र्याकहरूलाई बल्कमा डाउनलोड गर्छनु हो भने तपाईं स्पष्ट रूपमा साङ्गीत चोरी गरिरहेका छन् र यो साङ्गीतको रचनात्मक समाजलाई क्षति पनि पुर्याउँछ। उमेराइएको छ कि तपाईं यसको बारेमा जागरूक छिनुहुन्छ। सधैं, कला गर्दै र कलाकारको कडा परम्परा समर्थन गर्दै आइन्छ।';
+      'à¤¯à¤¦à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¸à¤¬à¥ˆ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤¬à¤²à¥à¤•à¤®à¤¾ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤—à¤°à¥à¤›à¤¨à¥ à¤¹à¥‹ à¤­à¤¨à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¸à¥à¤ªà¤·à¥à¤Ÿ à¤°à¥‚à¤ªà¤®à¤¾ à¤¸à¤¾à¤™à¥à¤—à¥€à¤¤ à¤šà¥‹à¤°à¥€ à¤—à¤°à¤¿à¤°à¤¹à¥‡à¤•à¤¾ à¤›à¤¨à¥ à¤° à¤¯à¥‹ à¤¸à¤¾à¤™à¥à¤—à¥€à¤¤à¤•à¥‹ à¤°à¤šà¤¨à¤¾à¤¤à¥à¤®à¤• à¤¸à¤®à¤¾à¤œà¤²à¤¾à¤ˆ à¤•à¥à¤·à¤¤à¤¿ à¤ªà¤¨à¤¿ à¤ªà¥à¤°à¥à¤¯à¤¾à¤‰à¤à¤›à¥¤ à¤‰à¤®à¥‡à¤°à¤¾à¤‡à¤à¤•à¥‹ à¤› à¤•à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¯à¤¸à¤•à¥‹ à¤¬à¤¾à¤°à¥‡à¤®à¤¾ à¤œà¤¾à¤—à¤°à¥‚à¤• à¤›à¤¿à¤¨à¥à¤¹à¥à¤¨à¥à¤›à¥¤ à¤¸à¤§à¥ˆà¤‚, à¤•à¤²à¤¾ à¤—à¤°à¥à¤¦à¥ˆ à¤° à¤•à¤²à¤¾à¤•à¤¾à¤°à¤•à¥‹ à¤•à¤¡à¤¾ à¤ªà¤°à¤®à¥à¤ªà¤°à¤¾ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤—à¤°à¥à¤¦à¥ˆ à¤†à¤‡à¤¨à¥à¤›à¥¤';
 
   @override
   String get download_ip_ban_warning =>
-      'बितिएका डाउनलोड अनुरोधहरूका कारण तपाईंको आइपीले YouTube मा ब्लक हुन सक्छ। आइपी ब्लक भनेको कम्तीमा 2-3 महिनासम्म तपाईं त्यस आइपी यन्त्रबाट YouTube प्रयोग गर्न सक्नुहुन्छ। र यदि यो हुँदैछ भने स्पट्यूबले यसलाई कसैले गरेको बारेमा कुनै दायित्व लिन्छैन।';
+      'à¤¬à¤¿à¤¤à¤¿à¤à¤•à¤¾ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤…à¤¨à¥à¤°à¥‹à¤§à¤¹à¤°à¥‚à¤•à¤¾ à¤•à¤¾à¤°à¤£ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤†à¤‡à¤ªà¥€à¤²à¥‡ YouTube à¤®à¤¾ à¤¬à¥à¤²à¤• à¤¹à¥à¤¨ à¤¸à¤•à¥à¤›à¥¤ à¤†à¤‡à¤ªà¥€ à¤¬à¥à¤²à¤• à¤­à¤¨à¥‡à¤•à¥‹ à¤•à¤®à¥à¤¤à¥€à¤®à¤¾ 2-3 à¤®à¤¹à¤¿à¤¨à¤¾à¤¸à¤®à¥à¤® à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¤à¥à¤¯à¤¸ à¤†à¤‡à¤ªà¥€ à¤¯à¤¨à¥à¤¤à¥à¤°à¤¬à¤¾à¤Ÿ YouTube à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›à¥¤ à¤° à¤¯à¤¦à¤¿ à¤¯à¥‹ à¤¹à¥à¤à¤¦à¥ˆà¤› à¤­à¤¨à¥‡ à¤¸à¥à¤ªà¤Ÿà¥à¤¯à¥‚à¤¬à¤²à¥‡ à¤¯à¤¸à¤²à¤¾à¤ˆ à¤•à¤¸à¥ˆà¤²à¥‡ à¤—à¤°à¥‡à¤•à¥‹ à¤¬à¤¾à¤°à¥‡à¤®à¤¾ à¤•à¥à¤¨à¥ˆ à¤¦à¤¾à¤¯à¤¿à¤¤à¥à¤µ à¤²à¤¿à¤¨à¥à¤›à¥ˆà¤¨à¥¤';
 
   @override
   String get by_clicking_accept_terms =>
-      '\'स्वीकृत\' गरेर तपाईं निम्नलिखित निर्वाचन गर्दैछिन्:';
+      '\'à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤\' à¤—à¤°à¥‡à¤° à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¨à¤¿à¤®à¥à¤¨à¤²à¤¿à¤–à¤¿à¤¤ à¤¨à¤¿à¤°à¥à¤µà¤¾à¤šà¤¨ à¤—à¤°à¥à¤¦à¥ˆà¤›à¤¿à¤¨à¥:';
 
   @override
   String get download_agreement_1 =>
-      'म मन्ने छु कि म साङ्गीत चोरी गरिरहेको छु। म बुरो हुँ';
+      'à¤® à¤®à¤¨à¥à¤¨à¥‡ à¤›à¥ à¤•à¤¿ à¤® à¤¸à¤¾à¤™à¥à¤—à¥€à¤¤ à¤šà¥‹à¤°à¥€ à¤—à¤°à¤¿à¤°à¤¹à¥‡à¤•à¥‹ à¤›à¥à¥¤ à¤® à¤¬à¥à¤°à¥‹ à¤¹à¥à¤';
 
   @override
   String get download_agreement_2 =>
-      'म कहिल्यै कहिल्यै तिनीहरूलाई समर्थन गर्नेछु र म यो तिनीहरूको कला किन्ने पैसा छैन भने मा मात्र यो गरेको छु';
+      'à¤® à¤•à¤¹à¤¿à¤²à¥à¤¯à¥ˆ à¤•à¤¹à¤¿à¤²à¥à¤¯à¥ˆ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤—à¤°à¥à¤¨à¥‡à¤›à¥ à¤° à¤® à¤¯à¥‹ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤•à¥‹ à¤•à¤²à¤¾ à¤•à¤¿à¤¨à¥à¤¨à¥‡ à¤ªà¥ˆà¤¸à¤¾ à¤›à¥ˆà¤¨ à¤­à¤¨à¥‡ à¤®à¤¾ à¤®à¤¾à¤¤à¥à¤° à¤¯à¥‹ à¤—à¤°à¥‡à¤•à¥‹ à¤›à¥';
 
   @override
   String get download_agreement_3 =>
-      'म पूरा रूपमा जान्छु कि मेरो आइपी YouTube मा ब्लक हुन सक्छ र म मन्छेहरूले मेरो चासोबाट भएको कुनै दुर्घटनामा स्पट्यूब वा तिनीहरूको मालिकहरू/सहयोगीहरूलाई दायित्वी ठान्छुँभन्ने पूर्ण जानकारी छैन';
+      'à¤® à¤ªà¥‚à¤°à¤¾ à¤°à¥‚à¤ªà¤®à¤¾ à¤œà¤¾à¤¨à¥à¤›à¥ à¤•à¤¿ à¤®à¥‡à¤°à¥‹ à¤†à¤‡à¤ªà¥€ YouTube à¤®à¤¾ à¤¬à¥à¤²à¤• à¤¹à¥à¤¨ à¤¸à¤•à¥à¤› à¤° à¤® à¤®à¤¨à¥à¤›à¥‡à¤¹à¤°à¥‚à¤²à¥‡ à¤®à¥‡à¤°à¥‹ à¤šà¤¾à¤¸à¥‹à¤¬à¤¾à¤Ÿ à¤­à¤à¤•à¥‹ à¤•à¥à¤¨à¥ˆ à¤¦à¥à¤°à¥à¤˜à¤Ÿà¤¨à¤¾à¤®à¤¾ à¤¸à¥à¤ªà¤Ÿà¥à¤¯à¥‚à¤¬ à¤µà¤¾ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤•à¥‹ à¤®à¤¾à¤²à¤¿à¤•à¤¹à¤°à¥‚/à¤¸à¤¹à¤¯à¥‹à¤—à¥€à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤¦à¤¾à¤¯à¤¿à¤¤à¥à¤µà¥€ à¤ à¤¾à¤¨à¥à¤›à¥à¤à¤­à¤¨à¥à¤¨à¥‡ à¤ªà¥‚à¤°à¥à¤£ à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤›à¥ˆà¤¨';
 
   @override
-  String get decline => 'अस्वीकृत';
+  String get decline => 'à¤…à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤';
 
   @override
-  String get accept => 'स्वीकृत';
+  String get accept => 'à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤';
 
   @override
-  String get details => 'विवरण';
+  String get details => 'à¤µà¤¿à¤µà¤°à¤£';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'च्यानल';
+  String get channel => 'à¤šà¥à¤¯à¤¾à¤¨à¤²';
 
   @override
-  String get likes => 'लाइकहरू';
+  String get likes => 'à¤²à¤¾à¤‡à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get dislikes => 'असुनुहरू';
+  String get dislikes => 'à¤…à¤¸à¥à¤¨à¥à¤¹à¤°à¥‚';
 
   @override
-  String get views => 'हेरिएको';
+  String get views => 'à¤¹à¥‡à¤°à¤¿à¤à¤•à¥‹';
 
   @override
-  String get streamUrl => 'स्ट्रिम यूआरएल';
+  String get streamUrl => 'à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤® à¤¯à¥‚à¤†à¤°à¤à¤²';
 
   @override
-  String get stop => 'रोक्नुहोस्';
+  String get stop => 'à¤°à¥‹à¤•à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_newest => 'नयाँ थपिएकोमा क्रमबद्ध गर्नुहोस्';
+  String get sort_newest =>
+      'à¤¨à¤¯à¤¾à¤ à¤¥à¤ªà¤¿à¤à¤•à¥‹à¤®à¤¾ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sort_oldest => 'पुरानो थपिएकोमा क्रमबद्ध गर्नुहोस्';
+  String get sort_oldest =>
+      'à¤ªà¥à¤°à¤¾à¤¨à¥‹ à¤¥à¤ªà¤¿à¤à¤•à¥‹à¤®à¤¾ à¤•à¥à¤°à¤®à¤¬à¤¦à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sleep_timer => 'सुत्ने टाइमर';
+  String get sleep_timer => 'à¤¸à¥à¤¤à¥à¤¨à¥‡ à¤Ÿà¤¾à¤‡à¤®à¤°';
 
   @override
   String mins(Object minutes) {
-    return '$minutes मिनेटहरू';
+    return '$minutes à¤®à¤¿à¤¨à¥‡à¤Ÿà¤¹à¤°à¥‚';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours घण्टाहरू';
+    return '$hours à¤˜à¤£à¥à¤Ÿà¤¾à¤¹à¤°à¥‚';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours घण्टा';
+    return '$hours à¤˜à¤£à¥à¤Ÿà¤¾';
   }
 
   @override
-  String get custom_hours => 'कस्टम घण्टाहरू';
+  String get custom_hours => 'à¤•à¤¸à¥à¤Ÿà¤® à¤˜à¤£à¥à¤Ÿà¤¾à¤¹à¤°à¥‚';
 
   @override
-  String get logs => 'लगहरू';
+  String get logs => 'à¤²à¤—à¤¹à¤°à¥‚';
 
   @override
-  String get developers => 'डेभेलपर्स';
+  String get developers => 'à¤¡à¥‡à¤­à¥‡à¤²à¤ªà¤°à¥à¤¸';
 
   @override
-  String get not_logged_in => 'तपाईंले लगइन गरेका छैनौं';
+  String get not_logged_in =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤²à¤—à¤‡à¤¨ à¤—à¤°à¥‡à¤•à¤¾ à¤›à¥ˆà¤¨à¥Œà¤‚';
 
   @override
-  String get search_mode => 'खोज मोड';
+  String get search_mode => 'à¤–à¥‹à¤œ à¤®à¥‹à¤¡';
 
   @override
-  String get audio_source => 'अडियो स्रोत';
+  String get audio_source => 'à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥‹à¤¤';
 
   @override
-  String get ok => 'ठिक छ';
+  String get ok => 'à¤ à¤¿à¤• à¤›';
 
   @override
-  String get failed_to_encrypt => 'एन्क्रिप्ट गर्न सकिएन';
+  String get failed_to_encrypt =>
+      'à¤à¤¨à¥à¤•à¥à¤°à¤¿à¤ªà¥à¤Ÿ à¤—à¤°à¥à¤¨ à¤¸à¤•à¤¿à¤à¤¨';
 
   @override
   String get encryption_failed_warning =>
-      'स्पट्यूबले तपाईंको डेटा सुरक्षित रूपमा स्टोर गर्नका लागि एन्क्रिप्ट गर्न खोजेको छ। तर यसले गरेको छैन। यसले असुरक्षित स्टोरेजमा फल्लब्याक गर्दछ\nयदि तपाईंले लिनक्स प्रयोग गरिरहेका छन् भने कृपया सुनिश्चित गर्नुहोस् कि तपाईंले कुनै सीक्रेट-सर्भिस (गोनोम-किरिङ, केडीइ-वालेट, किपासेक्ससि इत्यादि) इन्स्टल गरेका छौं';
+      'à¤¸à¥à¤ªà¤Ÿà¥à¤¯à¥‚à¤¬à¤²à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¡à¥‡à¤Ÿà¤¾ à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤°à¥‚à¤ªà¤®à¤¾ à¤¸à¥à¤Ÿà¥‹à¤° à¤—à¤°à¥à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤à¤¨à¥à¤•à¥à¤°à¤¿à¤ªà¥à¤Ÿ à¤—à¤°à¥à¤¨ à¤–à¥‹à¤œà¥‡à¤•à¥‹ à¤›à¥¤ à¤¤à¤° à¤¯à¤¸à¤²à¥‡ à¤—à¤°à¥‡à¤•à¥‹ à¤›à¥ˆà¤¨à¥¤ à¤¯à¤¸à¤²à¥‡ à¤…à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤¸à¥à¤Ÿà¥‹à¤°à¥‡à¤œà¤®à¤¾ à¤«à¤²à¥à¤²à¤¬à¥à¤¯à¤¾à¤• à¤—à¤°à¥à¤¦à¤›\nà¤¯à¤¦à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤²à¤¿à¤¨à¤•à¥à¤¸ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¤¿à¤°à¤¹à¥‡à¤•à¤¾ à¤›à¤¨à¥ à¤­à¤¨à¥‡ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥ à¤•à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤•à¥à¤¨à¥ˆ à¤¸à¥€à¤•à¥à¤°à¥‡à¤Ÿ-à¤¸à¤°à¥à¤­à¤¿à¤¸ (à¤—à¥‹à¤¨à¥‹à¤®-à¤•à¤¿à¤°à¤¿à¤™, à¤•à¥‡à¤¡à¥€à¤‡-à¤µà¤¾à¤²à¥‡à¤Ÿ, à¤•à¤¿à¤ªà¤¾à¤¸à¥‡à¤•à¥à¤¸à¤¸à¤¿ à¤‡à¤¤à¥à¤¯à¤¾à¤¦à¤¿) à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¤² à¤—à¤°à¥‡à¤•à¤¾ à¤›à¥Œà¤‚';
 
   @override
-  String get querying_info => 'जानकारी हेर्दै...';
+  String get querying_info => 'à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤¹à¥‡à¤°à¥à¤¦à¥ˆ...';
 
   @override
-  String get piped_api_down => 'पाइपड एपीआई डाउन छ';
+  String get piped_api_down =>
+      'à¤ªà¤¾à¤‡à¤ªà¤¡ à¤à¤ªà¥€à¤†à¤ˆ à¤¡à¤¾à¤‰à¤¨ à¤›';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'पाइपड इन्स्ट्यान्स $pipedInstance हाल डाउन छ\n\nजीसनै इन्स्ट्यान्स परिवर्तन गर्नुहोस् वा \'एपीआई प्रकार\' लाइ YouTube आफिसियल एपीआईमा परिवर्तन गर्नुहोस्\n\nपरिवर्तनपछि एप्लिकेसन पुन: सुरु गर्नुहोस्';
+    return 'à¤ªà¤¾à¤‡à¤ªà¤¡ à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥à¤¯à¤¾à¤¨à¥à¤¸ $pipedInstance à¤¹à¤¾à¤² à¤¡à¤¾à¤‰à¤¨ à¤›\n\nà¤œà¥€à¤¸à¤¨à¥ˆ à¤‡à¤¨à¥à¤¸à¥à¤Ÿà¥à¤¯à¤¾à¤¨à¥à¤¸ à¤ªà¤°à¤¿à¤µà¤°à¥à¤¤à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥ à¤µà¤¾ \'à¤à¤ªà¥€à¤†à¤ˆ à¤ªà¥à¤°à¤•à¤¾à¤°\' à¤²à¤¾à¤‡ YouTube à¤†à¤«à¤¿à¤¸à¤¿à¤¯à¤² à¤à¤ªà¥€à¤†à¤ˆà¤®à¤¾ à¤ªà¤°à¤¿à¤µà¤°à¥à¤¤à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥\n\nà¤ªà¤°à¤¿à¤µà¤°à¥à¤¤à¤¨à¤ªà¤›à¤¿ à¤à¤ªà¥à¤²à¤¿à¤•à¥‡à¤¸à¤¨ à¤ªà¥à¤¨: à¤¸à¥à¤°à¥ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
   }
 
   @override
-  String get you_are_offline => 'तपाईं वर्तमान अफलाइन हुनुहुन्छ';
+  String get you_are_offline =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤…à¤«à¤²à¤¾à¤‡à¤¨ à¤¹à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›';
 
   @override
   String get connection_restored =>
-      'तपाईंको इन्टरनेट कनेक्सन पुन: स्थापित भएको छ';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤‡à¤¨à¥à¤Ÿà¤°à¤¨à¥‡à¤Ÿ à¤•à¤¨à¥‡à¤•à¥à¤¸à¤¨ à¤ªà¥à¤¨: à¤¸à¥à¤¥à¤¾à¤ªà¤¿à¤¤ à¤­à¤à¤•à¥‹ à¤›';
 
   @override
-  String get use_system_title_bar => 'सिस्टम शीर्षक पट्टी प्रयोग गर्नुहोस्';
+  String get use_system_title_bar =>
+      'à¤¸à¤¿à¤¸à¥à¤Ÿà¤® à¤¶à¥€à¤°à¥à¤·à¤• à¤ªà¤Ÿà¥à¤Ÿà¥€ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get crunching_results => 'परिणामहरू कपालबाट पीस्दै...';
+  String get crunching_results =>
+      'à¤ªà¤°à¤¿à¤£à¤¾à¤®à¤¹à¤°à¥‚ à¤•à¤ªà¤¾à¤²à¤¬à¤¾à¤Ÿ à¤ªà¥€à¤¸à¥à¤¦à¥ˆ...';
 
   @override
   String get search_to_get_results =>
-      'परिणामहरू प्राप्त गर्नका लागि खोज्नुहोस्';
+      'à¤ªà¤°à¤¿à¤£à¤¾à¤®à¤¹à¤°à¥‚ à¤ªà¥à¤°à¤¾à¤ªà¥à¤¤ à¤—à¤°à¥à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤–à¥‹à¤œà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get use_amoled_mode => 'कृष्ण ब्ल्याक गाढा थिम प्रयोग गर्नुहोस्';
+  String get use_amoled_mode =>
+      'à¤•à¥ƒà¤·à¥à¤£ à¤¬à¥à¤²à¥à¤¯à¤¾à¤• à¤—à¤¾à¤¢à¤¾ à¤¥à¤¿à¤® à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get pitch_dark_theme => 'एमोलेड मोड';
+  String get pitch_dark_theme => 'à¤à¤®à¥‹à¤²à¥‡à¤¡ à¤®à¥‹à¤¡';
 
   @override
-  String get normalize_audio => 'अडियो सामान्य गर्नुहोस्';
+  String get normalize_audio =>
+      'à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¤¾à¤®à¤¾à¤¨à¥à¤¯ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get change_cover => 'कवर परिवर्तन गर्नुहोस्';
+  String get change_cover =>
+      'à¤•à¤µà¤° à¤ªà¤°à¤¿à¤µà¤°à¥à¤¤à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get add_cover => 'कवर थप्नुहोस्';
+  String get add_cover => 'à¤•à¤µà¤° à¤¥à¤ªà¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get restore_defaults => 'पूर्वनिर्धारितहरू पुनः स्थापित गर्नुहोस्';
+  String get restore_defaults =>
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤à¤¹à¤°à¥‚ à¤ªà¥à¤¨à¤ƒ à¤¸à¥à¤¥à¤¾à¤ªà¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get restore_defaults_confirmation =>
-      'यसले तपाईंका सबै सेटिङहरूलाई पूर्वनिर्धारित मानमा रिसेट गर्नेछ। यो कार्य रद्द गर्न सकिँदैन।';
+      'à¤¯à¤¸à¤²à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¤¾ à¤¸à¤¬à¥ˆ à¤¸à¥‡à¤Ÿà¤¿à¤™à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤®à¤¾à¤¨à¤®à¤¾ à¤°à¤¿à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥‡à¤›à¥¤ à¤¯à¥‹ à¤•à¤¾à¤°à¥à¤¯ à¤°à¤¦à¥à¤¦ à¤—à¤°à¥à¤¨ à¤¸à¤•à¤¿à¤à¤¦à¥ˆà¤¨à¥¤';
 
   @override
-  String get streaming_music_format => 'स्ट्रिमिङ सङ्गीत ढाँचा';
+  String get streaming_music_format =>
+      'à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤¿à¤™ à¤¸à¤™à¥à¤—à¥€à¤¤ à¤¢à¤¾à¤à¤šà¤¾';
 
   @override
-  String get streaming_music_quality => 'स्ट्रिमिङ गुणस्तर';
+  String get streaming_music_quality =>
+      'à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤¿à¤™ à¤—à¥à¤£à¤¸à¥à¤¤à¤°';
 
   @override
-  String get connect => 'जडान गर्नुहोस्';
+  String get connect => 'à¤œà¤¡à¤¾à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get disconnect => 'डिसकनेक्ट';
+  String get disconnect => 'à¤¡à¤¿à¤¸à¤•à¤¨à¥‡à¤•à¥à¤Ÿ';
 
   @override
-  String get username => 'प्रयोगकर्ता नाम';
+  String get username => 'à¤ªà¥à¤°à¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾ à¤¨à¤¾à¤®';
 
   @override
-  String get password => 'पासवर्ड';
+  String get password => 'à¤ªà¤¾à¤¸à¤µà¤°à¥à¤¡';
 
   @override
-  String get login => 'लगइन';
+  String get login => 'à¤²à¤—à¤‡à¤¨';
 
   @override
-  String get sign_in => 'साइन इन';
+  String get sign_in => 'à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨';
 
   @override
-  String get sign_up => 'साइन अप';
+  String get sign_up => 'à¤¸à¤¾à¤‡à¤¨ à¤…à¤ª';
 
   @override
-  String get sign_out => 'साइन आउट';
+  String get sign_out => 'à¤¸à¤¾à¤‡à¤¨ à¤†à¤‰à¤Ÿ';
 
   @override
-  String get verify => 'प्रमाणित गर्नुहोस्';
+  String get verify => 'à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get create_account => 'आफ्नो खाता सिर्जना गर्नुहोस्';
+  String get create_account =>
+      'à¤†à¤«à¥à¤¨à¥‹ à¤–à¤¾à¤¤à¤¾ à¤¸à¤¿à¤°à¥à¤œà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get already_have_account => 'पहिले नै खाता छ? साइन इन गर्नुहोस्';
+  String get already_have_account =>
+      'à¤ªà¤¹à¤¿à¤²à¥‡ à¤¨à¥ˆ à¤–à¤¾à¤¤à¤¾ à¤›? à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get dont_have_account => 'खाता छैन? साइन अप गर्नुहोस्';
+  String get dont_have_account =>
+      'à¤–à¤¾à¤¤à¤¾ à¤›à¥ˆà¤¨? à¤¸à¤¾à¤‡à¤¨ à¤…à¤ª à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String signed_in_as(Object userId) {
-    return '$userId को रूपमा साइन इन गरियो';
+    return '$userId à¤•à¥‹ à¤°à¥‚à¤ªà¤®à¤¾ à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨ à¤—à¤°à¤¿à¤¯à¥‹';
   }
 
   @override
-  String get verification_code => 'प्रमाणिकरण कोड';
+  String get verification_code => 'à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤•à¤°à¤£ à¤•à¥‹à¤¡';
 
   @override
   String get verification_code_hint =>
-      'तपाईंको इमेलमा पठाइएको कोड प्रविष्ट गर्नुहोस्';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤‡à¤®à¥‡à¤²à¤®à¤¾ à¤ªà¤ à¤¾à¤‡à¤à¤•à¥‹ à¤•à¥‹à¤¡ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get verify_email_code =>
-      'हामीले तपाईंको इमेलमा प्रमाणिकरण कोड पठाएका छौं';
+      'à¤¹à¤¾à¤®à¥€à¤²à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤‡à¤®à¥‡à¤²à¤®à¤¾ à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤•à¤°à¤£ à¤•à¥‹à¤¡ à¤ªà¤ à¤¾à¤à¤•à¤¾ à¤›à¥Œà¤‚';
 
   @override
-  String get go_to_album => 'आल्बममा जानुहोस्';
+  String get go_to_album => 'à¤†à¤²à¥à¤¬à¤®à¤®à¤¾ à¤œà¤¾à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get discord_rich_presence => 'डिस्कर्ड धनी उपस्थिति';
+  String get discord_rich_presence =>
+      'à¤¡à¤¿à¤¸à¥à¤•à¤°à¥à¤¡ à¤§à¤¨à¥€ à¤‰à¤ªà¤¸à¥à¤¥à¤¿à¤¤à¤¿';
 
   @override
-  String get browse_all => 'सबै हेर्नुहोस्';
+  String get browse_all => 'à¤¸à¤¬à¥ˆ à¤¹à¥‡à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get genres => 'शैलीहरू';
+  String get genres => 'à¤¶à¥ˆà¤²à¥€à¤¹à¤°à¥‚';
 
   @override
-  String get explore_genres => 'शैलीहरू अन्वेषण गर्नुहोस्';
+  String get explore_genres =>
+      'à¤¶à¥ˆà¤²à¥€à¤¹à¤°à¥‚ à¤…à¤¨à¥à¤µà¥‡à¤·à¤£ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get friends => 'साथीहरू';
+  String get friends => 'à¤¸à¤¾à¤¥à¥€à¤¹à¤°à¥‚';
 
   @override
   String get no_lyrics_available =>
-      'क्षमा गर्दैछौं, यस ट्र्याकका लागि गीतका शब्दहरू फेला परेन';
+      'à¤•à¥à¤·à¤®à¤¾ à¤—à¤°à¥à¤¦à¥ˆà¤›à¥Œà¤‚, à¤¯à¤¸ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤—à¥€à¤¤à¤•à¤¾ à¤¶à¤¬à¥à¤¦à¤¹à¤°à¥‚ à¤«à¥‡à¤²à¤¾ à¤ªà¤°à¥‡à¤¨';
 
   @override
-  String get start_a_radio => 'रेडियो सुरु गर्नुहोस्';
+  String get start_a_radio =>
+      'à¤°à¥‡à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get how_to_start_radio => 'तपाईं रेडियो कसरी सुरु गर्न चाहानुहुन्छ?';
+  String get how_to_start_radio =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤°à¥‡à¤¡à¤¿à¤¯à¥‹ à¤•à¤¸à¤°à¥€ à¤¸à¥à¤°à¥ à¤—à¤°à¥à¤¨ à¤šà¤¾à¤¹à¤¾à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
   String get replace_queue_question =>
-      'के तपाईं वर्तमान कताक्ष कोट बदल्न चाहानुहुन्छ वा यसलाई थप्नुहुन्छ?';
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤µà¤°à¥à¤¤à¤®à¤¾à¤¨ à¤•à¤¤à¤¾à¤•à¥à¤· à¤•à¥‹à¤Ÿ à¤¬à¤¦à¤²à¥à¤¨ à¤šà¤¾à¤¹à¤¾à¤¨à¥à¤¹à¥à¤¨à¥à¤› à¤µà¤¾ à¤¯à¤¸à¤²à¤¾à¤ˆ à¤¥à¤ªà¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
-  String get endless_playback => 'अनन्त प्लेब्याक';
+  String get endless_playback => 'à¤…à¤¨à¤¨à¥à¤¤ à¤ªà¥à¤²à¥‡à¤¬à¥à¤¯à¤¾à¤•';
 
   @override
-  String get delete_playlist => 'प्लेलिस्ट मेटाउनुहोस्';
+  String get delete_playlist =>
+      'à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤®à¥‡à¤Ÿà¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get delete_playlist_confirmation =>
-      'के तपाईं यो प्लेलिस्ट मेटाउन निश्चित हुनुहुन्छ?';
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¯à¥‹ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤®à¥‡à¤Ÿà¤¾à¤‰à¤¨ à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤¹à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
-  String get local_tracks => 'स्थानिय ट्र्याकहरू';
+  String get local_tracks =>
+      'à¤¸à¥à¤¥à¤¾à¤¨à¤¿à¤¯ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚';
 
   @override
-  String get local_tab => 'स्थानिय';
+  String get local_tab => 'à¤¸à¥à¤¥à¤¾à¤¨à¤¿à¤¯';
 
   @override
-  String get song_link => 'गीत लिंक';
+  String get song_link => 'à¤—à¥€à¤¤ à¤²à¤¿à¤‚à¤•';
 
   @override
-  String get skip_this_nonsense => 'यस अबश्यकता छोड्नुहोस्';
+  String get skip_this_nonsense =>
+      'à¤¯à¤¸ à¤…à¤¬à¤¶à¥à¤¯à¤•à¤¤à¤¾ à¤›à¥‹à¤¡à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get freedom_of_music => '“संगीतको स्वतन्त्रता”';
+  String get freedom_of_music =>
+      'â€œà¤¸à¤‚à¤—à¥€à¤¤à¤•à¥‹ à¤¸à¥à¤µà¤¤à¤¨à¥à¤¤à¥à¤°à¤¤à¤¾â€';
 
   @override
-  String get freedom_of_music_palm => '“तपाईंको हातमा संगीतको स्वतन्त्रता”';
+  String get freedom_of_music_palm =>
+      'â€œà¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¹à¤¾à¤¤à¤®à¤¾ à¤¸à¤‚à¤—à¥€à¤¤à¤•à¥‹ à¤¸à¥à¤µà¤¤à¤¨à¥à¤¤à¥à¤°à¤¤à¤¾â€';
 
   @override
-  String get get_started => 'आइयाँ प्रारम्भ गरौं';
+  String get get_started =>
+      'à¤†à¤‡à¤¯à¤¾à¤ à¤ªà¥à¤°à¤¾à¤°à¤®à¥à¤­ à¤—à¤°à¥Œà¤‚';
 
   @override
-  String get youtube_source_description => 'सिफारिस गरिएको र बेस्ट काम गर्दछ।';
+  String get youtube_source_description =>
+      'à¤¸à¤¿à¤«à¤¾à¤°à¤¿à¤¸ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤° à¤¬à¥‡à¤¸à¥à¤Ÿ à¤•à¤¾à¤® à¤—à¤°à¥à¤¦à¤›à¥¤';
 
   @override
   String get piped_source_description =>
-      'मुक्त सुस्त? YouTube जस्तै तर धेरै मुक्त।';
+      'à¤®à¥à¤•à¥à¤¤ à¤¸à¥à¤¸à¥à¤¤? YouTube à¤œà¤¸à¥à¤¤à¥ˆ à¤¤à¤° à¤§à¥‡à¤°à¥ˆ à¤®à¥à¤•à¥à¤¤à¥¤';
 
   @override
   String get jiosaavn_source_description =>
-      'दक्षिण एशियाली क्षेत्रको लागि सर्वोत्तम।';
+      'à¤¦à¤•à¥à¤·à¤¿à¤£ à¤à¤¶à¤¿à¤¯à¤¾à¤²à¥€ à¤•à¥à¤·à¥‡à¤¤à¥à¤°à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤¸à¤°à¥à¤µà¥‹à¤¤à¥à¤¤à¤®à¥¤';
 
   @override
-  String get invidious_source_description => 'Piped जस्तै तर उच्च उपलब्धतासँग।';
+  String get invidious_source_description =>
+      'Piped à¤œà¤¸à¥à¤¤à¥ˆ à¤¤à¤° à¤‰à¤šà¥à¤š à¤‰à¤ªà¤²à¤¬à¥à¤§à¤¤à¤¾à¤¸à¤à¤—à¥¤';
 
   @override
   String highest_quality(Object quality) {
-    return 'उच्चतम गुणस्तर: $quality';
+    return 'à¤‰à¤šà¥à¤šà¤¤à¤® à¤—à¥à¤£à¤¸à¥à¤¤à¤°: $quality';
   }
 
   @override
-  String get select_audio_source => 'आडियो स्रोत चयन गर्नुहोस्';
+  String get select_audio_source =>
+      'à¤†à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥‹à¤¤ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get endless_playback_description =>
-      'नयाँ गीतहरूलाई स्वचालित रूपमा कताक्षको अन्तमा जोड्नुहोस्';
+      'à¤¨à¤¯à¤¾à¤ à¤—à¥€à¤¤à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤¸à¥à¤µà¤šà¤¾à¤²à¤¿à¤¤ à¤°à¥‚à¤ªà¤®à¤¾ à¤•à¤¤à¤¾à¤•à¥à¤·à¤•à¥‹ à¤…à¤¨à¥à¤¤à¤®à¤¾ à¤œà¥‹à¤¡à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get choose_your_region => 'तपाईंको क्षेत्र छनौट गर्नुहोस्';
+  String get choose_your_region =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤•à¥à¤·à¥‡à¤¤à¥à¤° à¤›à¤¨à¥Œà¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get choose_your_region_description =>
-      'यो Soulful Bhaktiलाई तपाईंको स्थानका लागि सहि सामग्री देखाउने मद्दत गर्नेछ।';
+      'à¤¯à¥‹ Soulful Bhaktià¤²à¤¾à¤ˆ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¸à¥à¤¥à¤¾à¤¨à¤•à¤¾ à¤²à¤¾à¤—à¤¿ à¤¸à¤¹à¤¿ à¤¸à¤¾à¤®à¤—à¥à¤°à¥€ à¤¦à¥‡à¤–à¤¾à¤‰à¤¨à¥‡ à¤®à¤¦à¥à¤¦à¤¤ à¤—à¤°à¥à¤¨à¥‡à¤›à¥¤';
 
   @override
-  String get choose_your_language => 'तपाईंको भाषा छनौट गर्नुहोस्';
+  String get choose_your_language =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤­à¤¾à¤·à¤¾ à¤›à¤¨à¥Œà¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get help_project_grow => 'यस परियोजनामा वृद्धि गराउनुहोस्';
+  String get help_project_grow =>
+      'à¤¯à¤¸ à¤ªà¤°à¤¿à¤¯à¥‹à¤œà¤¨à¤¾à¤®à¤¾ à¤µà¥ƒà¤¦à¥à¤§à¤¿ à¤—à¤°à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti एक खुला स्रोतको परियोजना हो। तपाईं परियोजनामा योगदान गरेर, त्रुटिहरू सूचिकै, वा नयाँ सुविधाहरू सुझाव दिएर यस परियोजनामा वृद्धि गर्न सक्नुहुन्छ।';
+      'Soulful Bhakti à¤à¤• à¤–à¥à¤²à¤¾ à¤¸à¥à¤°à¥‹à¤¤à¤•à¥‹ à¤ªà¤°à¤¿à¤¯à¥‹à¤œà¤¨à¤¾ à¤¹à¥‹à¥¤ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤ªà¤°à¤¿à¤¯à¥‹à¤œà¤¨à¤¾à¤®à¤¾ à¤¯à¥‹à¤—à¤¦à¤¾à¤¨ à¤—à¤°à¥‡à¤°, à¤¤à¥à¤°à¥à¤Ÿà¤¿à¤¹à¤°à¥‚ à¤¸à¥‚à¤šà¤¿à¤•à¥ˆ, à¤µà¤¾ à¤¨à¤¯à¤¾à¤ à¤¸à¥à¤µà¤¿à¤§à¤¾à¤¹à¤°à¥‚ à¤¸à¥à¤à¤¾à¤µ à¤¦à¤¿à¤à¤° à¤¯à¤¸ à¤ªà¤°à¤¿à¤¯à¥‹à¤œà¤¨à¤¾à¤®à¤¾ à¤µà¥ƒà¤¦à¥à¤§à¤¿ à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›à¥¤';
 
   @override
-  String get contribute_on_github => 'GitHubमा योगदान गर्नुहोस्';
+  String get contribute_on_github =>
+      'GitHubà¤®à¤¾ à¤¯à¥‹à¤—à¤¦à¤¾à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get donate_on_open_collective => 'खुला संगठनमा दान गर्नुहोस्';
+  String get donate_on_open_collective =>
+      'à¤–à¥à¤²à¤¾ à¤¸à¤‚à¤—à¤ à¤¨à¤®à¤¾ à¤¦à¤¾à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get browse_anonymously => 'अनामित रूपमा ब्राउज़ गर्नुहोस्';
+  String get browse_anonymously =>
+      'à¤…à¤¨à¤¾à¤®à¤¿à¤¤ à¤°à¥‚à¤ªà¤®à¤¾ à¤¬à¥à¤°à¤¾à¤‰à¤œà¤¼ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get enable_connect => 'कनेक्ट सक्रिय गर्नुहोस्';
+  String get enable_connect =>
+      'à¤•à¤¨à¥‡à¤•à¥à¤Ÿ à¤¸à¤•à¥à¤°à¤¿à¤¯ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get enable_connect_description =>
-      'अन्य उपकरणहरूबाट Soulful Bhakti कन्ट्रोल गर्नुहोस्';
+      'à¤…à¤¨à¥à¤¯ à¤‰à¤ªà¤•à¤°à¤£à¤¹à¤°à¥‚à¤¬à¤¾à¤Ÿ Soulful Bhakti à¤•à¤¨à¥à¤Ÿà¥à¤°à¥‹à¤² à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get devices => 'उपकरणहरू';
+  String get devices => 'à¤‰à¤ªà¤•à¤°à¤£à¤¹à¤°à¥‚';
 
   @override
-  String get select => 'चयन गर्नुहोस्';
+  String get select => 'à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String connect_client_alert(Object client) {
-    return 'तपाईंलाई $client द्वारा नियन्त्रित गरिएको छ';
+    return 'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¤¾à¤ˆ $client à¤¦à¥à¤µà¤¾à¤°à¤¾ à¤¨à¤¿à¤¯à¤¨à¥à¤¤à¥à¤°à¤¿à¤¤ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
-  String get this_device => 'यो उपकरण';
+  String get this_device => 'à¤¯à¥‹ à¤‰à¤ªà¤•à¤°à¤£';
 
   @override
-  String get remote => 'दूरसंचार';
+  String get remote => 'à¤¦à¥‚à¤°à¤¸à¤‚à¤šà¤¾à¤°';
 
   @override
-  String get stats => 'तथ्याङ्क';
+  String get stats => 'à¤¤à¤¥à¥à¤¯à¤¾à¤™à¥à¤•';
 
   @override
   String and_n_more(Object count) {
-    return 'राम्रो $count थप';
+    return 'à¤°à¤¾à¤®à¥à¤°à¥‹ $count à¤¥à¤ª';
   }
 
   @override
-  String get recently_played => 'हालै खेलेको';
+  String get recently_played => 'à¤¹à¤¾à¤²à¥ˆ à¤–à¥‡à¤²à¥‡à¤•à¥‹';
 
   @override
-  String get browse_more => 'थप हेर्नुहोस्';
+  String get browse_more => 'à¤¥à¤ª à¤¹à¥‡à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get no_title => 'शीर्षक छैन';
+  String get no_title => 'à¤¶à¥€à¤°à¥à¤·à¤• à¤›à¥ˆà¤¨';
 
   @override
-  String get not_playing => 'खेलिरहेको छैन';
+  String get not_playing => 'à¤–à¥‡à¤²à¤¿à¤°à¤¹à¥‡à¤•à¥‹ à¤›à¥ˆà¤¨';
 
   @override
-  String get epic_failure => 'महाकवि असफलता!';
+  String get epic_failure => 'à¤®à¤¹à¤¾à¤•à¤µà¤¿ à¤…à¤¸à¤«à¤²à¤¤à¤¾!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '$tracks_length ट्र्याकहरू तालिकामा थपिएका छन्';
+    return '$tracks_length à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚ à¤¤à¤¾à¤²à¤¿à¤•à¤¾à¤®à¤¾ à¤¥à¤ªà¤¿à¤à¤•à¤¾ à¤›à¤¨à¥';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti मा अपडेट छ';
+  String get spotube_has_an_update =>
+      'Soulful Bhakti à¤®à¤¾ à¤…à¤ªà¤¡à¥‡à¤Ÿ à¤›';
 
   @override
-  String get download_now => 'अहिले डाउनलोड गर्नुहोस्';
+  String get download_now =>
+      'à¤…à¤¹à¤¿à¤²à¥‡ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum रिलिज गरिएको छ';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum à¤°à¤¿à¤²à¤¿à¤œ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version रिलिज गरिएको छ';
+    return 'Soulful Bhakti v$version à¤°à¤¿à¤²à¤¿à¤œ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›';
   }
 
   @override
-  String get read_the_latest => 'अर्को ';
+  String get read_the_latest => 'à¤…à¤°à¥à¤•à¥‹ ';
 
   @override
-  String get release_notes => 'रिलिज नोटहरू';
+  String get release_notes => 'à¤°à¤¿à¤²à¤¿à¤œ à¤¨à¥‹à¤Ÿà¤¹à¤°à¥‚';
 
   @override
-  String get pick_color_scheme => 'रंग योजना चयन गर्नुहोस्';
+  String get pick_color_scheme =>
+      'à¤°à¤‚à¤— à¤¯à¥‹à¤œà¤¨à¤¾ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get save => 'सुरक्षित गर्नुहोस्';
+  String get save => 'à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get choose_the_device => 'उपकरण चयन गर्नुहोस्:';
+  String get choose_the_device =>
+      'à¤‰à¤ªà¤•à¤°à¤£ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥:';
 
   @override
   String get multiple_device_connected =>
-      'धेरै उपकरण जडान गरिएको छ।\nयो क्रियाकलाप गर्ने उपकरण चयन गर्नुहोस्';
+      'à¤§à¥‡à¤°à¥ˆ à¤‰à¤ªà¤•à¤°à¤£ à¤œà¤¡à¤¾à¤¨ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›à¥¤\nà¤¯à¥‹ à¤•à¥à¤°à¤¿à¤¯à¤¾à¤•à¤²à¤¾à¤ª à¤—à¤°à¥à¤¨à¥‡ à¤‰à¤ªà¤•à¤°à¤£ à¤šà¤¯à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get nothing_found => 'केही फेला परेन';
+  String get nothing_found => 'à¤•à¥‡à¤¹à¥€ à¤«à¥‡à¤²à¤¾ à¤ªà¤°à¥‡à¤¨';
 
   @override
-  String get the_box_is_empty => 'बक्स खाली छ';
+  String get the_box_is_empty => 'à¤¬à¤•à¥à¤¸ à¤–à¤¾à¤²à¥€ à¤›';
 
   @override
-  String get top_artists => 'शीर्ष कलाकारहरू';
+  String get top_artists => 'à¤¶à¥€à¤°à¥à¤· à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚';
 
   @override
-  String get top_albums => 'शीर्ष एल्बमहरू';
+  String get top_albums => 'à¤¶à¥€à¤°à¥à¤· à¤à¤²à¥à¤¬à¤®à¤¹à¤°à¥‚';
 
   @override
-  String get this_week => 'यो हप्ता';
+  String get this_week => 'à¤¯à¥‹ à¤¹à¤ªà¥à¤¤à¤¾';
 
   @override
-  String get this_month => 'यो महिना';
+  String get this_month => 'à¤¯à¥‹ à¤®à¤¹à¤¿à¤¨à¤¾';
 
   @override
-  String get last_6_months => 'पछिल्लो ६ महिना';
+  String get last_6_months => 'à¤ªà¤›à¤¿à¤²à¥à¤²à¥‹ à¥¬ à¤®à¤¹à¤¿à¤¨à¤¾';
 
   @override
-  String get this_year => 'यो वर्ष';
+  String get this_year => 'à¤¯à¥‹ à¤µà¤°à¥à¤·';
 
   @override
-  String get last_2_years => 'पछिल्लो २ वर्ष';
+  String get last_2_years => 'à¤ªà¤›à¤¿à¤²à¥à¤²à¥‹ à¥¨ à¤µà¤°à¥à¤·';
 
   @override
-  String get all_time => 'सबै समय';
+  String get all_time => 'à¤¸à¤¬à¥ˆ à¤¸à¤®à¤¯';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '$providerName द्वारा शक्ति प्राप्त';
+    return '$providerName à¤¦à¥à¤µà¤¾à¤°à¤¾ à¤¶à¤•à¥à¤¤à¤¿ à¤ªà¥à¤°à¤¾à¤ªà¥à¤¤';
   }
 
   @override
-  String get email => 'ईमेल';
+  String get email => 'à¤ˆà¤®à¥‡à¤²';
 
   @override
-  String get send_code => 'कोड पठाउनुहोस्';
+  String get send_code => 'à¤•à¥‹à¤¡ à¤ªà¤ à¤¾à¤‰à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get change_identifier => 'अर्को इमेल प्रयोग गर्नुहोस्';
+  String get change_identifier =>
+      'à¤…à¤°à¥à¤•à¥‹ à¤‡à¤®à¥‡à¤² à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get sign_in_with_otp => 'एकपटक प्रयोग हुने कोडले साइन इन गर्नुहोस्';
+  String get sign_in_with_otp =>
+      'à¤à¤•à¤ªà¤Ÿà¤• à¤ªà¥à¤°à¤¯à¥‹à¤— à¤¹à¥à¤¨à¥‡ à¤•à¥‹à¤¡à¤²à¥‡ à¤¸à¤¾à¤‡à¤¨ à¤‡à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get enter_otp_sent => 'हामीले पठाएको कोड प्रविष्ट गर्नुहोस्';
+  String get enter_otp_sent =>
+      'à¤¹à¤¾à¤®à¥€à¤²à¥‡ à¤ªà¤ à¤¾à¤à¤•à¥‹ à¤•à¥‹à¤¡ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get verify_email_reminder =>
-      'तपाईंको खाता सुरक्षित गर्न कृपया आफ्नो इमेल ठेगाना प्रमाणित गर्नुहोस्';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤–à¤¾à¤¤à¤¾ à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤—à¤°à¥à¤¨ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤†à¤«à¥à¤¨à¥‹ à¤‡à¤®à¥‡à¤² à¤ à¥‡à¤—à¤¾à¤¨à¤¾ à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get verify_now => 'अहिले प्रमाणित गर्नुहोस्';
+  String get verify_now =>
+      'à¤…à¤¹à¤¿à¤²à¥‡ à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get enter_email_to_verify =>
-      'प्रमाणिकरण कोड प्राप्त गर्न आफ्नो इमेल ठेगाना प्रविष्ट गर्नुहोस्';
+      'à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤•à¤°à¤£ à¤•à¥‹à¤¡ à¤ªà¥à¤°à¤¾à¤ªà¥à¤¤ à¤—à¤°à¥à¤¨ à¤†à¤«à¥à¤¨à¥‹ à¤‡à¤®à¥‡à¤² à¤ à¥‡à¤—à¤¾à¤¨à¤¾ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get profile_followers => 'अनुयायीहरू';
+  String get profile_followers => 'à¤…à¤¨à¥à¤¯à¤¾à¤¯à¥€à¤¹à¤°à¥‚';
 
   @override
-  String get birthday => 'जन्मदिन';
+  String get birthday => 'à¤œà¤¨à¥à¤®à¤¦à¤¿à¤¨';
 
   @override
-  String get subscription => 'सदस्यता';
+  String get subscription => 'à¤¸à¤¦à¤¸à¥à¤¯à¤¤à¤¾';
 
   @override
-  String get not_born => 'जन्मिएको छैन';
+  String get not_born => 'à¤œà¤¨à¥à¤®à¤¿à¤à¤•à¥‹ à¤›à¥ˆà¤¨';
 
   @override
-  String get hacker => 'ह्याकर';
+  String get hacker => 'à¤¹à¥à¤¯à¤¾à¤•à¤°';
 
   @override
-  String get profile => 'प्रोफाइल';
+  String get profile => 'à¤ªà¥à¤°à¥‹à¤«à¤¾à¤‡à¤²';
 
   @override
-  String get no_name => 'नाम छैन';
+  String get no_name => 'à¤¨à¤¾à¤® à¤›à¥ˆà¤¨';
 
   @override
-  String get edit => 'सम्पादन गर्नुहोस्';
+  String get edit => 'à¤¸à¤®à¥à¤ªà¤¾à¤¦à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get user_profile => 'प्रयोगकर्ता प्रोफाइल';
+  String get user_profile =>
+      'à¤ªà¥à¤°à¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾ à¤ªà¥à¤°à¥‹à¤«à¤¾à¤‡à¤²';
 
   @override
   String count_plays(Object count) {
-    return '$count खेलाइन्छ';
+    return '$count à¤–à¥‡à¤²à¤¾à¤‡à¤¨à¥à¤›';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*यो Spotify को प्रति स्ट्रिमको आधारमा गणना गरिएको छ\n\$0.003 देखि \$0.005 बीचको भुक्तानी। यो एक काल्पनिक गणना हो\nउपयोगकर्तालाई यो थाहा दिनको लागि कि उनीहरूले अर्टिस्टहरूलाई\nSpotify मा गीत सुनेको भए कति भुक्तानी गर्ने थिए।';
+      '*à¤¯à¥‹ Spotify à¤•à¥‹ à¤ªà¥à¤°à¤¤à¤¿ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤•à¥‹ à¤†à¤§à¤¾à¤°à¤®à¤¾ à¤—à¤£à¤¨à¤¾ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›\n\$0.003 à¤¦à¥‡à¤–à¤¿ \$0.005 à¤¬à¥€à¤šà¤•à¥‹ à¤­à¥à¤•à¥à¤¤à¤¾à¤¨à¥€à¥¤ à¤¯à¥‹ à¤à¤• à¤•à¤¾à¤²à¥à¤ªà¤¨à¤¿à¤• à¤—à¤£à¤¨à¤¾ à¤¹à¥‹\nà¤‰à¤ªà¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾à¤²à¤¾à¤ˆ à¤¯à¥‹ à¤¥à¤¾à¤¹à¤¾ à¤¦à¤¿à¤¨à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤•à¤¿ à¤‰à¤¨à¥€à¤¹à¤°à¥‚à¤²à¥‡ à¤…à¤°à¥à¤Ÿà¤¿à¤¸à¥à¤Ÿà¤¹à¤°à¥‚à¤²à¤¾à¤ˆ\nSpotify à¤®à¤¾ à¤—à¥€à¤¤ à¤¸à¥à¤¨à¥‡à¤•à¥‹ à¤­à¤ à¤•à¤¤à¤¿ à¤­à¥à¤•à¥à¤¤à¤¾à¤¨à¥€ à¤—à¤°à¥à¤¨à¥‡ à¤¥à¤¿à¤à¥¤';
 
   @override
-  String get minutes_listened => 'सुनिएका मिनेटहरू';
+  String get minutes_listened =>
+      'à¤¸à¥à¤¨à¤¿à¤à¤•à¤¾ à¤®à¤¿à¤¨à¥‡à¤Ÿà¤¹à¤°à¥‚';
 
   @override
-  String get streamed_songs => 'स्ट्रीम गरिएका गीतहरू';
+  String get streamed_songs =>
+      'à¤¸à¥à¤Ÿà¥à¤°à¥€à¤® à¤—à¤°à¤¿à¤à¤•à¤¾ à¤—à¥€à¤¤à¤¹à¤°à¥‚';
 
   @override
   String count_streams(Object count) {
-    return '$count स्ट्रिम';
+    return '$count à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®';
   }
 
   @override
-  String get owned_by_you => 'तपाईंले स्वामित्व गरेको';
+  String get owned_by_you =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤¸à¥à¤µà¤¾à¤®à¤¿à¤¤à¥à¤µ à¤—à¤°à¥‡à¤•à¥‹';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl क्लिपबोर्डमा कपी गरियो';
+    return '$shareUrl à¤•à¥à¤²à¤¿à¤ªà¤¬à¥‹à¤°à¥à¤¡à¤®à¤¾ à¤•à¤ªà¥€ à¤—à¤°à¤¿à¤¯à¥‹';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*यो अनलाइन संगीत स्ट्रिमिङ प्लेटफर्मको प्रति स्ट्रिम भुक्तानी \$0.003 देखि \$0.005 को औसतमा आधारित छ। यो एक काल्पनिक गणना हो जुन प्रयोगकर्तालाई उनीहरूले विभिन्न संगीत स्ट्रिमिङ प्लेटफर्ममा आफ्ना गीतहरू सुनेमा कलाकारहरूलाई कति भुक्तानी गर्ने थिए भन्ने बारेमा अन्तरदृष्टि दिनको लागि हो।';
+      '*à¤¯à¥‹ à¤…à¤¨à¤²à¤¾à¤‡à¤¨ à¤¸à¤‚à¤—à¥€à¤¤ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤¿à¤™ à¤ªà¥à¤²à¥‡à¤Ÿà¤«à¤°à¥à¤®à¤•à¥‹ à¤ªà¥à¤°à¤¤à¤¿ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤® à¤­à¥à¤•à¥à¤¤à¤¾à¤¨à¥€ \$0.003 à¤¦à¥‡à¤–à¤¿ \$0.005 à¤•à¥‹ à¤”à¤¸à¤¤à¤®à¤¾ à¤†à¤§à¤¾à¤°à¤¿à¤¤ à¤›à¥¤ à¤¯à¥‹ à¤à¤• à¤•à¤¾à¤²à¥à¤ªà¤¨à¤¿à¤• à¤—à¤£à¤¨à¤¾ à¤¹à¥‹ à¤œà¥à¤¨ à¤ªà¥à¤°à¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾à¤²à¤¾à¤ˆ à¤‰à¤¨à¥€à¤¹à¤°à¥‚à¤²à¥‡ à¤µà¤¿à¤­à¤¿à¤¨à¥à¤¨ à¤¸à¤‚à¤—à¥€à¤¤ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤¿à¤™ à¤ªà¥à¤²à¥‡à¤Ÿà¤«à¤°à¥à¤®à¤®à¤¾ à¤†à¤«à¥à¤¨à¤¾ à¤—à¥€à¤¤à¤¹à¤°à¥‚ à¤¸à¥à¤¨à¥‡à¤®à¤¾ à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤•à¤¤à¤¿ à¤­à¥à¤•à¥à¤¤à¤¾à¤¨à¥€ à¤—à¤°à¥à¤¨à¥‡ à¤¥à¤¿à¤ à¤­à¤¨à¥à¤¨à¥‡ à¤¬à¤¾à¤°à¥‡à¤®à¤¾ à¤…à¤¨à¥à¤¤à¤°à¤¦à¥ƒà¤·à¥à¤Ÿà¤¿ à¤¦à¤¿à¤¨à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤¹à¥‹à¥¤';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes मिनेट';
+    return '$minutes à¤®à¤¿à¤¨à¥‡à¤Ÿ';
   }
 
   @override
-  String get summary_minutes => 'मिनेट';
+  String get summary_minutes => 'à¤®à¤¿à¤¨à¥‡à¤Ÿ';
 
   @override
-  String get summary_listened_to_music => 'सङ्गीत सुन्नु';
+  String get summary_listened_to_music =>
+      'à¤¸à¤™à¥à¤—à¥€à¤¤ à¤¸à¥à¤¨à¥à¤¨à¥';
 
   @override
-  String get summary_songs => 'गीतहरू';
+  String get summary_songs => 'à¤—à¥€à¤¤à¤¹à¤°à¥‚';
 
   @override
-  String get summary_streamed_overall => 'सामान्य रूपले स्ट्रीम गरिएको';
+  String get summary_streamed_overall =>
+      'à¤¸à¤¾à¤®à¤¾à¤¨à¥à¤¯ à¤°à¥‚à¤ªà¤²à¥‡ à¤¸à¥à¤Ÿà¥à¤°à¥€à¤® à¤—à¤°à¤¿à¤à¤•à¥‹';
 
   @override
-  String get summary_owed_to_artists => 'यस महिना कलाकारहरूलाई देन';
+  String get summary_owed_to_artists =>
+      'à¤¯à¤¸ à¤®à¤¹à¤¿à¤¨à¤¾ à¤•à¤²à¤¾à¤•à¤¾à¤°à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤¦à¥‡à¤¨';
 
   @override
-  String get summary_top_artist => 'शीर्ष कलाकार\nयस अवधिमा';
+  String get summary_top_artist =>
+      'à¤¶à¥€à¤°à¥à¤· à¤•à¤²à¤¾à¤•à¤¾à¤°\nà¤¯à¤¸ à¤…à¤µà¤§à¤¿à¤®à¤¾';
 
   @override
-  String get summary_artists => 'कलाकारको';
+  String get summary_artists => 'à¤•à¤²à¤¾à¤•à¤¾à¤°à¤•à¥‹';
 
   @override
-  String get summary_music_reached_you => 'सङ्गीत तपाईंलाई पुग्यो';
+  String get summary_music_reached_you =>
+      'à¤¸à¤™à¥à¤—à¥€à¤¤ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¤¾à¤ˆ à¤ªà¥à¤—à¥à¤¯à¥‹';
 
   @override
-  String get summary_full_albums => 'पूर्ण एल्बमहरू';
+  String get summary_full_albums => 'à¤ªà¥‚à¤°à¥à¤£ à¤à¤²à¥à¤¬à¤®à¤¹à¤°à¥‚';
 
   @override
-  String get summary_got_your_love => 'तपाईंको माया प्राप्त गरियो';
+  String get summary_got_your_love =>
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤®à¤¾à¤¯à¤¾ à¤ªà¥à¤°à¤¾à¤ªà¥à¤¤ à¤—à¤°à¤¿à¤¯à¥‹';
 
   @override
-  String get summary_playlists => 'प्लेइस्ट';
+  String get summary_playlists => 'à¤ªà¥à¤²à¥‡à¤‡à¤¸à¥à¤Ÿ';
 
   @override
-  String get summary_were_on_repeat => 'पुनरावृत्ति गरियो';
+  String get summary_were_on_repeat =>
+      'à¤ªà¥à¤¨à¤°à¤¾à¤µà¥ƒà¤¤à¥à¤¤à¤¿ à¤—à¤°à¤¿à¤¯à¥‹';
 
   @override
-  String get summary_listening_share => 'सुन्ने हिस्सा';
+  String get summary_listening_share => 'à¤¸à¥à¤¨à¥à¤¨à¥‡ à¤¹à¤¿à¤¸à¥à¤¸à¤¾';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'तपाईंले सबैभन्दा धेरै बजाएका शीर्ष $tracks_length ट्र्याकहरूको वितरण';
+    return 'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤¸à¤¬à¥ˆà¤­à¤¨à¥à¤¦à¤¾ à¤§à¥‡à¤°à¥ˆ à¤¬à¤œà¤¾à¤à¤•à¤¾ à¤¶à¥€à¤°à¥à¤· $tracks_length à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•à¤¹à¤°à¥‚à¤•à¥‹ à¤µà¤¿à¤¤à¤°à¤£';
   }
 
   @override
-  String get summary_plays => 'प्ले';
+  String get summary_plays => 'à¤ªà¥à¤²à¥‡';
 
   @override
   String get insights => 'Insights';
@@ -1332,320 +1447,350 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'कुल $money';
+    return 'à¤•à¥à¤² $money';
   }
 
   @override
-  String get webview_not_found => 'वेबभ्यू फेला परेन';
+  String get webview_not_found =>
+      'à¤µà¥‡à¤¬à¤­à¥à¤¯à¥‚ à¤«à¥‡à¤²à¤¾ à¤ªà¤°à¥‡à¤¨';
 
   @override
   String get webview_not_found_description =>
-      'तपाईंको उपकरणमा कुनै वेबभ्यू रनटाइम स्थापना गरिएको छैन।\nयदि स्थापना गरिएको छ भने, environment PATH मा छ कि छैन भनेर सुनिश्चित गर्नुहोस्\n\nस्थापना पछि, अनुप्रयोग पुनः सुरु गर्नुहोस्';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤‰à¤ªà¤•à¤°à¤£à¤®à¤¾ à¤•à¥à¤¨à¥ˆ à¤µà¥‡à¤¬à¤­à¥à¤¯à¥‚ à¤°à¤¨à¤Ÿà¤¾à¤‡à¤® à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤›à¥ˆà¤¨à¥¤\nà¤¯à¤¦à¤¿ à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¤¿à¤à¤•à¥‹ à¤› à¤­à¤¨à¥‡, environment PATH à¤®à¤¾ à¤› à¤•à¤¿ à¤›à¥ˆà¤¨ à¤­à¤¨à¥‡à¤° à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥\n\nà¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤ªà¤›à¤¿, à¤…à¤¨à¥à¤ªà¥à¤°à¤¯à¥‹à¤— à¤ªà¥à¤¨à¤ƒ à¤¸à¥à¤°à¥ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get unsupported_platform => 'असमर्थित प्लेटफार्म';
+  String get unsupported_platform =>
+      'à¤…à¤¸à¤®à¤°à¥à¤¥à¤¿à¤¤ à¤ªà¥à¤²à¥‡à¤Ÿà¤«à¤¾à¤°à¥à¤®';
 
   @override
-  String get cache_music => 'सङ्गीत क्यास गर्नुहोस्';
+  String get cache_music =>
+      'à¤¸à¤™à¥à¤—à¥€à¤¤ à¤•à¥à¤¯à¤¾à¤¸ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get open => 'खोल्नुहोस्';
+  String get open => 'à¤–à¥‹à¤²à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get cache_folder => 'क्यास फोल्डर';
+  String get cache_folder => 'à¤•à¥à¤¯à¤¾à¤¸ à¤«à¥‹à¤²à¥à¤¡à¤°';
 
   @override
-  String get export => 'निर्यात गर्नुहोस्';
+  String get export => 'à¤¨à¤¿à¤°à¥à¤¯à¤¾à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get clear_cache => 'क्यास खाली गर्नुहोस्';
+  String get clear_cache =>
+      'à¤•à¥à¤¯à¤¾à¤¸ à¤–à¤¾à¤²à¥€ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get clear_cache_confirmation => 'के तपाई क्यास खाली गर्न चाहनुहुन्छ?';
+  String get clear_cache_confirmation =>
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆ à¤•à¥à¤¯à¤¾à¤¸ à¤–à¤¾à¤²à¥€ à¤—à¤°à¥à¤¨ à¤šà¤¾à¤¹à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
-  String get export_cache_files => 'क्यास फाइलहरू निर्यात गर्नुहोस्';
+  String get export_cache_files =>
+      'à¤•à¥à¤¯à¤¾à¤¸ à¤«à¤¾à¤‡à¤²à¤¹à¤°à¥‚ à¤¨à¤¿à¤°à¥à¤¯à¤¾à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String found_n_files(Object count) {
-    return '$count फाइलहरू फेला परे';
+    return '$count à¤«à¤¾à¤‡à¤²à¤¹à¤°à¥‚ à¤«à¥‡à¤²à¤¾ à¤ªà¤°à¥‡';
   }
 
   @override
-  String get export_cache_confirmation => 'यी फाइलहरू निर्यात गर्न चाहनुहुन्छ';
+  String get export_cache_confirmation =>
+      'à¤¯à¥€ à¤«à¤¾à¤‡à¤²à¤¹à¤°à¥‚ à¤¨à¤¿à¤°à¥à¤¯à¤¾à¤¤ à¤—à¤°à¥à¤¨ à¤šà¤¾à¤¹à¤¨à¥à¤¹à¥à¤¨à¥à¤›';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$filesExported मध्ये $files फाइलहरू निर्यात गरियो';
+    return '$filesExported à¤®à¤§à¥à¤¯à¥‡ $files à¤«à¤¾à¤‡à¤²à¤¹à¤°à¥‚ à¤¨à¤¿à¤°à¥à¤¯à¤¾à¤¤ à¤—à¤°à¤¿à¤¯à¥‹';
   }
 
   @override
-  String get undo => 'पूर्ववत';
+  String get undo => 'à¤ªà¥‚à¤°à¥à¤µà¤µà¤¤';
 
   @override
-  String get add_all_to_playlist => 'सभी को प्लेलिस्ट में जोड़ें';
+  String get add_all_to_playlist =>
+      'à¤¸à¤­à¥€ à¤•à¥‹ à¤ªà¥à¤²à¥‡à¤²à¤¿à¤¸à¥à¤Ÿ à¤®à¥‡à¤‚ à¤œà¥‹à¤¡à¤¼à¥‡à¤‚';
 
   @override
-  String get add_all_to_queue => 'सभी को कतार में जोड़ें';
+  String get add_all_to_queue =>
+      'à¤¸à¤­à¥€ à¤•à¥‹ à¤•à¤¤à¤¾à¤° à¤®à¥‡à¤‚ à¤œà¥‹à¤¡à¤¼à¥‡à¤‚';
 
   @override
-  String get play_all_next => 'सभी को अगला प्ले करें';
+  String get play_all_next =>
+      'à¤¸à¤­à¥€ à¤•à¥‹ à¤…à¤—à¤²à¤¾ à¤ªà¥à¤²à¥‡ à¤•à¤°à¥‡à¤‚';
 
   @override
-  String get pause => 'विराम';
+  String get pause => 'à¤µà¤¿à¤°à¤¾à¤®';
 
   @override
-  String get view_all => 'सभी देखें';
+  String get view_all => 'à¤¸à¤­à¥€ à¤¦à¥‡à¤–à¥‡à¤‚';
 
   @override
   String get no_tracks_added_yet =>
-      'लगता है आपने अभी तक कोई ट्रैक नहीं जोड़ा है';
+      'à¤²à¤—à¤¤à¤¾ à¤¹à¥ˆ à¤†à¤ªà¤¨à¥‡ à¤…à¤­à¥€ à¤¤à¤• à¤•à¥‹à¤ˆ à¤Ÿà¥à¤°à¥ˆà¤• à¤¨à¤¹à¥€à¤‚ à¤œà¥‹à¤¡à¤¼à¤¾ à¤¹à¥ˆ';
 
   @override
-  String get no_tracks => 'यहाँ कोई ट्रैक नहीं दिख रहे हैं';
+  String get no_tracks =>
+      'à¤¯à¤¹à¤¾à¤ à¤•à¥‹à¤ˆ à¤Ÿà¥à¤°à¥ˆà¤• à¤¨à¤¹à¥€à¤‚ à¤¦à¤¿à¤– à¤°à¤¹à¥‡ à¤¹à¥ˆà¤‚';
 
   @override
   String get no_tracks_listened_yet =>
-      'आपने अभी तक कुछ नहीं सुना है ऐसा लगता है';
+      'à¤†à¤ªà¤¨à¥‡ à¤…à¤­à¥€ à¤¤à¤• à¤•à¥à¤› à¤¨à¤¹à¥€à¤‚ à¤¸à¥à¤¨à¤¾ à¤¹à¥ˆ à¤à¤¸à¤¾ à¤²à¤—à¤¤à¤¾ à¤¹à¥ˆ';
 
   @override
-  String get not_following_artists => 'आप किसी कलाकार को फॉलो नहीं कर रहे हैं';
+  String get not_following_artists =>
+      'à¤†à¤ª à¤•à¤¿à¤¸à¥€ à¤•à¤²à¤¾à¤•à¤¾à¤° à¤•à¥‹ à¤«à¥‰à¤²à¥‹ à¤¨à¤¹à¥€à¤‚ à¤•à¤° à¤°à¤¹à¥‡ à¤¹à¥ˆà¤‚';
 
   @override
   String get no_favorite_albums_yet =>
-      'लगता है आपने अभी तक कोई एल्बम पसंदीदा में नहीं जोड़ा है';
+      'à¤²à¤—à¤¤à¤¾ à¤¹à¥ˆ à¤†à¤ªà¤¨à¥‡ à¤…à¤­à¥€ à¤¤à¤• à¤•à¥‹à¤ˆ à¤à¤²à¥à¤¬à¤® à¤ªà¤¸à¤‚à¤¦à¥€à¤¦à¤¾ à¤®à¥‡à¤‚ à¤¨à¤¹à¥€à¤‚ à¤œà¥‹à¤¡à¤¼à¤¾ à¤¹à¥ˆ';
 
   @override
-  String get no_logs_found => 'कोई लॉग नहीं मिला';
+  String get no_logs_found => 'à¤•à¥‹à¤ˆ à¤²à¥‰à¤— à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾';
 
   @override
-  String get youtube_engine => 'YouTube इंजन';
+  String get youtube_engine => 'YouTube à¤‡à¤‚à¤œà¤¨';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine इंस्टॉल नहीं है';
+    return '$engine à¤‡à¤‚à¤¸à¥à¤Ÿà¥‰à¤² à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆ';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine आपके सिस्टम में इंस्टॉल नहीं है।';
+    return '$engine à¤†à¤ªà¤•à¥‡ à¤¸à¤¿à¤¸à¥à¤Ÿà¤® à¤®à¥‡à¤‚ à¤‡à¤‚à¤¸à¥à¤Ÿà¥‰à¤² à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆà¥¤';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'सुनिश्चित करें कि यह PATH वेरिएबल में उपलब्ध है या\nनीचे $engine एक्जीक्यूटेबल का पूर्ण पथ सेट करें';
+    return 'à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤•à¤°à¥‡à¤‚ à¤•à¤¿ à¤¯à¤¹ PATH à¤µà¥‡à¤°à¤¿à¤à¤¬à¤² à¤®à¥‡à¤‚ à¤‰à¤ªà¤²à¤¬à¥à¤§ à¤¹à¥ˆ à¤¯à¤¾\nà¤¨à¥€à¤šà¥‡ $engine à¤à¤•à¥à¤œà¥€à¤•à¥à¤¯à¥‚à¤Ÿà¥‡à¤¬à¤² à¤•à¤¾ à¤ªà¥‚à¤°à¥à¤£ à¤ªà¤¥ à¤¸à¥‡à¤Ÿ à¤•à¤°à¥‡à¤‚';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/unix जैसे ऑपरेटिंग सिस्टम में, .zshrc/.bashrc/.bash_profile आदि में पथ सेट करना काम नहीं करेगा।\nआपको शेल कॉन्फ़िगरेशन फ़ाइल में पथ सेट करना होगा';
+      'macOS/Linux/unix à¤œà¥ˆà¤¸à¥‡ à¤‘à¤ªà¤°à¥‡à¤Ÿà¤¿à¤‚à¤— à¤¸à¤¿à¤¸à¥à¤Ÿà¤® à¤®à¥‡à¤‚, .zshrc/.bashrc/.bash_profile à¤†à¤¦à¤¿ à¤®à¥‡à¤‚ à¤ªà¤¥ à¤¸à¥‡à¤Ÿ à¤•à¤°à¤¨à¤¾ à¤•à¤¾à¤® à¤¨à¤¹à¥€à¤‚ à¤•à¤°à¥‡à¤—à¤¾à¥¤\nà¤†à¤ªà¤•à¥‹ à¤¶à¥‡à¤² à¤•à¥‰à¤¨à¥à¤«à¤¼à¤¿à¤—à¤°à¥‡à¤¶à¤¨ à¤«à¤¼à¤¾à¤‡à¤² à¤®à¥‡à¤‚ à¤ªà¤¥ à¤¸à¥‡à¤Ÿ à¤•à¤°à¤¨à¤¾ à¤¹à¥‹à¤—à¤¾';
 
   @override
-  String get download => 'डाउनलोड';
+  String get download => 'à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡';
 
   @override
-  String get file_not_found => 'फ़ाइल नहीं मिली';
+  String get file_not_found => 'à¤«à¤¼à¤¾à¤‡à¤² à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¥€';
 
   @override
-  String get custom => 'कस्टम';
+  String get custom => 'à¤•à¤¸à¥à¤Ÿà¤®';
 
   @override
-  String get add_custom_url => 'कस्टम URL जोड़ें';
+  String get add_custom_url => 'à¤•à¤¸à¥à¤Ÿà¤® URL à¤œà¥‹à¤¡à¤¼à¥‡à¤‚';
 
   @override
-  String get edit_port => 'पोर्ट सम्पादन गर्नुहोस्';
+  String get edit_port =>
+      'à¤ªà¥‹à¤°à¥à¤Ÿ à¤¸à¤®à¥à¤ªà¤¾à¤¦à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get port_helper_msg =>
-      'डिफ़ॉल्ट -1 हो जुन यादृच्छिक संख्या जनाउँछ। यदि तपाईंले फायरवाल कन्फिगर गर्नुभएको छ भने, यसलाई सेट गर्न सिफारिस गरिन्छ।';
+      'à¤¡à¤¿à¤«à¤¼à¥‰à¤²à¥à¤Ÿ -1 à¤¹à¥‹ à¤œà¥à¤¨ à¤¯à¤¾à¤¦à¥ƒà¤šà¥à¤›à¤¿à¤• à¤¸à¤‚à¤–à¥à¤¯à¤¾ à¤œà¤¨à¤¾à¤‰à¤à¤›à¥¤ à¤¯à¤¦à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤«à¤¾à¤¯à¤°à¤µà¤¾à¤² à¤•à¤¨à¥à¤«à¤¿à¤—à¤° à¤—à¤°à¥à¤¨à¥à¤­à¤à¤•à¥‹ à¤› à¤­à¤¨à¥‡, à¤¯à¤¸à¤²à¤¾à¤ˆ à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨ à¤¸à¤¿à¤«à¤¾à¤°à¤¿à¤¸ à¤—à¤°à¤¿à¤¨à¥à¤›à¥¤';
 
   @override
   String connect_request(Object client) {
-    return '$client लाई जडान गर्न अनुमति दिनुहोस्?';
+    return '$client à¤²à¤¾à¤ˆ à¤œà¤¡à¤¾à¤¨ à¤—à¤°à¥à¤¨ à¤…à¤¨à¥à¤®à¤¤à¤¿ à¤¦à¤¿à¤¨à¥à¤¹à¥‹à¤¸à¥?';
   }
 
   @override
   String get connection_request_denied =>
-      'जडान अस्वीकृत। प्रयोगकर्ताले पहुँच अस्वीकृत गर्यो।';
+      'à¤œà¤¡à¤¾à¤¨ à¤…à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤à¥¤ à¤ªà¥à¤°à¤¯à¥‹à¤—à¤•à¤°à¥à¤¤à¤¾à¤²à¥‡ à¤ªà¤¹à¥à¤à¤š à¤…à¤¸à¥à¤µà¥€à¤•à¥ƒà¤¤ à¤—à¤°à¥à¤¯à¥‹à¥¤';
 
   @override
-  String get an_error_occurred => 'त्रुटि भयो';
+  String get an_error_occurred => 'à¤¤à¥à¤°à¥à¤Ÿà¤¿ à¤­à¤¯à¥‹';
 
   @override
-  String get copy_to_clipboard => 'क्लिपबोर्डमा प्रतिलिपि गर्नुहोस्';
+  String get copy_to_clipboard =>
+      'à¤•à¥à¤²à¤¿à¤ªà¤¬à¥‹à¤°à¥à¤¡à¤®à¤¾ à¤ªà¥à¤°à¤¤à¤¿à¤²à¤¿à¤ªà¤¿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get view_logs => 'लगहरू हेर्नुहोस्';
+  String get view_logs => 'à¤²à¤—à¤¹à¤°à¥‚ à¤¹à¥‡à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get retry => 'पुनः प्रयास गर्नुहोस्';
+  String get retry =>
+      'à¤ªà¥à¤¨à¤ƒ à¤ªà¥à¤°à¤¯à¤¾à¤¸ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'तपाईंले कुनै पूर्वनिर्धारित मेटाडेटा प्रदायक सेट गर्नुभएको छैन';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤•à¥à¤¨à¥ˆ à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤®à¥‡à¤Ÿà¤¾à¤¡à¥‡à¤Ÿà¤¾ à¤ªà¥à¤°à¤¦à¤¾à¤¯à¤• à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤­à¤à¤•à¥‹ à¤›à¥ˆà¤¨';
 
   @override
   String get manage_metadata_providers =>
-      'मेटाडेटा प्रदायकहरू प्रबन्ध गर्नुहोस्';
+      'à¤®à¥‡à¤Ÿà¤¾à¤¡à¥‡à¤Ÿà¤¾ à¤ªà¥à¤°à¤¦à¤¾à¤¯à¤•à¤¹à¤°à¥‚ à¤ªà¥à¤°à¤¬à¤¨à¥à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get open_link_in_browser => 'ब्राउजरमा लिङ्क खोल्ने?';
+  String get open_link_in_browser =>
+      'à¤¬à¥à¤°à¤¾à¤‰à¤œà¤°à¤®à¤¾ à¤²à¤¿à¤™à¥à¤• à¤–à¥‹à¤²à¥à¤¨à¥‡?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'के तपाईं निम्न लिङ्क खोल्न चाहनुहुन्छ';
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¨à¤¿à¤®à¥à¤¨ à¤²à¤¿à¤™à¥à¤• à¤–à¥‹à¤²à¥à¤¨ à¤šà¤¾à¤¹à¤¨à¥à¤¹à¥à¤¨à¥à¤›';
 
   @override
   String get unsafe_url_warning =>
-      'अविश्वसनीय स्रोतहरूबाट लिङ्कहरू खोल्नु असुरक्षित हुन सक्छ। सावधान रहनुहोस्!\nतपाईं लिङ्कलाई आफ्नो क्लिपबोर्डमा पनि प्रतिलिपि गर्न सक्नुहुन्छ।';
+      'à¤…à¤µà¤¿à¤¶à¥à¤µà¤¸à¤¨à¥€à¤¯ à¤¸à¥à¤°à¥‹à¤¤à¤¹à¤°à¥‚à¤¬à¤¾à¤Ÿ à¤²à¤¿à¤™à¥à¤•à¤¹à¤°à¥‚ à¤–à¥‹à¤²à¥à¤¨à¥ à¤…à¤¸à¥à¤°à¤•à¥à¤·à¤¿à¤¤ à¤¹à¥à¤¨ à¤¸à¤•à¥à¤›à¥¤ à¤¸à¤¾à¤µà¤§à¤¾à¤¨ à¤°à¤¹à¤¨à¥à¤¹à¥‹à¤¸à¥!\nà¤¤à¤ªà¤¾à¤ˆà¤‚ à¤²à¤¿à¤™à¥à¤•à¤²à¤¾à¤ˆ à¤†à¤«à¥à¤¨à¥‹ à¤•à¥à¤²à¤¿à¤ªà¤¬à¥‹à¤°à¥à¤¡à¤®à¤¾ à¤ªà¤¨à¤¿ à¤ªà¥à¤°à¤¤à¤¿à¤²à¤¿à¤ªà¤¿ à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤›à¥¤';
 
   @override
-  String get copy_link => 'लिङ्क प्रतिलिपि गर्नुहोस्';
+  String get copy_link =>
+      'à¤²à¤¿à¤™à¥à¤• à¤ªà¥à¤°à¤¤à¤¿à¤²à¤¿à¤ªà¤¿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get building_your_timeline =>
-      'तपाईंको सुन्ने आधारमा तपाईंको समयरेखा निर्माण गर्दै...';
+      'à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¸à¥à¤¨à¥à¤¨à¥‡ à¤†à¤§à¤¾à¤°à¤®à¤¾ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¸à¤®à¤¯à¤°à¥‡à¤–à¤¾ à¤¨à¤¿à¤°à¥à¤®à¤¾à¤£ à¤—à¤°à¥à¤¦à¥ˆ...';
 
   @override
-  String get official => 'आधिकारिक';
+  String get official => 'à¤†à¤§à¤¿à¤•à¤¾à¤°à¤¿à¤•';
 
   @override
   String author_name(Object author) {
-    return 'लेखक: $author';
+    return 'à¤²à¥‡à¤–à¤•: $author';
   }
 
   @override
-  String get third_party => 'तेस्रो-पक्ष';
+  String get third_party => 'à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤·';
 
   @override
-  String get plugin_requires_authentication => 'प्लगइनलाई प्रमाणीकरण चाहिन्छ';
+  String get plugin_requires_authentication =>
+      'à¤ªà¥à¤²à¤—à¤‡à¤¨à¤²à¤¾à¤ˆ à¤ªà¥à¤°à¤®à¤¾à¤£à¥€à¤•à¤°à¤£ à¤šà¤¾à¤¹à¤¿à¤¨à¥à¤›';
 
   @override
-  String get update_available => 'अपडेट उपलब्ध छ';
+  String get update_available => 'à¤…à¤ªà¤¡à¥‡à¤Ÿ à¤‰à¤ªà¤²à¤¬à¥à¤§ à¤›';
 
   @override
-  String get supports_scrobbling => 'स्क्रब्बलिंगलाई समर्थन गर्दछ';
+  String get supports_scrobbling =>
+      'à¤¸à¥à¤•à¥à¤°à¤¬à¥à¤¬à¤²à¤¿à¤‚à¤—à¤²à¤¾à¤ˆ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤—à¤°à¥à¤¦à¤›';
 
   @override
   String get plugin_scrobbling_info =>
-      'यो प्लगइनले तपाईंको सुन्ने इतिहास उत्पन्न गर्न तपाईंको संगीतलाई स्क्रब्बल गर्दछ।';
+      'à¤¯à¥‹ à¤ªà¥à¤²à¤—à¤‡à¤¨à¤²à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¸à¥à¤¨à¥à¤¨à¥‡ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸ à¤‰à¤¤à¥à¤ªà¤¨à¥à¤¨ à¤—à¤°à¥à¤¨ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤•à¥‹ à¤¸à¤‚à¤—à¥€à¤¤à¤²à¤¾à¤ˆ à¤¸à¥à¤•à¥à¤°à¤¬à¥à¤¬à¤² à¤—à¤°à¥à¤¦à¤›à¥¤';
 
   @override
-  String get default_metadata_source => 'पूर्वनिर्धारित मेटाडाटा स्रोत';
+  String get default_metadata_source =>
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤®à¥‡à¤Ÿà¤¾à¤¡à¤¾à¤Ÿà¤¾ à¤¸à¥à¤°à¥‹à¤¤';
 
   @override
   String get set_default_metadata_source =>
-      'पूर्वनिर्धारित मेटाडाटा स्रोत सेट गर्नुहोस्';
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤®à¥‡à¤Ÿà¤¾à¤¡à¤¾à¤Ÿà¤¾ à¤¸à¥à¤°à¥‹à¤¤ à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get default_audio_source => 'पूर्वनिर्धारित अडियो स्रोत';
+  String get default_audio_source =>
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥‹à¤¤';
 
   @override
   String get set_default_audio_source =>
-      'पूर्वनिर्धारित अडियो स्रोत सेट गर्नुहोस्';
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥‹à¤¤ à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get set_default => 'पूर्वनिर्धारित सेट गर्नुहोस्';
+  String get set_default =>
+      'à¤ªà¥‚à¤°à¥à¤µà¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤¸à¥‡à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get support => 'समर्थन';
+  String get support => 'à¤¸à¤®à¤°à¥à¤¥à¤¨';
 
   @override
-  String get support_plugin_development => 'प्लगइन विकासलाई समर्थन गर्नुहोस्';
+  String get support_plugin_development =>
+      'à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤µà¤¿à¤•à¤¾à¤¸à¤²à¤¾à¤ˆ à¤¸à¤®à¤°à¥à¤¥à¤¨ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String can_access_name_api(Object name) {
-    return '- **$name** API मा पहुँच गर्न सक्छ';
+    return '- **$name** API à¤®à¤¾ à¤ªà¤¹à¥à¤à¤š à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤›';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'के तपाईं यो प्लगइन स्थापना गर्न चाहनुहुन्छ?';
+      'à¤•à¥‡ à¤¤à¤ªà¤¾à¤ˆà¤‚ à¤¯à¥‹ à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¥à¤¨ à¤šà¤¾à¤¹à¤¨à¥à¤¹à¥à¤¨à¥à¤›?';
 
   @override
   String get third_party_plugin_warning =>
-      'यो प्लगइन तेस्रो-पक्ष रिपोसिटरीबाट हो। कृपया स्थापना गर्नु अघि तपाईंले स्रोतमा विश्वास गर्नुहुन्छ भनी सुनिश्चित गर्नुहोस्।';
+      'à¤¯à¥‹ à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤· à¤°à¤¿à¤ªà¥‹à¤¸à¤¿à¤Ÿà¤°à¥€à¤¬à¤¾à¤Ÿ à¤¹à¥‹à¥¤ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥ à¤…à¤˜à¤¿ à¤¤à¤ªà¤¾à¤ˆà¤‚à¤²à¥‡ à¤¸à¥à¤°à¥‹à¤¤à¤®à¤¾ à¤µà¤¿à¤¶à¥à¤µà¤¾à¤¸ à¤—à¤°à¥à¤¨à¥à¤¹à¥à¤¨à¥à¤› à¤­à¤¨à¥€ à¤¸à¥à¤¨à¤¿à¤¶à¥à¤šà¤¿à¤¤ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤';
 
   @override
-  String get author => 'लेखक';
+  String get author => 'à¤²à¥‡à¤–à¤•';
 
   @override
-  String get this_plugin_can_do_following => 'यो प्लगइनले निम्न गर्न सक्छ';
+  String get this_plugin_can_do_following =>
+      'à¤¯à¥‹ à¤ªà¥à¤²à¤—à¤‡à¤¨à¤²à¥‡ à¤¨à¤¿à¤®à¥à¤¨ à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤›';
 
   @override
-  String get install => 'स्थापना गर्नुहोस्';
+  String get install => 'à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get install_a_metadata_provider =>
-      'मेटाडेटा प्रदायक स्थापना गर्नुहोस्';
+      'à¤®à¥‡à¤Ÿà¤¾à¤¡à¥‡à¤Ÿà¤¾ à¤ªà¥à¤°à¤¦à¤¾à¤¯à¤• à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get no_tracks_playing => 'हाल कुनै ट्र्याक बजिरहेको छैन';
+  String get no_tracks_playing =>
+      'à¤¹à¤¾à¤² à¤•à¥à¤¨à¥ˆ à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤• à¤¬à¤œà¤¿à¤°à¤¹à¥‡à¤•à¥‹ à¤›à¥ˆà¤¨';
 
   @override
   String get synced_lyrics_not_available =>
-      'यो गीतको लागि सिङ्क गरिएका बोलहरू उपलब्ध छैनन्। कृपया यसको सट्टा';
+      'à¤¯à¥‹ à¤—à¥€à¤¤à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤¸à¤¿à¤™à¥à¤• à¤—à¤°à¤¿à¤à¤•à¤¾ à¤¬à¥‹à¤²à¤¹à¤°à¥‚ à¤‰à¤ªà¤²à¤¬à¥à¤§ à¤›à¥ˆà¤¨à¤¨à¥à¥¤ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¯à¤¸à¤•à¥‹ à¤¸à¤Ÿà¥à¤Ÿà¤¾';
 
   @override
-  String get plain_lyrics => 'सादा बोलहरू';
+  String get plain_lyrics => 'à¤¸à¤¾à¤¦à¤¾ à¤¬à¥‹à¤²à¤¹à¤°à¥‚';
 
   @override
-  String get tab_instead => 'ट्याब प्रयोग गर्नुहोस्।';
+  String get tab_instead =>
+      'à¤Ÿà¥à¤¯à¤¾à¤¬ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤';
 
   @override
-  String get disclaimer => 'अस्वीकरण';
+  String get disclaimer => 'à¤…à¤¸à¥à¤µà¥€à¤•à¤°à¤£';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'स्पोट्यूब टोलीले कुनै पनि \"तेस्रो-पक्ष\" प्लगइनहरूको लागि कुनै जिम्मेवारी (कानुनी सहित) लिँदैन।\nकृपया तिनीहरूलाई आफ्नो जोखिममा प्रयोग गर्नुहोस्। कुनै पनि बग/समस्याहरूको लागि, कृपया तिनीहरूलाई प्लगइन रिपोसिटरीमा रिपोर्ट गर्नुहोस्।\n\nयदि कुनै \"तेस्रो-पक्ष\" प्लगइनले कुनै सेवा/कानुनी संस्थाको ToS/DMCA तोडिरहेको छ भने, कृपया \"तेस्रो-पक्ष\" प्लगइन लेखक वा होस्टिङ प्लेटफर्म e.g. GitHub/Codeberg लाई कारबाही गर्न अनुरोध गर्नुहोस्। माथि सूचीबद्ध (\"तेस्रो-पक्ष\" लेबल गरिएका) सबै सार्वजनिक/सामुदायिक रूपमा राखिएका प्लगइनहरू हुन्। हामी तिनीहरूलाई क्युरेट गरिरहेका छैनौं, त्यसैले हामी तिनीहरूमा कुनै कारबाही गर्न सक्दैनौं।\n\n';
+      'à¤¸à¥à¤ªà¥‹à¤Ÿà¥à¤¯à¥‚à¤¬ à¤Ÿà¥‹à¤²à¥€à¤²à¥‡ à¤•à¥à¤¨à¥ˆ à¤ªà¤¨à¤¿ \"à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤·\" à¤ªà¥à¤²à¤—à¤‡à¤¨à¤¹à¤°à¥‚à¤•à¥‹ à¤²à¤¾à¤—à¤¿ à¤•à¥à¤¨à¥ˆ à¤œà¤¿à¤®à¥à¤®à¥‡à¤µà¤¾à¤°à¥€ (à¤•à¤¾à¤¨à¥à¤¨à¥€ à¤¸à¤¹à¤¿à¤¤) à¤²à¤¿à¤à¤¦à¥ˆà¤¨à¥¤\nà¤•à¥ƒà¤ªà¤¯à¤¾ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤†à¤«à¥à¤¨à¥‹ à¤œà¥‹à¤–à¤¿à¤®à¤®à¤¾ à¤ªà¥à¤°à¤¯à¥‹à¤— à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤ à¤•à¥à¤¨à¥ˆ à¤ªà¤¨à¤¿ à¤¬à¤—/à¤¸à¤®à¤¸à¥à¤¯à¤¾à¤¹à¤°à¥‚à¤•à¥‹ à¤²à¤¾à¤—à¤¿, à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤°à¤¿à¤ªà¥‹à¤¸à¤¿à¤Ÿà¤°à¥€à¤®à¤¾ à¤°à¤¿à¤ªà¥‹à¤°à¥à¤Ÿ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤\n\nà¤¯à¤¦à¤¿ à¤•à¥à¤¨à¥ˆ \"à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤·\" à¤ªà¥à¤²à¤—à¤‡à¤¨à¤²à¥‡ à¤•à¥à¤¨à¥ˆ à¤¸à¥‡à¤µà¤¾/à¤•à¤¾à¤¨à¥à¤¨à¥€ à¤¸à¤‚à¤¸à¥à¤¥à¤¾à¤•à¥‹ ToS/DMCA à¤¤à¥‹à¤¡à¤¿à¤°à¤¹à¥‡à¤•à¥‹ à¤› à¤­à¤¨à¥‡, à¤•à¥ƒà¤ªà¤¯à¤¾ \"à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤·\" à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤²à¥‡à¤–à¤• à¤µà¤¾ à¤¹à¥‹à¤¸à¥à¤Ÿà¤¿à¤™ à¤ªà¥à¤²à¥‡à¤Ÿà¤«à¤°à¥à¤® e.g. GitHub/Codeberg à¤²à¤¾à¤ˆ à¤•à¤¾à¤°à¤¬à¤¾à¤¹à¥€ à¤—à¤°à¥à¤¨ à¤…à¤¨à¥à¤°à¥‹à¤§ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥à¥¤ à¤®à¤¾à¤¥à¤¿ à¤¸à¥‚à¤šà¥€à¤¬à¤¦à¥à¤§ (\"à¤¤à¥‡à¤¸à¥à¤°à¥‹-à¤ªà¤•à¥à¤·\" à¤²à¥‡à¤¬à¤² à¤—à¤°à¤¿à¤à¤•à¤¾) à¤¸à¤¬à¥ˆ à¤¸à¤¾à¤°à¥à¤µà¤œà¤¨à¤¿à¤•/à¤¸à¤¾à¤®à¥à¤¦à¤¾à¤¯à¤¿à¤• à¤°à¥‚à¤ªà¤®à¤¾ à¤°à¤¾à¤–à¤¿à¤à¤•à¤¾ à¤ªà¥à¤²à¤—à¤‡à¤¨à¤¹à¤°à¥‚ à¤¹à¥à¤¨à¥à¥¤ à¤¹à¤¾à¤®à¥€ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤²à¤¾à¤ˆ à¤•à¥à¤¯à¥à¤°à¥‡à¤Ÿ à¤—à¤°à¤¿à¤°à¤¹à¥‡à¤•à¤¾ à¤›à¥ˆà¤¨à¥Œà¤‚, à¤¤à¥à¤¯à¤¸à¥ˆà¤²à¥‡ à¤¹à¤¾à¤®à¥€ à¤¤à¤¿à¤¨à¥€à¤¹à¤°à¥‚à¤®à¤¾ à¤•à¥à¤¨à¥ˆ à¤•à¤¾à¤°à¤¬à¤¾à¤¹à¥€ à¤—à¤°à¥à¤¨ à¤¸à¤•à¥à¤¦à¥ˆà¤¨à¥Œà¤‚à¥¤\n\n';
 
   @override
-  String get input_does_not_match_format => 'इनपुट आवश्यक ढाँचासँग मेल खाँदैन';
+  String get input_does_not_match_format =>
+      'à¤‡à¤¨à¤ªà¥à¤Ÿ à¤†à¤µà¤¶à¥à¤¯à¤• à¤¢à¤¾à¤à¤šà¤¾à¤¸à¤à¤— à¤®à¥‡à¤² à¤–à¤¾à¤à¤¦à¥ˆà¤¨';
 
   @override
-  String get plugins => 'प्लगइनहरू';
+  String get plugins => 'à¤ªà¥à¤²à¤—à¤‡à¤¨à¤¹à¤°à¥‚';
 
   @override
   String get paste_plugin_download_url =>
-      'डाउनलोड url वा GitHub/Codeberg repo url वा .smplug फाइलमा सिधा लिङ्क टाँस्नुहोस्';
+      'à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ url à¤µà¤¾ GitHub/Codeberg repo url à¤µà¤¾ .smplug à¤«à¤¾à¤‡à¤²à¤®à¤¾ à¤¸à¤¿à¤§à¤¾ à¤²à¤¿à¤™à¥à¤• à¤Ÿà¤¾à¤à¤¸à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'url बाट प्लगइन डाउनलोड र स्थापना गर्नुहोस्';
+      'url à¤¬à¤¾à¤Ÿ à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤° à¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'प्लगइन थप्न असफल: $error';
+    return 'à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤¥à¤ªà¥à¤¨ à¤…à¤¸à¤«à¤²: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'फाइलबाट प्लगइन अपलोड गर्नुहोस्';
+  String get upload_plugin_from_file =>
+      'à¤«à¤¾à¤‡à¤²à¤¬à¤¾à¤Ÿ à¤ªà¥à¤²à¤—à¤‡à¤¨ à¤…à¤ªà¤²à¥‹à¤¡ à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get installed => 'स्थापित';
+  String get installed => 'à¤¸à¥à¤¥à¤¾à¤ªà¤¿à¤¤';
 
   @override
-  String get available_plugins => 'उपलब्ध प्लगइनहरू';
+  String get available_plugins =>
+      'à¤‰à¤ªà¤²à¤¬à¥à¤§ à¤ªà¥à¤²à¤—à¤‡à¤¨à¤¹à¤°à¥‚';
 
   @override
   String get configure_plugins =>
-      'आफ्नै मेटाडाटा प्रदायक र अडियो स्रोत प्लगइनहरू कन्फिगर गर्नुहोस्';
+      'à¤†à¤«à¥à¤¨à¥ˆ à¤®à¥‡à¤Ÿà¤¾à¤¡à¤¾à¤Ÿà¤¾ à¤ªà¥à¤°à¤¦à¤¾à¤¯à¤• à¤° à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤°à¥‹à¤¤ à¤ªà¥à¤²à¤—à¤‡à¤¨à¤¹à¤°à¥‚ à¤•à¤¨à¥à¤«à¤¿à¤—à¤° à¤—à¤°à¥à¤¨à¥à¤¹à¥‹à¤¸à¥';
 
   @override
-  String get source => 'स्रोत: ';
+  String get source => 'à¤¸à¥à¤°à¥‹à¤¤: ';
 
   @override
-  String get uncompressed => 'असंक्षिप्त';
+  String get uncompressed => 'à¤…à¤¸à¤‚à¤•à¥à¤·à¤¿à¤ªà¥à¤¤';
 
   @override
   String get dab_music_source_description =>
-      'अडियोप्रेमीहरूका लागि। उच्च गुणस्तर/लसलेस अडियो स्ट्रिमहरू उपलब्ध गराउँछ। ISRC-मा आधारित सटीक ट्र्याक मिलान।';
+      'à¤…à¤¡à¤¿à¤¯à¥‹à¤ªà¥à¤°à¥‡à¤®à¥€à¤¹à¤°à¥‚à¤•à¤¾ à¤²à¤¾à¤—à¤¿à¥¤ à¤‰à¤šà¥à¤š à¤—à¥à¤£à¤¸à¥à¤¤à¤°/à¤²à¤¸à¤²à¥‡à¤¸ à¤…à¤¡à¤¿à¤¯à¥‹ à¤¸à¥à¤Ÿà¥à¤°à¤¿à¤®à¤¹à¤°à¥‚ à¤‰à¤ªà¤²à¤¬à¥à¤§ à¤—à¤°à¤¾à¤‰à¤à¤›à¥¤ ISRC-à¤®à¤¾ à¤†à¤§à¤¾à¤°à¤¿à¤¤ à¤¸à¤Ÿà¥€à¤• à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤• à¤®à¤¿à¤²à¤¾à¤¨à¥¤';
 
   @override
-  String get summary_top_track => 'शीर्ष ट्र्याक\nयस अवधिमा';
+  String get summary_top_track =>
+      'à¤¶à¥€à¤°à¥à¤· à¤Ÿà¥à¤°à¥à¤¯à¤¾à¤•\nà¤¯à¤¸ à¤…à¤µà¤§à¤¿à¤®à¤¾';
 
   @override
-  String get local => 'स्थानीय';
+  String get local => 'à¤¸à¥à¤¥à¤¾à¤¨à¥€à¤¯';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1655,4 +1800,21 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

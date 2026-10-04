@@ -24,16 +24,16 @@ class AppLocalizationsCa extends AppLocalizations {
   String get lyrics => 'Lletres';
 
   @override
-  String get settings => 'Configuració';
+  String get settings => 'ConfiguraciÃ³';
 
   @override
   String get settings_subtitle => 'Personalitza Soulful Bhakti al teu gust';
 
   @override
-  String get genre_categories_filter => 'Filtrar categories o gèneres...';
+  String get genre_categories_filter => 'Filtrar categories o gÃ¨neres...';
 
   @override
-  String get genre => 'Gènere';
+  String get genre => 'GÃ¨nere';
 
   @override
   String get personalized => 'Personalizat';
@@ -42,19 +42,19 @@ class AppLocalizationsCa extends AppLocalizations {
   String get featured => 'Destacat';
 
   @override
-  String get new_releases => 'Nous Llançaments';
+  String get new_releases => 'Nous LlanÃ§aments';
 
   @override
-  String get songs => 'Cançons';
+  String get songs => 'CanÃ§ons';
 
   @override
   String get newest_arrivals => 'Nous arribats';
 
   @override
-  String get top_trending => 'Tendències';
+  String get top_trending => 'TendÃ¨ncies';
 
   @override
-  String get see_more => 'Veure més';
+  String get see_more => 'Veure mÃ©s';
 
   @override
   String playing_track(Object track) {
@@ -63,60 +63,60 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Això eliminarà la llista actual. S\'eliminaran $track_length cançons.\n¿Vol continuar?';
+    return 'AixÃ² eliminarÃ  la llista actual. S\'eliminaran $track_length canÃ§ons.\nÂ¿Vol continuar?';
   }
 
   @override
-  String get load_more => 'Carregar més';
+  String get load_more => 'Carregar mÃ©s';
 
   @override
-  String get playlists => 'Llistes de reproducció';
+  String get playlists => 'Llistes de reproducciÃ³';
 
   @override
   String get artists => 'Artistes';
 
   @override
-  String get albums => 'Àlbums';
+  String get albums => 'Ã€lbums';
 
   @override
-  String get tracks => 'Cançons';
+  String get tracks => 'CanÃ§ons';
 
   @override
-  String get downloads => 'Descàrregues';
+  String get downloads => 'DescÃ rregues';
 
   @override
-  String get filter_playlists => 'Filtrar les seves llistes de reproducció...';
+  String get filter_playlists => 'Filtrar les seves llistes de reproducciÃ³...';
 
   @override
-  String get liked_tracks => 'Cançons Preferides';
+  String get liked_tracks => 'CanÃ§ons Preferides';
 
   @override
-  String get liked_tracks_description => 'Totes les seves cançons preferides';
+  String get liked_tracks_description => 'Totes les seves canÃ§ons preferides';
 
   @override
-  String get playlist => 'Llista de reproducció';
+  String get playlist => 'Llista de reproducciÃ³';
 
   @override
-  String get create_a_playlist => 'Crear una llista de reproducció';
+  String get create_a_playlist => 'Crear una llista de reproducciÃ³';
 
   @override
-  String get new_playlist => 'Nova llista de reproducció';
+  String get new_playlist => 'Nova llista de reproducciÃ³';
 
   @override
   String get playlist_name => 'Nom de la llista';
 
   @override
   String get no_playlists_yet =>
-      'Encara no hi ha llistes de reproducció. Crea una a partir de les cançons seleccionades.';
+      'Encara no hi ha llistes de reproducciÃ³. Crea una a partir de les canÃ§ons seleccionades.';
 
   @override
-  String get update_playlist => 'Actualitzar la llista de reproducció';
+  String get update_playlist => 'Actualitzar la llista de reproducciÃ³';
 
   @override
   String get create => 'Crear';
 
   @override
-  String get cancel => 'Cancel·lar';
+  String get cancel => 'CancelÂ·lar';
 
   @override
   String get update => 'Actualitzar';
@@ -125,16 +125,16 @@ class AppLocalizationsCa extends AppLocalizations {
   String get name_of_playlist => 'Nom de la lista';
 
   @override
-  String get description => 'Descripció';
+  String get description => 'DescripciÃ³';
 
   @override
-  String get public => 'Pública';
+  String get public => 'PÃºblica';
 
   @override
-  String get collaborative => 'Col·laborativa';
+  String get collaborative => 'ColÂ·laborativa';
 
   @override
-  String get search_local_tracks => 'Cercar cançons locals...';
+  String get search_local_tracks => 'Cercar canÃ§ons locals...';
 
   @override
   String get play => 'Reproduir';
@@ -155,21 +155,21 @@ class AppLocalizationsCa extends AppLocalizations {
   String get sort_artist => 'Ordenar per Artista';
 
   @override
-  String get sort_album => 'Ordenar per Àlbum';
+  String get sort_album => 'Ordenar per Ã€lbum';
 
   @override
   String get sort_duration => 'Ordenar per Durada';
 
   @override
-  String get sort_tracks => 'Ordenar Cançons';
+  String get sort_tracks => 'Ordenar CanÃ§ons';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'Descàrrega en curs ($tracks_length)';
+    return 'DescÃ rrega en curs ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'Cancel·lar todo';
+  String get cancel_all => 'CancelÂ·lar todo';
 
   @override
   String get filter_artist => 'Filtrar artistes...';
@@ -183,10 +183,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get add_artist_to_blacklist => 'Afegir artista a la llista negra';
 
   @override
-  String get top_tracks => 'Millors Cançons';
+  String get top_tracks => 'Millors CanÃ§ons';
 
   @override
-  String get fans_also_like => 'Als fans també els hi agrada';
+  String get fans_also_like => 'Als fans tambÃ© els hi agrada';
 
   @override
   String get loading => 'Carregant...';
@@ -208,11 +208,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String added_to_queue(Object tracks) {
-    return '$tracks cançons afegides a la llista';
+    return '$tracks canÃ§ons afegides a la llista';
   }
 
   @override
-  String get filter_albums => 'Filtrar àlbums...';
+  String get filter_albums => 'Filtrar Ã lbums...';
 
   @override
   String get synced => 'Sincronitzat';
@@ -224,7 +224,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get shuffle => 'Aleatori';
 
   @override
-  String get search_tracks => 'Buscar cançons...';
+  String get search_tracks => 'Buscar canÃ§ons...';
 
   @override
   String get released => 'Publicat';
@@ -235,17 +235,17 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get title => 'Títul';
+  String get title => 'TÃ­tul';
 
   @override
-  String get time => 'Duració';
+  String get time => 'DuraciÃ³';
 
   @override
-  String get more_actions => 'Més accios';
+  String get more_actions => 'MÃ©s accios';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'Afegir ($count) a la llista de reproducció';
+    return 'Afegir ($count) a la llista de reproducciÃ³';
   }
 
   @override
@@ -255,11 +255,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String play_count_next(Object count) {
-    return 'Reproduir ($count) a continuació';
+    return 'Reproduir ($count) a continuaciÃ³';
   }
 
   @override
-  String get album => 'Àlbum';
+  String get album => 'Ã€lbum';
 
   @override
   String copied_to_clipboard(Object data) {
@@ -268,7 +268,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'Afegir $track a les llistes de reproducció següents';
+    return 'Afegir $track a les llistes de reproducciÃ³ segÃ¼ents';
   }
 
   @override
@@ -284,11 +284,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String track_will_play_next(Object track) {
-    return '$track es reproduirà a continuació';
+    return '$track es reproduirÃ  a continuaciÃ³';
   }
 
   @override
-  String get play_next => 'Reproduir a continuació';
+  String get play_next => 'Reproduir a continuaciÃ³';
 
   @override
   String removed_track_from_queue(Object track) {
@@ -305,10 +305,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get save_as_favorite => 'Guardar a preferits';
 
   @override
-  String get add_to_playlist => 'Afegir a la llista de reproducció';
+  String get add_to_playlist => 'Afegir a la llista de reproducciÃ³';
 
   @override
-  String get remove_from_playlist => 'Eliminar de la llista de reproducció';
+  String get remove_from_playlist => 'Eliminar de la llista de reproducciÃ³';
 
   @override
   String get add_to_blacklist => 'Afegir a la llista negra';
@@ -326,41 +326,41 @@ class AppLocalizationsCa extends AppLocalizations {
   String get slide_to_seek => 'Lliscar per cercar endavant o endarrere';
 
   @override
-  String get shuffle_playlist => 'Mesclar la llista de reproducció';
+  String get shuffle_playlist => 'Mesclar la llista de reproducciÃ³';
 
   @override
-  String get unshuffle_playlist => 'No mesclar la llista de reproducció';
+  String get unshuffle_playlist => 'No mesclar la llista de reproducciÃ³';
 
   @override
-  String get previous_track => 'Cançó anterior';
+  String get previous_track => 'CanÃ§Ã³ anterior';
 
   @override
-  String get next_track => 'Canço següent';
+  String get next_track => 'CanÃ§o segÃ¼ent';
 
   @override
-  String get pause_playback => 'Pausar reproducció';
+  String get pause_playback => 'Pausar reproducciÃ³';
 
   @override
-  String get resume_playback => 'Continuar reproducció';
+  String get resume_playback => 'Continuar reproducciÃ³';
 
   @override
-  String get loop_track => 'Repetir canço';
+  String get loop_track => 'Repetir canÃ§o';
 
   @override
-  String get no_loop => 'Sense repetició';
+  String get no_loop => 'Sense repeticiÃ³';
 
   @override
-  String get repeat_playlist => 'Repetir la llista de reproducció';
+  String get repeat_playlist => 'Repetir la llista de reproducciÃ³';
 
   @override
   String get queue => 'Llista';
 
   @override
-  String get alternative_track_sources => 'Fonts alternatives de cançons';
+  String get alternative_track_sources => 'Fonts alternatives de canÃ§ons';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks cançons a la llista';
+    return '$tracks canÃ§ons a la llista';
   }
 
   @override
@@ -368,7 +368,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get show_hide_ui_on_hover =>
-      'Mostrar/Ocultar interfície al passar el cursor';
+      'Mostrar/Ocultar interfÃ­cie al passar el cursor';
 
   @override
   String get always_on_top => 'Sempre visible';
@@ -389,13 +389,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get account => 'Compte';
 
   @override
-  String get logout => 'Tancar sessió';
+  String get logout => 'Tancar sessiÃ³';
 
   @override
-  String get logout_of_this_account => 'Tancar sessió d\'aquest compte';
+  String get logout_of_this_account => 'Tancar sessiÃ³ d\'aquest compte';
 
   @override
-  String get language_region => 'Idioma i Regió';
+  String get language_region => 'Idioma i RegiÃ³';
 
   @override
   String get language => 'Idioma';
@@ -404,20 +404,20 @@ class AppLocalizationsCa extends AppLocalizations {
   String get system_default => 'Predeterminat del sistema';
 
   @override
-  String get market_place_region => 'Regió de la botiga';
+  String get market_place_region => 'RegiÃ³ de la botiga';
 
   @override
-  String get recommendation_country => 'País de recomanació';
+  String get recommendation_country => 'PaÃ­s de recomanaciÃ³';
 
   @override
-  String get appearance => 'Apariència';
+  String get appearance => 'ApariÃ¨ncia';
 
   @override
   String get layout_mode => 'Mode de disseny';
 
   @override
   String get override_layout_settings =>
-      'Anul·leu la configuració del mode de disseny responsiu';
+      'AnulÂ·leu la configuraciÃ³ del mode de disseny responsiu';
 
   @override
   String get adaptive => 'Adaptable';
@@ -426,7 +426,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get compact => 'Compacte';
 
   @override
-  String get extended => 'Extès';
+  String get extended => 'ExtÃ¨s';
 
   @override
   String get theme => 'Tema';
@@ -444,17 +444,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get accent_color => 'Color d\'accent';
 
   @override
-  String get sync_album_color => 'Sincronitzar color de l\'àlbum';
+  String get sync_album_color => 'Sincronitzar color de l\'Ã lbum';
 
   @override
   String get sync_album_color_description =>
-      'Utilitza el color dominant de l\'álbum com a color d\'accent';
+      'Utilitza el color dominant de l\'Ã¡lbum com a color d\'accent';
 
   @override
-  String get playback => 'Reproducció';
+  String get playback => 'ReproducciÃ³';
 
   @override
-  String get audio_quality => 'Qualitat d\'àudio';
+  String get audio_quality => 'Qualitat d\'Ã udio';
 
   @override
   String get high => 'Alta';
@@ -463,22 +463,22 @@ class AppLocalizationsCa extends AppLocalizations {
   String get low => 'Baixa';
 
   @override
-  String get pre_download_play => 'Descàrrega prèvia i reproduir';
+  String get pre_download_play => 'DescÃ rrega prÃ¨via i reproduir';
 
   @override
   String get pre_download_play_description =>
-      'En lloc de transmetre l\'àudio, descarrega bytes i ho reprodueix (recomendat per usuaris amb un bon ample de banda)';
+      'En lloc de transmetre l\'Ã udio, descarrega bytes i ho reprodueix (recomendat per usuaris amb un bon ample de banda)';
 
   @override
   String get skip_non_music =>
-      'Ometre segments que no son música (SponsorBlock)';
+      'Ometre segments que no son mÃºsica (SponsorBlock)';
 
   @override
-  String get blacklist_description => 'Cançons i artistes de la llista negra';
+  String get blacklist_description => 'CanÃ§ons i artistes de la llista negra';
 
   @override
   String get wait_for_download_to_finish =>
-      'Si us plau, esperi que acabi la descàrrega actual';
+      'Si us plau, esperi que acabi la descÃ rrega actual';
 
   @override
   String get desktop => 'Escriptori';
@@ -515,13 +515,13 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti, un client lleuger, multiplataforma i gratuït de Spotify';
+      'Soulful Bhakti, un client lleuger, multiplataforma i gratuÃ¯t de Spotify';
 
   @override
-  String get version => 'Versió';
+  String get version => 'VersiÃ³';
 
   @override
-  String get build_number => 'Número de compilació';
+  String get build_number => 'NÃºmero de compilaciÃ³';
 
   @override
   String get founder => 'Fundador';
@@ -533,22 +533,22 @@ class AppLocalizationsCa extends AppLocalizations {
   String get bug_issues => 'Errors i problemes';
 
   @override
-  String get made_with => 'Fet amb ❤️ a Bangladesh🇧🇩';
+  String get made_with => 'Fet amb â¤ï¸ a BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'Llicència';
+  String get license => 'LlicÃ¨ncia';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'No es preocupi, les seves credencials no seran recollides ni compartides amb ningú';
+      'No es preocupi, les seves credencials no seran recollides ni compartides amb ningÃº';
 
   @override
   String get know_how_to_login => 'No sap com fer-ho?';
@@ -574,7 +574,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get previous => 'Anterior';
 
   @override
-  String get next => 'Següent';
+  String get next => 'SegÃ¼ent';
 
   @override
   String get done => 'Fet';
@@ -589,33 +589,33 @@ class AppLocalizationsCa extends AppLocalizations {
   String get something_went_wrong => 'Quelcom ha sortit malament';
 
   @override
-  String get piped_instance => 'Instància del servidor Piped';
+  String get piped_instance => 'InstÃ ncia del servidor Piped';
 
   @override
   String get piped_description =>
-      'La instància del servidor Piped a utilitzar per la coincidència de cançons';
+      'La instÃ ncia del servidor Piped a utilitzar per la coincidÃ¨ncia de canÃ§ons';
 
   @override
   String get piped_warning =>
-      'Algunes poden no funcionar bé, utilitzi-les sota el seu propi risc';
+      'Algunes poden no funcionar bÃ©, utilitzi-les sota el seu propi risc';
 
   @override
-  String get invidious_instance => 'Instància del servidor Invidious';
+  String get invidious_instance => 'InstÃ ncia del servidor Invidious';
 
   @override
   String get invidious_description =>
-      'La instància del servidor Invidious per fer coincidir pistes';
+      'La instÃ ncia del servidor Invidious per fer coincidir pistes';
 
   @override
   String get invidious_warning =>
-      'Algunes instàncies podrien no funcionar bé. Feu-les servir sota la vostra responsabilitat';
+      'Algunes instÃ ncies podrien no funcionar bÃ©. Feu-les servir sota la vostra responsabilitat';
 
   @override
   String get generate => 'Generar';
 
   @override
   String track_exists(Object track) {
-    return 'La cançó $track ja existeix';
+    return 'La canÃ§Ã³ $track ja existeix';
   }
 
   @override
@@ -630,19 +630,19 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get select_genres => 'Seleccionar Gèneres';
+  String get select_genres => 'Seleccionar GÃ¨neres';
 
   @override
-  String get add_genres => 'Afegir Gèneres';
+  String get add_genres => 'Afegir GÃ¨neres';
 
   @override
-  String get country => 'País';
+  String get country => 'PaÃ­s';
 
   @override
-  String get number_of_tracks_generate => 'Número de cançons a generar';
+  String get number_of_tracks_generate => 'NÃºmero de canÃ§ons a generar';
 
   @override
-  String get acousticness => 'Acústica';
+  String get acousticness => 'AcÃºstica';
 
   @override
   String get danceability => 'Ballabilitat';
@@ -672,7 +672,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get key => 'To';
 
   @override
-  String get duration => 'Duració (s)';
+  String get duration => 'DuraciÃ³ (s)';
 
   @override
   String get tempo => 'Tempo (BPM)';
@@ -693,10 +693,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get long => 'Llarg';
 
   @override
-  String get min => 'Mín.';
+  String get min => 'MÃ­n.';
 
   @override
-  String get max => 'Màx.';
+  String get max => 'MÃ x.';
 
   @override
   String get target => 'Objetiu';
@@ -711,40 +711,40 @@ class AppLocalizationsCa extends AppLocalizations {
   String get select_all => 'Seleccionar tot';
 
   @override
-  String get are_you_sure => 'Està segur?';
+  String get are_you_sure => 'EstÃ  segur?';
 
   @override
   String get generating_playlist =>
-      'Generant la seva llista de reproducció personalitzada...';
+      'Generant la seva llista de reproducciÃ³ personalitzada...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'Cançons $count seleccionades';
+    return 'CanÃ§ons $count seleccionades';
   }
 
   @override
   String get download_warning =>
-      'Si descarrega totes les cançons de cop, està piratejant música clarament i causant dany a la societat creativa de la música. Espero que sigui conscient d\'això i sempre intenti respectar i recolzar la forta feina dels artístes';
+      'Si descarrega totes les canÃ§ons de cop, estÃ  piratejant mÃºsica clarament i causant dany a la societat creativa de la mÃºsica. Espero que sigui conscient d\'aixÃ² i sempre intenti respectar i recolzar la forta feina dels artÃ­stes';
 
   @override
   String get download_ip_ban_warning =>
-      'Per cert, la seva IP pot ser bloquejada a YouTube degut a solicituds de descàrrega excessives. El bloqueig d\'IP vol dir que no podrà utilitzar YouTube (fins i tot si ha iniciat sessió) durant un mínim de 2-3 meses desde esa dirección IP. I Soulful Bhakti no es fa responsable si això succeeix en alguna ocasió';
+      'Per cert, la seva IP pot ser bloquejada a YouTube degut a solicituds de descÃ rrega excessives. El bloqueig d\'IP vol dir que no podrÃ  utilitzar YouTube (fins i tot si ha iniciat sessiÃ³) durant un mÃ­nim de 2-3 meses desde esa direcciÃ³n IP. I Soulful Bhakti no es fa responsable si aixÃ² succeeix en alguna ocasiÃ³';
 
   @override
   String get by_clicking_accept_terms =>
-      'Al fer clic a \'Acceptar\', acepta els següents termes:';
+      'Al fer clic a \'Acceptar\', acepta els segÃ¼ents termes:';
 
   @override
   String get download_agreement_1 =>
-      'Se que estic piratejant música. Sóc dolent';
+      'Se que estic piratejant mÃºsica. SÃ³c dolent';
 
   @override
   String get download_agreement_2 =>
-      'Recolzaré l\'artista quan pugui i només ho faig perquè no tinc diners per comprar el seu art';
+      'RecolzarÃ© l\'artista quan pugui i nomÃ©s ho faig perquÃ¨ no tinc diners per comprar el seu art';
 
   @override
   String get download_agreement_3 =>
-      'Sóc completament conscient que la meva IP pot ser bloqueada per YouTube i no responsabilizo a Soulful Bhakti ni als seus propietaris/contribuents per qualsevol incident causat per la meva acció actual';
+      'SÃ³c completament conscient que la meva IP pot ser bloqueada per YouTube i no responsabilizo a Soulful Bhakti ni als seus propietaris/contribuents per qualsevol incident causat per la meva acciÃ³ actual';
 
   @override
   String get decline => 'Rebutjar';
@@ -777,10 +777,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get stop => 'Parar';
 
   @override
-  String get sort_newest => 'Ordenar per més noves';
+  String get sort_newest => 'Ordenar per mÃ©s noves';
 
   @override
-  String get sort_oldest => 'Ordenar per més antigues';
+  String get sort_oldest => 'Ordenar per mÃ©s antigues';
 
   @override
   String get sleep_timer => 'Temporitzador d\'apagat';
@@ -810,13 +810,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get developers => 'Desenvolupadors';
 
   @override
-  String get not_logged_in => 'No ha iniciat sesió';
+  String get not_logged_in => 'No ha iniciat sesiÃ³';
 
   @override
   String get search_mode => 'Mode de cerca';
 
   @override
-  String get audio_source => 'Font d\'àudio';
+  String get audio_source => 'Font d\'Ã udio';
 
   @override
   String get ok => 'OK';
@@ -826,27 +826,27 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti utilitza el xifrado per emmagatzemar les seves dades de forma segura. Però ha fallat. Per tant, tornarà a un emmagatzament no segur\nSi estè utilizant Linux, asseguri\'s de tenir instal·lats els serveis secrets com gnome-keyring, kde-wallet i keepassxc';
+      'Soulful Bhakti utilitza el xifrado per emmagatzemar les seves dades de forma segura. PerÃ² ha fallat. Per tant, tornarÃ  a un emmagatzament no segur\nSi estÃ¨ utilizant Linux, asseguri\'s de tenir instalÂ·lats els serveis secrets com gnome-keyring, kde-wallet i keepassxc';
 
   @override
-  String get querying_info => 'Consultant informació...';
+  String get querying_info => 'Consultant informaciÃ³...';
 
   @override
-  String get piped_api_down => 'La API de Piped no està operativa';
+  String get piped_api_down => 'La API de Piped no estÃ  operativa';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'La instància de Piped $pipedInstance no està operativa en aquest moment\n\nCanvieu la instància o canvieu el \'Tipus d\'API\' a l\'API oficial de YouTube\n\nAssegureu-vos de reiniciar l\'aplicació després del canvi';
+    return 'La instÃ ncia de Piped $pipedInstance no estÃ  operativa en aquest moment\n\nCanvieu la instÃ ncia o canvieu el \'Tipus d\'API\' a l\'API oficial de YouTube\n\nAssegureu-vos de reiniciar l\'aplicaciÃ³ desprÃ©s del canvi';
   }
 
   @override
-  String get you_are_offline => 'Actualment no teniu connexió a internet';
+  String get you_are_offline => 'Actualment no teniu connexiÃ³ a internet';
 
   @override
-  String get connection_restored => 'S\'ha restablert la connexió a internet';
+  String get connection_restored => 'S\'ha restablert la connexiÃ³ a internet';
 
   @override
-  String get use_system_title_bar => 'Utilitza la barra de títol del sistema';
+  String get use_system_title_bar => 'Utilitza la barra de tÃ­tol del sistema';
 
   @override
   String get crunching_results => 'Processant resultats...';
@@ -861,7 +861,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get pitch_dark_theme => 'Tema de dart negre intens';
 
   @override
-  String get normalize_audio => 'Normalitza l\'àudio';
+  String get normalize_audio => 'Normalitza l\'Ã udio';
 
   @override
   String get change_cover => 'Canvia la coberta';
@@ -874,15 +874,15 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'Això restablirà tots els teus paràmetres als valors per defecte. Aquesta acció no es pot desfer.';
+      'AixÃ² restablirÃ  tots els teus parÃ metres als valors per defecte. Aquesta acciÃ³ no es pot desfer.';
 
   @override
   String get streaming_music_format =>
-      'Format de reproducció de música en temps real';
+      'Format de reproducciÃ³ de mÃºsica en temps real';
 
   @override
   String get streaming_music_quality =>
-      'Qualitat de reproducció de música en temps real';
+      'Qualitat de reproducciÃ³ de mÃºsica en temps real';
 
   @override
   String get connect => 'Connecta';
@@ -897,16 +897,16 @@ class AppLocalizationsCa extends AppLocalizations {
   String get password => 'Contrasenya';
 
   @override
-  String get login => 'Inicia la sessió';
+  String get login => 'Inicia la sessiÃ³';
 
   @override
-  String get sign_in => 'Inicia la sessió';
+  String get sign_in => 'Inicia la sessiÃ³';
 
   @override
   String get sign_up => 'Registra\'t';
 
   @override
-  String get sign_out => 'Tanca la sessió';
+  String get sign_out => 'Tanca la sessiÃ³';
 
   @override
   String get verify => 'Verifica';
@@ -915,41 +915,41 @@ class AppLocalizationsCa extends AppLocalizations {
   String get create_account => 'Crea el teu compte';
 
   @override
-  String get already_have_account => 'Ja tens un compte? Inicia la sessió';
+  String get already_have_account => 'Ja tens un compte? Inicia la sessiÃ³';
 
   @override
   String get dont_have_account => 'No tens un compte? Dona-te\'n d\'alta';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Sessió iniciada com a $userId';
+    return 'SessiÃ³ iniciada com a $userId';
   }
 
   @override
-  String get verification_code => 'Codi de verificació';
+  String get verification_code => 'Codi de verificaciÃ³';
 
   @override
   String get verification_code_hint =>
-      'Introdueix el codi enviat al teu correu electrònic';
+      'Introdueix el codi enviat al teu correu electrÃ²nic';
 
   @override
   String get verify_email_code =>
-      'Hem enviat un codi de verificació al teu correu electrònic';
+      'Hem enviat un codi de verificaciÃ³ al teu correu electrÃ²nic';
 
   @override
-  String get go_to_album => 'Anar a l\'àlbum';
+  String get go_to_album => 'Anar a l\'Ã lbum';
 
   @override
-  String get discord_rich_presence => 'Presència rica de Discord';
+  String get discord_rich_presence => 'PresÃ¨ncia rica de Discord';
 
   @override
   String get browse_all => 'Navega per tot';
 
   @override
-  String get genres => 'Gèneres';
+  String get genres => 'GÃ¨neres';
 
   @override
-  String get explore_genres => 'Explora els gèneres';
+  String get explore_genres => 'Explora els gÃ¨neres';
 
   @override
   String get friends => 'Amics';
@@ -959,24 +959,24 @@ class AppLocalizationsCa extends AppLocalizations {
       'Ho sentim, no es poden trobar les lletres d\'aquesta pista';
 
   @override
-  String get start_a_radio => 'Inicia una ràdio';
+  String get start_a_radio => 'Inicia una rÃ dio';
 
   @override
-  String get how_to_start_radio => 'Com vols començar la ràdio?';
+  String get how_to_start_radio => 'Com vols comenÃ§ar la rÃ dio?';
 
   @override
   String get replace_queue_question =>
       'Voleu substituir la cua actual o afegir-hi?';
 
   @override
-  String get endless_playback => 'Reproducció infinita';
+  String get endless_playback => 'ReproducciÃ³ infinita';
 
   @override
-  String get delete_playlist => 'Suprimeix la llista de reproducció';
+  String get delete_playlist => 'Suprimeix la llista de reproducciÃ³';
 
   @override
   String get delete_playlist_confirmation =>
-      'Esteu segur que voleu suprimir aquesta llista de reproducció?';
+      'Esteu segur que voleu suprimir aquesta llista de reproducciÃ³?';
 
   @override
   String get local_tracks => 'Pistes locals';
@@ -985,17 +985,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get local_tab => 'Local';
 
   @override
-  String get song_link => 'Enllaç de la cançó';
+  String get song_link => 'EnllaÃ§ de la canÃ§Ã³';
 
   @override
   String get skip_this_nonsense => 'Omet aquesta tonteria';
 
   @override
-  String get freedom_of_music => '“Llibertat de la música”';
+  String get freedom_of_music => 'â€œLlibertat de la mÃºsicaâ€';
 
   @override
   String get freedom_of_music_palm =>
-      '“Llibertat de la música a la palma de la mà”';
+      'â€œLlibertat de la mÃºsica a la palma de la mÃ â€';
 
   @override
   String get get_started => 'Comencem';
@@ -1005,56 +1005,56 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get piped_source_description =>
-      'Et sents lliure? El mateix que YouTube però més lliure.';
+      'Et sents lliure? El mateix que YouTube perÃ² mÃ©s lliure.';
 
   @override
   String get jiosaavn_source_description =>
-      'El millor per a la regió del sud d\'Àsia.';
+      'El millor per a la regiÃ³ del sud d\'Ã€sia.';
 
   @override
   String get invidious_source_description =>
-      'Similar a Piped però amb més disponibilitat';
+      'Similar a Piped perÃ² amb mÃ©s disponibilitat';
 
   @override
   String highest_quality(Object quality) {
-    return 'Qualitat més alta: $quality';
+    return 'Qualitat mÃ©s alta: $quality';
   }
 
   @override
-  String get select_audio_source => 'Seleccioneu la font d\'àudio';
+  String get select_audio_source => 'Seleccioneu la font d\'Ã udio';
 
   @override
   String get endless_playback_description =>
-      'Afegiu automàticament noves cançons\nal final de la cua';
+      'Afegiu automÃ ticament noves canÃ§ons\nal final de la cua';
 
   @override
-  String get choose_your_region => 'Trieu la vostra regió';
+  String get choose_your_region => 'Trieu la vostra regiÃ³';
 
   @override
   String get choose_your_region_description =>
-      'Això ajudarà a Soulful Bhakti a mostrar-vos el contingut adequat\nper a la vostra ubicació.';
+      'AixÃ² ajudarÃ  a Soulful Bhakti a mostrar-vos el contingut adequat\nper a la vostra ubicaciÃ³.';
 
   @override
   String get choose_your_language => 'Trieu el vostre idioma';
 
   @override
-  String get help_project_grow => 'Ajuda a fer créixer aquest projecte';
+  String get help_project_grow => 'Ajuda a fer crÃ©ixer aquest projecte';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti és un projecte de codi obert. Podeu ajudar a fer créixer aquest projecte contribuint al projecte, informant d\'errors o suggerint noves funcionalitats.';
+      'Soulful Bhakti Ã©s un projecte de codi obert. Podeu ajudar a fer crÃ©ixer aquest projecte contribuint al projecte, informant d\'errors o suggerint noves funcionalitats.';
 
   @override
   String get contribute_on_github => 'Contribueix a GitHub';
 
   @override
-  String get donate_on_open_collective => 'Fes una donació a Open Collective';
+  String get donate_on_open_collective => 'Fes una donaciÃ³ a Open Collective';
 
   @override
-  String get browse_anonymously => 'Navega de manera anònima';
+  String get browse_anonymously => 'Navega de manera anÃ²nima';
 
   @override
-  String get enable_connect => 'Habilita la connexió';
+  String get enable_connect => 'Habilita la connexiÃ³';
 
   @override
   String get enable_connect_description =>
@@ -1068,7 +1068,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String connect_client_alert(Object client) {
-    return 'Estàs sent controlat per $client';
+    return 'EstÃ s sent controlat per $client';
   }
 
   @override
@@ -1078,27 +1078,27 @@ class AppLocalizationsCa extends AppLocalizations {
   String get remote => 'Remot';
 
   @override
-  String get stats => 'Estadístiques';
+  String get stats => 'EstadÃ­stiques';
 
   @override
   String and_n_more(Object count) {
-    return 'i $count més';
+    return 'i $count mÃ©s';
   }
 
   @override
-  String get recently_played => 'Reproduït recentment';
+  String get recently_played => 'ReproduÃ¯t recentment';
 
   @override
-  String get browse_more => 'Navega més';
+  String get browse_more => 'Navega mÃ©s';
 
   @override
-  String get no_title => 'Sense títol';
+  String get no_title => 'Sense tÃ­tol';
 
   @override
-  String get not_playing => 'No s\'està reproduint';
+  String get not_playing => 'No s\'estÃ  reproduint';
 
   @override
-  String get epic_failure => 'Fracàs èpic!';
+  String get epic_failure => 'FracÃ s Ã¨pic!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
@@ -1106,7 +1106,7 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti té una actualització';
+  String get spotube_has_an_update => 'Soulful Bhakti tÃ© una actualitzaciÃ³';
 
   @override
   String get download_now => 'Descarregar ara';
@@ -1122,10 +1122,10 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get read_the_latest => 'Llegeix el més recent';
+  String get read_the_latest => 'Llegeix el mÃ©s recent';
 
   @override
-  String get release_notes => 'notes de la versió';
+  String get release_notes => 'notes de la versiÃ³';
 
   @override
   String get pick_color_scheme => 'Tria l\'esquema de colors';
@@ -1138,19 +1138,19 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get multiple_device_connected =>
-      'Hi ha diversos dispositius connectats.\nTria el dispositiu on vols realitzar aquesta acció';
+      'Hi ha diversos dispositius connectats.\nTria el dispositiu on vols realitzar aquesta acciÃ³';
 
   @override
   String get nothing_found => 'No s\'ha trobat res';
 
   @override
-  String get the_box_is_empty => 'La caixa està buida';
+  String get the_box_is_empty => 'La caixa estÃ  buida';
 
   @override
   String get top_artists => 'Millors artistes';
 
   @override
-  String get top_albums => 'Millors àlbums';
+  String get top_albums => 'Millors Ã lbums';
 
   @override
   String get this_week => 'Aquesta setmana';
@@ -1159,13 +1159,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get this_month => 'Aquest mes';
 
   @override
-  String get last_6_months => 'Últims 6 mesos';
+  String get last_6_months => 'Ãšltims 6 mesos';
 
   @override
   String get this_year => 'Aquest any';
 
   @override
-  String get last_2_years => 'Últims 2 anys';
+  String get last_2_years => 'Ãšltims 2 anys';
 
   @override
   String get all_time => 'Tots els temps';
@@ -1176,30 +1176,30 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get email => 'Correu electrònic';
+  String get email => 'Correu electrÃ²nic';
 
   @override
   String get send_code => 'Enviar codi';
 
   @override
-  String get change_identifier => 'Utilitza un altre correu electrònic';
+  String get change_identifier => 'Utilitza un altre correu electrÃ²nic';
 
   @override
-  String get sign_in_with_otp => 'Inicia la sessió amb un codi d\'un sol ús';
+  String get sign_in_with_otp => 'Inicia la sessiÃ³ amb un codi d\'un sol Ãºs';
 
   @override
   String get enter_otp_sent => 'Introdueix el codi que t\'hem enviat';
 
   @override
   String get verify_email_reminder =>
-      'Verifica la teva adreça de correu electrònic per assegurar el teu compte';
+      'Verifica la teva adreÃ§a de correu electrÃ²nic per assegurar el teu compte';
 
   @override
   String get verify_now => 'Verifica ara';
 
   @override
   String get enter_email_to_verify =>
-      'Introdueix la teva adreça de correu electrònic per rebre un codi de verificació';
+      'Introdueix la teva adreÃ§a de correu electrÃ²nic per rebre un codi de verificaciÃ³';
 
   @override
   String get profile_followers => 'Seguidors';
@@ -1208,7 +1208,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get birthday => 'Aniversari';
 
   @override
-  String get subscription => 'Subscripció';
+  String get subscription => 'SubscripciÃ³';
 
   @override
   String get not_born => 'No ha nascut';
@@ -1235,13 +1235,13 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get streaming_fees_hypothetical =>
-      'Comissions de streaming (hipotètic)';
+      'Comissions de streaming (hipotÃ¨tic)';
 
   @override
   String get minutes_listened => 'minuts escoltats';
 
   @override
-  String get streamed_songs => 'cançons reproduïdes';
+  String get streamed_songs => 'canÃ§ons reproduÃ¯des';
 
   @override
   String count_streams(Object count) {
@@ -1258,7 +1258,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get hipotetical_calculation =>
-      '*Això està calculat en funció d’un pagament mitjà per reproducció de 0,003–0,005  USD en plataformes de reproducció musical en línia. És un càlcul hipotètic per ajudar l’usuari a entendre quant hauria pagat als artistes si hagués escoltat la seva cançó en diferents plataformes.';
+      '*AixÃ² estÃ  calculat en funciÃ³ dâ€™un pagament mitjÃ  per reproducciÃ³ de 0,003â€“0,005  USD en plataformes de reproducciÃ³ musical en lÃ­nia. Ã‰s un cÃ lcul hipotÃ¨tic per ajudar lâ€™usuari a entendre quant hauria pagat als artistes si haguÃ©s escoltat la seva canÃ§Ã³ en diferents plataformes.';
 
   @override
   String count_mins(Object minutes) {
@@ -1269,44 +1269,44 @@ class AppLocalizationsCa extends AppLocalizations {
   String get summary_minutes => 'minuts';
 
   @override
-  String get summary_listened_to_music => 'has escoltat música';
+  String get summary_listened_to_music => 'has escoltat mÃºsica';
 
   @override
-  String get summary_songs => 'cançons';
+  String get summary_songs => 'canÃ§ons';
 
   @override
-  String get summary_streamed_overall => 'reproduït en general';
+  String get summary_streamed_overall => 'reproduÃ¯t en general';
 
   @override
   String get summary_owed_to_artists => 'degut als artistes\nAquest mes';
 
   @override
-  String get summary_top_artist => 'Artista principal\naquest període';
+  String get summary_top_artist => 'Artista principal\naquest perÃ­ode';
 
   @override
   String get summary_artists => 'artistes';
 
   @override
-  String get summary_music_reached_you => 'La música t\'ha arribat';
+  String get summary_music_reached_you => 'La mÃºsica t\'ha arribat';
 
   @override
-  String get summary_full_albums => 'Àlbums complets';
+  String get summary_full_albums => 'Ã€lbums complets';
 
   @override
   String get summary_got_your_love => 'ha aconseguit el teu amor';
 
   @override
-  String get summary_playlists => 'llistes de reproducció';
+  String get summary_playlists => 'llistes de reproducciÃ³';
 
   @override
-  String get summary_were_on_repeat => 'estaven en repetició';
+  String get summary_were_on_repeat => 'estaven en repeticiÃ³';
 
   @override
   String get summary_listening_share => 'Quota d\'escolta';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribució de les $tracks_length cançons principals que més has escoltat';
+    return 'DistribuciÃ³ de les $tracks_length canÃ§ons principals que mÃ©s has escoltat';
   }
 
   @override
@@ -1340,31 +1340,31 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get webview_not_found_description =>
-      'No hi ha cap temps d\'execució de Webview instal·lat al dispositiu.\nSi està instal·lat, assegureu-vos que estigui en el environment PATH\n\nDesprés d\'instal·lar-lo, reinicieu l\'aplicació';
+      'No hi ha cap temps d\'execuciÃ³ de Webview instalÂ·lat al dispositiu.\nSi estÃ  instalÂ·lat, assegureu-vos que estigui en el environment PATH\n\nDesprÃ©s d\'instalÂ·lar-lo, reinicieu l\'aplicaciÃ³';
 
   @override
   String get unsupported_platform => 'Plataforma no compatible';
 
   @override
-  String get cache_music => 'Música en caché';
+  String get cache_music => 'MÃºsica en cachÃ©';
 
   @override
   String get open => 'Obrir';
 
   @override
-  String get cache_folder => 'Carpeta de caché';
+  String get cache_folder => 'Carpeta de cachÃ©';
 
   @override
   String get export => 'Exportar';
 
   @override
-  String get clear_cache => 'Netejar caché';
+  String get clear_cache => 'Netejar cachÃ©';
 
   @override
-  String get clear_cache_confirmation => 'Voleu netejar la memòria cau?';
+  String get clear_cache_confirmation => 'Voleu netejar la memÃ²ria cau?';
 
   @override
-  String get export_cache_files => 'Exportar arxius en caché';
+  String get export_cache_files => 'Exportar arxius en cachÃ©';
 
   @override
   String found_n_files(Object count) {
@@ -1383,13 +1383,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get undo => 'Desfer';
 
   @override
-  String get add_all_to_playlist => 'Afegir tot a la llista de reproducció';
+  String get add_all_to_playlist => 'Afegir tot a la llista de reproducciÃ³';
 
   @override
   String get add_all_to_queue => 'Afegir tot a la cua';
 
   @override
-  String get play_all_next => 'Reproduir tot a continuació';
+  String get play_all_next => 'Reproduir tot a continuaciÃ³';
 
   @override
   String get pause => 'Pausa';
@@ -1401,17 +1401,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get no_tracks_added_yet => 'Sembla que encara no has afegit cap pista';
 
   @override
-  String get no_tracks => 'Sembla que no hi ha pistes aquí';
+  String get no_tracks => 'Sembla que no hi ha pistes aquÃ­';
 
   @override
   String get no_tracks_listened_yet => 'Sembla que no has escoltat res encara';
 
   @override
-  String get not_following_artists => 'No estàs seguint cap artista';
+  String get not_following_artists => 'No estÃ s seguint cap artista';
 
   @override
   String get no_favorite_albums_yet =>
-      'Sembla que encara no has afegit cap àlbum als teus favorits';
+      'Sembla que encara no has afegit cap Ã lbum als teus favorits';
 
   @override
   String get no_logs_found => 'No s\'han trobat registres';
@@ -1421,22 +1421,22 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine no està instal·lat';
+    return '$engine no estÃ  instalÂ·lat';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine no està instal·lat al teu sistema.';
+    return '$engine no estÃ  instalÂ·lat al teu sistema.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'Assegura\'t que estigui disponible a la variable PATH o\nestableix el camí absolut a l\'executable de $engine a continuació';
+    return 'Assegura\'t que estigui disponible a la variable PATH o\nestableix el camÃ­ absolut a l\'executable de $engine a continuaciÃ³';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'En macOS/Linux/Unix com a sistemes operatius, establir el camí a .zshrc/.bashrc/.bash_profile etc. no funcionarà.\nHas de configurar el camí al fitxer de configuració de la shell';
+      'En macOS/Linux/Unix com a sistemes operatius, establir el camÃ­ a .zshrc/.bashrc/.bash_profile etc. no funcionarÃ .\nHas de configurar el camÃ­ al fitxer de configuraciÃ³ de la shell';
 
   @override
   String get download => 'Descarregar';
@@ -1455,7 +1455,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get port_helper_msg =>
-      'El valor per defecte és -1, que indica un número aleatori. Si teniu un tallafoc configurat, es recomana establir-ho.';
+      'El valor per defecte Ã©s -1, que indica un nÃºmero aleatori. Si teniu un tallafoc configurat, es recomana establir-ho.';
 
   @override
   String connect_request(Object client) {
@@ -1464,10 +1464,10 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get connection_request_denied =>
-      'Connexió denegada. L\'usuari ha denegat l\'accés.';
+      'ConnexiÃ³ denegada. L\'usuari ha denegat l\'accÃ©s.';
 
   @override
-  String get an_error_occurred => 'S’ha produït un error';
+  String get an_error_occurred => 'Sâ€™ha produÃ¯t un error';
 
   @override
   String get copy_to_clipboard => 'Copiar al porta-retalls';
@@ -1480,28 +1480,28 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get no_default_metadata_provider_selected =>
-      'No has configurat cap proveïdor de metadades predeterminat';
+      'No has configurat cap proveÃ¯dor de metadades predeterminat';
 
   @override
-  String get manage_metadata_providers => 'Gestionar proveïdors de metadades';
+  String get manage_metadata_providers => 'Gestionar proveÃ¯dors de metadades';
 
   @override
-  String get open_link_in_browser => 'Obrir l’enllaç en el navegador?';
+  String get open_link_in_browser => 'Obrir lâ€™enllaÃ§ en el navegador?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'Vols obrir l’enllaç següent?';
+      'Vols obrir lâ€™enllaÃ§ segÃ¼ent?';
 
   @override
   String get unsafe_url_warning =>
-      'Pot ser perillós obrir enllaços de fonts no fiables. Sigues precavís!\nTambé pots copiar l’enllaç al porta-retalls.';
+      'Pot ser perillÃ³s obrir enllaÃ§os de fonts no fiables. Sigues precavÃ­s!\nTambÃ© pots copiar lâ€™enllaÃ§ al porta-retalls.';
 
   @override
-  String get copy_link => 'Copiar enllaç';
+  String get copy_link => 'Copiar enllaÃ§';
 
   @override
   String get building_your_timeline =>
-      'Construint la teva cronologia en funció de les teves escoltes...';
+      'Construint la teva cronologia en funciÃ³ de les teves escoltes...';
 
   @override
   String get official => 'Oficial';
@@ -1516,17 +1516,17 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get plugin_requires_authentication =>
-      'El complement requereix autenticació';
+      'El complement requereix autenticaciÃ³';
 
   @override
-  String get update_available => 'Actualització disponible';
+  String get update_available => 'ActualitzaciÃ³ disponible';
 
   @override
   String get supports_scrobbling => 'Admet scrobbling';
 
   @override
   String get plugin_scrobbling_info =>
-      'Aquest complement fa scrobbling de la teva música per generar l’historial d’escoltes.';
+      'Aquest complement fa scrobbling de la teva mÃºsica per generar lâ€™historial dâ€™escoltes.';
 
   @override
   String get default_metadata_source => 'Font de metadades per defecte';
@@ -1536,11 +1536,11 @@ class AppLocalizationsCa extends AppLocalizations {
       'Estableix la font de metadades per defecte';
 
   @override
-  String get default_audio_source => 'Font d\'àudio per defecte';
+  String get default_audio_source => 'Font d\'Ã udio per defecte';
 
   @override
   String get set_default_audio_source =>
-      'Estableix la font d\'àudio per defecte';
+      'Estableix la font d\'Ã udio per defecte';
 
   @override
   String get set_default => 'Establir com a predeterminat';
@@ -1554,65 +1554,66 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String can_access_name_api(Object name) {
-    return '- Pot accedir a l’API **$name**';
+    return '- Pot accedir a lâ€™API **$name**';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'Vols instal·lar aquest complement?';
+      'Vols instalÂ·lar aquest complement?';
 
   @override
   String get third_party_plugin_warning =>
-      'Aquest complement prové d’un repositori de tercers. Assegura’t de confiar en la font abans d’instal·lar-lo.';
+      'Aquest complement provÃ© dâ€™un repositori de tercers. Asseguraâ€™t de confiar en la font abans dâ€™instalÂ·lar-lo.';
 
   @override
   String get author => 'Autor';
 
   @override
   String get this_plugin_can_do_following =>
-      'Aquest complement pot fer el següent';
+      'Aquest complement pot fer el segÃ¼ent';
 
   @override
-  String get install => 'Instal·lar';
+  String get install => 'InstalÂ·lar';
 
   @override
   String get install_a_metadata_provider =>
-      'Instal·lar un proveïdor de metadades';
+      'InstalÂ·lar un proveÃ¯dor de metadades';
 
   @override
-  String get no_tracks_playing => 'No s’està reproduint cap pista actualment';
+  String get no_tracks_playing =>
+      'No sâ€™estÃ  reproduint cap pista actualment';
 
   @override
   String get synced_lyrics_not_available =>
-      'Les lletres sincronitzades no estan disponibles per a aquesta cançó. Si us plau, usa';
+      'Les lletres sincronitzades no estan disponibles per a aquesta canÃ§Ã³. Si us plau, usa';
 
   @override
   String get plain_lyrics => 'Lletres sense format';
 
   @override
-  String get tab_instead => 'en lloc d’això, utilitza la tecla Tab.';
+  String get tab_instead => 'en lloc dâ€™aixÃ², utilitza la tecla Tab.';
 
   @override
-  String get disclaimer => 'Avís legal';
+  String get disclaimer => 'AvÃ­s legal';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'L’equip de Soulful Bhakti no accepta cap responsabilitat (inclosa legal) pels complements de “tercers”.\nFes-los servir sota la teva responsabilitat. Si detectes errors/problemes, informa’ls al repositori del complement.\n\nSi algun complement de “tercers” incompleix els ToS/DMCA d’un servei o entitat legal, contacta amb l’autor del complement o amb la plataforma d’allotjament (per exemple GitHub/Codeberg) per prendre mesures. Els complements etiquetats com a “tercers” són públics i gestionats per la comunitat; no els curatem, per la qual cosa no podem intervenir-hi.\n\n';
+      'Lâ€™equip de Soulful Bhakti no accepta cap responsabilitat (inclosa legal) pels complements de â€œtercersâ€.\nFes-los servir sota la teva responsabilitat. Si detectes errors/problemes, informaâ€™ls al repositori del complement.\n\nSi algun complement de â€œtercersâ€ incompleix els ToS/DMCA dâ€™un servei o entitat legal, contacta amb lâ€™autor del complement o amb la plataforma dâ€™allotjament (per exemple GitHub/Codeberg) per prendre mesures. Els complements etiquetats com a â€œtercersâ€ sÃ³n pÃºblics i gestionats per la comunitat; no els curatem, per la qual cosa no podem intervenir-hi.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'L’entrada no coincideix amb el format requerit';
+      'Lâ€™entrada no coincideix amb el format requerit';
 
   @override
   String get plugins => 'Connectors';
 
   @override
   String get paste_plugin_download_url =>
-      'Enllaça l’URL de descàrrega o el repositori de GitHub/Codeberg o l’enllaç directe al fitxer .smplug';
+      'EnllaÃ§a lâ€™URL de descÃ rrega o el repositori de GitHub/Codeberg o lâ€™enllaÃ§ directe al fitxer .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'Descarrega i instal·la el complement des d’un URL';
+      'Descarrega i instalÂ·la el complement des dâ€™un URL';
 
   @override
   String failed_to_add_plugin_error(Object error) {
@@ -1620,17 +1621,17 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get upload_plugin_from_file => 'Penja el complement des d’un fitxer';
+  String get upload_plugin_from_file => 'Penja el complement des dâ€™un fitxer';
 
   @override
-  String get installed => 'Instal·lat';
+  String get installed => 'InstalÂ·lat';
 
   @override
   String get available_plugins => 'Complements disponibles';
 
   @override
   String get configure_plugins =>
-      'Configura els teus propis connectors de proveïdor de metadades i de font d\'àudio';
+      'Configura els teus propis connectors de proveÃ¯dor de metadades i de font d\'Ã udio';
 
   @override
   String get source => 'Font: ';
@@ -1640,10 +1641,10 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get dab_music_source_description =>
-      'Per als audiòfils. Ofereix fluxos d\'àudio d\'alta qualitat/sense pèrdua. Coincidència precisa de pistes basada en ISRC.';
+      'Per als audiÃ²fils. Ofereix fluxos d\'Ã udio d\'alta qualitat/sense pÃ¨rdua. CoincidÃ¨ncia precisa de pistes basada en ISRC.';
 
   @override
-  String get summary_top_track => 'Cançó principal\naquest període';
+  String get summary_top_track => 'CanÃ§Ã³ principal\naquest perÃ­ode';
 
   @override
   String get local => 'Local';
@@ -1656,4 +1657,21 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

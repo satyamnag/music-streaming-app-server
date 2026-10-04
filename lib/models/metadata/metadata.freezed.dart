@@ -5152,7 +5152,8 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)
+            String? cardTextColor,
+            String? tags)
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5186,7 +5187,8 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
   }) =>
       throw _privateConstructorUsedError;
@@ -5220,7 +5222,8 @@ mixin _$SangeetTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
     required TResult orElse(),
   }) =>
@@ -5520,7 +5523,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)
+            String? cardTextColor,
+            String? tags)
         full,
   }) {
     return local(id, name, externalUri, artists, album, durationMs, path);
@@ -5557,7 +5561,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
   }) {
     return local?.call(id, name, externalUri, artists, album, durationMs, path);
@@ -5594,7 +5599,8 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
     required TResult orElse(),
   }) {
@@ -5706,7 +5712,8 @@ abstract class _$$SangeetFullTrackObjectImplCopyWith<$Res>
       String? plainLyricsEnTr,
       String? plainLyricsHiTr,
       String? cardBgColor,
-      String? cardTextColor});
+      String? cardTextColor,
+      String? tags});
 
   @override
   $SangeetSimpleAlbumObjectCopyWith<$Res> get album;
@@ -5745,6 +5752,7 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
     Object? plainLyricsHiTr = freezed,
     Object? cardBgColor = freezed,
     Object? cardTextColor = freezed,
+    Object? tags = freezed,
   }) {
     return _then(_$SangeetFullTrackObjectImpl(
       id: null == id
@@ -5823,6 +5831,10 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
           ? _value.cardTextColor
           : cardTextColor // ignore: cast_nullable_to_non_nullable
               as String?,
+      tags: freezed == tags
+          ? _value.tags
+          : tags // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -5850,6 +5862,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
       this.plainLyricsHiTr,
       this.cardBgColor,
       this.cardTextColor,
+      this.tags,
       final String? $type})
       : _artists = artists,
         $type = $type ?? 'full';
@@ -5909,12 +5922,17 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
   @override
   final String? cardTextColor;
 
+  /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
+  /// the home "Specials" shelves to group tracks by deity/theme.
+  @override
+  final String? tags;
+
   @JsonKey(name: 'runtimeType')
   final String $type;
 
   @override
   String toString() {
-    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor)';
+    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor, tags: $tags)';
   }
 
   @override
@@ -5953,7 +5971,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             (identical(other.cardBgColor, cardBgColor) ||
                 other.cardBgColor == cardBgColor) &&
             (identical(other.cardTextColor, cardTextColor) ||
-                other.cardTextColor == cardTextColor));
+                other.cardTextColor == cardTextColor) &&
+            (identical(other.tags, tags) || other.tags == tags));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5978,7 +5997,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsEnTr,
         plainLyricsHiTr,
         cardBgColor,
-        cardTextColor
+        cardTextColor,
+        tags
       ]);
 
   /// Create a copy of SangeetTrackObject
@@ -6021,7 +6041,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)
+            String? cardTextColor,
+            String? tags)
         full,
   }) {
     return full(
@@ -6043,7 +6064,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsEnTr,
         plainLyricsHiTr,
         cardBgColor,
-        cardTextColor);
+        cardTextColor,
+        tags);
   }
 
   @override
@@ -6077,7 +6099,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
   }) {
     return full?.call(
@@ -6099,7 +6122,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsEnTr,
         plainLyricsHiTr,
         cardBgColor,
-        cardTextColor);
+        cardTextColor,
+        tags);
   }
 
   @override
@@ -6133,7 +6157,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsEnTr,
             String? plainLyricsHiTr,
             String? cardBgColor,
-            String? cardTextColor)?
+            String? cardTextColor,
+            String? tags)?
         full,
     required TResult orElse(),
   }) {
@@ -6157,7 +6182,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
           plainLyricsEnTr,
           plainLyricsHiTr,
           cardBgColor,
-          cardTextColor);
+          cardTextColor,
+          tags);
     }
     return orElse();
   }
@@ -6221,7 +6247,8 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
       final String? plainLyricsEnTr,
       final String? plainLyricsHiTr,
       final String? cardBgColor,
-      final String? cardTextColor}) = _$SangeetFullTrackObjectImpl;
+      final String? cardTextColor,
+      final String? tags}) = _$SangeetFullTrackObjectImpl;
 
   factory SangeetFullTrackObject.fromJson(Map<String, dynamic> json) =
       _$SangeetFullTrackObjectImpl.fromJson;
@@ -6256,6 +6283,10 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
 
   /// Admin-configurable card text color (`#rrggbb`), or null for the default.
   String? get cardTextColor;
+
+  /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
+  /// the home "Specials" shelves to group tracks by deity/theme.
+  String? get tags;
 
   /// Create a copy of SangeetTrackObject
   /// with the given fields replaced by the non-null parameter values.

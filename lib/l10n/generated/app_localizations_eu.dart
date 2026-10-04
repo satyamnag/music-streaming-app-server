@@ -533,14 +533,14 @@ class AppLocalizationsEu extends AppLocalizations {
   String get bug_issues => 'Erroreak eta arazoak';
 
   @override
-  String get made_with => 'Bangladesh🇧🇩-en ❤️-z egina';
+  String get made_with => 'BangladeshðŸ‡§ðŸ‡©-en â¤ï¸-z egina';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -989,10 +989,10 @@ class AppLocalizationsEu extends AppLocalizations {
   String get skip_this_nonsense => 'Utzi txorakeria hau';
 
   @override
-  String get freedom_of_music => '“Musika Askatasuna”';
+  String get freedom_of_music => 'â€œMusika Askatasunaâ€';
 
   @override
-  String get freedom_of_music_palm => '“Musika Askatasuna zure eskuetan”';
+  String get freedom_of_music_palm => 'â€œMusika Askatasuna zure eskuetanâ€';
 
   @override
   String get get_started => 'Has gaitezen';
@@ -1255,7 +1255,7 @@ class AppLocalizationsEu extends AppLocalizations {
 
   @override
   String get hipotetical_calculation =>
-      '*Kalkulu hau online musika-streaming plataformetako batez besteko irteerako ordainari (0,003–0,005 USD) oinarrituta dago. Hipotetikoa da eta erabiltzaileari ideia bat ematen laguntzen dio artista nork zenbat kobratu zuen jakiteko, bere abestia plataform desberdinetan entzungo balu.';
+      '*Kalkulu hau online musika-streaming plataformetako batez besteko irteerako ordainari (0,003â€“0,005 USD) oinarrituta dago. Hipotetikoa da eta erabiltzaileari ideia bat ematen laguntzen dio artista nork zenbat kobratu zuen jakiteko, bere abestia plataform desberdinetan entzungo balu.';
 
   @override
   String count_mins(Object minutes) {
@@ -1501,7 +1501,7 @@ class AppLocalizationsEu extends AppLocalizations {
 
   @override
   String get building_your_timeline =>
-      'Zure entzuteen arabera zure kronologia eraikitzen…';
+      'Zure entzuteen arabera zure kronologia eraikitzenâ€¦';
 
   @override
   String get official => 'Ofiziala';
@@ -1596,7 +1596,7 @@ class AppLocalizationsEu extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti taldea ezin da arduratu (“hirugarrenen”) plugin-en>gatik (barne legala). Erabili zure arriskuarekin. Erroreak/ arazoak dituzu, jakinarazi pluginaren biltegiari.\n\nPlugin batek edozein zerbitzu/legalki entitate baten ToS/DMCA hautsi baditu, eska iezaiozu pluginaren egileari edo hosting plataformari (adibidez GitHub/Codeberg) neurriak har ditzaten. “Hirugarrena” etiketatutako plugin guztiak komunitate publikoaren bidez mantentzen dira; ez ditugu kuratoriatu, beraz ezin dugu inplikatu.\n\n';
+      'Soulful Bhakti taldea ezin da arduratu (â€œhirugarrenenâ€) plugin-en>gatik (barne legala). Erabili zure arriskuarekin. Erroreak/ arazoak dituzu, jakinarazi pluginaren biltegiari.\n\nPlugin batek edozein zerbitzu/legalki entitate baten ToS/DMCA hautsi baditu, eska iezaiozu pluginaren egileari edo hosting plataformari (adibidez GitHub/Codeberg) neurriak har ditzaten. â€œHirugarrenaâ€ etiketatutako plugin guztiak komunitate publikoaren bidez mantentzen dira; ez ditugu kuratoriatu, beraz ezin dugu inplikatu.\n\n';
 
   @override
   String get input_does_not_match_format =>
@@ -1655,4 +1655,21 @@ class AppLocalizationsEu extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

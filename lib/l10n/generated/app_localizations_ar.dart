@@ -9,670 +9,688 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
-  String get guest => 'ضيف';
+  String get guest => 'Ø¶ÙŠÙ';
 
   @override
-  String get browse => 'تصفح';
+  String get browse => 'ØªØµÙØ­';
 
   @override
-  String get search => 'بحث';
+  String get search => 'Ø¨Ø­Ø«';
 
   @override
-  String get library => 'مكتبة';
+  String get library => 'Ù…ÙƒØªØ¨Ø©';
 
   @override
-  String get lyrics => 'كلمات';
+  String get lyrics => 'ÙƒÙ„Ù…Ø§Øª';
 
   @override
-  String get settings => 'إعدادات';
+  String get settings => 'Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª';
 
   @override
-  String get settings_subtitle => 'خصص Soulful Bhakti حسب رغبتك';
+  String get settings_subtitle => 'Ø®ØµØµ Soulful Bhakti Ø­Ø³Ø¨ Ø±ØºØ¨ØªÙƒ';
 
   @override
-  String get genre_categories_filter => 'تصفية الفئات أو الأنواع...';
+  String get genre_categories_filter =>
+      'ØªØµÙÙŠØ© Ø§Ù„ÙØ¦Ø§Øª Ø£Ùˆ Ø§Ù„Ø£Ù†ÙˆØ§Ø¹...';
 
   @override
-  String get genre => 'النوع';
+  String get genre => 'Ø§Ù„Ù†ÙˆØ¹';
 
   @override
-  String get personalized => 'شخصية';
+  String get personalized => 'Ø´Ø®ØµÙŠØ©';
 
   @override
-  String get featured => 'متميز';
+  String get featured => 'Ù…ØªÙ…ÙŠØ²';
 
   @override
-  String get new_releases => 'الإصدارات الجديدة';
+  String get new_releases => 'Ø§Ù„Ø¥ØµØ¯Ø§Ø±Ø§Øª Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø©';
 
   @override
-  String get songs => 'أغاني';
+  String get songs => 'Ø£ØºØ§Ù†ÙŠ';
 
   @override
-  String get newest_arrivals => 'أحدث الإضافات';
+  String get newest_arrivals => 'Ø£Ø­Ø¯Ø« Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª';
 
   @override
-  String get top_trending => 'الأكثر رواجاً';
+  String get top_trending => 'Ø§Ù„Ø£ÙƒØ«Ø± Ø±ÙˆØ§Ø¬Ø§Ù‹';
 
   @override
-  String get see_more => 'عرض المزيد';
+  String get see_more => 'Ø¹Ø±Ø¶ Ø§Ù„Ù…Ø²ÙŠØ¯';
 
   @override
   String playing_track(Object track) {
-    return 'تشغيل $track';
+    return 'ØªØ´ØºÙŠÙ„ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'سيؤدي هذا إلى مسح قائمة الانتظار الحالية. $track_length ستتم إزالة المقطوعات\nهل تريد الإستمرار؟';
+    return 'Ø³ÙŠØ¤Ø¯ÙŠ Ù‡Ø°Ø§ Ø¥Ù„Ù‰ Ù…Ø³Ø­ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ø­Ø§Ù„ÙŠØ©. $track_length Ø³ØªØªÙ… Ø¥Ø²Ø§Ù„Ø© Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª\nÙ‡Ù„ ØªØ±ÙŠØ¯ Ø§Ù„Ø¥Ø³ØªÙ…Ø±Ø§Ø±ØŸ';
   }
 
   @override
-  String get load_more => 'تحميل المزيد';
+  String get load_more => 'ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø²ÙŠØ¯';
 
   @override
-  String get playlists => 'قوائم التشغيل';
+  String get playlists => 'Ù‚ÙˆØ§Ø¦Ù… Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get artists => 'فنانون';
+  String get artists => 'ÙÙ†Ø§Ù†ÙˆÙ†';
 
   @override
-  String get albums => 'ألبومات';
+  String get albums => 'Ø£Ù„Ø¨ÙˆÙ…Ø§Øª';
 
   @override
-  String get tracks => 'مقطوعات';
+  String get tracks => 'Ù…Ù‚Ø·ÙˆØ¹Ø§Øª';
 
   @override
-  String get downloads => 'تنزيلات';
+  String get downloads => 'ØªÙ†Ø²ÙŠÙ„Ø§Øª';
 
   @override
-  String get filter_playlists => 'تصفية قوائم التشغيل الخاصة بك...';
+  String get filter_playlists =>
+      'ØªØµÙÙŠØ© Ù‚ÙˆØ§Ø¦Ù… Ø§Ù„ØªØ´ØºÙŠÙ„ Ø§Ù„Ø®Ø§ØµØ© Ø¨Ùƒ...';
 
   @override
-  String get liked_tracks => 'المقطوعات التي أعجبتك';
+  String get liked_tracks => 'Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø§Ù„ØªÙŠ Ø£Ø¹Ø¬Ø¨ØªÙƒ';
 
   @override
-  String get liked_tracks_description => 'جميع المقطوعات التي أعجبتك';
+  String get liked_tracks_description =>
+      'Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø§Ù„ØªÙŠ Ø£Ø¹Ø¬Ø¨ØªÙƒ';
 
   @override
-  String get playlist => 'قائمة التشغيل';
+  String get playlist => 'Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get create_a_playlist => 'إنشاء قائمة تشغيل';
+  String get create_a_playlist => 'Ø¥Ù†Ø´Ø§Ø¡ Ù‚Ø§Ø¦Ù…Ø© ØªØ´ØºÙŠÙ„';
 
   @override
-  String get new_playlist => 'قائمة تشغيل جديدة';
+  String get new_playlist => 'Ù‚Ø§Ø¦Ù…Ø© ØªØ´ØºÙŠÙ„ Ø¬Ø¯ÙŠØ¯Ø©';
 
   @override
-  String get playlist_name => 'اسم قائمة التشغيل';
+  String get playlist_name => 'Ø§Ø³Ù… Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
   String get no_playlists_yet =>
-      'لا توجد قوائم تشغيل بعد. أنشئ واحدة من الأغاني المحددة.';
+      'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù‚ÙˆØ§Ø¦Ù… ØªØ´ØºÙŠÙ„ Ø¨Ø¹Ø¯. Ø£Ù†Ø´Ø¦ ÙˆØ§Ø­Ø¯Ø© Ù…Ù† Ø§Ù„Ø£ØºØ§Ù†ÙŠ Ø§Ù„Ù…Ø­Ø¯Ø¯Ø©.';
 
   @override
-  String get update_playlist => 'تحديث قائمة التشغيل';
+  String get update_playlist => 'ØªØ­Ø¯ÙŠØ« Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get create => 'إنشاء';
+  String get create => 'Ø¥Ù†Ø´Ø§Ø¡';
 
   @override
-  String get cancel => 'إلغاء';
+  String get cancel => 'Ø¥Ù„ØºØ§Ø¡';
 
   @override
-  String get update => 'تحديث';
+  String get update => 'ØªØ­Ø¯ÙŠØ«';
 
   @override
-  String get name_of_playlist => 'اسم قائمة التشغيل';
+  String get name_of_playlist => 'Ø§Ø³Ù… Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get description => 'وصف';
+  String get description => 'ÙˆØµÙ';
 
   @override
-  String get public => 'عام';
+  String get public => 'Ø¹Ø§Ù…';
 
   @override
-  String get collaborative => 'تعاوني';
+  String get collaborative => 'ØªØ¹Ø§ÙˆÙ†ÙŠ';
 
   @override
-  String get search_local_tracks => 'بحث عن مقطوعات محلية';
+  String get search_local_tracks => 'Ø¨Ø­Ø« Ø¹Ù† Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ù…Ø­Ù„ÙŠØ©';
 
   @override
-  String get play => 'تشغيل';
+  String get play => 'ØªØ´ØºÙŠÙ„';
 
   @override
-  String get delete => 'حذف';
+  String get delete => 'Ø­Ø°Ù';
 
   @override
-  String get none => 'لا شيء';
+  String get none => 'Ù„Ø§ Ø´ÙŠØ¡';
 
   @override
-  String get sort_a_z => 'الترتيب من A-Z';
+  String get sort_a_z => 'Ø§Ù„ØªØ±ØªÙŠØ¨ Ù…Ù† A-Z';
 
   @override
-  String get sort_z_a => 'الترتيب من Z-A';
+  String get sort_z_a => 'Ø§Ù„ØªØ±ØªÙŠØ¨ Ù…Ù† Z-A';
 
   @override
-  String get sort_artist => 'الترتيب حسب الفنان';
+  String get sort_artist => 'Ø§Ù„ØªØ±ØªÙŠØ¨ Ø­Ø³Ø¨ Ø§Ù„ÙÙ†Ø§Ù†';
 
   @override
-  String get sort_album => 'فرز حسب الألبوم';
+  String get sort_album => 'ÙØ±Ø² Ø­Ø³Ø¨ Ø§Ù„Ø£Ù„Ø¨ÙˆÙ…';
 
   @override
-  String get sort_duration => 'ترتيب حسب المدة';
+  String get sort_duration => 'ØªØ±ØªÙŠØ¨ Ø­Ø³Ø¨ Ø§Ù„Ù…Ø¯Ø©';
 
   @override
-  String get sort_tracks => 'ترتيب المقطوعات';
+  String get sort_tracks => 'ØªØ±ØªÙŠØ¨ Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'يتم التنزيل ($tracks_length)';
+    return 'ÙŠØªÙ… Ø§Ù„ØªÙ†Ø²ÙŠÙ„ ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'إلغاء الكل';
+  String get cancel_all => 'Ø¥Ù„ØºØ§Ø¡ Ø§Ù„ÙƒÙ„';
 
   @override
-  String get filter_artist => 'تصفية الفنانين...';
+  String get filter_artist => 'ØªØµÙÙŠØ© Ø§Ù„ÙÙ†Ø§Ù†ÙŠÙ†...';
 
   @override
   String followers(Object followers) {
-    return '$followers متابعون';
+    return '$followers Ù…ØªØ§Ø¨Ø¹ÙˆÙ†';
   }
 
   @override
-  String get add_artist_to_blacklist => 'إضافة فنان إلى القائمة السوداء';
+  String get add_artist_to_blacklist =>
+      'Ø¥Ø¶Ø§ÙØ© ÙÙ†Ø§Ù† Ø¥Ù„Ù‰ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
-  String get top_tracks => 'أهم المقطوعات الصوتية';
+  String get top_tracks => 'Ø£Ù‡Ù… Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø§Ù„ØµÙˆØªÙŠØ©';
 
   @override
-  String get fans_also_like => 'المعجبون يحبون أيضاً';
+  String get fans_also_like => 'Ø§Ù„Ù…Ø¹Ø¬Ø¨ÙˆÙ† ÙŠØ­Ø¨ÙˆÙ† Ø£ÙŠØ¶Ø§Ù‹';
 
   @override
-  String get loading => 'جارٍ التحميل';
+  String get loading => 'Ø¬Ø§Ø±Ù Ø§Ù„ØªØ­Ù…ÙŠÙ„';
 
   @override
-  String get artist => 'فنان';
+  String get artist => 'ÙÙ†Ø§Ù†';
 
   @override
-  String get blacklisted => 'في القائمة السوداء';
+  String get blacklisted => 'ÙÙŠ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
-  String get following => 'يتابع';
+  String get following => 'ÙŠØªØ§Ø¨Ø¹';
 
   @override
-  String get follow => 'تابع';
+  String get follow => 'ØªØ§Ø¨Ø¹';
 
   @override
-  String get artist_url_copied => 'تم نسخ عنوان URL للفنان إلى الحافظة';
+  String get artist_url_copied =>
+      'ØªÙ… Ù†Ø³Ø® Ø¹Ù†ÙˆØ§Ù† URL Ù„Ù„ÙÙ†Ø§Ù† Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø§ÙØ¸Ø©';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'تم إضافة المقطوعات إلى قائمة الإنتظار $tracks';
+    return 'ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø± $tracks';
   }
 
   @override
-  String get filter_albums => 'تصفية الألبومات...';
+  String get filter_albums => 'ØªØµÙÙŠØ© Ø§Ù„Ø£Ù„Ø¨ÙˆÙ…Ø§Øª...';
 
   @override
-  String get synced => 'تم المزامنة';
+  String get synced => 'ØªÙ… Ø§Ù„Ù…Ø²Ø§Ù…Ù†Ø©';
 
   @override
-  String get plain => 'سهل';
+  String get plain => 'Ø³Ù‡Ù„';
 
   @override
-  String get shuffle => 'خلط';
+  String get shuffle => 'Ø®Ù„Ø·';
 
   @override
-  String get search_tracks => 'يحث عن مقطوعات';
+  String get search_tracks => 'ÙŠØ­Ø« Ø¹Ù† Ù…Ù‚Ø·ÙˆØ¹Ø§Øª';
 
   @override
-  String get released => 'تم الإصدار';
+  String get released => 'ØªÙ… Ø§Ù„Ø¥ØµØ¯Ø§Ø±';
 
   @override
   String error(Object error) {
-    return 'خطأ $error';
+    return 'Ø®Ø·Ø£ $error';
   }
 
   @override
-  String get title => 'عنوان';
+  String get title => 'Ø¹Ù†ÙˆØ§Ù†';
 
   @override
-  String get time => 'وقت';
+  String get time => 'ÙˆÙ‚Øª';
 
   @override
-  String get more_actions => 'المزيد من الإجراءات';
+  String get more_actions => 'Ø§Ù„Ù…Ø²ÙŠØ¯ Ù…Ù† Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'إضافة ($count) إلى قائمة التشغيل';
+    return 'Ø¥Ø¶Ø§ÙØ© ($count) Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'إضافة ($count) إلى قائمة الإنتظار';
+    return 'Ø¥Ø¶Ø§ÙØ© ($count) Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'تشغيل ($count) التالي';
+    return 'ØªØ´ØºÙŠÙ„ ($count) Ø§Ù„ØªØ§Ù„ÙŠ';
   }
 
   @override
-  String get album => 'ألبوم';
+  String get album => 'Ø£Ù„Ø¨ÙˆÙ…';
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'تم النسخ $data إلى الحافظة';
+    return 'ØªÙ… Ø§Ù„Ù†Ø³Ø® $data Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø§ÙØ¸Ø©';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'إضافة $track إلى قوائم التشغيل التالية';
+    return 'Ø¥Ø¶Ø§ÙØ© $track Ø¥Ù„Ù‰ Ù‚ÙˆØ§Ø¦Ù… Ø§Ù„ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ§Ù„ÙŠØ©';
   }
 
   @override
-  String get add => 'إضافة';
+  String get add => 'Ø¥Ø¶Ø§ÙØ©';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'تم الإضافة $track إلى قائمة الإنتظار';
+    return 'ØªÙ… Ø§Ù„Ø¥Ø¶Ø§ÙØ© $track Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
   }
 
   @override
-  String get add_to_queue => 'إضافة إلى قائمة التشغيل';
+  String get add_to_queue => 'Ø¥Ø¶Ø§ÙØ© Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track سيتم تشغيل التالي';
+    return '$track Ø³ÙŠØªÙ… ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ§Ù„ÙŠ';
   }
 
   @override
-  String get play_next => 'تشغيل التالي';
+  String get play_next => 'ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ§Ù„ÙŠ';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'تم الإزالة $track من قائمة الإنتظار';
+    return 'ØªÙ… Ø§Ù„Ø¥Ø²Ø§Ù„Ø© $track Ù…Ù† Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
   }
 
   @override
-  String get remove_from_queue => 'إزالة من قائمة الإنتظار';
+  String get remove_from_queue => 'Ø¥Ø²Ø§Ù„Ø© Ù…Ù† Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
 
   @override
-  String get remove_from_favorites => 'إزالة من المفضلة';
+  String get remove_from_favorites => 'Ø¥Ø²Ø§Ù„Ø© Ù…Ù† Ø§Ù„Ù…ÙØ¶Ù„Ø©';
 
   @override
-  String get save_as_favorite => 'حفظ كمفضل';
+  String get save_as_favorite => 'Ø­ÙØ¸ ÙƒÙ…ÙØ¶Ù„';
 
   @override
-  String get add_to_playlist => 'إضافة إلى قائمة التشغيل';
+  String get add_to_playlist => 'Ø¥Ø¶Ø§ÙØ© Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get remove_from_playlist => 'إزالة من قائمة التشغيل';
+  String get remove_from_playlist =>
+      'Ø¥Ø²Ø§Ù„Ø© Ù…Ù† Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get add_to_blacklist => 'إضافة إلى القائمة السوداء';
+  String get add_to_blacklist =>
+      'Ø¥Ø¶Ø§ÙØ© Ø¥Ù„Ù‰ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
-  String get remove_from_blacklist => 'إزالة من القائمة السوداء';
+  String get remove_from_blacklist =>
+      'Ø¥Ø²Ø§Ù„Ø© Ù…Ù† Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
-  String get share => 'مشاكرة';
+  String get share => 'Ù…Ø´Ø§ÙƒØ±Ø©';
 
   @override
-  String get mini_player => 'مشغل مصغر';
+  String get mini_player => 'Ù…Ø´ØºÙ„ Ù…ØµØºØ±';
 
   @override
-  String get slide_to_seek => 'قم بالتمرير للبحث للأمام أو للخلف';
+  String get slide_to_seek =>
+      'Ù‚Ù… Ø¨Ø§Ù„ØªÙ…Ø±ÙŠØ± Ù„Ù„Ø¨Ø­Ø« Ù„Ù„Ø£Ù…Ø§Ù… Ø£Ùˆ Ù„Ù„Ø®Ù„Ù';
 
   @override
-  String get shuffle_playlist => 'قائمة تشغيل عشوائية';
+  String get shuffle_playlist => 'Ù‚Ø§Ø¦Ù…Ø© ØªØ´ØºÙŠÙ„ Ø¹Ø´ÙˆØ§Ø¦ÙŠØ©';
 
   @override
-  String get unshuffle_playlist => 'إلغاء ترتيب قائمة التشغيل';
+  String get unshuffle_playlist =>
+      'Ø¥Ù„ØºØ§Ø¡ ØªØ±ØªÙŠØ¨ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get previous_track => 'المقطوعة السابقة';
+  String get previous_track => 'Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø© Ø§Ù„Ø³Ø§Ø¨Ù‚Ø©';
 
   @override
-  String get next_track => 'مقطوعة جديدة';
+  String get next_track => 'Ù…Ù‚Ø·ÙˆØ¹Ø© Ø¬Ø¯ÙŠØ¯Ø©';
 
   @override
-  String get pause_playback => 'إيقاف التشغيل مؤقتًا';
+  String get pause_playback => 'Ø¥ÙŠÙ‚Ø§Ù Ø§Ù„ØªØ´ØºÙŠÙ„ Ù…Ø¤Ù‚ØªÙ‹Ø§';
 
   @override
-  String get resume_playback => 'استئناف التشغيل';
+  String get resume_playback => 'Ø§Ø³ØªØ¦Ù†Ø§Ù Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get loop_track => 'تشغيل المقطوعة بشكل لا نهائي';
+  String get loop_track =>
+      'ØªØ´ØºÙŠÙ„ Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø© Ø¨Ø´ÙƒÙ„ Ù„Ø§ Ù†Ù‡Ø§Ø¦ÙŠ';
 
   @override
-  String get no_loop => 'بدون تكرار';
+  String get no_loop => 'Ø¨Ø¯ÙˆÙ† ØªÙƒØ±Ø§Ø±';
 
   @override
-  String get repeat_playlist => 'تكرار قائمة التشغيل';
+  String get repeat_playlist => 'ØªÙƒØ±Ø§Ø± Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get queue => 'قائمة الإنتظار';
+  String get queue => 'Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
 
   @override
-  String get alternative_track_sources => 'مصادر مقطوعات بديلة';
+  String get alternative_track_sources =>
+      'Ù…ØµØ§Ø¯Ø± Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø¨Ø¯ÙŠÙ„Ø©';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks المقطوعات في قائمة الإنتظار';
+    return '$tracks Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª ÙÙŠ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¥Ù†ØªØ¸Ø§Ø±';
   }
 
   @override
-  String get clear_all => 'مسح الكل';
+  String get clear_all => 'Ù…Ø³Ø­ Ø§Ù„ÙƒÙ„';
 
   @override
-  String get show_hide_ui_on_hover => 'إظهار/إخفاء واجهة المستخدم عند التمرير';
+  String get show_hide_ui_on_hover =>
+      'Ø¥Ø¸Ù‡Ø§Ø±/Ø¥Ø®ÙØ§Ø¡ ÙˆØ§Ø¬Ù‡Ø© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø¹Ù†Ø¯ Ø§Ù„ØªÙ…Ø±ÙŠØ±';
 
   @override
-  String get always_on_top => 'دائما في القمة';
+  String get always_on_top => 'Ø¯Ø§Ø¦Ù…Ø§ ÙÙŠ Ø§Ù„Ù‚Ù…Ø©';
 
   @override
-  String get exit_mini_player => 'خروج من المشغل المصغر';
+  String get exit_mini_player => 'Ø®Ø±ÙˆØ¬ Ù…Ù† Ø§Ù„Ù…Ø´ØºÙ„ Ø§Ù„Ù…ØµØºØ±';
 
   @override
-  String get local_library => 'المكتبة المحلية';
+  String get local_library => 'Ø§Ù„Ù…ÙƒØªØ¨Ø© Ø§Ù„Ù…Ø­Ù„ÙŠØ©';
 
   @override
-  String get add_library_location => 'أضف إلى المكتبة';
+  String get add_library_location => 'Ø£Ø¶Ù Ø¥Ù„Ù‰ Ø§Ù„Ù…ÙƒØªØ¨Ø©';
 
   @override
-  String get remove_library_location => 'إزالة من المكتبة';
+  String get remove_library_location => 'Ø¥Ø²Ø§Ù„Ø© Ù…Ù† Ø§Ù„Ù…ÙƒØªØ¨Ø©';
 
   @override
-  String get account => 'حساب';
+  String get account => 'Ø­Ø³Ø§Ø¨';
 
   @override
-  String get logout => 'تسجيل الخروج';
+  String get logout => 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬';
 
   @override
-  String get logout_of_this_account => 'تسجيل الخروج من هذا الحساب';
+  String get logout_of_this_account =>
+      'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬ Ù…Ù† Ù‡Ø°Ø§ Ø§Ù„Ø­Ø³Ø§Ø¨';
 
   @override
-  String get language_region => 'اللغة والمنطقة';
+  String get language_region => 'Ø§Ù„Ù„ØºØ© ÙˆØ§Ù„Ù…Ù†Ø·Ù‚Ø©';
 
   @override
-  String get language => 'لغة';
+  String get language => 'Ù„ØºØ©';
 
   @override
-  String get system_default => 'لغة النظام الإفتراضية';
+  String get system_default => 'Ù„ØºØ© Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ø¥ÙØªØ±Ø§Ø¶ÙŠØ©';
 
   @override
-  String get market_place_region => 'منطقة السوق';
+  String get market_place_region => 'Ù…Ù†Ø·Ù‚Ø© Ø§Ù„Ø³ÙˆÙ‚';
 
   @override
-  String get recommendation_country => 'بلد التوصية';
+  String get recommendation_country => 'Ø¨Ù„Ø¯ Ø§Ù„ØªÙˆØµÙŠØ©';
 
   @override
-  String get appearance => 'مظهر';
+  String get appearance => 'Ù…Ø¸Ù‡Ø±';
 
   @override
-  String get layout_mode => 'وضع التخطيط';
+  String get layout_mode => 'ÙˆØ¶Ø¹ Ø§Ù„ØªØ®Ø·ÙŠØ·';
 
   @override
   String get override_layout_settings =>
-      'تجاوز إعدادات وضع التخطيط سريع الاستجابة';
+      'ØªØ¬Ø§ÙˆØ² Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª ÙˆØ¶Ø¹ Ø§Ù„ØªØ®Ø·ÙŠØ· Ø³Ø±ÙŠØ¹ Ø§Ù„Ø§Ø³ØªØ¬Ø§Ø¨Ø©';
 
   @override
-  String get adaptive => 'متكيف';
+  String get adaptive => 'Ù…ØªÙƒÙŠÙ';
 
   @override
-  String get compact => 'مدمج';
+  String get compact => 'Ù…Ø¯Ù…Ø¬';
 
   @override
-  String get extended => 'ممتد';
+  String get extended => 'Ù…Ù…ØªØ¯';
 
   @override
-  String get theme => 'مظهر';
+  String get theme => 'Ù…Ø¸Ù‡Ø±';
 
   @override
-  String get dark => 'داكن';
+  String get dark => 'Ø¯Ø§ÙƒÙ†';
 
   @override
-  String get light => 'ساطعt';
+  String get light => 'Ø³Ø§Ø·Ø¹t';
 
   @override
-  String get system => 'حسب النظام';
+  String get system => 'Ø­Ø³Ø¨ Ø§Ù„Ù†Ø¸Ø§Ù…';
 
   @override
-  String get accent_color => 'لون تمييز';
+  String get accent_color => 'Ù„ÙˆÙ† ØªÙ…ÙŠÙŠØ²';
 
   @override
-  String get sync_album_color => 'مزامنة لون الألبوم';
+  String get sync_album_color => 'Ù…Ø²Ø§Ù…Ù†Ø© Ù„ÙˆÙ† Ø§Ù„Ø£Ù„Ø¨ÙˆÙ…';
 
   @override
   String get sync_album_color_description =>
-      'يستخدم اللون السائد لصورة الألبوم باعتباره لون التمييز';
+      'ÙŠØ³ØªØ®Ø¯Ù… Ø§Ù„Ù„ÙˆÙ† Ø§Ù„Ø³Ø§Ø¦Ø¯ Ù„ØµÙˆØ±Ø© Ø§Ù„Ø£Ù„Ø¨ÙˆÙ… Ø¨Ø§Ø¹ØªØ¨Ø§Ø±Ù‡ Ù„ÙˆÙ† Ø§Ù„ØªÙ…ÙŠÙŠØ²';
 
   @override
-  String get playback => 'التشغيل';
+  String get playback => 'Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get audio_quality => 'جودة الصوت';
+  String get audio_quality => 'Ø¬ÙˆØ¯Ø© Ø§Ù„ØµÙˆØª';
 
   @override
-  String get high => 'مرتفعة';
+  String get high => 'Ù…Ø±ØªÙØ¹Ø©';
 
   @override
-  String get low => 'منخفضة';
+  String get low => 'Ù…Ù†Ø®ÙØ¶Ø©';
 
   @override
-  String get pre_download_play => 'التحميل المسبق والتشغيل';
+  String get pre_download_play =>
+      'Ø§Ù„ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø³Ø¨Ù‚ ÙˆØ§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
   String get pre_download_play_description =>
-      'بدلاً من دفق الصوت، قم بتنزيل وحدات البايت وتشغيلها بدلاً من ذلك (موصى به لمستخدمي Bandwidth)';
+      'Ø¨Ø¯Ù„Ø§Ù‹ Ù…Ù† Ø¯ÙÙ‚ Ø§Ù„ØµÙˆØªØŒ Ù‚Ù… Ø¨ØªÙ†Ø²ÙŠÙ„ ÙˆØ­Ø¯Ø§Øª Ø§Ù„Ø¨Ø§ÙŠØª ÙˆØªØ´ØºÙŠÙ„Ù‡Ø§ Ø¨Ø¯Ù„Ø§Ù‹ Ù…Ù† Ø°Ù„Ùƒ (Ù…ÙˆØµÙ‰ Ø¨Ù‡ Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠ Bandwidth)';
 
   @override
-  String get skip_non_music => 'تخطي المقاطع غير الموسيقية (SponsorBlock)';
+  String get skip_non_music =>
+      'ØªØ®Ø·ÙŠ Ø§Ù„Ù…Ù‚Ø§Ø·Ø¹ ØºÙŠØ± Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚ÙŠØ© (SponsorBlock)';
 
   @override
   String get blacklist_description =>
-      'المقطوعات والفنانون المدرجون في القائمة السوداء';
+      'Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª ÙˆØ§Ù„ÙÙ†Ø§Ù†ÙˆÙ† Ø§Ù„Ù…Ø¯Ø±Ø¬ÙˆÙ† ÙÙŠ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
   String get wait_for_download_to_finish =>
-      'يرجى الانتظار حتى انتهاء التنزيل الحالي';
+      'ÙŠØ±Ø¬Ù‰ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ø­ØªÙ‰ Ø§Ù†ØªÙ‡Ø§Ø¡ Ø§Ù„ØªÙ†Ø²ÙŠÙ„ Ø§Ù„Ø­Ø§Ù„ÙŠ';
 
   @override
-  String get desktop => 'سطح المكتب';
+  String get desktop => 'Ø³Ø·Ø­ Ø§Ù„Ù…ÙƒØªØ¨';
 
   @override
-  String get close_behavior => 'إغلاق التصرف';
+  String get close_behavior => 'Ø¥ØºÙ„Ø§Ù‚ Ø§Ù„ØªØµØ±Ù';
 
   @override
-  String get close => 'إغلاق';
+  String get close => 'Ø¥ØºÙ„Ø§Ù‚';
 
   @override
-  String get minimize_to_tray => 'تصغير إلى الدرج';
+  String get minimize_to_tray => 'ØªØµØºÙŠØ± Ø¥Ù„Ù‰ Ø§Ù„Ø¯Ø±Ø¬';
 
   @override
-  String get show_tray_icon => 'إظهار أيقونات درج النظام';
+  String get show_tray_icon => 'Ø¥Ø¸Ù‡Ø§Ø± Ø£ÙŠÙ‚ÙˆÙ†Ø§Øª Ø¯Ø±Ø¬ Ø§Ù„Ù†Ø¸Ø§Ù…';
 
   @override
-  String get about => 'حول';
+  String get about => 'Ø­ÙˆÙ„';
 
   @override
-  String get u_love_spotube => 'نحن نعلم أنك تحب Soulful Bhakti';
+  String get u_love_spotube => 'Ù†Ø­Ù† Ù†Ø¹Ù„Ù… Ø£Ù†Ùƒ ØªØ­Ø¨ Soulful Bhakti';
 
   @override
-  String get check_for_updates => 'تحقق من وجود تحديثات';
+  String get check_for_updates => 'ØªØ­Ù‚Ù‚ Ù…Ù† ÙˆØ¬ÙˆØ¯ ØªØ­Ø¯ÙŠØ«Ø§Øª';
 
   @override
-  String get about_spotube => 'حول Soulful Bhakti';
+  String get about_spotube => 'Ø­ÙˆÙ„ Soulful Bhakti';
 
   @override
-  String get blacklist => 'قائمة سوداء';
+  String get blacklist => 'Ù‚Ø§Ø¦Ù…Ø© Ø³ÙˆØ¯Ø§Ø¡';
 
   @override
-  String get please_sponsor => 'يرجى دعم/التبرع';
+  String get please_sponsor => 'ÙŠØ±Ø¬Ù‰ Ø¯Ø¹Ù…/Ø§Ù„ØªØ¨Ø±Ø¹';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti، عميل Spotify خفيف الوزن ومتعدد المنصات ومجاني للجميع';
+      'Soulful BhaktiØŒ Ø¹Ù…ÙŠÙ„ Spotify Ø®ÙÙŠÙ Ø§Ù„ÙˆØ²Ù† ÙˆÙ…ØªØ¹Ø¯Ø¯ Ø§Ù„Ù…Ù†ØµØ§Øª ÙˆÙ…Ø¬Ø§Ù†ÙŠ Ù„Ù„Ø¬Ù…ÙŠØ¹';
 
   @override
-  String get version => 'إصدار';
+  String get version => 'Ø¥ØµØ¯Ø§Ø±';
 
   @override
-  String get build_number => 'رقم البنية';
+  String get build_number => 'Ø±Ù‚Ù… Ø§Ù„Ø¨Ù†ÙŠØ©';
 
   @override
-  String get founder => 'الموئسس';
+  String get founder => 'Ø§Ù„Ù…ÙˆØ¦Ø³Ø³';
 
   @override
-  String get repository => 'المستودع';
+  String get repository => 'Ø§Ù„Ù…Ø³ØªÙˆØ¯Ø¹';
 
   @override
-  String get bug_issues => 'أخطاء+مشاكل';
+  String get bug_issues => 'Ø£Ø®Ø·Ø§Ø¡+Ù…Ø´Ø§ÙƒÙ„';
 
   @override
-  String get made_with => 'صُنع باستخدام ❤️ في بنغلاديش🇧🇩';
+  String get made_with =>
+      'ØµÙÙ†Ø¹ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… â¤ï¸ ÙÙŠ Ø¨Ù†ØºÙ„Ø§Ø¯ÙŠØ´ðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'الترخيص';
+  String get license => 'Ø§Ù„ØªØ±Ø®ÙŠØµ';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'لا تقلق، لن يتم جمع أي من بيانات الخاصة بك أو مشاركتها مع أي شخص';
+      'Ù„Ø§ ØªÙ‚Ù„Ù‚ØŒ Ù„Ù† ÙŠØªÙ… Ø¬Ù…Ø¹ Ø£ÙŠ Ù…Ù† Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø®Ø§ØµØ© Ø¨Ùƒ Ø£Ùˆ Ù…Ø´Ø§Ø±ÙƒØªÙ‡Ø§ Ù…Ø¹ Ø£ÙŠ Ø´Ø®Øµ';
 
   @override
-  String get know_how_to_login => 'لا تعرف كيف تفعل هذا؟';
+  String get know_how_to_login => 'Ù„Ø§ ØªØ¹Ø±Ù ÙƒÙŠÙ ØªÙØ¹Ù„ Ù‡Ø°Ø§ØŸ';
 
   @override
-  String get follow_step_by_step_guide => 'اتبع الدليل خطوة بخطوة';
+  String get follow_step_by_step_guide =>
+      'Ø§ØªØ¨Ø¹ Ø§Ù„Ø¯Ù„ÙŠÙ„ Ø®Ø·ÙˆØ© Ø¨Ø®Ø·ÙˆØ©';
 
   @override
   String cookie_name_cookie(Object name) {
-    return '$name كوكيز';
+    return '$name ÙƒÙˆÙƒÙŠØ²';
   }
 
   @override
-  String get fill_in_all_fields => 'يرجى تعبئة جميع الحقول';
+  String get fill_in_all_fields => 'ÙŠØ±Ø¬Ù‰ ØªØ¹Ø¨Ø¦Ø© Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ù‚ÙˆÙ„';
 
   @override
-  String get submit => 'إرسال';
+  String get submit => 'Ø¥Ø±Ø³Ø§Ù„';
 
   @override
-  String get exit => 'خروج';
+  String get exit => 'Ø®Ø±ÙˆØ¬';
 
   @override
-  String get previous => 'السابق';
+  String get previous => 'Ø§Ù„Ø³Ø§Ø¨Ù‚';
 
   @override
-  String get next => 'التالي';
+  String get next => 'Ø§Ù„ØªØ§Ù„ÙŠ';
 
   @override
-  String get done => 'تم';
+  String get done => 'ØªÙ…';
 
   @override
-  String get step_1 => 'الخطوة 1';
+  String get step_1 => 'Ø§Ù„Ø®Ø·ÙˆØ© 1';
 
   @override
-  String get first_go_to => 'أولا، اذهب إلى';
+  String get first_go_to => 'Ø£ÙˆÙ„Ø§ØŒ Ø§Ø°Ù‡Ø¨ Ø¥Ù„Ù‰';
 
   @override
-  String get something_went_wrong => 'هناك خطأ ما';
+  String get something_went_wrong => 'Ù‡Ù†Ø§Ùƒ Ø®Ø·Ø£ Ù…Ø§';
 
   @override
-  String get piped_instance => 'مثيل خادم Piped';
+  String get piped_instance => 'Ù…Ø«ÙŠÙ„ Ø®Ø§Ø¯Ù… Piped';
 
   @override
   String get piped_description =>
-      'مثيل خادم Piped الذي سيتم استخدامه لمطابقة المقطوعة';
+      'Ù…Ø«ÙŠÙ„ Ø®Ø§Ø¯Ù… Piped Ø§Ù„Ø°ÙŠ Ø³ÙŠØªÙ… Ø§Ø³ØªØ®Ø¯Ø§Ù…Ù‡ Ù„Ù…Ø·Ø§Ø¨Ù‚Ø© Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø©';
 
   @override
   String get piped_warning =>
-      'البعض منهم قد لا يعمل بشكل جيد. لذلك استخدمه على مسؤوليتك';
+      'Ø§Ù„Ø¨Ø¹Ø¶ Ù…Ù†Ù‡Ù… Ù‚Ø¯ Ù„Ø§ ÙŠØ¹Ù…Ù„ Ø¨Ø´ÙƒÙ„ Ø¬ÙŠØ¯. Ù„Ø°Ù„Ùƒ Ø§Ø³ØªØ®Ø¯Ù…Ù‡ Ø¹Ù„Ù‰ Ù…Ø³Ø¤ÙˆÙ„ÙŠØªÙƒ';
 
   @override
-  String get invidious_instance => 'مثيل خادم Invidious';
+  String get invidious_instance => 'Ù…Ø«ÙŠÙ„ Ø®Ø§Ø¯Ù… Invidious';
 
   @override
   String get invidious_description =>
-      'مثيل خادم Invidious المستخدم لمطابقة المسارات';
+      'Ù…Ø«ÙŠÙ„ Ø®Ø§Ø¯Ù… Invidious Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù„Ù…Ø·Ø§Ø¨Ù‚Ø© Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª';
 
   @override
   String get invidious_warning =>
-      'قد لا تعمل بعض الخوادم بشكل جيد. استخدمها على مسؤوليتك الخاصة';
+      'Ù‚Ø¯ Ù„Ø§ ØªØ¹Ù…Ù„ Ø¨Ø¹Ø¶ Ø§Ù„Ø®ÙˆØ§Ø¯Ù… Ø¨Ø´ÙƒÙ„ Ø¬ÙŠØ¯. Ø§Ø³ØªØ®Ø¯Ù…Ù‡Ø§ Ø¹Ù„Ù‰ Ù…Ø³Ø¤ÙˆÙ„ÙŠØªÙƒ Ø§Ù„Ø®Ø§ØµØ©';
 
   @override
-  String get generate => 'إنشاء';
+  String get generate => 'Ø¥Ù†Ø´Ø§Ø¡';
 
   @override
   String track_exists(Object track) {
-    return 'المقطوعة $track بالفعل موجودة';
+    return 'Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø© $track Ø¨Ø§Ù„ÙØ¹Ù„ Ù…ÙˆØ¬ÙˆØ¯Ø©';
   }
 
   @override
-  String get replace => 'إستبدال';
+  String get replace => 'Ø¥Ø³ØªØ¨Ø¯Ø§Ù„';
 
   @override
-  String get skip => 'تخطي';
+  String get skip => 'ØªØ®Ø·ÙŠ';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'إختر ما يصل إلى $count $type';
+    return 'Ø¥Ø®ØªØ± Ù…Ø§ ÙŠØµÙ„ Ø¥Ù„Ù‰ $count $type';
   }
 
   @override
-  String get select_genres => 'حدد الأنواع';
+  String get select_genres => 'Ø­Ø¯Ø¯ Ø§Ù„Ø£Ù†ÙˆØ§Ø¹';
 
   @override
-  String get add_genres => 'أضف الأنواع';
+  String get add_genres => 'Ø£Ø¶Ù Ø§Ù„Ø£Ù†ÙˆØ§Ø¹';
 
   @override
-  String get country => 'دولة';
+  String get country => 'Ø¯ÙˆÙ„Ø©';
 
   @override
   String get number_of_tracks_generate =>
-      'عدد المسارات المقطوعات المراد توليدها';
+      'Ø¹Ø¯Ø¯ Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø§Ù„Ù…Ù‚Ø·ÙˆØ¹Ø§Øª Ø§Ù„Ù…Ø±Ø§Ø¯ ØªÙˆÙ„ÙŠØ¯Ù‡Ø§';
 
   @override
-  String get acousticness => 'صوتية';
+  String get acousticness => 'ØµÙˆØªÙŠØ©';
 
   @override
-  String get danceability => 'قدرة على الرقص';
+  String get danceability => 'Ù‚Ø¯Ø±Ø© Ø¹Ù„Ù‰ Ø§Ù„Ø±Ù‚Øµ';
 
   @override
-  String get energy => 'طاقة';
+  String get energy => 'Ø·Ø§Ù‚Ø©';
 
   @override
-  String get instrumentalness => 'نفعية';
+  String get instrumentalness => 'Ù†ÙØ¹ÙŠØ©';
 
   @override
-  String get liveness => 'حيوية';
+  String get liveness => 'Ø­ÙŠÙˆÙŠØ©';
 
   @override
-  String get loudness => 'بريق';
+  String get loudness => 'Ø¨Ø±ÙŠÙ‚';
 
   @override
-  String get speechiness => 'كلام';
+  String get speechiness => 'ÙƒÙ„Ø§Ù…';
 
   @override
-  String get valence => 'تكافؤ';
+  String get valence => 'ØªÙƒØ§ÙØ¤';
 
   @override
-  String get popularity => 'شعبية';
+  String get popularity => 'Ø´Ø¹Ø¨ÙŠØ©';
 
   @override
-  String get key => 'مفتاح';
+  String get key => 'Ù…ÙØªØ§Ø­';
 
   @override
-  String get duration => 'مدة (s)';
+  String get duration => 'Ù…Ø¯Ø© (s)';
 
   @override
   String get tempo => 'Tempo (BPM)';
@@ -681,626 +699,649 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mode => 'Mode';
 
   @override
-  String get time_signature => 'توقيع الوقت';
+  String get time_signature => 'ØªÙˆÙ‚ÙŠØ¹ Ø§Ù„ÙˆÙ‚Øª';
 
   @override
-  String get short => 'قصير';
+  String get short => 'Ù‚ØµÙŠØ±';
 
   @override
-  String get medium => 'متوسط';
+  String get medium => 'Ù…ØªÙˆØ³Ø·';
 
   @override
-  String get long => 'طويل';
+  String get long => 'Ø·ÙˆÙŠÙ„';
 
   @override
-  String get min => 'أدنى';
+  String get min => 'Ø£Ø¯Ù†Ù‰';
 
   @override
-  String get max => 'أقصى';
+  String get max => 'Ø£Ù‚ØµÙ‰';
 
   @override
-  String get target => 'هدف';
+  String get target => 'Ù‡Ø¯Ù';
 
   @override
-  String get moderate => 'معتدل';
+  String get moderate => 'Ù…Ø¹ØªØ¯Ù„';
 
   @override
-  String get deselect_all => 'الغاء تحديد الكل';
+  String get deselect_all => 'Ø§Ù„ØºØ§Ø¡ ØªØ­Ø¯ÙŠØ¯ Ø§Ù„ÙƒÙ„';
 
   @override
-  String get select_all => 'اختر الكل';
+  String get select_all => 'Ø§Ø®ØªØ± Ø§Ù„ÙƒÙ„';
 
   @override
-  String get are_you_sure => 'هل أنت متأكد؟';
+  String get are_you_sure => 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ØŸ';
 
   @override
-  String get generating_playlist => 'جارٍ إنشاء قائمة التشغيل المخصصة...';
+  String get generating_playlist =>
+      'Ø¬Ø§Ø±Ù Ø¥Ù†Ø´Ø§Ø¡ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„ Ø§Ù„Ù…Ø®ØµØµØ©...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'مقطوعات $count مختارة';
+    return 'Ù…Ù‚Ø·ÙˆØ¹Ø§Øª $count Ù…Ø®ØªØ§Ø±Ø©';
   }
 
   @override
   String get download_warning =>
-      'إذا قمت بتنزيل جميع المقاطع الصوتية بكميات كبيرة، فمن الواضح أنك تقوم بقرصنة الموسيقى وتسبب الضرر للمجتمع الإبداعي للموسيقى. أتمنى أن تكون على علم بهذا. حاول دائمًا احترام ودعم العمل الجاد للفنان';
+      'Ø¥Ø°Ø§ Ù‚Ù…Øª Ø¨ØªÙ†Ø²ÙŠÙ„ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ù‚Ø§Ø·Ø¹ Ø§Ù„ØµÙˆØªÙŠØ© Ø¨ÙƒÙ…ÙŠØ§Øª ÙƒØ¨ÙŠØ±Ø©ØŒ ÙÙ…Ù† Ø§Ù„ÙˆØ§Ø¶Ø­ Ø£Ù†Ùƒ ØªÙ‚ÙˆÙ… Ø¨Ù‚Ø±ØµÙ†Ø© Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰ ÙˆØªØ³Ø¨Ø¨ Ø§Ù„Ø¶Ø±Ø± Ù„Ù„Ù…Ø¬ØªÙ…Ø¹ Ø§Ù„Ø¥Ø¨Ø¯Ø§Ø¹ÙŠ Ù„Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰. Ø£ØªÙ…Ù†Ù‰ Ø£Ù† ØªÙƒÙˆÙ† Ø¹Ù„Ù‰ Ø¹Ù„Ù… Ø¨Ù‡Ø°Ø§. Ø­Ø§ÙˆÙ„ Ø¯Ø§Ø¦Ù…Ù‹Ø§ Ø§Ø­ØªØ±Ø§Ù… ÙˆØ¯Ø¹Ù… Ø§Ù„Ø¹Ù…Ù„ Ø§Ù„Ø¬Ø§Ø¯ Ù„Ù„ÙÙ†Ø§Ù†';
 
   @override
   String get download_ip_ban_warning =>
-      'بالمناسبة، يمكن أن يتم حظر عنوان IP الخاص بك على YouTube بسبب طلبات التنزيل الزائدة عن المعتاد. يعني حظر IP أنه لا يمكنك استخدام YouTube (حتى إذا قمت بتسجيل الدخول) لمدة تتراوح بين شهرين إلى ثلاثة أشهر على الأقل من جهاز IP هذا. ولا يتحمل Soulful Bhakti أي مسؤولية إذا حدث هذا على الإطلاق';
+      'Ø¨Ø§Ù„Ù…Ù†Ø§Ø³Ø¨Ø©ØŒ ÙŠÙ…ÙƒÙ† Ø£Ù† ÙŠØªÙ… Ø­Ø¸Ø± Ø¹Ù†ÙˆØ§Ù† IP Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ Ø¹Ù„Ù‰ YouTube Ø¨Ø³Ø¨Ø¨ Ø·Ù„Ø¨Ø§Øª Ø§Ù„ØªÙ†Ø²ÙŠÙ„ Ø§Ù„Ø²Ø§Ø¦Ø¯Ø© Ø¹Ù† Ø§Ù„Ù…Ø¹ØªØ§Ø¯. ÙŠØ¹Ù†ÙŠ Ø­Ø¸Ø± IP Ø£Ù†Ù‡ Ù„Ø§ ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ø³ØªØ®Ø¯Ø§Ù… YouTube (Ø­ØªÙ‰ Ø¥Ø°Ø§ Ù‚Ù…Øª Ø¨ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„) Ù„Ù…Ø¯Ø© ØªØªØ±Ø§ÙˆØ­ Ø¨ÙŠÙ† Ø´Ù‡Ø±ÙŠÙ† Ø¥Ù„Ù‰ Ø«Ù„Ø§Ø«Ø© Ø£Ø´Ù‡Ø± Ø¹Ù„Ù‰ Ø§Ù„Ø£Ù‚Ù„ Ù…Ù† Ø¬Ù‡Ø§Ø² IP Ù‡Ø°Ø§. ÙˆÙ„Ø§ ÙŠØªØ­Ù…Ù„ Soulful Bhakti Ø£ÙŠ Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© Ø¥Ø°Ø§ Ø­Ø¯Ø« Ù‡Ø°Ø§ Ø¹Ù„Ù‰ Ø§Ù„Ø¥Ø·Ù„Ø§Ù‚';
 
   @override
   String get by_clicking_accept_terms =>
-      'بالنقر على \"قبول\"، فإنك توافق على الشروط التالية:';
+      'Ø¨Ø§Ù„Ù†Ù‚Ø± Ø¹Ù„Ù‰ \"Ù‚Ø¨ÙˆÙ„\"ØŒ ÙØ¥Ù†Ùƒ ØªÙˆØ§ÙÙ‚ Ø¹Ù„Ù‰ Ø§Ù„Ø´Ø±ÙˆØ· Ø§Ù„ØªØ§Ù„ÙŠØ©:';
 
   @override
-  String get download_agreement_1 => 'أعلم أنني أقوم بقرصنة الموسيقى. انا سيئ';
+  String get download_agreement_1 =>
+      'Ø£Ø¹Ù„Ù… Ø£Ù†Ù†ÙŠ Ø£Ù‚ÙˆÙ… Ø¨Ù‚Ø±ØµÙ†Ø© Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰. Ø§Ù†Ø§ Ø³ÙŠØ¦';
 
   @override
   String get download_agreement_2 =>
-      'سأدعم الفنان أينما أستطيع، وأنا أفعل هذا فقط لأنني لا أملك المال لشراء أعمالهم الفنية';
+      'Ø³Ø£Ø¯Ø¹Ù… Ø§Ù„ÙÙ†Ø§Ù† Ø£ÙŠÙ†Ù…Ø§ Ø£Ø³ØªØ·ÙŠØ¹ØŒ ÙˆØ£Ù†Ø§ Ø£ÙØ¹Ù„ Ù‡Ø°Ø§ ÙÙ‚Ø· Ù„Ø£Ù†Ù†ÙŠ Ù„Ø§ Ø£Ù…Ù„Ùƒ Ø§Ù„Ù…Ø§Ù„ Ù„Ø´Ø±Ø§Ø¡ Ø£Ø¹Ù…Ø§Ù„Ù‡Ù… Ø§Ù„ÙÙ†ÙŠØ©';
 
   @override
   String get download_agreement_3 =>
-      'أدرك تمامًا أنه يمكن حظر عنوان IP الخاص بي على YouTube ولا أحمل Soulful Bhakti أو مالكيه/مساهميه المسؤولية عن أي حوادث ناجمة عن الإجراء الحالي الخاص بي';
+      'Ø£Ø¯Ø±Ùƒ ØªÙ…Ø§Ù…Ù‹Ø§ Ø£Ù†Ù‡ ÙŠÙ…ÙƒÙ† Ø­Ø¸Ø± Ø¹Ù†ÙˆØ§Ù† IP Ø§Ù„Ø®Ø§Øµ Ø¨ÙŠ Ø¹Ù„Ù‰ YouTube ÙˆÙ„Ø§ Ø£Ø­Ù…Ù„ Soulful Bhakti Ø£Ùˆ Ù…Ø§Ù„ÙƒÙŠÙ‡/Ù…Ø³Ø§Ù‡Ù…ÙŠÙ‡ Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© Ø¹Ù† Ø£ÙŠ Ø­ÙˆØ§Ø¯Ø« Ù†Ø§Ø¬Ù…Ø© Ø¹Ù† Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡ Ø§Ù„Ø­Ø§Ù„ÙŠ Ø§Ù„Ø®Ø§Øµ Ø¨ÙŠ';
 
   @override
-  String get decline => 'رفض';
+  String get decline => 'Ø±ÙØ¶';
 
   @override
-  String get accept => 'قبول';
+  String get accept => 'Ù‚Ø¨ÙˆÙ„';
 
   @override
-  String get details => 'تفاصيل';
+  String get details => 'ØªÙØ§ØµÙŠÙ„';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'قناة';
+  String get channel => 'Ù‚Ù†Ø§Ø©';
 
   @override
-  String get likes => 'إعجابات';
+  String get likes => 'Ø¥Ø¹Ø¬Ø§Ø¨Ø§Øª';
 
   @override
-  String get dislikes => 'عدم الإعجابات';
+  String get dislikes => 'Ø¹Ø¯Ù… Ø§Ù„Ø¥Ø¹Ø¬Ø§Ø¨Ø§Øª';
 
   @override
-  String get views => 'مشاهدات';
+  String get views => 'Ù…Ø´Ø§Ù‡Ø¯Ø§Øª';
 
   @override
-  String get streamUrl => 'عنوان URL البث';
+  String get streamUrl => 'Ø¹Ù†ÙˆØ§Ù† URL Ø§Ù„Ø¨Ø«';
 
   @override
-  String get stop => 'إيقاف';
+  String get stop => 'Ø¥ÙŠÙ‚Ø§Ù';
 
   @override
-  String get sort_newest => 'الترتيب حسب الأقدم';
+  String get sort_newest => 'Ø§Ù„ØªØ±ØªÙŠØ¨ Ø­Ø³Ø¨ Ø§Ù„Ø£Ù‚Ø¯Ù…';
 
   @override
-  String get sort_oldest => 'الترتيب حسب الأقدم';
+  String get sort_oldest => 'Ø§Ù„ØªØ±ØªÙŠØ¨ Ø­Ø³Ø¨ Ø§Ù„Ø£Ù‚Ø¯Ù…';
 
   @override
-  String get sleep_timer => 'مؤقت النوم';
+  String get sleep_timer => 'Ù…Ø¤Ù‚Øª Ø§Ù„Ù†ÙˆÙ…';
 
   @override
   String mins(Object minutes) {
-    return '$minutes دقائق';
+    return '$minutes Ø¯Ù‚Ø§Ø¦Ù‚';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours ساعات';
+    return '$hours Ø³Ø§Ø¹Ø§Øª';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours ساعة';
+    return '$hours Ø³Ø§Ø¹Ø©';
   }
 
   @override
-  String get custom_hours => 'ساعات مخصصة';
+  String get custom_hours => 'Ø³Ø§Ø¹Ø§Øª Ù…Ø®ØµØµØ©';
 
   @override
-  String get logs => 'سجلات';
+  String get logs => 'Ø³Ø¬Ù„Ø§Øª';
 
   @override
-  String get developers => 'المطورون';
+  String get developers => 'Ø§Ù„Ù…Ø·ÙˆØ±ÙˆÙ†';
 
   @override
-  String get not_logged_in => 'لم تقم بتسجيل الدخول';
+  String get not_logged_in => 'Ù„Ù… ØªÙ‚Ù… Ø¨ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
 
   @override
-  String get search_mode => 'وضع البحث';
+  String get search_mode => 'ÙˆØ¶Ø¹ Ø§Ù„Ø¨Ø­Ø«';
 
   @override
-  String get audio_source => 'مصدر الصوت';
+  String get audio_source => 'Ù…ØµØ¯Ø± Ø§Ù„ØµÙˆØª';
 
   @override
-  String get ok => 'حسسناً';
+  String get ok => 'Ø­Ø³Ø³Ù†Ø§Ù‹';
 
   @override
-  String get failed_to_encrypt => 'فشل في التشفير';
+  String get failed_to_encrypt => 'ÙØ´Ù„ ÙÙŠ Ø§Ù„ØªØ´ÙÙŠØ±';
 
   @override
   String get encryption_failed_warning =>
-      'يستخدم Soulful Bhakti التشفير لتخزين بياناتك بشكل آمن. لكنها فشلت في القيام بذلك. لذلك سيعود الأمر إلى التخزين غير الآمن\nإذا كنت تستخدم Linux، فيرجى التأكد من تثبيت أي خدمة سرية (gnome-keyring، kde-wallet، keepassxc، إلخ)';
+      'ÙŠØ³ØªØ®Ø¯Ù… Soulful Bhakti Ø§Ù„ØªØ´ÙÙŠØ± Ù„ØªØ®Ø²ÙŠÙ† Ø¨ÙŠØ§Ù†Ø§ØªÙƒ Ø¨Ø´ÙƒÙ„ Ø¢Ù…Ù†. Ù„ÙƒÙ†Ù‡Ø§ ÙØ´Ù„Øª ÙÙŠ Ø§Ù„Ù‚ÙŠØ§Ù… Ø¨Ø°Ù„Ùƒ. Ù„Ø°Ù„Ùƒ Ø³ÙŠØ¹ÙˆØ¯ Ø§Ù„Ø£Ù…Ø± Ø¥Ù„Ù‰ Ø§Ù„ØªØ®Ø²ÙŠÙ† ØºÙŠØ± Ø§Ù„Ø¢Ù…Ù†\nØ¥Ø°Ø§ ÙƒÙ†Øª ØªØ³ØªØ®Ø¯Ù… LinuxØŒ ÙÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† ØªØ«Ø¨ÙŠØª Ø£ÙŠ Ø®Ø¯Ù…Ø© Ø³Ø±ÙŠØ© (gnome-keyringØŒ kde-walletØŒ keepassxcØŒ Ø¥Ù„Ø®)';
 
   @override
-  String get querying_info => 'جارٍ الاستعلام عن معلومات...';
+  String get querying_info =>
+      'Ø¬Ø§Ø±Ù Ø§Ù„Ø§Ø³ØªØ¹Ù„Ø§Ù… Ø¹Ù† Ù…Ø¹Ù„ÙˆÙ…Ø§Øª...';
 
   @override
-  String get piped_api_down => 'Piped API معطلة';
+  String get piped_api_down => 'Piped API Ù…Ø¹Ø·Ù„Ø©';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'المثيل الموجه $pipedInstance معطل حاليًا\n\nيمكنك إما تغيير المثيل أو تغيير \'نوع API\' إلى YouTube API الرسمي\n\nتأكد من إعادة تشغيل التطبيق بعد التغيير';
+    return 'Ø§Ù„Ù…Ø«ÙŠÙ„ Ø§Ù„Ù…ÙˆØ¬Ù‡ $pipedInstance Ù…Ø¹Ø·Ù„ Ø­Ø§Ù„ÙŠÙ‹Ø§\n\nÙŠÙ…ÙƒÙ†Ùƒ Ø¥Ù…Ø§ ØªØºÙŠÙŠØ± Ø§Ù„Ù…Ø«ÙŠÙ„ Ø£Ùˆ ØªØºÙŠÙŠØ± \'Ù†ÙˆØ¹ API\' Ø¥Ù„Ù‰ YouTube API Ø§Ù„Ø±Ø³Ù…ÙŠ\n\nØªØ£ÙƒØ¯ Ù…Ù† Ø¥Ø¹Ø§Ø¯Ø© ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ Ø¨Ø¹Ø¯ Ø§Ù„ØªØºÙŠÙŠØ±';
   }
 
   @override
-  String get you_are_offline => 'أنت غير متصل حالياً';
+  String get you_are_offline => 'Ø£Ù†Øª ØºÙŠØ± Ù…ØªØµÙ„ Ø­Ø§Ù„ÙŠØ§Ù‹';
 
   @override
-  String get connection_restored => 'تمت استعادة اتصالك بالإنترنت';
+  String get connection_restored =>
+      'ØªÙ…Øª Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§ØªØµØ§Ù„Ùƒ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª';
 
   @override
-  String get use_system_title_bar => 'استخدم شريط عنوان النظام';
+  String get use_system_title_bar =>
+      'Ø§Ø³ØªØ®Ø¯Ù… Ø´Ø±ÙŠØ· Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ù†Ø¸Ø§Ù…';
 
   @override
-  String get crunching_results => 'تدمير النتائج';
+  String get crunching_results => 'ØªØ¯Ù…ÙŠØ± Ø§Ù„Ù†ØªØ§Ø¦Ø¬';
 
   @override
-  String get search_to_get_results => 'إبحث للحصول على النتائج';
+  String get search_to_get_results =>
+      'Ø¥Ø¨Ø­Ø« Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ù†ØªØ§Ø¦Ø¬';
 
   @override
-  String get use_amoled_mode => 'استخدم وضع AMOLED';
+  String get use_amoled_mode => 'Ø§Ø³ØªØ®Ø¯Ù… ÙˆØ¶Ø¹ AMOLED';
 
   @override
-  String get pitch_dark_theme => 'موضوع دارت الأسود الفحمي';
+  String get pitch_dark_theme =>
+      'Ù…ÙˆØ¶ÙˆØ¹ Ø¯Ø§Ø±Øª Ø§Ù„Ø£Ø³ÙˆØ¯ Ø§Ù„ÙØ­Ù…ÙŠ';
 
   @override
-  String get normalize_audio => 'تطبيع الصوت';
+  String get normalize_audio => 'ØªØ·Ø¨ÙŠØ¹ Ø§Ù„ØµÙˆØª';
 
   @override
-  String get change_cover => 'تغيير الغلاف';
+  String get change_cover => 'ØªØºÙŠÙŠØ± Ø§Ù„ØºÙ„Ø§Ù';
 
   @override
-  String get add_cover => 'إضافة غلاف';
+  String get add_cover => 'Ø¥Ø¶Ø§ÙØ© ØºÙ„Ø§Ù';
 
   @override
-  String get restore_defaults => 'استعادة الإعدادات الافتراضية';
+  String get restore_defaults =>
+      'Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠØ©';
 
   @override
   String get restore_defaults_confirmation =>
-      'سيؤدي هذا إلى إعادة تعيين جميع إعداداتك إلى القيم الافتراضية. لا يمكن التراجع عن هذا الإجراء.';
+      'Ø³ÙŠØ¤Ø¯ÙŠ Ù‡Ø°Ø§ Ø¥Ù„Ù‰ Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† Ø¬Ù…ÙŠØ¹ Ø¥Ø¹Ø¯Ø§Ø¯Ø§ØªÙƒ Ø¥Ù„Ù‰ Ø§Ù„Ù‚ÙŠÙ… Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠØ©. Ù„Ø§ ÙŠÙ…ÙƒÙ† Ø§Ù„ØªØ±Ø§Ø¬Ø¹ Ø¹Ù† Ù‡Ø°Ø§ Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡.';
 
   @override
-  String get streaming_music_format => 'تنسيق بث الموسيقى';
+  String get streaming_music_format => 'ØªÙ†Ø³ÙŠÙ‚ Ø¨Ø« Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰';
 
   @override
-  String get streaming_music_quality => 'جودة بث الموسيقى';
+  String get streaming_music_quality => 'Ø¬ÙˆØ¯Ø© Ø¨Ø« Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰';
 
   @override
-  String get connect => 'اتصال';
+  String get connect => 'Ø§ØªØµØ§Ù„';
 
   @override
-  String get disconnect => 'قطع الاتصال';
+  String get disconnect => 'Ù‚Ø·Ø¹ Ø§Ù„Ø§ØªØµØ§Ù„';
 
   @override
-  String get username => 'اسم المستخدم';
+  String get username => 'Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…';
 
   @override
-  String get password => 'كلمة المرور';
+  String get password => 'ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±';
 
   @override
-  String get login => 'تسجيل الدخول';
+  String get login => 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
 
   @override
-  String get sign_in => 'تسجيل الدخول';
+  String get sign_in => 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
 
   @override
-  String get sign_up => 'إنشاء حساب';
+  String get sign_up => 'Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨';
 
   @override
-  String get sign_out => 'تسجيل الخروج';
+  String get sign_out => 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬';
 
   @override
-  String get verify => 'تحقق';
+  String get verify => 'ØªØ­Ù‚Ù‚';
 
   @override
-  String get create_account => 'إنشاء حسابك';
+  String get create_account => 'Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨Ùƒ';
 
   @override
-  String get already_have_account => 'لديك حساب بالفعل؟ تسجيل الدخول';
+  String get already_have_account =>
+      'Ù„Ø¯ÙŠÙƒ Ø­Ø³Ø§Ø¨ Ø¨Ø§Ù„ÙØ¹Ù„ØŸ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
 
   @override
-  String get dont_have_account => 'ليس لديك حساب؟ إنشاء حساب';
+  String get dont_have_account =>
+      'Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ Ø­Ø³Ø§Ø¨ØŸ Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨';
 
   @override
   String signed_in_as(Object userId) {
-    return 'تم تسجيل الدخول باسم $userId';
+    return 'ØªÙ… ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø§Ø³Ù… $userId';
   }
 
   @override
-  String get verification_code => 'رمز التحقق';
+  String get verification_code => 'Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚';
 
   @override
-  String get verification_code_hint => 'أدخل الرمز المرسل إلى بريدك الإلكتروني';
+  String get verification_code_hint =>
+      'Ø£Ø¯Ø®Ù„ Ø§Ù„Ø±Ù…Ø² Ø§Ù„Ù…Ø±Ø³Ù„ Ø¥Ù„Ù‰ Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ';
 
   @override
-  String get verify_email_code => 'أرسلنا رمز تحقق إلى بريدك الإلكتروني';
+  String get verify_email_code =>
+      'Ø£Ø±Ø³Ù„Ù†Ø§ Ø±Ù…Ø² ØªØ­Ù‚Ù‚ Ø¥Ù„Ù‰ Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ';
 
   @override
-  String get go_to_album => 'الانتقال إلى الألبوم';
+  String get go_to_album => 'Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ø¥Ù„Ù‰ Ø§Ù„Ø£Ù„Ø¨ÙˆÙ…';
 
   @override
-  String get discord_rich_presence => 'وجود ديسكورد الغني';
+  String get discord_rich_presence => 'ÙˆØ¬ÙˆØ¯ Ø¯ÙŠØ³ÙƒÙˆØ±Ø¯ Ø§Ù„ØºÙ†ÙŠ';
 
   @override
-  String get browse_all => 'تصفح الكل';
+  String get browse_all => 'ØªØµÙØ­ Ø§Ù„ÙƒÙ„';
 
   @override
-  String get genres => 'الأنواع الموسيقية';
+  String get genres => 'Ø§Ù„Ø£Ù†ÙˆØ§Ø¹ Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚ÙŠØ©';
 
   @override
-  String get explore_genres => 'استكشاف الأنواع';
+  String get explore_genres => 'Ø§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø£Ù†ÙˆØ§Ø¹';
 
   @override
-  String get friends => 'أصدقاء';
+  String get friends => 'Ø£ØµØ¯Ù‚Ø§Ø¡';
 
   @override
   String get no_lyrics_available =>
-      'عذرًا، تعذر العثور على كلمات الأغنية لهذه العنصر';
+      'Ø¹Ø°Ø±Ù‹Ø§ØŒ ØªØ¹Ø°Ø± Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ ÙƒÙ„Ù…Ø§Øª Ø§Ù„Ø£ØºÙ†ÙŠØ© Ù„Ù‡Ø°Ù‡ Ø§Ù„Ø¹Ù†ØµØ±';
 
   @override
-  String get start_a_radio => 'بدء راديو';
+  String get start_a_radio => 'Ø¨Ø¯Ø¡ Ø±Ø§Ø¯ÙŠÙˆ';
 
   @override
-  String get how_to_start_radio => 'كيف تريد بدء الراديو؟';
+  String get how_to_start_radio => 'ÙƒÙŠÙ ØªØ±ÙŠØ¯ Ø¨Ø¯Ø¡ Ø§Ù„Ø±Ø§Ø¯ÙŠÙˆØŸ';
 
   @override
   String get replace_queue_question =>
-      'هل تريد استبدال قائمة التشغيل الحالية أم إضافة إليها؟';
+      'Ù‡Ù„ ØªØ±ÙŠØ¯ Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„ Ø§Ù„Ø­Ø§Ù„ÙŠØ© Ø£Ù… Ø¥Ø¶Ø§ÙØ© Ø¥Ù„ÙŠÙ‡Ø§ØŸ';
 
   @override
-  String get endless_playback => 'تشغيل بلا نهاية';
+  String get endless_playback => 'ØªØ´ØºÙŠÙ„ Ø¨Ù„Ø§ Ù†Ù‡Ø§ÙŠØ©';
 
   @override
-  String get delete_playlist => 'حذف قائمة التشغيل';
+  String get delete_playlist => 'Ø­Ø°Ù Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
   String get delete_playlist_confirmation =>
-      'هل أنت متأكد أنك تريد حذف هذه قائمة التشغيل؟';
+      'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ø£Ù†Ùƒ ØªØ±ÙŠØ¯ Ø­Ø°Ù Ù‡Ø°Ù‡ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„ØŸ';
 
   @override
-  String get local_tracks => 'المسارات المحلية';
+  String get local_tracks => 'Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø§Ù„Ù…Ø­Ù„ÙŠØ©';
 
   @override
-  String get local_tab => 'محلي';
+  String get local_tab => 'Ù…Ø­Ù„ÙŠ';
 
   @override
-  String get song_link => 'رابط الأغنية';
+  String get song_link => 'Ø±Ø§Ø¨Ø· Ø§Ù„Ø£ØºÙ†ÙŠØ©';
 
   @override
-  String get skip_this_nonsense => 'تخطي هذه الهراء';
+  String get skip_this_nonsense => 'ØªØ®Ø·ÙŠ Ù‡Ø°Ù‡ Ø§Ù„Ù‡Ø±Ø§Ø¡';
 
   @override
-  String get freedom_of_music => '“حرية الموسيقى”';
+  String get freedom_of_music => 'â€œØ­Ø±ÙŠØ© Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰â€';
 
   @override
-  String get freedom_of_music_palm => '“حرية الموسيقى في متناول يدك”';
+  String get freedom_of_music_palm =>
+      'â€œØ­Ø±ÙŠØ© Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰ ÙÙŠ Ù…ØªÙ†Ø§ÙˆÙ„ ÙŠØ¯Ùƒâ€';
 
   @override
-  String get get_started => 'لنبدأ';
+  String get get_started => 'Ù„Ù†Ø¨Ø¯Ø£';
 
   @override
-  String get youtube_source_description => 'موصى به ويعمل بشكل أفضل.';
+  String get youtube_source_description =>
+      'Ù…ÙˆØµÙ‰ Ø¨Ù‡ ÙˆÙŠØ¹Ù…Ù„ Ø¨Ø´ÙƒÙ„ Ø£ÙØ¶Ù„.';
 
   @override
   String get piped_source_description =>
-      'تشعر بالحرية؟ نفس يوتيوب ولكن أكثر حرية.';
+      'ØªØ´Ø¹Ø± Ø¨Ø§Ù„Ø­Ø±ÙŠØ©ØŸ Ù†ÙØ³ ÙŠÙˆØªÙŠÙˆØ¨ ÙˆÙ„ÙƒÙ† Ø£ÙƒØ«Ø± Ø­Ø±ÙŠØ©.';
 
   @override
-  String get jiosaavn_source_description => 'الأفضل لمنطقة جنوب آسيا.';
+  String get jiosaavn_source_description =>
+      'Ø§Ù„Ø£ÙØ¶Ù„ Ù„Ù…Ù†Ø·Ù‚Ø© Ø¬Ù†ÙˆØ¨ Ø¢Ø³ÙŠØ§.';
 
   @override
-  String get invidious_source_description => 'مشابه لـ Piped ولكن بتوافر أعلى';
+  String get invidious_source_description =>
+      'Ù…Ø´Ø§Ø¨Ù‡ Ù„Ù€ Piped ÙˆÙ„ÙƒÙ† Ø¨ØªÙˆØ§ÙØ± Ø£Ø¹Ù„Ù‰';
 
   @override
   String highest_quality(Object quality) {
-    return 'أعلى جودة: $quality';
+    return 'Ø£Ø¹Ù„Ù‰ Ø¬ÙˆØ¯Ø©: $quality';
   }
 
   @override
-  String get select_audio_source => 'اختر مصدر الصوت';
+  String get select_audio_source => 'Ø§Ø®ØªØ± Ù…ØµØ¯Ø± Ø§Ù„ØµÙˆØª';
 
   @override
   String get endless_playback_description =>
-      'إلحاق الأغاني الجديدة تلقائيًا\nإلى نهاية قائمة التشغيل';
+      'Ø¥Ù„Ø­Ø§Ù‚ Ø§Ù„Ø£ØºØ§Ù†ÙŠ Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø© ØªÙ„Ù‚Ø§Ø¦ÙŠÙ‹Ø§\nØ¥Ù„Ù‰ Ù†Ù‡Ø§ÙŠØ© Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get choose_your_region => 'اختر منطقتك';
+  String get choose_your_region => 'Ø§Ø®ØªØ± Ù…Ù†Ø·Ù‚ØªÙƒ';
 
   @override
   String get choose_your_region_description =>
-      'سيساعدك هذا في عرض المحتوى المناسب\nلموقعك.';
+      'Ø³ÙŠØ³Ø§Ø¹Ø¯Ùƒ Ù‡Ø°Ø§ ÙÙŠ Ø¹Ø±Ø¶ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ù…Ù†Ø§Ø³Ø¨\nÙ„Ù…ÙˆÙ‚Ø¹Ùƒ.';
 
   @override
-  String get choose_your_language => 'اختر لغتك';
+  String get choose_your_language => 'Ø§Ø®ØªØ± Ù„ØºØªÙƒ';
 
   @override
-  String get help_project_grow => 'ساعد في نمو هذا المشروع';
+  String get help_project_grow => 'Ø³Ø§Ø¹Ø¯ ÙÙŠ Ù†Ù…Ùˆ Ù‡Ø°Ø§ Ø§Ù„Ù…Ø´Ø±ÙˆØ¹';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti هو مشروع مفتوح المصدر. يمكنك مساعدة هذا المشروع في النمو عن طريق المساهمة في المشروع، أو الإبلاغ عن الأخطاء، أو اقتراح ميزات جديدة.';
+      'Soulful Bhakti Ù‡Ùˆ Ù…Ø´Ø±ÙˆØ¹ Ù…ÙØªÙˆØ­ Ø§Ù„Ù…ØµØ¯Ø±. ÙŠÙ…ÙƒÙ†Ùƒ Ù…Ø³Ø§Ø¹Ø¯Ø© Ù‡Ø°Ø§ Ø§Ù„Ù…Ø´Ø±ÙˆØ¹ ÙÙŠ Ø§Ù„Ù†Ù…Ùˆ Ø¹Ù† Ø·Ø±ÙŠÙ‚ Ø§Ù„Ù…Ø³Ø§Ù‡Ù…Ø© ÙÙŠ Ø§Ù„Ù…Ø´Ø±ÙˆØ¹ØŒ Ø£Ùˆ Ø§Ù„Ø¥Ø¨Ù„Ø§Øº Ø¹Ù† Ø§Ù„Ø£Ø®Ø·Ø§Ø¡ØŒ Ø£Ùˆ Ø§Ù‚ØªØ±Ø§Ø­ Ù…ÙŠØ²Ø§Øª Ø¬Ø¯ÙŠØ¯Ø©.';
 
   @override
-  String get contribute_on_github => 'المساهمة على GitHub';
+  String get contribute_on_github => 'Ø§Ù„Ù…Ø³Ø§Ù‡Ù…Ø© Ø¹Ù„Ù‰ GitHub';
 
   @override
-  String get donate_on_open_collective => 'التبرع على Open Collective';
+  String get donate_on_open_collective => 'Ø§Ù„ØªØ¨Ø±Ø¹ Ø¹Ù„Ù‰ Open Collective';
 
   @override
-  String get browse_anonymously => 'تصفح بشكل مجهول';
+  String get browse_anonymously => 'ØªØµÙØ­ Ø¨Ø´ÙƒÙ„ Ù…Ø¬Ù‡ÙˆÙ„';
 
   @override
-  String get enable_connect => 'تمكين الاتصال';
+  String get enable_connect => 'ØªÙ…ÙƒÙŠÙ† Ø§Ù„Ø§ØªØµØ§Ù„';
 
   @override
   String get enable_connect_description =>
-      'التحكم في Soulful Bhakti من الأجهزة الأخرى';
+      'Ø§Ù„ØªØ­ÙƒÙ… ÙÙŠ Soulful Bhakti Ù…Ù† Ø§Ù„Ø£Ø¬Ù‡Ø²Ø© Ø§Ù„Ø£Ø®Ø±Ù‰';
 
   @override
-  String get devices => 'الأجهزة';
+  String get devices => 'Ø§Ù„Ø£Ø¬Ù‡Ø²Ø©';
 
   @override
-  String get select => 'اختر';
+  String get select => 'Ø§Ø®ØªØ±';
 
   @override
   String connect_client_alert(Object client) {
-    return 'أنت تتم التحكم بواسطة $client';
+    return 'Ø£Ù†Øª ØªØªÙ… Ø§Ù„ØªØ­ÙƒÙ… Ø¨ÙˆØ§Ø³Ø·Ø© $client';
   }
 
   @override
-  String get this_device => 'هذا الجهاز';
+  String get this_device => 'Ù‡Ø°Ø§ Ø§Ù„Ø¬Ù‡Ø§Ø²';
 
   @override
-  String get remote => 'بعيد';
+  String get remote => 'Ø¨Ø¹ÙŠØ¯';
 
   @override
-  String get stats => 'إحصائيات';
+  String get stats => 'Ø¥Ø­ØµØ§Ø¦ÙŠØ§Øª';
 
   @override
   String and_n_more(Object count) {
-    return 'و $count أكثر';
+    return 'Ùˆ $count Ø£ÙƒØ«Ø±';
   }
 
   @override
-  String get recently_played => 'تم تشغيله مؤخرًا';
+  String get recently_played => 'ØªÙ… ØªØ´ØºÙŠÙ„Ù‡ Ù…Ø¤Ø®Ø±Ù‹Ø§';
 
   @override
-  String get browse_more => 'تصفح المزيد';
+  String get browse_more => 'ØªØµÙØ­ Ø§Ù„Ù…Ø²ÙŠØ¯';
 
   @override
-  String get no_title => 'بدون عنوان';
+  String get no_title => 'Ø¨Ø¯ÙˆÙ† Ø¹Ù†ÙˆØ§Ù†';
 
   @override
-  String get not_playing => 'غير مشغل';
+  String get not_playing => 'ØºÙŠØ± Ù…Ø´ØºÙ„';
 
   @override
-  String get epic_failure => 'فشل كبير!';
+  String get epic_failure => 'ÙØ´Ù„ ÙƒØ¨ÙŠØ±!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'تمت إضافة $tracks_length مسارات إلى قائمة الانتظار';
+    return 'ØªÙ…Øª Ø¥Ø¶Ø§ÙØ© $tracks_length Ù…Ø³Ø§Ø±Ø§Øª Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±';
   }
 
   @override
-  String get spotube_has_an_update => 'يوجد تحديث لـ Soulful Bhakti';
+  String get spotube_has_an_update => 'ÙŠÙˆØ¬Ø¯ ØªØ­Ø¯ÙŠØ« Ù„Ù€ Soulful Bhakti';
 
   @override
-  String get download_now => 'تحميل الآن';
+  String get download_now => 'ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¢Ù†';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'تم إصدار Soulful Bhakti الليلي $nightlyBuildNum';
+    return 'ØªÙ… Ø¥ØµØ¯Ø§Ø± Soulful Bhakti Ø§Ù„Ù„ÙŠÙ„ÙŠ $nightlyBuildNum';
   }
 
   @override
   String release_version(Object version) {
-    return 'تم إصدار Soulful Bhakti v$version';
+    return 'ØªÙ… Ø¥ØµØ¯Ø§Ø± Soulful Bhakti v$version';
   }
 
   @override
-  String get read_the_latest => 'اقرأ الأحدث';
+  String get read_the_latest => 'Ø§Ù‚Ø±Ø£ Ø§Ù„Ø£Ø­Ø¯Ø«';
 
   @override
-  String get release_notes => 'ملاحظات الإصدار';
+  String get release_notes => 'Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø§Ù„Ø¥ØµØ¯Ø§Ø±';
 
   @override
-  String get pick_color_scheme => 'اختر نظام الألوان';
+  String get pick_color_scheme => 'Ø§Ø®ØªØ± Ù†Ø¸Ø§Ù… Ø§Ù„Ø£Ù„ÙˆØ§Ù†';
 
   @override
-  String get save => 'حفظ';
+  String get save => 'Ø­ÙØ¸';
 
   @override
-  String get choose_the_device => 'اختر الجهاز:';
+  String get choose_the_device => 'Ø§Ø®ØªØ± Ø§Ù„Ø¬Ù‡Ø§Ø²:';
 
   @override
   String get multiple_device_connected =>
-      'تم توصيل أجهزة متعددة.\nاختر الجهاز الذي تريد إجراء هذه العملية عليه';
+      'ØªÙ… ØªÙˆØµÙŠÙ„ Ø£Ø¬Ù‡Ø²Ø© Ù…ØªØ¹Ø¯Ø¯Ø©.\nØ§Ø®ØªØ± Ø§Ù„Ø¬Ù‡Ø§Ø² Ø§Ù„Ø°ÙŠ ØªØ±ÙŠØ¯ Ø¥Ø¬Ø±Ø§Ø¡ Ù‡Ø°Ù‡ Ø§Ù„Ø¹Ù…Ù„ÙŠØ© Ø¹Ù„ÙŠÙ‡';
 
   @override
-  String get nothing_found => 'لم يتم العثور على شيء';
+  String get nothing_found => 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø´ÙŠØ¡';
 
   @override
-  String get the_box_is_empty => 'الصندوق فارغ';
+  String get the_box_is_empty => 'Ø§Ù„ØµÙ†Ø¯ÙˆÙ‚ ÙØ§Ø±Øº';
 
   @override
-  String get top_artists => 'أفضل الفنانين';
+  String get top_artists => 'Ø£ÙØ¶Ù„ Ø§Ù„ÙÙ†Ø§Ù†ÙŠÙ†';
 
   @override
-  String get top_albums => 'أفضل الألبومات';
+  String get top_albums => 'Ø£ÙØ¶Ù„ Ø§Ù„Ø£Ù„Ø¨ÙˆÙ…Ø§Øª';
 
   @override
-  String get this_week => 'هذا الأسبوع';
+  String get this_week => 'Ù‡Ø°Ø§ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹';
 
   @override
-  String get this_month => 'هذا الشهر';
+  String get this_month => 'Ù‡Ø°Ø§ Ø§Ù„Ø´Ù‡Ø±';
 
   @override
-  String get last_6_months => 'آخر 6 أشهر';
+  String get last_6_months => 'Ø¢Ø®Ø± 6 Ø£Ø´Ù‡Ø±';
 
   @override
-  String get this_year => 'هذا العام';
+  String get this_year => 'Ù‡Ø°Ø§ Ø§Ù„Ø¹Ø§Ù…';
 
   @override
-  String get last_2_years => 'آخر سنتين';
+  String get last_2_years => 'Ø¢Ø®Ø± Ø³Ù†ØªÙŠÙ†';
 
   @override
-  String get all_time => 'كل الوقت';
+  String get all_time => 'ÙƒÙ„ Ø§Ù„ÙˆÙ‚Øª';
 
   @override
   String powered_by_provider(Object providerName) {
-    return 'مدعوم من $providerName';
+    return 'Ù…Ø¯Ø¹ÙˆÙ… Ù…Ù† $providerName';
   }
 
   @override
-  String get email => 'البريد الإلكتروني';
+  String get email => 'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ';
 
   @override
-  String get send_code => 'إرسال الرمز';
+  String get send_code => 'Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø±Ù…Ø²';
 
   @override
-  String get change_identifier => 'استخدم بريداً إلكترونياً مختلفاً';
+  String get change_identifier =>
+      'Ø§Ø³ØªØ®Ø¯Ù… Ø¨Ø±ÙŠØ¯Ø§Ù‹ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ§Ù‹ Ù…Ø®ØªÙ„ÙØ§Ù‹';
 
   @override
-  String get sign_in_with_otp => 'تسجيل الدخول برمز لمرة واحدة';
+  String get sign_in_with_otp =>
+      'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø±Ù…Ø² Ù„Ù…Ø±Ø© ÙˆØ§Ø­Ø¯Ø©';
 
   @override
-  String get enter_otp_sent => 'أدخل الرمز الذي أرسلناه إليك';
+  String get enter_otp_sent =>
+      'Ø£Ø¯Ø®Ù„ Ø§Ù„Ø±Ù…Ø² Ø§Ù„Ø°ÙŠ Ø£Ø±Ø³Ù„Ù†Ø§Ù‡ Ø¥Ù„ÙŠÙƒ';
 
   @override
   String get verify_email_reminder =>
-      'يرجى التحقق من عنوان بريدك الإلكتروني لتأمين حسابك';
+      'ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø¹Ù†ÙˆØ§Ù† Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù„ØªØ£Ù…ÙŠÙ† Ø­Ø³Ø§Ø¨Ùƒ';
 
   @override
-  String get verify_now => 'تحقق الآن';
+  String get verify_now => 'ØªØ­Ù‚Ù‚ Ø§Ù„Ø¢Ù†';
 
   @override
   String get enter_email_to_verify =>
-      'أدخل عنوان بريدك الإلكتروني لاستلام رمز التحقق';
+      'Ø£Ø¯Ø®Ù„ Ø¹Ù†ÙˆØ§Ù† Ø¨Ø±ÙŠØ¯Ùƒ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ Ù„Ø§Ø³ØªÙ„Ø§Ù… Ø±Ù…Ø² Ø§Ù„ØªØ­Ù‚Ù‚';
 
   @override
-  String get profile_followers => 'المتابعين';
+  String get profile_followers => 'Ø§Ù„Ù…ØªØ§Ø¨Ø¹ÙŠÙ†';
 
   @override
-  String get birthday => 'عيد الميلاد';
+  String get birthday => 'Ø¹ÙŠØ¯ Ø§Ù„Ù…ÙŠÙ„Ø§Ø¯';
 
   @override
-  String get subscription => 'اشتراك';
+  String get subscription => 'Ø§Ø´ØªØ±Ø§Ùƒ';
 
   @override
-  String get not_born => 'لم يولد';
+  String get not_born => 'Ù„Ù… ÙŠÙˆÙ„Ø¯';
 
   @override
-  String get hacker => 'هاكر';
+  String get hacker => 'Ù‡Ø§ÙƒØ±';
 
   @override
-  String get profile => 'الملف الشخصي';
+  String get profile => 'Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ';
 
   @override
-  String get no_name => 'بدون اسم';
+  String get no_name => 'Ø¨Ø¯ÙˆÙ† Ø§Ø³Ù…';
 
   @override
-  String get edit => 'تعديل';
+  String get edit => 'ØªØ¹Ø¯ÙŠÙ„';
 
   @override
-  String get user_profile => 'ملف المستخدم';
+  String get user_profile => 'Ù…Ù„Ù Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…';
 
   @override
   String count_plays(Object count) {
-    return '$count تشغيلات';
+    return '$count ØªØ´ØºÙŠÙ„Ø§Øª';
   }
 
   @override
-  String get streaming_fees_hypothetical => 'رسوم البث (افتراضية)';
+  String get streaming_fees_hypothetical =>
+      'Ø±Ø³ÙˆÙ… Ø§Ù„Ø¨Ø« (Ø§ÙØªØ±Ø§Ø¶ÙŠØ©)';
 
   @override
-  String get minutes_listened => 'الدقائق المستمعة';
+  String get minutes_listened => 'Ø§Ù„Ø¯Ù‚Ø§Ø¦Ù‚ Ø§Ù„Ù…Ø³ØªÙ…Ø¹Ø©';
 
   @override
-  String get streamed_songs => 'الأغاني المذاعة';
+  String get streamed_songs => 'Ø§Ù„Ø£ØºØ§Ù†ÙŠ Ø§Ù„Ù…Ø°Ø§Ø¹Ø©';
 
   @override
   String count_streams(Object count) {
-    return '$count بث';
+    return '$count Ø¨Ø«';
   }
 
   @override
-  String get owned_by_you => 'مملوك لك';
+  String get owned_by_you => 'Ù…Ù…Ù„ÙˆÙƒ Ù„Ùƒ';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return 'تم نسخ $shareUrl إلى الحافظة';
+    return 'ØªÙ… Ù†Ø³Ø® $shareUrl Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø§ÙØ¸Ø©';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*تمّ الحساب بمعدّل دفعة تتراوح بين 0.003–0.005 دولار أمريكي لكل تشغيل على منصات الموسيقى عبر الإنترنت. هذا حساب افتراضي لتوضيح للمستخدم مقدار ما كان سيدفعه للفنانين لو استمع إلى أغنيتهم على منصات مختلفة.';
+      '*ØªÙ…Ù‘ Ø§Ù„Ø­Ø³Ø§Ø¨ Ø¨Ù…Ø¹Ø¯Ù‘Ù„ Ø¯ÙØ¹Ø© ØªØªØ±Ø§ÙˆØ­ Ø¨ÙŠÙ† 0.003â€“0.005 Ø¯ÙˆÙ„Ø§Ø± Ø£Ù…Ø±ÙŠÙƒÙŠ Ù„ÙƒÙ„ ØªØ´ØºÙŠÙ„ Ø¹Ù„Ù‰ Ù…Ù†ØµØ§Øª Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰ Ø¹Ø¨Ø± Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª. Ù‡Ø°Ø§ Ø­Ø³Ø§Ø¨ Ø§ÙØªØ±Ø§Ø¶ÙŠ Ù„ØªÙˆØ¶ÙŠØ­ Ù„Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù…Ù‚Ø¯Ø§Ø± Ù…Ø§ ÙƒØ§Ù† Ø³ÙŠØ¯ÙØ¹Ù‡ Ù„Ù„ÙÙ†Ø§Ù†ÙŠÙ† Ù„Ùˆ Ø§Ø³ØªÙ…Ø¹ Ø¥Ù„Ù‰ Ø£ØºÙ†ÙŠØªÙ‡Ù… Ø¹Ù„Ù‰ Ù…Ù†ØµØ§Øª Ù…Ø®ØªÙ„ÙØ©.';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes دقيقة';
+    return '$minutes Ø¯Ù‚ÙŠÙ‚Ø©';
   }
 
   @override
-  String get summary_minutes => 'الدقائق';
+  String get summary_minutes => 'Ø§Ù„Ø¯Ù‚Ø§Ø¦Ù‚';
 
   @override
-  String get summary_listened_to_music => 'استمعت إلى الموسيقى';
+  String get summary_listened_to_music =>
+      'Ø§Ø³ØªÙ…Ø¹Øª Ø¥Ù„Ù‰ Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰';
 
   @override
-  String get summary_songs => 'أغاني';
+  String get summary_songs => 'Ø£ØºØ§Ù†ÙŠ';
 
   @override
-  String get summary_streamed_overall => 'بث بشكل عام';
+  String get summary_streamed_overall => 'Ø¨Ø« Ø¨Ø´ÙƒÙ„ Ø¹Ø§Ù…';
 
   @override
-  String get summary_owed_to_artists => 'مدين للفنانين\nهذا الشهر';
+  String get summary_owed_to_artists =>
+      'Ù…Ø¯ÙŠÙ† Ù„Ù„ÙÙ†Ø§Ù†ÙŠÙ†\nÙ‡Ø°Ø§ Ø§Ù„Ø´Ù‡Ø±';
 
   @override
-  String get summary_top_artist => 'الفنان الأفضل\nهذه الفترة';
+  String get summary_top_artist =>
+      'Ø§Ù„ÙÙ†Ø§Ù† Ø§Ù„Ø£ÙØ¶Ù„\nÙ‡Ø°Ù‡ Ø§Ù„ÙØªØ±Ø©';
 
   @override
-  String get summary_artists => 'الفنانين';
+  String get summary_artists => 'Ø§Ù„ÙÙ†Ø§Ù†ÙŠÙ†';
 
   @override
-  String get summary_music_reached_you => 'وصلت إليك الموسيقى';
+  String get summary_music_reached_you => 'ÙˆØµÙ„Øª Ø¥Ù„ÙŠÙƒ Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰';
 
   @override
-  String get summary_full_albums => 'ألبومات كاملة';
+  String get summary_full_albums => 'Ø£Ù„Ø¨ÙˆÙ…Ø§Øª ÙƒØ§Ù…Ù„Ø©';
 
   @override
-  String get summary_got_your_love => 'حصلت على حبك';
+  String get summary_got_your_love => 'Ø­ØµÙ„Øª Ø¹Ù„Ù‰ Ø­Ø¨Ùƒ';
 
   @override
-  String get summary_playlists => 'قوائم التشغيل';
+  String get summary_playlists => 'Ù‚ÙˆØ§Ø¦Ù… Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get summary_were_on_repeat => 'كانت على التكرار';
+  String get summary_were_on_repeat => 'ÙƒØ§Ù†Øª Ø¹Ù„Ù‰ Ø§Ù„ØªÙƒØ±Ø§Ø±';
 
   @override
-  String get summary_listening_share => 'حصة الاستماع';
+  String get summary_listening_share => 'Ø­ØµØ© Ø§Ù„Ø§Ø³ØªÙ…Ø§Ø¹';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'توزيع أفضل $tracks_length مسارات استمعت إليها أكثر من غيرها';
+    return 'ØªÙˆØ²ÙŠØ¹ Ø£ÙØ¶Ù„ $tracks_length Ù…Ø³Ø§Ø±Ø§Øª Ø§Ø³ØªÙ…Ø¹Øª Ø¥Ù„ÙŠÙ‡Ø§ Ø£ÙƒØ«Ø± Ù…Ù† ØºÙŠØ±Ù‡Ø§';
   }
 
   @override
-  String get summary_plays => 'تشغيلات';
+  String get summary_plays => 'ØªØ´ØºÙŠÙ„Ø§Øª';
 
   @override
   String get insights => 'Insights';
@@ -1322,316 +1363,333 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'المجموع $money';
+    return 'Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹ $money';
   }
 
   @override
-  String get webview_not_found => 'لم يتم العثور على Webview';
+  String get webview_not_found => 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Webview';
 
   @override
   String get webview_not_found_description =>
-      'لم يتم تثبيت بيئة تشغيل Webview على جهازك.\nإذا كانت مثبتة، تأكد من وجودها في environment PATH\n\nبعد التثبيت، أعد تشغيل التطبيق';
+      'Ù„Ù… ÙŠØªÙ… ØªØ«Ø¨ÙŠØª Ø¨ÙŠØ¦Ø© ØªØ´ØºÙŠÙ„ Webview Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²Ùƒ.\nØ¥Ø°Ø§ ÙƒØ§Ù†Øª Ù…Ø«Ø¨ØªØ©ØŒ ØªØ£ÙƒØ¯ Ù…Ù† ÙˆØ¬ÙˆØ¯Ù‡Ø§ ÙÙŠ environment PATH\n\nØ¨Ø¹Ø¯ Ø§Ù„ØªØ«Ø¨ÙŠØªØŒ Ø£Ø¹Ø¯ ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ·Ø¨ÙŠÙ‚';
 
   @override
-  String get unsupported_platform => 'المنصة غير مدعومة';
+  String get unsupported_platform => 'Ø§Ù„Ù…Ù†ØµØ© ØºÙŠØ± Ù…Ø¯Ø¹ÙˆÙ…Ø©';
 
   @override
-  String get cache_music => 'تخزين الموسيقى مؤقتًا';
+  String get cache_music => 'ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚Ù‰ Ù…Ø¤Ù‚ØªÙ‹Ø§';
 
   @override
-  String get open => 'فتح';
+  String get open => 'ÙØªØ­';
 
   @override
-  String get cache_folder => 'مجلد التخزين المؤقت';
+  String get cache_folder => 'Ù…Ø¬Ù„Ø¯ Ø§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…Ø¤Ù‚Øª';
 
   @override
-  String get export => 'تصدير';
+  String get export => 'ØªØµØ¯ÙŠØ±';
 
   @override
-  String get clear_cache => 'مسح التخزين المؤقت';
+  String get clear_cache => 'Ù…Ø³Ø­ Ø§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…Ø¤Ù‚Øª';
 
   @override
-  String get clear_cache_confirmation => 'هل تريد مسح التخزين المؤقت؟';
+  String get clear_cache_confirmation =>
+      'Ù‡Ù„ ØªØ±ÙŠØ¯ Ù…Ø³Ø­ Ø§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ù…Ø¤Ù‚ØªØŸ';
 
   @override
-  String get export_cache_files => 'تصدير الملفات المخزنة مؤقتًا';
+  String get export_cache_files =>
+      'ØªØµØ¯ÙŠØ± Ø§Ù„Ù…Ù„ÙØ§Øª Ø§Ù„Ù…Ø®Ø²Ù†Ø© Ù…Ø¤Ù‚ØªÙ‹Ø§';
 
   @override
   String found_n_files(Object count) {
-    return 'تم العثور على $count ملف';
+    return 'ØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ $count Ù…Ù„Ù';
   }
 
   @override
-  String get export_cache_confirmation => 'هل تريد تصدير هذه الملفات إلى';
+  String get export_cache_confirmation =>
+      'Ù‡Ù„ ØªØ±ÙŠØ¯ ØªØµØ¯ÙŠØ± Ù‡Ø°Ù‡ Ø§Ù„Ù…Ù„ÙØ§Øª Ø¥Ù„Ù‰';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return 'تم تصدير $filesExported من أصل $files ملفات';
+    return 'ØªÙ… ØªØµØ¯ÙŠØ± $filesExported Ù…Ù† Ø£ØµÙ„ $files Ù…Ù„ÙØ§Øª';
   }
 
   @override
-  String get undo => 'تراجع';
+  String get undo => 'ØªØ±Ø§Ø¬Ø¹';
 
   @override
-  String get add_all_to_playlist => 'إضافة الكل إلى قائمة التشغيل';
+  String get add_all_to_playlist =>
+      'Ø¥Ø¶Ø§ÙØ© Ø§Ù„ÙƒÙ„ Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØ´ØºÙŠÙ„';
 
   @override
-  String get add_all_to_queue => 'إضافة الكل إلى القائمة';
+  String get add_all_to_queue => 'Ø¥Ø¶Ø§ÙØ© Ø§Ù„ÙƒÙ„ Ø¥Ù„Ù‰ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø©';
 
   @override
-  String get play_all_next => 'تشغيل الكل بعد ذلك';
+  String get play_all_next => 'ØªØ´ØºÙŠÙ„ Ø§Ù„ÙƒÙ„ Ø¨Ø¹Ø¯ Ø°Ù„Ùƒ';
 
   @override
-  String get pause => 'إيقاف مؤقت';
+  String get pause => 'Ø¥ÙŠÙ‚Ø§Ù Ù…Ø¤Ù‚Øª';
 
   @override
-  String get view_all => 'عرض الكل';
+  String get view_all => 'Ø¹Ø±Ø¶ Ø§Ù„ÙƒÙ„';
 
   @override
-  String get no_tracks_added_yet => 'يبدو أنك لم تضف أي مسارات بعد';
+  String get no_tracks_added_yet =>
+      'ÙŠØ¨Ø¯Ùˆ Ø£Ù†Ùƒ Ù„Ù… ØªØ¶Ù Ø£ÙŠ Ù…Ø³Ø§Ø±Ø§Øª Ø¨Ø¹Ø¯';
 
   @override
-  String get no_tracks => 'يبدو أنه لا يوجد أي مسارات هنا';
+  String get no_tracks =>
+      'ÙŠØ¨Ø¯Ùˆ Ø£Ù†Ù‡ Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø£ÙŠ Ù…Ø³Ø§Ø±Ø§Øª Ù‡Ù†Ø§';
 
   @override
-  String get no_tracks_listened_yet => 'يبدو أنك لم تستمع إلى أي شيء بعد';
+  String get no_tracks_listened_yet =>
+      'ÙŠØ¨Ø¯Ùˆ Ø£Ù†Ùƒ Ù„Ù… ØªØ³ØªÙ…Ø¹ Ø¥Ù„Ù‰ Ø£ÙŠ Ø´ÙŠØ¡ Ø¨Ø¹Ø¯';
 
   @override
-  String get not_following_artists => 'أنت لا تتابع أي فنانين';
+  String get not_following_artists =>
+      'Ø£Ù†Øª Ù„Ø§ ØªØªØ§Ø¨Ø¹ Ø£ÙŠ ÙÙ†Ø§Ù†ÙŠÙ†';
 
   @override
   String get no_favorite_albums_yet =>
-      'يبدو أنك لم تضف أي ألبومات إلى المفضلة بعد';
+      'ÙŠØ¨Ø¯Ùˆ Ø£Ù†Ùƒ Ù„Ù… ØªØ¶Ù Ø£ÙŠ Ø£Ù„Ø¨ÙˆÙ…Ø§Øª Ø¥Ù„Ù‰ Ø§Ù„Ù…ÙØ¶Ù„Ø© Ø¨Ø¹Ø¯';
 
   @override
-  String get no_logs_found => 'لم يتم العثور على سجلات';
+  String get no_logs_found => 'Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ø³Ø¬Ù„Ø§Øª';
 
   @override
-  String get youtube_engine => 'محرك يوتيوب';
+  String get youtube_engine => 'Ù…Ø­Ø±Ùƒ ÙŠÙˆØªÙŠÙˆØ¨';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine غير مثبت';
+    return '$engine ØºÙŠØ± Ù…Ø«Ø¨Øª';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine غير مثبت في نظامك.';
+    return '$engine ØºÙŠØ± Ù…Ø«Ø¨Øª ÙÙŠ Ù†Ø¸Ø§Ù…Ùƒ.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'تأكد من أنه متاح في متغير PATH أو\nحدد المسار الكامل للملف القابل للتنفيذ $engine أدناه';
+    return 'ØªØ£ÙƒØ¯ Ù…Ù† Ø£Ù†Ù‡ Ù…ØªØ§Ø­ ÙÙŠ Ù…ØªØºÙŠØ± PATH Ø£Ùˆ\nØ­Ø¯Ø¯ Ø§Ù„Ù…Ø³Ø§Ø± Ø§Ù„ÙƒØ§Ù…Ù„ Ù„Ù„Ù…Ù„Ù Ø§Ù„Ù‚Ø§Ø¨Ù„ Ù„Ù„ØªÙ†ÙÙŠØ° $engine Ø£Ø¯Ù†Ø§Ù‡';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'في أنظمة macOS/Linux/Unix مثل الأنظمة، لن يعمل تعيين المسار في .zshrc/.bashrc/.bash_profile وما إلى ذلك.\nيجب تعيين المسار في ملف تكوين الصدفة';
+      'ÙÙŠ Ø£Ù†Ø¸Ù…Ø© macOS/Linux/Unix Ù…Ø«Ù„ Ø§Ù„Ø£Ù†Ø¸Ù…Ø©ØŒ Ù„Ù† ÙŠØ¹Ù…Ù„ ØªØ¹ÙŠÙŠÙ† Ø§Ù„Ù…Ø³Ø§Ø± ÙÙŠ .zshrc/.bashrc/.bash_profile ÙˆÙ…Ø§ Ø¥Ù„Ù‰ Ø°Ù„Ùƒ.\nÙŠØ¬Ø¨ ØªØ¹ÙŠÙŠÙ† Ø§Ù„Ù…Ø³Ø§Ø± ÙÙŠ Ù…Ù„Ù ØªÙƒÙˆÙŠÙ† Ø§Ù„ØµØ¯ÙØ©';
 
   @override
-  String get download => 'تنزيل';
+  String get download => 'ØªÙ†Ø²ÙŠÙ„';
 
   @override
-  String get file_not_found => 'الملف غير موجود';
+  String get file_not_found => 'Ø§Ù„Ù…Ù„Ù ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯';
 
   @override
-  String get custom => 'مخصص';
+  String get custom => 'Ù…Ø®ØµØµ';
 
   @override
-  String get add_custom_url => 'إضافة URL مخصص';
+  String get add_custom_url => 'Ø¥Ø¶Ø§ÙØ© URL Ù…Ø®ØµØµ';
 
   @override
-  String get edit_port => 'تعديل المنفذ';
+  String get edit_port => 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ù†ÙØ°';
 
   @override
   String get port_helper_msg =>
-      'القيمة الافتراضية هي -1 والتي تشير إلى رقم عشوائي. إذا كان لديك جدار ناري مُعد، يُوصى بتعيين هذا.';
+      'Ø§Ù„Ù‚ÙŠÙ…Ø© Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠØ© Ù‡ÙŠ -1 ÙˆØ§Ù„ØªÙŠ ØªØ´ÙŠØ± Ø¥Ù„Ù‰ Ø±Ù‚Ù… Ø¹Ø´ÙˆØ§Ø¦ÙŠ. Ø¥Ø°Ø§ ÙƒØ§Ù† Ù„Ø¯ÙŠÙƒ Ø¬Ø¯Ø§Ø± Ù†Ø§Ø±ÙŠ Ù…ÙØ¹Ø¯ØŒ ÙŠÙÙˆØµÙ‰ Ø¨ØªØ¹ÙŠÙŠÙ† Ù‡Ø°Ø§.';
 
   @override
   String connect_request(Object client) {
-    return 'السماح لـ $client بالاتصال؟';
+    return 'Ø§Ù„Ø³Ù…Ø§Ø­ Ù„Ù€ $client Ø¨Ø§Ù„Ø§ØªØµØ§Ù„ØŸ';
   }
 
   @override
   String get connection_request_denied =>
-      'تم رفض الاتصال. المستخدم رفض الوصول.';
+      'ØªÙ… Ø±ÙØ¶ Ø§Ù„Ø§ØªØµØ§Ù„. Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø±ÙØ¶ Ø§Ù„ÙˆØµÙˆÙ„.';
 
   @override
-  String get an_error_occurred => 'حدث خطأ';
+  String get an_error_occurred => 'Ø­Ø¯Ø« Ø®Ø·Ø£';
 
   @override
-  String get copy_to_clipboard => 'نسخ إلى الحافظة';
+  String get copy_to_clipboard => 'Ù†Ø³Ø® Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø§ÙØ¸Ø©';
 
   @override
-  String get view_logs => 'عرض السجلات';
+  String get view_logs => 'Ø¹Ø±Ø¶ Ø§Ù„Ø³Ø¬Ù„Ø§Øª';
 
   @override
-  String get retry => 'إعادة المحاولة';
+  String get retry => 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'لم تقُم بتعيين مزود بيانات افتراضي';
+      'Ù„Ù… ØªÙ‚ÙÙ… Ø¨ØªØ¹ÙŠÙŠÙ† Ù…Ø²ÙˆØ¯ Ø¨ÙŠØ§Ù†Ø§Øª Ø§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
-  String get manage_metadata_providers => 'إدارة مزوّدي البيانات';
+  String get manage_metadata_providers =>
+      'Ø¥Ø¯Ø§Ø±Ø© Ù…Ø²ÙˆÙ‘Ø¯ÙŠ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª';
 
   @override
-  String get open_link_in_browser => 'فتح الرابط في المتصفح؟';
+  String get open_link_in_browser =>
+      'ÙØªØ­ Ø§Ù„Ø±Ø§Ø¨Ø· ÙÙŠ Ø§Ù„Ù…ØªØµÙØ­ØŸ';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'هل ترغب في فتح الرابط التالي؟';
+      'Ù‡Ù„ ØªØ±ØºØ¨ ÙÙŠ ÙØªØ­ Ø§Ù„Ø±Ø§Ø¨Ø· Ø§Ù„ØªØ§Ù„ÙŠØŸ';
 
   @override
   String get unsafe_url_warning =>
-      'قد يكون فتح الروابط من مصادر غير موثوقة غير آمن. تحرّ الحذر!\nيمكنك أيضًا نسخ الرابط إلى الحافظة.';
+      'Ù‚Ø¯ ÙŠÙƒÙˆÙ† ÙØªØ­ Ø§Ù„Ø±ÙˆØ§Ø¨Ø· Ù…Ù† Ù…ØµØ§Ø¯Ø± ØºÙŠØ± Ù…ÙˆØ«ÙˆÙ‚Ø© ØºÙŠØ± Ø¢Ù…Ù†. ØªØ­Ø±Ù‘ Ø§Ù„Ø­Ø°Ø±!\nÙŠÙ…ÙƒÙ†Ùƒ Ø£ÙŠØ¶Ù‹Ø§ Ù†Ø³Ø® Ø§Ù„Ø±Ø§Ø¨Ø· Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø§ÙØ¸Ø©.';
 
   @override
-  String get copy_link => 'نسخ الرابط';
+  String get copy_link => 'Ù†Ø³Ø® Ø§Ù„Ø±Ø§Ø¨Ø·';
 
   @override
   String get building_your_timeline =>
-      'جاري بناء المخطط الزمني استنادًا إلى استماعاتك...';
+      'Ø¬Ø§Ø±ÙŠ Ø¨Ù†Ø§Ø¡ Ø§Ù„Ù…Ø®Ø·Ø· Ø§Ù„Ø²Ù…Ù†ÙŠ Ø§Ø³ØªÙ†Ø§Ø¯Ù‹Ø§ Ø¥Ù„Ù‰ Ø§Ø³ØªÙ…Ø§Ø¹Ø§ØªÙƒ...';
 
   @override
-  String get official => 'رسمي';
+  String get official => 'Ø±Ø³Ù…ÙŠ';
 
   @override
   String author_name(Object author) {
-    return 'المؤلّف: $author';
+    return 'Ø§Ù„Ù…Ø¤Ù„Ù‘Ù: $author';
   }
 
   @override
-  String get third_party => 'طرف ثالث';
+  String get third_party => 'Ø·Ø±Ù Ø«Ø§Ù„Ø«';
 
   @override
-  String get plugin_requires_authentication => 'تتطلّب الإضافة تسجيل الدخول';
+  String get plugin_requires_authentication =>
+      'ØªØªØ·Ù„Ù‘Ø¨ Ø§Ù„Ø¥Ø¶Ø§ÙØ© ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„';
 
   @override
-  String get update_available => 'تحديث متوفر';
+  String get update_available => 'ØªØ­Ø¯ÙŠØ« Ù…ØªÙˆÙØ±';
 
   @override
-  String get supports_scrobbling => 'يدعم التتبع (scrobbling)';
+  String get supports_scrobbling => 'ÙŠØ¯Ø¹Ù… Ø§Ù„ØªØªØ¨Ø¹ (scrobbling)';
 
   @override
   String get plugin_scrobbling_info =>
-      'تقوم هذه الإضافة بتتبع مقاطعك الموسيقية لإنشاء سجل الاستماع الخاص بك.';
+      'ØªÙ‚ÙˆÙ… Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ø¨ØªØªØ¨Ø¹ Ù…Ù‚Ø§Ø·Ø¹Ùƒ Ø§Ù„Ù…ÙˆØ³ÙŠÙ‚ÙŠØ© Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø³Ø¬Ù„ Ø§Ù„Ø§Ø³ØªÙ…Ø§Ø¹ Ø§Ù„Ø®Ø§Øµ Ø¨Ùƒ.';
 
   @override
-  String get default_metadata_source => 'مصدر البيانات الوصفية الافتراضي';
+  String get default_metadata_source =>
+      'Ù…ØµØ¯Ø± Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ÙˆØµÙÙŠØ© Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
   String get set_default_metadata_source =>
-      'تعيين مصدر البيانات الوصفية الافتراضي';
+      'ØªØ¹ÙŠÙŠÙ† Ù…ØµØ¯Ø± Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ÙˆØµÙÙŠØ© Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
-  String get default_audio_source => 'مصدر الصوت الافتراضي';
+  String get default_audio_source => 'Ù…ØµØ¯Ø± Ø§Ù„ØµÙˆØª Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
-  String get set_default_audio_source => 'تعيين مصدر الصوت الافتراضي';
+  String get set_default_audio_source =>
+      'ØªØ¹ÙŠÙŠÙ† Ù…ØµØ¯Ø± Ø§Ù„ØµÙˆØª Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
-  String get set_default => 'تعيين كافتراضي';
+  String get set_default => 'ØªØ¹ÙŠÙŠÙ† ÙƒØ§ÙØªØ±Ø§Ø¶ÙŠ';
 
   @override
-  String get support => 'الدعم';
+  String get support => 'Ø§Ù„Ø¯Ø¹Ù…';
 
   @override
-  String get support_plugin_development => 'دعم تطوير الإضافات';
+  String get support_plugin_development => 'Ø¯Ø¹Ù… ØªØ·ÙˆÙŠØ± Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª';
 
   @override
   String can_access_name_api(Object name) {
-    return '- يمكن الوصول إلى واجهة برمجة التطبيقات **$name**';
+    return '- ÙŠÙ…ÙƒÙ† Ø§Ù„ÙˆØµÙˆÙ„ Ø¥Ù„Ù‰ ÙˆØ§Ø¬Ù‡Ø© Ø¨Ø±Ù…Ø¬Ø© Ø§Ù„ØªØ·Ø¨ÙŠÙ‚Ø§Øª **$name**';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'هل ترغب في تثبيت هذه الإضافة؟';
+      'Ù‡Ù„ ØªØ±ØºØ¨ ÙÙŠ ØªØ«Ø¨ÙŠØª Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¶Ø§ÙØ©ØŸ';
 
   @override
   String get third_party_plugin_warning =>
-      'هذه الإضافة من مستودع طرف ثالث. تأكد من موثوقية المصدر قبل التثبيت.';
+      'Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ù…Ù† Ù…Ø³ØªÙˆØ¯Ø¹ Ø·Ø±Ù Ø«Ø§Ù„Ø«. ØªØ£ÙƒØ¯ Ù…Ù† Ù…ÙˆØ«ÙˆÙ‚ÙŠØ© Ø§Ù„Ù…ØµØ¯Ø± Ù‚Ø¨Ù„ Ø§Ù„ØªØ«Ø¨ÙŠØª.';
 
   @override
-  String get author => 'المؤلف';
+  String get author => 'Ø§Ù„Ù…Ø¤Ù„Ù';
 
   @override
-  String get this_plugin_can_do_following => 'يمكن لهذه الإضافة القيام بما يلي';
+  String get this_plugin_can_do_following =>
+      'ÙŠÙ…ÙƒÙ† Ù„Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù‚ÙŠØ§Ù… Ø¨Ù…Ø§ ÙŠÙ„ÙŠ';
 
   @override
-  String get install => 'تثبيت';
+  String get install => 'ØªØ«Ø¨ÙŠØª';
 
   @override
-  String get install_a_metadata_provider => 'تثبيت مزوّد بيانات';
+  String get install_a_metadata_provider =>
+      'ØªØ«Ø¨ÙŠØª Ù…Ø²ÙˆÙ‘Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª';
 
   @override
-  String get no_tracks_playing => 'لا توجد مقاطع تعمل حاليًا';
+  String get no_tracks_playing =>
+      'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ù‚Ø§Ø·Ø¹ ØªØ¹Ù…Ù„ Ø­Ø§Ù„ÙŠÙ‹Ø§';
 
   @override
   String get synced_lyrics_not_available =>
-      'الكلمات المتزامنة غير متوفرة لهذه الأغنية. يُرجى استخدام';
+      'Ø§Ù„ÙƒÙ„Ù…Ø§Øª Ø§Ù„Ù…ØªØ²Ø§Ù…Ù†Ø© ØºÙŠØ± Ù…ØªÙˆÙØ±Ø© Ù„Ù‡Ø°Ù‡ Ø§Ù„Ø£ØºÙ†ÙŠØ©. ÙŠÙØ±Ø¬Ù‰ Ø§Ø³ØªØ®Ø¯Ø§Ù…';
 
   @override
-  String get plain_lyrics => 'الكلمات العادية';
+  String get plain_lyrics => 'Ø§Ù„ÙƒÙ„Ù…Ø§Øª Ø§Ù„Ø¹Ø§Ø¯ÙŠØ©';
 
   @override
-  String get tab_instead => 'بدلاً من ذلك، استخدم التبويب.';
+  String get tab_instead =>
+      'Ø¨Ø¯Ù„Ø§Ù‹ Ù…Ù† Ø°Ù„ÙƒØŒ Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„ØªØ¨ÙˆÙŠØ¨.';
 
   @override
-  String get disclaimer => 'إخلاء المسؤولية';
+  String get disclaimer => 'Ø¥Ø®Ù„Ø§Ø¡ Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„ÙŠØ©';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'لا تتحمّل فريق Soulful Bhakti أي مسؤولية (بما في ذلك القانونية) عن أي من الإضافات “لطرف ثالث”.\nاستخدمها على مسؤوليتك الخاصّة. لأيّة أخطاء/مشكلات، يُرجى الإبلاغ عنها في مستودع الإضافة.\n\nإذا كانت أي إضافة “لطرف ثالث” تنتهك شروط الخدمة أو قانون DMCA الخاص بأي خدمة أو كيان قانوني، فيُرجى طلب اتخاذ إجراء من مؤلف الإضافة أو منصة الاستضافة مثل GitHub/Codeberg. الإضافات المدرجة كـ “لطرف ثالث” هي مفعّلة ومُدارة من المجتمع، وليس لدينا صلاحية إدارتها أو التدخل فيها.\n\n';
+      'Ù„Ø§ ØªØªØ­Ù…Ù‘Ù„ ÙØ±ÙŠÙ‚ Soulful Bhakti Ø£ÙŠ Ù…Ø³Ø¤ÙˆÙ„ÙŠØ© (Ø¨Ù…Ø§ ÙÙŠ Ø°Ù„Ùƒ Ø§Ù„Ù‚Ø§Ù†ÙˆÙ†ÙŠØ©) Ø¹Ù† Ø£ÙŠ Ù…Ù† Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª â€œÙ„Ø·Ø±Ù Ø«Ø§Ù„Ø«â€.\nØ§Ø³ØªØ®Ø¯Ù…Ù‡Ø§ Ø¹Ù„Ù‰ Ù…Ø³Ø¤ÙˆÙ„ÙŠØªÙƒ Ø§Ù„Ø®Ø§ØµÙ‘Ø©. Ù„Ø£ÙŠÙ‘Ø© Ø£Ø®Ø·Ø§Ø¡/Ù…Ø´ÙƒÙ„Ø§ØªØŒ ÙŠÙØ±Ø¬Ù‰ Ø§Ù„Ø¥Ø¨Ù„Ø§Øº Ø¹Ù†Ù‡Ø§ ÙÙŠ Ù…Ø³ØªÙˆØ¯Ø¹ Ø§Ù„Ø¥Ø¶Ø§ÙØ©.\n\nØ¥Ø°Ø§ ÙƒØ§Ù†Øª Ø£ÙŠ Ø¥Ø¶Ø§ÙØ© â€œÙ„Ø·Ø±Ù Ø«Ø§Ù„Ø«â€ ØªÙ†ØªÙ‡Ùƒ Ø´Ø±ÙˆØ· Ø§Ù„Ø®Ø¯Ù…Ø© Ø£Ùˆ Ù‚Ø§Ù†ÙˆÙ† DMCA Ø§Ù„Ø®Ø§Øµ Ø¨Ø£ÙŠ Ø®Ø¯Ù…Ø© Ø£Ùˆ ÙƒÙŠØ§Ù† Ù‚Ø§Ù†ÙˆÙ†ÙŠØŒ ÙÙŠÙØ±Ø¬Ù‰ Ø·Ù„Ø¨ Ø§ØªØ®Ø§Ø° Ø¥Ø¬Ø±Ø§Ø¡ Ù…Ù† Ù…Ø¤Ù„Ù Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ø£Ùˆ Ù…Ù†ØµØ© Ø§Ù„Ø§Ø³ØªØ¶Ø§ÙØ© Ù…Ø«Ù„ GitHub/Codeberg. Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª Ø§Ù„Ù…Ø¯Ø±Ø¬Ø© ÙƒÙ€ â€œÙ„Ø·Ø±Ù Ø«Ø§Ù„Ø«â€ Ù‡ÙŠ Ù…ÙØ¹Ù‘Ù„Ø© ÙˆÙ…ÙØ¯Ø§Ø±Ø© Ù…Ù† Ø§Ù„Ù…Ø¬ØªÙ…Ø¹ØŒ ÙˆÙ„ÙŠØ³ Ù„Ø¯ÙŠÙ†Ø§ ØµÙ„Ø§Ø­ÙŠØ© Ø¥Ø¯Ø§Ø±ØªÙ‡Ø§ Ø£Ùˆ Ø§Ù„ØªØ¯Ø®Ù„ ÙÙŠÙ‡Ø§.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'المدخل لا يتوافق مع التنسيق المطلوب';
+      'Ø§Ù„Ù…Ø¯Ø®Ù„ Ù„Ø§ ÙŠØªÙˆØ§ÙÙ‚ Ù…Ø¹ Ø§Ù„ØªÙ†Ø³ÙŠÙ‚ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨';
 
   @override
-  String get plugins => 'الإضافات';
+  String get plugins => 'Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª';
 
   @override
   String get paste_plugin_download_url =>
-      'الصق رابط التنزيل أو GitHub/Codeberg أو رابط مباشر لملف .smplug';
+      'Ø§Ù„ØµÙ‚ Ø±Ø§Ø¨Ø· Ø§Ù„ØªÙ†Ø²ÙŠÙ„ Ø£Ùˆ GitHub/Codeberg Ø£Ùˆ Ø±Ø§Ø¨Ø· Ù…Ø¨Ø§Ø´Ø± Ù„Ù…Ù„Ù .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'تنزيل وتثبيت الإضافة من رابط';
+      'ØªÙ†Ø²ÙŠÙ„ ÙˆØªØ«Ø¨ÙŠØª Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ù…Ù† Ø±Ø§Ø¨Ø·';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'فشل في إضافة الإضافة: $error';
+    return 'ÙØ´Ù„ ÙÙŠ Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ø¥Ø¶Ø§ÙØ©: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'رفع الإضافة من ملف';
+  String get upload_plugin_from_file => 'Ø±ÙØ¹ Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ù…Ù† Ù…Ù„Ù';
 
   @override
-  String get installed => 'تم التثبيت';
+  String get installed => 'ØªÙ… Ø§Ù„ØªØ«Ø¨ÙŠØª';
 
   @override
-  String get available_plugins => 'الإضافات المتوفّرة';
+  String get available_plugins => 'Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª Ø§Ù„Ù…ØªÙˆÙÙ‘Ø±Ø©';
 
   @override
   String get configure_plugins =>
-      'قم بتكوين مزود البيانات الوصفية ومكونات مصدر الصوت الخاصة بك';
+      'Ù‚Ù… Ø¨ØªÙƒÙˆÙŠÙ† Ù…Ø²ÙˆØ¯ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ÙˆØµÙÙŠØ© ÙˆÙ…ÙƒÙˆÙ†Ø§Øª Ù…ØµØ¯Ø± Ø§Ù„ØµÙˆØª Ø§Ù„Ø®Ø§ØµØ© Ø¨Ùƒ';
 
   @override
-  String get source => 'المصدر: ';
+  String get source => 'Ø§Ù„Ù…ØµØ¯Ø±: ';
 
   @override
-  String get uncompressed => 'غير مضغوط';
+  String get uncompressed => 'ØºÙŠØ± Ù…Ø¶ØºÙˆØ·';
 
   @override
   String get dab_music_source_description =>
-      'لمحبي الصوتيات. يوفر تدفقات صوتية عالية الجودة/بدون فقدان. مطابقة دقيقة للمسارات بناءً على ISRC.';
+      'Ù„Ù…Ø­Ø¨ÙŠ Ø§Ù„ØµÙˆØªÙŠØ§Øª. ÙŠÙˆÙØ± ØªØ¯ÙÙ‚Ø§Øª ØµÙˆØªÙŠØ© Ø¹Ø§Ù„ÙŠØ© Ø§Ù„Ø¬ÙˆØ¯Ø©/Ø¨Ø¯ÙˆÙ† ÙÙ‚Ø¯Ø§Ù†. Ù…Ø·Ø§Ø¨Ù‚Ø© Ø¯Ù‚ÙŠÙ‚Ø© Ù„Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø¨Ù†Ø§Ø¡Ù‹ Ø¹Ù„Ù‰ ISRC.';
 
   @override
-  String get summary_top_track => 'أفضل أغنية\nهذه الفترة';
+  String get summary_top_track => 'Ø£ÙØ¶Ù„ Ø£ØºÙ†ÙŠØ©\nÙ‡Ø°Ù‡ Ø§Ù„ÙØªØ±Ø©';
 
   @override
-  String get local => 'محلي';
+  String get local => 'Ù…Ø­Ù„ÙŠ';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1641,4 +1699,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

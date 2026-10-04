@@ -43,7 +43,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get featured => 'In evidenza';
 
   @override
-  String get new_releases => 'Novità';
+  String get new_releases => 'NovitÃ ';
 
   @override
   String get songs => 'Canzoni';
@@ -64,7 +64,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Questo cancellerà la coda corrente. $track_length tracce saranno rimosse\nVuoi continuare?';
+    return 'Questo cancellerÃ  la coda corrente. $track_length tracce saranno rimosse\nVuoi continuare?';
   }
 
   @override
@@ -242,7 +242,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get time => 'Durata';
 
   @override
-  String get more_actions => 'Più azioni';
+  String get more_actions => 'PiÃ¹ azioni';
 
   @override
   String add_count_to_playlist(Object count) {
@@ -285,7 +285,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String track_will_play_next(Object track) {
-    return 'in seguito sarà riprodotta $track';
+    return 'in seguito sarÃ  riprodotta $track';
   }
 
   @override
@@ -413,7 +413,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appearance => 'Aspetto';
 
   @override
-  String get layout_mode => 'Modalità Layout';
+  String get layout_mode => 'ModalitÃ  Layout';
 
   @override
   String get override_layout_settings =>
@@ -454,7 +454,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playback => 'Riproduzione';
 
   @override
-  String get audio_quality => 'Qualità Audio';
+  String get audio_quality => 'QualitÃ  Audio';
 
   @override
   String get high => 'Alta';
@@ -467,7 +467,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get pre_download_play_description =>
-      'Anzi che effettuare lo stream dell\'audio, scarica invece i byte e li riproduce (raccomandato per gli utenti con banda più alta)';
+      'Anzi che effettuare lo stream dell\'audio, scarica invece i byte e li riproduce (raccomandato per gli utenti con banda piÃ¹ alta)';
 
   @override
   String get skip_non_music => 'Salta i segmenti non di musica (SponsorBlock)';
@@ -532,14 +532,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get bug_issues => 'Bug+Problemi';
 
   @override
-  String get made_with => 'Fatto con ❤️ in Bangladesh🇧🇩';
+  String get made_with => 'Fatto con â¤ï¸ in BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -585,7 +585,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get first_go_to => 'Prim, vai a';
 
   @override
-  String get something_went_wrong => 'Qualcosa è andato storto';
+  String get something_went_wrong => 'Qualcosa Ã¨ andato storto';
 
   @override
   String get piped_instance => 'Istanza Server Piped';
@@ -614,7 +614,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String track_exists(Object track) {
-    return 'La traccia $track esiste già';
+    return 'La traccia $track esiste giÃ ';
   }
 
   @override
@@ -644,28 +644,28 @@ class AppLocalizationsIt extends AppLocalizations {
   String get acousticness => 'Acustica';
 
   @override
-  String get danceability => 'Ballabilità';
+  String get danceability => 'BallabilitÃ ';
 
   @override
   String get energy => 'Energia';
 
   @override
-  String get instrumentalness => 'Strumentalità';
+  String get instrumentalness => 'StrumentalitÃ ';
 
   @override
-  String get liveness => 'Vitalità';
+  String get liveness => 'VitalitÃ ';
 
   @override
-  String get loudness => 'Sonorità';
+  String get loudness => 'SonoritÃ ';
 
   @override
-  String get speechiness => 'Loquacità';
+  String get speechiness => 'LoquacitÃ ';
 
   @override
   String get valence => 'Valenza';
 
   @override
-  String get popularity => 'Popolarità';
+  String get popularity => 'PopolaritÃ ';
 
   @override
   String get key => 'Chiave';
@@ -722,11 +722,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get download_warning =>
-      'Se scarichi tutte le Tracce in massa stai chiaramente piratando Musica e causando un danno alla società creativa della Musica. Spero che tu sia cosciente di questo. Cerca di rispettare e supportare sempre il duro lavoro degli Artisti';
+      'Se scarichi tutte le Tracce in massa stai chiaramente piratando Musica e causando un danno alla societÃ  creativa della Musica. Spero che tu sia cosciente di questo. Cerca di rispettare e supportare sempre il duro lavoro degli Artisti';
 
   @override
   String get download_ip_ban_warning =>
-      'A proposito, il tuo IP può essere bloccato da YouTube per il numero di richieste di download eccessive rispetto la norma. Il blocco IP significa che non puoi usare YoutTube (anche hai effettuato l\'accesso) per almeno 2-3 mesi dal dispositivo con questo IP. Soulful Bhakti non ha responsabilità se questo dovesse accadere';
+      'A proposito, il tuo IP puÃ² essere bloccato da YouTube per il numero di richieste di download eccessive rispetto la norma. Il blocco IP significa che non puoi usare YoutTube (anche hai effettuato l\'accesso) per almeno 2-3 mesi dal dispositivo con questo IP. Soulful Bhakti non ha responsabilitÃ  se questo dovesse accadere';
 
   @override
   String get by_clicking_accept_terms =>
@@ -738,11 +738,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get download_agreement_2 =>
-      'Supporterò l\'Artista come potrò e sto facendo questo solo perchè non ho denaro per acquistare il suo prodotto dell\'ingegno';
+      'SupporterÃ² l\'Artista come potrÃ² e sto facendo questo solo perchÃ¨ non ho denaro per acquistare il suo prodotto dell\'ingegno';
 
   @override
   String get download_agreement_3 =>
-      'Sono completamente cosciente che il mio IP può essere bloccato da YouTube & non riterrò responsabili Soulful Bhakti o i suoi autori/contributori per ogni inconveniente causato dalla mia azione corrente';
+      'Sono completamente cosciente che il mio IP puÃ² essere bloccato da YouTube & non riterrÃ² responsabili Soulful Bhakti o i suoi autori/contributori per ogni inconveniente causato dalla mia azione corrente';
 
   @override
   String get decline => 'Declino';
@@ -778,7 +778,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sort_newest => 'Ordina per nuovi aggiunti';
 
   @override
-  String get sort_oldest => 'Ordina per aggiunta più vecchia';
+  String get sort_oldest => 'Ordina per aggiunta piÃ¹ vecchia';
 
   @override
   String get sleep_timer => 'Timer Dormire';
@@ -811,7 +811,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get not_logged_in => 'Non hai effettuato l\'accesso';
 
   @override
-  String get search_mode => 'Modalità Ricerca';
+  String get search_mode => 'ModalitÃ  Ricerca';
 
   @override
   String get audio_source => 'Fonte audio';
@@ -824,7 +824,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti usa la criptazione per memorizzare in modo sicuro i dati. Ma ha fallito a farlo. Passerà quindi in ripiego alla memorizzazione non siscura\nSe stai usando Linux assicurati di avere un servizio di segretezza installato (gnome-keyring, kde-wallet, keepassxc etc)';
+      'Soulful Bhakti usa la criptazione per memorizzare in modo sicuro i dati. Ma ha fallito a farlo. PasserÃ  quindi in ripiego alla memorizzazione non siscura\nSe stai usando Linux assicurati di avere un servizio di segretezza installato (gnome-keyring, kde-wallet, keepassxc etc)';
 
   @override
   String get querying_info => 'Richiesta informazioni...';
@@ -834,7 +834,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'L\'istanza di Piped $pipedInstance è correntemente offline\n\nCambia istanza o cambia \'Tipo API\' alle API ufficiali YouTube\n\nAssicurati di riavviare l\'app dopo il cambio';
+    return 'L\'istanza di Piped $pipedInstance Ã¨ correntemente offline\n\nCambia istanza o cambia \'Tipo API\' alle API ufficiali YouTube\n\nAssicurati di riavviare l\'app dopo il cambio';
   }
 
   @override
@@ -853,7 +853,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get search_to_get_results => 'Cerca per ottenere risultati';
 
   @override
-  String get use_amoled_mode => 'Usa modalità AMOLED';
+  String get use_amoled_mode => 'Usa modalitÃ  AMOLED';
 
   @override
   String get pitch_dark_theme => 'Tema nero profondo';
@@ -872,13 +872,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get restore_defaults_confirmation =>
-      'Questo ripristinerà tutte le impostazioni ai valori predefiniti. Questa azione non può essere annullata.';
+      'Questo ripristinerÃ  tutte le impostazioni ai valori predefiniti. Questa azione non puÃ² essere annullata.';
 
   @override
   String get streaming_music_format => 'Formato streaming musica';
 
   @override
-  String get streaming_music_quality => 'Qualità streaming musica';
+  String get streaming_music_quality => 'QualitÃ  streaming musica';
 
   @override
   String get connect => 'Connetti';
@@ -911,7 +911,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get create_account => 'Crea il tuo account';
 
   @override
-  String get already_have_account => 'Hai già un account? Accedi';
+  String get already_have_account => 'Hai giÃ  un account? Accedi';
 
   @override
   String get dont_have_account => 'Non hai un account? Registrati';
@@ -987,11 +987,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get skip_this_nonsense => 'Salta questa sciocchezza';
 
   @override
-  String get freedom_of_music => '“Libertà della Musica”';
+  String get freedom_of_music => 'â€œLibertÃ  della Musicaâ€';
 
   @override
   String get freedom_of_music_palm =>
-      '“Libertà della Musica nel palmo della tua mano”';
+      'â€œLibertÃ  della Musica nel palmo della tua manoâ€';
 
   @override
   String get get_started => 'Cominciamo';
@@ -1001,7 +1001,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get piped_source_description =>
-      'Ti senti libero? Come YouTube ma molto più gratuito.';
+      'Ti senti libero? Come YouTube ma molto piÃ¹ gratuito.';
 
   @override
   String get jiosaavn_source_description =>
@@ -1009,11 +1009,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get invidious_source_description =>
-      'Simile a Piped ma con maggiore disponibilità.';
+      'Simile a Piped ma con maggiore disponibilitÃ .';
 
   @override
   String highest_quality(Object quality) {
-    return 'Massima Qualità: $quality';
+    return 'Massima QualitÃ : $quality';
   }
 
   @override
@@ -1028,7 +1028,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get choose_your_region_description =>
-      'Questo aiuterà Soulful Bhakti a mostrarti il contenuto giusto per la tua posizione.';
+      'Questo aiuterÃ  Soulful Bhakti a mostrarti il contenuto giusto per la tua posizione.';
 
   @override
   String get choose_your_language => 'Scegli la tua lingua';
@@ -1038,7 +1038,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti è un progetto open-source. Puoi aiutare questo progetto a crescere contribuendo al progetto, segnalando bug o suggerendo nuove funzionalità.';
+      'Soulful Bhakti Ã¨ un progetto open-source. Puoi aiutare questo progetto a crescere contribuendo al progetto, segnalando bug o suggerendo nuove funzionalitÃ .';
 
   @override
   String get contribute_on_github => 'Contribuisci su GitHub';
@@ -1078,14 +1078,14 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String and_n_more(Object count) {
-    return 'e $count in più';
+    return 'e $count in piÃ¹';
   }
 
   @override
   String get recently_played => 'Riprodotti di recente';
 
   @override
-  String get browse_more => 'Esplora di più';
+  String get browse_more => 'Esplora di piÃ¹';
 
   @override
   String get no_title => 'Nessun titolo';
@@ -1109,12 +1109,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum è stato rilasciato';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum Ã¨ stato rilasciato';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version è stato rilasciato';
+    return 'Soulful Bhakti v$version Ã¨ stato rilasciato';
   }
 
   @override
@@ -1134,13 +1134,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get multiple_device_connected =>
-      'Sono collegati più dispositivi.\nScegli il dispositivo su cui vuoi che venga eseguita questa azione';
+      'Sono collegati piÃ¹ dispositivi.\nScegli il dispositivo su cui vuoi che venga eseguita questa azione';
 
   @override
   String get nothing_found => 'Nessun risultato';
 
   @override
-  String get the_box_is_empty => 'La scatola è vuota';
+  String get the_box_is_empty => 'La scatola Ã¨ vuota';
 
   @override
   String get top_artists => 'Artisti Top';
@@ -1244,7 +1244,7 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get owned_by_you => 'Di tua proprietà';
+  String get owned_by_you => 'Di tua proprietÃ ';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
@@ -1253,7 +1253,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get hipotetical_calculation =>
-      '*Questo è calcolato in base al pagamento medio per stream delle piattaforme di streaming musicale online, che va da \$0.003 a \$0.005. Si tratta di un calcolo ipotetico per dare all\'utente un\'idea di quanto avrebbe pagato agli artisti se avesse ascoltato la loro canzone su diverse piattaforme di streaming musicale.';
+      '*Questo Ã¨ calcolato in base al pagamento medio per stream delle piattaforme di streaming musicale online, che va da \$0.003 a \$0.005. Si tratta di un calcolo ipotetico per dare all\'utente un\'idea di quanto avrebbe pagato agli artisti se avesse ascoltato la loro canzone su diverse piattaforme di streaming musicale.';
 
   @override
   String count_mins(Object minutes) {
@@ -1301,7 +1301,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Distribuzione dei $tracks_length brani principali che hai ascoltato di più';
+    return 'Distribuzione dei $tracks_length brani principali che hai ascoltato di piÃ¹';
   }
 
   @override
@@ -1335,7 +1335,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get webview_not_found_description =>
-      'Nessun runtime Webview installato nel tuo dispositivo.\nSe è installato, assicurati che sia nel environment PATH\n\nDopo l\'installazione, riavvia l\'app';
+      'Nessun runtime Webview installato nel tuo dispositivo.\nSe Ã¨ installato, assicurati che sia nel environment PATH\n\nDopo l\'installazione, riavvia l\'app';
 
   @override
   String get unsupported_platform => 'Piattaforma non supportata';
@@ -1418,12 +1418,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine non è installato';
+    return '$engine non Ã¨ installato';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine non è installato nel tuo sistema.';
+    return '$engine non Ã¨ installato nel tuo sistema.';
   }
 
   @override
@@ -1433,7 +1433,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'In macOS/Linux/os simili a unix, impostare il percorso su .zshrc/.bashrc/.bash_profile ecc. non funzionerà.\nDevi impostare il percorso nel file di configurazione della shell';
+      'In macOS/Linux/os simili a unix, impostare il percorso su .zshrc/.bashrc/.bash_profile ecc. non funzionerÃ .\nDevi impostare il percorso nel file di configurazione della shell';
 
   @override
   String get download => 'Scarica';
@@ -1452,7 +1452,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get port_helper_msg =>
-      'Il valore predefinito è -1, che indica un numero casuale. Se hai configurato un firewall, si consiglia di impostarlo.';
+      'Il valore predefinito Ã¨ -1, che indica un numero casuale. Se hai configurato un firewall, si consiglia di impostarlo.';
 
   @override
   String connect_request(Object client) {
@@ -1464,7 +1464,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Connessione negata. L\'utente ha negato l\'accesso.';
 
   @override
-  String get an_error_occurred => 'Si è verificato un errore';
+  String get an_error_occurred => 'Si Ã¨ verificato un errore';
 
   @override
   String get copy_to_clipboard => 'Copia negli appunti';
@@ -1549,7 +1549,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String can_access_name_api(Object name) {
-    return '- Può accedere all\'API **$name**';
+    return '- PuÃ² accedere all\'API **$name**';
   }
 
   @override
@@ -1565,7 +1565,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get this_plugin_can_do_following =>
-      'Questo plugin può fare quanto segue';
+      'Questo plugin puÃ² fare quanto segue';
 
   @override
   String get install => 'Installa';
@@ -1591,7 +1591,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Il team di Soulful Bhakti non si assume alcuna responsabilità (anche legale) per i plugin di \"terze parti\".\nUsali a tuo rischio e pericolo. Per eventuali bug/problemi, segnalali al repository del plugin.\n\nSe un plugin di \"terze parti\" sta violando i ToS/DMCA di un servizio/entità legale, per favore chiedi all\'autore del plugin \"terzo\" o alla piattaforma di hosting, ad esempio GitHub/Codeberg, di agire. Quelli elencati sopra (etichettati come \"terze parti\") sono tutti plugin pubblici/mantenuti dalla comunità. Non li curiamo, quindi non possiamo intraprendere alcuna azione su di essi.\n\n';
+      'Il team di Soulful Bhakti non si assume alcuna responsabilitÃ  (anche legale) per i plugin di \"terze parti\".\nUsali a tuo rischio e pericolo. Per eventuali bug/problemi, segnalali al repository del plugin.\n\nSe un plugin di \"terze parti\" sta violando i ToS/DMCA di un servizio/entitÃ  legale, per favore chiedi all\'autore del plugin \"terzo\" o alla piattaforma di hosting, ad esempio GitHub/Codeberg, di agire. Quelli elencati sopra (etichettati come \"terze parti\") sono tutti plugin pubblici/mantenuti dalla comunitÃ . Non li curiamo, quindi non possiamo intraprendere alcuna azione su di essi.\n\n';
 
   @override
   String get input_does_not_match_format =>
@@ -1634,7 +1634,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get dab_music_source_description =>
-      'Per audiophile. Fornisce flussi audio di alta qualità/senza perdita. Abbinamento traccia accurato basato su ISRC.';
+      'Per audiophile. Fornisce flussi audio di alta qualitÃ /senza perdita. Abbinamento traccia accurato basato su ISRC.';
 
   @override
   String get summary_top_track => 'Miglior brano\nquesto periodo';
@@ -1650,4 +1650,21 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

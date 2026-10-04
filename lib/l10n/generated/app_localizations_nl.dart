@@ -30,7 +30,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_subtitle => 'Pas Soulful Bhakti naar wens aan';
 
   @override
-  String get genre_categories_filter => 'Categorieën of genres filteren…';
+  String get genre_categories_filter => 'CategorieÃ«n of genres filterenâ€¦';
 
   @override
   String get genre => 'Genre';
@@ -85,7 +85,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get downloads => 'Downloads';
 
   @override
-  String get filter_playlists => 'Afspeellijsten filteren…';
+  String get filter_playlists => 'Afspeellijsten filterenâ€¦';
 
   @override
   String get liked_tracks => 'Geliefde tracks';
@@ -134,7 +134,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get collaborative => 'Samenwerkend';
 
   @override
-  String get search_local_tracks => 'Lokale nummers zoeken…';
+  String get search_local_tracks => 'Lokale nummers zoekenâ€¦';
 
   @override
   String get play => 'Afspelen';
@@ -172,7 +172,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cancel_all => 'Alles annuleren';
 
   @override
-  String get filter_artist => 'Artiesten filteren…';
+  String get filter_artist => 'Artiesten filterenâ€¦';
 
   @override
   String followers(Object followers) {
@@ -189,7 +189,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get fans_also_like => 'Fans luisteren ook';
 
   @override
-  String get loading => 'Laden…';
+  String get loading => 'Ladenâ€¦';
 
   @override
   String get artist => 'Artiest';
@@ -212,7 +212,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get filter_albums => 'Albums filteren…';
+  String get filter_albums => 'Albums filterenâ€¦';
 
   @override
   String get synced => 'Gesynchroniseerd';
@@ -224,7 +224,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get shuffle => 'Willekeurig';
 
   @override
-  String get search_tracks => 'Nummers zoeken…';
+  String get search_tracks => 'Nummers zoekenâ€¦';
 
   @override
   String get released => 'Uitgegeven';
@@ -531,14 +531,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get bug_issues => 'Bug+problemen';
 
   @override
-  String get made_with => 'Met ❤️ gemaakt in Bangladesh🇧🇩';
+  String get made_with => 'Met â¤ï¸ gemaakt in BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -712,7 +712,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get are_you_sure => 'Weet je het zeker?';
 
   @override
-  String get generating_playlist => 'Aangepaste afspeellijst genereren…';
+  String get generating_playlist => 'Aangepaste afspeellijst genererenâ€¦';
 
   @override
   String selected_count_tracks(Object count) {
@@ -816,24 +816,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get audio_source => 'Audiobron';
 
   @override
-  String get ok => 'Oké';
+  String get ok => 'OkÃ©';
 
   @override
   String get failed_to_encrypt => 'Versleuteling mislukt';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti gebruikt versleuteling om je gegevens veilig op te slaan. Maar dat is niet gelukt. Dus zal het terugvallen op onveilige opslag.\nAls je linux gebruikt, zorg er dan voor dat je een geheim-dienst (gnome-keyring, kde-wallet, keepassxc etc) hebt geïnstalleerd.';
+      'Soulful Bhakti gebruikt versleuteling om je gegevens veilig op te slaan. Maar dat is niet gelukt. Dus zal het terugvallen op onveilige opslag.\nAls je linux gebruikt, zorg er dan voor dat je een geheim-dienst (gnome-keyring, kde-wallet, keepassxc etc) hebt geÃ¯nstalleerd.';
 
   @override
-  String get querying_info => 'Info opvragen…';
+  String get querying_info => 'Info opvragenâ€¦';
 
   @override
   String get piped_api_down => 'Piped API is uit';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'De Piped-instantie $pipedInstance is momenteel uitgevallen\n\nVerander de instantie of verander het \'API-type\' naar de officiële YouTube API.\n\nZorg ervoor dat u de app herstart na de wijziging';
+    return 'De Piped-instantie $pipedInstance is momenteel uitgevallen\n\nVerander de instantie of verander het \'API-type\' naar de officiÃ«le YouTube API.\n\nZorg ervoor dat u de app herstart na de wijziging';
   }
 
   @override
@@ -846,7 +846,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get use_system_title_bar => 'Systeemtitelbalk gebruiken';
 
   @override
-  String get crunching_results => 'Resultaten verwerken…';
+  String get crunching_results => 'Resultaten verwerkenâ€¦';
 
   @override
   String get search_to_get_results => 'Zoeken naar resultaten';
@@ -904,7 +904,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get sign_out => 'Uitloggen';
 
   @override
-  String get verify => 'Verifiëren';
+  String get verify => 'VerifiÃ«ren';
 
   @override
   String get create_account => 'Account aanmaken';
@@ -986,10 +986,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get skip_this_nonsense => 'Deze onzin overslaan';
 
   @override
-  String get freedom_of_music => '“Vrijheid van muziek”';
+  String get freedom_of_music => 'â€œVrijheid van muziekâ€';
 
   @override
-  String get freedom_of_music_palm => '“Vrijheid van muziek in je hand”';
+  String get freedom_of_music_palm => 'â€œVrijheid van muziek in je handâ€';
 
   @override
   String get get_started => 'Laten we beginnen';
@@ -1003,7 +1003,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get jiosaavn_source_description =>
-      'Het beste voor de regio Zuid-Azië.';
+      'Het beste voor de regio Zuid-AziÃ«.';
 
   @override
   String get invidious_source_description =>
@@ -1189,7 +1189,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Verifieer je e-mailadres om je account te beveiligen';
 
   @override
-  String get verify_now => 'Nu verifiëren';
+  String get verify_now => 'Nu verifiÃ«ren';
 
   @override
   String get enter_email_to_verify =>
@@ -1334,7 +1334,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get webview_not_found_description =>
-      'Er is geen Webview-runtime geïnstalleerd op uw apparaat.\nAls het is geïnstalleerd, zorg ervoor dat het in het environment PATH staat\n\nHerstart de app na installatie';
+      'Er is geen Webview-runtime geÃ¯nstalleerd op uw apparaat.\nAls het is geÃ¯nstalleerd, zorg ervoor dat het in het environment PATH staat\n\nHerstart de app na installatie';
 
   @override
   String get unsupported_platform => 'Niet ondersteund platform';
@@ -1371,7 +1371,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$filesExported van de $files bestanden geëxporteerd';
+    return '$filesExported van de $files bestanden geÃ«xporteerd';
   }
 
   @override
@@ -1418,12 +1418,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine is niet geïnstalleerd';
+    return '$engine is niet geÃ¯nstalleerd';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine is niet geïnstalleerd op je systeem.';
+    return '$engine is niet geÃ¯nstalleerd op je systeem.';
   }
 
   @override
@@ -1467,7 +1467,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get an_error_occurred => 'Er is een fout opgetreden';
 
   @override
-  String get copy_to_clipboard => 'Kopiëren naar klembord';
+  String get copy_to_clipboard => 'KopiÃ«ren naar klembord';
 
   @override
   String get view_logs => 'Logboeken bekijken';
@@ -1491,10 +1491,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get unsafe_url_warning =>
-      'Het kan onveilig zijn om links van onbetrouwbare bronnen te openen. Wees voorzichtig!\nU kunt de link ook naar uw klembord kopiëren.';
+      'Het kan onveilig zijn om links van onbetrouwbare bronnen te openen. Wees voorzichtig!\nU kunt de link ook naar uw klembord kopiÃ«ren.';
 
   @override
-  String get copy_link => 'Link kopiëren';
+  String get copy_link => 'Link kopiÃ«ren';
 
   @override
   String get building_your_timeline =>
@@ -1616,7 +1616,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get upload_plugin_from_file => 'Plugin uploaden vanuit bestand';
 
   @override
-  String get installed => 'Geïnstalleerd';
+  String get installed => 'GeÃ¯nstalleerd';
 
   @override
   String get available_plugins => 'Beschikbare plugins';
@@ -1649,4 +1649,21 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

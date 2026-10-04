@@ -9,546 +9,560 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get guest => 'ゲスト';
+  String get guest => 'ã‚²ã‚¹ãƒˆ';
 
   @override
-  String get browse => '閲覧';
+  String get browse => 'é–²è¦§';
 
   @override
-  String get search => '検索';
+  String get search => 'æ¤œç´¢';
 
   @override
-  String get library => 'ライブラリ';
+  String get library => 'ãƒ©ã‚¤ãƒ–ãƒ©ãƒª';
 
   @override
-  String get lyrics => '歌詞';
+  String get lyrics => 'æ­Œè©ž';
 
   @override
-  String get settings => '設定';
+  String get settings => 'è¨­å®š';
 
   @override
-  String get settings_subtitle => 'Soulful Bhakti をお好みに合わせてカスタマイズ';
+  String get settings_subtitle =>
+      'Soulful Bhakti ã‚’ãŠå¥½ã¿ã«åˆã‚ã›ã¦ã‚«ã‚¹ã‚¿ãƒžã‚¤ã‚º';
 
   @override
-  String get genre_categories_filter => 'カテゴリーやジャンルを絞り込み...';
+  String get genre_categories_filter =>
+      'ã‚«ãƒ†ã‚´ãƒªãƒ¼ã‚„ã‚¸ãƒ£ãƒ³ãƒ«ã‚’çµžã‚Šè¾¼ã¿...';
 
   @override
-  String get genre => 'ジャンル';
+  String get genre => 'ã‚¸ãƒ£ãƒ³ãƒ«';
 
   @override
-  String get personalized => 'あなたにおすすめ';
+  String get personalized => 'ã‚ãªãŸã«ãŠã™ã™ã‚';
 
   @override
-  String get featured => '注目';
+  String get featured => 'æ³¨ç›®';
 
   @override
-  String get new_releases => '新着';
+  String get new_releases => 'æ–°ç€';
 
   @override
-  String get songs => '曲';
+  String get songs => 'æ›²';
 
   @override
-  String get newest_arrivals => '最新の追加';
+  String get newest_arrivals => 'æœ€æ–°ã®è¿½åŠ ';
 
   @override
-  String get top_trending => '急上昇';
+  String get top_trending => 'æ€¥ä¸Šæ˜‡';
 
   @override
-  String get see_more => 'もっと見る';
+  String get see_more => 'ã‚‚ã£ã¨è¦‹ã‚‹';
 
   @override
   String playing_track(Object track) {
-    return '$track を再生';
+    return '$track ã‚’å†ç”Ÿ';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return '現在のキューを消去します。$track_length 曲を消去します。\n続行しますか？';
+    return 'ç¾åœ¨ã®ã‚­ãƒ¥ãƒ¼ã‚’æ¶ˆåŽ»ã—ã¾ã™ã€‚$track_length æ›²ã‚’æ¶ˆåŽ»ã—ã¾ã™ã€‚\nç¶šè¡Œã—ã¾ã™ã‹ï¼Ÿ';
   }
 
   @override
-  String get load_more => 'もっと読み込む';
+  String get load_more => 'ã‚‚ã£ã¨èª­ã¿è¾¼ã‚€';
 
   @override
-  String get playlists => '再生リスト';
+  String get playlists => 'å†ç”Ÿãƒªã‚¹ãƒˆ';
 
   @override
-  String get artists => 'アーティスト';
+  String get artists => 'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ';
 
   @override
-  String get albums => 'アルバム';
+  String get albums => 'ã‚¢ãƒ«ãƒãƒ ';
 
   @override
-  String get tracks => '曲';
+  String get tracks => 'æ›²';
 
   @override
-  String get downloads => 'ダウンロード';
+  String get downloads => 'ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰';
 
   @override
-  String get filter_playlists => 'あなたの再生リストを絞り込み...';
+  String get filter_playlists =>
+      'ã‚ãªãŸã®å†ç”Ÿãƒªã‚¹ãƒˆã‚’çµžã‚Šè¾¼ã¿...';
 
   @override
-  String get liked_tracks => 'いいねした曲';
+  String get liked_tracks => 'ã„ã„ã­ã—ãŸæ›²';
 
   @override
-  String get liked_tracks_description => 'いいねしたすべての曲';
+  String get liked_tracks_description => 'ã„ã„ã­ã—ãŸã™ã¹ã¦ã®æ›²';
 
   @override
-  String get playlist => '再生リスト';
+  String get playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆ';
 
   @override
-  String get create_a_playlist => '再生リストの作成';
+  String get create_a_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã®ä½œæˆ';
 
   @override
-  String get new_playlist => '新しいプレイリスト';
+  String get new_playlist => 'æ–°ã—ã„ãƒ—ãƒ¬ã‚¤ãƒªã‚¹ãƒˆ';
 
   @override
-  String get playlist_name => '再生リスト名';
+  String get playlist_name => 'å†ç”Ÿãƒªã‚¹ãƒˆå';
 
   @override
-  String get no_playlists_yet => 'まだプレイリストがありません。選択した曲から作成してください。';
+  String get no_playlists_yet =>
+      'ã¾ã ãƒ—ãƒ¬ã‚¤ãƒªã‚¹ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚é¸æŠžã—ãŸæ›²ã‹ã‚‰ä½œæˆã—ã¦ãã ã•ã„ã€‚';
 
   @override
-  String get update_playlist => '再生リストを更新';
+  String get update_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã‚’æ›´æ–°';
 
   @override
-  String get create => '作成';
+  String get create => 'ä½œæˆ';
 
   @override
-  String get cancel => 'キャンセル';
+  String get cancel => 'ã‚­ãƒ£ãƒ³ã‚»ãƒ«';
 
   @override
-  String get update => '更新';
+  String get update => 'æ›´æ–°';
 
   @override
-  String get name_of_playlist => '再生リストの名前';
+  String get name_of_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã®åå‰';
 
   @override
-  String get description => '説明';
+  String get description => 'èª¬æ˜Ž';
 
   @override
-  String get public => '公開';
+  String get public => 'å…¬é–‹';
 
   @override
-  String get collaborative => 'コラボ';
+  String get collaborative => 'ã‚³ãƒ©ãƒœ';
 
   @override
-  String get search_local_tracks => '端末内の曲を検索...';
+  String get search_local_tracks => 'ç«¯æœ«å†…ã®æ›²ã‚’æ¤œç´¢...';
 
   @override
-  String get play => '再生';
+  String get play => 'å†ç”Ÿ';
 
   @override
-  String get delete => '削除';
+  String get delete => 'å‰Šé™¤';
 
   @override
-  String get none => 'なし';
+  String get none => 'ãªã—';
 
   @override
-  String get sort_a_z => 'A-Z 順に並び替え';
+  String get sort_a_z => 'A-Z é †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sort_z_a => 'Z-A 順に並び替え';
+  String get sort_z_a => 'Z-A é †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sort_artist => 'アーティスト順に並び替え';
+  String get sort_artist => 'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆé †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sort_album => 'アルバム順に並び替え';
+  String get sort_album => 'ã‚¢ãƒ«ãƒãƒ é †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sort_duration => '長さ順に並べ替え';
+  String get sort_duration => 'é•·ã•é †ã«ä¸¦ã¹æ›¿ãˆ';
 
   @override
-  String get sort_tracks => '曲の並び替え';
+  String get sort_tracks => 'æ›²ã®ä¸¦ã³æ›¿ãˆ';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'ダウンロード中 ($tracks_length) 曲';
+    return 'ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ä¸­ ($tracks_length) æ›²';
   }
 
   @override
-  String get cancel_all => 'すべてキャンセル';
+  String get cancel_all => 'ã™ã¹ã¦ã‚­ãƒ£ãƒ³ã‚»ãƒ«';
 
   @override
-  String get filter_artist => 'アーティストを絞り込み...';
+  String get filter_artist => 'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã‚’çµžã‚Šè¾¼ã¿...';
 
   @override
   String followers(Object followers) {
-    return '$followers フォロワー';
+    return '$followers ãƒ•ã‚©ãƒ­ãƒ¯ãƒ¼';
   }
 
   @override
-  String get add_artist_to_blacklist => 'このアーティストをブラックリストに追加';
+  String get add_artist_to_blacklist =>
+      'ã“ã®ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã‚’ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆã«è¿½åŠ ';
 
   @override
-  String get top_tracks => '人気の曲';
+  String get top_tracks => 'äººæ°—ã®æ›²';
 
   @override
-  String get fans_also_like => 'ファンの間で人気';
+  String get fans_also_like => 'ãƒ•ã‚¡ãƒ³ã®é–“ã§äººæ°—';
 
   @override
-  String get loading => '読み込み中...';
+  String get loading => 'èª­ã¿è¾¼ã¿ä¸­...';
 
   @override
-  String get artist => 'アーティスト';
+  String get artist => 'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ';
 
   @override
-  String get blacklisted => 'ブラックリスト';
+  String get blacklisted => 'ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆ';
 
   @override
-  String get following => 'フォロー中';
+  String get following => 'ãƒ•ã‚©ãƒ­ãƒ¼ä¸­';
 
   @override
-  String get follow => 'フォローする';
+  String get follow => 'ãƒ•ã‚©ãƒ­ãƒ¼ã™ã‚‹';
 
   @override
-  String get artist_url_copied => 'アーティストの URL をクリップボードにコピーしました';
+  String get artist_url_copied =>
+      'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã® URL ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼ã—ã¾ã—ãŸ';
 
   @override
   String added_to_queue(Object tracks) {
-    return '$tracks をキューに追加しました';
+    return '$tracks ã‚’ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ã—ã¾ã—ãŸ';
   }
 
   @override
-  String get filter_albums => 'アルバムを絞り込み...';
+  String get filter_albums => 'ã‚¢ãƒ«ãƒãƒ ã‚’çµžã‚Šè¾¼ã¿...';
 
   @override
-  String get synced => '同期する';
+  String get synced => 'åŒæœŸã™ã‚‹';
 
   @override
-  String get plain => 'そのまま';
+  String get plain => 'ãã®ã¾ã¾';
 
   @override
-  String get shuffle => 'シャッフル';
+  String get shuffle => 'ã‚·ãƒ£ãƒƒãƒ•ãƒ«';
 
   @override
-  String get search_tracks => '曲を検索...';
+  String get search_tracks => 'æ›²ã‚’æ¤œç´¢...';
 
   @override
-  String get released => 'リリース日';
+  String get released => 'ãƒªãƒªãƒ¼ã‚¹æ—¥';
 
   @override
   String error(Object error) {
-    return 'エラー $error';
+    return 'ã‚¨ãƒ©ãƒ¼ $error';
   }
 
   @override
-  String get title => 'タイトル';
+  String get title => 'ã‚¿ã‚¤ãƒˆãƒ«';
 
   @override
-  String get time => '長さ';
+  String get time => 'é•·ã•';
 
   @override
-  String get more_actions => 'ほかの操作';
+  String get more_actions => 'ã»ã‹ã®æ“ä½œ';
 
   @override
   String add_count_to_playlist(Object count) {
-    return '再生リストに ($count) 曲を追加';
+    return 'å†ç”Ÿãƒªã‚¹ãƒˆã« ($count) æ›²ã‚’è¿½åŠ ';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'キューに ($count) 曲を追加';
+    return 'ã‚­ãƒ¥ãƒ¼ã« ($count) æ›²ã‚’è¿½åŠ ';
   }
 
   @override
   String play_count_next(Object count) {
-    return '次に ($count) 曲を再生';
+    return 'æ¬¡ã« ($count) æ›²ã‚’å†ç”Ÿ';
   }
 
   @override
-  String get album => 'アルバム';
+  String get album => 'ã‚¢ãƒ«ãƒãƒ ';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '$data をクリップボードにコピーしました';
+    return '$data ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼ã—ã¾ã—ãŸ';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return '$track をこの再生リストに追加';
+    return '$track ã‚’ã“ã®å†ç”Ÿãƒªã‚¹ãƒˆã«è¿½åŠ ';
   }
 
   @override
-  String get add => '追加';
+  String get add => 'è¿½åŠ ';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'キューに $track を追加しました';
+    return 'ã‚­ãƒ¥ãƒ¼ã« $track ã‚’è¿½åŠ ã—ã¾ã—ãŸ';
   }
 
   @override
-  String get add_to_queue => 'キューに追加';
+  String get add_to_queue => 'ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track を次に再生';
+    return '$track ã‚’æ¬¡ã«å†ç”Ÿ';
   }
 
   @override
-  String get play_next => '次に再生';
+  String get play_next => 'æ¬¡ã«å†ç”Ÿ';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'キューから $track を除去しました';
+    return 'ã‚­ãƒ¥ãƒ¼ã‹ã‚‰ $track ã‚’é™¤åŽ»ã—ã¾ã—ãŸ';
   }
 
   @override
-  String get remove_from_queue => 'キューから除去';
+  String get remove_from_queue => 'ã‚­ãƒ¥ãƒ¼ã‹ã‚‰é™¤åŽ»';
 
   @override
-  String get remove_from_favorites => 'お気に入りから除去';
+  String get remove_from_favorites => 'ãŠæ°—ã«å…¥ã‚Šã‹ã‚‰é™¤åŽ»';
 
   @override
-  String get save_as_favorite => 'お気に入りに保存';
+  String get save_as_favorite => 'ãŠæ°—ã«å…¥ã‚Šã«ä¿å­˜';
 
   @override
-  String get add_to_playlist => '再生リストに追加';
+  String get add_to_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã«è¿½åŠ ';
 
   @override
-  String get remove_from_playlist => '再生リストから除去';
+  String get remove_from_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã‹ã‚‰é™¤åŽ»';
 
   @override
-  String get add_to_blacklist => 'ブラックリストに追加';
+  String get add_to_blacklist => 'ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆã«è¿½åŠ ';
 
   @override
-  String get remove_from_blacklist => 'ブラックリストから除去';
+  String get remove_from_blacklist => 'ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆã‹ã‚‰é™¤åŽ»';
 
   @override
-  String get share => '共有';
+  String get share => 'å…±æœ‰';
 
   @override
-  String get mini_player => 'ミニプレイヤー';
+  String get mini_player => 'ãƒŸãƒ‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼';
 
   @override
-  String get slide_to_seek => '前後にスライドしてシーク';
+  String get slide_to_seek => 'å‰å¾Œã«ã‚¹ãƒ©ã‚¤ãƒ‰ã—ã¦ã‚·ãƒ¼ã‚¯';
 
   @override
-  String get shuffle_playlist => '再生リストをシャッフル';
+  String get shuffle_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã‚’ã‚·ãƒ£ãƒƒãƒ•ãƒ«';
 
   @override
-  String get unshuffle_playlist => '再生リストのシャッフル解除';
+  String get unshuffle_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã®ã‚·ãƒ£ãƒƒãƒ•ãƒ«è§£é™¤';
 
   @override
-  String get previous_track => '前の曲';
+  String get previous_track => 'å‰ã®æ›²';
 
   @override
-  String get next_track => '次の曲';
+  String get next_track => 'æ¬¡ã®æ›²';
 
   @override
-  String get pause_playback => '再生を停止';
+  String get pause_playback => 'å†ç”Ÿã‚’åœæ­¢';
 
   @override
-  String get resume_playback => '再生を再開';
+  String get resume_playback => 'å†ç”Ÿã‚’å†é–‹';
 
   @override
-  String get loop_track => '曲をループ';
+  String get loop_track => 'æ›²ã‚’ãƒ«ãƒ¼ãƒ—';
 
   @override
-  String get no_loop => 'ループなし';
+  String get no_loop => 'ãƒ«ãƒ¼ãƒ—ãªã—';
 
   @override
-  String get repeat_playlist => '再生リストをリピート';
+  String get repeat_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã‚’ãƒªãƒ”ãƒ¼ãƒˆ';
 
   @override
-  String get queue => '再生キュー';
+  String get queue => 'å†ç”Ÿã‚­ãƒ¥ãƒ¼';
 
   @override
-  String get alternative_track_sources => 'この曲の別の音源を選ぶ';
+  String get alternative_track_sources => 'ã“ã®æ›²ã®åˆ¥ã®éŸ³æºã‚’é¸ã¶';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks曲の再生キュー';
+    return '$tracksæ›²ã®å†ç”Ÿã‚­ãƒ¥ãƒ¼';
   }
 
   @override
-  String get clear_all => 'すべて消去l';
+  String get clear_all => 'ã™ã¹ã¦æ¶ˆåŽ»l';
 
   @override
-  String get show_hide_ui_on_hover => 'マウスを乗せてUIを表示/隠す';
+  String get show_hide_ui_on_hover => 'ãƒžã‚¦ã‚¹ã‚’ä¹—ã›ã¦UIã‚’è¡¨ç¤º/éš ã™';
 
   @override
-  String get always_on_top => '常に手前に表示';
+  String get always_on_top => 'å¸¸ã«æ‰‹å‰ã«è¡¨ç¤º';
 
   @override
-  String get exit_mini_player => 'ミニプレイヤーを終了';
+  String get exit_mini_player => 'ãƒŸãƒ‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’çµ‚äº†';
 
   @override
-  String get local_library => '端末内ライブラリ';
+  String get local_library => 'ç«¯æœ«å†…ãƒ©ã‚¤ãƒ–ãƒ©ãƒª';
 
   @override
-  String get add_library_location => 'ライブラリに追加';
+  String get add_library_location => 'ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã«è¿½åŠ ';
 
   @override
-  String get remove_library_location => 'ライブラリから削除';
+  String get remove_library_location => 'ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã‹ã‚‰å‰Šé™¤';
 
   @override
-  String get account => 'アカウント';
+  String get account => 'ã‚¢ã‚«ã‚¦ãƒ³ãƒˆ';
 
   @override
-  String get logout => 'ログアウト';
+  String get logout => 'ãƒ­ã‚°ã‚¢ã‚¦ãƒˆ';
 
   @override
-  String get logout_of_this_account => 'このアカウントからログアウト';
+  String get logout_of_this_account =>
+      'ã“ã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‹ã‚‰ãƒ­ã‚°ã‚¢ã‚¦ãƒˆ';
 
   @override
-  String get language_region => '言語 & 地域';
+  String get language_region => 'è¨€èªž & åœ°åŸŸ';
 
   @override
-  String get language => '言語';
+  String get language => 'è¨€èªž';
 
   @override
-  String get system_default => 'システムの既定値';
+  String get system_default => 'ã‚·ã‚¹ãƒ†ãƒ ã®æ—¢å®šå€¤';
 
   @override
-  String get market_place_region => '音楽市場の地域';
+  String get market_place_region => 'éŸ³æ¥½å¸‚å ´ã®åœ°åŸŸ';
 
   @override
-  String get recommendation_country => 'おすすめの国';
+  String get recommendation_country => 'ãŠã™ã™ã‚ã®å›½';
 
   @override
-  String get appearance => '外観';
+  String get appearance => 'å¤–è¦³';
 
   @override
-  String get layout_mode => 'レイアウトの種類';
+  String get layout_mode => 'ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã®ç¨®é¡ž';
 
   @override
-  String get override_layout_settings => 'レスポンシブなレイアウトの種類の設定を上書きする';
+  String get override_layout_settings =>
+      'ãƒ¬ã‚¹ãƒãƒ³ã‚·ãƒ–ãªãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã®ç¨®é¡žã®è¨­å®šã‚’ä¸Šæ›¸ãã™ã‚‹';
 
   @override
-  String get adaptive => '適応的';
+  String get adaptive => 'é©å¿œçš„';
 
   @override
-  String get compact => 'コンパクト';
+  String get compact => 'ã‚³ãƒ³ãƒ‘ã‚¯ãƒˆ';
 
   @override
-  String get extended => '幅広';
+  String get extended => 'å¹…åºƒ';
 
   @override
-  String get theme => 'テーマ';
+  String get theme => 'ãƒ†ãƒ¼ãƒž';
 
   @override
-  String get dark => 'ダーク';
+  String get dark => 'ãƒ€ãƒ¼ã‚¯';
 
   @override
-  String get light => 'ライト';
+  String get light => 'ãƒ©ã‚¤ãƒˆ';
 
   @override
-  String get system => 'システムに従う';
+  String get system => 'ã‚·ã‚¹ãƒ†ãƒ ã«å¾“ã†';
 
   @override
-  String get accent_color => 'アクセントカラー';
+  String get accent_color => 'ã‚¢ã‚¯ã‚»ãƒ³ãƒˆã‚«ãƒ©ãƒ¼';
 
   @override
-  String get sync_album_color => 'アルバムの色に合わせる';
+  String get sync_album_color => 'ã‚¢ãƒ«ãƒãƒ ã®è‰²ã«åˆã‚ã›ã‚‹';
 
   @override
-  String get sync_album_color_description => 'アルバムアートの主張色をアクセントカラーとして使用';
+  String get sync_album_color_description =>
+      'ã‚¢ãƒ«ãƒãƒ ã‚¢ãƒ¼ãƒˆã®ä¸»å¼µè‰²ã‚’ã‚¢ã‚¯ã‚»ãƒ³ãƒˆã‚«ãƒ©ãƒ¼ã¨ã—ã¦ä½¿ç”¨';
 
   @override
-  String get playback => '再生';
+  String get playback => 'å†ç”Ÿ';
 
   @override
-  String get audio_quality => '音声品質';
+  String get audio_quality => 'éŸ³å£°å“è³ª';
 
   @override
-  String get high => '高';
+  String get high => 'é«˜';
 
   @override
-  String get low => '低';
+  String get low => 'ä½Ž';
 
   @override
-  String get pre_download_play => '事前ダウンロードと再生';
+  String get pre_download_play => 'äº‹å‰ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã¨å†ç”Ÿ';
 
   @override
   String get pre_download_play_description =>
-      '音声をストリーミングする代わりに、データをバイト単位でダウンロードして再生 (回線速度が早いユーザーにおすすめ)';
+      'éŸ³å£°ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°ã™ã‚‹ä»£ã‚ã‚Šã«ã€ãƒ‡ãƒ¼ã‚¿ã‚’ãƒã‚¤ãƒˆå˜ä½ã§ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã—ã¦å†ç”Ÿ (å›žç·šé€Ÿåº¦ãŒæ—©ã„ãƒ¦ãƒ¼ã‚¶ãƒ¼ã«ãŠã™ã™ã‚)';
 
   @override
-  String get skip_non_music => '音楽でない部分をスキップ (SponsorBlock)';
+  String get skip_non_music =>
+      'éŸ³æ¥½ã§ãªã„éƒ¨åˆ†ã‚’ã‚¹ã‚­ãƒƒãƒ— (SponsorBlock)';
 
   @override
-  String get blacklist_description => '曲とアーティストのブラックリスト';
+  String get blacklist_description =>
+      'æ›²ã¨ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã®ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆ';
 
   @override
-  String get wait_for_download_to_finish => '現在のダウンロードが完了するまでお待ちください';
+  String get wait_for_download_to_finish =>
+      'ç¾åœ¨ã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ãŒå®Œäº†ã™ã‚‹ã¾ã§ãŠå¾…ã¡ãã ã•ã„';
 
   @override
-  String get desktop => 'デスクトップ';
+  String get desktop => 'ãƒ‡ã‚¹ã‚¯ãƒˆãƒƒãƒ—';
 
   @override
-  String get close_behavior => '閉じた時の動作';
+  String get close_behavior => 'é–‰ã˜ãŸæ™‚ã®å‹•ä½œ';
 
   @override
-  String get close => '閉じる';
+  String get close => 'é–‰ã˜ã‚‹';
 
   @override
-  String get minimize_to_tray => 'トレイに最小化';
+  String get minimize_to_tray => 'ãƒˆãƒ¬ã‚¤ã«æœ€å°åŒ–';
 
   @override
-  String get show_tray_icon => 'システムトレイにアイコンを表示';
+  String get show_tray_icon => 'ã‚·ã‚¹ãƒ†ãƒ ãƒˆãƒ¬ã‚¤ã«ã‚¢ã‚¤ã‚³ãƒ³ã‚’è¡¨ç¤º';
 
   @override
-  String get about => 'このアプリについて';
+  String get about => 'ã“ã®ã‚¢ãƒ—ãƒªã«ã¤ã„ã¦';
 
   @override
-  String get u_love_spotube => 'Soulful Bhakti が好きだと知っていますよ';
+  String get u_love_spotube =>
+      'Soulful Bhakti ãŒå¥½ãã ã¨çŸ¥ã£ã¦ã„ã¾ã™ã‚ˆ';
 
   @override
-  String get check_for_updates => 'アップデートの確認';
+  String get check_for_updates => 'ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆã®ç¢ºèª';
 
   @override
-  String get about_spotube => 'Soulful Bhakti について';
+  String get about_spotube => 'Soulful Bhakti ã«ã¤ã„ã¦';
 
   @override
-  String get blacklist => 'ブラックリスト';
+  String get blacklist => 'ãƒ–ãƒ©ãƒƒã‚¯ãƒªã‚¹ãƒˆ';
 
   @override
-  String get please_sponsor => '出資/寄付もお待ちします';
+  String get please_sponsor => 'å‡ºè³‡/å¯„ä»˜ã‚‚ãŠå¾…ã¡ã—ã¾ã™';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti は、軽量でクロスプラットフォームな、すべて無料の spotify クライアント';
+      'Soulful Bhakti ã¯ã€è»½é‡ã§ã‚¯ãƒ­ã‚¹ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ãªã€ã™ã¹ã¦ç„¡æ–™ã® spotify ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ';
 
   @override
-  String get version => 'バージョン';
+  String get version => 'ãƒãƒ¼ã‚¸ãƒ§ãƒ³';
 
   @override
-  String get build_number => 'ビルド番号';
+  String get build_number => 'ãƒ“ãƒ«ãƒ‰ç•ªå·';
 
   @override
-  String get founder => '創始者';
+  String get founder => 'å‰µå§‹è€…';
 
   @override
-  String get repository => 'リポジトリ';
+  String get repository => 'ãƒªãƒã‚¸ãƒˆãƒª';
 
   @override
-  String get bug_issues => 'バグや問題';
+  String get bug_issues => 'ãƒã‚°ã‚„å•é¡Œ';
 
   @override
-  String get made_with => '❤️ を込めてバングラディシュ🇧🇩で開発';
+  String get made_with =>
+      'â¤ï¸ ã‚’è¾¼ã‚ã¦ãƒãƒ³ã‚°ãƒ©ãƒ‡ã‚£ã‚·ãƒ¥ðŸ‡§ðŸ‡©ã§é–‹ç™º';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'ライセンス';
+  String get license => 'ãƒ©ã‚¤ã‚»ãƒ³ã‚¹';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      '心配ありません。個人情報を収集したり、共有されることはありません';
+      'å¿ƒé…ã‚ã‚Šã¾ã›ã‚“ã€‚å€‹äººæƒ…å ±ã‚’åŽé›†ã—ãŸã‚Šã€å…±æœ‰ã•ã‚Œã‚‹ã“ã¨ã¯ã‚ã‚Šã¾ã›ã‚“';
 
   @override
-  String get know_how_to_login => 'やり方が分からないですか？';
+  String get know_how_to_login => 'ã‚„ã‚Šæ–¹ãŒåˆ†ã‹ã‚‰ãªã„ã§ã™ã‹ï¼Ÿ';
 
   @override
-  String get follow_step_by_step_guide => 'やり方の説明を見る';
+  String get follow_step_by_step_guide => 'ã‚„ã‚Šæ–¹ã®èª¬æ˜Žã‚’è¦‹ã‚‹';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -556,730 +570,761 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => 'すべての欄に入力してください';
+  String get fill_in_all_fields => 'ã™ã¹ã¦ã®æ¬„ã«å…¥åŠ›ã—ã¦ãã ã•ã„';
 
   @override
-  String get submit => '送信';
+  String get submit => 'é€ä¿¡';
 
   @override
-  String get exit => '終了';
+  String get exit => 'çµ‚äº†';
 
   @override
-  String get previous => '前へ';
+  String get previous => 'å‰ã¸';
 
   @override
-  String get next => '次へ';
+  String get next => 'æ¬¡ã¸';
 
   @override
-  String get done => '完了';
+  String get done => 'å®Œäº†';
 
   @override
-  String get step_1 => 'ステップ 1';
+  String get step_1 => 'ã‚¹ãƒ†ãƒƒãƒ— 1';
 
   @override
-  String get first_go_to => '最初にここを開き';
+  String get first_go_to => 'æœ€åˆã«ã“ã“ã‚’é–‹ã';
 
   @override
-  String get something_went_wrong => '何か誤りがあります';
+  String get something_went_wrong => 'ä½•ã‹èª¤ã‚ŠãŒã‚ã‚Šã¾ã™';
 
   @override
-  String get piped_instance => 'Piped サーバーのインスタンス';
+  String get piped_instance => 'Piped ã‚µãƒ¼ãƒãƒ¼ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹';
 
   @override
-  String get piped_description => '曲の一致に使う Piped サーバーのインスタンス';
+  String get piped_description =>
+      'æ›²ã®ä¸€è‡´ã«ä½¿ã† Piped ã‚µãƒ¼ãƒãƒ¼ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹';
 
   @override
-  String get piped_warning => 'それらの一部ではうまく動作しないこともあります。自己責任で使用してください';
+  String get piped_warning =>
+      'ãã‚Œã‚‰ã®ä¸€éƒ¨ã§ã¯ã†ã¾ãå‹•ä½œã—ãªã„ã“ã¨ã‚‚ã‚ã‚Šã¾ã™ã€‚è‡ªå·±è²¬ä»»ã§ä½¿ç”¨ã—ã¦ãã ã•ã„';
 
   @override
-  String get invidious_instance => 'Invidiousサーバーインスタンス';
+  String get invidious_instance => 'Invidiousã‚µãƒ¼ãƒãƒ¼ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹';
 
   @override
-  String get invidious_description => '曲の一致に使用するInvidiousサーバーインスタンス';
+  String get invidious_description =>
+      'æ›²ã®ä¸€è‡´ã«ä½¿ç”¨ã™ã‚‹Invidiousã‚µãƒ¼ãƒãƒ¼ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹';
 
   @override
-  String get invidious_warning => '一部はうまく機能しない可能性があります。自己責任で使用してください';
+  String get invidious_warning =>
+      'ä¸€éƒ¨ã¯ã†ã¾ãæ©Ÿèƒ½ã—ãªã„å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚è‡ªå·±è²¬ä»»ã§ä½¿ç”¨ã—ã¦ãã ã•ã„';
 
   @override
-  String get generate => '生成';
+  String get generate => 'ç”Ÿæˆ';
 
   @override
   String track_exists(Object track) {
-    return '曲 $track は既に存在します';
+    return 'æ›² $track ã¯æ—¢ã«å­˜åœ¨ã—ã¾ã™';
   }
 
   @override
-  String get replace => '置換する';
+  String get replace => 'ç½®æ›ã™ã‚‹';
 
   @override
-  String get skip => 'スキップ';
+  String get skip => 'ã‚¹ã‚­ãƒƒãƒ—';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return '$typeを最大$count 個まで選択';
+    return '$typeã‚’æœ€å¤§$count å€‹ã¾ã§é¸æŠž';
   }
 
   @override
-  String get select_genres => 'ジャンルを選択';
+  String get select_genres => 'ã‚¸ãƒ£ãƒ³ãƒ«ã‚’é¸æŠž';
 
   @override
-  String get add_genres => 'ジャンルを追加';
+  String get add_genres => 'ã‚¸ãƒ£ãƒ³ãƒ«ã‚’è¿½åŠ ';
 
   @override
-  String get country => '国';
+  String get country => 'å›½';
 
   @override
-  String get number_of_tracks_generate => '生成する曲数';
+  String get number_of_tracks_generate => 'ç”Ÿæˆã™ã‚‹æ›²æ•°';
 
   @override
-  String get acousticness => 'アコースティック感';
+  String get acousticness => 'ã‚¢ã‚³ãƒ¼ã‚¹ãƒ†ã‚£ãƒƒã‚¯æ„Ÿ';
 
   @override
-  String get danceability => 'ダンス感';
+  String get danceability => 'ãƒ€ãƒ³ã‚¹æ„Ÿ';
 
   @override
-  String get energy => 'エネルギー';
+  String get energy => 'ã‚¨ãƒãƒ«ã‚®ãƒ¼';
 
   @override
-  String get instrumentalness => 'インストゥルメンタル';
+  String get instrumentalness => 'ã‚¤ãƒ³ã‚¹ãƒˆã‚¥ãƒ«ãƒ¡ãƒ³ã‚¿ãƒ«';
 
   @override
-  String get liveness => 'ライブ感';
+  String get liveness => 'ãƒ©ã‚¤ãƒ–æ„Ÿ';
 
   @override
-  String get loudness => 'ラウドネス';
+  String get loudness => 'ãƒ©ã‚¦ãƒ‰ãƒã‚¹';
 
   @override
-  String get speechiness => '会話感';
+  String get speechiness => 'ä¼šè©±æ„Ÿ';
 
   @override
-  String get valence => '多幸性';
+  String get valence => 'å¤šå¹¸æ€§';
 
   @override
-  String get popularity => '人気度';
+  String get popularity => 'äººæ°—åº¦';
 
   @override
-  String get key => 'キー';
+  String get key => 'ã‚­ãƒ¼';
 
   @override
-  String get duration => '長さ (秒)';
+  String get duration => 'é•·ã• (ç§’)';
 
   @override
-  String get tempo => 'テンポ (BPM)';
+  String get tempo => 'ãƒ†ãƒ³ãƒ (BPM)';
 
   @override
-  String get mode => '長調';
+  String get mode => 'é•·èª¿';
 
   @override
-  String get time_signature => '拍子記号';
+  String get time_signature => 'æ‹å­è¨˜å·';
 
   @override
-  String get short => '短';
+  String get short => 'çŸ­';
 
   @override
-  String get medium => '中';
+  String get medium => 'ä¸­';
 
   @override
-  String get long => '長';
+  String get long => 'é•·';
 
   @override
-  String get min => '最小';
+  String get min => 'æœ€å°';
 
   @override
-  String get max => '最大';
+  String get max => 'æœ€å¤§';
 
   @override
-  String get target => '目標';
+  String get target => 'ç›®æ¨™';
 
   @override
-  String get moderate => '中';
+  String get moderate => 'ä¸­';
 
   @override
-  String get deselect_all => 'すべて選択解除';
+  String get deselect_all => 'ã™ã¹ã¦é¸æŠžè§£é™¤';
 
   @override
-  String get select_all => 'すべて選択';
+  String get select_all => 'ã™ã¹ã¦é¸æŠž';
 
   @override
-  String get are_you_sure => 'よろしいですか？';
+  String get are_you_sure => 'ã‚ˆã‚ã—ã„ã§ã™ã‹ï¼Ÿ';
 
   @override
-  String get generating_playlist => 'カスタムの再生リストを生成中...';
+  String get generating_playlist =>
+      'ã‚«ã‚¹ã‚¿ãƒ ã®å†ç”Ÿãƒªã‚¹ãƒˆã‚’ç”Ÿæˆä¸­...';
 
   @override
   String selected_count_tracks(Object count) {
-    return '$count 曲が選ばれました';
+    return '$count æ›²ãŒé¸ã°ã‚Œã¾ã—ãŸ';
   }
 
   @override
   String get download_warning =>
-      '全曲の一括ダウンロードは明らかに音楽への海賊行為であり、音楽を生み出す共同体に損害を与えるでしょう。気づいてほしい。アーティストの多大な努力に敬意を払い、支援するようにしてください';
+      'å…¨æ›²ã®ä¸€æ‹¬ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã¯æ˜Žã‚‰ã‹ã«éŸ³æ¥½ã¸ã®æµ·è³Šè¡Œç‚ºã§ã‚ã‚Šã€éŸ³æ¥½ã‚’ç”Ÿã¿å‡ºã™å…±åŒä½“ã«æå®³ã‚’ä¸Žãˆã‚‹ã§ã—ã‚‡ã†ã€‚æ°—ã¥ã„ã¦ã»ã—ã„ã€‚ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã®å¤šå¤§ãªåŠªåŠ›ã«æ•¬æ„ã‚’æ‰•ã„ã€æ”¯æ´ã™ã‚‹ã‚ˆã†ã«ã—ã¦ãã ã•ã„';
 
   @override
   String get download_ip_ban_warning =>
-      'また、通常よりも過剰なダウンロード要求があれば、YouTubeはあなたのIPをブロックします。つまりそのIPの端末からは、少なくとも2-3か月の間、（ログインしても）YouTubeを利用できなくなりす。そうなっても Soulful Bhakti は一切の責任を負いません';
+      'ã¾ãŸã€é€šå¸¸ã‚ˆã‚Šã‚‚éŽå‰°ãªãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰è¦æ±‚ãŒã‚ã‚Œã°ã€YouTubeã¯ã‚ãªãŸã®IPã‚’ãƒ–ãƒ­ãƒƒã‚¯ã—ã¾ã™ã€‚ã¤ã¾ã‚Šãã®IPã®ç«¯æœ«ã‹ã‚‰ã¯ã€å°‘ãªãã¨ã‚‚2-3ã‹æœˆã®é–“ã€ï¼ˆãƒ­ã‚°ã‚¤ãƒ³ã—ã¦ã‚‚ï¼‰YouTubeã‚’åˆ©ç”¨ã§ããªããªã‚Šã™ã€‚ãã†ãªã£ã¦ã‚‚ Soulful Bhakti ã¯ä¸€åˆ‡ã®è²¬ä»»ã‚’è² ã„ã¾ã›ã‚“';
 
   @override
-  String get by_clicking_accept_terms => '「同意する」のクリックにより、以下への同意となります:';
+  String get by_clicking_accept_terms =>
+      'ã€ŒåŒæ„ã™ã‚‹ã€ã®ã‚¯ãƒªãƒƒã‚¯ã«ã‚ˆã‚Šã€ä»¥ä¸‹ã¸ã®åŒæ„ã¨ãªã‚Šã¾ã™:';
 
   @override
-  String get download_agreement_1 => 'ええ、音楽への海賊行為だ。私はよくない';
+  String get download_agreement_1 =>
+      'ãˆãˆã€éŸ³æ¥½ã¸ã®æµ·è³Šè¡Œç‚ºã ã€‚ç§ã¯ã‚ˆããªã„';
 
   @override
-  String get download_agreement_2 => '芸術作品を買うお金がないのでそうするしかないが、アーティストをできる限り支援する';
+  String get download_agreement_2 =>
+      'èŠ¸è¡“ä½œå“ã‚’è²·ã†ãŠé‡‘ãŒãªã„ã®ã§ãã†ã™ã‚‹ã—ã‹ãªã„ãŒã€ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã‚’ã§ãã‚‹é™ã‚Šæ”¯æ´ã™ã‚‹';
 
   @override
   String get download_agreement_3 =>
-      '私のIPがYouTubeにブロックされることがあると完全に把握した。私のこの行動により起きたどんな事故も、Soulful Bhakti やその所有者/貢献者に責任はありません。';
+      'ç§ã®IPãŒYouTubeã«ãƒ–ãƒ­ãƒƒã‚¯ã•ã‚Œã‚‹ã“ã¨ãŒã‚ã‚‹ã¨å®Œå…¨ã«æŠŠæ¡ã—ãŸã€‚ç§ã®ã“ã®è¡Œå‹•ã«ã‚ˆã‚Šèµ·ããŸã©ã‚“ãªäº‹æ•…ã‚‚ã€Soulful Bhakti ã‚„ãã®æ‰€æœ‰è€…/è²¢çŒ®è€…ã«è²¬ä»»ã¯ã‚ã‚Šã¾ã›ã‚“ã€‚';
 
   @override
-  String get decline => '同意しない';
+  String get decline => 'åŒæ„ã—ãªã„';
 
   @override
-  String get accept => '同意する';
+  String get accept => 'åŒæ„ã™ã‚‹';
 
   @override
-  String get details => '詳細';
+  String get details => 'è©³ç´°';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'チャンネル';
+  String get channel => 'ãƒãƒ£ãƒ³ãƒãƒ«';
 
   @override
-  String get likes => '高評価';
+  String get likes => 'é«˜è©•ä¾¡';
 
   @override
-  String get dislikes => '低評価';
+  String get dislikes => 'ä½Žè©•ä¾¡';
 
   @override
-  String get views => '視聴回数';
+  String get views => 'è¦–è´å›žæ•°';
 
   @override
-  String get streamUrl => '動画の URL';
+  String get streamUrl => 'å‹•ç”»ã® URL';
 
   @override
-  String get stop => '中止';
+  String get stop => 'ä¸­æ­¢';
 
   @override
-  String get sort_newest => '追加日の新しい順に並び替え';
+  String get sort_newest => 'è¿½åŠ æ—¥ã®æ–°ã—ã„é †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sort_oldest => '追加日の古い順に並び替え';
+  String get sort_oldest => 'è¿½åŠ æ—¥ã®å¤ã„é †ã«ä¸¦ã³æ›¿ãˆ';
 
   @override
-  String get sleep_timer => 'スリープタイマー';
+  String get sleep_timer => 'ã‚¹ãƒªãƒ¼ãƒ—ã‚¿ã‚¤ãƒžãƒ¼';
 
   @override
   String mins(Object minutes) {
-    return '$minutes 分';
+    return '$minutes åˆ†';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours 時間';
+    return '$hours æ™‚é–“';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours 時間';
+    return '$hours æ™‚é–“';
   }
 
   @override
-  String get custom_hours => '時間を指定';
+  String get custom_hours => 'æ™‚é–“ã‚’æŒ‡å®š';
 
   @override
-  String get logs => 'ログ';
+  String get logs => 'ãƒ­ã‚°';
 
   @override
-  String get developers => '開発';
+  String get developers => 'é–‹ç™º';
 
   @override
-  String get not_logged_in => 'ログインしていません';
+  String get not_logged_in => 'ãƒ­ã‚°ã‚¤ãƒ³ã—ã¦ã„ã¾ã›ã‚“';
 
   @override
-  String get search_mode => '検索モード';
+  String get search_mode => 'æ¤œç´¢ãƒ¢ãƒ¼ãƒ‰';
 
   @override
-  String get audio_source => '音声の提供元';
+  String get audio_source => 'éŸ³å£°ã®æä¾›å…ƒ';
 
   @override
   String get ok => 'OK';
 
   @override
-  String get failed_to_encrypt => '暗号化に失敗しました';
+  String get failed_to_encrypt => 'æš—å·åŒ–ã«å¤±æ•—ã—ã¾ã—ãŸ';
 
   @override
   String get encryption_failed_warning =>
-      'SpoTubeはデータを安全に保存するために暗号化を用いますが、暗号化に失敗しました。このため、安全でない保存領域への保存に切り替えます\nOSがLinuxなら、gnome-keyring、kde-wallet、keepassxcなどの管理ツールがインストールされていることを確認してください';
+      'SpoTubeã¯ãƒ‡ãƒ¼ã‚¿ã‚’å®‰å…¨ã«ä¿å­˜ã™ã‚‹ãŸã‚ã«æš—å·åŒ–ã‚’ç”¨ã„ã¾ã™ãŒã€æš—å·åŒ–ã«å¤±æ•—ã—ã¾ã—ãŸã€‚ã“ã®ãŸã‚ã€å®‰å…¨ã§ãªã„ä¿å­˜é ˜åŸŸã¸ã®ä¿å­˜ã«åˆ‡ã‚Šæ›¿ãˆã¾ã™\nOSãŒLinuxãªã‚‰ã€gnome-keyringã€kde-walletã€keepassxcãªã©ã®ç®¡ç†ãƒ„ãƒ¼ãƒ«ãŒã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèªã—ã¦ãã ã•ã„';
 
   @override
-  String get querying_info => '情報を取得中...';
+  String get querying_info => 'æƒ…å ±ã‚’å–å¾—ä¸­...';
 
   @override
-  String get piped_api_down => 'Piped APIがダウンしています';
+  String get piped_api_down => 'Piped APIãŒãƒ€ã‚¦ãƒ³ã—ã¦ã„ã¾ã™';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Pipedインスタンス $pipedInstance は現在ダウンしています\n\nインスタンスを変更するか、「APIの種類」を公式のYouTube APIに変更してください\n\n変更後にアプリを再起動してください';
+    return 'Pipedã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ $pipedInstance ã¯ç¾åœ¨ãƒ€ã‚¦ãƒ³ã—ã¦ã„ã¾ã™\n\nã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å¤‰æ›´ã™ã‚‹ã‹ã€ã€ŒAPIã®ç¨®é¡žã€ã‚’å…¬å¼ã®YouTube APIã«å¤‰æ›´ã—ã¦ãã ã•ã„\n\nå¤‰æ›´å¾Œã«ã‚¢ãƒ—ãƒªã‚’å†èµ·å‹•ã—ã¦ãã ã•ã„';
   }
 
   @override
-  String get you_are_offline => '現在、オフラインです';
+  String get you_are_offline => 'ç¾åœ¨ã€ã‚ªãƒ•ãƒ©ã‚¤ãƒ³ã§ã™';
 
   @override
-  String get connection_restored => 'インターネット接続が復旧しました';
+  String get connection_restored =>
+      'ã‚¤ãƒ³ã‚¿ãƒ¼ãƒãƒƒãƒˆæŽ¥ç¶šãŒå¾©æ—§ã—ã¾ã—ãŸ';
 
   @override
-  String get use_system_title_bar => 'システムのタイトルバーを使う';
+  String get use_system_title_bar =>
+      'ã‚·ã‚¹ãƒ†ãƒ ã®ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã‚’ä½¿ã†';
 
   @override
-  String get crunching_results => '結果を処理中...';
+  String get crunching_results => 'çµæžœã‚’å‡¦ç†ä¸­...';
 
   @override
-  String get search_to_get_results => '結果を取得するために検索';
+  String get search_to_get_results => 'çµæžœã‚’å–å¾—ã™ã‚‹ãŸã‚ã«æ¤œç´¢';
 
   @override
-  String get use_amoled_mode => 'AMOLEDモードを使用';
+  String get use_amoled_mode => 'AMOLEDãƒ¢ãƒ¼ãƒ‰ã‚’ä½¿ç”¨';
 
   @override
-  String get pitch_dark_theme => 'ピッチブラック ダークテーマ';
+  String get pitch_dark_theme => 'ãƒ”ãƒƒãƒãƒ–ãƒ©ãƒƒã‚¯ ãƒ€ãƒ¼ã‚¯ãƒ†ãƒ¼ãƒž';
 
   @override
-  String get normalize_audio => '音声を正規化';
+  String get normalize_audio => 'éŸ³å£°ã‚’æ­£è¦åŒ–';
 
   @override
-  String get change_cover => 'カバーを変更';
+  String get change_cover => 'ã‚«ãƒãƒ¼ã‚’å¤‰æ›´';
 
   @override
-  String get add_cover => 'カバーを追加';
+  String get add_cover => 'ã‚«ãƒãƒ¼ã‚’è¿½åŠ ';
 
   @override
-  String get restore_defaults => '設定を初期化';
+  String get restore_defaults => 'è¨­å®šã‚’åˆæœŸåŒ–';
 
   @override
   String get restore_defaults_confirmation =>
-      'すべての設定がデフォルト値にリセットされます。この操作は元に戻せません。';
+      'ã™ã¹ã¦ã®è¨­å®šãŒãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ã«ãƒªã‚»ãƒƒãƒˆã•ã‚Œã¾ã™ã€‚ã“ã®æ“ä½œã¯å…ƒã«æˆ»ã›ã¾ã›ã‚“ã€‚';
 
   @override
-  String get streaming_music_format => '音楽ストリーミング形式';
+  String get streaming_music_format => 'éŸ³æ¥½ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°å½¢å¼';
 
   @override
-  String get streaming_music_quality => '音楽ストリーミング品質';
+  String get streaming_music_quality => 'éŸ³æ¥½ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°å“è³ª';
 
   @override
-  String get connect => '接続';
+  String get connect => 'æŽ¥ç¶š';
 
   @override
-  String get disconnect => '切断';
+  String get disconnect => 'åˆ‡æ–­';
 
   @override
-  String get username => 'ユーザー名';
+  String get username => 'ãƒ¦ãƒ¼ã‚¶ãƒ¼å';
 
   @override
-  String get password => 'パスワード';
+  String get password => 'ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰';
 
   @override
-  String get login => 'ログイン';
+  String get login => 'ãƒ­ã‚°ã‚¤ãƒ³';
 
   @override
-  String get sign_in => 'ログイン';
+  String get sign_in => 'ãƒ­ã‚°ã‚¤ãƒ³';
 
   @override
-  String get sign_up => 'サインアップ';
+  String get sign_up => 'ã‚µã‚¤ãƒ³ã‚¢ãƒƒãƒ—';
 
   @override
-  String get sign_out => 'ログアウト';
+  String get sign_out => 'ãƒ­ã‚°ã‚¢ã‚¦ãƒˆ';
 
   @override
-  String get verify => '確認';
+  String get verify => 'ç¢ºèª';
 
   @override
-  String get create_account => 'アカウントを作成';
+  String get create_account => 'ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’ä½œæˆ';
 
   @override
-  String get already_have_account => 'すでにアカウントをお持ちですか？ログイン';
+  String get already_have_account =>
+      'ã™ã§ã«ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’ãŠæŒã¡ã§ã™ã‹ï¼Ÿãƒ­ã‚°ã‚¤ãƒ³';
 
   @override
-  String get dont_have_account => 'アカウントをお持ちでないですか？サインアップ';
+  String get dont_have_account =>
+      'ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’ãŠæŒã¡ã§ãªã„ã§ã™ã‹ï¼Ÿã‚µã‚¤ãƒ³ã‚¢ãƒƒãƒ—';
 
   @override
   String signed_in_as(Object userId) {
-    return '$userId としてログイン中';
+    return '$userId ã¨ã—ã¦ãƒ­ã‚°ã‚¤ãƒ³ä¸­';
   }
 
   @override
-  String get verification_code => '確認コード';
+  String get verification_code => 'ç¢ºèªã‚³ãƒ¼ãƒ‰';
 
   @override
-  String get verification_code_hint => 'メールに送信されたコードを入力してください';
+  String get verification_code_hint =>
+      'ãƒ¡ãƒ¼ãƒ«ã«é€ä¿¡ã•ã‚ŒãŸã‚³ãƒ¼ãƒ‰ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„';
 
   @override
-  String get verify_email_code => '確認コードをメールに送信しました';
+  String get verify_email_code =>
+      'ç¢ºèªã‚³ãƒ¼ãƒ‰ã‚’ãƒ¡ãƒ¼ãƒ«ã«é€ä¿¡ã—ã¾ã—ãŸ';
 
   @override
-  String get go_to_album => 'アルバムに移動';
+  String get go_to_album => 'ã‚¢ãƒ«ãƒãƒ ã«ç§»å‹•';
 
   @override
-  String get discord_rich_presence => 'Discord リッチプレゼンス';
+  String get discord_rich_presence => 'Discord ãƒªãƒƒãƒãƒ—ãƒ¬ã‚¼ãƒ³ã‚¹';
 
   @override
-  String get browse_all => 'すべてを閲覧';
+  String get browse_all => 'ã™ã¹ã¦ã‚’é–²è¦§';
 
   @override
-  String get genres => 'ジャンル';
+  String get genres => 'ã‚¸ãƒ£ãƒ³ãƒ«';
 
   @override
-  String get explore_genres => 'ジャンルを探索';
+  String get explore_genres => 'ã‚¸ãƒ£ãƒ³ãƒ«ã‚’æŽ¢ç´¢';
 
   @override
-  String get friends => '友達';
+  String get friends => 'å‹é”';
 
   @override
-  String get no_lyrics_available => 'すみません、この曲の歌詞が見つかりません';
+  String get no_lyrics_available =>
+      'ã™ã¿ã¾ã›ã‚“ã€ã“ã®æ›²ã®æ­Œè©žãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“';
 
   @override
-  String get start_a_radio => 'ラジオを開始';
+  String get start_a_radio => 'ãƒ©ã‚¸ã‚ªã‚’é–‹å§‹';
 
   @override
-  String get how_to_start_radio => 'ラジオをどのように開始しますか？';
+  String get how_to_start_radio =>
+      'ãƒ©ã‚¸ã‚ªã‚’ã©ã®ã‚ˆã†ã«é–‹å§‹ã—ã¾ã™ã‹ï¼Ÿ';
 
   @override
-  String get replace_queue_question => '現在のキューを置き換えるか、追加しますか？';
+  String get replace_queue_question =>
+      'ç¾åœ¨ã®ã‚­ãƒ¥ãƒ¼ã‚’ç½®ãæ›ãˆã‚‹ã‹ã€è¿½åŠ ã—ã¾ã™ã‹ï¼Ÿ';
 
   @override
-  String get endless_playback => 'エンドレス再生';
+  String get endless_playback => 'ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚¹å†ç”Ÿ';
 
   @override
-  String get delete_playlist => '再生リストを削除';
+  String get delete_playlist => 'å†ç”Ÿãƒªã‚¹ãƒˆã‚’å‰Šé™¤';
 
   @override
-  String get delete_playlist_confirmation => 'この再生リストを削除しますか？';
+  String get delete_playlist_confirmation =>
+      'ã“ã®å†ç”Ÿãƒªã‚¹ãƒˆã‚’å‰Šé™¤ã—ã¾ã™ã‹ï¼Ÿ';
 
   @override
-  String get local_tracks => '端末内の曲';
+  String get local_tracks => 'ç«¯æœ«å†…ã®æ›²';
 
   @override
-  String get local_tab => '端末内';
+  String get local_tab => 'ç«¯æœ«å†…';
 
   @override
-  String get song_link => '曲のリンク';
+  String get song_link => 'æ›²ã®ãƒªãƒ³ã‚¯';
 
   @override
-  String get skip_this_nonsense => 'こんなことはスキップ';
+  String get skip_this_nonsense => 'ã“ã‚“ãªã“ã¨ã¯ã‚¹ã‚­ãƒƒãƒ—';
 
   @override
-  String get freedom_of_music => '“音楽の自由”';
+  String get freedom_of_music => 'â€œéŸ³æ¥½ã®è‡ªç”±â€';
 
   @override
-  String get freedom_of_music_palm => '“音楽の自由を思いのままに”';
+  String get freedom_of_music_palm =>
+      'â€œéŸ³æ¥½ã®è‡ªç”±ã‚’æ€ã„ã®ã¾ã¾ã«â€';
 
   @override
-  String get get_started => 'さあ始めましょう';
+  String get get_started => 'ã•ã‚å§‹ã‚ã¾ã—ã‚‡ã†';
 
   @override
-  String get youtube_source_description => '推奨され、最適に機能します。';
+  String get youtube_source_description =>
+      'æŽ¨å¥¨ã•ã‚Œã€æœ€é©ã«æ©Ÿèƒ½ã—ã¾ã™ã€‚';
 
   @override
-  String get piped_source_description => '自由を感じる？YouTubeと同じだけど、はるかに自由です。';
+  String get piped_source_description =>
+      'è‡ªç”±ã‚’æ„Ÿã˜ã‚‹ï¼ŸYouTubeã¨åŒã˜ã ã‘ã©ã€ã¯ã‚‹ã‹ã«è‡ªç”±ã§ã™ã€‚';
 
   @override
-  String get jiosaavn_source_description => '南アジア地域では最適です。';
+  String get jiosaavn_source_description =>
+      'å—ã‚¢ã‚¸ã‚¢åœ°åŸŸã§ã¯æœ€é©ã§ã™ã€‚';
 
   @override
-  String get invidious_source_description => 'Pipedに似ていますが、より利用性があります。';
+  String get invidious_source_description =>
+      'Pipedã«ä¼¼ã¦ã„ã¾ã™ãŒã€ã‚ˆã‚Šåˆ©ç”¨æ€§ãŒã‚ã‚Šã¾ã™ã€‚';
 
   @override
   String highest_quality(Object quality) {
-    return '最高品質：$quality';
+    return 'æœ€é«˜å“è³ªï¼š$quality';
   }
 
   @override
-  String get select_audio_source => '音声の提供元を選択';
+  String get select_audio_source => 'éŸ³å£°ã®æä¾›å…ƒã‚’é¸æŠž';
 
   @override
-  String get endless_playback_description => 'キューの最後に新しい曲を自動で追加';
+  String get endless_playback_description =>
+      'ã‚­ãƒ¥ãƒ¼ã®æœ€å¾Œã«æ–°ã—ã„æ›²ã‚’è‡ªå‹•ã§è¿½åŠ ';
 
   @override
-  String get choose_your_region => '地域を選択';
+  String get choose_your_region => 'åœ°åŸŸã‚’é¸æŠž';
 
   @override
   String get choose_your_region_description =>
-      'Soulful Bhaktiがあなたの地域に適したコンテンツを表示します。';
+      'Soulful BhaktiãŒã‚ãªãŸã®åœ°åŸŸã«é©ã—ãŸã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚’è¡¨ç¤ºã—ã¾ã™ã€‚';
 
   @override
-  String get choose_your_language => '言語を選択してください';
+  String get choose_your_language => 'è¨€èªžã‚’é¸æŠžã—ã¦ãã ã•ã„';
 
   @override
-  String get help_project_grow => 'プロジェクトの成長を支援する';
+  String get help_project_grow => 'ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã®æˆé•·ã‚’æ”¯æ´ã™ã‚‹';
 
   @override
   String get help_project_grow_description =>
-      'SpoTubeはオープンソースプロジェクトです。貢献したり、バグ報告したり、新機能を提案することで、プロジェクトの成長に貢献できます。';
+      'SpoTubeã¯ã‚ªãƒ¼ãƒ—ãƒ³ã‚½ãƒ¼ã‚¹ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã§ã™ã€‚è²¢çŒ®ã—ãŸã‚Šã€ãƒã‚°å ±å‘Šã—ãŸã‚Šã€æ–°æ©Ÿèƒ½ã‚’ææ¡ˆã™ã‚‹ã“ã¨ã§ã€ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã®æˆé•·ã«è²¢çŒ®ã§ãã¾ã™ã€‚';
 
   @override
-  String get contribute_on_github => 'GitHubで貢献';
+  String get contribute_on_github => 'GitHubã§è²¢çŒ®';
 
   @override
-  String get donate_on_open_collective => 'Open Collectiveで寄付';
+  String get donate_on_open_collective => 'Open Collectiveã§å¯„ä»˜';
 
   @override
-  String get browse_anonymously => '匿名で閲覧する';
+  String get browse_anonymously => 'åŒ¿åã§é–²è¦§ã™ã‚‹';
 
   @override
-  String get enable_connect => '接続する';
+  String get enable_connect => 'æŽ¥ç¶šã™ã‚‹';
 
   @override
-  String get enable_connect_description => '他の端末からSoulful Bhaktiを制御する';
+  String get enable_connect_description =>
+      'ä»–ã®ç«¯æœ«ã‹ã‚‰Soulful Bhaktiã‚’åˆ¶å¾¡ã™ã‚‹';
 
   @override
-  String get devices => '機器';
+  String get devices => 'æ©Ÿå™¨';
 
   @override
-  String get select => '選択';
+  String get select => 'é¸æŠž';
 
   @override
   String connect_client_alert(Object client) {
-    return '$client から操作されています';
+    return '$client ã‹ã‚‰æ“ä½œã•ã‚Œã¦ã„ã¾ã™';
   }
 
   @override
-  String get this_device => 'この端末';
+  String get this_device => 'ã“ã®ç«¯æœ«';
 
   @override
-  String get remote => 'リモート';
+  String get remote => 'ãƒªãƒ¢ãƒ¼ãƒˆ';
 
   @override
-  String get stats => '統計';
+  String get stats => 'çµ±è¨ˆ';
 
   @override
   String and_n_more(Object count) {
-    return 'さらに $count 項目';
+    return 'ã•ã‚‰ã« $count é …ç›®';
   }
 
   @override
-  String get recently_played => '最近聴いた曲';
+  String get recently_played => 'æœ€è¿‘è´ã„ãŸæ›²';
 
   @override
-  String get browse_more => 'もっと表示';
+  String get browse_more => 'ã‚‚ã£ã¨è¡¨ç¤º';
 
   @override
-  String get no_title => 'タイトルなし';
+  String get no_title => 'ã‚¿ã‚¤ãƒˆãƒ«ãªã—';
 
   @override
-  String get not_playing => '再生なし';
+  String get not_playing => 'å†ç”Ÿãªã—';
 
   @override
-  String get epic_failure => '壮大なエラー！';
+  String get epic_failure => 'å£®å¤§ãªã‚¨ãƒ©ãƒ¼ï¼';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return '$tracks_length 曲をキューに追加しました';
+    return '$tracks_length æ›²ã‚’ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ã—ã¾ã—ãŸ';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti の最新版あり';
+  String get spotube_has_an_update => 'Soulful Bhakti ã®æœ€æ–°ç‰ˆã‚ã‚Š';
 
   @override
-  String get download_now => '今すぐダウンロード';
+  String get download_now => 'ä»Šã™ããƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum がリリースされました';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum ãŒãƒªãƒªãƒ¼ã‚¹ã•ã‚Œã¾ã—ãŸ';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version がリリースされました';
+    return 'Soulful Bhakti v$version ãŒãƒªãƒªãƒ¼ã‚¹ã•ã‚Œã¾ã—ãŸ';
   }
 
   @override
-  String get read_the_latest => '最新の ';
+  String get read_the_latest => 'æœ€æ–°ã® ';
 
   @override
-  String get release_notes => '更新情報を読む';
+  String get release_notes => 'æ›´æ–°æƒ…å ±ã‚’èª­ã‚€';
 
   @override
-  String get pick_color_scheme => 'カラーテーマを選択';
+  String get pick_color_scheme => 'ã‚«ãƒ©ãƒ¼ãƒ†ãƒ¼ãƒžã‚’é¸æŠž';
 
   @override
-  String get save => '保存';
+  String get save => 'ä¿å­˜';
 
   @override
-  String get choose_the_device => '端末を選択：';
+  String get choose_the_device => 'ç«¯æœ«ã‚’é¸æŠžï¼š';
 
   @override
-  String get multiple_device_connected => '複数の端末が接続されています。\nこの操作を実行する端末を選択';
+  String get multiple_device_connected =>
+      'è¤‡æ•°ã®ç«¯æœ«ãŒæŽ¥ç¶šã•ã‚Œã¦ã„ã¾ã™ã€‚\nã“ã®æ“ä½œã‚’å®Ÿè¡Œã™ã‚‹ç«¯æœ«ã‚’é¸æŠž';
 
   @override
-  String get nothing_found => '何も見つかりませんでした';
+  String get nothing_found => 'ä½•ã‚‚è¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸ';
 
   @override
-  String get the_box_is_empty => 'ボックスは空です';
+  String get the_box_is_empty => 'ãƒœãƒƒã‚¯ã‚¹ã¯ç©ºã§ã™';
 
   @override
-  String get top_artists => 'トップアーティスト';
+  String get top_artists => 'ãƒˆãƒƒãƒ—ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ';
 
   @override
-  String get top_albums => 'トップアルバム';
+  String get top_albums => 'ãƒˆãƒƒãƒ—ã‚¢ãƒ«ãƒãƒ ';
 
   @override
-  String get this_week => '今週';
+  String get this_week => 'ä»Šé€±';
 
   @override
-  String get this_month => '今月';
+  String get this_month => 'ä»Šæœˆ';
 
   @override
-  String get last_6_months => '過去6か月';
+  String get last_6_months => 'éŽåŽ»6ã‹æœˆ';
 
   @override
-  String get this_year => '今年';
+  String get this_year => 'ä»Šå¹´';
 
   @override
-  String get last_2_years => '過去2年間';
+  String get last_2_years => 'éŽåŽ»2å¹´é–“';
 
   @override
-  String get all_time => '全期間';
+  String get all_time => 'å…¨æœŸé–“';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '$providerName 提供';
+    return '$providerName æä¾›';
   }
 
   @override
-  String get email => 'メール';
+  String get email => 'ãƒ¡ãƒ¼ãƒ«';
 
   @override
-  String get send_code => 'コードを送信';
+  String get send_code => 'ã‚³ãƒ¼ãƒ‰ã‚’é€ä¿¡';
 
   @override
-  String get change_identifier => '別のメールアドレスを使用';
+  String get change_identifier => 'åˆ¥ã®ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ä½¿ç”¨';
 
   @override
-  String get sign_in_with_otp => 'ワンタイムコードでログイン';
+  String get sign_in_with_otp => 'ãƒ¯ãƒ³ã‚¿ã‚¤ãƒ ã‚³ãƒ¼ãƒ‰ã§ãƒ­ã‚°ã‚¤ãƒ³';
 
   @override
-  String get enter_otp_sent => 'お送りしたコードを入力してください';
+  String get enter_otp_sent =>
+      'ãŠé€ã‚Šã—ãŸã‚³ãƒ¼ãƒ‰ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„';
 
   @override
-  String get verify_email_reminder => 'アカウントを保護するため、メールアドレスを確認してください';
+  String get verify_email_reminder =>
+      'ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’ä¿è­·ã™ã‚‹ãŸã‚ã€ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ç¢ºèªã—ã¦ãã ã•ã„';
 
   @override
-  String get verify_now => '今すぐ確認';
+  String get verify_now => 'ä»Šã™ãç¢ºèª';
 
   @override
-  String get enter_email_to_verify => '確認コードを受け取るにはメールアドレスを入力してください';
+  String get enter_email_to_verify =>
+      'ç¢ºèªã‚³ãƒ¼ãƒ‰ã‚’å—ã‘å–ã‚‹ã«ã¯ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„';
 
   @override
-  String get profile_followers => 'フォロワー';
+  String get profile_followers => 'ãƒ•ã‚©ãƒ­ãƒ¯ãƒ¼';
 
   @override
-  String get birthday => '誕生日';
+  String get birthday => 'èª•ç”Ÿæ—¥';
 
   @override
-  String get subscription => '登録';
+  String get subscription => 'ç™»éŒ²';
 
   @override
-  String get not_born => '未出生';
+  String get not_born => 'æœªå‡ºç”Ÿ';
 
   @override
-  String get hacker => 'ハッカー';
+  String get hacker => 'ãƒãƒƒã‚«ãƒ¼';
 
   @override
-  String get profile => 'プロフィール';
+  String get profile => 'ãƒ—ãƒ­ãƒ•ã‚£ãƒ¼ãƒ«';
 
   @override
-  String get no_name => '名前なし';
+  String get no_name => 'åå‰ãªã—';
 
   @override
-  String get edit => '編集';
+  String get edit => 'ç·¨é›†';
 
   @override
-  String get user_profile => 'ユーザープロフィール';
+  String get user_profile => 'ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒ—ãƒ­ãƒ•ã‚£ãƒ¼ãƒ«';
 
   @override
   String count_plays(Object count) {
-    return '$count 回再生';
+    return '$count å›žå†ç”Ÿ';
   }
 
   @override
-  String get streaming_fees_hypothetical => 'ストリーミング料金 (概算)';
+  String get streaming_fees_hypothetical =>
+      'ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°æ–™é‡‘ (æ¦‚ç®—)';
 
   @override
-  String get minutes_listened => '視聴時間';
+  String get minutes_listened => 'è¦–è´æ™‚é–“';
 
   @override
-  String get streamed_songs => 'ストリーミングされた曲';
+  String get streamed_songs => 'ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°ã•ã‚ŒãŸæ›²';
 
   @override
   String count_streams(Object count) {
-    return '$count 回のストリーム';
+    return '$count å›žã®ã‚¹ãƒˆãƒªãƒ¼ãƒ ';
   }
 
   @override
-  String get owned_by_you => 'あなたが所有';
+  String get owned_by_you => 'ã‚ãªãŸãŒæ‰€æœ‰';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl をクリップボードにコピーしました';
+    return '$shareUrl ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼ã—ã¾ã—ãŸ';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*これは、オンライン音楽ストリーミングプラットフォームの1ストリームあたりの平均支払い額である\$0.003〜\$0.005に基づいて計算されています。これは、ユーザーが異なる音楽ストリーミングプラットフォームで曲を聴いた場合に、アーティストにどれだけ支払ったかを把握するための仮説的な計算です。';
+      '*ã“ã‚Œã¯ã€ã‚ªãƒ³ãƒ©ã‚¤ãƒ³éŸ³æ¥½ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã®1ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚ãŸã‚Šã®å¹³å‡æ”¯æ‰•ã„é¡ã§ã‚ã‚‹\$0.003ã€œ\$0.005ã«åŸºã¥ã„ã¦è¨ˆç®—ã•ã‚Œã¦ã„ã¾ã™ã€‚ã“ã‚Œã¯ã€ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒç•°ãªã‚‹éŸ³æ¥½ã‚¹ãƒˆãƒªãƒ¼ãƒŸãƒ³ã‚°ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã§æ›²ã‚’è´ã„ãŸå ´åˆã«ã€ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã«ã©ã‚Œã ã‘æ”¯æ‰•ã£ãŸã‹ã‚’æŠŠæ¡ã™ã‚‹ãŸã‚ã®ä»®èª¬çš„ãªè¨ˆç®—ã§ã™ã€‚';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes 分';
+    return '$minutes åˆ†';
   }
 
   @override
-  String get summary_minutes => '分';
+  String get summary_minutes => 'åˆ†';
 
   @override
-  String get summary_listened_to_music => '音楽を聴いた';
+  String get summary_listened_to_music => 'éŸ³æ¥½ã‚’è´ã„ãŸ';
 
   @override
-  String get summary_songs => '曲';
+  String get summary_songs => 'æ›²';
 
   @override
-  String get summary_streamed_overall => 'まるごと聴いた';
+  String get summary_streamed_overall => 'ã¾ã‚‹ã”ã¨è´ã„ãŸ';
 
   @override
-  String get summary_owed_to_artists => '今月アーティストに払う\nべき額';
+  String get summary_owed_to_artists =>
+      'ä»Šæœˆã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã«æ‰•ã†\nã¹ãé¡';
 
   @override
-  String get summary_top_artist => 'トップアーティスト\nこの期間';
+  String get summary_top_artist => 'ãƒˆãƒƒãƒ—ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ\nã“ã®æœŸé–“';
 
   @override
-  String get summary_artists => 'アーティスト';
+  String get summary_artists => 'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆ';
 
   @override
-  String get summary_music_reached_you => 'の音楽が届いた';
+  String get summary_music_reached_you => 'ã®éŸ³æ¥½ãŒå±Šã„ãŸ';
 
   @override
-  String get summary_full_albums => 'フルアルバム';
+  String get summary_full_albums => 'ãƒ•ãƒ«ã‚¢ãƒ«ãƒãƒ ';
 
   @override
-  String get summary_got_your_love => 'があなたの愛を受け取った';
+  String get summary_got_your_love => 'ãŒã‚ãªãŸã®æ„›ã‚’å—ã‘å–ã£ãŸ';
 
   @override
-  String get summary_playlists => '再生リスト';
+  String get summary_playlists => 'å†ç”Ÿãƒªã‚¹ãƒˆ';
 
   @override
-  String get summary_were_on_repeat => 'をリピートしました';
+  String get summary_were_on_repeat => 'ã‚’ãƒªãƒ”ãƒ¼ãƒˆã—ã¾ã—ãŸ';
 
   @override
-  String get summary_listening_share => '再生シェア';
+  String get summary_listening_share => 'å†ç”Ÿã‚·ã‚§ã‚¢';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return '最も多く再生した上位$tracks_length曲の分布';
+    return 'æœ€ã‚‚å¤šãå†ç”Ÿã—ãŸä¸Šä½$tracks_lengthæ›²ã®åˆ†å¸ƒ';
   }
 
   @override
-  String get summary_plays => '回再生';
+  String get summary_plays => 'å›žå†ç”Ÿ';
 
   @override
   String get insights => 'Insights';
@@ -1301,306 +1346,332 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return '計 $money';
+    return 'è¨ˆ $money';
   }
 
   @override
-  String get webview_not_found => 'Webviewが見つかりません';
+  String get webview_not_found => 'WebviewãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“';
 
   @override
   String get webview_not_found_description =>
-      '端末にWebviewランタイムがインストールされていません。\nインストールされている場合は、環境変数のパスにあるか確認してください\n\nインストール後、アプリを再起動してください';
+      'ç«¯æœ«ã«Webviewãƒ©ãƒ³ã‚¿ã‚¤ãƒ ãŒã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚\nã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ã€ç’°å¢ƒå¤‰æ•°ã®ãƒ‘ã‚¹ã«ã‚ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„\n\nã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«å¾Œã€ã‚¢ãƒ—ãƒªã‚’å†èµ·å‹•ã—ã¦ãã ã•ã„';
 
   @override
-  String get unsupported_platform => '未対応のプラットフォーム';
+  String get unsupported_platform => 'æœªå¯¾å¿œã®ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ';
 
   @override
-  String get cache_music => '音楽をキャッシュ';
+  String get cache_music => 'éŸ³æ¥½ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥';
 
   @override
-  String get open => '開く';
+  String get open => 'é–‹ã';
 
   @override
-  String get cache_folder => 'キャッシュフォルダー';
+  String get cache_folder => 'ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãƒ•ã‚©ãƒ«ãƒ€ãƒ¼';
 
   @override
-  String get export => 'エクスポート';
+  String get export => 'ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆ';
 
   @override
-  String get clear_cache => 'キャッシュをクリア';
+  String get clear_cache => 'ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢';
 
   @override
-  String get clear_cache_confirmation => 'キャッシュをクリアしますか？';
+  String get clear_cache_confirmation =>
+      'ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’ã‚¯ãƒªã‚¢ã—ã¾ã™ã‹ï¼Ÿ';
 
   @override
-  String get export_cache_files => 'キャッシュされたファイルをエクスポート';
+  String get export_cache_files =>
+      'ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆ';
 
   @override
   String found_n_files(Object count) {
-    return '$countファイルが見つかりました';
+    return '$countãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚Šã¾ã—ãŸ';
   }
 
   @override
-  String get export_cache_confirmation => 'これらのファイルをエクスポートしますか';
+  String get export_cache_confirmation =>
+      'ã“ã‚Œã‚‰ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã—ã¾ã™ã‹';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$filesExported / $filesファイルがエクスポートされました';
+    return '$filesExported / $filesãƒ•ã‚¡ã‚¤ãƒ«ãŒã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã•ã‚Œã¾ã—ãŸ';
   }
 
   @override
-  String get undo => '元に戻す';
+  String get undo => 'å…ƒã«æˆ»ã™';
 
   @override
-  String get add_all_to_playlist => 'すべて再生リストに追加';
+  String get add_all_to_playlist => 'ã™ã¹ã¦å†ç”Ÿãƒªã‚¹ãƒˆã«è¿½åŠ ';
 
   @override
-  String get add_all_to_queue => 'すべてキューに追加';
+  String get add_all_to_queue => 'ã™ã¹ã¦ã‚­ãƒ¥ãƒ¼ã«è¿½åŠ ';
 
   @override
-  String get play_all_next => 'すべてを次に再生';
+  String get play_all_next => 'ã™ã¹ã¦ã‚’æ¬¡ã«å†ç”Ÿ';
 
   @override
-  String get pause => '一時停止';
+  String get pause => 'ä¸€æ™‚åœæ­¢';
 
   @override
-  String get view_all => 'すべて表示';
+  String get view_all => 'ã™ã¹ã¦è¡¨ç¤º';
 
   @override
-  String get no_tracks_added_yet => 'まだ曲を追加していないようです';
+  String get no_tracks_added_yet =>
+      'ã¾ã æ›²ã‚’è¿½åŠ ã—ã¦ã„ãªã„ã‚ˆã†ã§ã™';
 
   @override
-  String get no_tracks => 'ここには曲がないようです';
+  String get no_tracks => 'ã“ã“ã«ã¯æ›²ãŒãªã„ã‚ˆã†ã§ã™';
 
   @override
-  String get no_tracks_listened_yet => 'まだ何も聞いていないようです';
+  String get no_tracks_listened_yet =>
+      'ã¾ã ä½•ã‚‚èžã„ã¦ã„ãªã„ã‚ˆã†ã§ã™';
 
   @override
-  String get not_following_artists => 'アーティストをフォローしていません';
+  String get not_following_artists =>
+      'ã‚¢ãƒ¼ãƒ†ã‚£ã‚¹ãƒˆã‚’ãƒ•ã‚©ãƒ­ãƒ¼ã—ã¦ã„ã¾ã›ã‚“';
 
   @override
-  String get no_favorite_albums_yet => 'まだお気に入りのアルバムを追加していないようです';
+  String get no_favorite_albums_yet =>
+      'ã¾ã ãŠæ°—ã«å…¥ã‚Šã®ã‚¢ãƒ«ãƒãƒ ã‚’è¿½åŠ ã—ã¦ã„ãªã„ã‚ˆã†ã§ã™';
 
   @override
-  String get no_logs_found => 'ログなし';
+  String get no_logs_found => 'ãƒ­ã‚°ãªã—';
 
   @override
-  String get youtube_engine => 'YouTubeエンジン';
+  String get youtube_engine => 'YouTubeã‚¨ãƒ³ã‚¸ãƒ³';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engineはインストールされていません';
+    return '$engineã¯ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã¾ã›ã‚“';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engineはシステムにインストールされていません。';
+    return '$engineã¯ã‚·ã‚¹ãƒ†ãƒ ã«ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'PATH変数に設定されていることを確認するか\n$engine実行ファイルの絶対パスを下記に設定してください';
+    return 'PATHå¤‰æ•°ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèªã™ã‚‹ã‹\n$engineå®Ÿè¡Œãƒ•ã‚¡ã‚¤ãƒ«ã®çµ¶å¯¾ãƒ‘ã‚¹ã‚’ä¸‹è¨˜ã«è¨­å®šã—ã¦ãã ã•ã„';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/Unix系OSでは、.zshrc/.bashrc/.bash_profileなどでパスを設定しても動作しません。\nシェルの設定ファイルにパスを設定する必要があります';
+      'macOS/Linux/Unixç³»OSã§ã¯ã€.zshrc/.bashrc/.bash_profileãªã©ã§ãƒ‘ã‚¹ã‚’è¨­å®šã—ã¦ã‚‚å‹•ä½œã—ã¾ã›ã‚“ã€‚\nã‚·ã‚§ãƒ«ã®è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã«ãƒ‘ã‚¹ã‚’è¨­å®šã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™';
 
   @override
-  String get download => 'ダウンロード';
+  String get download => 'ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰';
 
   @override
-  String get file_not_found => 'ファイルが見つかりません';
+  String get file_not_found => 'ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“';
 
   @override
-  String get custom => '独自';
+  String get custom => 'ç‹¬è‡ª';
 
   @override
-  String get add_custom_url => '独自にURLを追加';
+  String get add_custom_url => 'ç‹¬è‡ªã«URLã‚’è¿½åŠ ';
 
   @override
-  String get edit_port => 'ポートを編集';
+  String get edit_port => 'ãƒãƒ¼ãƒˆã‚’ç·¨é›†';
 
   @override
   String get port_helper_msg =>
-      '初期設定は-1で、ランダムな番号を示します。ファイアウォールを設定している場合に設定することを推奨します。';
+      'åˆæœŸè¨­å®šã¯-1ã§ã€ãƒ©ãƒ³ãƒ€ãƒ ãªç•ªå·ã‚’ç¤ºã—ã¾ã™ã€‚ãƒ•ã‚¡ã‚¤ã‚¢ã‚¦ã‚©ãƒ¼ãƒ«ã‚’è¨­å®šã—ã¦ã„ã‚‹å ´åˆã«è¨­å®šã™ã‚‹ã“ã¨ã‚’æŽ¨å¥¨ã—ã¾ã™ã€‚';
 
   @override
   String connect_request(Object client) {
-    return '$clientの接続を許可しますか？';
+    return '$clientã®æŽ¥ç¶šã‚’è¨±å¯ã—ã¾ã™ã‹ï¼Ÿ';
   }
 
   @override
-  String get connection_request_denied => '接続が拒否されました。ユーザーがアクセスを拒否しました。';
+  String get connection_request_denied =>
+      'æŽ¥ç¶šãŒæ‹’å¦ã•ã‚Œã¾ã—ãŸã€‚ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒã‚¢ã‚¯ã‚»ã‚¹ã‚’æ‹’å¦ã—ã¾ã—ãŸã€‚';
 
   @override
-  String get an_error_occurred => 'エラーが発生しました';
+  String get an_error_occurred => 'ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸ';
 
   @override
-  String get copy_to_clipboard => 'クリップボードにコピー';
+  String get copy_to_clipboard => 'ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼';
 
   @override
-  String get view_logs => 'ログを表示';
+  String get view_logs => 'ãƒ­ã‚°ã‚’è¡¨ç¤º';
 
   @override
-  String get retry => '再試行';
+  String get retry => 'å†è©¦è¡Œ';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'デフォルトのメタデータプロバイダーが設定されていません';
+      'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ãƒ—ãƒ­ãƒã‚¤ãƒ€ãƒ¼ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“';
 
   @override
-  String get manage_metadata_providers => 'メタデータプロバイダーを管理';
+  String get manage_metadata_providers =>
+      'ãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ãƒ—ãƒ­ãƒã‚¤ãƒ€ãƒ¼ã‚’ç®¡ç†';
 
   @override
-  String get open_link_in_browser => 'リンクをブラウザで開きますか？';
+  String get open_link_in_browser =>
+      'ãƒªãƒ³ã‚¯ã‚’ãƒ–ãƒ©ã‚¦ã‚¶ã§é–‹ãã¾ã™ã‹ï¼Ÿ';
 
   @override
-  String get do_you_want_to_open_the_following_link => '次のリンクを開きますか';
+  String get do_you_want_to_open_the_following_link =>
+      'æ¬¡ã®ãƒªãƒ³ã‚¯ã‚’é–‹ãã¾ã™ã‹';
 
   @override
   String get unsafe_url_warning =>
-      '信頼できないソースからのリンクを開くのは安全ではない場合があります。注意してください！\nリンクをクリップボードにコピーすることもできます。';
+      'ä¿¡é ¼ã§ããªã„ã‚½ãƒ¼ã‚¹ã‹ã‚‰ã®ãƒªãƒ³ã‚¯ã‚’é–‹ãã®ã¯å®‰å…¨ã§ã¯ãªã„å ´åˆãŒã‚ã‚Šã¾ã™ã€‚æ³¨æ„ã—ã¦ãã ã•ã„ï¼\nãƒªãƒ³ã‚¯ã‚’ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹ã“ã¨ã‚‚ã§ãã¾ã™ã€‚';
 
   @override
-  String get copy_link => 'リンクをコピー';
+  String get copy_link => 'ãƒªãƒ³ã‚¯ã‚’ã‚³ãƒ”ãƒ¼';
 
   @override
-  String get building_your_timeline => 'あなたの視聴履歴に基づいてタイムラインを作成しています...';
+  String get building_your_timeline =>
+      'ã‚ãªãŸã®è¦–è´å±¥æ­´ã«åŸºã¥ã„ã¦ã‚¿ã‚¤ãƒ ãƒ©ã‚¤ãƒ³ã‚’ä½œæˆã—ã¦ã„ã¾ã™...';
 
   @override
-  String get official => '公式';
+  String get official => 'å…¬å¼';
 
   @override
   String author_name(Object author) {
-    return '作者: $author';
+    return 'ä½œè€…: $author';
   }
 
   @override
-  String get third_party => 'サードパーティ';
+  String get third_party => 'ã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£';
 
   @override
-  String get plugin_requires_authentication => 'プラグインには認証が必要です';
+  String get plugin_requires_authentication =>
+      'ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã«ã¯èªè¨¼ãŒå¿…è¦ã§ã™';
 
   @override
-  String get update_available => 'アップデートが利用可能です';
+  String get update_available => 'ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆãŒåˆ©ç”¨å¯èƒ½ã§ã™';
 
   @override
-  String get supports_scrobbling => 'scrobblingに対応';
+  String get supports_scrobbling => 'scrobblingã«å¯¾å¿œ';
 
   @override
-  String get plugin_scrobbling_info => 'このプラグインは、あなたの音楽をscrobbleして視聴履歴を生成します。';
+  String get plugin_scrobbling_info =>
+      'ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã¯ã€ã‚ãªãŸã®éŸ³æ¥½ã‚’scrobbleã—ã¦è¦–è´å±¥æ­´ã‚’ç”Ÿæˆã—ã¾ã™ã€‚';
 
   @override
-  String get default_metadata_source => 'デフォルトメタデータソース';
+  String get default_metadata_source =>
+      'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ã‚½ãƒ¼ã‚¹';
 
   @override
-  String get set_default_metadata_source => 'デフォルトメタデータソースを設定';
+  String get set_default_metadata_source =>
+      'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ã‚½ãƒ¼ã‚¹ã‚’è¨­å®š';
 
   @override
-  String get default_audio_source => 'デフォルトオーディオソース';
+  String get default_audio_source => 'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹';
 
   @override
-  String get set_default_audio_source => 'デフォルトオーディオソースを設定';
+  String get set_default_audio_source =>
+      'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹ã‚’è¨­å®š';
 
   @override
-  String get set_default => 'デフォルトに設定';
+  String get set_default => 'ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã«è¨­å®š';
 
   @override
-  String get support => 'サポート';
+  String get support => 'ã‚µãƒãƒ¼ãƒˆ';
 
   @override
-  String get support_plugin_development => 'プラグイン開発をサポート';
+  String get support_plugin_development =>
+      'ãƒ—ãƒ©ã‚°ã‚¤ãƒ³é–‹ç™ºã‚’ã‚µãƒãƒ¼ãƒˆ';
 
   @override
   String can_access_name_api(Object name) {
-    return '- **$name** APIにアクセスできます';
+    return '- **$name** APIã«ã‚¢ã‚¯ã‚»ã‚¹ã§ãã¾ã™';
   }
 
   @override
-  String get do_you_want_to_install_this_plugin => 'このプラグインをインストールしますか？';
+  String get do_you_want_to_install_this_plugin =>
+      'ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¾ã™ã‹ï¼Ÿ';
 
   @override
   String get third_party_plugin_warning =>
-      'このプラグインはサードパーティのリポジトリからのものです。インストールする前にソースを信頼できるか確認してください。';
+      'ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã¯ã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£ã®ãƒªãƒã‚¸ãƒˆãƒªã‹ã‚‰ã®ã‚‚ã®ã§ã™ã€‚ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã™ã‚‹å‰ã«ã‚½ãƒ¼ã‚¹ã‚’ä¿¡é ¼ã§ãã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚';
 
   @override
-  String get author => '作者';
+  String get author => 'ä½œè€…';
 
   @override
-  String get this_plugin_can_do_following => 'このプラグインは以下のことができます';
+  String get this_plugin_can_do_following =>
+      'ã“ã®ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã¯ä»¥ä¸‹ã®ã“ã¨ãŒã§ãã¾ã™';
 
   @override
-  String get install => 'インストール';
+  String get install => 'ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«';
 
   @override
-  String get install_a_metadata_provider => 'メタデータプロバイダーをインストール';
+  String get install_a_metadata_provider =>
+      'ãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ãƒ—ãƒ­ãƒã‚¤ãƒ€ãƒ¼ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«';
 
   @override
-  String get no_tracks_playing => '現在再生中のトラックはありません';
+  String get no_tracks_playing =>
+      'ç¾åœ¨å†ç”Ÿä¸­ã®ãƒˆãƒ©ãƒƒã‚¯ã¯ã‚ã‚Šã¾ã›ã‚“';
 
   @override
-  String get synced_lyrics_not_available => 'この曲の同期歌詞は利用できません。代わりに';
+  String get synced_lyrics_not_available =>
+      'ã“ã®æ›²ã®åŒæœŸæ­Œè©žã¯åˆ©ç”¨ã§ãã¾ã›ã‚“ã€‚ä»£ã‚ã‚Šã«';
 
   @override
-  String get plain_lyrics => 'シンプルな歌詞';
+  String get plain_lyrics => 'ã‚·ãƒ³ãƒ—ãƒ«ãªæ­Œè©ž';
 
   @override
-  String get tab_instead => 'タブを使用してください。';
+  String get tab_instead => 'ã‚¿ãƒ–ã‚’ä½¿ç”¨ã—ã¦ãã ã•ã„ã€‚';
 
   @override
-  String get disclaimer => '免責事項';
+  String get disclaimer => 'å…è²¬äº‹é …';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhaktiチームは、いかなる「サードパーティ」プラグインについても責任（法的責任を含む）を負いません。\nご自身の責任でご使用ください。バグや問題については、プラグインリポジトリに報告してください。\n\n「サードパーティ」プラグインが何らかのサービス/法人のToS/DMCAを侵害している場合、その「サードパーティ」プラグインの作者またはホスティングプラットフォーム（例：GitHub/Codeberg）に措置を講じるよう依頼してください。上記に記載されている（「サードパーティ」とラベル付けされた）ものはすべて、パブリック/コミュニティによって維持されているプラグインです。私たちはそれらをキュレーションしていないため、それらに対して措置を講じることはできません。\n\n';
+      'Soulful Bhaktiãƒãƒ¼ãƒ ã¯ã€ã„ã‹ãªã‚‹ã€Œã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã«ã¤ã„ã¦ã‚‚è²¬ä»»ï¼ˆæ³•çš„è²¬ä»»ã‚’å«ã‚€ï¼‰ã‚’è² ã„ã¾ã›ã‚“ã€‚\nã”è‡ªèº«ã®è²¬ä»»ã§ã”ä½¿ç”¨ãã ã•ã„ã€‚ãƒã‚°ã‚„å•é¡Œã«ã¤ã„ã¦ã¯ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ãƒªãƒã‚¸ãƒˆãƒªã«å ±å‘Šã—ã¦ãã ã•ã„ã€‚\n\nã€Œã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ãŒä½•ã‚‰ã‹ã®ã‚µãƒ¼ãƒ“ã‚¹/æ³•äººã®ToS/DMCAã‚’ä¾µå®³ã—ã¦ã„ã‚‹å ´åˆã€ãã®ã€Œã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£ã€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®ä½œè€…ã¾ãŸã¯ãƒ›ã‚¹ãƒ†ã‚£ãƒ³ã‚°ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ï¼ˆä¾‹ï¼šGitHub/Codebergï¼‰ã«æŽªç½®ã‚’è¬›ã˜ã‚‹ã‚ˆã†ä¾é ¼ã—ã¦ãã ã•ã„ã€‚ä¸Šè¨˜ã«è¨˜è¼‰ã•ã‚Œã¦ã„ã‚‹ï¼ˆã€Œã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£ã€ã¨ãƒ©ãƒ™ãƒ«ä»˜ã‘ã•ã‚ŒãŸï¼‰ã‚‚ã®ã¯ã™ã¹ã¦ã€ãƒ‘ãƒ–ãƒªãƒƒã‚¯/ã‚³ãƒŸãƒ¥ãƒ‹ãƒ†ã‚£ã«ã‚ˆã£ã¦ç¶­æŒã•ã‚Œã¦ã„ã‚‹ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã§ã™ã€‚ç§ãŸã¡ã¯ãã‚Œã‚‰ã‚’ã‚­ãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã—ã¦ã„ãªã„ãŸã‚ã€ãã‚Œã‚‰ã«å¯¾ã—ã¦æŽªç½®ã‚’è¬›ã˜ã‚‹ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚\n\n';
 
   @override
-  String get input_does_not_match_format => '入力が必須フォーマットと一致しません';
+  String get input_does_not_match_format =>
+      'å…¥åŠ›ãŒå¿…é ˆãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆã¨ä¸€è‡´ã—ã¾ã›ã‚“';
 
   @override
-  String get plugins => 'プラグイン';
+  String get plugins => 'ãƒ—ãƒ©ã‚°ã‚¤ãƒ³';
 
   @override
   String get paste_plugin_download_url =>
-      'ダウンロードURL、GitHub/CodebergリポジトリURL、または.smplugファイルへの直接リンクを貼り付けます';
+      'ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰URLã€GitHub/Codebergãƒªãƒã‚¸ãƒˆãƒªURLã€ã¾ãŸã¯.smplugãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ç›´æŽ¥ãƒªãƒ³ã‚¯ã‚’è²¼ã‚Šä»˜ã‘ã¾ã™';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'URLからプラグインをダウンロードしてインストール';
+      'URLã‹ã‚‰ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã—ã¦ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'プラグインの追加に失敗しました: $error';
+    return 'ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã®è¿½åŠ ã«å¤±æ•—ã—ã¾ã—ãŸ: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'ファイルからプラグインをアップロード';
+  String get upload_plugin_from_file =>
+      'ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰';
 
   @override
-  String get installed => 'インストール済み';
+  String get installed => 'ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«æ¸ˆã¿';
 
   @override
-  String get available_plugins => '利用可能なプラグイン';
+  String get available_plugins => 'åˆ©ç”¨å¯èƒ½ãªãƒ—ãƒ©ã‚°ã‚¤ãƒ³';
 
   @override
-  String get configure_plugins => '独自のメタデータプロバイダーとオーディオソースプラグインを設定';
+  String get configure_plugins =>
+      'ç‹¬è‡ªã®ãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ãƒ—ãƒ­ãƒã‚¤ãƒ€ãƒ¼ã¨ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã‚’è¨­å®š';
 
   @override
-  String get source => 'ソース: ';
+  String get source => 'ã‚½ãƒ¼ã‚¹: ';
 
   @override
-  String get uncompressed => '非圧縮';
+  String get uncompressed => 'éžåœ§ç¸®';
 
   @override
   String get dab_music_source_description =>
-      'オーディオファイル向け。高品質/ロスレスオーディオストリームを提供。正確なISRCベースのトラックマッチング。';
+      'ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªãƒ•ã‚¡ã‚¤ãƒ«å‘ã‘ã€‚é«˜å“è³ª/ãƒ­ã‚¹ãƒ¬ã‚¹ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’æä¾›ã€‚æ­£ç¢ºãªISRCãƒ™ãƒ¼ã‚¹ã®ãƒˆãƒ©ãƒƒã‚¯ãƒžãƒƒãƒãƒ³ã‚°ã€‚';
 
   @override
-  String get summary_top_track => 'トップ曲\nこの期間';
+  String get summary_top_track => 'ãƒˆãƒƒãƒ—æ›²\nã“ã®æœŸé–“';
 
   @override
-  String get local => 'ローカル';
+  String get local => 'ãƒ­ãƒ¼ã‚«ãƒ«';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1610,4 +1681,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

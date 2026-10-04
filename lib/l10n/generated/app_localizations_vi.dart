@@ -9,254 +9,255 @@ class AppLocalizationsVi extends AppLocalizations {
   AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
-  String get guest => 'Khách';
+  String get guest => 'KhÃ¡ch';
 
   @override
-  String get browse => 'Khám phá';
+  String get browse => 'KhÃ¡m phÃ¡';
 
   @override
-  String get search => 'Tìm kiếm';
+  String get search => 'TÃ¬m kiáº¿m';
 
   @override
-  String get library => 'Thư viên';
+  String get library => 'ThÆ° viÃªn';
 
   @override
-  String get lyrics => 'Lời bài hát';
+  String get lyrics => 'Lá»i bÃ i hÃ¡t';
 
   @override
-  String get settings => 'Cài đặt';
+  String get settings => 'CÃ i Ä‘áº·t';
 
   @override
   String get settings_subtitle =>
-      'Tùy chỉnh Soulful Bhakti theo ý thích của bạn';
+      'TÃ¹y chá»‰nh Soulful Bhakti theo Ã½ thÃ­ch cá»§a báº¡n';
 
   @override
-  String get genre_categories_filter => 'Lọc theo thể loại nhạc...';
+  String get genre_categories_filter => 'Lá»c theo thá»ƒ loáº¡i nháº¡c...';
 
   @override
-  String get genre => 'Thể loại nhạc';
+  String get genre => 'Thá»ƒ loáº¡i nháº¡c';
 
   @override
-  String get personalized => 'Cá nhân hóa';
+  String get personalized => 'CÃ¡ nhÃ¢n hÃ³a';
 
   @override
-  String get featured => 'Nổi bật';
+  String get featured => 'Ná»•i báº­t';
 
   @override
-  String get new_releases => 'Bản phát hành mới';
+  String get new_releases => 'Báº£n phÃ¡t hÃ nh má»›i';
 
   @override
-  String get songs => 'Bài hát';
+  String get songs => 'BÃ i hÃ¡t';
 
   @override
-  String get newest_arrivals => 'Mới nhất';
+  String get newest_arrivals => 'Má»›i nháº¥t';
 
   @override
-  String get top_trending => 'Thịnh hành';
+  String get top_trending => 'Thá»‹nh hÃ nh';
 
   @override
-  String get see_more => 'Xem thêm';
+  String get see_more => 'Xem thÃªm';
 
   @override
   String playing_track(Object track) {
-    return 'Đang phát $track';
+    return 'Äang phÃ¡t $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Điều này sẽ xóa hàng đợi hiện tại. $track_length bài hát sẽ bị xóa\nBạn có muốn tiếp tục không?';
+    return 'Äiá»u nÃ y sáº½ xÃ³a hÃ ng Ä‘á»£i hiá»‡n táº¡i. $track_length bÃ i hÃ¡t sáº½ bá»‹ xÃ³a\nBáº¡n cÃ³ muá»‘n tiáº¿p tá»¥c khÃ´ng?';
   }
 
   @override
-  String get load_more => 'Tải thêm';
+  String get load_more => 'Táº£i thÃªm';
 
   @override
-  String get playlists => 'Danh sách phát';
+  String get playlists => 'Danh sÃ¡ch phÃ¡t';
 
   @override
-  String get artists => 'Nghệ sĩ';
+  String get artists => 'Nghá»‡ sÄ©';
 
   @override
   String get albums => 'Album';
 
   @override
-  String get tracks => 'Bài hát';
+  String get tracks => 'BÃ i hÃ¡t';
 
   @override
-  String get downloads => 'Tải về';
+  String get downloads => 'Táº£i vá»';
 
   @override
-  String get filter_playlists => 'Lọc danh sách phát...';
+  String get filter_playlists => 'Lá»c danh sÃ¡ch phÃ¡t...';
 
   @override
-  String get liked_tracks => 'Bài hát được thích';
+  String get liked_tracks => 'BÃ i hÃ¡t Ä‘Æ°á»£c thÃ­ch';
 
   @override
-  String get liked_tracks_description => 'Tất cả bài hát bạn đã thích';
+  String get liked_tracks_description =>
+      'Táº¥t cáº£ bÃ i hÃ¡t báº¡n Ä‘Ã£ thÃ­ch';
 
   @override
-  String get playlist => 'Danh sách phát';
+  String get playlist => 'Danh sÃ¡ch phÃ¡t';
 
   @override
-  String get create_a_playlist => 'Tạo danh sách phát';
+  String get create_a_playlist => 'Táº¡o danh sÃ¡ch phÃ¡t';
 
   @override
-  String get new_playlist => 'Danh sách phát mới';
+  String get new_playlist => 'Danh sÃ¡ch phÃ¡t má»›i';
 
   @override
-  String get playlist_name => 'Tên danh sách phát';
+  String get playlist_name => 'TÃªn danh sÃ¡ch phÃ¡t';
 
   @override
   String get no_playlists_yet =>
-      'Chưa có danh sách phát nào. Tạo một danh sách từ các bài hát đã chọn.';
+      'ChÆ°a cÃ³ danh sÃ¡ch phÃ¡t nÃ o. Táº¡o má»™t danh sÃ¡ch tá»« cÃ¡c bÃ i hÃ¡t Ä‘Ã£ chá»n.';
 
   @override
-  String get update_playlist => 'Cập nhật danh sách phát';
+  String get update_playlist => 'Cáº­p nháº­t danh sÃ¡ch phÃ¡t';
 
   @override
-  String get create => 'Tạo';
+  String get create => 'Táº¡o';
 
   @override
-  String get cancel => 'Hủy';
+  String get cancel => 'Há»§y';
 
   @override
-  String get update => 'Cập nhật';
+  String get update => 'Cáº­p nháº­t';
 
   @override
-  String get name_of_playlist => 'Tên của danh sách phát';
+  String get name_of_playlist => 'TÃªn cá»§a danh sÃ¡ch phÃ¡t';
 
   @override
-  String get description => 'Mô tả';
+  String get description => 'MÃ´ táº£';
 
   @override
-  String get public => 'Công khai';
+  String get public => 'CÃ´ng khai';
 
   @override
-  String get collaborative => 'Hợp tác';
+  String get collaborative => 'Há»£p tÃ¡c';
 
   @override
-  String get search_local_tracks => 'Tìm kiếm bài hát trong máy...';
+  String get search_local_tracks => 'TÃ¬m kiáº¿m bÃ i hÃ¡t trong mÃ¡y...';
 
   @override
-  String get play => 'Phát';
+  String get play => 'PhÃ¡t';
 
   @override
-  String get delete => 'Xóa';
+  String get delete => 'XÃ³a';
 
   @override
-  String get none => 'Không có';
+  String get none => 'KhÃ´ng cÃ³';
 
   @override
-  String get sort_a_z => 'Sắp xếp theo A-Z';
+  String get sort_a_z => 'Sáº¯p xáº¿p theo A-Z';
 
   @override
-  String get sort_z_a => 'Sắp xếp theo Z-A';
+  String get sort_z_a => 'Sáº¯p xáº¿p theo Z-A';
 
   @override
-  String get sort_artist => 'Sắp xếp theo Nghệ sĩ';
+  String get sort_artist => 'Sáº¯p xáº¿p theo Nghá»‡ sÄ©';
 
   @override
-  String get sort_album => 'Sắp xếp theo Album';
+  String get sort_album => 'Sáº¯p xáº¿p theo Album';
 
   @override
-  String get sort_duration => 'Sắp xếp theo Thời lượng';
+  String get sort_duration => 'Sáº¯p xáº¿p theo Thá»i lÆ°á»£ng';
 
   @override
-  String get sort_tracks => 'Sắp xếp các bài hát';
+  String get sort_tracks => 'Sáº¯p xáº¿p cÃ¡c bÃ i hÃ¡t';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'Đang tải về ($tracks_length bài hát)';
+    return 'Äang táº£i vá» ($tracks_length bÃ i hÃ¡t)';
   }
 
   @override
-  String get cancel_all => 'Hủy tất cả';
+  String get cancel_all => 'Há»§y táº¥t cáº£';
 
   @override
-  String get filter_artist => 'Lọc nghệ sĩ...';
+  String get filter_artist => 'Lá»c nghá»‡ sÄ©...';
 
   @override
   String followers(Object followers) {
-    return '$followers Người theo dõi';
+    return '$followers NgÆ°á»i theo dÃµi';
   }
 
   @override
-  String get add_artist_to_blacklist => 'Thêm nghệ sĩ vào blacklist';
+  String get add_artist_to_blacklist => 'ThÃªm nghá»‡ sÄ© vÃ o blacklist';
 
   @override
-  String get top_tracks => 'Bài hát nổi bật';
+  String get top_tracks => 'BÃ i hÃ¡t ná»•i báº­t';
 
   @override
-  String get fans_also_like => 'Người hâm mộ cũng thích';
+  String get fans_also_like => 'NgÆ°á»i hÃ¢m má»™ cÅ©ng thÃ­ch';
 
   @override
-  String get loading => 'Đang tải...';
+  String get loading => 'Äang táº£i...';
 
   @override
-  String get artist => 'Nghệ sĩ';
+  String get artist => 'Nghá»‡ sÄ©';
 
   @override
-  String get blacklisted => 'Đã đưa vào blacklist';
+  String get blacklisted => 'ÄÃ£ Ä‘Æ°a vÃ o blacklist';
 
   @override
-  String get following => 'Đang theo dõi';
+  String get following => 'Äang theo dÃµi';
 
   @override
-  String get follow => 'Theo dõi';
+  String get follow => 'Theo dÃµi';
 
   @override
-  String get artist_url_copied => 'Đã sao chép URL nghệ sĩ';
+  String get artist_url_copied => 'ÄÃ£ sao chÃ©p URL nghá»‡ sÄ©';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'Đã thêm $tracks bài hát vào hàng đợi';
+    return 'ÄÃ£ thÃªm $tracks bÃ i hÃ¡t vÃ o hÃ ng Ä‘á»£i';
   }
 
   @override
-  String get filter_albums => 'Lọc album...';
+  String get filter_albums => 'Lá»c album...';
 
   @override
-  String get synced => 'Đồng bộ';
+  String get synced => 'Äá»“ng bá»™';
 
   @override
-  String get plain => 'Bình thường';
+  String get plain => 'BÃ¬nh thÆ°á»ng';
 
   @override
-  String get shuffle => 'Trộn';
+  String get shuffle => 'Trá»™n';
 
   @override
-  String get search_tracks => 'Tìm kiếm bài hát...';
+  String get search_tracks => 'TÃ¬m kiáº¿m bÃ i hÃ¡t...';
 
   @override
-  String get released => 'Phát hành';
+  String get released => 'PhÃ¡t hÃ nh';
 
   @override
   String error(Object error) {
-    return 'Lỗi $error';
+    return 'Lá»—i $error';
   }
 
   @override
-  String get title => 'Đề mục';
+  String get title => 'Äá» má»¥c';
 
   @override
-  String get time => 'Thời gian';
+  String get time => 'Thá»i gian';
 
   @override
-  String get more_actions => 'Thao tác khác';
+  String get more_actions => 'Thao tÃ¡c khÃ¡c';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'Thêm ($count) vào danh sách phát';
+    return 'ThÃªm ($count) vÃ o danh sÃ¡ch phÃ¡t';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'Thêm ($count) vào hàng đợi';
+    return 'ThÃªm ($count) vÃ o hÃ ng Ä‘á»£i';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'Phát ($count) tiếp theo';
+    return 'PhÃ¡t ($count) tiáº¿p theo';
   }
 
   @override
@@ -264,296 +265,301 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'Đã sao chép $data vào clipboard';
+    return 'ÄÃ£ sao chÃ©p $data vÃ o clipboard';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'Thêm $track vào danh sách phát đang theo dõi';
+    return 'ThÃªm $track vÃ o danh sÃ¡ch phÃ¡t Ä‘ang theo dÃµi';
   }
 
   @override
-  String get add => 'Thêm';
+  String get add => 'ThÃªm';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'Đã thêm $track vào hàng đợi';
+    return 'ÄÃ£ thÃªm $track vÃ o hÃ ng Ä‘á»£i';
   }
 
   @override
-  String get add_to_queue => 'Thêm vào hàng đợi';
+  String get add_to_queue => 'ThÃªm vÃ o hÃ ng Ä‘á»£i';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track sẽ được phát tiếp theo';
+    return '$track sáº½ Ä‘Æ°á»£c phÃ¡t tiáº¿p theo';
   }
 
   @override
-  String get play_next => 'Phát tiếp theo';
+  String get play_next => 'PhÃ¡t tiáº¿p theo';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'Đã xóa $track khỏi hàng đợi';
+    return 'ÄÃ£ xÃ³a $track khá»i hÃ ng Ä‘á»£i';
   }
 
   @override
-  String get remove_from_queue => 'Xóa khỏi hàng đợi';
+  String get remove_from_queue => 'XÃ³a khá»i hÃ ng Ä‘á»£i';
 
   @override
-  String get remove_from_favorites => 'Xóa khỏi bài hát yêu thích';
+  String get remove_from_favorites => 'XÃ³a khá»i bÃ i hÃ¡t yÃªu thÃ­ch';
 
   @override
-  String get save_as_favorite => 'Thêm vào bài hát yêu thích';
+  String get save_as_favorite => 'ThÃªm vÃ o bÃ i hÃ¡t yÃªu thÃ­ch';
 
   @override
-  String get add_to_playlist => 'Thêm vào danh sách phát';
+  String get add_to_playlist => 'ThÃªm vÃ o danh sÃ¡ch phÃ¡t';
 
   @override
-  String get remove_from_playlist => 'Xóa khỏi danh sách phát';
+  String get remove_from_playlist => 'XÃ³a khá»i danh sÃ¡ch phÃ¡t';
 
   @override
-  String get add_to_blacklist => 'Thêm vào blacklist';
+  String get add_to_blacklist => 'ThÃªm vÃ o blacklist';
 
   @override
-  String get remove_from_blacklist => 'Xóa khỏi blacklist';
+  String get remove_from_blacklist => 'XÃ³a khá»i blacklist';
 
   @override
-  String get share => 'Chia sẻ';
+  String get share => 'Chia sáº»';
 
   @override
-  String get mini_player => 'Trình phát thu nhỏ';
+  String get mini_player => 'TrÃ¬nh phÃ¡t thu nhá»';
 
   @override
-  String get slide_to_seek => 'Trượt để tìm kiếm tiến hoặc lùi';
+  String get slide_to_seek => 'TrÆ°á»£t Ä‘á»ƒ tÃ¬m kiáº¿m tiáº¿n hoáº·c lÃ¹i';
 
   @override
-  String get shuffle_playlist => 'Xáo trộn bài hát';
+  String get shuffle_playlist => 'XÃ¡o trá»™n bÃ i hÃ¡t';
 
   @override
-  String get unshuffle_playlist => 'Hủy xáo trộn bài hát';
+  String get unshuffle_playlist => 'Há»§y xÃ¡o trá»™n bÃ i hÃ¡t';
 
   @override
-  String get previous_track => 'Bài hát trước';
+  String get previous_track => 'BÃ i hÃ¡t trÆ°á»›c';
 
   @override
-  String get next_track => 'Bài hát tiếp theo';
+  String get next_track => 'BÃ i hÃ¡t tiáº¿p theo';
 
   @override
-  String get pause_playback => 'Tạm dừng phát';
+  String get pause_playback => 'Táº¡m dá»«ng phÃ¡t';
 
   @override
-  String get resume_playback => 'Tiếp tục phát';
+  String get resume_playback => 'Tiáº¿p tá»¥c phÃ¡t';
 
   @override
-  String get loop_track => 'Lặp lại bài hát';
+  String get loop_track => 'Láº·p láº¡i bÃ i hÃ¡t';
 
   @override
-  String get no_loop => 'Không lặp lại';
+  String get no_loop => 'KhÃ´ng láº·p láº¡i';
 
   @override
-  String get repeat_playlist => 'Lặp lại danh sách phát';
+  String get repeat_playlist => 'Láº·p láº¡i danh sÃ¡ch phÃ¡t';
 
   @override
-  String get queue => 'Hàng đợi';
+  String get queue => 'HÃ ng Ä‘á»£i';
 
   @override
-  String get alternative_track_sources => 'Đổi nguồn bài hát';
+  String get alternative_track_sources => 'Äá»•i nguá»“n bÃ i hÃ¡t';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks bài hát trong hàng đợi';
+    return '$tracks bÃ i hÃ¡t trong hÃ ng Ä‘á»£i';
   }
 
   @override
-  String get clear_all => 'Xóa tất cả';
+  String get clear_all => 'XÃ³a táº¥t cáº£';
 
   @override
   String get show_hide_ui_on_hover =>
-      'Hiển thị/Ẩn giao diện người dùng khi di chuột qua';
+      'Hiá»ƒn thá»‹/áº¨n giao diá»‡n ngÆ°á»i dÃ¹ng khi di chuá»™t qua';
 
   @override
-  String get always_on_top => 'Luôn ở trên cùng';
+  String get always_on_top => 'LuÃ´n á»Ÿ trÃªn cÃ¹ng';
 
   @override
-  String get exit_mini_player => 'Thoát khỏi trình phát thu nhỏ';
+  String get exit_mini_player => 'ThoÃ¡t khá»i trÃ¬nh phÃ¡t thu nhá»';
 
   @override
-  String get local_library => 'Thư viện địa phương';
+  String get local_library => 'ThÆ° viá»‡n Ä‘á»‹a phÆ°Æ¡ng';
 
   @override
-  String get add_library_location => 'Thêm vào thư viện';
+  String get add_library_location => 'ThÃªm vÃ o thÆ° viá»‡n';
 
   @override
-  String get remove_library_location => 'Xóa khỏi thư viện';
+  String get remove_library_location => 'XÃ³a khá»i thÆ° viá»‡n';
 
   @override
-  String get account => 'Tài khoản';
+  String get account => 'TÃ i khoáº£n';
 
   @override
-  String get logout => 'Đăng xuất';
+  String get logout => 'ÄÄƒng xuáº¥t';
 
   @override
-  String get logout_of_this_account => 'Đăng xuất khỏi tài khoản này';
+  String get logout_of_this_account => 'ÄÄƒng xuáº¥t khá»i tÃ i khoáº£n nÃ y';
 
   @override
-  String get language_region => 'Ngôn ngữ và Khu vực';
+  String get language_region => 'NgÃ´n ngá»¯ vÃ  Khu vá»±c';
 
   @override
-  String get language => 'Ngôn ngữ';
+  String get language => 'NgÃ´n ngá»¯';
 
   @override
-  String get system_default => 'Mặc định hệ thống';
+  String get system_default => 'Máº·c Ä‘á»‹nh há»‡ thá»‘ng';
 
   @override
-  String get market_place_region => 'Khu vực Marketplace';
+  String get market_place_region => 'Khu vá»±c Marketplace';
 
   @override
-  String get recommendation_country => 'Quốc gia gợi ý';
+  String get recommendation_country => 'Quá»‘c gia gá»£i Ã½';
 
   @override
-  String get appearance => 'Giao diện';
+  String get appearance => 'Giao diá»‡n';
 
   @override
-  String get layout_mode => 'Chế độ layout';
+  String get layout_mode => 'Cháº¿ Ä‘á»™ layout';
 
   @override
-  String get override_layout_settings => 'Ghi đè cài đặt layout';
+  String get override_layout_settings => 'Ghi Ä‘Ã¨ cÃ i Ä‘áº·t layout';
 
   @override
-  String get adaptive => 'Tương thích';
+  String get adaptive => 'TÆ°Æ¡ng thÃ­ch';
 
   @override
-  String get compact => 'Nhỏ gọn';
+  String get compact => 'Nhá» gá»n';
 
   @override
-  String get extended => 'Mở rộng';
+  String get extended => 'Má»Ÿ rá»™ng';
 
   @override
-  String get theme => 'Chủ đề';
+  String get theme => 'Chá»§ Ä‘á»';
 
   @override
-  String get dark => 'Tối';
+  String get dark => 'Tá»‘i';
 
   @override
-  String get light => 'Sáng';
+  String get light => 'SÃ¡ng';
 
   @override
-  String get system => 'Hệ thống';
+  String get system => 'Há»‡ thá»‘ng';
 
   @override
-  String get accent_color => 'Màu nhấn';
+  String get accent_color => 'MÃ u nháº¥n';
 
   @override
-  String get sync_album_color => 'Đồng bộ màu album';
+  String get sync_album_color => 'Äá»“ng bá»™ mÃ u album';
 
   @override
   String get sync_album_color_description =>
-      'Sử dụng màu chủ đạo của hình ảnh album làm màu nhấn';
+      'Sá»­ dá»¥ng mÃ u chá»§ Ä‘áº¡o cá»§a hÃ¬nh áº£nh album lÃ m mÃ u nháº¥n';
 
   @override
-  String get playback => 'Phát';
+  String get playback => 'PhÃ¡t';
 
   @override
-  String get audio_quality => 'Chất lượng âm thanh';
+  String get audio_quality => 'Cháº¥t lÆ°á»£ng Ã¢m thanh';
 
   @override
   String get high => 'Cao';
 
   @override
-  String get low => 'Thấp';
+  String get low => 'Tháº¥p';
 
   @override
-  String get pre_download_play => 'Tải xuống và phát';
+  String get pre_download_play => 'Táº£i xuá»‘ng vÃ  phÃ¡t';
 
   @override
   String get pre_download_play_description =>
-      'Thay vì stream âm thanh, tải xuống trước và phát (Khuyến nghị cho người dùng có băng thông cao)';
+      'Thay vÃ¬ stream Ã¢m thanh, táº£i xuá»‘ng trÆ°á»›c vÃ  phÃ¡t (Khuyáº¿n nghá»‹ cho ngÆ°á»i dÃ¹ng cÃ³ bÄƒng thÃ´ng cao)';
 
   @override
-  String get skip_non_music => 'Bỏ qua các đoạn không phải nhạc (SponsorBlock)';
+  String get skip_non_music =>
+      'Bá» qua cÃ¡c Ä‘oáº¡n khÃ´ng pháº£i nháº¡c (SponsorBlock)';
 
   @override
-  String get blacklist_description => 'Các bài hát và nghệ sĩ trong blacklist';
+  String get blacklist_description =>
+      'CÃ¡c bÃ i hÃ¡t vÃ  nghá»‡ sÄ© trong blacklist';
 
   @override
   String get wait_for_download_to_finish =>
-      'Vui lòng đợi quá trình tải xuống hiện tại hoàn thành';
+      'Vui lÃ²ng Ä‘á»£i quÃ¡ trÃ¬nh táº£i xuá»‘ng hiá»‡n táº¡i hoÃ n thÃ nh';
 
   @override
-  String get desktop => 'Máy tính';
+  String get desktop => 'MÃ¡y tÃ­nh';
 
   @override
-  String get close_behavior => 'Thao tác đóng';
+  String get close_behavior => 'Thao tÃ¡c Ä‘Ã³ng';
 
   @override
-  String get close => 'Đóng';
+  String get close => 'ÄÃ³ng';
 
   @override
-  String get minimize_to_tray => 'Thu nhỏ vào khay hệ thống';
+  String get minimize_to_tray => 'Thu nhá» vÃ o khay há»‡ thá»‘ng';
 
   @override
-  String get show_tray_icon => 'Hiển thị biểu tượng trên khay hệ thống';
+  String get show_tray_icon =>
+      'Hiá»ƒn thá»‹ biá»ƒu tÆ°á»£ng trÃªn khay há»‡ thá»‘ng';
 
   @override
-  String get about => 'Về chúng tôi';
+  String get about => 'Vá» chÃºng tÃ´i';
 
   @override
-  String get u_love_spotube => 'Chúng tôi biết bạn yêu Soulful Bhakti';
+  String get u_love_spotube => 'ChÃºng tÃ´i biáº¿t báº¡n yÃªu Soulful Bhakti';
 
   @override
-  String get check_for_updates => 'Kiểm tra cập nhật';
+  String get check_for_updates => 'Kiá»ƒm tra cáº­p nháº­t';
 
   @override
-  String get about_spotube => 'Về Soulful Bhakti';
+  String get about_spotube => 'Vá» Soulful Bhakti';
 
   @override
   String get blacklist => 'blacklist';
 
   @override
-  String get please_sponsor => 'Vui lòng tài trợ/ủng hộ';
+  String get please_sponsor => 'Vui lÃ²ng tÃ i trá»£/á»§ng há»™';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti, một ứng dụng Spotify nhẹ, đa nền tảng và miễn phí';
+      'Soulful Bhakti, má»™t á»©ng dá»¥ng Spotify nháº¹, Ä‘a ná»n táº£ng vÃ  miá»…n phÃ­';
 
   @override
-  String get version => 'Phiên bản';
+  String get version => 'PhiÃªn báº£n';
 
   @override
-  String get build_number => 'Số phiên bản';
+  String get build_number => 'Sá»‘ phiÃªn báº£n';
 
   @override
-  String get founder => 'Người sáng lập';
+  String get founder => 'NgÆ°á»i sÃ¡ng láº­p';
 
   @override
-  String get repository => 'Mã nguồn';
+  String get repository => 'MÃ£ nguá»“n';
 
   @override
-  String get bug_issues => 'Báo cáo lỗi';
+  String get bug_issues => 'BÃ¡o cÃ¡o lá»—i';
 
   @override
-  String get made_with => 'Được làm bằng ❤️ ở Băng-la-đét';
+  String get made_with => 'ÄÆ°á»£c lÃ m báº±ng â¤ï¸ á»Ÿ BÄƒng-la-Ä‘Ã©t';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'Giấy phép';
+  String get license => 'Giáº¥y phÃ©p';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'Đừng lo, thông tin đăng nhập của bạn sẽ không được thu thập hoặc chia sẻ với bất kỳ ai';
+      'Äá»«ng lo, thÃ´ng tin Ä‘Äƒng nháº­p cá»§a báº¡n sáº½ khÃ´ng Ä‘Æ°á»£c thu tháº­p hoáº·c chia sáº» vá»›i báº¥t ká»³ ai';
 
   @override
-  String get know_how_to_login => 'Không biết cách lấy thông tin đăng nhập?';
+  String get know_how_to_login =>
+      'KhÃ´ng biáº¿t cÃ¡ch láº¥y thÃ´ng tin Ä‘Äƒng nháº­p?';
 
   @override
-  String get follow_step_by_step_guide => 'Các bước lấy thông tin đăng nhập';
+  String get follow_step_by_step_guide =>
+      'CÃ¡c bÆ°á»›c láº¥y thÃ´ng tin Ä‘Äƒng nháº­p';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -561,754 +567,759 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => 'Vui lòng điền đầy đủ thông tin';
+  String get fill_in_all_fields => 'Vui lÃ²ng Ä‘iá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin';
 
   @override
-  String get submit => 'Gửi';
+  String get submit => 'Gá»­i';
 
   @override
-  String get exit => 'Thoát';
+  String get exit => 'ThoÃ¡t';
 
   @override
-  String get previous => 'Trước';
+  String get previous => 'TrÆ°á»›c';
 
   @override
-  String get next => 'Tiếp';
+  String get next => 'Tiáº¿p';
 
   @override
-  String get done => 'Hoàn tất';
+  String get done => 'HoÃ n táº¥t';
 
   @override
-  String get step_1 => 'Bước 1';
+  String get step_1 => 'BÆ°á»›c 1';
 
   @override
-  String get first_go_to => 'Đầu tiên, truy cập';
+  String get first_go_to => 'Äáº§u tiÃªn, truy cáº­p';
 
   @override
-  String get something_went_wrong => 'Đã xảy ra lỗi';
+  String get something_went_wrong => 'ÄÃ£ xáº£y ra lá»—i';
 
   @override
-  String get piped_instance => 'Phiên bản Server Piped';
+  String get piped_instance => 'PhiÃªn báº£n Server Piped';
 
   @override
   String get piped_description =>
-      'Phiên bản Piped để sử dụng cho Track matching';
+      'PhiÃªn báº£n Piped Ä‘á»ƒ sá»­ dá»¥ng cho Track matching';
 
   @override
   String get piped_warning =>
-      'Một số phiên bản Piped có thể không hoạt động tốt';
+      'Má»™t sá»‘ phiÃªn báº£n Piped cÃ³ thá»ƒ khÃ´ng hoáº¡t Ä‘á»™ng tá»‘t';
 
   @override
-  String get invidious_instance => 'Phiên bản máy chủ Invidious';
+  String get invidious_instance => 'PhiÃªn báº£n mÃ¡y chá»§ Invidious';
 
   @override
   String get invidious_description =>
-      'Phiên bản máy chủ Invidious để sử dụng để so khớp bản nhạc';
+      'PhiÃªn báº£n mÃ¡y chá»§ Invidious Ä‘á»ƒ sá»­ dá»¥ng Ä‘á»ƒ so khá»›p báº£n nháº¡c';
 
   @override
   String get invidious_warning =>
-      'Một số có thể sẽ không hoạt động tốt. Vì vậy hãy sử dụng với rủi ro của riêng bạn';
+      'Má»™t sá»‘ cÃ³ thá»ƒ sáº½ khÃ´ng hoáº¡t Ä‘á»™ng tá»‘t. VÃ¬ váº­y hÃ£y sá»­ dá»¥ng vá»›i rá»§i ro cá»§a riÃªng báº¡n';
 
   @override
-  String get generate => 'Tạo';
+  String get generate => 'Táº¡o';
 
   @override
   String track_exists(Object track) {
-    return 'Bài hát $track đã tồn tại';
+    return 'BÃ i hÃ¡t $track Ä‘Ã£ tá»“n táº¡i';
   }
 
   @override
-  String get replace => 'Thay thế';
+  String get replace => 'Thay tháº¿';
 
   @override
-  String get skip => 'Bỏ qua';
+  String get skip => 'Bá» qua';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'Chọn tối đa $count $type';
+    return 'Chá»n tá»‘i Ä‘a $count $type';
   }
 
   @override
-  String get select_genres => 'Chọn Thể loại';
+  String get select_genres => 'Chá»n Thá»ƒ loáº¡i';
 
   @override
-  String get add_genres => 'Thêm Thể loại';
+  String get add_genres => 'ThÃªm Thá»ƒ loáº¡i';
 
   @override
-  String get country => 'Quốc gia';
+  String get country => 'Quá»‘c gia';
 
   @override
-  String get number_of_tracks_generate => 'Số lượng bài hát để tạo';
+  String get number_of_tracks_generate => 'Sá»‘ lÆ°á»£ng bÃ i hÃ¡t Ä‘á»ƒ táº¡o';
 
   @override
-  String get acousticness => 'Độ âm thanh';
+  String get acousticness => 'Äá»™ Ã¢m thanh';
 
   @override
-  String get danceability => 'Khả năng nhảy';
+  String get danceability => 'Kháº£ nÄƒng nháº£y';
 
   @override
-  String get energy => 'Năng lượng';
+  String get energy => 'NÄƒng lÆ°á»£ng';
 
   @override
-  String get instrumentalness => 'Độ nhạc cụ';
+  String get instrumentalness => 'Äá»™ nháº¡c cá»¥';
 
   @override
-  String get liveness => 'Sống động';
+  String get liveness => 'Sá»‘ng Ä‘á»™ng';
 
   @override
-  String get loudness => 'Độ ồn';
+  String get loudness => 'Äá»™ á»“n';
 
   @override
-  String get speechiness => 'Độ nói';
+  String get speechiness => 'Äá»™ nÃ³i';
 
   @override
-  String get valence => 'Tính tích cực';
+  String get valence => 'TÃ­nh tÃ­ch cá»±c';
 
   @override
-  String get popularity => 'Độ phổ biến';
+  String get popularity => 'Äá»™ phá»• biáº¿n';
 
   @override
-  String get key => 'Tông';
+  String get key => 'TÃ´ng';
 
   @override
-  String get duration => 'Thời lượng (giây)';
+  String get duration => 'Thá»i lÆ°á»£ng (giÃ¢y)';
 
   @override
-  String get tempo => 'Nhịp độ (BPM)';
+  String get tempo => 'Nhá»‹p Ä‘á»™ (BPM)';
 
   @override
-  String get mode => 'Chế độ';
+  String get mode => 'Cháº¿ Ä‘á»™';
 
   @override
-  String get time_signature => 'Chữ ký thời gian';
+  String get time_signature => 'Chá»¯ kÃ½ thá»i gian';
 
   @override
-  String get short => 'Ngắn';
+  String get short => 'Ngáº¯n';
 
   @override
-  String get medium => 'Trung bình';
+  String get medium => 'Trung bÃ¬nh';
 
   @override
-  String get long => 'Dài';
+  String get long => 'DÃ i';
 
   @override
-  String get min => 'Tối thiểu';
+  String get min => 'Tá»‘i thiá»ƒu';
 
   @override
-  String get max => 'Tối đa';
+  String get max => 'Tá»‘i Ä‘a';
 
   @override
-  String get target => 'Mục tiêu';
+  String get target => 'Má»¥c tiÃªu';
 
   @override
-  String get moderate => 'Trung bình';
+  String get moderate => 'Trung bÃ¬nh';
 
   @override
-  String get deselect_all => 'Bỏ chọn tất cả';
+  String get deselect_all => 'Bá» chá»n táº¥t cáº£';
 
   @override
-  String get select_all => 'Chọn tất cả';
+  String get select_all => 'Chá»n táº¥t cáº£';
 
   @override
-  String get are_you_sure => 'Bạn có chắc chắn?';
+  String get are_you_sure => 'Báº¡n cÃ³ cháº¯c cháº¯n?';
 
   @override
   String get generating_playlist =>
-      'Đang tạo danh sách phát tùy chỉnh của bạn...';
+      'Äang táº¡o danh sÃ¡ch phÃ¡t tÃ¹y chá»‰nh cá»§a báº¡n...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'Đã chọn $count bài hát';
+    return 'ÄÃ£ chá»n $count bÃ i hÃ¡t';
   }
 
   @override
   String get download_warning =>
-      'Tải xuống tất cả các bài hát một lần, sẽ vi phạm bản quyền âm nhạc và gây thiệt hại cho xã hội sáng tạo âm nhạc. Hy vọng bạn nhận thức được điều này. Hãy luôn tôn trọng và ủng hộ công sức của nghệ sĩ';
+      'Táº£i xuá»‘ng táº¥t cáº£ cÃ¡c bÃ i hÃ¡t má»™t láº§n, sáº½ vi pháº¡m báº£n quyá»n Ã¢m nháº¡c vÃ  gÃ¢y thiá»‡t háº¡i cho xÃ£ há»™i sÃ¡ng táº¡o Ã¢m nháº¡c. Hy vá»ng báº¡n nháº­n thá»©c Ä‘Æ°á»£c Ä‘iá»u nÃ y. HÃ£y luÃ´n tÃ´n trá»ng vÃ  á»§ng há»™ cÃ´ng sá»©c cá»§a nghá»‡ sÄ©';
 
   @override
   String get download_ip_ban_warning =>
-      'Địa chỉ IP của bạn có thể bị chặn trên YouTube do yêu cầu tải xuống quá mức so với bình thường. Chặn IP có nghĩa là bạn không thể sử dụng YouTube (ngay cả khi bạn đã đăng nhập) ít nhất 2-3 tháng từ thiết bị IP đó. Và Soulful Bhakti không chịu trách nhiệm nếu điều này xảy ra';
+      'Äá»‹a chá»‰ IP cá»§a báº¡n cÃ³ thá»ƒ bá»‹ cháº·n trÃªn YouTube do yÃªu cáº§u táº£i xuá»‘ng quÃ¡ má»©c so vá»›i bÃ¬nh thÆ°á»ng. Cháº·n IP cÃ³ nghÄ©a lÃ  báº¡n khÃ´ng thá»ƒ sá»­ dá»¥ng YouTube (ngay cáº£ khi báº¡n Ä‘Ã£ Ä‘Äƒng nháº­p) Ã­t nháº¥t 2-3 thÃ¡ng tá»« thiáº¿t bá»‹ IP Ä‘Ã³. VÃ  Soulful Bhakti khÃ´ng chá»‹u trÃ¡ch nhiá»‡m náº¿u Ä‘iá»u nÃ y xáº£y ra';
 
   @override
   String get by_clicking_accept_terms =>
-      'Bằng cách nhấp vào \'Chấp nhận\', bạn đồng ý với các điều khoản sau:';
+      'Báº±ng cÃ¡ch nháº¥p vÃ o \'Cháº¥p nháº­n\', báº¡n Ä‘á»“ng Ã½ vá»›i cÃ¡c Ä‘iá»u khoáº£n sau:';
 
   @override
   String get download_agreement_1 =>
-      'Tôi biết mình đang vi phạm bản quyền âm nhạc. Đó là không tốt.';
+      'TÃ´i biáº¿t mÃ¬nh Ä‘ang vi pháº¡m báº£n quyá»n Ã¢m nháº¡c. ÄÃ³ lÃ  khÃ´ng tá»‘t.';
 
   @override
   String get download_agreement_2 =>
-      'Tôi sẽ ủng hộ nghệ sĩ bất cứ nơi nào tôi có thể và tôi chỉ làm điều này vì tôi không có tiền để mua tác phẩm của họ';
+      'TÃ´i sáº½ á»§ng há»™ nghá»‡ sÄ© báº¥t cá»© nÆ¡i nÃ o tÃ´i cÃ³ thá»ƒ vÃ  tÃ´i chá»‰ lÃ m Ä‘iá»u nÃ y vÃ¬ tÃ´i khÃ´ng cÃ³ tiá»n Ä‘á»ƒ mua tÃ¡c pháº©m cá»§a há»';
 
   @override
   String get download_agreement_3 =>
-      'Tôi hoàn toàn nhận thức được rằng địa chỉ IP của tôi có thể bị chặn trên YouTube và tôi không đổ lỗi cho Soulful Bhakti hoặc chủ sở hữu/người đóng góp của nó về bất kỳ tai nạn nào do hành động này của tôi';
+      'TÃ´i hoÃ n toÃ n nháº­n thá»©c Ä‘Æ°á»£c ráº±ng Ä‘á»‹a chá»‰ IP cá»§a tÃ´i cÃ³ thá»ƒ bá»‹ cháº·n trÃªn YouTube vÃ  tÃ´i khÃ´ng Ä‘á»• lá»—i cho Soulful Bhakti hoáº·c chá»§ sá»Ÿ há»¯u/ngÆ°á»i Ä‘Ã³ng gÃ³p cá»§a nÃ³ vá» báº¥t ká»³ tai náº¡n nÃ o do hÃ nh Ä‘á»™ng nÃ y cá»§a tÃ´i';
 
   @override
-  String get decline => 'Từ chối';
+  String get decline => 'Tá»« chá»‘i';
 
   @override
-  String get accept => 'Chấp nhận';
+  String get accept => 'Cháº¥p nháº­n';
 
   @override
-  String get details => 'Chi tiết';
+  String get details => 'Chi tiáº¿t';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'Kênh';
+  String get channel => 'KÃªnh';
 
   @override
-  String get likes => 'Thích';
+  String get likes => 'ThÃ­ch';
 
   @override
-  String get dislikes => 'Không thích';
+  String get dislikes => 'KhÃ´ng thÃ­ch';
 
   @override
-  String get views => 'Lượt xem';
+  String get views => 'LÆ°á»£t xem';
 
   @override
-  String get streamUrl => 'URL phát trực tiếp';
+  String get streamUrl => 'URL phÃ¡t trá»±c tiáº¿p';
 
   @override
-  String get stop => 'Dừng';
+  String get stop => 'Dá»«ng';
 
   @override
-  String get sort_newest => 'Sắp xếp theo mới nhất';
+  String get sort_newest => 'Sáº¯p xáº¿p theo má»›i nháº¥t';
 
   @override
-  String get sort_oldest => 'Sắp xếp theo cũ nhất';
+  String get sort_oldest => 'Sáº¯p xáº¿p theo cÅ© nháº¥t';
 
   @override
-  String get sleep_timer => 'Hẹn giờ tắt';
+  String get sleep_timer => 'Háº¹n giá» táº¯t';
 
   @override
   String mins(Object minutes) {
-    return '$minutes Phút';
+    return '$minutes PhÃºt';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours Giờ';
+    return '$hours Giá»';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours Giờ';
+    return '$hours Giá»';
   }
 
   @override
-  String get custom_hours => 'Giờ Tùy chỉnh';
+  String get custom_hours => 'Giá» TÃ¹y chá»‰nh';
 
   @override
-  String get logs => 'Nhật ký';
+  String get logs => 'Nháº­t kÃ½';
 
   @override
-  String get developers => 'Nhà phát triển';
+  String get developers => 'NhÃ  phÃ¡t triá»ƒn';
 
   @override
-  String get not_logged_in => 'Bạn chưa đăng nhập';
+  String get not_logged_in => 'Báº¡n chÆ°a Ä‘Äƒng nháº­p';
 
   @override
-  String get search_mode => 'Chế độ tìm kiếm';
+  String get search_mode => 'Cháº¿ Ä‘á»™ tÃ¬m kiáº¿m';
 
   @override
-  String get audio_source => 'Nguồn âm thanh';
+  String get audio_source => 'Nguá»“n Ã¢m thanh';
 
   @override
   String get ok => 'Ok';
 
   @override
-  String get failed_to_encrypt => 'Mã hóa không thành công';
+  String get failed_to_encrypt => 'MÃ£ hÃ³a khÃ´ng thÃ nh cÃ´ng';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti không thành công trong việc mã hóa nhằm lưu trữ dữ liêu an toàn. vậy nên sẽ chuyển về lưu trữ không an toàn\nNếu bạn đang sử dụng Linux, đảm bảo rằng bạn có sử dụng dịch vụ bảo mật (gnome-keyring, kde-wallet, keepassxc, v.v.)';
+      'Soulful Bhakti khÃ´ng thÃ nh cÃ´ng trong viá»‡c mÃ£ hÃ³a nháº±m lÆ°u trá»¯ dá»¯ liÃªu an toÃ n. váº­y nÃªn sáº½ chuyá»ƒn vá» lÆ°u trá»¯ khÃ´ng an toÃ n\nNáº¿u báº¡n Ä‘ang sá»­ dá»¥ng Linux, Ä‘áº£m báº£o ráº±ng báº¡n cÃ³ sá»­ dá»¥ng dá»‹ch vá»¥ báº£o máº­t (gnome-keyring, kde-wallet, keepassxc, v.v.)';
 
   @override
-  String get querying_info => 'Đang truy vấn thông tin...';
+  String get querying_info => 'Äang truy váº¥n thÃ´ng tin...';
 
   @override
-  String get piped_api_down => 'API Piped đang gặp sự cố';
+  String get piped_api_down => 'API Piped Ä‘ang gáº·p sá»± cá»‘';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Phiên bản Piped $pipedInstance hiện đang gặp sự cố\n\nThay đổi phiên bản hoặc thay đổi \'Loại API\' thành API YouTube official\n\nKhởi động lai ứng dụng sau khi thay đổi.';
+    return 'PhiÃªn báº£n Piped $pipedInstance hiá»‡n Ä‘ang gáº·p sá»± cá»‘\n\nThay Ä‘á»•i phiÃªn báº£n hoáº·c thay Ä‘á»•i \'Loáº¡i API\' thÃ nh API YouTube official\n\nKhá»Ÿi Ä‘á»™ng lai á»©ng dá»¥ng sau khi thay Ä‘á»•i.';
   }
 
   @override
-  String get you_are_offline => 'Bạn đang ngoại tuyến';
+  String get you_are_offline => 'Báº¡n Ä‘ang ngoáº¡i tuyáº¿n';
 
   @override
   String get connection_restored =>
-      'Kết nối internet của bạn đã được khôi phục';
+      'Káº¿t ná»‘i internet cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c khÃ´i phá»¥c';
 
   @override
-  String get use_system_title_bar => 'Sử dụng thanh tiêu đề hệ thống';
+  String get use_system_title_bar =>
+      'Sá»­ dá»¥ng thanh tiÃªu Ä‘á» há»‡ thá»‘ng';
 
   @override
-  String get crunching_results => 'Đang tìm kiếm...';
+  String get crunching_results => 'Äang tÃ¬m kiáº¿m...';
 
   @override
-  String get search_to_get_results => 'Chưa tìm kiếm';
+  String get search_to_get_results => 'ChÆ°a tÃ¬m kiáº¿m';
 
   @override
-  String get use_amoled_mode => 'Chủ đề tối hoàn toàn';
+  String get use_amoled_mode => 'Chá»§ Ä‘á» tá»‘i hoÃ n toÃ n';
 
   @override
-  String get pitch_dark_theme => 'Chế độ AMOLED';
+  String get pitch_dark_theme => 'Cháº¿ Ä‘á»™ AMOLED';
 
   @override
-  String get normalize_audio => 'Bình thường hóa âm thanh';
+  String get normalize_audio => 'BÃ¬nh thÆ°á»ng hÃ³a Ã¢m thanh';
 
   @override
-  String get change_cover => 'Thay đổi ảnh bìa';
+  String get change_cover => 'Thay Ä‘á»•i áº£nh bÃ¬a';
 
   @override
-  String get add_cover => 'Thêm ảnh bìa';
+  String get add_cover => 'ThÃªm áº£nh bÃ¬a';
 
   @override
-  String get restore_defaults => 'Khôi phục mặc định';
+  String get restore_defaults => 'KhÃ´i phá»¥c máº·c Ä‘á»‹nh';
 
   @override
   String get restore_defaults_confirmation =>
-      'Thao tác này sẽ đặt lại tất cả cài đặt của bạn về giá trị mặc định. Hành động này không thể hoàn tác.';
+      'Thao tÃ¡c nÃ y sáº½ Ä‘áº·t láº¡i táº¥t cáº£ cÃ i Ä‘áº·t cá»§a báº¡n vá» giÃ¡ trá»‹ máº·c Ä‘á»‹nh. HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.';
 
   @override
-  String get streaming_music_format => 'Định dạng nhạc phát trực tuyến';
+  String get streaming_music_format =>
+      'Äá»‹nh dáº¡ng nháº¡c phÃ¡t trá»±c tuyáº¿n';
 
   @override
-  String get streaming_music_quality => 'Chất lượng nhạc phát trực tuyến';
+  String get streaming_music_quality =>
+      'Cháº¥t lÆ°á»£ng nháº¡c phÃ¡t trá»±c tuyáº¿n';
 
   @override
-  String get connect => 'Liên kết';
+  String get connect => 'LiÃªn káº¿t';
 
   @override
-  String get disconnect => 'Ngắt kết nối';
+  String get disconnect => 'Ngáº¯t káº¿t ná»‘i';
 
   @override
-  String get username => 'Tên người dùng';
+  String get username => 'TÃªn ngÆ°á»i dÃ¹ng';
 
   @override
-  String get password => 'Mật khẩu';
+  String get password => 'Máº­t kháº©u';
 
   @override
-  String get login => 'Đăng nhập';
+  String get login => 'ÄÄƒng nháº­p';
 
   @override
-  String get sign_in => 'Đăng nhập';
+  String get sign_in => 'ÄÄƒng nháº­p';
 
   @override
-  String get sign_up => 'Đăng ký';
+  String get sign_up => 'ÄÄƒng kÃ½';
 
   @override
-  String get sign_out => 'Đăng xuất';
+  String get sign_out => 'ÄÄƒng xuáº¥t';
 
   @override
-  String get verify => 'Xác minh';
+  String get verify => 'XÃ¡c minh';
 
   @override
-  String get create_account => 'Tạo tài khoản của bạn';
+  String get create_account => 'Táº¡o tÃ i khoáº£n cá»§a báº¡n';
 
   @override
-  String get already_have_account => 'Đã có tài khoản? Đăng nhập';
+  String get already_have_account => 'ÄÃ£ cÃ³ tÃ i khoáº£n? ÄÄƒng nháº­p';
 
   @override
-  String get dont_have_account => 'Chưa có tài khoản? Đăng ký';
+  String get dont_have_account => 'ChÆ°a cÃ³ tÃ i khoáº£n? ÄÄƒng kÃ½';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Đã đăng nhập với tên $userId';
+    return 'ÄÃ£ Ä‘Äƒng nháº­p vá»›i tÃªn $userId';
   }
 
   @override
-  String get verification_code => 'Mã xác minh';
+  String get verification_code => 'MÃ£ xÃ¡c minh';
 
   @override
-  String get verification_code_hint => 'Nhập mã đã gửi đến email của bạn';
+  String get verification_code_hint =>
+      'Nháº­p mÃ£ Ä‘Ã£ gá»­i Ä‘áº¿n email cá»§a báº¡n';
 
   @override
   String get verify_email_code =>
-      'Chúng tôi đã gửi mã xác minh đến email của bạn';
+      'ChÃºng tÃ´i Ä‘Ã£ gá»­i mÃ£ xÃ¡c minh Ä‘áº¿n email cá»§a báº¡n';
 
   @override
-  String get go_to_album => 'Đi đến Album';
+  String get go_to_album => 'Äi Ä‘áº¿n Album';
 
   @override
-  String get discord_rich_presence => 'Hiển thị trạng thái Discord';
+  String get discord_rich_presence => 'Hiá»ƒn thá»‹ tráº¡ng thÃ¡i Discord';
 
   @override
-  String get browse_all => 'Duyệt tất cả';
+  String get browse_all => 'Duyá»‡t táº¥t cáº£';
 
   @override
-  String get genres => 'Thể loại';
+  String get genres => 'Thá»ƒ loáº¡i';
 
   @override
-  String get explore_genres => 'Khám phá Thể loại';
+  String get explore_genres => 'KhÃ¡m phÃ¡ Thá»ƒ loáº¡i';
 
   @override
-  String get friends => 'Bạn bè';
+  String get friends => 'Báº¡n bÃ¨';
 
   @override
   String get no_lyrics_available =>
-      'Xin lỗi, không tìm thấy lời cho bài hát này';
+      'Xin lá»—i, khÃ´ng tÃ¬m tháº¥y lá»i cho bÃ i hÃ¡t nÃ y';
 
   @override
-  String get start_a_radio => 'Bắt đầu Một Đài phát thanh';
+  String get start_a_radio => 'Báº¯t Ä‘áº§u Má»™t ÄÃ i phÃ¡t thanh';
 
   @override
   String get how_to_start_radio =>
-      'Bạn muốn bắt đầu đài phát thanh như thế nào?';
+      'Báº¡n muá»‘n báº¯t Ä‘áº§u Ä‘Ã i phÃ¡t thanh nhÆ° tháº¿ nÃ o?';
 
   @override
   String get replace_queue_question =>
-      'Bạn muốn thay thế hàng đợi hiện tại hay thêm vào?';
+      'Báº¡n muá»‘n thay tháº¿ hÃ ng Ä‘á»£i hiá»‡n táº¡i hay thÃªm vÃ o?';
 
   @override
-  String get endless_playback => 'Phát không giới hạn';
+  String get endless_playback => 'PhÃ¡t khÃ´ng giá»›i háº¡n';
 
   @override
-  String get delete_playlist => 'Xóa Danh sách phát';
+  String get delete_playlist => 'XÃ³a Danh sÃ¡ch phÃ¡t';
 
   @override
   String get delete_playlist_confirmation =>
-      'Bạn có chắc chắn muốn xóa danh sách phát này không?';
+      'Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a danh sÃ¡ch phÃ¡t nÃ y khÃ´ng?';
 
   @override
-  String get local_tracks => 'Bài hát Địa phương';
+  String get local_tracks => 'BÃ i hÃ¡t Äá»‹a phÆ°Æ¡ng';
 
   @override
-  String get local_tab => 'Địa phương';
+  String get local_tab => 'Äá»‹a phÆ°Æ¡ng';
 
   @override
-  String get song_link => 'Liên kết Bài hát';
+  String get song_link => 'LiÃªn káº¿t BÃ i hÃ¡t';
 
   @override
-  String get skip_this_nonsense => 'Bỏ qua bớt rối này';
+  String get skip_this_nonsense => 'Bá» qua bá»›t rá»‘i nÃ y';
 
   @override
-  String get freedom_of_music => '“Sự Tự do của Âm nhạc”';
+  String get freedom_of_music => 'â€œSá»± Tá»± do cá»§a Ã‚m nháº¡câ€';
 
   @override
   String get freedom_of_music_palm =>
-      '“Sự Tự do của Âm nhạc trong lòng bàn tay của bạn”';
+      'â€œSá»± Tá»± do cá»§a Ã‚m nháº¡c trong lÃ²ng bÃ n tay cá»§a báº¡nâ€';
 
   @override
-  String get get_started => 'Bắt đầu thôi';
+  String get get_started => 'Báº¯t Ä‘áº§u thÃ´i';
 
   @override
   String get youtube_source_description =>
-      'Được đề xuất và hoạt động tốt nhất.';
+      'ÄÆ°á»£c Ä‘á» xuáº¥t vÃ  hoáº¡t Ä‘á»™ng tá»‘t nháº¥t.';
 
   @override
   String get piped_source_description =>
-      'Cảm thấy tự do? Giống như YouTube nhưng miễn phí hơn rất nhiều.';
+      'Cáº£m tháº¥y tá»± do? Giá»‘ng nhÆ° YouTube nhÆ°ng miá»…n phÃ­ hÆ¡n ráº¥t nhiá»u.';
 
   @override
-  String get jiosaavn_source_description => 'Tốt nhất cho khu vực Nam Á.';
+  String get jiosaavn_source_description =>
+      'Tá»‘t nháº¥t cho khu vá»±c Nam Ã.';
 
   @override
   String get invidious_source_description =>
-      'Tương tự như Piped nhưng có tính khả dụng cao hơn.';
+      'TÆ°Æ¡ng tá»± nhÆ° Piped nhÆ°ng cÃ³ tÃ­nh kháº£ dá»¥ng cao hÆ¡n.';
 
   @override
   String highest_quality(Object quality) {
-    return 'Chất lượng Tốt nhất: $quality';
+    return 'Cháº¥t lÆ°á»£ng Tá»‘t nháº¥t: $quality';
   }
 
   @override
-  String get select_audio_source => 'Chọn Nguồn Âm thanh';
+  String get select_audio_source => 'Chá»n Nguá»“n Ã‚m thanh';
 
   @override
   String get endless_playback_description =>
-      'Tự động thêm các bài hát mới\nvào cuối hàng đợi';
+      'Tá»± Ä‘á»™ng thÃªm cÃ¡c bÃ i hÃ¡t má»›i\nvÃ o cuá»‘i hÃ ng Ä‘á»£i';
 
   @override
-  String get choose_your_region => 'Chọn khu vực của bạn';
+  String get choose_your_region => 'Chá»n khu vá»±c cá»§a báº¡n';
 
   @override
   String get choose_your_region_description =>
-      'Điều này sẽ giúp Soulful Bhakti hiển thị nội dung phù hợp cho vị trí của bạn.';
+      'Äiá»u nÃ y sáº½ giÃºp Soulful Bhakti hiá»ƒn thá»‹ ná»™i dung phÃ¹ há»£p cho vá»‹ trÃ­ cá»§a báº¡n.';
 
   @override
-  String get choose_your_language => 'Chọn ngôn ngữ của bạn';
+  String get choose_your_language => 'Chá»n ngÃ´n ngá»¯ cá»§a báº¡n';
 
   @override
-  String get help_project_grow => 'Hãy giúp dự án này phát triển';
+  String get help_project_grow => 'HÃ£y giÃºp dá»± Ã¡n nÃ y phÃ¡t triá»ƒn';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti là một dự án mã nguồn mở. Bạn có thể giúp dự án này phát triển bằng cách đóng góp vào dự án, báo cáo lỗi hoặc đề xuất tính năng mới.';
+      'Soulful Bhakti lÃ  má»™t dá»± Ã¡n mÃ£ nguá»“n má»Ÿ. Báº¡n cÃ³ thá»ƒ giÃºp dá»± Ã¡n nÃ y phÃ¡t triá»ƒn báº±ng cÃ¡ch Ä‘Ã³ng gÃ³p vÃ o dá»± Ã¡n, bÃ¡o cÃ¡o lá»—i hoáº·c Ä‘á» xuáº¥t tÃ­nh nÄƒng má»›i.';
 
   @override
-  String get contribute_on_github => 'Đóng góp trên GitHub';
+  String get contribute_on_github => 'ÄÃ³ng gÃ³p trÃªn GitHub';
 
   @override
-  String get donate_on_open_collective => 'Quyên góp trên Open Collective';
+  String get donate_on_open_collective => 'QuyÃªn gÃ³p trÃªn Open Collective';
 
   @override
-  String get browse_anonymously => 'Duyệt Anonymously';
+  String get browse_anonymously => 'Duyá»‡t Anonymously';
 
   @override
-  String get enable_connect => 'Kích hoạt kết nối';
+  String get enable_connect => 'KÃ­ch hoáº¡t káº¿t ná»‘i';
 
   @override
   String get enable_connect_description =>
-      'Điều khiển Soulful Bhakti từ các thiết bị khác';
+      'Äiá»u khiá»ƒn Soulful Bhakti tá»« cÃ¡c thiáº¿t bá»‹ khÃ¡c';
 
   @override
-  String get devices => 'Thiết bị';
+  String get devices => 'Thiáº¿t bá»‹';
 
   @override
-  String get select => 'Chọn';
+  String get select => 'Chá»n';
 
   @override
   String connect_client_alert(Object client) {
-    return 'Bạn đang được điều khiển bởi $client';
+    return 'Báº¡n Ä‘ang Ä‘Æ°á»£c Ä‘iá»u khiá»ƒn bá»Ÿi $client';
   }
 
   @override
-  String get this_device => 'Thiết bị này';
+  String get this_device => 'Thiáº¿t bá»‹ nÃ y';
 
   @override
-  String get remote => 'Từ xa';
+  String get remote => 'Tá»« xa';
 
   @override
-  String get stats => 'Thống kê';
+  String get stats => 'Thá»‘ng kÃª';
 
   @override
   String and_n_more(Object count) {
-    return 'và $count cái khác';
+    return 'vÃ  $count cÃ¡i khÃ¡c';
   }
 
   @override
-  String get recently_played => 'Gần đây đã phát';
+  String get recently_played => 'Gáº§n Ä‘Ã¢y Ä‘Ã£ phÃ¡t';
 
   @override
-  String get browse_more => 'Xem thêm';
+  String get browse_more => 'Xem thÃªm';
 
   @override
-  String get no_title => 'Không có tiêu đề';
+  String get no_title => 'KhÃ´ng cÃ³ tiÃªu Ä‘á»';
 
   @override
-  String get not_playing => 'Không phát';
+  String get not_playing => 'KhÃ´ng phÃ¡t';
 
   @override
-  String get epic_failure => 'Thất bại hoàn toàn!';
+  String get epic_failure => 'Tháº¥t báº¡i hoÃ n toÃ n!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'Đã thêm $tracks_length bài hát vào danh sách phát';
+    return 'ÄÃ£ thÃªm $tracks_length bÃ i hÃ¡t vÃ o danh sÃ¡ch phÃ¡t';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti có bản cập nhật';
+  String get spotube_has_an_update => 'Soulful Bhakti cÃ³ báº£n cáº­p nháº­t';
 
   @override
-  String get download_now => 'Tải về ngay';
+  String get download_now => 'Táº£i vá» ngay';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum đã được phát hành';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum Ä‘Ã£ Ä‘Æ°á»£c phÃ¡t hÃ nh';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version đã được phát hành';
+    return 'Soulful Bhakti v$version Ä‘Ã£ Ä‘Æ°á»£c phÃ¡t hÃ nh';
   }
 
   @override
-  String get read_the_latest => 'Đọc tin mới nhất';
+  String get read_the_latest => 'Äá»c tin má»›i nháº¥t';
 
   @override
-  String get release_notes => 'ghi chú phát hành';
+  String get release_notes => 'ghi chÃº phÃ¡t hÃ nh';
 
   @override
-  String get pick_color_scheme => 'Chọn chủ đề màu sắc';
+  String get pick_color_scheme => 'Chá»n chá»§ Ä‘á» mÃ u sáº¯c';
 
   @override
-  String get save => 'Lưu';
+  String get save => 'LÆ°u';
 
   @override
-  String get choose_the_device => 'Chọn thiết bị:';
+  String get choose_the_device => 'Chá»n thiáº¿t bá»‹:';
 
   @override
   String get multiple_device_connected =>
-      'Có nhiều thiết bị kết nối.\nChọn thiết bị mà bạn muốn thực hiện hành động này';
+      'CÃ³ nhiá»u thiáº¿t bá»‹ káº¿t ná»‘i.\nChá»n thiáº¿t bá»‹ mÃ  báº¡n muá»‘n thá»±c hiá»‡n hÃ nh Ä‘á»™ng nÃ y';
 
   @override
-  String get nothing_found => 'Không tìm thấy gì';
+  String get nothing_found => 'KhÃ´ng tÃ¬m tháº¥y gÃ¬';
 
   @override
-  String get the_box_is_empty => 'Hộp trống';
+  String get the_box_is_empty => 'Há»™p trá»‘ng';
 
   @override
-  String get top_artists => 'Những Nghệ Sĩ Hàng Đầu';
+  String get top_artists => 'Nhá»¯ng Nghá»‡ SÄ© HÃ ng Äáº§u';
 
   @override
-  String get top_albums => 'Những Album Hàng Đầu';
+  String get top_albums => 'Nhá»¯ng Album HÃ ng Äáº§u';
 
   @override
-  String get this_week => 'Tuần này';
+  String get this_week => 'Tuáº§n nÃ y';
 
   @override
-  String get this_month => 'Tháng này';
+  String get this_month => 'ThÃ¡ng nÃ y';
 
   @override
-  String get last_6_months => '6 tháng qua';
+  String get last_6_months => '6 thÃ¡ng qua';
 
   @override
-  String get this_year => 'Năm nay';
+  String get this_year => 'NÄƒm nay';
 
   @override
-  String get last_2_years => '2 năm qua';
+  String get last_2_years => '2 nÄƒm qua';
 
   @override
-  String get all_time => 'Mọi thời đại';
+  String get all_time => 'Má»i thá»i Ä‘áº¡i';
 
   @override
   String powered_by_provider(Object providerName) {
-    return 'Cung cấp bởi $providerName';
+    return 'Cung cáº¥p bá»Ÿi $providerName';
   }
 
   @override
   String get email => 'Email';
 
   @override
-  String get send_code => 'Gửi mã';
+  String get send_code => 'Gá»­i mÃ£';
 
   @override
-  String get change_identifier => 'Dùng email khác';
+  String get change_identifier => 'DÃ¹ng email khÃ¡c';
 
   @override
-  String get sign_in_with_otp => 'Đăng nhập bằng mã dùng một lần';
+  String get sign_in_with_otp => 'ÄÄƒng nháº­p báº±ng mÃ£ dÃ¹ng má»™t láº§n';
 
   @override
-  String get enter_otp_sent => 'Nhập mã chúng tôi đã gửi cho bạn';
+  String get enter_otp_sent => 'Nháº­p mÃ£ chÃºng tÃ´i Ä‘Ã£ gá»­i cho báº¡n';
 
   @override
   String get verify_email_reminder =>
-      'Vui lòng xác minh địa chỉ email của bạn để bảo mật tài khoản';
+      'Vui lÃ²ng xÃ¡c minh Ä‘á»‹a chá»‰ email cá»§a báº¡n Ä‘á»ƒ báº£o máº­t tÃ i khoáº£n';
 
   @override
-  String get verify_now => 'Xác minh ngay';
+  String get verify_now => 'XÃ¡c minh ngay';
 
   @override
   String get enter_email_to_verify =>
-      'Nhập địa chỉ email của bạn để nhận mã xác minh';
+      'Nháº­p Ä‘á»‹a chá»‰ email cá»§a báº¡n Ä‘á»ƒ nháº­n mÃ£ xÃ¡c minh';
 
   @override
-  String get profile_followers => 'Người theo dõi';
+  String get profile_followers => 'NgÆ°á»i theo dÃµi';
 
   @override
-  String get birthday => 'Ngày sinh';
+  String get birthday => 'NgÃ y sinh';
 
   @override
-  String get subscription => 'Gói cước';
+  String get subscription => 'GÃ³i cÆ°á»›c';
 
   @override
-  String get not_born => 'Chưa sinh';
+  String get not_born => 'ChÆ°a sinh';
 
   @override
-  String get hacker => 'Tin tặc';
+  String get hacker => 'Tin táº·c';
 
   @override
-  String get profile => 'Hồ sơ';
+  String get profile => 'Há»“ sÆ¡';
 
   @override
-  String get no_name => 'Không có tên';
+  String get no_name => 'KhÃ´ng cÃ³ tÃªn';
 
   @override
-  String get edit => 'Chỉnh sửa';
+  String get edit => 'Chá»‰nh sá»­a';
 
   @override
-  String get user_profile => 'Hồ sơ người dùng';
+  String get user_profile => 'Há»“ sÆ¡ ngÆ°á»i dÃ¹ng';
 
   @override
   String count_plays(Object count) {
-    return '$count lần phát';
+    return '$count láº§n phÃ¡t';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*Tính toán dựa trên thanh toán của Spotify cho mỗi lần phát\ntừ \$0.003 đến \$0.005. Đây là một tính toán giả định để\ngive người dùng cái nhìn về số tiền họ sẽ chi trả cho các nghệ sĩ nếu họ nghe\nbài hát của họ trên Spotify.';
+      '*TÃ­nh toÃ¡n dá»±a trÃªn thanh toÃ¡n cá»§a Spotify cho má»—i láº§n phÃ¡t\ntá»« \$0.003 Ä‘áº¿n \$0.005. ÄÃ¢y lÃ  má»™t tÃ­nh toÃ¡n giáº£ Ä‘á»‹nh Ä‘á»ƒ\ngive ngÆ°á»i dÃ¹ng cÃ¡i nhÃ¬n vá» sá»‘ tiá»n há» sáº½ chi tráº£ cho cÃ¡c nghá»‡ sÄ© náº¿u há» nghe\nbÃ i hÃ¡t cá»§a há» trÃªn Spotify.';
 
   @override
-  String get minutes_listened => 'Thời gian nghe';
+  String get minutes_listened => 'Thá»i gian nghe';
 
   @override
-  String get streamed_songs => 'Bài hát đã phát';
+  String get streamed_songs => 'BÃ i hÃ¡t Ä‘Ã£ phÃ¡t';
 
   @override
   String count_streams(Object count) {
-    return '$count lượt phát';
+    return '$count lÆ°á»£t phÃ¡t';
   }
 
   @override
-  String get owned_by_you => 'Thuộc sở hữu của bạn';
+  String get owned_by_you => 'Thuá»™c sá»Ÿ há»¯u cá»§a báº¡n';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl đã sao chép vào bảng tạm';
+    return '$shareUrl Ä‘Ã£ sao chÃ©p vÃ o báº£ng táº¡m';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*Điều này được tính toán dựa trên khoản thanh toán trung bình mỗi luồng của nền tảng phát nhạc trực tuyến là \$0,003 đến \$0,005. Đây là một phép tính giả định để cung cấp cho người dùng cái nhìn sâu sắc về số tiền họ đã trả cho các nghệ sĩ nếu họ nghe bài hát của họ trên các nền tảng phát nhạc trực tuyến khác nhau.';
+      '*Äiá»u nÃ y Ä‘Æ°á»£c tÃ­nh toÃ¡n dá»±a trÃªn khoáº£n thanh toÃ¡n trung bÃ¬nh má»—i luá»“ng cá»§a ná»n táº£ng phÃ¡t nháº¡c trá»±c tuyáº¿n lÃ  \$0,003 Ä‘áº¿n \$0,005. ÄÃ¢y lÃ  má»™t phÃ©p tÃ­nh giáº£ Ä‘á»‹nh Ä‘á»ƒ cung cáº¥p cho ngÆ°á»i dÃ¹ng cÃ¡i nhÃ¬n sÃ¢u sáº¯c vá» sá»‘ tiá»n há» Ä‘Ã£ tráº£ cho cÃ¡c nghá»‡ sÄ© náº¿u há» nghe bÃ i hÃ¡t cá»§a há» trÃªn cÃ¡c ná»n táº£ng phÃ¡t nháº¡c trá»±c tuyáº¿n khÃ¡c nhau.';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes phút';
+    return '$minutes phÃºt';
   }
 
   @override
-  String get summary_minutes => 'phút';
+  String get summary_minutes => 'phÃºt';
 
   @override
-  String get summary_listened_to_music => 'Đã nghe nhạc';
+  String get summary_listened_to_music => 'ÄÃ£ nghe nháº¡c';
 
   @override
-  String get summary_songs => 'bài hát';
+  String get summary_songs => 'bÃ i hÃ¡t';
 
   @override
-  String get summary_streamed_overall => 'Stream tổng cộng';
+  String get summary_streamed_overall => 'Stream tá»•ng cá»™ng';
 
   @override
-  String get summary_owed_to_artists => 'Nợ nghệ sĩ\ntrong tháng này';
+  String get summary_owed_to_artists => 'Ná»£ nghá»‡ sÄ©\ntrong thÃ¡ng nÃ y';
 
   @override
-  String get summary_top_artist => 'Nghệ sĩ hàng đầu\nkỳ này';
+  String get summary_top_artist => 'Nghá»‡ sÄ© hÃ ng Ä‘áº§u\nká»³ nÃ y';
 
   @override
-  String get summary_artists => 'nghệ sĩ';
+  String get summary_artists => 'nghá»‡ sÄ©';
 
   @override
-  String get summary_music_reached_you => 'Âm nhạc đã đến với bạn';
+  String get summary_music_reached_you => 'Ã‚m nháº¡c Ä‘Ã£ Ä‘áº¿n vá»›i báº¡n';
 
   @override
-  String get summary_full_albums => 'album đầy đủ';
+  String get summary_full_albums => 'album Ä‘áº§y Ä‘á»§';
 
   @override
-  String get summary_got_your_love => 'Nhận được tình yêu của bạn';
+  String get summary_got_your_love => 'Nháº­n Ä‘Æ°á»£c tÃ¬nh yÃªu cá»§a báº¡n';
 
   @override
-  String get summary_playlists => 'danh sách phát';
+  String get summary_playlists => 'danh sÃ¡ch phÃ¡t';
 
   @override
-  String get summary_were_on_repeat => 'Đã được phát lại';
+  String get summary_were_on_repeat => 'ÄÃ£ Ä‘Æ°á»£c phÃ¡t láº¡i';
 
   @override
-  String get summary_listening_share => 'Thị phần nghe';
+  String get summary_listening_share => 'Thá»‹ pháº§n nghe';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Phân bố $tracks_length bài hát hàng đầu bạn đã nghe nhiều nhất';
+    return 'PhÃ¢n bá»‘ $tracks_length bÃ i hÃ¡t hÃ ng Ä‘áº§u báº¡n Ä‘Ã£ nghe nhiá»u nháº¥t';
   }
 
   @override
-  String get summary_plays => 'lượt phát';
+  String get summary_plays => 'lÆ°á»£t phÃ¡t';
 
   @override
   String get insights => 'Insights';
@@ -1330,318 +1341,327 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'Tổng cộng $money';
+    return 'Tá»•ng cá»™ng $money';
   }
 
   @override
-  String get webview_not_found => 'Không tìm thấy Webview';
+  String get webview_not_found => 'KhÃ´ng tÃ¬m tháº¥y Webview';
 
   @override
   String get webview_not_found_description =>
-      'Không có runtime Webview nào được cài đặt trên thiết bị của bạn.\nNếu đã cài đặt, hãy đảm bảo rằng nó nằm trong environment PATH\n\nSau khi cài đặt, hãy khởi động lại ứng dụng';
+      'KhÃ´ng cÃ³ runtime Webview nÃ o Ä‘Æ°á»£c cÃ i Ä‘áº·t trÃªn thiáº¿t bá»‹ cá»§a báº¡n.\nNáº¿u Ä‘Ã£ cÃ i Ä‘áº·t, hÃ£y Ä‘áº£m báº£o ráº±ng nÃ³ náº±m trong environment PATH\n\nSau khi cÃ i Ä‘áº·t, hÃ£y khá»Ÿi Ä‘á»™ng láº¡i á»©ng dá»¥ng';
 
   @override
-  String get unsupported_platform => 'Nền tảng không được hỗ trợ';
+  String get unsupported_platform => 'Ná»n táº£ng khÃ´ng Ä‘Æ°á»£c há»— trá»£';
 
   @override
-  String get cache_music => 'Lưu nhạc vào bộ nhớ đệm';
+  String get cache_music => 'LÆ°u nháº¡c vÃ o bá»™ nhá»› Ä‘á»‡m';
 
   @override
-  String get open => 'Mở';
+  String get open => 'Má»Ÿ';
 
   @override
-  String get cache_folder => 'Thư mục bộ nhớ đệm';
+  String get cache_folder => 'ThÆ° má»¥c bá»™ nhá»› Ä‘á»‡m';
 
   @override
-  String get export => 'Xuất';
+  String get export => 'Xuáº¥t';
 
   @override
-  String get clear_cache => 'Xóa bộ nhớ đệm';
+  String get clear_cache => 'XÃ³a bá»™ nhá»› Ä‘á»‡m';
 
   @override
-  String get clear_cache_confirmation => 'Bạn có muốn xóa bộ nhớ đệm không?';
+  String get clear_cache_confirmation =>
+      'Báº¡n cÃ³ muá»‘n xÃ³a bá»™ nhá»› Ä‘á»‡m khÃ´ng?';
 
   @override
-  String get export_cache_files => 'Xuất các tệp được lưu trong bộ nhớ đệm';
+  String get export_cache_files =>
+      'Xuáº¥t cÃ¡c tá»‡p Ä‘Æ°á»£c lÆ°u trong bá»™ nhá»› Ä‘á»‡m';
 
   @override
   String found_n_files(Object count) {
-    return 'Tìm thấy $count tệp';
+    return 'TÃ¬m tháº¥y $count tá»‡p';
   }
 
   @override
-  String get export_cache_confirmation => 'Bạn có muốn xuất các tệp này đến';
+  String get export_cache_confirmation =>
+      'Báº¡n cÃ³ muá»‘n xuáº¥t cÃ¡c tá»‡p nÃ y Ä‘áº¿n';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return 'Đã xuất $filesExported trên $files tệp';
+    return 'ÄÃ£ xuáº¥t $filesExported trÃªn $files tá»‡p';
   }
 
   @override
-  String get undo => 'Hoàn tác';
+  String get undo => 'HoÃ n tÃ¡c';
 
   @override
-  String get add_all_to_playlist => 'Thêm tất cả vào danh sách phát';
+  String get add_all_to_playlist => 'ThÃªm táº¥t cáº£ vÃ o danh sÃ¡ch phÃ¡t';
 
   @override
-  String get add_all_to_queue => 'Thêm tất cả vào danh sách chờ';
+  String get add_all_to_queue => 'ThÃªm táº¥t cáº£ vÃ o danh sÃ¡ch chá»';
 
   @override
-  String get play_all_next => 'Chơi tất cả tiếp theo';
+  String get play_all_next => 'ChÆ¡i táº¥t cáº£ tiáº¿p theo';
 
   @override
-  String get pause => 'Tạm dừng';
+  String get pause => 'Táº¡m dá»«ng';
 
   @override
-  String get view_all => 'Xem tất cả';
+  String get view_all => 'Xem táº¥t cáº£';
 
   @override
-  String get no_tracks_added_yet => 'Có vẻ bạn chưa thêm bất kỳ bài hát nào';
+  String get no_tracks_added_yet =>
+      'CÃ³ váº» báº¡n chÆ°a thÃªm báº¥t ká»³ bÃ i hÃ¡t nÃ o';
 
   @override
-  String get no_tracks => 'Có vẻ không có bài hát nào ở đây';
+  String get no_tracks => 'CÃ³ váº» khÃ´ng cÃ³ bÃ i hÃ¡t nÃ o á»Ÿ Ä‘Ã¢y';
 
   @override
-  String get no_tracks_listened_yet => 'Có vẻ bạn chưa nghe gì cả';
+  String get no_tracks_listened_yet => 'CÃ³ váº» báº¡n chÆ°a nghe gÃ¬ cáº£';
 
   @override
   String get not_following_artists =>
-      'Bạn không đang theo dõi bất kỳ nghệ sĩ nào';
+      'Báº¡n khÃ´ng Ä‘ang theo dÃµi báº¥t ká»³ nghá»‡ sÄ© nÃ o';
 
   @override
   String get no_favorite_albums_yet =>
-      'Có vẻ bạn chưa thêm album nào vào danh sách yêu thích';
+      'CÃ³ váº» báº¡n chÆ°a thÃªm album nÃ o vÃ o danh sÃ¡ch yÃªu thÃ­ch';
 
   @override
-  String get no_logs_found => 'Không tìm thấy nhật ký';
+  String get no_logs_found => 'KhÃ´ng tÃ¬m tháº¥y nháº­t kÃ½';
 
   @override
-  String get youtube_engine => 'Công cụ YouTube';
+  String get youtube_engine => 'CÃ´ng cá»¥ YouTube';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine chưa được cài đặt';
+    return '$engine chÆ°a Ä‘Æ°á»£c cÃ i Ä‘áº·t';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine chưa được cài đặt trong hệ thống của bạn.';
+    return '$engine chÆ°a Ä‘Æ°á»£c cÃ i Ä‘áº·t trong há»‡ thá»‘ng cá»§a báº¡n.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'Đảm bảo nó có sẵn trong biến PATH hoặc\nđặt đường dẫn tuyệt đối đến tệp thực thi $engine dưới đây';
+    return 'Äáº£m báº£o nÃ³ cÃ³ sáºµn trong biáº¿n PATH hoáº·c\nÄ‘áº·t Ä‘Æ°á»ng dáº«n tuyá»‡t Ä‘á»‘i Ä‘áº¿n tá»‡p thá»±c thi $engine dÆ°á»›i Ä‘Ã¢y';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'Trên macOS/Linux/Unix, việc thiết lập đường dẫn trong .zshrc/.bashrc/.bash_profile v.v. sẽ không hoạt động.\nBạn cần thiết lập đường dẫn trong tệp cấu hình shell';
+      'TrÃªn macOS/Linux/Unix, viá»‡c thiáº¿t láº­p Ä‘Æ°á»ng dáº«n trong .zshrc/.bashrc/.bash_profile v.v. sáº½ khÃ´ng hoáº¡t Ä‘á»™ng.\nBáº¡n cáº§n thiáº¿t láº­p Ä‘Æ°á»ng dáº«n trong tá»‡p cáº¥u hÃ¬nh shell';
 
   @override
-  String get download => 'Tải xuống';
+  String get download => 'Táº£i xuá»‘ng';
 
   @override
-  String get file_not_found => 'Không tìm thấy tệp';
+  String get file_not_found => 'KhÃ´ng tÃ¬m tháº¥y tá»‡p';
 
   @override
-  String get custom => 'Tùy chỉnh';
+  String get custom => 'TÃ¹y chá»‰nh';
 
   @override
-  String get add_custom_url => 'Thêm URL tùy chỉnh';
+  String get add_custom_url => 'ThÃªm URL tÃ¹y chá»‰nh';
 
   @override
-  String get edit_port => 'Chỉnh sửa cổng';
+  String get edit_port => 'Chá»‰nh sá»­a cá»•ng';
 
   @override
   String get port_helper_msg =>
-      'Mặc định là -1, có nghĩa là số ngẫu nhiên. Nếu bạn đã cấu hình tường lửa, nên đặt điều này.';
+      'Máº·c Ä‘á»‹nh lÃ  -1, cÃ³ nghÄ©a lÃ  sá»‘ ngáº«u nhiÃªn. Náº¿u báº¡n Ä‘Ã£ cáº¥u hÃ¬nh tÆ°á»ng lá»­a, nÃªn Ä‘áº·t Ä‘iá»u nÃ y.';
 
   @override
   String connect_request(Object client) {
-    return 'Cho phép $client kết nối?';
+    return 'Cho phÃ©p $client káº¿t ná»‘i?';
   }
 
   @override
   String get connection_request_denied =>
-      'Kết nối bị từ chối. Người dùng đã từ chối quyền truy cập.';
+      'Káº¿t ná»‘i bá»‹ tá»« chá»‘i. NgÆ°á»i dÃ¹ng Ä‘Ã£ tá»« chá»‘i quyá»n truy cáº­p.';
 
   @override
-  String get an_error_occurred => 'Đã xảy ra lỗi';
+  String get an_error_occurred => 'ÄÃ£ xáº£y ra lá»—i';
 
   @override
-  String get copy_to_clipboard => 'Sao chép vào khay nhớ tạm';
+  String get copy_to_clipboard => 'Sao chÃ©p vÃ o khay nhá»› táº¡m';
 
   @override
-  String get view_logs => 'Xem nhật ký';
+  String get view_logs => 'Xem nháº­t kÃ½';
 
   @override
-  String get retry => 'Thử lại';
+  String get retry => 'Thá»­ láº¡i';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'Bạn chưa đặt nhà cung cấp siêu dữ liệu mặc định nào';
+      'Báº¡n chÆ°a Ä‘áº·t nhÃ  cung cáº¥p siÃªu dá»¯ liá»‡u máº·c Ä‘á»‹nh nÃ o';
 
   @override
-  String get manage_metadata_providers => 'Quản lý nhà cung cấp siêu dữ liệu';
+  String get manage_metadata_providers =>
+      'Quáº£n lÃ½ nhÃ  cung cáº¥p siÃªu dá»¯ liá»‡u';
 
   @override
-  String get open_link_in_browser => 'Mở liên kết trong Trình duyệt?';
+  String get open_link_in_browser => 'Má»Ÿ liÃªn káº¿t trong TrÃ¬nh duyá»‡t?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'Bạn có muốn mở liên kết sau không';
+      'Báº¡n cÃ³ muá»‘n má»Ÿ liÃªn káº¿t sau khÃ´ng';
 
   @override
   String get unsafe_url_warning =>
-      'Việc mở các liên kết từ các nguồn không đáng tin cậy có thể không an toàn. Hãy thận trọng!\nBạn cũng có thể sao chép liên kết vào khay nhớ tạm của mình.';
+      'Viá»‡c má»Ÿ cÃ¡c liÃªn káº¿t tá»« cÃ¡c nguá»“n khÃ´ng Ä‘Ã¡ng tin cáº­y cÃ³ thá»ƒ khÃ´ng an toÃ n. HÃ£y tháº­n trá»ng!\nBáº¡n cÅ©ng cÃ³ thá»ƒ sao chÃ©p liÃªn káº¿t vÃ o khay nhá»› táº¡m cá»§a mÃ¬nh.';
 
   @override
-  String get copy_link => 'Sao chép liên kết';
+  String get copy_link => 'Sao chÃ©p liÃªn káº¿t';
 
   @override
   String get building_your_timeline =>
-      'Đang xây dựng dòng thời gian của bạn dựa trên những gì bạn đã nghe...';
+      'Äang xÃ¢y dá»±ng dÃ²ng thá»i gian cá»§a báº¡n dá»±a trÃªn nhá»¯ng gÃ¬ báº¡n Ä‘Ã£ nghe...';
 
   @override
-  String get official => 'Chính thức';
+  String get official => 'ChÃ­nh thá»©c';
 
   @override
   String author_name(Object author) {
-    return 'Tác giả: $author';
+    return 'TÃ¡c giáº£: $author';
   }
 
   @override
-  String get third_party => 'Bên thứ ba';
+  String get third_party => 'BÃªn thá»© ba';
 
   @override
-  String get plugin_requires_authentication => 'Plugin yêu cầu xác thực';
+  String get plugin_requires_authentication => 'Plugin yÃªu cáº§u xÃ¡c thá»±c';
 
   @override
-  String get update_available => 'Có bản cập nhật';
+  String get update_available => 'CÃ³ báº£n cáº­p nháº­t';
 
   @override
-  String get supports_scrobbling => 'Hỗ trợ scrobbling';
+  String get supports_scrobbling => 'Há»— trá»£ scrobbling';
 
   @override
   String get plugin_scrobbling_info =>
-      'Plugin này scrobble nhạc của bạn để tạo lịch sử nghe của bạn.';
+      'Plugin nÃ y scrobble nháº¡c cá»§a báº¡n Ä‘á»ƒ táº¡o lá»‹ch sá»­ nghe cá»§a báº¡n.';
 
   @override
-  String get default_metadata_source => 'Nguồn siêu dữ liệu mặc định';
+  String get default_metadata_source =>
+      'Nguá»“n siÃªu dá»¯ liá»‡u máº·c Ä‘á»‹nh';
 
   @override
-  String get set_default_metadata_source => 'Đặt nguồn siêu dữ liệu mặc định';
+  String get set_default_metadata_source =>
+      'Äáº·t nguá»“n siÃªu dá»¯ liá»‡u máº·c Ä‘á»‹nh';
 
   @override
-  String get default_audio_source => 'Nguồn âm thanh mặc định';
+  String get default_audio_source => 'Nguá»“n Ã¢m thanh máº·c Ä‘á»‹nh';
 
   @override
-  String get set_default_audio_source => 'Đặt nguồn âm thanh mặc định';
+  String get set_default_audio_source =>
+      'Äáº·t nguá»“n Ã¢m thanh máº·c Ä‘á»‹nh';
 
   @override
-  String get set_default => 'Đặt làm mặc định';
+  String get set_default => 'Äáº·t lÃ m máº·c Ä‘á»‹nh';
 
   @override
-  String get support => 'Hỗ trợ';
+  String get support => 'Há»— trá»£';
 
   @override
-  String get support_plugin_development => 'Hỗ trợ phát triển plugin';
+  String get support_plugin_development => 'Há»— trá»£ phÃ¡t triá»ƒn plugin';
 
   @override
   String can_access_name_api(Object name) {
-    return '- Có thể truy cập API **$name**';
+    return '- CÃ³ thá»ƒ truy cáº­p API **$name**';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'Bạn có muốn cài đặt plugin này không?';
+      'Báº¡n cÃ³ muá»‘n cÃ i Ä‘áº·t plugin nÃ y khÃ´ng?';
 
   @override
   String get third_party_plugin_warning =>
-      'Plugin này đến từ một kho lưu trữ của bên thứ ba. Vui lòng đảm bảo rằng bạn tin tưởng nguồn trước khi cài đặt.';
+      'Plugin nÃ y Ä‘áº¿n tá»« má»™t kho lÆ°u trá»¯ cá»§a bÃªn thá»© ba. Vui lÃ²ng Ä‘áº£m báº£o ráº±ng báº¡n tin tÆ°á»Ÿng nguá»“n trÆ°á»›c khi cÃ i Ä‘áº·t.';
 
   @override
-  String get author => 'Tác giả';
+  String get author => 'TÃ¡c giáº£';
 
   @override
   String get this_plugin_can_do_following =>
-      'Plugin này có thể làm những việc sau';
+      'Plugin nÃ y cÃ³ thá»ƒ lÃ m nhá»¯ng viá»‡c sau';
 
   @override
-  String get install => 'Cài đặt';
+  String get install => 'CÃ i Ä‘áº·t';
 
   @override
   String get install_a_metadata_provider =>
-      'Cài đặt một Nhà cung cấp siêu dữ liệu';
+      'CÃ i Ä‘áº·t má»™t NhÃ  cung cáº¥p siÃªu dá»¯ liá»‡u';
 
   @override
-  String get no_tracks_playing => 'Hiện không có bản nhạc nào đang phát';
+  String get no_tracks_playing =>
+      'Hiá»‡n khÃ´ng cÃ³ báº£n nháº¡c nÃ o Ä‘ang phÃ¡t';
 
   @override
   String get synced_lyrics_not_available =>
-      'Lời bài hát được đồng bộ hóa không có sẵn cho bài hát này. Vui lòng sử dụng';
+      'Lá»i bÃ i hÃ¡t Ä‘Æ°á»£c Ä‘á»“ng bá»™ hÃ³a khÃ´ng cÃ³ sáºµn cho bÃ i hÃ¡t nÃ y. Vui lÃ²ng sá»­ dá»¥ng';
 
   @override
-  String get plain_lyrics => 'Lời bài hát thuần túy';
+  String get plain_lyrics => 'Lá»i bÃ i hÃ¡t thuáº§n tÃºy';
 
   @override
-  String get tab_instead => 'thay thế.';
+  String get tab_instead => 'thay tháº¿.';
 
   @override
-  String get disclaimer => 'Miễn trừ trách nhiệm';
+  String get disclaimer => 'Miá»…n trá»« trÃ¡ch nhiá»‡m';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Nhóm Soulful Bhakti không chịu bất kỳ trách nhiệm nào (bao gồm cả pháp lý) đối với bất kỳ plugin \"Bên thứ ba\" nào.\nVui lòng sử dụng chúng với rủi ro của riêng bạn. Đối với bất kỳ lỗi/vấn đề nào, vui lòng báo cáo chúng cho kho lưu trữ plugin.\n\nNếu bất kỳ plugin \"Bên thứ ba\" nào vi phạm ToS/DMCA của bất kỳ dịch vụ/thực thể pháp lý nào, vui lòng yêu cầu tác giả plugin \"Bên thứ ba\" hoặc nền tảng lưu trữ, ví dụ: GitHub/Codeberg, thực hiện hành động. Tất cả các plugin được liệt kê ở trên (được gắn nhãn \"Bên thứ ba\") đều là các plugin công cộng/do cộng đồng duy trì. Chúng tôi không quản lý chúng, vì vậy chúng tôi không thể thực hiện bất kỳ hành động nào đối với chúng.\n\n';
+      'NhÃ³m Soulful Bhakti khÃ´ng chá»‹u báº¥t ká»³ trÃ¡ch nhiá»‡m nÃ o (bao gá»“m cáº£ phÃ¡p lÃ½) Ä‘á»‘i vá»›i báº¥t ká»³ plugin \"BÃªn thá»© ba\" nÃ o.\nVui lÃ²ng sá»­ dá»¥ng chÃºng vá»›i rá»§i ro cá»§a riÃªng báº¡n. Äá»‘i vá»›i báº¥t ká»³ lá»—i/váº¥n Ä‘á» nÃ o, vui lÃ²ng bÃ¡o cÃ¡o chÃºng cho kho lÆ°u trá»¯ plugin.\n\nNáº¿u báº¥t ká»³ plugin \"BÃªn thá»© ba\" nÃ o vi pháº¡m ToS/DMCA cá»§a báº¥t ká»³ dá»‹ch vá»¥/thá»±c thá»ƒ phÃ¡p lÃ½ nÃ o, vui lÃ²ng yÃªu cáº§u tÃ¡c giáº£ plugin \"BÃªn thá»© ba\" hoáº·c ná»n táº£ng lÆ°u trá»¯, vÃ­ dá»¥: GitHub/Codeberg, thá»±c hiá»‡n hÃ nh Ä‘á»™ng. Táº¥t cáº£ cÃ¡c plugin Ä‘Æ°á»£c liá»‡t kÃª á»Ÿ trÃªn (Ä‘Æ°á»£c gáº¯n nhÃ£n \"BÃªn thá»© ba\") Ä‘á»u lÃ  cÃ¡c plugin cÃ´ng cá»™ng/do cá»™ng Ä‘á»“ng duy trÃ¬. ChÃºng tÃ´i khÃ´ng quáº£n lÃ½ chÃºng, vÃ¬ váº­y chÃºng tÃ´i khÃ´ng thá»ƒ thá»±c hiá»‡n báº¥t ká»³ hÃ nh Ä‘á»™ng nÃ o Ä‘á»‘i vá»›i chÃºng.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'Đầu vào không khớp với định dạng yêu cầu';
+      'Äáº§u vÃ o khÃ´ng khá»›p vá»›i Ä‘á»‹nh dáº¡ng yÃªu cáº§u';
 
   @override
-  String get plugins => 'Tiện ích bổ sung';
+  String get plugins => 'Tiá»‡n Ã­ch bá»• sung';
 
   @override
   String get paste_plugin_download_url =>
-      'Dán url tải xuống hoặc url kho lưu trữ GitHub/Codeberg hoặc liên kết trực tiếp đến tệp .smplug';
+      'DÃ¡n url táº£i xuá»‘ng hoáº·c url kho lÆ°u trá»¯ GitHub/Codeberg hoáº·c liÃªn káº¿t trá»±c tiáº¿p Ä‘áº¿n tá»‡p .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'Tải xuống và cài đặt plugin từ url';
+      'Táº£i xuá»‘ng vÃ  cÃ i Ä‘áº·t plugin tá»« url';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'Không thể thêm plugin: $error';
+    return 'KhÃ´ng thá»ƒ thÃªm plugin: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'Tải lên plugin từ tệp';
+  String get upload_plugin_from_file => 'Táº£i lÃªn plugin tá»« tá»‡p';
 
   @override
-  String get installed => 'Đã cài đặt';
+  String get installed => 'ÄÃ£ cÃ i Ä‘áº·t';
 
   @override
-  String get available_plugins => 'Các plugin có sẵn';
+  String get available_plugins => 'CÃ¡c plugin cÃ³ sáºµn';
 
   @override
   String get configure_plugins =>
-      'Cấu hình nhà cung cấp siêu dữ liệu và tiện ích nguồn âm thanh riêng';
+      'Cáº¥u hÃ¬nh nhÃ  cung cáº¥p siÃªu dá»¯ liá»‡u vÃ  tiá»‡n Ã­ch nguá»“n Ã¢m thanh riÃªng';
 
   @override
-  String get source => 'Nguồn: ';
+  String get source => 'Nguá»“n: ';
 
   @override
-  String get uncompressed => 'Không nén';
+  String get uncompressed => 'KhÃ´ng nÃ©n';
 
   @override
   String get dab_music_source_description =>
-      'Dành cho người yêu âm nhạc chất lượng cao. Cung cấp luồng âm thanh chất lượng cao/không nén. Phù hợp bài hát dựa trên ISRC chính xác.';
+      'DÃ nh cho ngÆ°á»i yÃªu Ã¢m nháº¡c cháº¥t lÆ°á»£ng cao. Cung cáº¥p luá»“ng Ã¢m thanh cháº¥t lÆ°á»£ng cao/khÃ´ng nÃ©n. PhÃ¹ há»£p bÃ i hÃ¡t dá»±a trÃªn ISRC chÃ­nh xÃ¡c.';
 
   @override
-  String get summary_top_track => 'Bài hát hàng đầu\nkỳ này';
+  String get summary_top_track => 'BÃ i hÃ¡t hÃ ng Ä‘áº§u\nká»³ nÃ y';
 
   @override
-  String get local => 'Cục bộ';
+  String get local => 'Cá»¥c bá»™';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1651,4 +1671,21 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

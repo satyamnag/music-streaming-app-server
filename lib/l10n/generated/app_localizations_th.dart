@@ -9,1298 +9,1386 @@ class AppLocalizationsTh extends AppLocalizations {
   AppLocalizationsTh([String locale = 'th']) : super(locale);
 
   @override
-  String get guest => 'ผู้มาเยือน';
+  String get guest => 'à¸œà¸¹à¹‰à¸¡à¸²à¹€à¸¢à¸·à¸­à¸™';
 
   @override
-  String get browse => 'เรียกดู';
+  String get browse => 'à¹€à¸£à¸µà¸¢à¸à¸”à¸¹';
 
   @override
-  String get search => 'ค้นหา';
+  String get search => 'à¸„à¹‰à¸™à¸«à¸²';
 
   @override
-  String get library => 'คลัง';
+  String get library => 'à¸„à¸¥à¸±à¸‡';
 
   @override
-  String get lyrics => 'เนื้อเพลง';
+  String get lyrics => 'à¹€à¸™à¸·à¹‰à¸­à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get settings => 'ตั้งค่า';
+  String get settings => 'à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²';
 
   @override
-  String get settings_subtitle => 'ปรับแต่ง Soulful Bhakti ตามที่คุณต้องการ';
+  String get settings_subtitle =>
+      'à¸›à¸£à¸±à¸šà¹à¸•à¹ˆà¸‡ Soulful Bhakti à¸•à¸²à¸¡à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£';
 
   @override
-  String get genre_categories_filter => 'กรองประเภทหรือแนวเพลง...';
+  String get genre_categories_filter =>
+      'à¸à¸£à¸­à¸‡à¸›à¸£à¸°à¹€à¸ à¸—à¸«à¸£à¸·à¸­à¹à¸™à¸§à¹€à¸žà¸¥à¸‡...';
 
   @override
-  String get genre => 'ประเภท';
+  String get genre => 'à¸›à¸£à¸°à¹€à¸ à¸—';
 
   @override
-  String get personalized => 'ปรับแต่ง';
+  String get personalized => 'à¸›à¸£à¸±à¸šà¹à¸•à¹ˆà¸‡';
 
   @override
-  String get featured => 'เด่น';
+  String get featured => 'à¹€à¸”à¹ˆà¸™';
 
   @override
-  String get new_releases => 'เพิ่งปล่อยใหม่';
+  String get new_releases => 'à¹€à¸žà¸´à¹ˆà¸‡à¸›à¸¥à¹ˆà¸­à¸¢à¹ƒà¸«à¸¡à¹ˆ';
 
   @override
-  String get songs => 'เพลง';
+  String get songs => 'à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get newest_arrivals => 'มาใหม่';
+  String get newest_arrivals => 'à¸¡à¸²à¹ƒà¸«à¸¡à¹ˆ';
 
   @override
-  String get top_trending => 'กำลังมาแรง';
+  String get top_trending => 'à¸à¸³à¸¥à¸±à¸‡à¸¡à¸²à¹à¸£à¸‡';
 
   @override
-  String get see_more => 'ดูเพิ่มเติม';
+  String get see_more => 'à¸”à¸¹à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡';
 
   @override
   String playing_track(Object track) {
-    return 'กำลังเล่น $track';
+    return 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸¥à¹ˆà¸™ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'การดำเนินการนี้จะล้างคิวปัจจุบัน $track_length แทร็ก จะถูกลบออก\nคุณต้องการดำเนินการต่อหรือไม่?';
+    return 'à¸à¸²à¸£à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸™à¸µà¹‰à¸ˆà¸°à¸¥à¹‰à¸²à¸‡à¸„à¸´à¸§à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™ $track_length à¹à¸—à¸£à¹‡à¸ à¸ˆà¸°à¸–à¸¹à¸à¸¥à¸šà¸­à¸­à¸\nà¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸•à¹ˆà¸­à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?';
   }
 
   @override
-  String get load_more => 'โหลดเพิ่มเติม';
+  String get load_more => 'à¹‚à¸«à¸¥à¸”à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡';
 
   @override
-  String get playlists => 'เพลย์ลิสต์';
+  String get playlists => 'à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get artists => 'ศิลปิน';
+  String get artists => 'à¸¨à¸´à¸¥à¸›à¸´à¸™';
 
   @override
-  String get albums => 'อัลบั้ม';
+  String get albums => 'à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡';
 
   @override
-  String get tracks => 'แทร็ก';
+  String get tracks => 'à¹à¸—à¸£à¹‡à¸';
 
   @override
-  String get downloads => 'ดาวน์โหลด';
+  String get downloads => 'à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”';
 
   @override
-  String get filter_playlists => 'กรองเพลย์ลิสต์...';
+  String get filter_playlists =>
+      'à¸à¸£à¸­à¸‡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ...';
 
   @override
-  String get liked_tracks => 'เพลงที่ชอบ';
+  String get liked_tracks => 'à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸Šà¸­à¸š';
 
   @override
-  String get liked_tracks_description => 'เพลงที่คุณชื่นชอบทั้งหมด';
+  String get liked_tracks_description =>
+      'à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸Šà¸·à¹ˆà¸™à¸Šà¸­à¸šà¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get playlist => 'เพลย์ลิสต์';
+  String get playlist => 'à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get create_a_playlist => 'สร้างเพลย์ลิสต์';
+  String get create_a_playlist =>
+      'à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get new_playlist => 'เพลย์ลิสต์ใหม่';
+  String get new_playlist => 'à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œà¹ƒà¸«à¸¡à¹ˆ';
 
   @override
-  String get playlist_name => 'ชื่อเพลย์ลิสต์';
+  String get playlist_name => 'à¸Šà¸·à¹ˆà¸­à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
   String get no_playlists_yet =>
-      'ยังไม่มีเพลย์ลิสต์ สร้างหนึ่งรายการจากเพลงที่เลือก';
+      'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ à¸ªà¸£à¹‰à¸²à¸‡à¸«à¸™à¸¶à¹ˆà¸‡à¸£à¸²à¸¢à¸à¸²à¸£à¸ˆà¸²à¸à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¹€à¸¥à¸·à¸­à¸';
 
   @override
-  String get update_playlist => 'อัพเดทเพลย์ลิสต์';
+  String get update_playlist =>
+      'à¸­à¸±à¸žà¹€à¸”à¸—à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get create => 'สร้าง';
+  String get create => 'à¸ªà¸£à¹‰à¸²à¸‡';
 
   @override
-  String get cancel => 'ยกเลิก';
+  String get cancel => 'à¸¢à¸à¹€à¸¥à¸´à¸';
 
   @override
-  String get update => 'อัพเดท';
+  String get update => 'à¸­à¸±à¸žà¹€à¸”à¸—';
 
   @override
-  String get name_of_playlist => 'ชื่อของเพลย์ลิสต์';
+  String get name_of_playlist =>
+      'à¸Šà¸·à¹ˆà¸­à¸‚à¸­à¸‡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get description => 'คำอธิบาย';
+  String get description => 'à¸„à¸³à¸­à¸˜à¸´à¸šà¸²à¸¢';
 
   @override
-  String get public => 'สาธารณะ';
+  String get public => 'à¸ªà¸²à¸˜à¸²à¸£à¸“à¸°';
 
   @override
-  String get collaborative => 'ร่วมมือกัน';
+  String get collaborative => 'à¸£à¹ˆà¸§à¸¡à¸¡à¸·à¸­à¸à¸±à¸™';
 
   @override
-  String get search_local_tracks => 'ค้นหาเพลงในเครื่อง...';
+  String get search_local_tracks =>
+      'à¸„à¹‰à¸™à¸«à¸²à¹€à¸žà¸¥à¸‡à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡...';
 
   @override
-  String get play => 'เล่น';
+  String get play => 'à¹€à¸¥à¹ˆà¸™';
 
   @override
-  String get delete => 'ลบ';
+  String get delete => 'à¸¥à¸š';
 
   @override
-  String get none => 'ไม่มี';
+  String get none => 'à¹„à¸¡à¹ˆà¸¡à¸µ';
 
   @override
-  String get sort_a_z => 'เรียงตาม A-Z';
+  String get sort_a_z => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡ A-Z';
 
   @override
-  String get sort_z_a => 'เรียงตาม Z-A';
+  String get sort_z_a => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡ Z-A';
 
   @override
-  String get sort_artist => 'เรียงตามศิลปิน';
+  String get sort_artist => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸¨à¸´à¸¥à¸›à¸´à¸™';
 
   @override
-  String get sort_album => 'เรียงตามอัลบั้ม';
+  String get sort_album => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡';
 
   @override
-  String get sort_duration => 'เรียงตามความยาว';
+  String get sort_duration => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸„à¸§à¸²à¸¡à¸¢à¸²à¸§';
 
   @override
-  String get sort_tracks => 'เรียงตามเพลง';
+  String get sort_tracks => 'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¹€à¸žà¸¥à¸‡';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'กำลังดาวน์โหลด ($tracks_length)';
+    return 'à¸à¸³à¸¥à¸±à¸‡à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸” ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'ยกเลิกทั้งหมด';
+  String get cancel_all => 'à¸¢à¸à¹€à¸¥à¸´à¸à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get filter_artist => 'กรองศิลปิน...';
+  String get filter_artist => 'à¸à¸£à¸­à¸‡à¸¨à¸´à¸¥à¸›à¸´à¸™...';
 
   @override
   String followers(Object followers) {
-    return '$followers ผู้ติดตาม';
+    return '$followers à¸œà¸¹à¹‰à¸•à¸´à¸”à¸•à¸²à¸¡';
   }
 
   @override
-  String get add_artist_to_blacklist => 'เพิ่มศิลปินในบัญชีดำ';
+  String get add_artist_to_blacklist =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¸¨à¸´à¸¥à¸›à¸´à¸™à¹ƒà¸™à¸šà¸±à¸à¸Šà¸µà¸”à¸³';
 
   @override
-  String get top_tracks => 'เพลงฮิต';
+  String get top_tracks => 'à¹€à¸žà¸¥à¸‡à¸®à¸´à¸•';
 
   @override
-  String get fans_also_like => 'แฟนๆ ยังชอบ';
+  String get fans_also_like => 'à¹à¸Ÿà¸™à¹† à¸¢à¸±à¸‡à¸Šà¸­à¸š';
 
   @override
-  String get loading => 'กำลังโหลด...';
+  String get loading => 'à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”...';
 
   @override
-  String get artist => 'ศิลปิน';
+  String get artist => 'à¸¨à¸´à¸¥à¸›à¸´à¸™';
 
   @override
-  String get blacklisted => 'อยู่ในบัญชีดำ';
+  String get blacklisted => 'à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸šà¸±à¸à¸Šà¸µà¸”à¸³';
 
   @override
-  String get following => 'กำลังติดตาม';
+  String get following => 'à¸à¸³à¸¥à¸±à¸‡à¸•à¸´à¸”à¸•à¸²à¸¡';
 
   @override
-  String get follow => 'ติดตาม';
+  String get follow => 'à¸•à¸´à¸”à¸•à¸²à¸¡';
 
   @override
-  String get artist_url_copied => 'คัดลอก URL ศิลปินไปยังคลิปบอร์ด';
+  String get artist_url_copied =>
+      'à¸„à¸±à¸”à¸¥à¸­à¸ URL à¸¨à¸´à¸¥à¸›à¸´à¸™à¹„à¸›à¸¢à¸±à¸‡à¸„à¸¥à¸´à¸›à¸šà¸­à¸£à¹Œà¸”';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'เพิ่ม $tracks เพลงลงในคิว';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ $tracks à¹€à¸žà¸¥à¸‡à¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§';
   }
 
   @override
-  String get filter_albums => 'กรองอัลบั้ม...';
+  String get filter_albums => 'à¸à¸£à¸­à¸‡à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡...';
 
   @override
-  String get synced => 'ซิงค์';
+  String get synced => 'à¸‹à¸´à¸‡à¸„à¹Œ';
 
   @override
-  String get plain => 'เรียบง่าย';
+  String get plain => 'à¹€à¸£à¸µà¸¢à¸šà¸‡à¹ˆà¸²à¸¢';
 
   @override
-  String get shuffle => 'สุ่ม';
+  String get shuffle => 'à¸ªà¸¸à¹ˆà¸¡';
 
   @override
-  String get search_tracks => 'ค้นหาเพลง...';
+  String get search_tracks => 'à¸„à¹‰à¸™à¸«à¸²à¹€à¸žà¸¥à¸‡...';
 
   @override
-  String get released => 'เผยแพร่';
+  String get released => 'à¹€à¸œà¸¢à¹à¸žà¸£à¹ˆ';
 
   @override
   String error(Object error) {
-    return 'ข้อผิดพลาด $error';
+    return 'à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸” $error';
   }
 
   @override
-  String get title => 'ชื่อ';
+  String get title => 'à¸Šà¸·à¹ˆà¸­';
 
   @override
-  String get time => 'เวลา';
+  String get time => 'à¹€à¸§à¸¥à¸²';
 
   @override
-  String get more_actions => 'เพิ่มเติม';
+  String get more_actions => 'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'เพิ่ม ($count) ลงในเพลย์ลิสต์';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ ($count) à¸¥à¸‡à¹ƒà¸™à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'เพิ่ม ($count) ลงในคิว';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ ($count) à¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'เล่น ($count) ต่อไป';
+    return 'à¹€à¸¥à¹ˆà¸™ ($count) à¸•à¹ˆà¸­à¹„à¸›';
   }
 
   @override
-  String get album => 'อัลบั้ม';
+  String get album => 'à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡';
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'คัดลอก $data ไปยังคลิปบอร์ด';
+    return 'à¸„à¸±à¸”à¸¥à¸­à¸ $data à¹„à¸›à¸¢à¸±à¸‡à¸„à¸¥à¸´à¸›à¸šà¸­à¸£à¹Œà¸”';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'เพิ่ม $track ลงในเพลย์ลิสต์';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ $track à¸¥à¸‡à¹ƒà¸™à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
   }
 
   @override
-  String get add => 'เพิ่ม';
+  String get add => 'à¹€à¸žà¸´à¹ˆà¸¡';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'เพิ่ม $track ลงในคิว';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ $track à¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§';
   }
 
   @override
-  String get add_to_queue => 'เพิ่มลงในคิว';
+  String get add_to_queue => 'à¹€à¸žà¸´à¹ˆà¸¡à¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track จะเล่นต่อไป';
+    return '$track à¸ˆà¸°à¹€à¸¥à¹ˆà¸™à¸•à¹ˆà¸­à¹„à¸›';
   }
 
   @override
-  String get play_next => 'เล่นต่อไป';
+  String get play_next => 'à¹€à¸¥à¹ˆà¸™à¸•à¹ˆà¸­à¹„à¸›';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'ลบ $track ออกจากคิว';
+    return 'à¸¥à¸š $track à¸­à¸­à¸à¸ˆà¸²à¸à¸„à¸´à¸§';
   }
 
   @override
-  String get remove_from_queue => 'ลบออกจากคิว';
+  String get remove_from_queue => 'à¸¥à¸šà¸­à¸­à¸à¸ˆà¸²à¸à¸„à¸´à¸§';
 
   @override
-  String get remove_from_favorites => 'ลบออกจากรายการโปรด';
+  String get remove_from_favorites =>
+      'à¸¥à¸šà¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸›à¸£à¸”';
 
   @override
-  String get save_as_favorite => 'บันทึกเป็นรายการโปรด';
+  String get save_as_favorite =>
+      'à¸šà¸±à¸™à¸—à¸¶à¸à¹€à¸›à¹‡à¸™à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸›à¸£à¸”';
 
   @override
-  String get add_to_playlist => 'เพิ่มลงในเพลย์ลิสต์';
+  String get add_to_playlist =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¸¥à¸‡à¹ƒà¸™à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get remove_from_playlist => 'ลบออกจากเพลย์ลิสต์';
+  String get remove_from_playlist =>
+      'à¸¥à¸šà¸­à¸­à¸à¸ˆà¸²à¸à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get add_to_blacklist => 'เพิ่มลงในบัญชีดำ';
+  String get add_to_blacklist =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¸¥à¸‡à¹ƒà¸™à¸šà¸±à¸à¸Šà¸µà¸”à¸³';
 
   @override
-  String get remove_from_blacklist => 'ลบออกจากบัญชีดำ';
+  String get remove_from_blacklist =>
+      'à¸¥à¸šà¸­à¸­à¸à¸ˆà¸²à¸à¸šà¸±à¸à¸Šà¸µà¸”à¸³';
 
   @override
-  String get share => 'แชร์';
+  String get share => 'à¹à¸Šà¸£à¹Œ';
 
   @override
-  String get mini_player => 'มินิเพลเยอร์';
+  String get mini_player => 'à¸¡à¸´à¸™à¸´à¹€à¸žà¸¥à¹€à¸¢à¸­à¸£à¹Œ';
 
   @override
-  String get slide_to_seek => 'เลื่อนเพื่อไปข้างหน้าหรือถอยหลัง';
+  String get slide_to_seek =>
+      'à¹€à¸¥à¸·à¹ˆà¸­à¸™à¹€à¸žà¸·à¹ˆà¸­à¹„à¸›à¸‚à¹‰à¸²à¸‡à¸«à¸™à¹‰à¸²à¸«à¸£à¸·à¸­à¸–à¸­à¸¢à¸«à¸¥à¸±à¸‡';
 
   @override
-  String get shuffle_playlist => 'สุ่มเพลย์ลิสต์';
+  String get shuffle_playlist => 'à¸ªà¸¸à¹ˆà¸¡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get unshuffle_playlist => 'ยกเลิกการสุ่มเพลย์ลิสต์';
+  String get unshuffle_playlist =>
+      'à¸¢à¸à¹€à¸¥à¸´à¸à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get previous_track => 'แทร็กก่อนหน้า';
+  String get previous_track => 'à¹à¸—à¸£à¹‡à¸à¸à¹ˆà¸­à¸™à¸«à¸™à¹‰à¸²';
 
   @override
-  String get next_track => 'แทร็กถัดไป';
+  String get next_track => 'à¹à¸—à¸£à¹‡à¸à¸–à¸±à¸”à¹„à¸›';
 
   @override
-  String get pause_playback => 'หยุดการเล่น';
+  String get pause_playback => 'à¸«à¸¢à¸¸à¸”à¸à¸²à¸£à¹€à¸¥à¹ˆà¸™';
 
   @override
-  String get resume_playback => 'เล่นต่อ';
+  String get resume_playback => 'à¹€à¸¥à¹ˆà¸™à¸•à¹ˆà¸­';
 
   @override
-  String get loop_track => 'วนเพลง';
+  String get loop_track => 'à¸§à¸™à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get no_loop => 'ไม่มีการวนซ้ำ';
+  String get no_loop => 'à¹„à¸¡à¹ˆà¸¡à¸µà¸à¸²à¸£à¸§à¸™à¸‹à¹‰à¸³';
 
   @override
-  String get repeat_playlist => 'ซ้ำเพลย์ลิสต์';
+  String get repeat_playlist => 'à¸‹à¹‰à¸³à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get queue => 'คิว';
+  String get queue => 'à¸„à¸´à¸§';
 
   @override
-  String get alternative_track_sources => 'แหล่งแทร็กอื่น';
+  String get alternative_track_sources =>
+      'à¹à¸«à¸¥à¹ˆà¸‡à¹à¸—à¸£à¹‡à¸à¸­à¸·à¹ˆà¸™';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks แทร็กในคิว';
+    return '$tracks à¹à¸—à¸£à¹‡à¸à¹ƒà¸™à¸„à¸´à¸§';
   }
 
   @override
-  String get clear_all => 'ล้างทั้งหมด';
+  String get clear_all => 'à¸¥à¹‰à¸²à¸‡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get show_hide_ui_on_hover => 'แสดง/ซ่อน UI เมื่อโฮเวอร์';
+  String get show_hide_ui_on_hover =>
+      'à¹à¸ªà¸”à¸‡/à¸‹à¹ˆà¸­à¸™ UI à¹€à¸¡à¸·à¹ˆà¸­à¹‚à¸®à¹€à¸§à¸­à¸£à¹Œ';
 
   @override
-  String get always_on_top => 'อยู่ด้านบนเสมอ';
+  String get always_on_top => 'à¸­à¸¢à¸¹à¹ˆà¸”à¹‰à¸²à¸™à¸šà¸™à¹€à¸ªà¸¡à¸­';
 
   @override
-  String get exit_mini_player => 'ออกจากมินิเพลย์เยอร์';
+  String get exit_mini_player =>
+      'à¸­à¸­à¸à¸ˆà¸²à¸à¸¡à¸´à¸™à¸´à¹€à¸žà¸¥à¸¢à¹Œà¹€à¸¢à¸­à¸£à¹Œ';
 
   @override
-  String get local_library => 'ห้องสมุดท้องถิ่น';
+  String get local_library =>
+      'à¸«à¹‰à¸­à¸‡à¸ªà¸¡à¸¸à¸”à¸—à¹‰à¸­à¸‡à¸–à¸´à¹ˆà¸™';
 
   @override
-  String get add_library_location => 'เพิ่มในห้องสมุด';
+  String get add_library_location =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¹ƒà¸™à¸«à¹‰à¸­à¸‡à¸ªà¸¡à¸¸à¸”';
 
   @override
-  String get remove_library_location => 'ลบออกจากห้องสมุด';
+  String get remove_library_location =>
+      'à¸¥à¸šà¸­à¸­à¸à¸ˆà¸²à¸à¸«à¹‰à¸­à¸‡à¸ªà¸¡à¸¸à¸”';
 
   @override
-  String get account => 'บัญชี';
+  String get account => 'à¸šà¸±à¸à¸Šà¸µ';
 
   @override
-  String get logout => 'ออกจากระบบ';
+  String get logout => 'à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š';
 
   @override
-  String get logout_of_this_account => 'ออกจากระบบบัญชีนี้';
+  String get logout_of_this_account =>
+      'à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸šà¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰';
 
   @override
-  String get language_region => 'ภาษาและภูมิภาค';
+  String get language_region => 'à¸ à¸²à¸©à¸²à¹à¸¥à¸°à¸ à¸¹à¸¡à¸´à¸ à¸²à¸„';
 
   @override
-  String get language => 'ภาษา';
+  String get language => 'à¸ à¸²à¸©à¸²';
 
   @override
-  String get system_default => 'ค่าเริ่มต้นของระบบ';
+  String get system_default =>
+      'à¸„à¹ˆà¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™à¸‚à¸­à¸‡à¸£à¸°à¸šà¸š';
 
   @override
-  String get market_place_region => 'ภูมิภาค Marketplace';
+  String get market_place_region => 'à¸ à¸¹à¸¡à¸´à¸ à¸²à¸„ Marketplace';
 
   @override
-  String get recommendation_country => 'ประเทศที่แนะนำ';
+  String get recommendation_country =>
+      'à¸›à¸£à¸°à¹€à¸—à¸¨à¸—à¸µà¹ˆà¹à¸™à¸°à¸™à¸³';
 
   @override
-  String get appearance => 'ลักษณะที่ปรากฏ';
+  String get appearance => 'à¸¥à¸±à¸à¸©à¸“à¸°à¸—à¸µà¹ˆà¸›à¸£à¸²à¸à¸';
 
   @override
-  String get layout_mode => 'โหมดเค้าโครง';
+  String get layout_mode => 'à¹‚à¸«à¸¡à¸”à¹€à¸„à¹‰à¸²à¹‚à¸„à¸£à¸‡';
 
   @override
   String get override_layout_settings =>
-      'แทนที่การตั้งค่าโหมดเค้าโครงแบบตอบสนอง';
+      'à¹à¸—à¸™à¸—à¸µà¹ˆà¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹‚à¸«à¸¡à¸”à¹€à¸„à¹‰à¸²à¹‚à¸„à¸£à¸‡à¹à¸šà¸šà¸•à¸­à¸šà¸ªà¸™à¸­à¸‡';
 
   @override
-  String get adaptive => 'ปรับเปลี่ยน';
+  String get adaptive => 'à¸›à¸£à¸±à¸šà¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™';
 
   @override
-  String get compact => 'กระชับ';
+  String get compact => 'à¸à¸£à¸°à¸Šà¸±à¸š';
 
   @override
-  String get extended => 'ขยาย';
+  String get extended => 'à¸‚à¸¢à¸²à¸¢';
 
   @override
-  String get theme => 'ธีม';
+  String get theme => 'à¸˜à¸µà¸¡';
 
   @override
-  String get dark => 'มืด';
+  String get dark => 'à¸¡à¸·à¸”';
 
   @override
-  String get light => 'สว่าง';
+  String get light => 'à¸ªà¸§à¹ˆà¸²à¸‡';
 
   @override
-  String get system => 'ระบบ';
+  String get system => 'à¸£à¸°à¸šà¸š';
 
   @override
-  String get accent_color => 'สีเน้น';
+  String get accent_color => 'à¸ªà¸µà¹€à¸™à¹‰à¸™';
 
   @override
-  String get sync_album_color => 'ซิงค์สีอัลบั้ม';
+  String get sync_album_color => 'à¸‹à¸´à¸‡à¸„à¹Œà¸ªà¸µà¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡';
 
   @override
   String get sync_album_color_description =>
-      'ใช้สีเด่นของอาร์ตอัลบั้มเป็นสีเน้น';
+      'à¹ƒà¸Šà¹‰à¸ªà¸µà¹€à¸”à¹ˆà¸™à¸‚à¸­à¸‡à¸­à¸²à¸£à¹Œà¸•à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡à¹€à¸›à¹‡à¸™à¸ªà¸µà¹€à¸™à¹‰à¸™';
 
   @override
-  String get playback => 'การเล่น';
+  String get playback => 'à¸à¸²à¸£à¹€à¸¥à¹ˆà¸™';
 
   @override
-  String get audio_quality => 'คุณภาพเสียง';
+  String get audio_quality => 'à¸„à¸¸à¸“à¸ à¸²à¸žà¹€à¸ªà¸µà¸¢à¸‡';
 
   @override
-  String get high => 'สูง';
+  String get high => 'à¸ªà¸¹à¸‡';
 
   @override
-  String get low => 'ต่ำ';
+  String get low => 'à¸•à¹ˆà¸³';
 
   @override
-  String get pre_download_play => 'ดาวน์โหลดล่วงหน้าและเล่น';
+  String get pre_download_play =>
+      'à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸¥à¹ˆà¸§à¸‡à¸«à¸™à¹‰à¸²à¹à¸¥à¸°à¹€à¸¥à¹ˆà¸™';
 
   @override
   String get pre_download_play_description =>
-      'แทนที่จะสตรีมเสียง ดาวน์โหลดข้อมูลและเล่นแทน (แนะนำสำหรับผู้ใช้แบนด์วิดธ์สูง)';
+      'à¹à¸—à¸™à¸—à¸µà¹ˆà¸ˆà¸°à¸ªà¸•à¸£à¸µà¸¡à¹€à¸ªà¸µà¸¢à¸‡ à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¸°à¹€à¸¥à¹ˆà¸™à¹à¸—à¸™ (à¹à¸™à¸°à¸™à¸³à¸ªà¸³à¸«à¸£à¸±à¸šà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¹à¸šà¸™à¸”à¹Œà¸§à¸´à¸”à¸˜à¹Œà¸ªà¸¹à¸‡)';
 
   @override
-  String get skip_non_music => 'ข้ามส่วนที่ไม่ใช่เพลง (SponsorBlock)';
+  String get skip_non_music =>
+      'à¸‚à¹‰à¸²à¸¡à¸ªà¹ˆà¸§à¸™à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¹€à¸žà¸¥à¸‡ (SponsorBlock)';
 
   @override
-  String get blacklist_description => 'แทร็กและศิลปินที่บล็อก';
+  String get blacklist_description =>
+      'à¹à¸—à¸£à¹‡à¸à¹à¸¥à¸°à¸¨à¸´à¸¥à¸›à¸´à¸™à¸—à¸µà¹ˆà¸šà¸¥à¹‡à¸­à¸';
 
   @override
   String get wait_for_download_to_finish =>
-      'โปรดรอให้การดาวน์โหลดปัจจุบันเสร็จสิ้น';
+      'à¹‚à¸›à¸£à¸”à¸£à¸­à¹ƒà¸«à¹‰à¸à¸²à¸£à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™à¹€à¸ªà¸£à¹‡à¸ˆà¸ªà¸´à¹‰à¸™';
 
   @override
-  String get desktop => 'เดสก์ท็อป';
+  String get desktop => 'à¹€à¸”à¸ªà¸à¹Œà¸—à¹‡à¸­à¸›';
 
   @override
-  String get close_behavior => 'ปิดพฤติกรรม';
+  String get close_behavior => 'à¸›à¸´à¸”à¸žà¸¤à¸•à¸´à¸à¸£à¸£à¸¡';
 
   @override
-  String get close => 'ปิด';
+  String get close => 'à¸›à¸´à¸”';
 
   @override
-  String get minimize_to_tray => 'ลดขนาดลงถาด';
+  String get minimize_to_tray => 'à¸¥à¸”à¸‚à¸™à¸²à¸”à¸¥à¸‡à¸–à¸²à¸”';
 
   @override
-  String get show_tray_icon => 'แสดงไอคอนถาดระบบ';
+  String get show_tray_icon =>
+      'à¹à¸ªà¸”à¸‡à¹„à¸­à¸„à¸­à¸™à¸–à¸²à¸”à¸£à¸°à¸šà¸š';
 
   @override
-  String get about => 'เกี่ยวกับ';
+  String get about => 'à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸š';
 
   @override
-  String get u_love_spotube => 'เรารู้ว่าคุณรัก Soulful Bhakti';
+  String get u_love_spotube =>
+      'à¹€à¸£à¸²à¸£à¸¹à¹‰à¸§à¹ˆà¸²à¸„à¸¸à¸“à¸£à¸±à¸ Soulful Bhakti';
 
   @override
-  String get check_for_updates => 'ตรวจสอบการปรับปรุง';
+  String get check_for_updates =>
+      'à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¸›à¸£à¸±à¸šà¸›à¸£à¸¸à¸‡';
 
   @override
-  String get about_spotube => 'เกี่ยวกับ Soulful Bhakti';
+  String get about_spotube => 'à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸š Soulful Bhakti';
 
   @override
-  String get blacklist => 'แบล็กลิสต์';
+  String get blacklist => 'à¹à¸šà¸¥à¹‡à¸à¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get please_sponsor => 'กรุณาสนับสนุน/บริจาค';
+  String get please_sponsor =>
+      'à¸à¸£à¸¸à¸“à¸²à¸ªà¸™à¸±à¸šà¸ªà¸™à¸¸à¸™/à¸šà¸£à¸´à¸ˆà¸²à¸„';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti โปรแกรมเล่น Spotify ฟรีสำหรับทุกคน น้ำหนักเบา รองรับหลายแพลตฟอร์ม';
+      'Soulful Bhakti à¹‚à¸›à¸£à¹à¸à¸£à¸¡à¹€à¸¥à¹ˆà¸™ Spotify à¸Ÿà¸£à¸µà¸ªà¸³à¸«à¸£à¸±à¸šà¸—à¸¸à¸à¸„à¸™ à¸™à¹‰à¸³à¸«à¸™à¸±à¸à¹€à¸šà¸² à¸£à¸­à¸‡à¸£à¸±à¸šà¸«à¸¥à¸²à¸¢à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡';
 
   @override
-  String get version => 'รุ่น';
+  String get version => 'à¸£à¸¸à¹ˆà¸™';
 
   @override
-  String get build_number => 'หมายเลขบิลด์';
+  String get build_number => 'à¸«à¸¡à¸²à¸¢à¹€à¸¥à¸‚à¸šà¸´à¸¥à¸”à¹Œ';
 
   @override
-  String get founder => 'ผู้ก่อตั้ง';
+  String get founder => 'à¸œà¸¹à¹‰à¸à¹ˆà¸­à¸•à¸±à¹‰à¸‡';
 
   @override
-  String get repository => 'ที่เก็บ';
+  String get repository => 'à¸—à¸µà¹ˆà¹€à¸à¹‡à¸š';
 
   @override
-  String get bug_issues => 'ข้อผิดพลาด+ปัญหา';
+  String get bug_issues => 'à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”+à¸›à¸±à¸à¸«à¸²';
 
   @override
-  String get made_with => 'ทำด้วย❤️ใน บังคลาเทศ🇧🇩';
+  String get made_with =>
+      'à¸—à¸³à¸”à¹‰à¸§à¸¢â¤ï¸à¹ƒà¸™ à¸šà¸±à¸‡à¸„à¸¥à¸²à¹€à¸—à¸¨ðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'ใบอนุญาต';
+  String get license => 'à¹ƒà¸šà¸­à¸™à¸¸à¸à¸²à¸•';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'ไม่ต้องกังวล ข้อมูลรับรองใดๆ ของคุณจะไม่ถูกเก็บรวบรวมหรือแชร์กับใคร';
+      'à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸à¸±à¸‡à¸§à¸¥ à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸£à¸±à¸šà¸£à¸­à¸‡à¹ƒà¸”à¹† à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸ˆà¸°à¹„à¸¡à¹ˆà¸–à¸¹à¸à¹€à¸à¹‡à¸šà¸£à¸§à¸šà¸£à¸§à¸¡à¸«à¸£à¸·à¸­à¹à¸Šà¸£à¹Œà¸à¸±à¸šà¹ƒà¸„à¸£';
 
   @override
-  String get know_how_to_login => 'ไม่รู้จักวิธีดำเนินการนี้ใช่ไหม';
+  String get know_how_to_login =>
+      'à¹„à¸¡à¹ˆà¸£à¸¹à¹‰à¸ˆà¸±à¸à¸§à¸´à¸˜à¸µà¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸™à¸µà¹‰à¹ƒà¸Šà¹ˆà¹„à¸«à¸¡';
 
   @override
-  String get follow_step_by_step_guide => 'ทำตามคู่มือทีละขั้น';
+  String get follow_step_by_step_guide =>
+      'à¸—à¸³à¸•à¸²à¸¡à¸„à¸¹à¹ˆà¸¡à¸·à¸­à¸—à¸µà¸¥à¸°à¸‚à¸±à¹‰à¸™';
 
   @override
   String cookie_name_cookie(Object name) {
-    return 'คุกกี้ $name';
+    return 'à¸„à¸¸à¸à¸à¸µà¹‰ $name';
   }
 
   @override
-  String get fill_in_all_fields => 'กรุณากรอกข้อมูลทุกช่อง';
+  String get fill_in_all_fields =>
+      'à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸¸à¸à¸Šà¹ˆà¸­à¸‡';
 
   @override
-  String get submit => 'ยื่น';
+  String get submit => 'à¸¢à¸·à¹ˆà¸™';
 
   @override
-  String get exit => 'ออก';
+  String get exit => 'à¸­à¸­à¸';
 
   @override
-  String get previous => 'ย้อนกลับ';
+  String get previous => 'à¸¢à¹‰à¸­à¸™à¸à¸¥à¸±à¸š';
 
   @override
-  String get next => 'ถัดไป';
+  String get next => 'à¸–à¸±à¸”à¹„à¸›';
 
   @override
-  String get done => 'เสร็จ';
+  String get done => 'à¹€à¸ªà¸£à¹‡à¸ˆ';
 
   @override
-  String get step_1 => 'ขั้นที่ 1';
+  String get step_1 => 'à¸‚à¸±à¹‰à¸™à¸—à¸µà¹ˆ 1';
 
   @override
-  String get first_go_to => 'ก่อนอื่น ไปที่';
+  String get first_go_to => 'à¸à¹ˆà¸­à¸™à¸­à¸·à¹ˆà¸™ à¹„à¸›à¸—à¸µà¹ˆ';
 
   @override
-  String get something_went_wrong => 'มีอะไรผิดพลาด';
+  String get something_went_wrong => 'à¸¡à¸µà¸­à¸°à¹„à¸£à¸œà¸´à¸”à¸žà¸¥à¸²à¸”';
 
   @override
-  String get piped_instance => 'อินสแตนซ์เซิร์ฟเวอร์แบบ Pipe';
+  String get piped_instance =>
+      'à¸­à¸´à¸™à¸ªà¹à¸•à¸™à¸‹à¹Œà¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¹à¸šà¸š Pipe';
 
   @override
   String get piped_description =>
-      'อินสแตนซ์เซิร์ฟเวอร์แบบ Pipe ที่ใช้สำหรับการจับคู่แทร็ก';
+      'à¸­à¸´à¸™à¸ªà¹à¸•à¸™à¸‹à¹Œà¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¹à¸šà¸š Pipe à¸—à¸µà¹ˆà¹ƒà¸Šà¹‰à¸ªà¸³à¸«à¸£à¸±à¸šà¸à¸²à¸£à¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¹à¸—à¸£à¹‡à¸';
 
   @override
   String get piped_warning =>
-      'บางอย่างอาจใช้งานไม่ได้ผล คุณจึงต้องรับความเสี่ยงเอง';
+      'à¸šà¸²à¸‡à¸­à¸¢à¹ˆà¸²à¸‡à¸­à¸²à¸ˆà¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸œà¸¥ à¸„à¸¸à¸“à¸ˆà¸¶à¸‡à¸•à¹‰à¸­à¸‡à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¹€à¸ªà¸µà¹ˆà¸¢à¸‡à¹€à¸­à¸‡';
 
   @override
-  String get invidious_instance => 'อินสแตนซ์เซิร์ฟเวอร์ Invidious';
+  String get invidious_instance =>
+      'à¸­à¸´à¸™à¸ªà¹à¸•à¸™à¸‹à¹Œà¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œ Invidious';
 
   @override
   String get invidious_description =>
-      'อินสแตนซ์เซิร์ฟเวอร์ Invidious ที่ใช้สำหรับการจับคู่เพลง';
+      'à¸­à¸´à¸™à¸ªà¹à¸•à¸™à¸‹à¹Œà¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œ Invidious à¸—à¸µà¹ˆà¹ƒà¸Šà¹‰à¸ªà¸³à¸«à¸£à¸±à¸šà¸à¸²à¸£à¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¹€à¸žà¸¥à¸‡';
 
   @override
   String get invidious_warning =>
-      'บางอันอาจใช้งานไม่ดี ใช้ด้วยความเสี่ยงของคุณเอง';
+      'à¸šà¸²à¸‡à¸­à¸±à¸™à¸­à¸²à¸ˆà¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¹„à¸¡à¹ˆà¸”à¸µ à¹ƒà¸Šà¹‰à¸”à¹‰à¸§à¸¢à¸„à¸§à¸²à¸¡à¹€à¸ªà¸µà¹ˆà¸¢à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸­à¸‡';
 
   @override
-  String get generate => 'สร้าง';
+  String get generate => 'à¸ªà¸£à¹‰à¸²à¸‡';
 
   @override
   String track_exists(Object track) {
-    return 'แทร็ก $track มีอยู่แล้ว';
+    return 'à¹à¸—à¸£à¹‡à¸ $track à¸¡à¸µà¸­à¸¢à¸¹à¹ˆà¹à¸¥à¹‰à¸§';
   }
 
   @override
-  String get replace => 'แทนที่';
+  String get replace => 'à¹à¸—à¸™à¸—à¸µà¹ˆ';
 
   @override
-  String get skip => 'ข้าม';
+  String get skip => 'à¸‚à¹‰à¸²à¸¡';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'เลือกสูงสุด $count $type';
+    return 'à¹€à¸¥à¸·à¸­à¸à¸ªà¸¹à¸‡à¸ªà¸¸à¸” $count $type';
   }
 
   @override
-  String get select_genres => 'เลือกประเภท';
+  String get select_genres => 'à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—';
 
   @override
-  String get add_genres => 'เพิ่มประเภท';
+  String get add_genres => 'à¹€à¸žà¸´à¹ˆà¸¡à¸›à¸£à¸°à¹€à¸ à¸—';
 
   @override
-  String get country => 'ประเทศ';
+  String get country => 'à¸›à¸£à¸°à¹€à¸—à¸¨';
 
   @override
-  String get number_of_tracks_generate => 'จำนวนแทร็กที่จะสร้าง';
+  String get number_of_tracks_generate =>
+      'à¸ˆà¸³à¸™à¸§à¸™à¹à¸—à¸£à¹‡à¸à¸—à¸µà¹ˆà¸ˆà¸°à¸ªà¸£à¹‰à¸²à¸‡';
 
   @override
-  String get acousticness => 'อะคูสติก';
+  String get acousticness => 'à¸­à¸°à¸„à¸¹à¸ªà¸•à¸´à¸';
 
   @override
-  String get danceability => 'ความสามารถในการเต้น';
+  String get danceability =>
+      'à¸„à¸§à¸²à¸¡à¸ªà¸²à¸¡à¸²à¸£à¸–à¹ƒà¸™à¸à¸²à¸£à¹€à¸•à¹‰à¸™';
 
   @override
-  String get energy => 'พลัง';
+  String get energy => 'à¸žà¸¥à¸±à¸‡';
 
   @override
-  String get instrumentalness => 'บรรเลง';
+  String get instrumentalness => 'à¸šà¸£à¸£à¹€à¸¥à¸‡';
 
   @override
-  String get liveness => 'ความสด';
+  String get liveness => 'à¸„à¸§à¸²à¸¡à¸ªà¸”';
 
   @override
-  String get loudness => 'ความดัง';
+  String get loudness => 'à¸„à¸§à¸²à¸¡à¸”à¸±à¸‡';
 
   @override
-  String get speechiness => 'การพูด';
+  String get speechiness => 'à¸à¸²à¸£à¸žà¸¹à¸”';
 
   @override
-  String get valence => 'ความสุข';
+  String get valence => 'à¸„à¸§à¸²à¸¡à¸ªà¸¸à¸‚';
 
   @override
-  String get popularity => 'ความนิยม';
+  String get popularity => 'à¸„à¸§à¸²à¸¡à¸™à¸´à¸¢à¸¡';
 
   @override
-  String get key => 'คีย์';
+  String get key => 'à¸„à¸µà¸¢à¹Œ';
 
   @override
-  String get duration => 'ระยะเวลา (วินาที)';
+  String get duration => 'à¸£à¸°à¸¢à¸°à¹€à¸§à¸¥à¸² (à¸§à¸´à¸™à¸²à¸—à¸µ)';
 
   @override
-  String get tempo => 'ความเร็ว (BPM)';
+  String get tempo => 'à¸„à¸§à¸²à¸¡à¹€à¸£à¹‡à¸§ (BPM)';
 
   @override
-  String get mode => 'โหมด';
+  String get mode => 'à¹‚à¸«à¸¡à¸”';
 
   @override
-  String get time_signature => 'ลายเซ็นเวลา';
+  String get time_signature => 'à¸¥à¸²à¸¢à¹€à¸‹à¹‡à¸™à¹€à¸§à¸¥à¸²';
 
   @override
-  String get short => 'สั้น';
+  String get short => 'à¸ªà¸±à¹‰à¸™';
 
   @override
-  String get medium => 'กลาง';
+  String get medium => 'à¸à¸¥à¸²à¸‡';
 
   @override
-  String get long => 'ยาว';
+  String get long => 'à¸¢à¸²à¸§';
 
   @override
-  String get min => 'ต่ำสุด';
+  String get min => 'à¸•à¹ˆà¸³à¸ªà¸¸à¸”';
 
   @override
-  String get max => 'สูงสุด';
+  String get max => 'à¸ªà¸¹à¸‡à¸ªà¸¸à¸”';
 
   @override
-  String get target => 'เป้าหมาย';
+  String get target => 'à¹€à¸›à¹‰à¸²à¸«à¸¡à¸²à¸¢';
 
   @override
-  String get moderate => 'ปานกลาง';
+  String get moderate => 'à¸›à¸²à¸™à¸à¸¥à¸²à¸‡';
 
   @override
-  String get deselect_all => 'ยกเลิกการเลือกทั้งหมด';
+  String get deselect_all =>
+      'à¸¢à¸à¹€à¸¥à¸´à¸à¸à¸²à¸£à¹€à¸¥à¸·à¸­à¸à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get select_all => 'เลือกทั้งหมด';
+  String get select_all => 'à¹€à¸¥à¸·à¸­à¸à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get are_you_sure => 'คุณแน่ใจไหม?';
+  String get are_you_sure => 'à¸„à¸¸à¸“à¹à¸™à¹ˆà¹ƒà¸ˆà¹„à¸«à¸¡?';
 
   @override
-  String get generating_playlist => 'กำลังสร้างเพลย์ลิสต์ที่คุณกำหนดเอง...';
+  String get generating_playlist =>
+      'à¸à¸³à¸¥à¸±à¸‡à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œà¸—à¸µà¹ˆà¸„à¸¸à¸“à¸à¸³à¸«à¸™à¸”à¹€à¸­à¸‡...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'เลือก $count แทร็ก';
+    return 'à¹€à¸¥à¸·à¸­à¸ $count à¹à¸—à¸£à¹‡à¸';
   }
 
   @override
   String get download_warning =>
-      'ถ้าคุณดาวน์โหลดเพลงทั้งหมดเป็นจำนวนมาก คุณกำลังละเมิดลิขสิทธิ์เพลงและสร้างความเสียหายให้กับสังคมดนตรี สร้างสรรค์ หวังว่าคุณจะรับรู้เรื่องนี้ เสมอ พยายามเคารพและสนับสนุนผลงานหนักของศิลปิน';
+      'à¸–à¹‰à¸²à¸„à¸¸à¸“à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¹€à¸žà¸¥à¸‡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¹€à¸›à¹‡à¸™à¸ˆà¸³à¸™à¸§à¸™à¸¡à¸²à¸ à¸„à¸¸à¸“à¸à¸³à¸¥à¸±à¸‡à¸¥à¸°à¹€à¸¡à¸´à¸”à¸¥à¸´à¸‚à¸ªà¸´à¸—à¸˜à¸´à¹Œà¹€à¸žà¸¥à¸‡à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡à¸„à¸§à¸²à¸¡à¹€à¸ªà¸µà¸¢à¸«à¸²à¸¢à¹ƒà¸«à¹‰à¸à¸±à¸šà¸ªà¸±à¸‡à¸„à¸¡à¸”à¸™à¸•à¸£à¸µ à¸ªà¸£à¹‰à¸²à¸‡à¸ªà¸£à¸£à¸„à¹Œ à¸«à¸§à¸±à¸‡à¸§à¹ˆà¸²à¸„à¸¸à¸“à¸ˆà¸°à¸£à¸±à¸šà¸£à¸¹à¹‰à¹€à¸£à¸·à¹ˆà¸­à¸‡à¸™à¸µà¹‰ à¹€à¸ªà¸¡à¸­ à¸žà¸¢à¸²à¸¢à¸²à¸¡à¹€à¸„à¸²à¸£à¸žà¹à¸¥à¸°à¸ªà¸™à¸±à¸šà¸ªà¸™à¸¸à¸™à¸œà¸¥à¸‡à¸²à¸™à¸«à¸™à¸±à¸à¸‚à¸­à¸‡à¸¨à¸´à¸¥à¸›à¸´à¸™';
 
   @override
   String get download_ip_ban_warning =>
-      'นอกเหนือจากนั้น IP ของคุณอาจถูกบล็อกบน YouTube เนื่องจากคำขอดาวน์โหลดมากเกินกว่าปกติ การบล็อก IP หมายความว่าคุณไม่สามารถใช้ YouTube (แม้ว่าคุณจะล็อกอินอยู่) เป็นเวลาอย่างน้อย 2-3 เดือนจากอุปกรณ์ IP นั้น และ Soulful Bhakti จะไม่รับผิดชอบใด ๆ หากสิ่งนี้เกิดขึ้น';
+      'à¸™à¸­à¸à¹€à¸«à¸™à¸·à¸­à¸ˆà¸²à¸à¸™à¸±à¹‰à¸™ IP à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸­à¸²à¸ˆà¸–à¸¹à¸à¸šà¸¥à¹‡à¸­à¸à¸šà¸™ YouTube à¹€à¸™à¸·à¹ˆà¸­à¸‡à¸ˆà¸²à¸à¸„à¸³à¸‚à¸­à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸¡à¸²à¸à¹€à¸à¸´à¸™à¸à¸§à¹ˆà¸²à¸›à¸à¸•à¸´ à¸à¸²à¸£à¸šà¸¥à¹‡à¸­à¸ IP à¸«à¸¡à¸²à¸¢à¸„à¸§à¸²à¸¡à¸§à¹ˆà¸²à¸„à¸¸à¸“à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¹ƒà¸Šà¹‰ YouTube (à¹à¸¡à¹‰à¸§à¹ˆà¸²à¸„à¸¸à¸“à¸ˆà¸°à¸¥à¹‡à¸­à¸à¸­à¸´à¸™à¸­à¸¢à¸¹à¹ˆ) à¹€à¸›à¹‡à¸™à¹€à¸§à¸¥à¸²à¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 2-3 à¹€à¸”à¸·à¸­à¸™à¸ˆà¸²à¸à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ IP à¸™à¸±à¹‰à¸™ à¹à¸¥à¸° Soulful Bhakti à¸ˆà¸°à¹„à¸¡à¹ˆà¸£à¸±à¸šà¸œà¸´à¸”à¸Šà¸­à¸šà¹ƒà¸” à¹† à¸«à¸²à¸à¸ªà¸´à¹ˆà¸‡à¸™à¸µà¹‰à¹€à¸à¸´à¸”à¸‚à¸¶à¹‰à¸™';
 
   @override
   String get by_clicking_accept_terms =>
-      'คลิก \'ยอมรับ\' คุณยินยอมตามเงื่อนไขต่อไปนี้:';
+      'à¸„à¸¥à¸´à¸ \'à¸¢à¸­à¸¡à¸£à¸±à¸š\' à¸„à¸¸à¸“à¸¢à¸´à¸™à¸¢à¸­à¸¡à¸•à¸²à¸¡à¹€à¸‡à¸·à¹ˆà¸­à¸™à¹„à¸‚à¸•à¹ˆà¸­à¹„à¸›à¸™à¸µà¹‰:';
 
   @override
   String get download_agreement_1 =>
-      'ฉันรู้ว่าฉันกำลังละเมิดลิขสิทธิ์เพลง ฉันเลว';
+      'à¸‰à¸±à¸™à¸£à¸¹à¹‰à¸§à¹ˆà¸²à¸‰à¸±à¸™à¸à¸³à¸¥à¸±à¸‡à¸¥à¸°à¹€à¸¡à¸´à¸”à¸¥à¸´à¸‚à¸ªà¸´à¸—à¸˜à¸´à¹Œà¹€à¸žà¸¥à¸‡ à¸‰à¸±à¸™à¹€à¸¥à¸§';
 
   @override
   String get download_agreement_2 =>
-      'ฉันจะสนับสนุนศิลปินทุกที่ที่ฉันทำได้และฉันทำสิ่งนี้เพียงเพราะฉันไม่มีเงินซื้อผลงานศิลปะของพวกเขา';
+      'à¸‰à¸±à¸™à¸ˆà¸°à¸ªà¸™à¸±à¸šà¸ªà¸™à¸¸à¸™à¸¨à¸´à¸¥à¸›à¸´à¸™à¸—à¸¸à¸à¸—à¸µà¹ˆà¸—à¸µà¹ˆà¸‰à¸±à¸™à¸—à¸³à¹„à¸”à¹‰à¹à¸¥à¸°à¸‰à¸±à¸™à¸—à¸³à¸ªà¸´à¹ˆà¸‡à¸™à¸µà¹‰à¹€à¸žà¸µà¸¢à¸‡à¹€à¸žà¸£à¸²à¸°à¸‰à¸±à¸™à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸‡à¸´à¸™à¸‹à¸·à¹‰à¸­à¸œà¸¥à¸‡à¸²à¸™à¸¨à¸´à¸¥à¸›à¸°à¸‚à¸­à¸‡à¸žà¸§à¸à¹€à¸‚à¸²';
 
   @override
   String get download_agreement_3 =>
-      'ฉันรับทราบอย่างสมบูรณ์ว่า IP ของฉันอาจถูกบล็อกบน YouTube และฉันจะไม่ถือ Soulful Bhakti หรือเจ้าของ/ผู้มีส่วนร่วมใด ๆ รับผิดชอบต่ออุบัติเหตุใด ๆ ที่เกิดจากการกระทำปัจจุบันของฉัน';
+      'à¸‰à¸±à¸™à¸£à¸±à¸šà¸—à¸£à¸²à¸šà¸­à¸¢à¹ˆà¸²à¸‡à¸ªà¸¡à¸šà¸¹à¸£à¸“à¹Œà¸§à¹ˆà¸² IP à¸‚à¸­à¸‡à¸‰à¸±à¸™à¸­à¸²à¸ˆà¸–à¸¹à¸à¸šà¸¥à¹‡à¸­à¸à¸šà¸™ YouTube à¹à¸¥à¸°à¸‰à¸±à¸™à¸ˆà¸°à¹„à¸¡à¹ˆà¸–à¸·à¸­ Soulful Bhakti à¸«à¸£à¸·à¸­à¹€à¸ˆà¹‰à¸²à¸‚à¸­à¸‡/à¸œà¸¹à¹‰à¸¡à¸µà¸ªà¹ˆà¸§à¸™à¸£à¹ˆà¸§à¸¡à¹ƒà¸” à¹† à¸£à¸±à¸šà¸œà¸´à¸”à¸Šà¸­à¸šà¸•à¹ˆà¸­à¸­à¸¸à¸šà¸±à¸•à¸´à¹€à¸«à¸•à¸¸à¹ƒà¸” à¹† à¸—à¸µà¹ˆà¹€à¸à¸´à¸”à¸ˆà¸²à¸à¸à¸²à¸£à¸à¸£à¸°à¸—à¸³à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™à¸‚à¸­à¸‡à¸‰à¸±à¸™';
 
   @override
-  String get decline => 'ปฏิเสธ';
+  String get decline => 'à¸›à¸à¸´à¹€à¸ªà¸˜';
 
   @override
-  String get accept => 'ยอมรับ';
+  String get accept => 'à¸¢à¸­à¸¡à¸£à¸±à¸š';
 
   @override
-  String get details => 'รายละเอียด';
+  String get details => 'à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”';
 
   @override
   String get youtube => 'youtube';
 
   @override
-  String get channel => 'ช่อง';
+  String get channel => 'à¸Šà¹ˆà¸­à¸‡';
 
   @override
-  String get likes => 'ถูกใจ';
+  String get likes => 'à¸–à¸¹à¸à¹ƒà¸ˆ';
 
   @override
-  String get dislikes => 'ไม่ชอบ';
+  String get dislikes => 'à¹„à¸¡à¹ˆà¸Šà¸­à¸š';
 
   @override
-  String get views => 'วิว';
+  String get views => 'à¸§à¸´à¸§';
 
   @override
-  String get streamUrl => 'สตรีม URL';
+  String get streamUrl => 'à¸ªà¸•à¸£à¸µà¸¡ URL';
 
   @override
-  String get stop => 'หยุด';
+  String get stop => 'à¸«à¸¢à¸¸à¸”';
 
   @override
-  String get sort_newest => 'เรียงตามการเพิ่มใหม่ล่าสุด';
+  String get sort_newest =>
+      'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸à¸²à¸£à¹€à¸žà¸´à¹ˆà¸¡à¹ƒà¸«à¸¡à¹ˆà¸¥à¹ˆà¸²à¸ªà¸¸à¸”';
 
   @override
-  String get sort_oldest => 'เรียงตามการเพิ่มเก่าสุด';
+  String get sort_oldest =>
+      'à¹€à¸£à¸µà¸¢à¸‡à¸•à¸²à¸¡à¸à¸²à¸£à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸à¹ˆà¸²à¸ªà¸¸à¸”';
 
   @override
-  String get sleep_timer => 'ตั้งเวลาปิด';
+  String get sleep_timer => 'à¸•à¸±à¹‰à¸‡à¹€à¸§à¸¥à¸²à¸›à¸´à¸”';
 
   @override
   String mins(Object minutes) {
-    return '$minutes นาที';
+    return '$minutes à¸™à¸²à¸—à¸µ';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours ชั่วโมง';
+    return '$hours à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours ชั่วโมง';
+    return '$hours à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡';
   }
 
   @override
-  String get custom_hours => 'ชั่วโมงที่กำหนดเอง';
+  String get custom_hours =>
+      'à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡à¸—à¸µà¹ˆà¸à¸³à¸«à¸™à¸”à¹€à¸­à¸‡';
 
   @override
-  String get logs => 'บันทึก';
+  String get logs => 'à¸šà¸±à¸™à¸—à¸¶à¸';
 
   @override
-  String get developers => 'นักพัฒนา';
+  String get developers => 'à¸™à¸±à¸à¸žà¸±à¸’à¸™à¸²';
 
   @override
-  String get not_logged_in => 'คุณไม่ได้เข้าสู่ระบบ';
+  String get not_logged_in =>
+      'à¸„à¸¸à¸“à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š';
 
   @override
-  String get search_mode => 'โหมดการค้นหา';
+  String get search_mode => 'à¹‚à¸«à¸¡à¸”à¸à¸²à¸£à¸„à¹‰à¸™à¸«à¸²';
 
   @override
-  String get audio_source => 'แหล่งที่มาของเสียง';
+  String get audio_source =>
+      'à¹à¸«à¸¥à¹ˆà¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸‚à¸­à¸‡à¹€à¸ªà¸µà¸¢à¸‡';
 
   @override
-  String get ok => 'ตกลง';
+  String get ok => 'à¸•à¸à¸¥à¸‡';
 
   @override
-  String get failed_to_encrypt => 'เข้ารหัสล้มเหลว';
+  String get failed_to_encrypt =>
+      'à¹€à¸‚à¹‰à¸²à¸£à¸«à¸±à¸ªà¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti ใช้การเข้ารหัสเพื่อเก็บข้อมูลของคุณอย่างปลอดภัย แต่ไม่สามารถทำได้ ดังนั้นจะเปลี่ยนเป็นการจัดเก็บที่ไม่ปลอดภัย\nหากคุณใช้ Linux โปรดตรวจสอบว่าคุณได้ติดตั้งบริการลับ (gnome-keyring, kde-wallet, keepassxc เป็นต้น)';
+      'Soulful Bhakti à¹ƒà¸Šà¹‰à¸à¸²à¸£à¹€à¸‚à¹‰à¸²à¸£à¸«à¸±à¸ªà¹€à¸žà¸·à¹ˆà¸­à¹€à¸à¹‡à¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸­à¸¢à¹ˆà¸²à¸‡à¸›à¸¥à¸­à¸”à¸ à¸±à¸¢ à¹à¸•à¹ˆà¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸—à¸³à¹„à¸”à¹‰ à¸”à¸±à¸‡à¸™à¸±à¹‰à¸™à¸ˆà¸°à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¹€à¸›à¹‡à¸™à¸à¸²à¸£à¸ˆà¸±à¸”à¹€à¸à¹‡à¸šà¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸›à¸¥à¸­à¸”à¸ à¸±à¸¢\nà¸«à¸²à¸à¸„à¸¸à¸“à¹ƒà¸Šà¹‰ Linux à¹‚à¸›à¸£à¸”à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸§à¹ˆà¸²à¸„à¸¸à¸“à¹„à¸”à¹‰à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¸šà¸£à¸´à¸à¸²à¸£à¸¥à¸±à¸š (gnome-keyring, kde-wallet, keepassxc à¹€à¸›à¹‡à¸™à¸•à¹‰à¸™)';
 
   @override
-  String get querying_info => 'กำลังดึงข้อมูล...';
+  String get querying_info => 'à¸à¸³à¸¥à¸±à¸‡à¸”à¸¶à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥...';
 
   @override
-  String get piped_api_down => 'Piped API ไม่ทำงาน';
+  String get piped_api_down => 'Piped API à¹„à¸¡à¹ˆà¸—à¸³à¸‡à¸²à¸™';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Piped instance $pipedInstance ไม่ทำงานขณะนี้\n\nเปลี่ยนอินสแตนซ์หรือเปลี่ยน \'ประเภท API\' เป็น YouTube API อย่างเป็นทางการ\n\nอย่าลืมรีสตาร์ทแอปหลังจากเปลี่ยน';
+    return 'Piped instance $pipedInstance à¹„à¸¡à¹ˆà¸—à¸³à¸‡à¸²à¸™à¸‚à¸“à¸°à¸™à¸µà¹‰\n\nà¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸­à¸´à¸™à¸ªà¹à¸•à¸™à¸‹à¹Œà¸«à¸£à¸·à¸­à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™ \'à¸›à¸£à¸°à¹€à¸ à¸— API\' à¹€à¸›à¹‡à¸™ YouTube API à¸­à¸¢à¹ˆà¸²à¸‡à¹€à¸›à¹‡à¸™à¸—à¸²à¸‡à¸à¸²à¸£\n\nà¸­à¸¢à¹ˆà¸²à¸¥à¸·à¸¡à¸£à¸µà¸ªà¸•à¸²à¸£à¹Œà¸—à¹à¸­à¸›à¸«à¸¥à¸±à¸‡à¸ˆà¸²à¸à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™';
   }
 
   @override
-  String get you_are_offline => 'คุณออฟไลน์อยู่';
+  String get you_are_offline => 'à¸„à¸¸à¸“à¸­à¸­à¸Ÿà¹„à¸¥à¸™à¹Œà¸­à¸¢à¸¹à¹ˆ';
 
   @override
   String get connection_restored =>
-      'การเชื่อมต่ออินเทอร์เน็ตของคุณได้รับการกู้คืน';
+      'à¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸­à¸´à¸™à¹€à¸—à¸­à¸£à¹Œà¹€à¸™à¹‡à¸•à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹„à¸”à¹‰à¸£à¸±à¸šà¸à¸²à¸£à¸à¸¹à¹‰à¸„à¸·à¸™';
 
   @override
-  String get use_system_title_bar => 'ใช้แถบชื่อระบบ';
+  String get use_system_title_bar =>
+      'à¹ƒà¸Šà¹‰à¹à¸–à¸šà¸Šà¸·à¹ˆà¸­à¸£à¸°à¸šà¸š';
 
   @override
-  String get crunching_results => 'กำลังประมวลผล...';
+  String get crunching_results => 'à¸à¸³à¸¥à¸±à¸‡à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥...';
 
   @override
-  String get search_to_get_results => 'ค้นหาเพื่อดูผลลัพธ์';
+  String get search_to_get_results =>
+      'à¸„à¹‰à¸™à¸«à¸²à¹€à¸žà¸·à¹ˆà¸­à¸”à¸¹à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œ';
 
   @override
-  String get use_amoled_mode => 'ธีมมืดสนิท';
+  String get use_amoled_mode => 'à¸˜à¸µà¸¡à¸¡à¸·à¸”à¸ªà¸™à¸´à¸—';
 
   @override
-  String get pitch_dark_theme => 'โหมด AMOLED';
+  String get pitch_dark_theme => 'à¹‚à¸«à¸¡à¸” AMOLED';
 
   @override
-  String get normalize_audio => 'ปรับระดับเสียง';
+  String get normalize_audio => 'à¸›à¸£à¸±à¸šà¸£à¸°à¸”à¸±à¸šà¹€à¸ªà¸µà¸¢à¸‡';
 
   @override
-  String get change_cover => 'เปลี่ยนปก';
+  String get change_cover => 'à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸›à¸';
 
   @override
-  String get add_cover => 'เพิ่มปก';
+  String get add_cover => 'à¹€à¸žà¸´à¹ˆà¸¡à¸›à¸';
 
   @override
-  String get restore_defaults => 'คืนค่าเริ่มต้น';
+  String get restore_defaults => 'à¸„à¸·à¸™à¸„à¹ˆà¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™';
 
   @override
   String get restore_defaults_confirmation =>
-      'การดำเนินการนี้จะรีเซ็ตการตั้งค่าทั้งหมดของคุณกลับเป็นค่าเริ่มต้น การดำเนินการนี้ไม่สามารถยกเลิกได้';
+      'à¸à¸²à¸£à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸™à¸µà¹‰à¸ˆà¸°à¸£à¸µà¹€à¸‹à¹‡à¸•à¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸à¸¥à¸±à¸šà¹€à¸›à¹‡à¸™à¸„à¹ˆà¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™ à¸à¸²à¸£à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸™à¸µà¹‰à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸¢à¸à¹€à¸¥à¸´à¸à¹„à¸”à¹‰';
 
   @override
-  String get streaming_music_format => 'รูปแบบการสตรีมเพลง';
+  String get streaming_music_format =>
+      'à¸£à¸¹à¸›à¹à¸šà¸šà¸à¸²à¸£à¸ªà¸•à¸£à¸µà¸¡à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get streaming_music_quality => 'คุณภาพการสตรีม';
+  String get streaming_music_quality =>
+      'à¸„à¸¸à¸“à¸ à¸²à¸žà¸à¸²à¸£à¸ªà¸•à¸£à¸µà¸¡';
 
   @override
-  String get connect => 'เชื่อมต่อ';
+  String get connect => 'à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­';
 
   @override
-  String get disconnect => 'ตัดการเชื่อมต่อ';
+  String get disconnect => 'à¸•à¸±à¸”à¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­';
 
   @override
-  String get username => 'ชื่อผู้ใช้';
+  String get username => 'à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰';
 
   @override
-  String get password => 'รหัสผ่าน';
+  String get password => 'à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™';
 
   @override
-  String get login => 'เข้าสู่ระบบ';
+  String get login => 'à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š';
 
   @override
-  String get sign_in => 'ลงชื่อเข้าใช้';
+  String get sign_in => 'à¸¥à¸‡à¸Šà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸Šà¹‰';
 
   @override
-  String get sign_up => 'ลงทะเบียน';
+  String get sign_up => 'à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™';
 
   @override
-  String get sign_out => 'ออกจากระบบ';
+  String get sign_out => 'à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š';
 
   @override
-  String get verify => 'ยืนยัน';
+  String get verify => 'à¸¢à¸·à¸™à¸¢à¸±à¸™';
 
   @override
-  String get create_account => 'สร้างบัญชีของคุณ';
+  String get create_account =>
+      'à¸ªà¸£à¹‰à¸²à¸‡à¸šà¸±à¸à¸Šà¸µà¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get already_have_account => 'มีบัญชีอยู่แล้ว? ลงชื่อเข้าใช้';
+  String get already_have_account =>
+      'à¸¡à¸µà¸šà¸±à¸à¸Šà¸µà¸­à¸¢à¸¹à¹ˆà¹à¸¥à¹‰à¸§? à¸¥à¸‡à¸Šà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸Šà¹‰';
 
   @override
-  String get dont_have_account => 'ยังไม่มีบัญชี? ลงทะเบียน';
+  String get dont_have_account =>
+      'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸šà¸±à¸à¸Šà¸µ? à¸¥à¸‡à¸—à¸°à¹€à¸šà¸µà¸¢à¸™';
 
   @override
   String signed_in_as(Object userId) {
-    return 'ลงชื่อเข้าใช้ในฐานะ $userId';
+    return 'à¸¥à¸‡à¸Šà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸Šà¹‰à¹ƒà¸™à¸à¸²à¸™à¸° $userId';
   }
 
   @override
-  String get verification_code => 'รหัสยืนยัน';
+  String get verification_code => 'à¸£à¸«à¸±à¸ªà¸¢à¸·à¸™à¸¢à¸±à¸™';
 
   @override
-  String get verification_code_hint => 'ป้อนรหัสที่ส่งไปยังอีเมลของคุณ';
+  String get verification_code_hint =>
+      'à¸›à¹‰à¸­à¸™à¸£à¸«à¸±à¸ªà¸—à¸µà¹ˆà¸ªà¹ˆà¸‡à¹„à¸›à¸¢à¸±à¸‡à¸­à¸µà¹€à¸¡à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get verify_email_code => 'เราได้ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว';
+  String get verify_email_code =>
+      'à¹€à¸£à¸²à¹„à¸”à¹‰à¸ªà¹ˆà¸‡à¸£à¸«à¸±à¸ªà¸¢à¸·à¸™à¸¢à¸±à¸™à¹„à¸›à¸¢à¸±à¸‡à¸­à¸µà¹€à¸¡à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹à¸¥à¹‰à¸§';
 
   @override
-  String get go_to_album => 'ไปที่อัลบั้ม';
+  String get go_to_album => 'à¹„à¸›à¸—à¸µà¹ˆà¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡';
 
   @override
   String get discord_rich_presence => 'Discord Rich Presence';
 
   @override
-  String get browse_all => 'เรียกดูทั้งหมด';
+  String get browse_all => 'à¹€à¸£à¸µà¸¢à¸à¸”à¸¹à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get genres => 'ประเภท';
+  String get genres => 'à¸›à¸£à¸°à¹€à¸ à¸—';
 
   @override
-  String get explore_genres => 'สำรวจประเภท';
+  String get explore_genres => 'à¸ªà¸³à¸£à¸§à¸ˆà¸›à¸£à¸°à¹€à¸ à¸—';
 
   @override
-  String get friends => 'เพื่อน';
+  String get friends => 'à¹€à¸žà¸·à¹ˆà¸­à¸™';
 
   @override
-  String get no_lyrics_available => 'ขออภัย ไม่พบเนื้อเพลงสำหรับเพลงนี้';
+  String get no_lyrics_available =>
+      'à¸‚à¸­à¸­à¸ à¸±à¸¢ à¹„à¸¡à¹ˆà¸žà¸šà¹€à¸™à¸·à¹‰à¸­à¹€à¸žà¸¥à¸‡à¸ªà¸³à¸«à¸£à¸±à¸šà¹€à¸žà¸¥à¸‡à¸™à¸µà¹‰';
 
   @override
-  String get start_a_radio => 'เปิดวิทยุ';
+  String get start_a_radio => 'à¹€à¸›à¸´à¸”à¸§à¸´à¸—à¸¢à¸¸';
 
   @override
-  String get how_to_start_radio => 'หากต้องการเปิดวิทยุฟังยังไง?';
+  String get how_to_start_radio =>
+      'à¸«à¸²à¸à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹€à¸›à¸´à¸”à¸§à¸´à¸—à¸¢à¸¸à¸Ÿà¸±à¸‡à¸¢à¸±à¸‡à¹„à¸‡?';
 
   @override
   String get replace_queue_question =>
-      'คุณต้องการแทนที่คิวปัจจุบันหรือเพิ่มเข้าไปหรือไม่';
+      'à¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹à¸—à¸™à¸—à¸µà¹ˆà¸„à¸´à¸§à¸›à¸±à¸ˆà¸ˆà¸¸à¸šà¸±à¸™à¸«à¸£à¸·à¸­à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸‚à¹‰à¸²à¹„à¸›à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ';
 
   @override
-  String get endless_playback => 'เล่นซ้ำ';
+  String get endless_playback => 'à¹€à¸¥à¹ˆà¸™à¸‹à¹‰à¸³';
 
   @override
-  String get delete_playlist => 'ลบเพลย์ลิสต์';
+  String get delete_playlist => 'à¸¥à¸šà¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
   String get delete_playlist_confirmation =>
-      'คุณแน่ใจที่จะลบเพลย์ลิสต์นี้หรือไม่';
+      'à¸„à¸¸à¸“à¹à¸™à¹ˆà¹ƒà¸ˆà¸—à¸µà¹ˆà¸ˆà¸°à¸¥à¸šà¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œà¸™à¸µà¹‰à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ';
 
   @override
-  String get local_tracks => 'เพลงในเครื่อง';
+  String get local_tracks => 'à¹€à¸žà¸¥à¸‡à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡';
 
   @override
-  String get local_tab => 'ท้องถิ่น';
+  String get local_tab => 'à¸—à¹‰à¸­à¸‡à¸–à¸´à¹ˆà¸™';
 
   @override
-  String get song_link => 'ลิงค์เพลง';
+  String get song_link => 'à¸¥à¸´à¸‡à¸„à¹Œà¹€à¸žà¸¥à¸‡';
 
   @override
-  String get skip_this_nonsense => 'ข้ามสิ่งไร้สาระนี้';
+  String get skip_this_nonsense =>
+      'à¸‚à¹‰à¸²à¸¡à¸ªà¸´à¹ˆà¸‡à¹„à¸£à¹‰à¸ªà¸²à¸£à¸°à¸™à¸µà¹‰';
 
   @override
-  String get freedom_of_music => '“เสรีภาพแห่งเสียงเพลง”';
+  String get freedom_of_music =>
+      'â€œà¹€à¸ªà¸£à¸µà¸ à¸²à¸žà¹à¸«à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡à¹€à¸žà¸¥à¸‡â€';
 
   @override
-  String get freedom_of_music_palm => '“เสรีภาพแห่งเสียงเพลง ในมือของคุณ”';
+  String get freedom_of_music_palm =>
+      'â€œà¹€à¸ªà¸£à¸µà¸ à¸²à¸žà¹à¸«à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡à¹€à¸žà¸¥à¸‡ à¹ƒà¸™à¸¡à¸·à¸­à¸‚à¸­à¸‡à¸„à¸¸à¸“â€';
 
   @override
-  String get get_started => 'เริ่มต้น';
+  String get get_started => 'à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™';
 
   @override
-  String get youtube_source_description => 'แนะนำและใช้งานได้ดีที่สุด';
+  String get youtube_source_description =>
+      'à¹à¸™à¸°à¸™à¸³à¹à¸¥à¸°à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¹„à¸”à¹‰à¸”à¸µà¸—à¸µà¹ˆà¸ªà¸¸à¸”';
 
   @override
   String get piped_source_description =>
-      'รู้สึกอิสระ? เหมือน YouTube แต่ฟรีกว่าเยอะ';
+      'à¸£à¸¹à¹‰à¸ªà¸¶à¸à¸­à¸´à¸ªà¸£à¸°? à¹€à¸«à¸¡à¸·à¸­à¸™ YouTube à¹à¸•à¹ˆà¸Ÿà¸£à¸µà¸à¸§à¹ˆà¸²à¹€à¸¢à¸­à¸°';
 
   @override
-  String get jiosaavn_source_description => 'ดีที่สุดสำหรับภูมิภาคเอเชียใต้';
+  String get jiosaavn_source_description =>
+      'à¸”à¸µà¸—à¸µà¹ˆà¸ªà¸¸à¸”à¸ªà¸³à¸«à¸£à¸±à¸šà¸ à¸¹à¸¡à¸´à¸ à¸²à¸„à¹€à¸­à¹€à¸Šà¸µà¸¢à¹ƒà¸•à¹‰';
 
   @override
   String get invidious_source_description =>
-      'คล้ายกับ Piped แต่มีความพร้อมใช้งานสูงกว่า';
+      'à¸„à¸¥à¹‰à¸²à¸¢à¸à¸±à¸š Piped à¹à¸•à¹ˆà¸¡à¸µà¸„à¸§à¸²à¸¡à¸žà¸£à¹‰à¸­à¸¡à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¸ªà¸¹à¸‡à¸à¸§à¹ˆà¸²';
 
   @override
   String highest_quality(Object quality) {
-    return 'คุณภาพสูงสุด: $quality';
+    return 'à¸„à¸¸à¸“à¸ à¸²à¸žà¸ªà¸¹à¸‡à¸ªà¸¸à¸”: $quality';
   }
 
   @override
-  String get select_audio_source => 'เลือกแหล่งเสียง';
+  String get select_audio_source =>
+      'à¹€à¸¥à¸·à¸­à¸à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡';
 
   @override
-  String get endless_playback_description => 'เพิ่มเพลงใหม่ลงในคิวโดยอัตโนมัติ';
+  String get endless_playback_description =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸žà¸¥à¸‡à¹ƒà¸«à¸¡à¹ˆà¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§à¹‚à¸”à¸¢à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´';
 
   @override
-  String get choose_your_region => 'เลือกภูมิภาคของคุณ';
+  String get choose_your_region =>
+      'à¹€à¸¥à¸·à¸­à¸à¸ à¸¹à¸¡à¸´à¸ à¸²à¸„à¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
   String get choose_your_region_description =>
-      'สิ่งนี้จะช่วยให้ Soulful Bhakti แสดงเนื้อหาที่เหมาะสมสำหรับคุณ';
+      'à¸ªà¸´à¹ˆà¸‡à¸™à¸µà¹‰à¸ˆà¸°à¸Šà¹ˆà¸§à¸¢à¹ƒà¸«à¹‰ Soulful Bhakti à¹à¸ªà¸”à¸‡à¹€à¸™à¸·à¹‰à¸­à¸«à¸²à¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¸ªà¸¡à¸ªà¸³à¸«à¸£à¸±à¸šà¸„à¸¸à¸“';
 
   @override
-  String get choose_your_language => 'เลือกภาษาของคุณ';
+  String get choose_your_language =>
+      'à¹€à¸¥à¸·à¸­à¸à¸ à¸²à¸©à¸²à¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get help_project_grow => 'ช่วยให้โครงการนี้เติบโต';
+  String get help_project_grow =>
+      'à¸Šà¹ˆà¸§à¸¢à¹ƒà¸«à¹‰à¹‚à¸„à¸£à¸‡à¸à¸²à¸£à¸™à¸µà¹‰à¹€à¸•à¸´à¸šà¹‚à¸•';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti เป็นโครงการโอเพนซอร์ส คุณสามารถช่วยให้โครงการนี้เติบโตได้โดยการมีส่วนร่วมในโครงการ รายงานข้อบกพร่อง หรือเสนอคุณสมบัติใหม่';
+      'Soulful Bhakti à¹€à¸›à¹‡à¸™à¹‚à¸„à¸£à¸‡à¸à¸²à¸£à¹‚à¸­à¹€à¸žà¸™à¸‹à¸­à¸£à¹Œà¸ª à¸„à¸¸à¸“à¸ªà¸²à¸¡à¸²à¸£à¸–à¸Šà¹ˆà¸§à¸¢à¹ƒà¸«à¹‰à¹‚à¸„à¸£à¸‡à¸à¸²à¸£à¸™à¸µà¹‰à¹€à¸•à¸´à¸šà¹‚à¸•à¹„à¸”à¹‰à¹‚à¸”à¸¢à¸à¸²à¸£à¸¡à¸µà¸ªà¹ˆà¸§à¸™à¸£à¹ˆà¸§à¸¡à¹ƒà¸™à¹‚à¸„à¸£à¸‡à¸à¸²à¸£ à¸£à¸²à¸¢à¸‡à¸²à¸™à¸‚à¹‰à¸­à¸šà¸à¸žà¸£à¹ˆà¸­à¸‡ à¸«à¸£à¸·à¸­à¹€à¸ªà¸™à¸­à¸„à¸¸à¸“à¸ªà¸¡à¸šà¸±à¸•à¸´à¹ƒà¸«à¸¡à¹ˆ';
 
   @override
-  String get contribute_on_github => 'มีส่วนร่วมบน GitHub';
+  String get contribute_on_github =>
+      'à¸¡à¸µà¸ªà¹ˆà¸§à¸™à¸£à¹ˆà¸§à¸¡à¸šà¸™ GitHub';
 
   @override
-  String get donate_on_open_collective => 'บริจาคบน Open Collective';
+  String get donate_on_open_collective =>
+      'à¸šà¸£à¸´à¸ˆà¸²à¸„à¸šà¸™ Open Collective';
 
   @override
-  String get browse_anonymously => 'เรียกดูแบบไม่ระบุตัวตน';
+  String get browse_anonymously =>
+      'à¹€à¸£à¸µà¸¢à¸à¸”à¸¹à¹à¸šà¸šà¹„à¸¡à¹ˆà¸£à¸°à¸šà¸¸à¸•à¸±à¸§à¸•à¸™';
 
   @override
-  String get enable_connect => 'เปิดใช้งานการเชื่อมต่อ';
+  String get enable_connect =>
+      'à¹€à¸›à¸´à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­';
 
   @override
   String get enable_connect_description =>
-      'ควบคุม Soulful Bhakti จากอุปกรณ์อื่น';
+      'à¸„à¸§à¸šà¸„à¸¸à¸¡ Soulful Bhakti à¸ˆà¸²à¸à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸­à¸·à¹ˆà¸™';
 
   @override
-  String get devices => 'อุปกรณ์';
+  String get devices => 'à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ';
 
   @override
-  String get select => 'เลือก';
+  String get select => 'à¹€à¸¥à¸·à¸­à¸';
 
   @override
   String connect_client_alert(Object client) {
-    return 'คุณกำลังถูกควบคุมโดย $client';
+    return 'à¸„à¸¸à¸“à¸à¸³à¸¥à¸±à¸‡à¸–à¸¹à¸à¸„à¸§à¸šà¸„à¸¸à¸¡à¹‚à¸”à¸¢ $client';
   }
 
   @override
-  String get this_device => 'อุปกรณ์นี้';
+  String get this_device => 'à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸™à¸µà¹‰';
 
   @override
-  String get remote => 'ระยะไกล';
+  String get remote => 'à¸£à¸°à¸¢à¸°à¹„à¸à¸¥';
 
   @override
-  String get stats => 'สถิติ';
+  String get stats => 'à¸ªà¸–à¸´à¸•à¸´';
 
   @override
   String and_n_more(Object count) {
-    return 'และ $count อีก';
+    return 'à¹à¸¥à¸° $count à¸­à¸µà¸';
   }
 
   @override
-  String get recently_played => 'เพลงที่เพิ่งเล่น';
+  String get recently_played =>
+      'à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¹€à¸žà¸´à¹ˆà¸‡à¹€à¸¥à¹ˆà¸™';
 
   @override
-  String get browse_more => 'ดูเพิ่มเติม';
+  String get browse_more => 'à¸”à¸¹à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡';
 
   @override
-  String get no_title => 'ไม่มีชื่อ';
+  String get no_title => 'à¹„à¸¡à¹ˆà¸¡à¸µà¸Šà¸·à¹ˆà¸­';
 
   @override
-  String get not_playing => 'ไม่เล่น';
+  String get not_playing => 'à¹„à¸¡à¹ˆà¹€à¸¥à¹ˆà¸™';
 
   @override
-  String get epic_failure => 'ล้มเหลวอย่างยิ่ง!';
+  String get epic_failure =>
+      'à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§à¸­à¸¢à¹ˆà¸²à¸‡à¸¢à¸´à¹ˆà¸‡!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'เพิ่ม $tracks_length เพลงในคิว';
+    return 'à¹€à¸žà¸´à¹ˆà¸¡ $tracks_length à¹€à¸žà¸¥à¸‡à¹ƒà¸™à¸„à¸´à¸§';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti มีการอัปเดต';
+  String get spotube_has_an_update =>
+      'Soulful Bhakti à¸¡à¸µà¸à¸²à¸£à¸­à¸±à¸›à¹€à¸”à¸•';
 
   @override
-  String get download_now => 'ดาวน์โหลดตอนนี้';
+  String get download_now => 'à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸•à¸­à¸™à¸™à¸µà¹‰';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum ได้รับการปล่อยออกมา';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum à¹„à¸”à¹‰à¸£à¸±à¸šà¸à¸²à¸£à¸›à¸¥à¹ˆà¸­à¸¢à¸­à¸­à¸à¸¡à¸²';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version ได้รับการปล่อยออกมา';
+    return 'Soulful Bhakti v$version à¹„à¸”à¹‰à¸£à¸±à¸šà¸à¸²à¸£à¸›à¸¥à¹ˆà¸­à¸¢à¸­à¸­à¸à¸¡à¸²';
   }
 
   @override
-  String get read_the_latest => 'อ่านข่าวสารล่าสุด ';
+  String get read_the_latest =>
+      'à¸­à¹ˆà¸²à¸™à¸‚à¹ˆà¸²à¸§à¸ªà¸²à¸£à¸¥à¹ˆà¸²à¸ªà¸¸à¸” ';
 
   @override
-  String get release_notes => 'บันทึกการปล่อย';
+  String get release_notes => 'à¸šà¸±à¸™à¸—à¸¶à¸à¸à¸²à¸£à¸›à¸¥à¹ˆà¸­à¸¢';
 
   @override
-  String get pick_color_scheme => 'เลือกธีมสี';
+  String get pick_color_scheme => 'à¹€à¸¥à¸·à¸­à¸à¸˜à¸µà¸¡à¸ªà¸µ';
 
   @override
-  String get save => 'บันทึก';
+  String get save => 'à¸šà¸±à¸™à¸—à¸¶à¸';
 
   @override
-  String get choose_the_device => 'เลือกอุปกรณ์:';
+  String get choose_the_device => 'à¹€à¸¥à¸·à¸­à¸à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ:';
 
   @override
   String get multiple_device_connected =>
-      'มีอุปกรณ์เชื่อมต่อหลายเครื่อง\nเลือกอุปกรณ์ที่คุณต้องการให้การดำเนินการนี้เกิดขึ้น';
+      'à¸¡à¸µà¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸«à¸¥à¸²à¸¢à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡\nà¹€à¸¥à¸·à¸­à¸à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸—à¸µà¹ˆà¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹ƒà¸«à¹‰à¸à¸²à¸£à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸™à¸µà¹‰à¹€à¸à¸´à¸”à¸‚à¸¶à¹‰à¸™';
 
   @override
-  String get nothing_found => 'ไม่พบข้อมูล';
+  String get nothing_found => 'à¹„à¸¡à¹ˆà¸žà¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥';
 
   @override
-  String get the_box_is_empty => 'กล่องว่างเปล่า';
+  String get the_box_is_empty => 'à¸à¸¥à¹ˆà¸­à¸‡à¸§à¹ˆà¸²à¸‡à¹€à¸›à¸¥à¹ˆà¸²';
 
   @override
-  String get top_artists => 'ศิลปินยอดนิยม';
+  String get top_artists => 'à¸¨à¸´à¸¥à¸›à¸´à¸™à¸¢à¸­à¸”à¸™à¸´à¸¢à¸¡';
 
   @override
-  String get top_albums => 'อัลบั้มยอดนิยม';
+  String get top_albums => 'à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡à¸¢à¸­à¸”à¸™à¸´à¸¢à¸¡';
 
   @override
-  String get this_week => 'สัปดาห์นี้';
+  String get this_week => 'à¸ªà¸±à¸›à¸”à¸²à¸«à¹Œà¸™à¸µà¹‰';
 
   @override
-  String get this_month => 'เดือนนี้';
+  String get this_month => 'à¹€à¸”à¸·à¸­à¸™à¸™à¸µà¹‰';
 
   @override
-  String get last_6_months => '6 เดือนที่ผ่านมา';
+  String get last_6_months => '6 à¹€à¸”à¸·à¸­à¸™à¸—à¸µà¹ˆà¸œà¹ˆà¸²à¸™à¸¡à¸²';
 
   @override
-  String get this_year => 'ปีนี้';
+  String get this_year => 'à¸›à¸µà¸™à¸µà¹‰';
 
   @override
-  String get last_2_years => '2 ปีที่ผ่านมา';
+  String get last_2_years => '2 à¸›à¸µà¸—à¸µà¹ˆà¸œà¹ˆà¸²à¸™à¸¡à¸²';
 
   @override
-  String get all_time => 'ตลอดกาล';
+  String get all_time => 'à¸•à¸¥à¸­à¸”à¸à¸²à¸¥';
 
   @override
   String powered_by_provider(Object providerName) {
-    return 'ขับเคลื่อนโดย $providerName';
+    return 'à¸‚à¸±à¸šà¹€à¸„à¸¥à¸·à¹ˆà¸­à¸™à¹‚à¸”à¸¢ $providerName';
   }
 
   @override
-  String get email => 'อีเมล';
+  String get email => 'à¸­à¸µà¹€à¸¡à¸¥';
 
   @override
-  String get send_code => 'ส่งรหัส';
+  String get send_code => 'à¸ªà¹ˆà¸‡à¸£à¸«à¸±à¸ª';
 
   @override
-  String get change_identifier => 'ใช้อีเมลอื่น';
+  String get change_identifier => 'à¹ƒà¸Šà¹‰à¸­à¸µà¹€à¸¡à¸¥à¸­à¸·à¹ˆà¸™';
 
   @override
-  String get sign_in_with_otp => 'ลงชื่อเข้าใช้ด้วยรหัสแบบใช้ครั้งเดียว';
+  String get sign_in_with_otp =>
+      'à¸¥à¸‡à¸Šà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸Šà¹‰à¸”à¹‰à¸§à¸¢à¸£à¸«à¸±à¸ªà¹à¸šà¸šà¹ƒà¸Šà¹‰à¸„à¸£à¸±à¹‰à¸‡à¹€à¸”à¸µà¸¢à¸§';
 
   @override
-  String get enter_otp_sent => 'ป้อนรหัสที่เราส่งให้คุณ';
+  String get enter_otp_sent =>
+      'à¸›à¹‰à¸­à¸™à¸£à¸«à¸±à¸ªà¸—à¸µà¹ˆà¹€à¸£à¸²à¸ªà¹ˆà¸‡à¹ƒà¸«à¹‰à¸„à¸¸à¸“';
 
   @override
   String get verify_email_reminder =>
-      'โปรดยืนยันที่อยู่อีเมลของคุณเพื่อความปลอดภัยของบัญชี';
+      'à¹‚à¸›à¸£à¸”à¸¢à¸·à¸™à¸¢à¸±à¸™à¸—à¸µà¹ˆà¸­à¸¢à¸¹à¹ˆà¸­à¸µà¹€à¸¡à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸žà¸·à¹ˆà¸­à¸„à¸§à¸²à¸¡à¸›à¸¥à¸­à¸”à¸ à¸±à¸¢à¸‚à¸­à¸‡à¸šà¸±à¸à¸Šà¸µ';
 
   @override
-  String get verify_now => 'ยืนยันตอนนี้';
+  String get verify_now => 'à¸¢à¸·à¸™à¸¢à¸±à¸™à¸•à¸­à¸™à¸™à¸µà¹‰';
 
   @override
   String get enter_email_to_verify =>
-      'กรอกที่อยู่อีเมลของคุณเพื่อรับรหัสยืนยัน';
+      'à¸à¸£à¸­à¸à¸—à¸µà¹ˆà¸­à¸¢à¸¹à¹ˆà¸­à¸µà¹€à¸¡à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸žà¸·à¹ˆà¸­à¸£à¸±à¸šà¸£à¸«à¸±à¸ªà¸¢à¸·à¸™à¸¢à¸±à¸™';
 
   @override
-  String get profile_followers => 'ผู้ติดตาม';
+  String get profile_followers => 'à¸œà¸¹à¹‰à¸•à¸´à¸”à¸•à¸²à¸¡';
 
   @override
-  String get birthday => 'วันเกิด';
+  String get birthday => 'à¸§à¸±à¸™à¹€à¸à¸´à¸”';
 
   @override
-  String get subscription => 'การสมัครสมาชิก';
+  String get subscription => 'à¸à¸²à¸£à¸ªà¸¡à¸±à¸„à¸£à¸ªà¸¡à¸²à¸Šà¸´à¸';
 
   @override
-  String get not_born => 'ยังไม่เกิด';
+  String get not_born => 'à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸à¸´à¸”';
 
   @override
-  String get hacker => 'แฮ็กเกอร์';
+  String get hacker => 'à¹à¸®à¹‡à¸à¹€à¸à¸­à¸£à¹Œ';
 
   @override
-  String get profile => 'โปรไฟล์';
+  String get profile => 'à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ';
 
   @override
-  String get no_name => 'ไม่มีชื่อ';
+  String get no_name => 'à¹„à¸¡à¹ˆà¸¡à¸µà¸Šà¸·à¹ˆà¸­';
 
   @override
-  String get edit => 'แก้ไข';
+  String get edit => 'à¹à¸à¹‰à¹„à¸‚';
 
   @override
-  String get user_profile => 'โปรไฟล์ผู้ใช้';
+  String get user_profile => 'à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰';
 
   @override
   String count_plays(Object count) {
-    return '$count การเล่น';
+    return '$count à¸à¸²à¸£à¹€à¸¥à¹ˆà¸™';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*คำนวณจากการจ่ายเงินต่อการสตรีมของ Spotify\nระหว่าง \$0.003 ถึง \$0.005 นี่เป็นการคำนวณสมมุติ\nเพื่อให้ข้อมูลแก่ผู้ใช้เกี่ยวกับจำนวนเงินที่พวกเขา\nอาจจะจ่ายให้กับศิลปินหากพวกเขาฟังเพลงของพวกเขาใน Spotify';
+      '*à¸„à¸³à¸™à¸§à¸“à¸ˆà¸²à¸à¸à¸²à¸£à¸ˆà¹ˆà¸²à¸¢à¹€à¸‡à¸´à¸™à¸•à¹ˆà¸­à¸à¸²à¸£à¸ªà¸•à¸£à¸µà¸¡à¸‚à¸­à¸‡ Spotify\nà¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡ \$0.003 à¸–à¸¶à¸‡ \$0.005 à¸™à¸µà¹ˆà¹€à¸›à¹‡à¸™à¸à¸²à¸£à¸„à¸³à¸™à¸§à¸“à¸ªà¸¡à¸¡à¸¸à¸•à¸´\nà¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸à¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸šà¸ˆà¸³à¸™à¸§à¸™à¹€à¸‡à¸´à¸™à¸—à¸µà¹ˆà¸žà¸§à¸à¹€à¸‚à¸²\nà¸­à¸²à¸ˆà¸ˆà¸°à¸ˆà¹ˆà¸²à¸¢à¹ƒà¸«à¹‰à¸à¸±à¸šà¸¨à¸´à¸¥à¸›à¸´à¸™à¸«à¸²à¸à¸žà¸§à¸à¹€à¸‚à¸²à¸Ÿà¸±à¸‡à¹€à¸žà¸¥à¸‡à¸‚à¸­à¸‡à¸žà¸§à¸à¹€à¸‚à¸²à¹ƒà¸™ Spotify';
 
   @override
-  String get minutes_listened => 'เวลาที่ฟัง';
+  String get minutes_listened => 'à¹€à¸§à¸¥à¸²à¸—à¸µà¹ˆà¸Ÿà¸±à¸‡';
 
   @override
-  String get streamed_songs => 'เพลงที่สตรีม';
+  String get streamed_songs => 'à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸ªà¸•à¸£à¸µà¸¡';
 
   @override
   String count_streams(Object count) {
-    return '$count สตรีม';
+    return '$count à¸ªà¸•à¸£à¸µà¸¡';
   }
 
   @override
-  String get owned_by_you => 'เป็นเจ้าของโดยคุณ';
+  String get owned_by_you =>
+      'à¹€à¸›à¹‡à¸™à¹€à¸ˆà¹‰à¸²à¸‚à¸­à¸‡à¹‚à¸”à¸¢à¸„à¸¸à¸“';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl คัดลอกไปที่คลิปบอร์ดแล้ว';
+    return '$shareUrl à¸„à¸±à¸”à¸¥à¸­à¸à¹„à¸›à¸—à¸µà¹ˆà¸„à¸¥à¸´à¸›à¸šà¸­à¸£à¹Œà¸”à¹à¸¥à¹‰à¸§';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*การคำนวณนี้อิงจากค่าเฉลี่ยการจ่ายเงินต่อสตรีมของแพลตฟอร์มสตรีมมิ่งเพลงออนไลน์ที่ \$0.003 ถึง \$0.005 นี่เป็นการคำนวณสมมติฐานเพื่อให้ผู้ใช้เข้าใจว่าพวกเขาจะต้องจ่ายเงินให้ศิลปินเท่าไหร่หากพวกเขาฟังเพลงบนแพลตฟอร์มสตรีมมิ่งเพลงที่แตกต่างกัน';
+      '*à¸à¸²à¸£à¸„à¸³à¸™à¸§à¸“à¸™à¸µà¹‰à¸­à¸´à¸‡à¸ˆà¸²à¸à¸„à¹ˆà¸²à¹€à¸‰à¸¥à¸µà¹ˆà¸¢à¸à¸²à¸£à¸ˆà¹ˆà¸²à¸¢à¹€à¸‡à¸´à¸™à¸•à¹ˆà¸­à¸ªà¸•à¸£à¸µà¸¡à¸‚à¸­à¸‡à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¸ªà¸•à¸£à¸µà¸¡à¸¡à¸´à¹ˆà¸‡à¹€à¸žà¸¥à¸‡à¸­à¸­à¸™à¹„à¸¥à¸™à¹Œà¸—à¸µà¹ˆ \$0.003 à¸–à¸¶à¸‡ \$0.005 à¸™à¸µà¹ˆà¹€à¸›à¹‡à¸™à¸à¸²à¸£à¸„à¸³à¸™à¸§à¸“à¸ªà¸¡à¸¡à¸•à¸´à¸à¸²à¸™à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¹€à¸‚à¹‰à¸²à¹ƒà¸ˆà¸§à¹ˆà¸²à¸žà¸§à¸à¹€à¸‚à¸²à¸ˆà¸°à¸•à¹‰à¸­à¸‡à¸ˆà¹ˆà¸²à¸¢à¹€à¸‡à¸´à¸™à¹ƒà¸«à¹‰à¸¨à¸´à¸¥à¸›à¸´à¸™à¹€à¸—à¹ˆà¸²à¹„à¸«à¸£à¹ˆà¸«à¸²à¸à¸žà¸§à¸à¹€à¸‚à¸²à¸Ÿà¸±à¸‡à¹€à¸žà¸¥à¸‡à¸šà¸™à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¸ªà¸•à¸£à¸µà¸¡à¸¡à¸´à¹ˆà¸‡à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¹à¸•à¸à¸•à¹ˆà¸²à¸‡à¸à¸±à¸™';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes นาที';
+    return '$minutes à¸™à¸²à¸—à¸µ';
   }
 
   @override
-  String get summary_minutes => 'นาที';
+  String get summary_minutes => 'à¸™à¸²à¸—à¸µ';
 
   @override
-  String get summary_listened_to_music => 'ฟังเพลง';
+  String get summary_listened_to_music => 'à¸Ÿà¸±à¸‡à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get summary_songs => 'เพลง';
+  String get summary_songs => 'à¹€à¸žà¸¥à¸‡';
 
   @override
-  String get summary_streamed_overall => 'สตรีมทั้งหมด';
+  String get summary_streamed_overall => 'à¸ªà¸•à¸£à¸µà¸¡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get summary_owed_to_artists => 'ค้างชำระให้ศิลปิน\nในเดือนนี้';
+  String get summary_owed_to_artists =>
+      'à¸„à¹‰à¸²à¸‡à¸Šà¸³à¸£à¸°à¹ƒà¸«à¹‰à¸¨à¸´à¸¥à¸›à¸´à¸™\nà¹ƒà¸™à¹€à¸”à¸·à¸­à¸™à¸™à¸µà¹‰';
 
   @override
-  String get summary_top_artist => 'ศิลปินอันดับต้น\nช่วงเวลานี้';
+  String get summary_top_artist =>
+      'à¸¨à¸´à¸¥à¸›à¸´à¸™à¸­à¸±à¸™à¸”à¸±à¸šà¸•à¹‰à¸™\nà¸Šà¹ˆà¸§à¸‡à¹€à¸§à¸¥à¸²à¸™à¸µà¹‰';
 
   @override
-  String get summary_artists => 'ศิลปิน';
+  String get summary_artists => 'à¸¨à¸´à¸¥à¸›à¸´à¸™';
 
   @override
-  String get summary_music_reached_you => 'เพลงมาถึงคุณ';
+  String get summary_music_reached_you =>
+      'à¹€à¸žà¸¥à¸‡à¸¡à¸²à¸–à¸¶à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get summary_full_albums => 'อัลบั้มเต็ม';
+  String get summary_full_albums => 'à¸­à¸±à¸¥à¸šà¸±à¹‰à¸¡à¹€à¸•à¹‡à¸¡';
 
   @override
-  String get summary_got_your_love => 'ได้รับความรักของคุณ';
+  String get summary_got_your_love =>
+      'à¹„à¸”à¹‰à¸£à¸±à¸šà¸„à¸§à¸²à¸¡à¸£à¸±à¸à¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get summary_playlists => 'เพลย์ลิสต์';
+  String get summary_playlists => 'à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get summary_were_on_repeat => 'อยู่ในโหมดซ้ำ';
+  String get summary_were_on_repeat =>
+      'à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¹‚à¸«à¸¡à¸”à¸‹à¹‰à¸³';
 
   @override
-  String get summary_listening_share => 'ส่วนแบ่งการฟัง';
+  String get summary_listening_share =>
+      'à¸ªà¹ˆà¸§à¸™à¹à¸šà¹ˆà¸‡à¸à¸²à¸£à¸Ÿà¸±à¸‡';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'การกระจายของ $tracks_length เพลงอันดับต้นๆ ที่คุณเล่นมากที่สุด';
+    return 'à¸à¸²à¸£à¸à¸£à¸°à¸ˆà¸²à¸¢à¸‚à¸­à¸‡ $tracks_length à¹€à¸žà¸¥à¸‡à¸­à¸±à¸™à¸”à¸±à¸šà¸•à¹‰à¸™à¹† à¸—à¸µà¹ˆà¸„à¸¸à¸“à¹€à¸¥à¹ˆà¸™à¸¡à¸²à¸à¸—à¸µà¹ˆà¸ªà¸¸à¸”';
   }
 
   @override
-  String get summary_plays => 'ครั้งที่เล่น';
+  String get summary_plays => 'à¸„à¸£à¸±à¹‰à¸‡à¸—à¸µà¹ˆà¹€à¸¥à¹ˆà¸™';
 
   @override
   String get insights => 'Insights';
@@ -1322,315 +1410,341 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'รวม $money';
+    return 'à¸£à¸§à¸¡ $money';
   }
 
   @override
-  String get webview_not_found => 'ไม่พบ Webview';
+  String get webview_not_found => 'à¹„à¸¡à¹ˆà¸žà¸š Webview';
 
   @override
   String get webview_not_found_description =>
-      'ไม่พบ runtime ของ Webview บนอุปกรณ์ของคุณ\nหากติดตั้งแล้วตรวจสอบให้แน่ใจว่าอยู่ใน environment PATH\n\nหลังจากติดตั้งแล้ว ให้รีสตาร์ทแอป';
+      'à¹„à¸¡à¹ˆà¸žà¸š runtime à¸‚à¸­à¸‡ Webview à¸šà¸™à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“\nà¸«à¸²à¸à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¹à¸¥à¹‰à¸§à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¹ƒà¸«à¹‰à¹à¸™à¹ˆà¹ƒà¸ˆà¸§à¹ˆà¸²à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™ environment PATH\n\nà¸«à¸¥à¸±à¸‡à¸ˆà¸²à¸à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¹à¸¥à¹‰à¸§ à¹ƒà¸«à¹‰à¸£à¸µà¸ªà¸•à¸²à¸£à¹Œà¸—à¹à¸­à¸›';
 
   @override
-  String get unsupported_platform => 'แพลตฟอร์มไม่รองรับ';
+  String get unsupported_platform =>
+      'à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¹„à¸¡à¹ˆà¸£à¸­à¸‡à¸£à¸±à¸š';
 
   @override
-  String get cache_music => 'แคชเพลง';
+  String get cache_music => 'à¹à¸„à¸Šà¹€à¸žà¸¥à¸‡';
 
   @override
-  String get open => 'เปิด';
+  String get open => 'à¹€à¸›à¸´à¸”';
 
   @override
-  String get cache_folder => 'โฟลเดอร์แคช';
+  String get cache_folder => 'à¹‚à¸Ÿà¸¥à¹€à¸”à¸­à¸£à¹Œà¹à¸„à¸Š';
 
   @override
-  String get export => 'ส่งออก';
+  String get export => 'à¸ªà¹ˆà¸‡à¸­à¸­à¸';
 
   @override
-  String get clear_cache => 'ล้างแคช';
+  String get clear_cache => 'à¸¥à¹‰à¸²à¸‡à¹à¸„à¸Š';
 
   @override
-  String get clear_cache_confirmation => 'คุณต้องการล้างแคชหรือไม่?';
+  String get clear_cache_confirmation =>
+      'à¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸¥à¹‰à¸²à¸‡à¹à¸„à¸Šà¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?';
 
   @override
-  String get export_cache_files => 'ส่งออกไฟล์แคช';
+  String get export_cache_files => 'à¸ªà¹ˆà¸‡à¸­à¸­à¸à¹„à¸Ÿà¸¥à¹Œà¹à¸„à¸Š';
 
   @override
   String found_n_files(Object count) {
-    return 'พบ $count ไฟล์';
+    return 'à¸žà¸š $count à¹„à¸Ÿà¸¥à¹Œ';
   }
 
   @override
-  String get export_cache_confirmation => 'คุณต้องการส่งออกไฟล์เหล่านี้ไปยัง';
+  String get export_cache_confirmation =>
+      'à¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸ªà¹ˆà¸‡à¸­à¸­à¸à¹„à¸Ÿà¸¥à¹Œà¹€à¸«à¸¥à¹ˆà¸²à¸™à¸µà¹‰à¹„à¸›à¸¢à¸±à¸‡';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return 'ส่งออก $filesExported จาก $files ไฟล์';
+    return 'à¸ªà¹ˆà¸‡à¸­à¸­à¸ $filesExported à¸ˆà¸²à¸ $files à¹„à¸Ÿà¸¥à¹Œ';
   }
 
   @override
-  String get undo => 'ย้อนกลับ';
+  String get undo => 'à¸¢à¹‰à¸­à¸™à¸à¸¥à¸±à¸š';
 
   @override
-  String get add_all_to_playlist => 'เพิ่มทั้งหมดในเพลย์ลิสต์';
+  String get add_all_to_playlist =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¹ƒà¸™à¹€à¸žà¸¥à¸¢à¹Œà¸¥à¸´à¸ªà¸•à¹Œ';
 
   @override
-  String get add_all_to_queue => 'เพิ่มทั้งหมดในคิว';
+  String get add_all_to_queue =>
+      'à¹€à¸žà¸´à¹ˆà¸¡à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¹ƒà¸™à¸„à¸´à¸§';
 
   @override
-  String get play_all_next => 'เล่นทั้งหมดถัดไป';
+  String get play_all_next =>
+      'à¹€à¸¥à¹ˆà¸™à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”à¸–à¸±à¸”à¹„à¸›';
 
   @override
-  String get pause => 'หยุดชั่วคราว';
+  String get pause => 'à¸«à¸¢à¸¸à¸”à¸Šà¸±à¹ˆà¸§à¸„à¸£à¸²à¸§';
 
   @override
-  String get view_all => 'ดูทั้งหมด';
+  String get view_all => 'à¸”à¸¹à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”';
 
   @override
-  String get no_tracks_added_yet => 'ดูเหมือนคุณยังไม่ได้เพิ่มเพลงใด ๆ';
+  String get no_tracks_added_yet =>
+      'à¸”à¸¹à¹€à¸«à¸¡à¸·à¸­à¸™à¸„à¸¸à¸“à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸žà¸¥à¸‡à¹ƒà¸” à¹†';
 
   @override
-  String get no_tracks => 'ดูเหมือนจะไม่มีเพลงที่นี่';
+  String get no_tracks =>
+      'à¸”à¸¹à¹€à¸«à¸¡à¸·à¸­à¸™à¸ˆà¸°à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ';
 
   @override
-  String get no_tracks_listened_yet => 'ดูเหมือนคุณยังไม่ได้ฟังอะไรเลย';
+  String get no_tracks_listened_yet =>
+      'à¸”à¸¹à¹€à¸«à¸¡à¸·à¸­à¸™à¸„à¸¸à¸“à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸Ÿà¸±à¸‡à¸­à¸°à¹„à¸£à¹€à¸¥à¸¢';
 
   @override
-  String get not_following_artists => 'คุณไม่ได้ติดตามศิลปินใด ๆ';
+  String get not_following_artists =>
+      'à¸„à¸¸à¸“à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸´à¸”à¸•à¸²à¸¡à¸¨à¸´à¸¥à¸›à¸´à¸™à¹ƒà¸” à¹†';
 
   @override
   String get no_favorite_albums_yet =>
-      'ดูเหมือนคุณยังไม่ได้เพิ่มอัลบัมใด ๆ ในรายการโปรด';
+      'à¸”à¸¹à¹€à¸«à¸¡à¸·à¸­à¸™à¸„à¸¸à¸“à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸žà¸´à¹ˆà¸¡à¸­à¸±à¸¥à¸šà¸±à¸¡à¹ƒà¸” à¹† à¹ƒà¸™à¸£à¸²à¸¢à¸à¸²à¸£à¹‚à¸›à¸£à¸”';
 
   @override
-  String get no_logs_found => 'ไม่พบบันทึก';
+  String get no_logs_found => 'à¹„à¸¡à¹ˆà¸žà¸šà¸šà¸±à¸™à¸—à¸¶à¸';
 
   @override
-  String get youtube_engine => 'เครื่องมือ YouTube';
+  String get youtube_engine => 'à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸¡à¸·à¸­ YouTube';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine ยังไม่ได้ติดตั้ง';
+    return '$engine à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine ยังไม่ได้ติดตั้งในระบบของคุณ';
+    return '$engine à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¹ƒà¸™à¸£à¸°à¸šà¸šà¸‚à¸­à¸‡à¸„à¸¸à¸“';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'ตรวจสอบให้แน่ใจว่ามันมีอยู่ในตัวแปร PATH หรือ\nตั้งค่าพาธที่แท้จริงของไฟล์ที่สามารถทำงานได้ $engine ด้านล่าง';
+    return 'à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¹ƒà¸«à¹‰à¹à¸™à¹ˆà¹ƒà¸ˆà¸§à¹ˆà¸²à¸¡à¸±à¸™à¸¡à¸µà¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸•à¸±à¸§à¹à¸›à¸£ PATH à¸«à¸£à¸·à¸­\nà¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸žà¸²à¸˜à¸—à¸µà¹ˆà¹à¸—à¹‰à¸ˆà¸£à¸´à¸‡à¸‚à¸­à¸‡à¹„à¸Ÿà¸¥à¹Œà¸—à¸µà¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸—à¸³à¸‡à¸²à¸™à¹„à¸”à¹‰ $engine à¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'ใน macOS/Linux/Unix อย่าง OS การตั้งค่าพาธใน .zshrc/.bashrc/.bash_profile เป็นต้น จะไม่ทำงาน\nคุณต้องตั้งค่าพาธในไฟล์การกำหนดค่า shell';
+      'à¹ƒà¸™ macOS/Linux/Unix à¸­à¸¢à¹ˆà¸²à¸‡ OS à¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸žà¸²à¸˜à¹ƒà¸™ .zshrc/.bashrc/.bash_profile à¹€à¸›à¹‡à¸™à¸•à¹‰à¸™ à¸ˆà¸°à¹„à¸¡à¹ˆà¸—à¸³à¸‡à¸²à¸™\nà¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸žà¸²à¸˜à¹ƒà¸™à¹„à¸Ÿà¸¥à¹Œà¸à¸²à¸£à¸à¸³à¸«à¸™à¸”à¸„à¹ˆà¸² shell';
 
   @override
-  String get download => 'ดาวน์โหลด';
+  String get download => 'à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”';
 
   @override
-  String get file_not_found => 'ไม่พบไฟล์';
+  String get file_not_found => 'à¹„à¸¡à¹ˆà¸žà¸šà¹„à¸Ÿà¸¥à¹Œ';
 
   @override
-  String get custom => 'กำหนดเอง';
+  String get custom => 'à¸à¸³à¸«à¸™à¸”à¹€à¸­à¸‡';
 
   @override
-  String get add_custom_url => 'เพิ่ม URL แบบกำหนดเอง';
+  String get add_custom_url =>
+      'à¹€à¸žà¸´à¹ˆà¸¡ URL à¹à¸šà¸šà¸à¸³à¸«à¸™à¸”à¹€à¸­à¸‡';
 
   @override
-  String get edit_port => 'แก้ไขพอร์ต';
+  String get edit_port => 'à¹à¸à¹‰à¹„à¸‚à¸žà¸­à¸£à¹Œà¸•';
 
   @override
   String get port_helper_msg =>
-      'ค่าเริ่มต้นคือ -1 ซึ่งหมายถึงหมายเลขสุ่ม หากคุณได้กำหนดค่าไฟร์วอลล์แล้ว แนะนำให้ตั้งค่านี้';
+      'à¸„à¹ˆà¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™à¸„à¸·à¸­ -1 à¸‹à¸¶à¹ˆà¸‡à¸«à¸¡à¸²à¸¢à¸–à¸¶à¸‡à¸«à¸¡à¸²à¸¢à¹€à¸¥à¸‚à¸ªà¸¸à¹ˆà¸¡ à¸«à¸²à¸à¸„à¸¸à¸“à¹„à¸”à¹‰à¸à¸³à¸«à¸™à¸”à¸„à¹ˆà¸²à¹„à¸Ÿà¸£à¹Œà¸§à¸­à¸¥à¸¥à¹Œà¹à¸¥à¹‰à¸§ à¹à¸™à¸°à¸™à¸³à¹ƒà¸«à¹‰à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸™à¸µà¹‰';
 
   @override
   String connect_request(Object client) {
-    return 'อนุญาตให้ $client เชื่อมต่อหรือไม่?';
+    return 'à¸­à¸™à¸¸à¸à¸²à¸•à¹ƒà¸«à¹‰ $client à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?';
   }
 
   @override
   String get connection_request_denied =>
-      'การเชื่อมต่อล้มเหลว ผู้ใช้ปฏิเสธการเข้าถึง';
+      'à¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§ à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸›à¸à¸´à¹€à¸ªà¸˜à¸à¸²à¸£à¹€à¸‚à¹‰à¸²à¸–à¸¶à¸‡';
 
   @override
-  String get an_error_occurred => 'เกิดข้อผิดพลาด';
+  String get an_error_occurred => 'à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”';
 
   @override
-  String get copy_to_clipboard => 'คัดลอกไปยังคลิปบอร์ด';
+  String get copy_to_clipboard =>
+      'à¸„à¸±à¸”à¸¥à¸­à¸à¹„à¸›à¸¢à¸±à¸‡à¸„à¸¥à¸´à¸›à¸šà¸­à¸£à¹Œà¸”';
 
   @override
-  String get view_logs => 'ดูบันทึก';
+  String get view_logs => 'à¸”à¸¹à¸šà¸±à¸™à¸—à¸¶à¸';
 
   @override
-  String get retry => 'ลองใหม่';
+  String get retry => 'à¸¥à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆ';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'คุณไม่ได้ตั้งค่าผู้ให้บริการเมตาดาต้าเริ่มต้น';
+      'à¸„à¸¸à¸“à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™';
 
   @override
-  String get manage_metadata_providers => 'จัดการผู้ให้บริการเมตาดาต้า';
+  String get manage_metadata_providers =>
+      'à¸ˆà¸±à¸”à¸à¸²à¸£à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²';
 
   @override
-  String get open_link_in_browser => 'เปิดลิงก์ในเบราว์เซอร์หรือไม่?';
+  String get open_link_in_browser =>
+      'à¹€à¸›à¸´à¸”à¸¥à¸´à¸‡à¸à¹Œà¹ƒà¸™à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œà¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'คุณต้องการเปิดลิงก์ต่อไปนี้หรือไม่';
+      'à¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹€à¸›à¸´à¸”à¸¥à¸´à¸‡à¸à¹Œà¸•à¹ˆà¸­à¹„à¸›à¸™à¸µà¹‰à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ';
 
   @override
   String get unsafe_url_warning =>
-      'การเปิดลิงก์จากแหล่งที่ไม่น่าเชื่อถืออาจไม่ปลอดภัย โปรดระมัดระวัง!\nคุณยังสามารถคัดลอกลิงก์ไปยังคลิปบอร์ดของคุณได้';
+      'à¸à¸²à¸£à¹€à¸›à¸´à¸”à¸¥à¸´à¸‡à¸à¹Œà¸ˆà¸²à¸à¹à¸«à¸¥à¹ˆà¸‡à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸™à¹ˆà¸²à¹€à¸Šà¸·à¹ˆà¸­à¸–à¸·à¸­à¸­à¸²à¸ˆà¹„à¸¡à¹ˆà¸›à¸¥à¸­à¸”à¸ à¸±à¸¢ à¹‚à¸›à¸£à¸”à¸£à¸°à¸¡à¸±à¸”à¸£à¸°à¸§à¸±à¸‡!\nà¸„à¸¸à¸“à¸¢à¸±à¸‡à¸ªà¸²à¸¡à¸²à¸£à¸–à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œà¹„à¸›à¸¢à¸±à¸‡à¸„à¸¥à¸´à¸›à¸šà¸­à¸£à¹Œà¸”à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹„à¸”à¹‰';
 
   @override
-  String get copy_link => 'คัดลอกลิงก์';
+  String get copy_link => 'à¸„à¸±à¸”à¸¥à¸­à¸à¸¥à¸´à¸‡à¸à¹Œ';
 
   @override
   String get building_your_timeline =>
-      'กำลังสร้างไทม์ไลน์ของคุณตามการฟังของคุณ...';
+      'à¸à¸³à¸¥à¸±à¸‡à¸ªà¸£à¹‰à¸²à¸‡à¹„à¸—à¸¡à¹Œà¹„à¸¥à¸™à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“à¸•à¸²à¸¡à¸à¸²à¸£à¸Ÿà¸±à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“...';
 
   @override
-  String get official => 'อย่างเป็นทางการ';
+  String get official => 'à¸­à¸¢à¹ˆà¸²à¸‡à¹€à¸›à¹‡à¸™à¸—à¸²à¸‡à¸à¸²à¸£';
 
   @override
   String author_name(Object author) {
-    return 'ผู้เขียน: $author';
+    return 'à¸œà¸¹à¹‰à¹€à¸‚à¸µà¸¢à¸™: $author';
   }
 
   @override
-  String get third_party => 'บุคคลที่สาม';
+  String get third_party => 'à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡';
 
   @override
   String get plugin_requires_authentication =>
-      'ปลั๊กอินต้องมีการรับรองความถูกต้อง';
+      'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸•à¹‰à¸­à¸‡à¸¡à¸µà¸à¸²à¸£à¸£à¸±à¸šà¸£à¸­à¸‡à¸„à¸§à¸²à¸¡à¸–à¸¹à¸à¸•à¹‰à¸­à¸‡';
 
   @override
-  String get update_available => 'มีการอัปเดต';
+  String get update_available => 'à¸¡à¸µà¸à¸²à¸£à¸­à¸±à¸›à¹€à¸”à¸•';
 
   @override
-  String get supports_scrobbling => 'รองรับการ scrobbling';
+  String get supports_scrobbling => 'à¸£à¸­à¸‡à¸£à¸±à¸šà¸à¸²à¸£ scrobbling';
 
   @override
   String get plugin_scrobbling_info =>
-      'ปลั๊กอินนี้จะ scrobble เพลงของคุณเพื่อสร้างประวัติการฟังของคุณ';
+      'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸™à¸µà¹‰à¸ˆà¸° scrobble à¹€à¸žà¸¥à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸žà¸·à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡à¸›à¸£à¸°à¸§à¸±à¸•à¸´à¸à¸²à¸£à¸Ÿà¸±à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“';
 
   @override
-  String get default_metadata_source => 'แหล่งเมตาดาต้าพื้นฐาน';
+  String get default_metadata_source =>
+      'à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²à¸žà¸·à¹‰à¸™à¸à¸²à¸™';
 
   @override
-  String get set_default_metadata_source => 'ตั้งค่าแหล่งเมตาดาต้าพื้นฐาน';
+  String get set_default_metadata_source =>
+      'à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²à¸žà¸·à¹‰à¸™à¸à¸²à¸™';
 
   @override
-  String get default_audio_source => 'แหล่งเสียงพื้นฐาน';
+  String get default_audio_source =>
+      'à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡à¸žà¸·à¹‰à¸™à¸à¸²à¸™';
 
   @override
-  String get set_default_audio_source => 'ตั้งค่าแหล่งเสียงพื้นฐาน';
+  String get set_default_audio_source =>
+      'à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡à¸žà¸·à¹‰à¸™à¸à¸²à¸™';
 
   @override
-  String get set_default => 'ตั้งค่าเริ่มต้น';
+  String get set_default => 'à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹€à¸£à¸´à¹ˆà¸¡à¸•à¹‰à¸™';
 
   @override
-  String get support => 'สนับสนุน';
+  String get support => 'à¸ªà¸™à¸±à¸šà¸ªà¸™à¸¸à¸™';
 
   @override
-  String get support_plugin_development => 'สนับสนุนการพัฒนาปลั๊กอิน';
+  String get support_plugin_development =>
+      'à¸ªà¸™à¸±à¸šà¸ªà¸™à¸¸à¸™à¸à¸²à¸£à¸žà¸±à¸’à¸™à¸²à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™';
 
   @override
   String can_access_name_api(Object name) {
-    return '- สามารถเข้าถึง API **$name**';
+    return '- à¸ªà¸²à¸¡à¸²à¸£à¸–à¹€à¸‚à¹‰à¸²à¸–à¸¶à¸‡ API **$name**';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'คุณต้องการติดตั้งปลั๊กอินนี้หรือไม่?';
+      'à¸„à¸¸à¸“à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸™à¸µà¹‰à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ?';
 
   @override
   String get third_party_plugin_warning =>
-      'ปลั๊กอินนี้มาจากที่เก็บของบุคคลที่สาม โปรดตรวจสอบให้แน่ใจว่าคุณเชื่อถือแหล่งที่มาก่อนทำการติดตั้ง';
+      'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸™à¸µà¹‰à¸¡à¸²à¸ˆà¸²à¸à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¸‚à¸­à¸‡à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡ à¹‚à¸›à¸£à¸”à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¹ƒà¸«à¹‰à¹à¸™à¹ˆà¹ƒà¸ˆà¸§à¹ˆà¸²à¸„à¸¸à¸“à¹€à¸Šà¸·à¹ˆà¸­à¸–à¸·à¸­à¹à¸«à¸¥à¹ˆà¸‡à¸—à¸µà¹ˆà¸¡à¸²à¸à¹ˆà¸­à¸™à¸—à¸³à¸à¸²à¸£à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡';
 
   @override
-  String get author => 'ผู้เขียน';
+  String get author => 'à¸œà¸¹à¹‰à¹€à¸‚à¸µà¸¢à¸™';
 
   @override
-  String get this_plugin_can_do_following => 'ปลั๊กอินนี้สามารถทำสิ่งต่อไปนี้';
+  String get this_plugin_can_do_following =>
+      'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸™à¸µà¹‰à¸ªà¸²à¸¡à¸²à¸£à¸–à¸—à¸³à¸ªà¸´à¹ˆà¸‡à¸•à¹ˆà¸­à¹„à¸›à¸™à¸µà¹‰';
 
   @override
-  String get install => 'ติดตั้ง';
+  String get install => 'à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡';
 
   @override
-  String get install_a_metadata_provider => 'ติดตั้งผู้ให้บริการเมตาดาต้า';
+  String get install_a_metadata_provider =>
+      'à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²';
 
   @override
-  String get no_tracks_playing => 'ขณะนี้ไม่มีเพลงที่กำลังเล่นอยู่';
+  String get no_tracks_playing =>
+      'à¸‚à¸“à¸°à¸™à¸µà¹‰à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸à¸³à¸¥à¸±à¸‡à¹€à¸¥à¹ˆà¸™à¸­à¸¢à¸¹à¹ˆ';
 
   @override
   String get synced_lyrics_not_available =>
-      'ไม่มีเนื้อเพลงที่ซิงค์สำหรับเพลงนี้ กรุณาใช้แท็บ';
+      'à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸™à¸·à¹‰à¸­à¹€à¸žà¸¥à¸‡à¸—à¸µà¹ˆà¸‹à¸´à¸‡à¸„à¹Œà¸ªà¸³à¸«à¸£à¸±à¸šà¹€à¸žà¸¥à¸‡à¸™à¸µà¹‰ à¸à¸£à¸¸à¸“à¸²à¹ƒà¸Šà¹‰à¹à¸—à¹‡à¸š';
 
   @override
-  String get plain_lyrics => 'เนื้อเพลงธรรมดา';
+  String get plain_lyrics => 'à¹€à¸™à¸·à¹‰à¸­à¹€à¸žà¸¥à¸‡à¸˜à¸£à¸£à¸¡à¸”à¸²';
 
   @override
-  String get tab_instead => 'แทน';
+  String get tab_instead => 'à¹à¸—à¸™';
 
   @override
-  String get disclaimer => 'ข้อสงวนสิทธิ์';
+  String get disclaimer => 'à¸‚à¹‰à¸­à¸ªà¸‡à¸§à¸™à¸ªà¸´à¸—à¸˜à¸´à¹Œ';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'ทีม Soulful Bhakti ไม่รับผิดชอบใดๆ (รวมถึงทางกฎหมาย) สำหรับปลั๊กอิน \"บุคคลที่สาม\" ใดๆ\nโปรดใช้งานด้วยความเสี่ยงของคุณเอง สำหรับข้อบกพร่อง/ปัญหาใดๆ โปรดรายงานไปยังที่เก็บปลั๊กอิน\n\nหากปลั๊กอิน \"บุคคลที่สาม\" ใดๆ ละเมิด ToS/DMCA ของบริการ/นิติบุคคลใดๆ โปรดขอให้ผู้เขียนปลั๊กอิน \"บุคคลที่สาม\" หรือแพลตฟอร์มโฮสติ้ง เช่น GitHub/Codeberg ดำเนินการ ที่ระบุไว้ข้างต้น (ที่ติดป้าย \"บุคคลที่สาม\") เป็นปลั๊กอินสาธารณะ/ที่ดูแลโดยชุมชนทั้งหมด เราไม่ได้จัดการดูแล ดังนั้นเราจึงไม่สามารถดำเนินการใดๆ กับพวกเขาได้\n\n';
+      'à¸—à¸µà¸¡ Soulful Bhakti à¹„à¸¡à¹ˆà¸£à¸±à¸šà¸œà¸´à¸”à¸Šà¸­à¸šà¹ƒà¸”à¹† (à¸£à¸§à¸¡à¸–à¸¶à¸‡à¸—à¸²à¸‡à¸à¸Žà¸«à¸¡à¸²à¸¢) à¸ªà¸³à¸«à¸£à¸±à¸šà¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™ \"à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡\" à¹ƒà¸”à¹†\nà¹‚à¸›à¸£à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¸”à¹‰à¸§à¸¢à¸„à¸§à¸²à¸¡à¹€à¸ªà¸µà¹ˆà¸¢à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸­à¸‡ à¸ªà¸³à¸«à¸£à¸±à¸šà¸‚à¹‰à¸­à¸šà¸à¸žà¸£à¹ˆà¸­à¸‡/à¸›à¸±à¸à¸«à¸²à¹ƒà¸”à¹† à¹‚à¸›à¸£à¸”à¸£à¸²à¸¢à¸‡à¸²à¸™à¹„à¸›à¸¢à¸±à¸‡à¸—à¸µà¹ˆà¹€à¸à¹‡à¸šà¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™\n\nà¸«à¸²à¸à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™ \"à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡\" à¹ƒà¸”à¹† à¸¥à¸°à¹€à¸¡à¸´à¸” ToS/DMCA à¸‚à¸­à¸‡à¸šà¸£à¸´à¸à¸²à¸£/à¸™à¸´à¸•à¸´à¸šà¸¸à¸„à¸„à¸¥à¹ƒà¸”à¹† à¹‚à¸›à¸£à¸”à¸‚à¸­à¹ƒà¸«à¹‰à¸œà¸¹à¹‰à¹€à¸‚à¸µà¸¢à¸™à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™ \"à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡\" à¸«à¸£à¸·à¸­à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¹‚à¸®à¸ªà¸•à¸´à¹‰à¸‡ à¹€à¸Šà¹ˆà¸™ GitHub/Codeberg à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£ à¸—à¸µà¹ˆà¸£à¸°à¸šà¸¸à¹„à¸§à¹‰à¸‚à¹‰à¸²à¸‡à¸•à¹‰à¸™ (à¸—à¸µà¹ˆà¸•à¸´à¸”à¸›à¹‰à¸²à¸¢ \"à¸šà¸¸à¸„à¸„à¸¥à¸—à¸µà¹ˆà¸ªà¸²à¸¡\") à¹€à¸›à¹‡à¸™à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸ªà¸²à¸˜à¸²à¸£à¸“à¸°/à¸—à¸µà¹ˆà¸”à¸¹à¹à¸¥à¹‚à¸”à¸¢à¸Šà¸¸à¸¡à¸Šà¸™à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” à¹€à¸£à¸²à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸ˆà¸±à¸”à¸à¸²à¸£à¸”à¸¹à¹à¸¥ à¸”à¸±à¸‡à¸™à¸±à¹‰à¸™à¹€à¸£à¸²à¸ˆà¸¶à¸‡à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¹ƒà¸”à¹† à¸à¸±à¸šà¸žà¸§à¸à¹€à¸‚à¸²à¹„à¸”à¹‰\n\n';
 
   @override
-  String get input_does_not_match_format => 'อินพุตไม่ตรงกับรูปแบบที่ต้องการ';
+  String get input_does_not_match_format =>
+      'à¸­à¸´à¸™à¸žà¸¸à¸•à¹„à¸¡à¹ˆà¸•à¸£à¸‡à¸à¸±à¸šà¸£à¸¹à¸›à¹à¸šà¸šà¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£';
 
   @override
-  String get plugins => 'ปลั๊กอิน';
+  String get plugins => 'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™';
 
   @override
   String get paste_plugin_download_url =>
-      'วาง url ดาวน์โหลดหรือ url ที่เก็บ GitHub/Codeberg หรือลิงก์โดยตรงไปยังไฟล์ .smplug';
+      'à¸§à¸²à¸‡ url à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸«à¸£à¸·à¸­ url à¸—à¸µà¹ˆà¹€à¸à¹‡à¸š GitHub/Codeberg à¸«à¸£à¸·à¸­à¸¥à¸´à¸‡à¸à¹Œà¹‚à¸”à¸¢à¸•à¸£à¸‡à¹„à¸›à¸¢à¸±à¸‡à¹„à¸Ÿà¸¥à¹Œ .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'ดาวน์โหลดและติดตั้งปลั๊กอินจาก url';
+      'à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¹à¸¥à¸°à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸ˆà¸²à¸ url';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'ไม่สามารถเพิ่มปลั๊กอินได้: $error';
+    return 'à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¹€à¸žà¸´à¹ˆà¸¡à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¹„à¸”à¹‰: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'อัปโหลดปลั๊กอินจากไฟล์';
+  String get upload_plugin_from_file =>
+      'à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸ˆà¸²à¸à¹„à¸Ÿà¸¥à¹Œ';
 
   @override
-  String get installed => 'ติดตั้งแล้ว';
+  String get installed => 'à¸•à¸´à¸”à¸•à¸±à¹‰à¸‡à¹à¸¥à¹‰à¸§';
 
   @override
-  String get available_plugins => 'ปลั๊กอินที่มีอยู่';
+  String get available_plugins =>
+      'à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸—à¸µà¹ˆà¸¡à¸µà¸­à¸¢à¸¹à¹ˆ';
 
   @override
   String get configure_plugins =>
-      'กำหนดค่าปลั๊กอินผู้ให้บริการเมตาดาต้าและแหล่งเสียงของคุณเอง';
+      'à¸à¸³à¸«à¸™à¸”à¸„à¹ˆà¸²à¸›à¸¥à¸±à¹Šà¸à¸­à¸´à¸™à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£à¹€à¸¡à¸•à¸²à¸”à¸²à¸•à¹‰à¸²à¹à¸¥à¸°à¹à¸«à¸¥à¹ˆà¸‡à¹€à¸ªà¸µà¸¢à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸­à¸‡';
 
   @override
-  String get source => 'แหล่งที่มา: ';
+  String get source => 'à¹à¸«à¸¥à¹ˆà¸‡à¸—à¸µà¹ˆà¸¡à¸²: ';
 
   @override
-  String get uncompressed => 'ไม่บีบอัด';
+  String get uncompressed => 'à¹„à¸¡à¹ˆà¸šà¸µà¸šà¸­à¸±à¸”';
 
   @override
   String get dab_music_source_description =>
-      'สำหรับคนรักเสียงเพลง ให้สตรีมเสียงคุณภาพสูง/ไร้การสูญเสียการบีบอัด การจับคู่แทร็กแม่นยำตาม ISRC';
+      'à¸ªà¸³à¸«à¸£à¸±à¸šà¸„à¸™à¸£à¸±à¸à¹€à¸ªà¸µà¸¢à¸‡à¹€à¸žà¸¥à¸‡ à¹ƒà¸«à¹‰à¸ªà¸•à¸£à¸µà¸¡à¹€à¸ªà¸µà¸¢à¸‡à¸„à¸¸à¸“à¸ à¸²à¸žà¸ªà¸¹à¸‡/à¹„à¸£à¹‰à¸à¸²à¸£à¸ªà¸¹à¸à¹€à¸ªà¸µà¸¢à¸à¸²à¸£à¸šà¸µà¸šà¸­à¸±à¸” à¸à¸²à¸£à¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¹à¸—à¸£à¹‡à¸à¹à¸¡à¹ˆà¸™à¸¢à¸³à¸•à¸²à¸¡ ISRC';
 
   @override
-  String get summary_top_track => 'เพลงอันดับต้น\nช่วงเวลานี้';
+  String get summary_top_track =>
+      'à¹€à¸žà¸¥à¸‡à¸­à¸±à¸™à¸”à¸±à¸šà¸•à¹‰à¸™\nà¸Šà¹ˆà¸§à¸‡à¹€à¸§à¸¥à¸²à¸™à¸µà¹‰';
 
   @override
-  String get local => 'ในเครื่อง';
+  String get local => 'à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1640,4 +1754,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

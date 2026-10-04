@@ -98,6 +98,9 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     'artists': artists,
     'status': t['status'] ?? 'free',
     'language': t['language'],
+    // Admin-authored tags (comma-separated), used by the home "Specials"
+    // shelves to group tracks by deity/theme alongside name matching.
+    'tags': t['tags'],
     // Admin-configurable card colors (null = use the app's default theme).
     'cardBgColor': t['card_bg_color'],
     'cardTextColor': t['card_text_color'],

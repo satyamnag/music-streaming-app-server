@@ -9,584 +9,637 @@ class AppLocalizationsKa extends AppLocalizations {
   AppLocalizationsKa([String locale = 'ka']) : super(locale);
 
   @override
-  String get guest => 'სტუმარი';
+  String get guest => 'áƒ¡áƒ¢áƒ£áƒ›áƒáƒ áƒ˜';
 
   @override
-  String get browse => 'ნახვა';
+  String get browse => 'áƒœáƒáƒ®áƒ•áƒ';
 
   @override
-  String get search => 'ძებნა';
+  String get search => 'áƒ«áƒ”áƒ‘áƒœáƒ';
 
   @override
-  String get library => 'ბიბლიოთეკა';
+  String get library => 'áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒ';
 
   @override
-  String get lyrics => 'ტექსტები';
+  String get lyrics => 'áƒ¢áƒ”áƒ¥áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get settings => 'კონფიგურაციები';
+  String get settings => 'áƒ™áƒáƒœáƒ¤áƒ˜áƒ’áƒ£áƒ áƒáƒªáƒ˜áƒ”áƒ‘áƒ˜';
 
   @override
-  String get settings_subtitle => 'მოარგეთ Soulful Bhakti თქვენს გემოვნებას';
+  String get settings_subtitle =>
+      'áƒ›áƒáƒáƒ áƒ’áƒ”áƒ— Soulful Bhakti áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ’áƒ”áƒ›áƒáƒ•áƒœáƒ”áƒ‘áƒáƒ¡';
 
   @override
-  String get genre_categories_filter => 'კატეგორიების ან ჟანრების ფილტრი...';
+  String get genre_categories_filter =>
+      'áƒ™áƒáƒ¢áƒ”áƒ’áƒáƒ áƒ˜áƒ”áƒ‘áƒ˜áƒ¡ áƒáƒœ áƒŸáƒáƒœáƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ¤áƒ˜áƒšáƒ¢áƒ áƒ˜...';
 
   @override
-  String get genre => 'ჟანრი';
+  String get genre => 'áƒŸáƒáƒœáƒ áƒ˜';
 
   @override
-  String get personalized => 'პეერსონალიზებული';
+  String get personalized => 'áƒžáƒ”áƒ”áƒ áƒ¡áƒáƒœáƒáƒšáƒ˜áƒ–áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get featured => 'გამორჩეული';
+  String get featured => 'áƒ’áƒáƒ›áƒáƒ áƒ©áƒ”áƒ£áƒšáƒ˜';
 
   @override
-  String get new_releases => 'ახალი გამოცემები';
+  String get new_releases => 'áƒáƒ®áƒáƒšáƒ˜ áƒ’áƒáƒ›áƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜';
 
   @override
-  String get songs => 'სიმღერები';
+  String get songs => 'áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ”áƒ‘áƒ˜';
 
   @override
-  String get newest_arrivals => 'ახალი ჩანაწერები';
+  String get newest_arrivals =>
+      'áƒáƒ®áƒáƒšáƒ˜ áƒ©áƒáƒœáƒáƒ¬áƒ”áƒ áƒ”áƒ‘áƒ˜';
 
   @override
-  String get top_trending => 'ტრენდული';
+  String get top_trending => 'áƒ¢áƒ áƒ”áƒœáƒ“áƒ£áƒšáƒ˜';
 
   @override
-  String get see_more => 'მეტის ნახვა';
+  String get see_more => 'áƒ›áƒ”áƒ¢áƒ˜áƒ¡ áƒœáƒáƒ®áƒ•áƒ';
 
   @override
   String playing_track(Object track) {
-    return 'უკრავს $track';
+    return 'áƒ£áƒ™áƒ áƒáƒ•áƒ¡ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'ეს გაასუფთავებს მიმდინარე რიგს. $track_length ტრეკი წაიშლება\nᲒინდა გააგრძელო?';
+    return 'áƒ”áƒ¡ áƒ’áƒáƒáƒ¡áƒ£áƒ¤áƒ—áƒáƒ•áƒ”áƒ‘áƒ¡ áƒ›áƒ˜áƒ›áƒ“áƒ˜áƒœáƒáƒ áƒ” áƒ áƒ˜áƒ’áƒ¡. $track_length áƒ¢áƒ áƒ”áƒ™áƒ˜ áƒ¬áƒáƒ˜áƒ¨áƒšáƒ”áƒ‘áƒ\ná²’áƒ˜áƒœáƒ“áƒ áƒ’áƒáƒáƒ’áƒ áƒ«áƒ”áƒšáƒ?';
   }
 
   @override
-  String get load_more => 'მეტის ჩატვირთვა';
+  String get load_more => 'áƒ›áƒ”áƒ¢áƒ˜áƒ¡ áƒ©áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ';
 
   @override
-  String get playlists => 'ფლეილისტები';
+  String get playlists => 'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get artists => 'არტისტები';
+  String get artists => 'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get albums => 'ალბომები';
+  String get albums => 'áƒáƒšáƒ‘áƒáƒ›áƒ”áƒ‘áƒ˜';
 
   @override
-  String get tracks => 'ტრეკები';
+  String get tracks => 'áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
-  String get downloads => 'ჩამოტვირთვები';
+  String get downloads => 'áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ”áƒ‘áƒ˜';
 
   @override
-  String get filter_playlists => 'ფლეილისტების გაფილტვრა...';
+  String get filter_playlists =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜áƒ¡ áƒ’áƒáƒ¤áƒ˜áƒšáƒ¢áƒ•áƒ áƒ...';
 
   @override
-  String get liked_tracks => 'მოწონებული ტრეკები';
+  String get liked_tracks =>
+      'áƒ›áƒáƒ¬áƒáƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
-  String get liked_tracks_description => 'ყველა შენი მოწონებული ტრეკი';
+  String get liked_tracks_description =>
+      'áƒ§áƒ•áƒ”áƒšáƒ áƒ¨áƒ”áƒœáƒ˜ áƒ›áƒáƒ¬áƒáƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ˜';
 
   @override
-  String get playlist => 'პლეისთი';
+  String get playlist => 'áƒžáƒšáƒ”áƒ˜áƒ¡áƒ—áƒ˜';
 
   @override
-  String get create_a_playlist => 'ფლეილისტის შექმნა';
+  String get create_a_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¨áƒ”áƒ¥áƒ›áƒœáƒ';
 
   @override
-  String get new_playlist => 'ახალი ფლეილისტი';
+  String get new_playlist => 'áƒáƒ®áƒáƒšáƒ˜ áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜';
 
   @override
-  String get playlist_name => 'ფლეილისტის სახელი';
+  String get playlist_name =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¡áƒáƒ®áƒ”áƒšáƒ˜';
 
   @override
   String get no_playlists_yet =>
-      'ჯერ ფლეილისტები არ არის. შექმენით ერთი არჩეული სიმღერებისგან.';
+      'áƒ¯áƒ”áƒ  áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡. áƒ¨áƒ”áƒ¥áƒ›áƒ”áƒœáƒ˜áƒ— áƒ”áƒ áƒ—áƒ˜ áƒáƒ áƒ©áƒ”áƒ£áƒšáƒ˜ áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ”áƒ‘áƒ˜áƒ¡áƒ’áƒáƒœ.';
 
   @override
-  String get update_playlist => 'ფლეილისტის განახლება';
+  String get update_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ';
 
   @override
-  String get create => 'შექმნა';
+  String get create => 'áƒ¨áƒ”áƒ¥áƒ›áƒœáƒ';
 
   @override
-  String get cancel => 'გაუქმება';
+  String get cancel => 'áƒ’áƒáƒ£áƒ¥áƒ›áƒ”áƒ‘áƒ';
 
   @override
-  String get update => 'განახლება';
+  String get update => 'áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ';
 
   @override
-  String get name_of_playlist => 'ფლეილისტის სახელი';
+  String get name_of_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¡áƒáƒ®áƒ”áƒšáƒ˜';
 
   @override
-  String get description => 'აღწერა';
+  String get description => 'áƒáƒ¦áƒ¬áƒ”áƒ áƒ';
 
   @override
-  String get public => 'საჯარო';
+  String get public => 'áƒ¡áƒáƒ¯áƒáƒ áƒ';
 
   @override
-  String get collaborative => 'კოლაბორაციული';
+  String get collaborative => 'áƒ™áƒáƒšáƒáƒ‘áƒáƒ áƒáƒªáƒ˜áƒ£áƒšáƒ˜';
 
   @override
-  String get search_local_tracks => 'ლოცალური ტრეკების ძებნა...';
+  String get search_local_tracks =>
+      'áƒšáƒáƒªáƒáƒšáƒ£áƒ áƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜áƒ¡ áƒ«áƒ”áƒ‘áƒœáƒ...';
 
   @override
-  String get play => 'დაკვრა';
+  String get play => 'áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
-  String get delete => 'წაშლა';
+  String get delete => 'áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get none => 'არცერთი';
+  String get none => 'áƒáƒ áƒªáƒ”áƒ áƒ—áƒ˜';
 
   @override
-  String get sort_a_z => 'დალაგება A-Z-ს მიხედვით';
+  String get sort_a_z =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ A-Z-áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sort_z_a => 'დალაგება Z-A-ს მიხედვით';
+  String get sort_z_a =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ Z-A-áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sort_artist => 'დალაგება არტისტის მიხედვით';
+  String get sort_artist =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sort_album => 'დალაგება ალბომის მიხედვით';
+  String get sort_album =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ áƒáƒšáƒ‘áƒáƒ›áƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sort_duration => 'დალაგება ხანგრძლივობის მიხედვით';
+  String get sort_duration =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ áƒ®áƒáƒœáƒ’áƒ áƒ«áƒšáƒ˜áƒ•áƒáƒ‘áƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sort_tracks => 'ტრეკების დალაგება';
+  String get sort_tracks => 'áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜áƒ¡ áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'მიმდინარეობს ჩამოტვირთვა ($tracks_length)';
+    return 'áƒ›áƒ˜áƒ›áƒ“áƒ˜áƒœáƒáƒ áƒ”áƒáƒ‘áƒ¡ áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'ყველას გაუქმება';
+  String get cancel_all => 'áƒ§áƒ•áƒ”áƒšáƒáƒ¡ áƒ’áƒáƒ£áƒ¥áƒ›áƒ”áƒ‘áƒ';
 
   @override
-  String get filter_artist => 'არტისტების ფილტრი...';
+  String get filter_artist =>
+      'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜áƒ¡ áƒ¤áƒ˜áƒšáƒ¢áƒ áƒ˜...';
 
   @override
   String followers(Object followers) {
-    return '$followers ფოლოვერები';
+    return '$followers áƒ¤áƒáƒšáƒáƒ•áƒ”áƒ áƒ”áƒ‘áƒ˜';
   }
 
   @override
-  String get add_artist_to_blacklist => 'არტისტის შავ სიაში დამატება';
+  String get add_artist_to_blacklist =>
+      'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¨áƒáƒ• áƒ¡áƒ˜áƒáƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get top_tracks => 'ტოპ ტრეკები';
+  String get top_tracks => 'áƒ¢áƒáƒž áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
-  String get fans_also_like => 'ფანებს ასევე მოსწონთ';
+  String get fans_also_like =>
+      'áƒ¤áƒáƒœáƒ”áƒ‘áƒ¡ áƒáƒ¡áƒ”áƒ•áƒ” áƒ›áƒáƒ¡áƒ¬áƒáƒœáƒ—';
 
   @override
-  String get loading => 'იტვირთება...';
+  String get loading => 'áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒ...';
 
   @override
-  String get artist => 'არტისტი';
+  String get artist => 'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ˜';
 
   @override
-  String get blacklisted => 'შავ სიაში მყოფი';
+  String get blacklisted => 'áƒ¨áƒáƒ• áƒ¡áƒ˜áƒáƒ¨áƒ˜ áƒ›áƒ§áƒáƒ¤áƒ˜';
 
   @override
-  String get following => 'ფოლოვინგი';
+  String get following => 'áƒ¤áƒáƒšáƒáƒ•áƒ˜áƒœáƒ’áƒ˜';
 
   @override
-  String get follow => 'დაფოლოვება';
+  String get follow => 'áƒ“áƒáƒ¤áƒáƒšáƒáƒ•áƒ”áƒ‘áƒ';
 
   @override
-  String get artist_url_copied => 'არტისტის ლინკი დაკოპირებულია';
+  String get artist_url_copied =>
+      'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒšáƒ˜áƒœáƒ™áƒ˜ áƒ“áƒáƒ™áƒáƒžáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ';
 
   @override
   String added_to_queue(Object tracks) {
-    return '$tracks ტრეკი დაემატა რიგში';
+    return '$tracks áƒ¢áƒ áƒ”áƒ™áƒ˜ áƒ“áƒáƒ”áƒ›áƒáƒ¢áƒ áƒ áƒ˜áƒ’áƒ¨áƒ˜';
   }
 
   @override
-  String get filter_albums => 'ალბომების გაფილტვრა...';
+  String get filter_albums =>
+      'áƒáƒšáƒ‘áƒáƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒ’áƒáƒ¤áƒ˜áƒšáƒ¢áƒ•áƒ áƒ...';
 
   @override
-  String get synced => 'სინქრონიზებული';
+  String get synced => 'áƒ¡áƒ˜áƒœáƒ¥áƒ áƒáƒœáƒ˜áƒ–áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
   String get plain => 'Plain';
 
   @override
-  String get shuffle => 'რიგის არევა';
+  String get shuffle => 'áƒ áƒ˜áƒ’áƒ˜áƒ¡ áƒáƒ áƒ”áƒ•áƒ';
 
   @override
-  String get search_tracks => 'ტრეკების ძებნა...';
+  String get search_tracks => 'áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜áƒ¡ áƒ«áƒ”áƒ‘áƒœáƒ...';
 
   @override
-  String get released => 'გამოშვებული';
+  String get released => 'áƒ’áƒáƒ›áƒáƒ¨áƒ•áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
   String error(Object error) {
-    return 'შეცდომა $error';
+    return 'áƒ¨áƒ”áƒªáƒ“áƒáƒ›áƒ $error';
   }
 
   @override
-  String get title => 'სათაური';
+  String get title => 'áƒ¡áƒáƒ—áƒáƒ£áƒ áƒ˜';
 
   @override
-  String get time => 'დრო';
+  String get time => 'áƒ“áƒ áƒ';
 
   @override
-  String get more_actions => 'მეტი მოქმედებები';
+  String get more_actions => 'áƒ›áƒ”áƒ¢áƒ˜ áƒ›áƒáƒ¥áƒ›áƒ”áƒ“áƒ”áƒ‘áƒ”áƒ‘áƒ˜';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'ფლეილისტში ($count)-ის დამატება';
+    return 'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ¨áƒ˜ ($count)-áƒ˜áƒ¡ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'რიგში ($count)-ის დამატება';
+    return 'áƒ áƒ˜áƒ’áƒ¨áƒ˜ ($count)-áƒ˜áƒ¡ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'შემდეგი ($count)-ის დაკვრა';
+    return 'áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜ ($count)-áƒ˜áƒ¡ áƒ“áƒáƒ™áƒ•áƒ áƒ';
   }
 
   @override
-  String get album => 'ალბომი';
+  String get album => 'áƒáƒšáƒ‘áƒáƒ›áƒ˜';
 
   @override
   String copied_to_clipboard(Object data) {
-    return '$data დაკოპირებულია';
+    return '$data áƒ“áƒáƒ™áƒáƒžáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'დაამატე $track ამ ფლეილისტებში';
+    return 'áƒ“áƒáƒáƒ›áƒáƒ¢áƒ” $track áƒáƒ› áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ¨áƒ˜';
   }
 
   @override
-  String get add => 'დამატება';
+  String get add => 'áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'რიგში დაემატა $track';
+    return 'áƒ áƒ˜áƒ’áƒ¨áƒ˜ áƒ“áƒáƒ”áƒ›áƒáƒ¢áƒ $track';
   }
 
   @override
-  String get add_to_queue => 'რიგში დამატება';
+  String get add_to_queue => 'áƒ áƒ˜áƒ’áƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track დაუკრავს შემდეგს';
+    return '$track áƒ“áƒáƒ£áƒ™áƒ áƒáƒ•áƒ¡ áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ¡';
   }
 
   @override
-  String get play_next => 'შემდეგის დაკვრა';
+  String get play_next => 'áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜áƒ¡ áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
   String removed_track_from_queue(Object track) {
-    return 'რიგიდან წაიშალა $track';
+    return 'áƒ áƒ˜áƒ’áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ˜áƒ¨áƒáƒšáƒ $track';
   }
 
   @override
-  String get remove_from_queue => 'რიგიდან წაშლა';
+  String get remove_from_queue => 'áƒ áƒ˜áƒ’áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get remove_from_favorites => 'ფავორიტებიდან წაშლა';
+  String get remove_from_favorites =>
+      'áƒ¤áƒáƒ•áƒáƒ áƒ˜áƒ¢áƒ”áƒ‘áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get save_as_favorite => 'ფავორიტებში დამატება';
+  String get save_as_favorite =>
+      'áƒ¤áƒáƒ•áƒáƒ áƒ˜áƒ¢áƒ”áƒ‘áƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get add_to_playlist => 'ფლეილისტში დამატება';
+  String get add_to_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get remove_from_playlist => 'ფლეილისტიდან წაშლა';
+  String get remove_from_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get add_to_blacklist => 'შავ სიაში დამატება';
+  String get add_to_blacklist =>
+      'áƒ¨áƒáƒ• áƒ¡áƒ˜áƒáƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get remove_from_blacklist => 'შავი სიიდან წაშლა';
+  String get remove_from_blacklist =>
+      'áƒ¨áƒáƒ•áƒ˜ áƒ¡áƒ˜áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get share => 'გაზიარება';
+  String get share => 'áƒ’áƒáƒ–áƒ˜áƒáƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get mini_player => 'მინი დამკვრელი';
+  String get mini_player => 'áƒ›áƒ˜áƒœáƒ˜ áƒ“áƒáƒ›áƒ™áƒ•áƒ áƒ”áƒšáƒ˜';
 
   @override
-  String get slide_to_seek => 'გადახვევისთვის გაასრიალეთ წინ ან უკან';
+  String get slide_to_seek =>
+      'áƒ’áƒáƒ“áƒáƒ®áƒ•áƒ”áƒ•áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡ áƒ’áƒáƒáƒ¡áƒ áƒ˜áƒáƒšáƒ”áƒ— áƒ¬áƒ˜áƒœ áƒáƒœ áƒ£áƒ™áƒáƒœ';
 
   @override
-  String get shuffle_playlist => 'ფლეილისტის არევა';
+  String get shuffle_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒáƒ áƒ”áƒ•áƒ';
 
   @override
-  String get unshuffle_playlist => 'ფლეილისტის დალაგება';
+  String get unshuffle_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ';
 
   @override
-  String get previous_track => 'წინა ტრეკი';
+  String get previous_track => 'áƒ¬áƒ˜áƒœáƒ áƒ¢áƒ áƒ”áƒ™áƒ˜';
 
   @override
-  String get next_track => 'შემდეგი ტრეკი';
+  String get next_track => 'áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ˜';
 
   @override
-  String get pause_playback => 'დაკვრის გაჩერება';
+  String get pause_playback => 'áƒ“áƒáƒ™áƒ•áƒ áƒ˜áƒ¡ áƒ’áƒáƒ©áƒ”áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get resume_playback => 'დაკვრის გაგრძელება';
+  String get resume_playback =>
+      'áƒ“áƒáƒ™áƒ•áƒ áƒ˜áƒ¡ áƒ’áƒáƒ’áƒ áƒ«áƒ”áƒšáƒ”áƒ‘áƒ';
 
   @override
-  String get loop_track => 'ტრეკის ლუპზე დაკვრა';
+  String get loop_track =>
+      'áƒ¢áƒ áƒ”áƒ™áƒ˜áƒ¡ áƒšáƒ£áƒžáƒ–áƒ” áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
-  String get no_loop => 'არ არის ციკლი';
+  String get no_loop => 'áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒªáƒ˜áƒ™áƒšáƒ˜';
 
   @override
-  String get repeat_playlist => 'ფლეილისტის გამეორება';
+  String get repeat_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ’áƒáƒ›áƒ”áƒáƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get queue => 'რიგი';
+  String get queue => 'áƒ áƒ˜áƒ’áƒ˜';
 
   @override
-  String get alternative_track_sources => 'ალტერნატიული ტრეკების წყაროები';
+  String get alternative_track_sources =>
+      'áƒáƒšáƒ¢áƒ”áƒ áƒœáƒáƒ¢áƒ˜áƒ£áƒšáƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜áƒ¡ áƒ¬áƒ§áƒáƒ áƒáƒ”áƒ‘áƒ˜';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks ტრეკი რიგში';
+    return '$tracks áƒ¢áƒ áƒ”áƒ™áƒ˜ áƒ áƒ˜áƒ’áƒ¨áƒ˜';
   }
 
   @override
-  String get clear_all => 'ყველას წაშლა';
+  String get clear_all => 'áƒ§áƒ•áƒ”áƒšáƒáƒ¡ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get show_hide_ui_on_hover => 'UI-ის ჩვენება/დამალვა ჰოვერზე';
+  String get show_hide_ui_on_hover =>
+      'UI-áƒ˜áƒ¡ áƒ©áƒ•áƒ”áƒœáƒ”áƒ‘áƒ/áƒ“áƒáƒ›áƒáƒšáƒ•áƒ áƒ°áƒáƒ•áƒ”áƒ áƒ–áƒ”';
 
   @override
-  String get always_on_top => 'ტოველთვის ზემოდან';
+  String get always_on_top =>
+      'áƒ¢áƒáƒ•áƒ”áƒšáƒ—áƒ•áƒ˜áƒ¡ áƒ–áƒ”áƒ›áƒáƒ“áƒáƒœ';
 
   @override
-  String get exit_mini_player => 'მინი დამკვრელიდან გამოსვლა';
+  String get exit_mini_player =>
+      'áƒ›áƒ˜áƒœáƒ˜ áƒ“áƒáƒ›áƒ™áƒ•áƒ áƒ”áƒšáƒ˜áƒ“áƒáƒœ áƒ’áƒáƒ›áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get local_library => 'ადგილობრივი ბიბლიოთეკა';
+  String get local_library =>
+      'áƒáƒ“áƒ’áƒ˜áƒšáƒáƒ‘áƒ áƒ˜áƒ•áƒ˜ áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒ';
 
   @override
-  String get add_library_location => 'ბიბლიოთეკაში დამატება';
+  String get add_library_location =>
+      'áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒáƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get remove_library_location => 'ბიბლიოთეკიდან წაშლა';
+  String get remove_library_location =>
+      'áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒ˜áƒ“áƒáƒœ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
-  String get account => 'ანგარიში';
+  String get account => 'áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜';
 
   @override
-  String get logout => 'გასვლა';
+  String get logout => 'áƒ’áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get logout_of_this_account => 'ანგარიშიდან გასვლა';
+  String get logout_of_this_account =>
+      'áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜áƒ“áƒáƒœ áƒ’áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get language_region => 'ენა და რეგიონი';
+  String get language_region => 'áƒ”áƒœáƒ áƒ“áƒ áƒ áƒ”áƒ’áƒ˜áƒáƒœáƒ˜';
 
   @override
-  String get language => 'ენა';
+  String get language => 'áƒ”áƒœáƒ';
 
   @override
-  String get system_default => 'სისტემის ნაგულისხმევი';
+  String get system_default =>
+      'áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒ˜áƒ¡ áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜';
 
   @override
-  String get market_place_region => 'მარკეტფლეისის რეგიონი';
+  String get market_place_region =>
+      'áƒ›áƒáƒ áƒ™áƒ”áƒ¢áƒ¤áƒšáƒ”áƒ˜áƒ¡áƒ˜áƒ¡ áƒ áƒ”áƒ’áƒ˜áƒáƒœáƒ˜';
 
   @override
-  String get recommendation_country => 'რეკომენდირებული ქვეყანა';
+  String get recommendation_country =>
+      'áƒ áƒ”áƒ™áƒáƒ›áƒ”áƒœáƒ“áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¥áƒ•áƒ”áƒ§áƒáƒœáƒ';
 
   @override
-  String get appearance => 'გარეგნობა';
+  String get appearance => 'áƒ’áƒáƒ áƒ”áƒ’áƒœáƒáƒ‘áƒ';
 
   @override
-  String get layout_mode => 'განლაგების რეჟიმი';
+  String get layout_mode => 'áƒ’áƒáƒœáƒšáƒáƒ’áƒ”áƒ‘áƒ˜áƒ¡ áƒ áƒ”áƒŸáƒ˜áƒ›áƒ˜';
 
   @override
   String get override_layout_settings =>
-      'რესფონსივ განლაგების რეჟიმის კონფიგურაციაზე გადაწერა';
+      'áƒ áƒ”áƒ¡áƒ¤áƒáƒœáƒ¡áƒ˜áƒ• áƒ’áƒáƒœáƒšáƒáƒ’áƒ”áƒ‘áƒ˜áƒ¡ áƒ áƒ”áƒŸáƒ˜áƒ›áƒ˜áƒ¡ áƒ™áƒáƒœáƒ¤áƒ˜áƒ’áƒ£áƒ áƒáƒªáƒ˜áƒáƒ–áƒ” áƒ’áƒáƒ“áƒáƒ¬áƒ”áƒ áƒ';
 
   @override
-  String get adaptive => 'ადაპტირებული';
+  String get adaptive => 'áƒáƒ“áƒáƒžáƒ¢áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get compact => 'კომპაქტური';
+  String get compact => 'áƒ™áƒáƒ›áƒžáƒáƒ¥áƒ¢áƒ£áƒ áƒ˜';
 
   @override
-  String get extended => 'გაფართოებული';
+  String get extended => 'áƒ’áƒáƒ¤áƒáƒ áƒ—áƒáƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get theme => 'თემა';
+  String get theme => 'áƒ—áƒ”áƒ›áƒ';
 
   @override
-  String get dark => 'ბნელი';
+  String get dark => 'áƒ‘áƒœáƒ”áƒšáƒ˜';
 
   @override
-  String get light => 'ღია';
+  String get light => 'áƒ¦áƒ˜áƒ';
 
   @override
-  String get system => 'სისტემის';
+  String get system => 'áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒ˜áƒ¡';
 
   @override
-  String get accent_color => 'აქცენტის ფერი';
+  String get accent_color => 'áƒáƒ¥áƒªáƒ”áƒœáƒ¢áƒ˜áƒ¡ áƒ¤áƒ”áƒ áƒ˜';
 
   @override
-  String get sync_album_color => 'ალბომის ფერის სინქრონიზაცია';
+  String get sync_album_color =>
+      'áƒáƒšáƒ‘áƒáƒ›áƒ˜áƒ¡ áƒ¤áƒ”áƒ áƒ˜áƒ¡ áƒ¡áƒ˜áƒœáƒ¥áƒ áƒáƒœáƒ˜áƒ–áƒáƒªáƒ˜áƒ';
 
   @override
   String get sync_album_color_description =>
-      'დომინანტური ალბომის ფერის აქცენტის ფერად გამოყენება';
+      'áƒ“áƒáƒ›áƒ˜áƒœáƒáƒœáƒ¢áƒ£áƒ áƒ˜ áƒáƒšáƒ‘áƒáƒ›áƒ˜áƒ¡ áƒ¤áƒ”áƒ áƒ˜áƒ¡ áƒáƒ¥áƒªáƒ”áƒœáƒ¢áƒ˜áƒ¡ áƒ¤áƒ”áƒ áƒáƒ“ áƒ’áƒáƒ›áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get playback => 'დაკვრა';
+  String get playback => 'áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
-  String get audio_quality => 'აუდიოს ხარისხი';
+  String get audio_quality => 'áƒáƒ£áƒ“áƒ˜áƒáƒ¡ áƒ®áƒáƒ áƒ˜áƒ¡áƒ®áƒ˜';
 
   @override
-  String get high => 'მაღალი';
+  String get high => 'áƒ›áƒáƒ¦áƒáƒšáƒ˜';
 
   @override
-  String get low => 'დაბალი';
+  String get low => 'áƒ“áƒáƒ‘áƒáƒšáƒ˜';
 
   @override
-  String get pre_download_play => 'წინასწარ ჩამოტვირთვა და დაკვრა';
+  String get pre_download_play =>
+      'áƒ¬áƒ˜áƒœáƒáƒ¡áƒ¬áƒáƒ  áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ áƒ“áƒ áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
   String get pre_download_play_description =>
-      'აუდიოს სტრიმინგის ნაცვლად, ბაიტების ჩამოტვირთვა და დაკვრა (რეკომენდებულია უფრო მაღალი გამტარუნარიანობის მომხმარებლებისთვის)';
+      'áƒáƒ£áƒ“áƒ˜áƒáƒ¡ áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒœáƒ’áƒ˜áƒ¡ áƒœáƒáƒªáƒ•áƒšáƒáƒ“, áƒ‘áƒáƒ˜áƒ¢áƒ”áƒ‘áƒ˜áƒ¡ áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ áƒ“áƒ áƒ“áƒáƒ™áƒ•áƒ áƒ (áƒ áƒ”áƒ™áƒáƒ›áƒ”áƒœáƒ“áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ áƒ£áƒ¤áƒ áƒ áƒ›áƒáƒ¦áƒáƒšáƒ˜ áƒ’áƒáƒ›áƒ¢áƒáƒ áƒ£áƒœáƒáƒ áƒ˜áƒáƒœáƒáƒ‘áƒ˜áƒ¡ áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒšáƒ”áƒ‘áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡)';
 
   @override
   String get skip_non_music =>
-      'არა მუსიკალური ნაწილის გამოტოვება (სპონსორის ბლოკი)';
+      'áƒáƒ áƒ áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒáƒšáƒ£áƒ áƒ˜ áƒœáƒáƒ¬áƒ˜áƒšáƒ˜áƒ¡ áƒ’áƒáƒ›áƒáƒ¢áƒáƒ•áƒ”áƒ‘áƒ (áƒ¡áƒžáƒáƒœáƒ¡áƒáƒ áƒ˜áƒ¡ áƒ‘áƒšáƒáƒ™áƒ˜)';
 
   @override
-  String get blacklist_description => 'შავ სიაში მყოფი არტისტები და ტრეკები';
+  String get blacklist_description =>
+      'áƒ¨áƒáƒ• áƒ¡áƒ˜áƒáƒ¨áƒ˜ áƒ›áƒ§áƒáƒ¤áƒ˜ áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜ áƒ“áƒ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
   String get wait_for_download_to_finish =>
-      'გთხოვთ, დაელოდოთ მიმდინარე ჩამოტვირთვის დასრულებას';
+      'áƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ“áƒáƒ”áƒšáƒáƒ“áƒáƒ— áƒ›áƒ˜áƒ›áƒ“áƒ˜áƒœáƒáƒ áƒ” áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ˜áƒ¡ áƒ“áƒáƒ¡áƒ áƒ£áƒšáƒ”áƒ‘áƒáƒ¡';
 
   @override
-  String get desktop => 'დესკტოპი';
+  String get desktop => 'áƒ“áƒ”áƒ¡áƒ™áƒ¢áƒáƒžáƒ˜';
 
   @override
-  String get close_behavior => 'დახურვის ქცევა';
+  String get close_behavior => 'áƒ“áƒáƒ®áƒ£áƒ áƒ•áƒ˜áƒ¡ áƒ¥áƒªáƒ”áƒ•áƒ';
 
   @override
-  String get close => 'დახურვა';
+  String get close => 'áƒ“áƒáƒ®áƒ£áƒ áƒ•áƒ';
 
   @override
-  String get minimize_to_tray => 'მინიმიზაცია';
+  String get minimize_to_tray => 'áƒ›áƒ˜áƒœáƒ˜áƒ›áƒ˜áƒ–áƒáƒªáƒ˜áƒ';
 
   @override
-  String get show_tray_icon => 'სისტემის აიკონის ჩვენება';
+  String get show_tray_icon =>
+      'áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒ˜áƒ¡ áƒáƒ˜áƒ™áƒáƒœáƒ˜áƒ¡ áƒ©áƒ•áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get about => 'ჩვენს შესახებ';
+  String get about => 'áƒ©áƒ•áƒ”áƒœáƒ¡ áƒ¨áƒ”áƒ¡áƒáƒ®áƒ”áƒ‘';
 
   @override
   String get u_love_spotube => 'We know you love Soulful Bhakti';
 
   @override
-  String get check_for_updates => 'განახლებების შემოწმება';
+  String get check_for_updates =>
+      'áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ”áƒ‘áƒ˜áƒ¡ áƒ¨áƒ”áƒ›áƒáƒ¬áƒ›áƒ”áƒ‘áƒ';
 
   @override
-  String get about_spotube => 'Soulful Bhakti-ს შესახებ';
+  String get about_spotube => 'Soulful Bhakti-áƒ¡ áƒ¨áƒ”áƒ¡áƒáƒ®áƒ”áƒ‘';
 
   @override
-  String get blacklist => 'შავი სია';
+  String get blacklist => 'áƒ¨áƒáƒ•áƒ˜ áƒ¡áƒ˜áƒ';
 
   @override
-  String get please_sponsor => 'გთხოვთ დაგვასპონსოროთ';
+  String get please_sponsor =>
+      'áƒ’áƒ—áƒ®áƒáƒ•áƒ— áƒ“áƒáƒ’áƒ•áƒáƒ¡áƒžáƒáƒœáƒ¡áƒáƒ áƒáƒ—';
 
   @override
   String get spotube_description =>
       'Soulful Bhakti, a lightweight, cross-platform, free-for-all spotify client';
 
   @override
-  String get version => 'ვერსია';
+  String get version => 'áƒ•áƒ”áƒ áƒ¡áƒ˜áƒ';
 
   @override
   String get build_number => 'Build Number';
 
   @override
-  String get founder => 'დამფუძნებელი';
+  String get founder => 'áƒ“áƒáƒ›áƒ¤áƒ£áƒ«áƒœáƒ”áƒ‘áƒ”áƒšáƒ˜';
 
   @override
-  String get repository => 'რეპოზიტორია';
+  String get repository => 'áƒ áƒ”áƒžáƒáƒ–áƒ˜áƒ¢áƒáƒ áƒ˜áƒ';
 
   @override
   String get bug_issues => 'Bug+Issues';
 
   @override
-  String get made_with => 'Made with ❤️ in Bangladesh🇧🇩';
+  String get made_with => 'Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'ლიცენზია';
+  String get license => 'áƒšáƒ˜áƒªáƒ”áƒœáƒ–áƒ˜áƒ';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'არ ინერვიულოთ, თქვენი მონაცემები არ იქნება შეგროვებული ან გაზიარებული ვინმესთან';
+      'áƒáƒ  áƒ˜áƒœáƒ”áƒ áƒ•áƒ˜áƒ£áƒšáƒáƒ—, áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜ áƒáƒ  áƒ˜áƒ¥áƒœáƒ”áƒ‘áƒ áƒ¨áƒ”áƒ’áƒ áƒáƒ•áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒáƒœ áƒ’áƒáƒ–áƒ˜áƒáƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ•áƒ˜áƒœáƒ›áƒ”áƒ¡áƒ—áƒáƒœ';
 
   @override
-  String get know_how_to_login => 'არ იცით როგორ გააკეთოთ ეს?';
+  String get know_how_to_login =>
+      'áƒáƒ  áƒ˜áƒªáƒ˜áƒ— áƒ áƒáƒ’áƒáƒ  áƒ’áƒáƒáƒ™áƒ”áƒ—áƒáƒ— áƒ”áƒ¡?';
 
   @override
   String get follow_step_by_step_guide =>
-      'მიჰყევით ნაბიჯ-ნაბიჯ სახელმძღვანელოს';
+      'áƒ›áƒ˜áƒ°áƒ§áƒ”áƒ•áƒ˜áƒ— áƒœáƒáƒ‘áƒ˜áƒ¯-áƒœáƒáƒ‘áƒ˜áƒ¯ áƒ¡áƒáƒ®áƒ”áƒšáƒ›áƒ«áƒ¦áƒ•áƒáƒœáƒ”áƒšáƒáƒ¡';
 
   @override
   String cookie_name_cookie(Object name) {
-    return '$name ქუქი';
+    return '$name áƒ¥áƒ£áƒ¥áƒ˜';
   }
 
   @override
-  String get fill_in_all_fields => 'გთხოვთ შეავსოთ ყველა ველი';
+  String get fill_in_all_fields =>
+      'áƒ’áƒ—áƒ®áƒáƒ•áƒ— áƒ¨áƒ”áƒáƒ•áƒ¡áƒáƒ— áƒ§áƒ•áƒ”áƒšáƒ áƒ•áƒ”áƒšáƒ˜';
 
   @override
-  String get submit => 'გაგზავნა';
+  String get submit => 'áƒ’áƒáƒ’áƒ–áƒáƒ•áƒœáƒ';
 
   @override
-  String get exit => 'გამოსვლა';
+  String get exit => 'áƒ’áƒáƒ›áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get previous => 'წინა';
+  String get previous => 'áƒ¬áƒ˜áƒœáƒ';
 
   @override
-  String get next => 'შემდეგი';
+  String get next => 'áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜';
 
   @override
-  String get done => 'მზადაა';
+  String get done => 'áƒ›áƒ–áƒáƒ“áƒáƒ';
 
   @override
-  String get step_1 => 'ნაბიჯი 1';
+  String get step_1 => 'áƒœáƒáƒ‘áƒ˜áƒ¯áƒ˜ 1';
 
   @override
-  String get first_go_to => 'პირველი, გადადით';
+  String get first_go_to => 'áƒžáƒ˜áƒ áƒ•áƒ”áƒšáƒ˜, áƒ’áƒáƒ“áƒáƒ“áƒ˜áƒ—';
 
   @override
-  String get something_went_wrong => 'Რაღაც არასწორად წავიდა';
+  String get something_went_wrong =>
+      'á² áƒáƒ¦áƒáƒª áƒáƒ áƒáƒ¡áƒ¬áƒáƒ áƒáƒ“ áƒ¬áƒáƒ•áƒ˜áƒ“áƒ';
 
   @override
   String get piped_instance => 'Piped Server Instance';
@@ -596,49 +649,52 @@ class AppLocalizationsKa extends AppLocalizations {
       'The Piped server instance to use for track matching';
 
   @override
-  String get piped_warning => 'ზოგიერთი მათგანმა შეიძლება კარგად არ იმუშაოს. ';
+  String get piped_warning =>
+      'áƒ–áƒáƒ’áƒ˜áƒ”áƒ áƒ—áƒ˜ áƒ›áƒáƒ—áƒ’áƒáƒœáƒ›áƒ áƒ¨áƒ”áƒ˜áƒ«áƒšáƒ”áƒ‘áƒ áƒ™áƒáƒ áƒ’áƒáƒ“ áƒáƒ  áƒ˜áƒ›áƒ£áƒ¨áƒáƒáƒ¡. ';
 
   @override
-  String get invidious_instance => 'Invidious სერვერის ინსტანცია';
+  String get invidious_instance =>
+      'Invidious áƒ¡áƒ”áƒ áƒ•áƒ”áƒ áƒ˜áƒ¡ áƒ˜áƒœáƒ¡áƒ¢áƒáƒœáƒªáƒ˜áƒ';
 
   @override
   String get invidious_description =>
-      'Invidious სერვერის ინსტანცია, რომელიც გამოიყენება ტრეკის შესატყვისად';
+      'Invidious áƒ¡áƒ”áƒ áƒ•áƒ”áƒ áƒ˜áƒ¡ áƒ˜áƒœáƒ¡áƒ¢áƒáƒœáƒªáƒ˜áƒ, áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒª áƒ’áƒáƒ›áƒáƒ˜áƒ§áƒ”áƒœáƒ”áƒ‘áƒ áƒ¢áƒ áƒ”áƒ™áƒ˜áƒ¡ áƒ¨áƒ”áƒ¡áƒáƒ¢áƒ§áƒ•áƒ˜áƒ¡áƒáƒ“';
 
   @override
   String get invidious_warning =>
-      'ზოგიერთი შეიძლება კარგად არ მუშაობდეს. გამოიყენეთ თქვენს პასუხისმგებლობაზე';
+      'áƒ–áƒáƒ’áƒ˜áƒ”áƒ áƒ—áƒ˜ áƒ¨áƒ”áƒ˜áƒ«áƒšáƒ”áƒ‘áƒ áƒ™áƒáƒ áƒ’áƒáƒ“ áƒáƒ  áƒ›áƒ£áƒ¨áƒáƒáƒ‘áƒ“áƒ”áƒ¡. áƒ’áƒáƒ›áƒáƒ˜áƒ§áƒ”áƒœáƒ”áƒ— áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒžáƒáƒ¡áƒ£áƒ®áƒ˜áƒ¡áƒ›áƒ’áƒ”áƒ‘áƒšáƒáƒ‘áƒáƒ–áƒ”';
 
   @override
-  String get generate => 'გააგენერირეთ';
+  String get generate => 'áƒ’áƒáƒáƒ’áƒ”áƒœáƒ”áƒ áƒ˜áƒ áƒ”áƒ—';
 
   @override
   String track_exists(Object track) {
-    return 'ტრეკი $track უკვე არსებობს';
+    return 'áƒ¢áƒ áƒ”áƒ™áƒ˜ $track áƒ£áƒ™áƒ•áƒ” áƒáƒ áƒ¡áƒ”áƒ‘áƒáƒ‘áƒ¡';
   }
 
   @override
-  String get replace => 'შეცვლა';
+  String get replace => 'áƒ¨áƒ”áƒªáƒ•áƒšáƒ';
 
   @override
-  String get skip => 'გამოტოვება';
+  String get skip => 'áƒ’áƒáƒ›áƒáƒ¢áƒáƒ•áƒ”áƒ‘áƒ';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'აირჩიე $count-მდე $type';
+    return 'áƒáƒ˜áƒ áƒ©áƒ˜áƒ” $count-áƒ›áƒ“áƒ” $type';
   }
 
   @override
-  String get select_genres => 'ჟანრების არჩევა';
+  String get select_genres => 'áƒŸáƒáƒœáƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒáƒ áƒ©áƒ”áƒ•áƒ';
 
   @override
-  String get add_genres => 'ჟანრების დამატება';
+  String get add_genres => 'áƒŸáƒáƒœáƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get country => 'ქვეყანა';
+  String get country => 'áƒ¥áƒ•áƒ”áƒ§áƒáƒœáƒ';
 
   @override
-  String get number_of_tracks_generate => 'დასაგენერირებელი ტრეკების რაოდენობა';
+  String get number_of_tracks_generate =>
+      'áƒ“áƒáƒ¡áƒáƒ’áƒ”áƒœáƒ”áƒ áƒ˜áƒ áƒ”áƒ‘áƒ”áƒšáƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜áƒ¡ áƒ áƒáƒáƒ“áƒ”áƒœáƒáƒ‘áƒ';
 
   @override
   String get acousticness => 'Acousticness';
@@ -686,39 +742,41 @@ class AppLocalizationsKa extends AppLocalizations {
   String get short => 'Short';
 
   @override
-  String get medium => 'საშუალო';
+  String get medium => 'áƒ¡áƒáƒ¨áƒ£áƒáƒšáƒ';
 
   @override
-  String get long => 'გრძელი';
+  String get long => 'áƒ’áƒ áƒ«áƒ”áƒšáƒ˜';
 
   @override
-  String get min => 'მინიმალური';
+  String get min => 'áƒ›áƒ˜áƒœáƒ˜áƒ›áƒáƒšáƒ£áƒ áƒ˜';
 
   @override
-  String get max => 'მაქსიმალური';
+  String get max => 'áƒ›áƒáƒ¥áƒ¡áƒ˜áƒ›áƒáƒšáƒ£áƒ áƒ˜';
 
   @override
-  String get target => 'სამიზნე';
+  String get target => 'áƒ¡áƒáƒ›áƒ˜áƒ–áƒœáƒ”';
 
   @override
-  String get moderate => 'საშუალო';
+  String get moderate => 'áƒ¡áƒáƒ¨áƒ£áƒáƒšáƒ';
 
   @override
-  String get deselect_all => 'ყველა მონიშვნის გაუქმება';
+  String get deselect_all =>
+      'áƒ§áƒ•áƒ”áƒšáƒ áƒ›áƒáƒœáƒ˜áƒ¨áƒ•áƒœáƒ˜áƒ¡ áƒ’áƒáƒ£áƒ¥áƒ›áƒ”áƒ‘áƒ';
 
   @override
-  String get select_all => 'ყველას მონიშვნა';
+  String get select_all => 'áƒ§áƒ•áƒ”áƒšáƒáƒ¡ áƒ›áƒáƒœáƒ˜áƒ¨áƒ•áƒœáƒ';
 
   @override
-  String get are_you_sure => 'Დარწმუნებული ხართ?';
+  String get are_you_sure =>
+      'á²“áƒáƒ áƒ¬áƒ›áƒ£áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ®áƒáƒ áƒ—?';
 
   @override
   String get generating_playlist =>
-      'მიმდინარეობს თქვენი მორგებული ფლეილისტის გენერირება...';
+      'áƒ›áƒ˜áƒ›áƒ“áƒ˜áƒœáƒáƒ áƒ”áƒáƒ‘áƒ¡ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ›áƒáƒ áƒ’áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ’áƒ”áƒœáƒ”áƒ áƒ˜áƒ áƒ”áƒ‘áƒ...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'არჩეულია $count ტრეკი';
+    return 'áƒáƒ áƒ©áƒ”áƒ£áƒšáƒ˜áƒ $count áƒ¢áƒ áƒ”áƒ™áƒ˜';
   }
 
   @override
@@ -745,13 +803,13 @@ class AppLocalizationsKa extends AppLocalizations {
       'I\'m completely aware that my IP can get blocked on YouTube & I don\'t hold Soulful Bhakti or his owners/contributors responsible for any accidents caused by my current action';
 
   @override
-  String get decline => 'უარყოფა';
+  String get decline => 'áƒ£áƒáƒ áƒ§áƒáƒ¤áƒ';
 
   @override
-  String get accept => 'დათანხმება';
+  String get accept => 'áƒ“áƒáƒ—áƒáƒœáƒ®áƒ›áƒ”áƒ‘áƒ';
 
   @override
-  String get details => 'დეტალები';
+  String get details => 'áƒ“áƒ”áƒ¢áƒáƒšáƒ”áƒ‘áƒ˜';
 
   @override
   String get youtube => 'YouTube';
@@ -760,67 +818,72 @@ class AppLocalizationsKa extends AppLocalizations {
   String get channel => 'Channel';
 
   @override
-  String get likes => 'მოწონებები';
+  String get likes => 'áƒ›áƒáƒ¬áƒáƒœáƒ”áƒ‘áƒ”áƒ‘áƒ˜';
 
   @override
-  String get dislikes => 'არ მოწონებები';
+  String get dislikes => 'áƒáƒ  áƒ›áƒáƒ¬áƒáƒœáƒ”áƒ‘áƒ”áƒ‘áƒ˜';
 
   @override
-  String get views => 'ნახვები';
+  String get views => 'áƒœáƒáƒ®áƒ•áƒ”áƒ‘áƒ˜';
 
   @override
-  String get streamUrl => 'სტრიმის ლინკი';
+  String get streamUrl => 'áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒ¡ áƒšáƒ˜áƒœáƒ™áƒ˜';
 
   @override
-  String get stop => 'გაჩერება';
+  String get stop => 'áƒ’áƒáƒ©áƒ”áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get sort_newest => 'ფალაგება სიახლის მიხედიტ';
+  String get sort_newest =>
+      'áƒ¤áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ áƒ¡áƒ˜áƒáƒ®áƒšáƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ˜áƒ¢';
 
   @override
-  String get sort_oldest => 'დალაგება სიძველის მიხედვით';
+  String get sort_oldest =>
+      'áƒ“áƒáƒšáƒáƒ’áƒ”áƒ‘áƒ áƒ¡áƒ˜áƒ«áƒ•áƒ”áƒšáƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—';
 
   @override
-  String get sleep_timer => 'ძილის ტაიმერი';
+  String get sleep_timer => 'áƒ«áƒ˜áƒšáƒ˜áƒ¡ áƒ¢áƒáƒ˜áƒ›áƒ”áƒ áƒ˜';
 
   @override
   String mins(Object minutes) {
-    return '$minutes წუთი';
+    return '$minutes áƒ¬áƒ£áƒ—áƒ˜';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours საათი';
+    return '$hours áƒ¡áƒáƒáƒ—áƒ˜';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours საათი';
+    return '$hours áƒ¡áƒáƒáƒ—áƒ˜';
   }
 
   @override
-  String get custom_hours => 'მორგებული საათები';
+  String get custom_hours =>
+      'áƒ›áƒáƒ áƒ’áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¡áƒáƒáƒ—áƒ”áƒ‘áƒ˜';
 
   @override
-  String get logs => 'ლოგები';
+  String get logs => 'áƒšáƒáƒ’áƒ”áƒ‘áƒ˜';
 
   @override
-  String get developers => 'დეველოპერები';
+  String get developers => 'áƒ“áƒ”áƒ•áƒ”áƒšáƒáƒžáƒ”áƒ áƒ”áƒ‘áƒ˜';
 
   @override
-  String get not_logged_in => 'არ ხარ დალოგინებული';
+  String get not_logged_in =>
+      'áƒáƒ  áƒ®áƒáƒ  áƒ“áƒáƒšáƒáƒ’áƒ˜áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get search_mode => 'ძებნის რეჟიმი';
+  String get search_mode => 'áƒ«áƒ”áƒ‘áƒœáƒ˜áƒ¡ áƒ áƒ”áƒŸáƒ˜áƒ›áƒ˜';
 
   @override
-  String get audio_source => 'აუდიოს წყარო';
+  String get audio_source => 'áƒáƒ£áƒ“áƒ˜áƒáƒ¡ áƒ¬áƒ§áƒáƒ áƒ';
 
   @override
-  String get ok => 'ოკ';
+  String get ok => 'áƒáƒ™';
 
   @override
-  String get failed_to_encrypt => 'დაშიფვრა ვერ მოხერხდა';
+  String get failed_to_encrypt =>
+      'áƒ“áƒáƒ¨áƒ˜áƒ¤áƒ•áƒ áƒ áƒ•áƒ”áƒ  áƒ›áƒáƒ®áƒ”áƒ áƒ®áƒ“áƒ';
 
   @override
   String get encryption_failed_warning =>
@@ -838,19 +901,24 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get you_are_offline => 'ამჟამად ხაზგარეშე ხართ';
+  String get you_are_offline =>
+      'áƒáƒ›áƒŸáƒáƒ›áƒáƒ“ áƒ®áƒáƒ–áƒ’áƒáƒ áƒ”áƒ¨áƒ” áƒ®áƒáƒ áƒ—';
 
   @override
-  String get connection_restored => 'თქვენი ინტერნეტ კავშირი აღდგა';
+  String get connection_restored =>
+      'áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ˜áƒœáƒ¢áƒ”áƒ áƒœáƒ”áƒ¢ áƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ˜ áƒáƒ¦áƒ“áƒ’áƒ';
 
   @override
-  String get use_system_title_bar => 'სისტემის სათაურის ზოლის გამოყენება';
+  String get use_system_title_bar =>
+      'áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒ˜áƒ¡ áƒ¡áƒáƒ—áƒáƒ£áƒ áƒ˜áƒ¡ áƒ–áƒáƒšáƒ˜áƒ¡ áƒ’áƒáƒ›áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get crunching_results => 'იტვირთება შედეგები...';
+  String get crunching_results =>
+      'áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒ áƒ¨áƒ”áƒ“áƒ”áƒ’áƒ”áƒ‘áƒ˜...';
 
   @override
-  String get search_to_get_results => 'მოძებნეთ შედეგების მისაღებად';
+  String get search_to_get_results =>
+      'áƒ›áƒáƒ«áƒ”áƒ‘áƒœáƒ”áƒ— áƒ¨áƒ”áƒ“áƒ”áƒ’áƒ”áƒ‘áƒ˜áƒ¡ áƒ›áƒ˜áƒ¡áƒáƒ¦áƒ”áƒ‘áƒáƒ“';
 
   @override
   String get use_amoled_mode => 'Pitch black dark theme';
@@ -859,454 +927,499 @@ class AppLocalizationsKa extends AppLocalizations {
   String get pitch_dark_theme => 'AMOLED Mode';
 
   @override
-  String get normalize_audio => 'აუდიოს ნორმალიზება';
+  String get normalize_audio =>
+      'áƒáƒ£áƒ“áƒ˜áƒáƒ¡ áƒœáƒáƒ áƒ›áƒáƒšáƒ˜áƒ–áƒ”áƒ‘áƒ';
 
   @override
-  String get change_cover => 'Ქავერის შეცვლა';
+  String get change_cover => 'á²¥áƒáƒ•áƒ”áƒ áƒ˜áƒ¡ áƒ¨áƒ”áƒªáƒ•áƒšáƒ';
 
   @override
-  String get add_cover => 'Ქავერის ფოტოს დამატება';
+  String get add_cover =>
+      'á²¥áƒáƒ•áƒ”áƒ áƒ˜áƒ¡ áƒ¤áƒáƒ¢áƒáƒ¡ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get restore_defaults => 'ნაგულისხმევი პარამეტრების აღდგენა';
+  String get restore_defaults =>
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒžáƒáƒ áƒáƒ›áƒ”áƒ¢áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒáƒ¦áƒ“áƒ’áƒ”áƒœáƒ';
 
   @override
   String get restore_defaults_confirmation =>
-      'ეს თქვენს ყველა პარამეტრს დააბრუნებს ნაგულისხმევ მნიშვნელობებზე. ამ მოქმედების გაუქმება შეუძლებელია.';
+      'áƒ”áƒ¡ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ§áƒ•áƒ”áƒšáƒ áƒžáƒáƒ áƒáƒ›áƒ”áƒ¢áƒ áƒ¡ áƒ“áƒáƒáƒ‘áƒ áƒ£áƒœáƒ”áƒ‘áƒ¡ áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ• áƒ›áƒœáƒ˜áƒ¨áƒ•áƒœáƒ”áƒšáƒáƒ‘áƒ”áƒ‘áƒ–áƒ”. áƒáƒ› áƒ›áƒáƒ¥áƒ›áƒ”áƒ“áƒ”áƒ‘áƒ˜áƒ¡ áƒ’áƒáƒ£áƒ¥áƒ›áƒ”áƒ‘áƒ áƒ¨áƒ”áƒ£áƒ«áƒšáƒ”áƒ‘áƒ”áƒšáƒ˜áƒ.';
 
   @override
-  String get streaming_music_format => 'სტრიმინგის მუსიკის ფორმატი';
+  String get streaming_music_format =>
+      'áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒœáƒ’áƒ˜áƒ¡ áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ˜áƒ¡ áƒ¤áƒáƒ áƒ›áƒáƒ¢áƒ˜';
 
   @override
-  String get streaming_music_quality => 'სტრიმინგის ხარისხი';
+  String get streaming_music_quality =>
+      'áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒœáƒ’áƒ˜áƒ¡ áƒ®áƒáƒ áƒ˜áƒ¡áƒ®áƒ˜';
 
   @override
-  String get connect => 'დაკავშირება';
+  String get connect => 'áƒ“áƒáƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get disconnect => 'გამოსვლა';
+  String get disconnect => 'áƒ’áƒáƒ›áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get username => 'მომხმარებელი';
+  String get username => 'áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒ”áƒšáƒ˜';
 
   @override
-  String get password => 'პაროლი';
+  String get password => 'áƒžáƒáƒ áƒáƒšáƒ˜';
 
   @override
-  String get login => 'შესვლა';
+  String get login => 'áƒ¨áƒ”áƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get sign_in => 'შესვლა';
+  String get sign_in => 'áƒ¨áƒ”áƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get sign_up => 'რეგისტრაცია';
+  String get sign_up => 'áƒ áƒ”áƒ’áƒ˜áƒ¡áƒ¢áƒ áƒáƒªáƒ˜áƒ';
 
   @override
-  String get sign_out => 'გასვლა';
+  String get sign_out => 'áƒ’áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
-  String get verify => 'დადასტურება';
+  String get verify => 'áƒ“áƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get create_account => 'შექმენით თქვენი ანგარიში';
+  String get create_account =>
+      'áƒ¨áƒ”áƒ¥áƒ›áƒ”áƒœáƒ˜áƒ— áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜';
 
   @override
-  String get already_have_account => 'უკვე გაქვთ ანგარიში? შედით';
+  String get already_have_account =>
+      'áƒ£áƒ™áƒ•áƒ” áƒ’áƒáƒ¥áƒ•áƒ— áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜? áƒ¨áƒ”áƒ“áƒ˜áƒ—';
 
   @override
-  String get dont_have_account => 'არ გაქვთ ანგარიში? დარეგისტრირდით';
+  String get dont_have_account =>
+      'áƒáƒ  áƒ’áƒáƒ¥áƒ•áƒ— áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜? áƒ“áƒáƒ áƒ”áƒ’áƒ˜áƒ¡áƒ¢áƒ áƒ˜áƒ áƒ“áƒ˜áƒ—';
 
   @override
   String signed_in_as(Object userId) {
-    return 'შესულია როგორც $userId';
+    return 'áƒ¨áƒ”áƒ¡áƒ£áƒšáƒ˜áƒ áƒ áƒáƒ’áƒáƒ áƒª $userId';
   }
 
   @override
-  String get verification_code => 'დადასტურების კოდი';
+  String get verification_code =>
+      'áƒ“áƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ™áƒáƒ“áƒ˜';
 
   @override
   String get verification_code_hint =>
-      'შეიყვანეთ თქვენს ელფოსტაზე გაგზავნილი კოდი';
+      'áƒ¨áƒ”áƒ˜áƒ§áƒ•áƒáƒœáƒ”áƒ— áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ”áƒšáƒ¤áƒáƒ¡áƒ¢áƒáƒ–áƒ” áƒ’áƒáƒ’áƒ–áƒáƒ•áƒœáƒ˜áƒšáƒ˜ áƒ™áƒáƒ“áƒ˜';
 
   @override
   String get verify_email_code =>
-      'ჩვენ გამოგიგზავნეთ დადასტურების კოდი თქვენს ელფოსტაზე';
+      'áƒ©áƒ•áƒ”áƒœ áƒ’áƒáƒ›áƒáƒ’áƒ˜áƒ’áƒ–áƒáƒ•áƒœáƒ”áƒ— áƒ“áƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ™áƒáƒ“áƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ”áƒšáƒ¤áƒáƒ¡áƒ¢áƒáƒ–áƒ”';
 
   @override
-  String get go_to_album => 'ალბომზე გადასვლა';
+  String get go_to_album => 'áƒáƒšáƒ‘áƒáƒ›áƒ–áƒ” áƒ’áƒáƒ“áƒáƒ¡áƒ•áƒšáƒ';
 
   @override
   String get discord_rich_presence => 'Discord Rich Presence';
 
   @override
-  String get browse_all => 'ყველას ნახვა';
+  String get browse_all => 'áƒ§áƒ•áƒ”áƒšáƒáƒ¡ áƒœáƒáƒ®áƒ•áƒ';
 
   @override
-  String get genres => 'ჟანრები';
+  String get genres => 'áƒŸáƒáƒœáƒ áƒ”áƒ‘áƒ˜';
 
   @override
-  String get explore_genres => 'შეისწავლეთ ჟანრები';
+  String get explore_genres =>
+      'áƒ¨áƒ”áƒ˜áƒ¡áƒ¬áƒáƒ•áƒšáƒ”áƒ— áƒŸáƒáƒœáƒ áƒ”áƒ‘áƒ˜';
 
   @override
-  String get friends => 'მეგობრები';
+  String get friends => 'áƒ›áƒ”áƒ’áƒáƒ‘áƒ áƒ”áƒ‘áƒ˜';
 
   @override
   String get no_lyrics_available =>
-      'უკაცრავად, ამ ტრეკისთვის ტექსტის პოვნა შეუძლებელია';
+      'áƒ£áƒ™áƒáƒªáƒ áƒáƒ•áƒáƒ“, áƒáƒ› áƒ¢áƒ áƒ”áƒ™áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡ áƒ¢áƒ”áƒ¥áƒ¡áƒ¢áƒ˜áƒ¡ áƒžáƒáƒ•áƒœáƒ áƒ¨áƒ”áƒ£áƒ«áƒšáƒ”áƒ‘áƒ”áƒšáƒ˜áƒ';
 
   @override
-  String get start_a_radio => 'რადიოს ჩართვა';
+  String get start_a_radio => 'áƒ áƒáƒ“áƒ˜áƒáƒ¡ áƒ©áƒáƒ áƒ—áƒ•áƒ';
 
   @override
-  String get how_to_start_radio => 'როგორ გნებავთ რადიოს ჩართვა?';
+  String get how_to_start_radio =>
+      'áƒ áƒáƒ’áƒáƒ  áƒ’áƒœáƒ”áƒ‘áƒáƒ•áƒ— áƒ áƒáƒ“áƒ˜áƒáƒ¡ áƒ©áƒáƒ áƒ—áƒ•áƒ?';
 
   @override
   String get replace_queue_question =>
-      'გნებავთ ჩაანაცვლოთ არსებული რიგი თუ დაამატოთ მასზე?';
+      'áƒ’áƒœáƒ”áƒ‘áƒáƒ•áƒ— áƒ©áƒáƒáƒœáƒáƒªáƒ•áƒšáƒáƒ— áƒáƒ áƒ¡áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ áƒ˜áƒ’áƒ˜ áƒ—áƒ£ áƒ“áƒáƒáƒ›áƒáƒ¢áƒáƒ— áƒ›áƒáƒ¡áƒ–áƒ”?';
 
   @override
-  String get endless_playback => 'დაუსრულებელი დაკვრა';
+  String get endless_playback =>
+      'áƒ“áƒáƒ£áƒ¡áƒ áƒ£áƒšáƒ”áƒ‘áƒ”áƒšáƒ˜ áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
-  String get delete_playlist => 'ფლეილისტის წაშლა';
+  String get delete_playlist =>
+      'áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¬áƒáƒ¨áƒšáƒ';
 
   @override
   String get delete_playlist_confirmation =>
-      'დარწმუნებული ხართ რომ გნებავთ ფლეილისტის წაშლა?';
+      'áƒ“áƒáƒ áƒ¬áƒ›áƒ£áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ®áƒáƒ áƒ— áƒ áƒáƒ› áƒ’áƒœáƒ”áƒ‘áƒáƒ•áƒ— áƒ¤áƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ˜áƒ¡ áƒ¬áƒáƒ¨áƒšáƒ?';
 
   @override
-  String get local_tracks => 'ლოკალური ტრეკები';
+  String get local_tracks => 'áƒšáƒáƒ™áƒáƒšáƒ£áƒ áƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
-  String get local_tab => 'ადგილობრივი';
+  String get local_tab => 'áƒáƒ“áƒ’áƒ˜áƒšáƒáƒ‘áƒ áƒ˜áƒ•áƒ˜';
 
   @override
-  String get song_link => 'ტრეკის ლინკი';
+  String get song_link => 'áƒ¢áƒ áƒ”áƒ™áƒ˜áƒ¡ áƒšáƒ˜áƒœáƒ™áƒ˜';
 
   @override
-  String get skip_this_nonsense => 'ამ სისულელის გამოტოვება';
+  String get skip_this_nonsense =>
+      'áƒáƒ› áƒ¡áƒ˜áƒ¡áƒ£áƒšáƒ”áƒšáƒ˜áƒ¡ áƒ’áƒáƒ›áƒáƒ¢áƒáƒ•áƒ”áƒ‘áƒ';
 
   @override
-  String get freedom_of_music => '“მუსიკის თავისუფლება”';
+  String get freedom_of_music =>
+      'â€œáƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ˜áƒ¡ áƒ—áƒáƒ•áƒ˜áƒ¡áƒ£áƒ¤áƒšáƒ”áƒ‘áƒâ€';
 
   @override
-  String get freedom_of_music_palm => '“მუსიკის თავისუფლება შენს ხელის გულზე”';
+  String get freedom_of_music_palm =>
+      'â€œáƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ˜áƒ¡ áƒ—áƒáƒ•áƒ˜áƒ¡áƒ£áƒ¤áƒšáƒ”áƒ‘áƒ áƒ¨áƒ”áƒœáƒ¡ áƒ®áƒ”áƒšáƒ˜áƒ¡ áƒ’áƒ£áƒšáƒ–áƒ”â€';
 
   @override
-  String get get_started => 'დავიწყოთ';
+  String get get_started => 'áƒ“áƒáƒ•áƒ˜áƒ¬áƒ§áƒáƒ—';
 
   @override
   String get youtube_source_description =>
-      'რეკომენდებულია და მუშაობს საუკეთესოდ.';
+      'áƒ áƒ”áƒ™áƒáƒ›áƒ”áƒœáƒ“áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ áƒ“áƒ áƒ›áƒ£áƒ¨áƒáƒáƒ‘áƒ¡ áƒ¡áƒáƒ£áƒ™áƒ”áƒ—áƒ”áƒ¡áƒáƒ“.';
 
   @override
   String get piped_source_description =>
-      'თავისუფლად გრძნობთ თავს? იგივეა, რაც YouTube, მაგრამ ბევრი თავისუფალი.';
+      'áƒ—áƒáƒ•áƒ˜áƒ¡áƒ£áƒ¤áƒšáƒáƒ“ áƒ’áƒ áƒ«áƒœáƒáƒ‘áƒ— áƒ—áƒáƒ•áƒ¡? áƒ˜áƒ’áƒ˜áƒ•áƒ”áƒ, áƒ áƒáƒª YouTube, áƒ›áƒáƒ’áƒ áƒáƒ› áƒ‘áƒ”áƒ•áƒ áƒ˜ áƒ—áƒáƒ•áƒ˜áƒ¡áƒ£áƒ¤áƒáƒšáƒ˜.';
 
   @override
   String get jiosaavn_source_description =>
-      'საუკეთესოა სამხრეთ აზიის რეგიონისთვის.';
+      'áƒ¡áƒáƒ£áƒ™áƒ”áƒ—áƒ”áƒ¡áƒáƒ áƒ¡áƒáƒ›áƒ®áƒ áƒ”áƒ— áƒáƒ–áƒ˜áƒ˜áƒ¡ áƒ áƒ”áƒ’áƒ˜áƒáƒœáƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡.';
 
   @override
   String get invidious_source_description =>
-      'მსგავსია Piped-ის, მაგრამ მაღალი ხელმისაწვდომობით.';
+      'áƒ›áƒ¡áƒ’áƒáƒ•áƒ¡áƒ˜áƒ Piped-áƒ˜áƒ¡, áƒ›áƒáƒ’áƒ áƒáƒ› áƒ›áƒáƒ¦áƒáƒšáƒ˜ áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒáƒ‘áƒ˜áƒ—.';
 
   @override
   String highest_quality(Object quality) {
-    return 'საუკეთესო ხარისხი: $quality';
+    return 'áƒ¡áƒáƒ£áƒ™áƒ”áƒ—áƒ”áƒ¡áƒ áƒ®áƒáƒ áƒ˜áƒ¡áƒ®áƒ˜: $quality';
   }
 
   @override
-  String get select_audio_source => 'აუდიოს წყაროს არჩევა';
+  String get select_audio_source =>
+      'áƒáƒ£áƒ“áƒ˜áƒáƒ¡ áƒ¬áƒ§áƒáƒ áƒáƒ¡ áƒáƒ áƒ©áƒ”áƒ•áƒ';
 
   @override
   String get endless_playback_description =>
-      'ახალი სიმთერების ავტომატურად რიგის ბოლოში დამატება';
+      'áƒáƒ®áƒáƒšáƒ˜ áƒ¡áƒ˜áƒ›áƒ—áƒ”áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒáƒ•áƒ¢áƒáƒ›áƒáƒ¢áƒ£áƒ áƒáƒ“ áƒ áƒ˜áƒ’áƒ˜áƒ¡ áƒ‘áƒáƒšáƒáƒ¨áƒ˜ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ';
 
   @override
-  String get choose_your_region => 'აირჩიე შენი რეგიონი';
+  String get choose_your_region =>
+      'áƒáƒ˜áƒ áƒ©áƒ˜áƒ” áƒ¨áƒ”áƒœáƒ˜ áƒ áƒ”áƒ’áƒ˜áƒáƒœáƒ˜';
 
   @override
   String get choose_your_region_description =>
       'This will help Soulful Bhakti show you the right content\nfor your location.';
 
   @override
-  String get choose_your_language => 'აირჩიე ენა';
+  String get choose_your_language => 'áƒáƒ˜áƒ áƒ©áƒ˜áƒ” áƒ”áƒœáƒ';
 
   @override
-  String get help_project_grow => 'დაეხმარეთ ამ პროექტს განვითარებაში';
+  String get help_project_grow =>
+      'áƒ“áƒáƒ”áƒ®áƒ›áƒáƒ áƒ”áƒ— áƒáƒ› áƒžáƒ áƒáƒ”áƒ¥áƒ¢áƒ¡ áƒ’áƒáƒœáƒ•áƒ˜áƒ—áƒáƒ áƒ”áƒ‘áƒáƒ¨áƒ˜';
 
   @override
   String get help_project_grow_description =>
       'Soulful Bhakti is an open-source project. You can help this project grow by contributing to the project, reporting bugs, or suggesting new features.';
 
   @override
-  String get contribute_on_github => 'GitHub-ზე კონტრიბუცია';
+  String get contribute_on_github =>
+      'GitHub-áƒ–áƒ” áƒ™áƒáƒœáƒ¢áƒ áƒ˜áƒ‘áƒ£áƒªáƒ˜áƒ';
 
   @override
-  String get donate_on_open_collective => 'Open Collective-ზე დონაცია';
+  String get donate_on_open_collective =>
+      'Open Collective-áƒ–áƒ” áƒ“áƒáƒœáƒáƒªáƒ˜áƒ';
 
   @override
-  String get browse_anonymously => 'ანონიმურად ნახვა';
+  String get browse_anonymously =>
+      'áƒáƒœáƒáƒœáƒ˜áƒ›áƒ£áƒ áƒáƒ“ áƒœáƒáƒ®áƒ•áƒ';
 
   @override
-  String get enable_connect => 'დაკავშირების ჩართვა';
+  String get enable_connect =>
+      'áƒ“áƒáƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ©áƒáƒ áƒ—áƒ•áƒ';
 
   @override
   String get enable_connect_description =>
-      'აკონტროლე Soulful Bhakti სხვა მოწყობილობებიდან';
+      'áƒáƒ™áƒáƒœáƒ¢áƒ áƒáƒšáƒ” Soulful Bhakti áƒ¡áƒ®áƒ•áƒ áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ”áƒ‘áƒ˜áƒ“áƒáƒœ';
 
   @override
-  String get devices => 'მოწყობილობები';
+  String get devices => 'áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ”áƒ‘áƒ˜';
 
   @override
-  String get select => 'არჩევა';
+  String get select => 'áƒáƒ áƒ©áƒ”áƒ•áƒ';
 
   @override
   String connect_client_alert(Object client) {
-    return 'თქვენ კონტროლირებული ხართ $client მოწყობილობით';
+    return 'áƒ—áƒ¥áƒ•áƒ”áƒœ áƒ™áƒáƒœáƒ¢áƒ áƒáƒšáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ®áƒáƒ áƒ— $client áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ˜áƒ—';
   }
 
   @override
-  String get this_device => 'ეს მოწყობილობა';
+  String get this_device => 'áƒ”áƒ¡ áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ';
 
   @override
-  String get remote => 'დისტანციური';
+  String get remote => 'áƒ“áƒ˜áƒ¡áƒ¢áƒáƒœáƒªáƒ˜áƒ£áƒ áƒ˜';
 
   @override
-  String get stats => 'სტატისტიკა';
+  String get stats => 'áƒ¡áƒ¢áƒáƒ¢áƒ˜áƒ¡áƒ¢áƒ˜áƒ™áƒ';
 
   @override
   String and_n_more(Object count) {
-    return 'და $count მეტი';
+    return 'áƒ“áƒ $count áƒ›áƒ”áƒ¢áƒ˜';
   }
 
   @override
-  String get recently_played => 'მიუწვდელი';
+  String get recently_played => 'áƒ›áƒ˜áƒ£áƒ¬áƒ•áƒ“áƒ”áƒšáƒ˜';
 
   @override
-  String get browse_more => 'დაიცალეთ მეტი';
+  String get browse_more => 'áƒ“áƒáƒ˜áƒªáƒáƒšáƒ”áƒ— áƒ›áƒ”áƒ¢áƒ˜';
 
   @override
-  String get no_title => 'არ აქვს სათაური';
+  String get no_title => 'áƒáƒ  áƒáƒ¥áƒ•áƒ¡ áƒ¡áƒáƒ—áƒáƒ£áƒ áƒ˜';
 
   @override
-  String get not_playing => 'არ ერთვის';
+  String get not_playing => 'áƒáƒ  áƒ”áƒ áƒ—áƒ•áƒ˜áƒ¡';
 
   @override
-  String get epic_failure => 'ეპიკური მარცხი!';
+  String get epic_failure => 'áƒ”áƒžáƒ˜áƒ™áƒ£áƒ áƒ˜ áƒ›áƒáƒ áƒªáƒ®áƒ˜!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'დამატებული $tracks_length ტრეკი რიგში';
+    return 'áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ£áƒšáƒ˜ $tracks_length áƒ¢áƒ áƒ”áƒ™áƒ˜ áƒ áƒ˜áƒ’áƒ¨áƒ˜';
   }
 
   @override
-  String get spotube_has_an_update => 'Soulful Bhakti-ს აქვს განახლება';
+  String get spotube_has_an_update =>
+      'Soulful Bhakti-áƒ¡ áƒáƒ¥áƒ•áƒ¡ áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ';
 
   @override
-  String get download_now => 'ჩამოტვირთეთ ახლავე';
+  String get download_now =>
+      'áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ— áƒáƒ®áƒšáƒáƒ•áƒ”';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum გამოშვებულია';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum áƒ’áƒáƒ›áƒáƒ¨áƒ•áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version გამოშვებულია';
+    return 'Soulful Bhakti v$version áƒ’áƒáƒ›áƒáƒ¨áƒ•áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ';
   }
 
   @override
-  String get read_the_latest => 'წაიკითხეთ უახლესი ';
+  String get read_the_latest =>
+      'áƒ¬áƒáƒ˜áƒ™áƒ˜áƒ—áƒ®áƒ”áƒ— áƒ£áƒáƒ®áƒšáƒ”áƒ¡áƒ˜ ';
 
   @override
-  String get release_notes => 'გამოშვების შენიშვნები';
+  String get release_notes =>
+      'áƒ’áƒáƒ›áƒáƒ¨áƒ•áƒ”áƒ‘áƒ˜áƒ¡ áƒ¨áƒ”áƒœáƒ˜áƒ¨áƒ•áƒœáƒ”áƒ‘áƒ˜';
 
   @override
-  String get pick_color_scheme => 'აირჩიეთ ფერის სქემა';
+  String get pick_color_scheme =>
+      'áƒáƒ˜áƒ áƒ©áƒ˜áƒ”áƒ— áƒ¤áƒ”áƒ áƒ˜áƒ¡ áƒ¡áƒ¥áƒ”áƒ›áƒ';
 
   @override
-  String get save => 'შეინახეთ';
+  String get save => 'áƒ¨áƒ”áƒ˜áƒœáƒáƒ®áƒ”áƒ—';
 
   @override
-  String get choose_the_device => 'აირჩიეთ მოწყობილობა:';
+  String get choose_the_device =>
+      'áƒáƒ˜áƒ áƒ©áƒ˜áƒ”áƒ— áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ:';
 
   @override
   String get multiple_device_connected =>
-      'დაკავშირებულია რამდენიმე მოწყობილობა.\nაირჩიეთ მოწყობილობა, რომელზეც უნდა განხორციელდეს ეს მოქმედება';
+      'áƒ“áƒáƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ áƒ áƒáƒ›áƒ“áƒ”áƒœáƒ˜áƒ›áƒ” áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ.\náƒáƒ˜áƒ áƒ©áƒ˜áƒ”áƒ— áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒ, áƒ áƒáƒ›áƒ”áƒšáƒ–áƒ”áƒª áƒ£áƒœáƒ“áƒ áƒ’áƒáƒœáƒ®áƒáƒ áƒªáƒ˜áƒ”áƒšáƒ“áƒ”áƒ¡ áƒ”áƒ¡ áƒ›áƒáƒ¥áƒ›áƒ”áƒ“áƒ”áƒ‘áƒ';
 
   @override
-  String get nothing_found => 'არაფერი მოიძებნა';
+  String get nothing_found => 'áƒáƒ áƒáƒ¤áƒ”áƒ áƒ˜ áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ';
 
   @override
-  String get the_box_is_empty => 'კვადრატია ცარიელი';
+  String get the_box_is_empty =>
+      'áƒ™áƒ•áƒáƒ“áƒ áƒáƒ¢áƒ˜áƒ áƒªáƒáƒ áƒ˜áƒ”áƒšáƒ˜';
 
   @override
-  String get top_artists => 'ტოპ არტისტები';
+  String get top_artists => 'áƒ¢áƒáƒž áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get top_albums => 'ტოპ ალბომები';
+  String get top_albums => 'áƒ¢áƒáƒž áƒáƒšáƒ‘áƒáƒ›áƒ”áƒ‘áƒ˜';
 
   @override
-  String get this_week => 'ამ კვირას';
+  String get this_week => 'áƒáƒ› áƒ™áƒ•áƒ˜áƒ áƒáƒ¡';
 
   @override
-  String get this_month => 'ამ თვეში';
+  String get this_month => 'áƒáƒ› áƒ—áƒ•áƒ”áƒ¨áƒ˜';
 
   @override
-  String get last_6_months => 'ბოლო 6 თვე';
+  String get last_6_months => 'áƒ‘áƒáƒšáƒ 6 áƒ—áƒ•áƒ”';
 
   @override
-  String get this_year => 'ამ წელს';
+  String get this_year => 'áƒáƒ› áƒ¬áƒ”áƒšáƒ¡';
 
   @override
-  String get last_2_years => 'ბოლო 2 წელი';
+  String get last_2_years => 'áƒ‘áƒáƒšáƒ 2 áƒ¬áƒ”áƒšáƒ˜';
 
   @override
-  String get all_time => 'ყველა დრო';
+  String get all_time => 'áƒ§áƒ•áƒ”áƒšáƒ áƒ“áƒ áƒ';
 
   @override
   String powered_by_provider(Object providerName) {
-    return '$providerName-ით გაწვდილი';
+    return '$providerName-áƒ˜áƒ— áƒ’áƒáƒ¬áƒ•áƒ“áƒ˜áƒšáƒ˜';
   }
 
   @override
-  String get email => 'ელ. ფოსტა';
+  String get email => 'áƒ”áƒš. áƒ¤áƒáƒ¡áƒ¢áƒ';
 
   @override
-  String get send_code => 'კოდის გაგზავნა';
+  String get send_code => 'áƒ™áƒáƒ“áƒ˜áƒ¡ áƒ’áƒáƒ’áƒ–áƒáƒ•áƒœáƒ';
 
   @override
-  String get change_identifier => 'გამოიყენეთ სხვა ელფოსტა';
+  String get change_identifier =>
+      'áƒ’áƒáƒ›áƒáƒ˜áƒ§áƒ”áƒœáƒ”áƒ— áƒ¡áƒ®áƒ•áƒ áƒ”áƒšáƒ¤áƒáƒ¡áƒ¢áƒ';
 
   @override
-  String get sign_in_with_otp => 'შესვლა ერთჯერადი კოდით';
+  String get sign_in_with_otp =>
+      'áƒ¨áƒ”áƒ¡áƒ•áƒšáƒ áƒ”áƒ áƒ—áƒ¯áƒ”áƒ áƒáƒ“áƒ˜ áƒ™áƒáƒ“áƒ˜áƒ—';
 
   @override
-  String get enter_otp_sent => 'შეიყვანეთ კოდი, რომელიც გამოგიგზავნეთ';
+  String get enter_otp_sent =>
+      'áƒ¨áƒ”áƒ˜áƒ§áƒ•áƒáƒœáƒ”áƒ— áƒ™áƒáƒ“áƒ˜, áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒª áƒ’áƒáƒ›áƒáƒ’áƒ˜áƒ’áƒ–áƒáƒ•áƒœáƒ”áƒ—';
 
   @override
   String get verify_email_reminder =>
-      'გთხოვთ, დაადასტუროთ თქვენი ელფოსტის მისამართი თქვენი ანგარიშის დასაცავად';
+      'áƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ“áƒáƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒáƒ— áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ”áƒšáƒ¤áƒáƒ¡áƒ¢áƒ˜áƒ¡ áƒ›áƒ˜áƒ¡áƒáƒ›áƒáƒ áƒ—áƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ˜áƒ¡ áƒ“áƒáƒ¡áƒáƒªáƒáƒ•áƒáƒ“';
 
   @override
-  String get verify_now => 'დაადასტურეთ ახლავე';
+  String get verify_now =>
+      'áƒ“áƒáƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒ”áƒ— áƒáƒ®áƒšáƒáƒ•áƒ”';
 
   @override
   String get enter_email_to_verify =>
-      'შეიყვანეთ თქვენი ელფოსტის მისამართი დადასტურების კოდის მისაღებად';
+      'áƒ¨áƒ”áƒ˜áƒ§áƒ•áƒáƒœáƒ”áƒ— áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ”áƒšáƒ¤áƒáƒ¡áƒ¢áƒ˜áƒ¡ áƒ›áƒ˜áƒ¡áƒáƒ›áƒáƒ áƒ—áƒ˜ áƒ“áƒáƒ“áƒáƒ¡áƒ¢áƒ£áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ™áƒáƒ“áƒ˜áƒ¡ áƒ›áƒ˜áƒ¡áƒáƒ¦áƒ”áƒ‘áƒáƒ“';
 
   @override
-  String get profile_followers => 'გამყვანები';
+  String get profile_followers => 'áƒ’áƒáƒ›áƒ§áƒ•áƒáƒœáƒ”áƒ‘áƒ˜';
 
   @override
-  String get birthday => 'დაბადების დღე';
+  String get birthday => 'áƒ“áƒáƒ‘áƒáƒ“áƒ”áƒ‘áƒ˜áƒ¡ áƒ“áƒ¦áƒ”';
 
   @override
-  String get subscription => 'გამოწერა';
+  String get subscription => 'áƒ’áƒáƒ›áƒáƒ¬áƒ”áƒ áƒ';
 
   @override
-  String get not_born => 'არ დაბადებულა';
+  String get not_born => 'áƒáƒ  áƒ“áƒáƒ‘áƒáƒ“áƒ”áƒ‘áƒ£áƒšáƒ';
 
   @override
-  String get hacker => 'ჰაკერი';
+  String get hacker => 'áƒ°áƒáƒ™áƒ”áƒ áƒ˜';
 
   @override
-  String get profile => 'პროფილი';
+  String get profile => 'áƒžáƒ áƒáƒ¤áƒ˜áƒšáƒ˜';
 
   @override
-  String get no_name => 'არ არის სახელი';
+  String get no_name => 'áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ¡áƒáƒ®áƒ”áƒšáƒ˜';
 
   @override
-  String get edit => 'რედაქტირება';
+  String get edit => 'áƒ áƒ”áƒ“áƒáƒ¥áƒ¢áƒ˜áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get user_profile => 'მომხმარებლის პროფილი';
+  String get user_profile =>
+      'áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒšáƒ˜áƒ¡ áƒžáƒ áƒáƒ¤áƒ˜áƒšáƒ˜';
 
   @override
   String count_plays(Object count) {
-    return '$count გაწვდვა';
+    return '$count áƒ’áƒáƒ¬áƒ•áƒ“áƒ•áƒ';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*ეს рассчитывается на основе выплат за поток от Spotify\nот \$0.003 до \$0.005. ეს ჰიპოთეტური გამოთვლა იძლევა მომხმარებელს წარმოდგენას იმაზე, რამდენად\nგადახდილი იქნებოდა არტისტებისთვის, თუ მათ მოუსმინოს Spotify-ს ტრეკებს.';
+      '*áƒ”áƒ¡ Ñ€Ð°ÑÑÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð¾ÑÐ½Ð¾Ð²Ðµ Ð²Ñ‹Ð¿Ð»Ð°Ñ‚ Ð·Ð° Ð¿Ð¾Ñ‚Ð¾Ðº Ð¾Ñ‚ Spotify\nÐ¾Ñ‚ \$0.003 Ð´Ð¾ \$0.005. áƒ”áƒ¡ áƒ°áƒ˜áƒžáƒáƒ—áƒ”áƒ¢áƒ£áƒ áƒ˜ áƒ’áƒáƒ›áƒáƒ—áƒ•áƒšáƒ áƒ˜áƒ«áƒšáƒ”áƒ•áƒ áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒ”áƒšáƒ¡ áƒ¬áƒáƒ áƒ›áƒáƒ“áƒ’áƒ”áƒœáƒáƒ¡ áƒ˜áƒ›áƒáƒ–áƒ”, áƒ áƒáƒ›áƒ“áƒ”áƒœáƒáƒ“\náƒ’áƒáƒ“áƒáƒ®áƒ“áƒ˜áƒšáƒ˜ áƒ˜áƒ¥áƒœáƒ”áƒ‘áƒáƒ“áƒ áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡, áƒ—áƒ£ áƒ›áƒáƒ— áƒ›áƒáƒ£áƒ¡áƒ›áƒ˜áƒœáƒáƒ¡ Spotify-áƒ¡ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ¡.';
 
   @override
-  String get minutes_listened => 'წუთები მოუსმინეს';
+  String get minutes_listened =>
+      'áƒ¬áƒ£áƒ—áƒ”áƒ‘áƒ˜ áƒ›áƒáƒ£áƒ¡áƒ›áƒ˜áƒœáƒ”áƒ¡';
 
   @override
-  String get streamed_songs => 'სტრიმირებული სიმღერები';
+  String get streamed_songs =>
+      'áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ”áƒ‘áƒ˜';
 
   @override
   String count_streams(Object count) {
-    return '$count სტრიმი';
+    return '$count áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜';
   }
 
   @override
-  String get owned_by_you => 'შენ მიერ საკუთრებული';
+  String get owned_by_you =>
+      'áƒ¨áƒ”áƒœ áƒ›áƒ˜áƒ”áƒ  áƒ¡áƒáƒ™áƒ£áƒ—áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl აიღო კლიპბორდზე';
+    return '$shareUrl áƒáƒ˜áƒ¦áƒ áƒ™áƒšáƒ˜áƒžáƒ‘áƒáƒ áƒ“áƒ–áƒ”';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*ეს გამოითვლება ონლაინ მუსიკალური სტრიმინგის პლატფორმების საშუალო ანაზღაურების საფუძველზე, რომელიც შეადგენს \$0.003-დან \$0.005-მდე. ეს არის ჰიპოთეტური გაანგარიშება, რომელიც მომხმარებელს აძლევს წარმოდგენას, თუ რამდენს გადაუხდიდნენ ისინი არტისტებს, თუ მათ სიმღერებს მოუსმენდნენ სხვადასხვა მუსიკალურ სტრიმინგ პლატფორმაზე.';
+      '*áƒ”áƒ¡ áƒ’áƒáƒ›áƒáƒ˜áƒ—áƒ•áƒšáƒ”áƒ‘áƒ áƒáƒœáƒšáƒáƒ˜áƒœ áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒáƒšáƒ£áƒ áƒ˜ áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒœáƒ’áƒ˜áƒ¡ áƒžáƒšáƒáƒ¢áƒ¤áƒáƒ áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒ¡áƒáƒ¨áƒ£áƒáƒšáƒ áƒáƒœáƒáƒ–áƒ¦áƒáƒ£áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ¡áƒáƒ¤áƒ£áƒ«áƒ•áƒ”áƒšáƒ–áƒ”, áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒª áƒ¨áƒ”áƒáƒ“áƒ’áƒ”áƒœáƒ¡ \$0.003-áƒ“áƒáƒœ \$0.005-áƒ›áƒ“áƒ”. áƒ”áƒ¡ áƒáƒ áƒ˜áƒ¡ áƒ°áƒ˜áƒžáƒáƒ—áƒ”áƒ¢áƒ£áƒ áƒ˜ áƒ’áƒáƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ”áƒ‘áƒ, áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒª áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒ”áƒšáƒ¡ áƒáƒ«áƒšáƒ”áƒ•áƒ¡ áƒ¬áƒáƒ áƒ›áƒáƒ“áƒ’áƒ”áƒœáƒáƒ¡, áƒ—áƒ£ áƒ áƒáƒ›áƒ“áƒ”áƒœáƒ¡ áƒ’áƒáƒ“áƒáƒ£áƒ®áƒ“áƒ˜áƒ“áƒœáƒ”áƒœ áƒ˜áƒ¡áƒ˜áƒœáƒ˜ áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ¡, áƒ—áƒ£ áƒ›áƒáƒ— áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ”áƒ‘áƒ¡ áƒ›áƒáƒ£áƒ¡áƒ›áƒ”áƒœáƒ“áƒœáƒ”áƒœ áƒ¡áƒ®áƒ•áƒáƒ“áƒáƒ¡áƒ®áƒ•áƒ áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒáƒšáƒ£áƒ  áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ˜áƒœáƒ’ áƒžáƒšáƒáƒ¢áƒ¤áƒáƒ áƒ›áƒáƒ–áƒ”.';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes წუთი';
+    return '$minutes áƒ¬áƒ£áƒ—áƒ˜';
   }
 
   @override
-  String get summary_minutes => 'წუთები';
+  String get summary_minutes => 'áƒ¬áƒ£áƒ—áƒ”áƒ‘áƒ˜';
 
   @override
-  String get summary_listened_to_music => 'მუსიკა გაწვდილი';
+  String get summary_listened_to_music =>
+      'áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ áƒ’áƒáƒ¬áƒ•áƒ“áƒ˜áƒšáƒ˜';
 
   @override
-  String get summary_songs => 'მელოდია';
+  String get summary_songs => 'áƒ›áƒ”áƒšáƒáƒ“áƒ˜áƒ';
 
   @override
-  String get summary_streamed_overall => 'გაწვდილი საერთო';
+  String get summary_streamed_overall =>
+      'áƒ’áƒáƒ¬áƒ•áƒ“áƒ˜áƒšáƒ˜ áƒ¡áƒáƒ”áƒ áƒ—áƒ';
 
   @override
-  String get summary_owed_to_artists => 'გადასახადი არტისტებს\nამ თვეში';
+  String get summary_owed_to_artists =>
+      'áƒ’áƒáƒ“áƒáƒ¡áƒáƒ®áƒáƒ“áƒ˜ áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ¡\náƒáƒ› áƒ—áƒ•áƒ”áƒ¨áƒ˜';
 
   @override
-  String get summary_top_artist => 'ტოპ არტისტი\nამ პერიოდში';
+  String get summary_top_artist =>
+      'áƒ¢áƒáƒž áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ˜\náƒáƒ› áƒžáƒ”áƒ áƒ˜áƒáƒ“áƒ¨áƒ˜';
 
   @override
-  String get summary_artists => 'არტისტების';
+  String get summary_artists => 'áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜áƒ¡';
 
   @override
-  String get summary_music_reached_you => 'მუსიკა ჩაგივარდა';
+  String get summary_music_reached_you =>
+      'áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ áƒ©áƒáƒ’áƒ˜áƒ•áƒáƒ áƒ“áƒ';
 
   @override
-  String get summary_full_albums => 'სრული ალბომები';
+  String get summary_full_albums => 'áƒ¡áƒ áƒ£áƒšáƒ˜ áƒáƒšáƒ‘áƒáƒ›áƒ”áƒ‘áƒ˜';
 
   @override
-  String get summary_got_your_love => 'მოსულა თქვენი სიყვარული';
+  String get summary_got_your_love =>
+      'áƒ›áƒáƒ¡áƒ£áƒšáƒ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ¡áƒ˜áƒ§áƒ•áƒáƒ áƒ£áƒšáƒ˜';
 
   @override
-  String get summary_playlists => 'პლეილისტები';
+  String get summary_playlists => 'áƒžáƒšáƒ”áƒ˜áƒšáƒ˜áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get summary_were_on_repeat => 'გადაწვდილი იყო';
+  String get summary_were_on_repeat =>
+      'áƒ’áƒáƒ“áƒáƒ¬áƒ•áƒ“áƒ˜áƒšáƒ˜ áƒ˜áƒ§áƒ';
 
   @override
-  String get summary_listening_share => 'მოსმენის წილი';
+  String get summary_listening_share => 'áƒ›áƒáƒ¡áƒ›áƒ”áƒœáƒ˜áƒ¡ áƒ¬áƒ˜áƒšáƒ˜';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'თქვენ მიერ ყველაზე მეტად მოსმენილი $tracks_length ტრეკის განაწილება';
+    return 'áƒ—áƒ¥áƒ•áƒ”áƒœ áƒ›áƒ˜áƒ”áƒ  áƒ§áƒ•áƒ”áƒšáƒáƒ–áƒ” áƒ›áƒ”áƒ¢áƒáƒ“ áƒ›áƒáƒ¡áƒ›áƒ”áƒœáƒ˜áƒšáƒ˜ $tracks_length áƒ¢áƒ áƒ”áƒ™áƒ˜áƒ¡ áƒ’áƒáƒœáƒáƒ¬áƒ˜áƒšáƒ”áƒ‘áƒ';
   }
 
   @override
-  String get summary_plays => 'დაკვრა';
+  String get summary_plays => 'áƒ“áƒáƒ™áƒ•áƒ áƒ';
 
   @override
   String get insights => 'Insights';
@@ -1328,322 +1441,351 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'მთლიანი $money';
+    return 'áƒ›áƒ—áƒšáƒ˜áƒáƒœáƒ˜ $money';
   }
 
   @override
-  String get webview_not_found => 'ვებვიუ ვერ მოიძებნა';
+  String get webview_not_found =>
+      'áƒ•áƒ”áƒ‘áƒ•áƒ˜áƒ£ áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ';
 
   @override
   String get webview_not_found_description =>
-      'თქვენს მოწყობილობაზე ვებვიუის შესრულების დრო არ არის დაყენებული.\nთუ დაყენებულია, დარწმუნდით, რომ ის environment PATH-შია\n\nდაყენების შემდეგ, გადატვირთეთ აპი';
+      'áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ›áƒáƒ¬áƒ§áƒáƒ‘áƒ˜áƒšáƒáƒ‘áƒáƒ–áƒ” áƒ•áƒ”áƒ‘áƒ•áƒ˜áƒ£áƒ˜áƒ¡ áƒ¨áƒ”áƒ¡áƒ áƒ£áƒšáƒ”áƒ‘áƒ˜áƒ¡ áƒ“áƒ áƒ áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜.\náƒ—áƒ£ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜áƒ, áƒ“áƒáƒ áƒ¬áƒ›áƒ£áƒœáƒ“áƒ˜áƒ—, áƒ áƒáƒ› áƒ˜áƒ¡ environment PATH-áƒ¨áƒ˜áƒ\n\náƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ˜áƒ¡ áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’, áƒ’áƒáƒ“áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ— áƒáƒžáƒ˜';
 
   @override
-  String get unsupported_platform => 'მოუხერხებელი პლატფორმა';
+  String get unsupported_platform =>
+      'áƒ›áƒáƒ£áƒ®áƒ”áƒ áƒ®áƒ”áƒ‘áƒ”áƒšáƒ˜ áƒžáƒšáƒáƒ¢áƒ¤áƒáƒ áƒ›áƒ';
 
   @override
-  String get cache_music => 'მუსიკის ქეში';
+  String get cache_music => 'áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ˜áƒ¡ áƒ¥áƒ”áƒ¨áƒ˜';
 
   @override
-  String get open => 'გახსენით';
+  String get open => 'áƒ’áƒáƒ®áƒ¡áƒ”áƒœáƒ˜áƒ—';
 
   @override
-  String get cache_folder => 'ქეშის საქაღალდე';
+  String get cache_folder => 'áƒ¥áƒ”áƒ¨áƒ˜áƒ¡ áƒ¡áƒáƒ¥áƒáƒ¦áƒáƒšáƒ“áƒ”';
 
   @override
-  String get export => 'ექსპორტი';
+  String get export => 'áƒ”áƒ¥áƒ¡áƒžáƒáƒ áƒ¢áƒ˜';
 
   @override
-  String get clear_cache => 'ქეშის გასუფთავება';
+  String get clear_cache => 'áƒ¥áƒ”áƒ¨áƒ˜áƒ¡ áƒ’áƒáƒ¡áƒ£áƒ¤áƒ—áƒáƒ•áƒ”áƒ‘áƒ';
 
   @override
-  String get clear_cache_confirmation => 'გსურთ ქეშის გასუფთავება?';
+  String get clear_cache_confirmation =>
+      'áƒ’áƒ¡áƒ£áƒ áƒ— áƒ¥áƒ”áƒ¨áƒ˜áƒ¡ áƒ’áƒáƒ¡áƒ£áƒ¤áƒ—áƒáƒ•áƒ”áƒ‘áƒ?';
 
   @override
-  String get export_cache_files => 'ქეშირებული ფაილების ექსპორტი';
+  String get export_cache_files =>
+      'áƒ¥áƒ”áƒ¨áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¤áƒáƒ˜áƒšáƒ”áƒ‘áƒ˜áƒ¡ áƒ”áƒ¥áƒ¡áƒžáƒáƒ áƒ¢áƒ˜';
 
   @override
   String found_n_files(Object count) {
-    return 'ნაპოვნია $count ფაილი';
+    return 'áƒœáƒáƒžáƒáƒ•áƒœáƒ˜áƒ $count áƒ¤áƒáƒ˜áƒšáƒ˜';
   }
 
   @override
-  String get export_cache_confirmation => 'გსურთ ამ ფაილების ექსპორტი';
+  String get export_cache_confirmation =>
+      'áƒ’áƒ¡áƒ£áƒ áƒ— áƒáƒ› áƒ¤áƒáƒ˜áƒšáƒ”áƒ‘áƒ˜áƒ¡ áƒ”áƒ¥áƒ¡áƒžáƒáƒ áƒ¢áƒ˜';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return '$filesExported ფაილი $files-დან ექსპორტირებულია';
+    return '$filesExported áƒ¤áƒáƒ˜áƒšáƒ˜ $files-áƒ“áƒáƒœ áƒ”áƒ¥áƒ¡áƒžáƒáƒ áƒ¢áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜áƒ';
   }
 
   @override
-  String get undo => 'დაბრუნება';
+  String get undo => 'áƒ“áƒáƒ‘áƒ áƒ£áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get add_all_to_playlist => 'ყველა დაამატეთ პლეისთში';
+  String get add_all_to_playlist =>
+      'áƒ§áƒ•áƒ”áƒšáƒ áƒ“áƒáƒáƒ›áƒáƒ¢áƒ”áƒ— áƒžáƒšáƒ”áƒ˜áƒ¡áƒ—áƒ¨áƒ˜';
 
   @override
-  String get add_all_to_queue => 'ყველა დაამატეთ რიგში';
+  String get add_all_to_queue =>
+      'áƒ§áƒ•áƒ”áƒšáƒ áƒ“áƒáƒáƒ›áƒáƒ¢áƒ”áƒ— áƒ áƒ˜áƒ’áƒ¨áƒ˜';
 
   @override
-  String get play_all_next => 'ყველა შემდეგ ითამაშე';
+  String get play_all_next =>
+      'áƒ§áƒ•áƒ”áƒšáƒ áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’ áƒ˜áƒ—áƒáƒ›áƒáƒ¨áƒ”';
 
   @override
-  String get pause => 'შეჩერება';
+  String get pause => 'áƒ¨áƒ”áƒ©áƒ”áƒ áƒ”áƒ‘áƒ';
 
   @override
-  String get view_all => 'ყველა ნახვა';
+  String get view_all => 'áƒ§áƒ•áƒ”áƒšáƒ áƒœáƒáƒ®áƒ•áƒ';
 
   @override
   String get no_tracks_added_yet =>
-      'გაჩნდება რომ ჯერ არ გაქვთ დამატებული ტრეკები';
+      'áƒ’áƒáƒ©áƒœáƒ“áƒ”áƒ‘áƒ áƒ áƒáƒ› áƒ¯áƒ”áƒ  áƒáƒ  áƒ’áƒáƒ¥áƒ•áƒ— áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
-  String get no_tracks => 'გავლებული არ ჩანს არ არსებობს ტრეკები';
+  String get no_tracks =>
+      'áƒ’áƒáƒ•áƒšáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒáƒ  áƒ©áƒáƒœáƒ¡ áƒáƒ  áƒáƒ áƒ¡áƒ”áƒ‘áƒáƒ‘áƒ¡ áƒ¢áƒ áƒ”áƒ™áƒ”áƒ‘áƒ˜';
 
   @override
   String get no_tracks_listened_yet =>
-      'გქონდეთ გრძნობა, რომ ჯერ არაფერი უსმენია';
+      'áƒ’áƒ¥áƒáƒœáƒ“áƒ”áƒ— áƒ’áƒ áƒ«áƒœáƒáƒ‘áƒ, áƒ áƒáƒ› áƒ¯áƒ”áƒ  áƒáƒ áƒáƒ¤áƒ”áƒ áƒ˜ áƒ£áƒ¡áƒ›áƒ”áƒœáƒ˜áƒ';
 
   @override
-  String get not_following_artists => 'არ მიჰყვებით რომელიმე არტისტს';
+  String get not_following_artists =>
+      'áƒáƒ  áƒ›áƒ˜áƒ°áƒ§áƒ•áƒ”áƒ‘áƒ˜áƒ— áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒ›áƒ” áƒáƒ áƒ¢áƒ˜áƒ¡áƒ¢áƒ¡';
 
   @override
   String get no_favorite_albums_yet =>
-      'გაჩნდება რომ ჯერ არ გაქვთ დამატებული ალბომები თქვენს ფავორიტებში';
+      'áƒ’áƒáƒ©áƒœáƒ“áƒ”áƒ‘áƒ áƒ áƒáƒ› áƒ¯áƒ”áƒ  áƒáƒ  áƒ’áƒáƒ¥áƒ•áƒ— áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒáƒšáƒ‘áƒáƒ›áƒ”áƒ‘áƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ¤áƒáƒ•áƒáƒ áƒ˜áƒ¢áƒ”áƒ‘áƒ¨áƒ˜';
 
   @override
-  String get no_logs_found => 'ჩაწერები ვერ მოიძებნა';
+  String get no_logs_found =>
+      'áƒ©áƒáƒ¬áƒ”áƒ áƒ”áƒ‘áƒ˜ áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ';
 
   @override
-  String get youtube_engine => 'YouTube ძრავა';
+  String get youtube_engine => 'YouTube áƒ«áƒ áƒáƒ•áƒ';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine არ არის ინსტალირებული';
+    return '$engine áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ˜áƒœáƒ¡áƒ¢áƒáƒšáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine არ არის ინსტალირებული თქვენს სისტემაში.';
+    return '$engine áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ˜áƒœáƒ¡áƒ¢áƒáƒšáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒáƒ¨áƒ˜.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'დარწმუნდით, რომ ის ხელმისაწვდომია PATH ცვლადში ან\nდაუყავით $engine პროგრამის ფაილის სრული გზა';
+    return 'áƒ“áƒáƒ áƒ¬áƒ›áƒ£áƒœáƒ“áƒ˜áƒ—, áƒ áƒáƒ› áƒ˜áƒ¡ áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜áƒ PATH áƒªáƒ•áƒšáƒáƒ“áƒ¨áƒ˜ áƒáƒœ\náƒ“áƒáƒ£áƒ§áƒáƒ•áƒ˜áƒ— $engine áƒžáƒ áƒáƒ’áƒ áƒáƒ›áƒ˜áƒ¡ áƒ¤áƒáƒ˜áƒšáƒ˜áƒ¡ áƒ¡áƒ áƒ£áƒšáƒ˜ áƒ’áƒ–áƒ';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'macOS/Linux/Unix მსგავსი ოპერაციული სისტემებში, .zshrc/.bashrc/.bash_profile-ით პათის დაყენება ვერ იმუშავებს.\nთქვენ უნდა დააყენოთ პათი შელ ფაილში';
+      'macOS/Linux/Unix áƒ›áƒ¡áƒ’áƒáƒ•áƒ¡áƒ˜ áƒáƒžáƒ”áƒ áƒáƒªáƒ˜áƒ£áƒšáƒ˜ áƒ¡áƒ˜áƒ¡áƒ¢áƒ”áƒ›áƒ”áƒ‘áƒ¨áƒ˜, .zshrc/.bashrc/.bash_profile-áƒ˜áƒ— áƒžáƒáƒ—áƒ˜áƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ áƒ•áƒ”áƒ  áƒ˜áƒ›áƒ£áƒ¨áƒáƒ•áƒ”áƒ‘áƒ¡.\náƒ—áƒ¥áƒ•áƒ”áƒœ áƒ£áƒœáƒ“áƒ áƒ“áƒáƒáƒ§áƒ”áƒœáƒáƒ— áƒžáƒáƒ—áƒ˜ áƒ¨áƒ”áƒš áƒ¤áƒáƒ˜áƒšáƒ¨áƒ˜';
 
   @override
-  String get download => 'ჩამოტვირთვა';
+  String get download => 'áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ';
 
   @override
-  String get file_not_found => 'ფაილი ვერ მოიძებნა';
+  String get file_not_found =>
+      'áƒ¤áƒáƒ˜áƒšáƒ˜ áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ';
 
   @override
-  String get custom => 'პერსონალიზირებული';
+  String get custom => 'áƒžáƒ”áƒ áƒ¡áƒáƒœáƒáƒšáƒ˜áƒ–áƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get add_custom_url => 'დამატება პერსონალური URL';
+  String get add_custom_url =>
+      'áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ áƒžáƒ”áƒ áƒ¡áƒáƒœáƒáƒšáƒ£áƒ áƒ˜ URL';
 
   @override
-  String get edit_port => 'პორტის რედაქტირება';
+  String get edit_port =>
+      'áƒžáƒáƒ áƒ¢áƒ˜áƒ¡ áƒ áƒ”áƒ“áƒáƒ¥áƒ¢áƒ˜áƒ áƒ”áƒ‘áƒ';
 
   @override
   String get port_helper_msg =>
-      'ნაგულისხმევი არის -1, რაც შემთხვევითი ნომრის მითითებას ნიშნავს. თუ لديك firewall настроен, рекомендуется установить это.';
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒáƒ áƒ˜áƒ¡ -1, áƒ áƒáƒª áƒ¨áƒ”áƒ›áƒ—áƒ®áƒ•áƒ”áƒ•áƒ˜áƒ—áƒ˜ áƒœáƒáƒ›áƒ áƒ˜áƒ¡ áƒ›áƒ˜áƒ—áƒ˜áƒ—áƒ”áƒ‘áƒáƒ¡ áƒœáƒ˜áƒ¨áƒœáƒáƒ•áƒ¡. áƒ—áƒ£ Ù„Ø¯ÙŠÙƒ firewall Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐ½, Ñ€ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑƒÐµÑ‚ÑÑ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾.';
 
   @override
   String connect_request(Object client) {
-    return '$client-ის დაკავშირების ნებართვა?';
+    return '$client-áƒ˜áƒ¡ áƒ“áƒáƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒœáƒ”áƒ‘áƒáƒ áƒ—áƒ•áƒ?';
   }
 
   @override
   String get connection_request_denied =>
-      'კავშირი უარყოფილია. მომხმარებელმა უარყო წვდომა.';
+      'áƒ™áƒáƒ•áƒ¨áƒ˜áƒ áƒ˜ áƒ£áƒáƒ áƒ§áƒáƒ¤áƒ˜áƒšáƒ˜áƒ. áƒ›áƒáƒ›áƒ®áƒ›áƒáƒ áƒ”áƒ‘áƒ”áƒšáƒ›áƒ áƒ£áƒáƒ áƒ§áƒ áƒ¬áƒ•áƒ“áƒáƒ›áƒ.';
 
   @override
-  String get an_error_occurred => 'მოხდა შეცდომა';
+  String get an_error_occurred => 'áƒ›áƒáƒ®áƒ“áƒ áƒ¨áƒ”áƒªáƒ“áƒáƒ›áƒ';
 
   @override
-  String get copy_to_clipboard => 'კოპირება ბუფერში';
+  String get copy_to_clipboard =>
+      'áƒ™áƒáƒžáƒ˜áƒ áƒ”áƒ‘áƒ áƒ‘áƒ£áƒ¤áƒ”áƒ áƒ¨áƒ˜';
 
   @override
-  String get view_logs => 'იხილეთ ჟურნალები';
+  String get view_logs => 'áƒ˜áƒ®áƒ˜áƒšáƒ”áƒ— áƒŸáƒ£áƒ áƒœáƒáƒšáƒ”áƒ‘áƒ˜';
 
   @override
-  String get retry => 'ხელახლა ცდა';
+  String get retry => 'áƒ®áƒ”áƒšáƒáƒ®áƒšáƒ áƒªáƒ“áƒ';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'თქვენ არ გაქვთ დაყენებული ნაგულისხმევი მეტამონაცემების პროვაიდერი';
+      'áƒ—áƒ¥áƒ•áƒ”áƒœ áƒáƒ  áƒ’áƒáƒ¥áƒ•áƒ— áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒžáƒ áƒáƒ•áƒáƒ˜áƒ“áƒ”áƒ áƒ˜';
 
   @override
   String get manage_metadata_providers =>
-      'მეტამონაცემების პროვაიდერების მართვა';
+      'áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒžáƒ áƒáƒ•áƒáƒ˜áƒ“áƒ”áƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ›áƒáƒ áƒ—áƒ•áƒ';
 
   @override
-  String get open_link_in_browser => 'ბმულის გახსნა ბრაუზერში?';
+  String get open_link_in_browser =>
+      'áƒ‘áƒ›áƒ£áƒšáƒ˜áƒ¡ áƒ’áƒáƒ®áƒ¡áƒœáƒ áƒ‘áƒ áƒáƒ£áƒ–áƒ”áƒ áƒ¨áƒ˜?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'გსურთ გახსნათ შემდეგი ბმული';
+      'áƒ’áƒ¡áƒ£áƒ áƒ— áƒ’áƒáƒ®áƒ¡áƒœáƒáƒ— áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜ áƒ‘áƒ›áƒ£áƒšáƒ˜';
 
   @override
   String get unsafe_url_warning =>
-      'შეიძლება სახიფათო იყოს ბმულების გახსნა უნდობელი წყაროებიდან. იყავით ფრთხილად!\nასევე შეგიძლიათ დააკოპიროთ ბმული თქვენს ბუფერში.';
+      'áƒ¨áƒ”áƒ˜áƒ«áƒšáƒ”áƒ‘áƒ áƒ¡áƒáƒ®áƒ˜áƒ¤áƒáƒ—áƒ áƒ˜áƒ§áƒáƒ¡ áƒ‘áƒ›áƒ£áƒšáƒ”áƒ‘áƒ˜áƒ¡ áƒ’áƒáƒ®áƒ¡áƒœáƒ áƒ£áƒœáƒ“áƒáƒ‘áƒ”áƒšáƒ˜ áƒ¬áƒ§áƒáƒ áƒáƒ”áƒ‘áƒ˜áƒ“áƒáƒœ. áƒ˜áƒ§áƒáƒ•áƒ˜áƒ— áƒ¤áƒ áƒ—áƒ®áƒ˜áƒšáƒáƒ“!\náƒáƒ¡áƒ”áƒ•áƒ” áƒ¨áƒ”áƒ’áƒ˜áƒ«áƒšáƒ˜áƒáƒ— áƒ“áƒáƒáƒ™áƒáƒžáƒ˜áƒ áƒáƒ— áƒ‘áƒ›áƒ£áƒšáƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ¡ áƒ‘áƒ£áƒ¤áƒ”áƒ áƒ¨áƒ˜.';
 
   @override
-  String get copy_link => 'ბმულის კოპირება';
+  String get copy_link => 'áƒ‘áƒ›áƒ£áƒšáƒ˜áƒ¡ áƒ™áƒáƒžáƒ˜áƒ áƒ”áƒ‘áƒ';
 
   @override
   String get building_your_timeline =>
-      'თქვენი დროის ხაზის აგება თქვენი მოსმენების საფუძველზე...';
+      'áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ“áƒ áƒáƒ˜áƒ¡ áƒ®áƒáƒ–áƒ˜áƒ¡ áƒáƒ’áƒ”áƒ‘áƒ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ›áƒáƒ¡áƒ›áƒ”áƒœáƒ”áƒ‘áƒ˜áƒ¡ áƒ¡áƒáƒ¤áƒ£áƒ«áƒ•áƒ”áƒšáƒ–áƒ”...';
 
   @override
-  String get official => 'ოფიციალური';
+  String get official => 'áƒáƒ¤áƒ˜áƒªáƒ˜áƒáƒšáƒ£áƒ áƒ˜';
 
   @override
   String author_name(Object author) {
-    return 'ავტორი: $author';
+    return 'áƒáƒ•áƒ¢áƒáƒ áƒ˜: $author';
   }
 
   @override
-  String get third_party => 'მესამე მხარის';
+  String get third_party => 'áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡';
 
   @override
   String get plugin_requires_authentication =>
-      'პლაგინი საჭიროებს ავთენტიფიკაციას';
+      'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜ áƒ¡áƒáƒ­áƒ˜áƒ áƒáƒ”áƒ‘áƒ¡ áƒáƒ•áƒ—áƒ”áƒœáƒ¢áƒ˜áƒ¤áƒ˜áƒ™áƒáƒªáƒ˜áƒáƒ¡';
 
   @override
-  String get update_available => 'განახლება ხელმისაწვდომია';
+  String get update_available =>
+      'áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜áƒ';
 
   @override
-  String get supports_scrobbling => 'მხარს უჭერს სქრობლინგს';
+  String get supports_scrobbling =>
+      'áƒ›áƒ®áƒáƒ áƒ¡ áƒ£áƒ­áƒ”áƒ áƒ¡ áƒ¡áƒ¥áƒ áƒáƒ‘áƒšáƒ˜áƒœáƒ’áƒ¡';
 
   @override
   String get plugin_scrobbling_info =>
-      'ეს პლაგინი აწარმოებს თქვენი მუსიკის სქრობლინგს, რათა შექმნას თქვენი მოსმენის ისტორია.';
+      'áƒ”áƒ¡ áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜ áƒáƒ¬áƒáƒ áƒ›áƒáƒ”áƒ‘áƒ¡ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ›áƒ£áƒ¡áƒ˜áƒ™áƒ˜áƒ¡ áƒ¡áƒ¥áƒ áƒáƒ‘áƒšáƒ˜áƒœáƒ’áƒ¡, áƒ áƒáƒ—áƒ áƒ¨áƒ”áƒ¥áƒ›áƒœáƒáƒ¡ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ›áƒáƒ¡áƒ›áƒ”áƒœáƒ˜áƒ¡ áƒ˜áƒ¡áƒ¢áƒáƒ áƒ˜áƒ.';
 
   @override
-  String get default_metadata_source => 'ნაგულისხმევი მეტამონაცემების წყარო';
+  String get default_metadata_source =>
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒ¬áƒ§áƒáƒ áƒ';
 
   @override
   String get set_default_metadata_source =>
-      'ნაგულისხმევი მეტამონაცემების წყაროს დაყენება';
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒ¬áƒ§áƒáƒ áƒáƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get default_audio_source => 'ნაგულისხმევი აუდიო წყარო';
+  String get default_audio_source =>
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒáƒ£áƒ“áƒ˜áƒ áƒ¬áƒ§áƒáƒ áƒ';
 
   @override
-  String get set_default_audio_source => 'ნაგულისხმევი აუდიო წყაროს დაყენება';
+  String get set_default_audio_source =>
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒ˜ áƒáƒ£áƒ“áƒ˜áƒ áƒ¬áƒ§áƒáƒ áƒáƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get set_default => 'ნაგულისხმევად დაყენება';
+  String get set_default =>
+      'áƒœáƒáƒ’áƒ£áƒšáƒ˜áƒ¡áƒ®áƒ›áƒ”áƒ•áƒáƒ“ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
-  String get support => 'მხარდაჭერა';
+  String get support => 'áƒ›áƒ®áƒáƒ áƒ“áƒáƒ­áƒ”áƒ áƒ';
 
   @override
-  String get support_plugin_development => 'პლაგინის განვითარების მხარდაჭერა';
+  String get support_plugin_development =>
+      'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒ’áƒáƒœáƒ•áƒ˜áƒ—áƒáƒ áƒ”áƒ‘áƒ˜áƒ¡ áƒ›áƒ®áƒáƒ áƒ“áƒáƒ­áƒ”áƒ áƒ';
 
   @override
   String can_access_name_api(Object name) {
-    return '- შეუძლია წვდომა **$name** API-ზე';
+    return '- áƒ¨áƒ”áƒ£áƒ«áƒšáƒ˜áƒ áƒ¬áƒ•áƒ“áƒáƒ›áƒ **$name** API-áƒ–áƒ”';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'გსურთ ამ პლაგინის დაყენება?';
+      'áƒ’áƒ¡áƒ£áƒ áƒ— áƒáƒ› áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ?';
 
   @override
   String get third_party_plugin_warning =>
-      'ეს პლაგინი არის მესამე მხარის საცავიდან. გთხოვთ, დარწმუნდეთ, რომ ენდობით წყაროს დაყენებამდე.';
+      'áƒ”áƒ¡ áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜ áƒáƒ áƒ˜áƒ¡ áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡ áƒ¡áƒáƒªáƒáƒ•áƒ˜áƒ“áƒáƒœ. áƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ“áƒáƒ áƒ¬áƒ›áƒ£áƒœáƒ“áƒ”áƒ—, áƒ áƒáƒ› áƒ”áƒœáƒ“áƒáƒ‘áƒ˜áƒ— áƒ¬áƒ§áƒáƒ áƒáƒ¡ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒáƒ›áƒ“áƒ”.';
 
   @override
-  String get author => 'ავტორი';
+  String get author => 'áƒáƒ•áƒ¢áƒáƒ áƒ˜';
 
   @override
   String get this_plugin_can_do_following =>
-      'ამ პლაგინს შეუძლია შემდეგის გაკეთება';
+      'áƒáƒ› áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ¡ áƒ¨áƒ”áƒ£áƒ«áƒšáƒ˜áƒ áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜áƒ¡ áƒ’áƒáƒ™áƒ”áƒ—áƒ”áƒ‘áƒ';
 
   @override
-  String get install => 'დაყენება';
+  String get install => 'áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ';
 
   @override
   String get install_a_metadata_provider =>
-      'დააყენეთ მეტამონაცემების პროვაიდერი';
+      'áƒ“áƒáƒáƒ§áƒ”áƒœáƒ”áƒ— áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒžáƒ áƒáƒ•áƒáƒ˜áƒ“áƒ”áƒ áƒ˜';
 
   @override
-  String get no_tracks_playing => 'ამჟამად არ უკრავს არცერთი ტრეკი';
+  String get no_tracks_playing =>
+      'áƒáƒ›áƒŸáƒáƒ›áƒáƒ“ áƒáƒ  áƒ£áƒ™áƒ áƒáƒ•áƒ¡ áƒáƒ áƒªáƒ”áƒ áƒ—áƒ˜ áƒ¢áƒ áƒ”áƒ™áƒ˜';
 
   @override
   String get synced_lyrics_not_available =>
-      'ამ სიმღერისთვის სინქრონიზებული ტექსტები არ არის ხელმისაწვდომი. გთხოვთ, გამოიყენოთ';
+      'áƒáƒ› áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡ áƒ¡áƒ˜áƒœáƒ¥áƒ áƒáƒœáƒ˜áƒ–áƒ”áƒ‘áƒ£áƒšáƒ˜ áƒ¢áƒ”áƒ¥áƒ¡áƒ¢áƒ”áƒ‘áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜. áƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ’áƒáƒ›áƒáƒ˜áƒ§áƒ”áƒœáƒáƒ—';
 
   @override
-  String get plain_lyrics => 'მარტივი ტექსტები';
+  String get plain_lyrics => 'áƒ›áƒáƒ áƒ¢áƒ˜áƒ•áƒ˜ áƒ¢áƒ”áƒ¥áƒ¡áƒ¢áƒ”áƒ‘áƒ˜';
 
   @override
-  String get tab_instead => 'ჩანართი, სანაცვლოდ.';
+  String get tab_instead =>
+      'áƒ©áƒáƒœáƒáƒ áƒ—áƒ˜, áƒ¡áƒáƒœáƒáƒªáƒ•áƒšáƒáƒ“.';
 
   @override
-  String get disclaimer => 'პასუხისმგებლობის უარყოფა';
+  String get disclaimer =>
+      'áƒžáƒáƒ¡áƒ£áƒ®áƒ˜áƒ¡áƒ›áƒ’áƒ”áƒ‘áƒšáƒáƒ‘áƒ˜áƒ¡ áƒ£áƒáƒ áƒ§áƒáƒ¤áƒ';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Soulful Bhakti-ის გუნდი არ იღებს პასუხისმგებლობას (მათ შორის, იურიდიულს) არცერთ \"მესამე მხარის\" პლაგინზე.\nგთხოვთ, გამოიყენოთ ისინი თქვენი რისკის ქვეშ. ნებისმიერი ხარვეზის/პრობლემის შესახებ შეატყობინეთ პლაგინის საცავს.\n\nთუ რომელიმე \"მესამე მხარის\" პლაგინი არღვევს რაიმე სერვისის/იურიდიული პირის ToS/DMCA-ს, გთხოვთ, სთხოვეთ \"მესამე მხარის\" პლაგინის ავტორს ან ჰოსტინგის პლატფორმას, მაგალითად GitHub/Codeberg, მიიღოს ზომები. ზემოთ ჩამოთვლილი (\"მესამე მხარის\" ეტიკეტის მქონე) ყველა არის საჯარო/საზოგადოების მიერ შენარჩუნებული პლაგინები. ჩვენ მათ არ ვაკონტროლებთ, ამიტომ არ შეგვიძლია მათზე რაიმე ზომების მიღება.\n\n';
+      'Soulful Bhakti-áƒ˜áƒ¡ áƒ’áƒ£áƒœáƒ“áƒ˜ áƒáƒ  áƒ˜áƒ¦áƒ”áƒ‘áƒ¡ áƒžáƒáƒ¡áƒ£áƒ®áƒ˜áƒ¡áƒ›áƒ’áƒ”áƒ‘áƒšáƒáƒ‘áƒáƒ¡ (áƒ›áƒáƒ— áƒ¨áƒáƒ áƒ˜áƒ¡, áƒ˜áƒ£áƒ áƒ˜áƒ“áƒ˜áƒ£áƒšáƒ¡) áƒáƒ áƒªáƒ”áƒ áƒ— \"áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡\" áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ–áƒ”.\náƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ’áƒáƒ›áƒáƒ˜áƒ§áƒ”áƒœáƒáƒ— áƒ˜áƒ¡áƒ˜áƒœáƒ˜ áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ áƒ˜áƒ¡áƒ™áƒ˜áƒ¡ áƒ¥áƒ•áƒ”áƒ¨. áƒœáƒ”áƒ‘áƒ˜áƒ¡áƒ›áƒ˜áƒ”áƒ áƒ˜ áƒ®áƒáƒ áƒ•áƒ”áƒ–áƒ˜áƒ¡/áƒžáƒ áƒáƒ‘áƒšáƒ”áƒ›áƒ˜áƒ¡ áƒ¨áƒ”áƒ¡áƒáƒ®áƒ”áƒ‘ áƒ¨áƒ”áƒáƒ¢áƒ§áƒáƒ‘áƒ˜áƒœáƒ”áƒ— áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒ¡áƒáƒªáƒáƒ•áƒ¡.\n\náƒ—áƒ£ áƒ áƒáƒ›áƒ”áƒšáƒ˜áƒ›áƒ” \"áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡\" áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜ áƒáƒ áƒ¦áƒ•áƒ”áƒ•áƒ¡ áƒ áƒáƒ˜áƒ›áƒ” áƒ¡áƒ”áƒ áƒ•áƒ˜áƒ¡áƒ˜áƒ¡/áƒ˜áƒ£áƒ áƒ˜áƒ“áƒ˜áƒ£áƒšáƒ˜ áƒžáƒ˜áƒ áƒ˜áƒ¡ ToS/DMCA-áƒ¡, áƒ’áƒ—áƒ®áƒáƒ•áƒ—, áƒ¡áƒ—áƒ®áƒáƒ•áƒ”áƒ— \"áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡\" áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒáƒ•áƒ¢áƒáƒ áƒ¡ áƒáƒœ áƒ°áƒáƒ¡áƒ¢áƒ˜áƒœáƒ’áƒ˜áƒ¡ áƒžáƒšáƒáƒ¢áƒ¤áƒáƒ áƒ›áƒáƒ¡, áƒ›áƒáƒ’áƒáƒšáƒ˜áƒ—áƒáƒ“ GitHub/Codeberg, áƒ›áƒ˜áƒ˜áƒ¦áƒáƒ¡ áƒ–áƒáƒ›áƒ”áƒ‘áƒ˜. áƒ–áƒ”áƒ›áƒáƒ— áƒ©áƒáƒ›áƒáƒ—áƒ•áƒšáƒ˜áƒšáƒ˜ (\"áƒ›áƒ”áƒ¡áƒáƒ›áƒ” áƒ›áƒ®áƒáƒ áƒ˜áƒ¡\" áƒ”áƒ¢áƒ˜áƒ™áƒ”áƒ¢áƒ˜áƒ¡ áƒ›áƒ¥áƒáƒœáƒ”) áƒ§áƒ•áƒ”áƒšáƒ áƒáƒ áƒ˜áƒ¡ áƒ¡áƒáƒ¯áƒáƒ áƒ/áƒ¡áƒáƒ–áƒáƒ’áƒáƒ“áƒáƒ”áƒ‘áƒ˜áƒ¡ áƒ›áƒ˜áƒ”áƒ  áƒ¨áƒ”áƒœáƒáƒ áƒ©áƒ£áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜ áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ”áƒ‘áƒ˜. áƒ©áƒ•áƒ”áƒœ áƒ›áƒáƒ— áƒáƒ  áƒ•áƒáƒ™áƒáƒœáƒ¢áƒ áƒáƒšáƒ”áƒ‘áƒ—, áƒáƒ›áƒ˜áƒ¢áƒáƒ› áƒáƒ  áƒ¨áƒ”áƒ’áƒ•áƒ˜áƒ«áƒšáƒ˜áƒ áƒ›áƒáƒ—áƒ–áƒ” áƒ áƒáƒ˜áƒ›áƒ” áƒ–áƒáƒ›áƒ”áƒ‘áƒ˜áƒ¡ áƒ›áƒ˜áƒ¦áƒ”áƒ‘áƒ.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'შეყვანა არ ემთხვევა საჭირო ფორმატს';
+      'áƒ¨áƒ”áƒ§áƒ•áƒáƒœáƒ áƒáƒ  áƒ”áƒ›áƒ—áƒ®áƒ•áƒ”áƒ•áƒ áƒ¡áƒáƒ­áƒ˜áƒ áƒ áƒ¤áƒáƒ áƒ›áƒáƒ¢áƒ¡';
 
   @override
-  String get plugins => 'პლაგინები';
+  String get plugins => 'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ”áƒ‘áƒ˜';
 
   @override
   String get paste_plugin_download_url =>
-      'ჩასვით ჩამოტვირთვის url ან GitHub/Codeberg-ის რეპოს url ან პირდაპირი ბმული .smplug ფაილზე';
+      'áƒ©áƒáƒ¡áƒ•áƒ˜áƒ— áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ˜áƒ¡ url áƒáƒœ GitHub/Codeberg-áƒ˜áƒ¡ áƒ áƒ”áƒžáƒáƒ¡ url áƒáƒœ áƒžáƒ˜áƒ áƒ“áƒáƒžáƒ˜áƒ áƒ˜ áƒ‘áƒ›áƒ£áƒšáƒ˜ .smplug áƒ¤áƒáƒ˜áƒšáƒ–áƒ”';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'პლაგინის ჩამოტვირთვა და დაყენება url-დან';
+      'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒ©áƒáƒ›áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ áƒ“áƒ áƒ“áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ url-áƒ“áƒáƒœ';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'პლაგინის დამატება ვერ მოხერხდა: $error';
+    return 'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒ“áƒáƒ›áƒáƒ¢áƒ”áƒ‘áƒ áƒ•áƒ”áƒ  áƒ›áƒáƒ®áƒ”áƒ áƒ®áƒ“áƒ: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'პლაგინის ატვირთვა ფაილიდან';
+  String get upload_plugin_from_file =>
+      'áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ˜áƒ¡ áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ áƒ¤áƒáƒ˜áƒšáƒ˜áƒ“áƒáƒœ';
 
   @override
-  String get installed => 'დაინსტალირებული';
+  String get installed => 'áƒ“áƒáƒ˜áƒœáƒ¡áƒ¢áƒáƒšáƒ˜áƒ áƒ”áƒ‘áƒ£áƒšáƒ˜';
 
   @override
-  String get available_plugins => 'ხელმისაწვდომი პლაგინები';
+  String get available_plugins =>
+      'áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜ áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ”áƒ‘áƒ˜';
 
   @override
   String get configure_plugins =>
-      'თქვენი საკუთარი მეტამონაცემებისა და აუდიო წყაროს პლაგინების კონფიგურაცია';
+      'áƒ—áƒ¥áƒ•áƒ”áƒœáƒ˜ áƒ¡áƒáƒ™áƒ£áƒ—áƒáƒ áƒ˜ áƒ›áƒ”áƒ¢áƒáƒ›áƒáƒœáƒáƒªáƒ”áƒ›áƒ”áƒ‘áƒ˜áƒ¡áƒ áƒ“áƒ áƒáƒ£áƒ“áƒ˜áƒ áƒ¬áƒ§áƒáƒ áƒáƒ¡ áƒžáƒšáƒáƒ’áƒ˜áƒœáƒ”áƒ‘áƒ˜áƒ¡ áƒ™áƒáƒœáƒ¤áƒ˜áƒ’áƒ£áƒ áƒáƒªáƒ˜áƒ';
 
   @override
-  String get source => 'წყარო: ';
+  String get source => 'áƒ¬áƒ§áƒáƒ áƒ: ';
 
   @override
-  String get uncompressed => 'შეუკუმშავი';
+  String get uncompressed => 'áƒ¨áƒ”áƒ£áƒ™áƒ£áƒ›áƒ¨áƒáƒ•áƒ˜';
 
   @override
   String get dab_music_source_description =>
-      'აუდიოფილებისთვის. უზრუნველყოფს მაღალი ხარისხის/უკომპრესო აუდიო სტრიმებს. ზუსტი შესაბამისობა ISRC-ის მიხედვით.';
+      'áƒáƒ£áƒ“áƒ˜áƒáƒ¤áƒ˜áƒšáƒ”áƒ‘áƒ˜áƒ¡áƒ—áƒ•áƒ˜áƒ¡. áƒ£áƒ–áƒ áƒ£áƒœáƒ•áƒ”áƒšáƒ§áƒáƒ¤áƒ¡ áƒ›áƒáƒ¦áƒáƒšáƒ˜ áƒ®áƒáƒ áƒ˜áƒ¡áƒ®áƒ˜áƒ¡/áƒ£áƒ™áƒáƒ›áƒžáƒ áƒ”áƒ¡áƒ áƒáƒ£áƒ“áƒ˜áƒ áƒ¡áƒ¢áƒ áƒ˜áƒ›áƒ”áƒ‘áƒ¡. áƒ–áƒ£áƒ¡áƒ¢áƒ˜ áƒ¨áƒ”áƒ¡áƒáƒ‘áƒáƒ›áƒ˜áƒ¡áƒáƒ‘áƒ ISRC-áƒ˜áƒ¡ áƒ›áƒ˜áƒ®áƒ”áƒ“áƒ•áƒ˜áƒ—.';
 
   @override
-  String get summary_top_track => 'ტოპ სიმღერა\nამ პერიოდში';
+  String get summary_top_track =>
+      'áƒ¢áƒáƒž áƒ¡áƒ˜áƒ›áƒ¦áƒ”áƒ áƒ\náƒáƒ› áƒžáƒ”áƒ áƒ˜áƒáƒ“áƒ¨áƒ˜';
 
   @override
-  String get local => 'ლოკალური';
+  String get local => 'áƒšáƒáƒ™áƒáƒšáƒ£áƒ áƒ˜';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1653,4 +1795,21 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

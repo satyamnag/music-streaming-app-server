@@ -1,4 +1,4 @@
-{
+﻿{
   "guest": "Guest",
   "browse": "Browse",
   "search": "Search",
@@ -161,9 +161,9 @@
   "founder": "Founder",
   "repository": "Repository",
   "bug_issues": "Bug+Issues",
-  "made_with": "Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©",
+  "made_with": "Made with Ã¢ÂÂ¤Ã¯Â¸Â in BangladeshÃ°Å¸â€¡Â§Ã°Å¸â€¡Â©",
   "kingkor_roy_tirtho": "Kingkor Roy Tirtho",
-  "copyright": "Â© 2021-{current_year} Kingkor Roy Tirtho",
+  "copyright": "Ã‚Â© 2021-{current_year} Kingkor Roy Tirtho",
   "license": "License",
   "credentials_will_not_be_shared_disclaimer": "Don't worry, any of your credentials won't be collected or shared with anyone",
   "know_how_to_login": "Don't know how to do this?",
@@ -300,8 +300,8 @@
   "local_tab": "Local",
   "song_link": "Song Link",
   "skip_this_nonsense": "Skip this nonsense",
-  "freedom_of_music": "â€œFreedom of Musicâ€",
-  "freedom_of_music_palm": "â€œFreedom of Music in the palm of your handâ€",
+  "freedom_of_music": "Ã¢â‚¬Å“Freedom of MusicÃ¢â‚¬Â",
+  "freedom_of_music_palm": "Ã¢â‚¬Å“Freedom of Music in the palm of your handÃ¢â‚¬Â",
   "get_started": "Let's get started",
   "youtube_source_description": "Recommended and works best.",
   "piped_source_description": "Feeling free? Same as YouTube but a lot free.",
@@ -494,5 +494,13 @@
   "local": "Local",
   "set_as_ringtone": "Set as ringtone",
   "ringtone_set": "Ringtone set",
-  "ringtone_failed": "Could not set ringtone"
+  "ringtone_failed": "Could not set ringtone",
+  "specials": "Specials",
+  "play_now": "Play Now",
+  "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
+  "@songs_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

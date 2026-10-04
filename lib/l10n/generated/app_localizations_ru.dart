@@ -9,552 +9,584 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get guest => 'Гость';
+  String get guest => 'Ð“Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get browse => 'Обзор';
+  String get browse => 'ÐžÐ±Ð·Ð¾Ñ€';
 
   @override
-  String get search => 'Поиск';
+  String get search => 'ÐŸÐ¾Ð¸ÑÐº';
 
   @override
-  String get library => 'Библиотека';
+  String get library => 'Ð‘Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÐ°';
 
   @override
-  String get lyrics => 'Текст';
+  String get lyrics => 'Ð¢ÐµÐºÑÑ‚';
 
   @override
-  String get settings => 'Настройки';
+  String get settings => 'ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸';
 
   @override
-  String get settings_subtitle => 'Настройте Soulful Bhakti по своему вкусу';
+  String get settings_subtitle =>
+      'ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹Ñ‚Ðµ Soulful Bhakti Ð¿Ð¾ ÑÐ²Ð¾ÐµÐ¼Ñƒ Ð²ÐºÑƒÑÑƒ';
 
   @override
-  String get genre_categories_filter => 'Фильтр по категориям или жанрам...';
+  String get genre_categories_filter =>
+      'Ð¤Ð¸Ð»ÑŒÑ‚Ñ€ Ð¿Ð¾ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸ÑÐ¼ Ð¸Ð»Ð¸ Ð¶Ð°Ð½Ñ€Ð°Ð¼...';
 
   @override
-  String get genre => 'Жанр';
+  String get genre => 'Ð–Ð°Ð½Ñ€';
 
   @override
-  String get personalized => 'Персонализированный';
+  String get personalized => 'ÐŸÐµÑ€ÑÐ¾Ð½Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹';
 
   @override
-  String get featured => 'Популярное';
+  String get featured => 'ÐŸÐ¾Ð¿ÑƒÐ»ÑÑ€Ð½Ð¾Ðµ';
 
   @override
-  String get new_releases => 'Новое';
+  String get new_releases => 'ÐÐ¾Ð²Ð¾Ðµ';
 
   @override
-  String get songs => 'Треки';
+  String get songs => 'Ð¢Ñ€ÐµÐºÐ¸';
 
   @override
-  String get newest_arrivals => 'Новинки';
+  String get newest_arrivals => 'ÐÐ¾Ð²Ð¸Ð½ÐºÐ¸';
 
   @override
-  String get top_trending => 'В тренде';
+  String get top_trending => 'Ð’ Ñ‚Ñ€ÐµÐ½Ð´Ðµ';
 
   @override
-  String get see_more => 'Показать больше';
+  String get see_more => 'ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ Ð±Ð¾Ð»ÑŒÑˆÐµ';
 
   @override
   String playing_track(Object track) {
-    return 'Играет $track';
+    return 'Ð˜Ð³Ñ€Ð°ÐµÑ‚ $track';
   }
 
   @override
   String queue_clear_alert(Object track_length) {
-    return 'Это удалит текущую очередь. $track_length треков будет удалено. Вы хотите продолжить?';
+    return 'Ð­Ñ‚Ð¾ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ Ñ‚ÐµÐºÑƒÑ‰ÑƒÑŽ Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ. $track_length Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð±ÑƒÐ´ÐµÑ‚ ÑƒÐ´Ð°Ð»ÐµÐ½Ð¾. Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð¿Ñ€Ð¾Ð´Ð¾Ð»Ð¶Ð¸Ñ‚ÑŒ?';
   }
 
   @override
-  String get load_more => 'Загрузить больше';
+  String get load_more => 'Ð—Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð±Ð¾Ð»ÑŒÑˆÐµ';
 
   @override
-  String get playlists => 'Плейлисты';
+  String get playlists => 'ÐŸÐ»ÐµÐ¹Ð»Ð¸ÑÑ‚Ñ‹';
 
   @override
-  String get artists => 'Исполнители';
+  String get artists => 'Ð˜ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»Ð¸';
 
   @override
-  String get albums => 'Альбомы';
+  String get albums => 'ÐÐ»ÑŒÐ±Ð¾Ð¼Ñ‹';
 
   @override
-  String get tracks => 'Треки';
+  String get tracks => 'Ð¢Ñ€ÐµÐºÐ¸';
 
   @override
-  String get downloads => 'Загрузки';
+  String get downloads => 'Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸';
 
   @override
-  String get filter_playlists => 'Применить фильтры к вашим плейлистам...';
+  String get filter_playlists =>
+      'ÐŸÑ€Ð¸Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ñ„Ð¸Ð»ÑŒÑ‚Ñ€Ñ‹ Ðº Ð²Ð°ÑˆÐ¸Ð¼ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð°Ð¼...';
 
   @override
-  String get liked_tracks => 'Понравившиеся треки';
+  String get liked_tracks => 'ÐŸÐ¾Ð½Ñ€Ð°Ð²Ð¸Ð²ÑˆÐ¸ÐµÑÑ Ñ‚Ñ€ÐµÐºÐ¸';
 
   @override
-  String get liked_tracks_description => 'Все понравившиеся треки';
+  String get liked_tracks_description =>
+      'Ð’ÑÐµ Ð¿Ð¾Ð½Ñ€Ð°Ð²Ð¸Ð²ÑˆÐ¸ÐµÑÑ Ñ‚Ñ€ÐµÐºÐ¸';
 
   @override
-  String get playlist => 'Плейлист';
+  String get playlist => 'ÐŸÐ»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get create_a_playlist => 'Создать плейлист';
+  String get create_a_playlist => 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get new_playlist => 'Новый плейлист';
+  String get new_playlist => 'ÐÐ¾Ð²Ñ‹Ð¹ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get playlist_name => 'Назвать плейлист';
+  String get playlist_name => 'ÐÐ°Ð·Ð²Ð°Ñ‚ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
   String get no_playlists_yet =>
-      'Плейлистов пока нет. Создайте один из выбранных треков.';
+      'ÐŸÐ»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð¾Ð² Ð¿Ð¾ÐºÐ° Ð½ÐµÑ‚. Ð¡Ð¾Ð·Ð´Ð°Ð¹Ñ‚Ðµ Ð¾Ð´Ð¸Ð½ Ð¸Ð· Ð²Ñ‹Ð±Ñ€Ð°Ð½Ð½Ñ‹Ñ… Ñ‚Ñ€ÐµÐºÐ¾Ð².';
 
   @override
-  String get update_playlist => 'Обновить плейлист';
+  String get update_playlist => 'ÐžÐ±Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get create => 'Создать';
+  String get create => 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ';
 
   @override
-  String get cancel => 'Отмена';
+  String get cancel => 'ÐžÑ‚Ð¼ÐµÐ½Ð°';
 
   @override
-  String get update => 'Обновить';
+  String get update => 'ÐžÐ±Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ';
 
   @override
-  String get name_of_playlist => 'Название плейлиста';
+  String get name_of_playlist => 'ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð°';
 
   @override
-  String get description => 'Описание';
+  String get description => 'ÐžÐ¿Ð¸ÑÐ°Ð½Ð¸Ðµ';
 
   @override
-  String get public => 'Публичный';
+  String get public => 'ÐŸÑƒÐ±Ð»Ð¸Ñ‡Ð½Ñ‹Ð¹';
 
   @override
-  String get collaborative => 'Совместный';
+  String get collaborative => 'Ð¡Ð¾Ð²Ð¼ÐµÑÑ‚Ð½Ñ‹Ð¹';
 
   @override
-  String get search_local_tracks => 'Поиск песен на вашем устройстве...';
+  String get search_local_tracks =>
+      'ÐŸÐ¾Ð¸ÑÐº Ð¿ÐµÑÐµÐ½ Ð½Ð° Ð²Ð°ÑˆÐµÐ¼ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ðµ...';
 
   @override
-  String get play => 'Играть';
+  String get play => 'Ð˜Ð³Ñ€Ð°Ñ‚ÑŒ';
 
   @override
-  String get delete => 'Удалить';
+  String get delete => 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ';
 
   @override
-  String get none => 'Пусто';
+  String get none => 'ÐŸÑƒÑÑ‚Ð¾';
 
   @override
-  String get sort_a_z => 'Сортировка по алфавиту';
+  String get sort_a_z => 'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²ÐºÐ° Ð¿Ð¾ Ð°Ð»Ñ„Ð°Ð²Ð¸Ñ‚Ñƒ';
 
   @override
-  String get sort_z_a => 'Сортировка по алфавиту в обратную сторону';
+  String get sort_z_a =>
+      'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²ÐºÐ° Ð¿Ð¾ Ð°Ð»Ñ„Ð°Ð²Ð¸Ñ‚Ñƒ Ð² Ð¾Ð±Ñ€Ð°Ñ‚Ð½ÑƒÑŽ ÑÑ‚Ð¾Ñ€Ð¾Ð½Ñƒ';
 
   @override
-  String get sort_artist => 'Сортировать по исполнителю';
+  String get sort_artist =>
+      'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŽ';
 
   @override
-  String get sort_album => 'Сортировать по альбомам';
+  String get sort_album => 'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ð°Ð¼';
 
   @override
-  String get sort_duration => 'Сортировать по длительности';
+  String get sort_duration =>
+      'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ Ð´Ð»Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚Ð¸';
 
   @override
-  String get sort_tracks => 'Сортировать треки';
+  String get sort_tracks => 'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ‚Ñ€ÐµÐºÐ¸';
 
   @override
   String currently_downloading(Object tracks_length) {
-    return 'Загружается ($tracks_length)';
+    return 'Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÑ‚ÑÑ ($tracks_length)';
   }
 
   @override
-  String get cancel_all => 'Отменить все';
+  String get cancel_all => 'ÐžÑ‚Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð²ÑÐµ';
 
   @override
-  String get filter_artist => 'Фильтровать по исполнителю...';
+  String get filter_artist =>
+      'Ð¤Ð¸Ð»ÑŒÑ‚Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŽ...';
 
   @override
   String followers(Object followers) {
-    return '$followers Подписчики';
+    return '$followers ÐŸÐ¾Ð´Ð¿Ð¸ÑÑ‡Ð¸ÐºÐ¸';
   }
 
   @override
-  String get add_artist_to_blacklist => 'Добавить исполнителя в черный список';
+  String get add_artist_to_blacklist =>
+      'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»Ñ Ð² Ñ‡ÐµÑ€Ð½Ñ‹Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº';
 
   @override
-  String get top_tracks => 'Чарт';
+  String get top_tracks => 'Ð§Ð°Ñ€Ñ‚';
 
   @override
-  String get fans_also_like => 'Поклонникам также нравится';
+  String get fans_also_like =>
+      'ÐŸÐ¾ÐºÐ»Ð¾Ð½Ð½Ð¸ÐºÐ°Ð¼ Ñ‚Ð°ÐºÐ¶Ðµ Ð½Ñ€Ð°Ð²Ð¸Ñ‚ÑÑ';
 
   @override
-  String get loading => 'Загрузка...';
+  String get loading => 'Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ°...';
 
   @override
-  String get artist => 'Исполнитель';
+  String get artist => 'Ð˜ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒ';
 
   @override
-  String get blacklisted => 'Внесен в черный список';
+  String get blacklisted => 'Ð’Ð½ÐµÑÐµÐ½ Ð² Ñ‡ÐµÑ€Ð½Ñ‹Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº';
 
   @override
-  String get following => 'Подписаны';
+  String get following => 'ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‹';
 
   @override
-  String get follow => 'Подписаться';
+  String get follow => 'ÐŸÐ¾Ð´Ð¿Ð¸ÑÐ°Ñ‚ÑŒÑÑ';
 
   @override
   String get artist_url_copied =>
-      'URL-адрес исполнителя скопирован в буфер обмена';
+      'URL-Ð°Ð´Ñ€ÐµÑ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»Ñ ÑÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½ Ð² Ð±ÑƒÑ„ÐµÑ€ Ð¾Ð±Ð¼ÐµÐ½Ð°';
 
   @override
   String added_to_queue(Object tracks) {
-    return 'Добавлено $tracks треков в очередь';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¾ $tracks Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
   }
 
   @override
-  String get filter_albums => 'Фильтровать альбомы...';
+  String get filter_albums => 'Ð¤Ð¸Ð»ÑŒÑ‚Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ñ‹...';
 
   @override
-  String get synced => 'Синхронизировано';
+  String get synced => 'Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾';
 
   @override
-  String get plain => 'Обычный';
+  String get plain => 'ÐžÐ±Ñ‹Ñ‡Ð½Ñ‹Ð¹';
 
   @override
-  String get shuffle => 'Перемешать';
+  String get shuffle => 'ÐŸÐµÑ€ÐµÐ¼ÐµÑˆÐ°Ñ‚ÑŒ';
 
   @override
-  String get search_tracks => 'Поиск треков...';
+  String get search_tracks => 'ÐŸÐ¾Ð¸ÑÐº Ñ‚Ñ€ÐµÐºÐ¾Ð²...';
 
   @override
-  String get released => 'Дата выхода';
+  String get released => 'Ð”Ð°Ñ‚Ð° Ð²Ñ‹Ñ…Ð¾Ð´Ð°';
 
   @override
   String error(Object error) {
-    return 'Ошибка $error';
+    return 'ÐžÑˆÐ¸Ð±ÐºÐ° $error';
   }
 
   @override
-  String get title => 'Заголовок';
+  String get title => 'Ð—Ð°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº';
 
   @override
-  String get time => 'Время';
+  String get time => 'Ð’Ñ€ÐµÐ¼Ñ';
 
   @override
-  String get more_actions => 'Больше действий';
+  String get more_actions => 'Ð‘Ð¾Ð»ÑŒÑˆÐµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ð¹';
 
   @override
   String add_count_to_playlist(Object count) {
-    return 'Добавить ($count) в плейлист';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ($count) Ð² Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
   }
 
   @override
   String add_count_to_queue(Object count) {
-    return 'Добавить ($count) в очередь';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ ($count) Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
   }
 
   @override
   String play_count_next(Object count) {
-    return 'Воспроизвести ($count) следующий';
+    return 'Ð’Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÑÑ‚Ð¸ ($count) ÑÐ»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹';
   }
 
   @override
-  String get album => 'Альбом';
+  String get album => 'ÐÐ»ÑŒÐ±Ð¾Ð¼';
 
   @override
   String copied_to_clipboard(Object data) {
-    return 'Скопировано $data в буфер обмена';
+    return 'Ð¡ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾ $data Ð² Ð±ÑƒÑ„ÐµÑ€ Ð¾Ð±Ð¼ÐµÐ½Ð°';
   }
 
   @override
   String add_to_following_playlists(Object track) {
-    return 'Добавить $track в этот плейлист';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ $track Ð² ÑÑ‚Ð¾Ñ‚ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
   }
 
   @override
-  String get add => 'Добавить';
+  String get add => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ';
 
   @override
   String added_track_to_queue(Object track) {
-    return 'Добавлен $track в очередь';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½ $track Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
   }
 
   @override
-  String get add_to_queue => 'Добавить в очередь';
+  String get add_to_queue => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
 
   @override
   String track_will_play_next(Object track) {
-    return '$track будет воспроизведен следующим';
+    return '$track Ð±ÑƒÐ´ÐµÑ‚ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¼';
   }
 
   @override
-  String get play_next => 'Воспроизвести следующий';
+  String get play_next => 'Ð’Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÑÑ‚Ð¸ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹';
 
   @override
   String removed_track_from_queue(Object track) {
-    return '$track удален из очереди';
+    return '$track ÑƒÐ´Ð°Ð»ÐµÐ½ Ð¸Ð· Ð¾Ñ‡ÐµÑ€ÐµÐ´Ð¸';
   }
 
   @override
-  String get remove_from_queue => 'Удалить из очереди';
+  String get remove_from_queue => 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ð¾Ñ‡ÐµÑ€ÐµÐ´Ð¸';
 
   @override
-  String get remove_from_favorites => 'Удалить из избранного';
+  String get remove_from_favorites =>
+      'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ð¸Ð·Ð±Ñ€Ð°Ð½Ð½Ð¾Ð³Ð¾';
 
   @override
-  String get save_as_favorite => 'Сохранить в избранное';
+  String get save_as_favorite => 'Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ Ð² Ð¸Ð·Ð±Ñ€Ð°Ð½Ð½Ð¾Ðµ';
 
   @override
-  String get add_to_playlist => 'Добавить в плейлист';
+  String get add_to_playlist => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get remove_from_playlist => 'Удалить из плейлиста';
+  String get remove_from_playlist => 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð°';
 
   @override
-  String get add_to_blacklist => 'Добавить в черный список';
+  String get add_to_blacklist =>
+      'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ñ‡ÐµÑ€Ð½Ñ‹Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº';
 
   @override
-  String get remove_from_blacklist => 'Удалить из черного списка';
+  String get remove_from_blacklist =>
+      'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ñ‡ÐµÑ€Ð½Ð¾Ð³Ð¾ ÑÐ¿Ð¸ÑÐºÐ°';
 
   @override
-  String get share => 'Поделиться';
+  String get share => 'ÐŸÐ¾Ð´ÐµÐ»Ð¸Ñ‚ÑŒÑÑ';
 
   @override
-  String get mini_player => 'Мини-плеер';
+  String get mini_player => 'ÐœÐ¸Ð½Ð¸-Ð¿Ð»ÐµÐµÑ€';
 
   @override
-  String get slide_to_seek => 'Потяните для перемотки вперед или назад';
+  String get slide_to_seek =>
+      'ÐŸÐ¾Ñ‚ÑÐ½Ð¸Ñ‚Ðµ Ð´Ð»Ñ Ð¿ÐµÑ€ÐµÐ¼Ð¾Ñ‚ÐºÐ¸ Ð²Ð¿ÐµÑ€ÐµÐ´ Ð¸Ð»Ð¸ Ð½Ð°Ð·Ð°Ð´';
 
   @override
-  String get shuffle_playlist => 'Перемешать плейлист';
+  String get shuffle_playlist => 'ÐŸÐµÑ€ÐµÐ¼ÐµÑˆÐ°Ñ‚ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get unshuffle_playlist => 'Снять перемешивание плейлиста';
+  String get unshuffle_playlist =>
+      'Ð¡Ð½ÑÑ‚ÑŒ Ð¿ÐµÑ€ÐµÐ¼ÐµÑˆÐ¸Ð²Ð°Ð½Ð¸Ðµ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð°';
 
   @override
-  String get previous_track => 'Предыдущий трек';
+  String get previous_track => 'ÐŸÑ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰Ð¸Ð¹ Ñ‚Ñ€ÐµÐº';
 
   @override
-  String get next_track => 'Следующий трек';
+  String get next_track => 'Ð¡Ð»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹ Ñ‚Ñ€ÐµÐº';
 
   @override
-  String get pause_playback => 'Пауза воспроизведения';
+  String get pause_playback => 'ÐŸÐ°ÑƒÐ·Ð° Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ñ';
 
   @override
-  String get resume_playback => 'Возобновить воспроизведение';
+  String get resume_playback =>
+      'Ð’Ð¾Ð·Ð¾Ð±Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get loop_track => 'Циклический трек';
+  String get loop_track => 'Ð¦Ð¸ÐºÐ»Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ‚Ñ€ÐµÐº';
 
   @override
-  String get no_loop => 'Без повтора';
+  String get no_loop => 'Ð‘ÐµÐ· Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð°';
 
   @override
-  String get repeat_playlist => 'Повторите плейлист';
+  String get repeat_playlist => 'ÐŸÐ¾Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‚Ðµ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get queue => 'Очередь';
+  String get queue => 'ÐžÑ‡ÐµÑ€ÐµÐ´ÑŒ';
 
   @override
-  String get alternative_track_sources => 'Альтернативные источники треков';
+  String get alternative_track_sources =>
+      'ÐÐ»ÑŒÑ‚ÐµÑ€Ð½Ð°Ñ‚Ð¸Ð²Ð½Ñ‹Ðµ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÐ¸ Ñ‚Ñ€ÐµÐºÐ¾Ð²';
 
   @override
   String tracks_in_queue(Object tracks) {
-    return '$tracks треков в очереди';
+    return '$tracks Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´Ð¸';
   }
 
   @override
-  String get clear_all => 'Очистить все';
+  String get clear_all => 'ÐžÑ‡Ð¸ÑÑ‚Ð¸Ñ‚ÑŒ Ð²ÑÐµ';
 
   @override
-  String get show_hide_ui_on_hover => 'Показать/Скрыть интерфейс при наведении';
+  String get show_hide_ui_on_hover =>
+      'ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ/Ð¡ÐºÑ€Ñ‹Ñ‚ÑŒ Ð¸Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ Ð¿Ñ€Ð¸ Ð½Ð°Ð²ÐµÐ´ÐµÐ½Ð¸Ð¸';
 
   @override
-  String get always_on_top => 'Всегда сверху';
+  String get always_on_top => 'Ð’ÑÐµÐ³Ð´Ð° ÑÐ²ÐµÑ€Ñ…Ñƒ';
 
   @override
-  String get exit_mini_player => 'Выйти из мини-плеера';
+  String get exit_mini_player => 'Ð’Ñ‹Ð¹Ñ‚Ð¸ Ð¸Ð· Ð¼Ð¸Ð½Ð¸-Ð¿Ð»ÐµÐµÑ€Ð°';
 
   @override
-  String get local_library => 'Локальная библиотека';
+  String get local_library => 'Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ð°Ñ Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÐ°';
 
   @override
-  String get add_library_location => 'Добавить в библиотеку';
+  String get add_library_location => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð² Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÑƒ';
 
   @override
-  String get remove_library_location => 'Удалить из библиотеки';
+  String get remove_library_location =>
+      'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¸Ð· Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÐ¸';
 
   @override
-  String get account => 'Аккаунт';
+  String get account => 'ÐÐºÐºÐ°ÑƒÐ½Ñ‚';
 
   @override
-  String get logout => 'Выйти';
+  String get logout => 'Ð’Ñ‹Ð¹Ñ‚Ð¸';
 
   @override
-  String get logout_of_this_account => 'Выйдите из этого аккаунта';
+  String get logout_of_this_account =>
+      'Ð’Ñ‹Ð¹Ð´Ð¸Ñ‚Ðµ Ð¸Ð· ÑÑ‚Ð¾Ð³Ð¾ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚Ð°';
 
   @override
-  String get language_region => 'Язык и регион';
+  String get language_region => 'Ð¯Ð·Ñ‹Ðº Ð¸ Ñ€ÐµÐ³Ð¸Ð¾Ð½';
 
   @override
-  String get language => 'Язык';
+  String get language => 'Ð¯Ð·Ñ‹Ðº';
 
   @override
-  String get system_default => 'Системное значение по умолчанию';
+  String get system_default =>
+      'Ð¡Ð¸ÑÑ‚ÐµÐ¼Ð½Ð¾Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get market_place_region => 'Региональное пространство';
+  String get market_place_region =>
+      'Ð ÐµÐ³Ð¸Ð¾Ð½Ð°Ð»ÑŒÐ½Ð¾Ðµ Ð¿Ñ€Ð¾ÑÑ‚Ñ€Ð°Ð½ÑÑ‚Ð²Ð¾';
 
   @override
-  String get recommendation_country => 'Страна рекомендаций';
+  String get recommendation_country => 'Ð¡Ñ‚Ñ€Ð°Ð½Ð° Ñ€ÐµÐºÐ¾Ð¼ÐµÐ½Ð´Ð°Ñ†Ð¸Ð¹';
 
   @override
-  String get appearance => 'Внешний вид';
+  String get appearance => 'Ð’Ð½ÐµÑˆÐ½Ð¸Ð¹ Ð²Ð¸Ð´';
 
   @override
-  String get layout_mode => 'Режим компоновки';
+  String get layout_mode => 'Ð ÐµÐ¶Ð¸Ð¼ ÐºÐ¾Ð¼Ð¿Ð¾Ð½Ð¾Ð²ÐºÐ¸';
 
   @override
   String get override_layout_settings =>
-      'Изменить настройки режима адаптивной компоновки';
+      'Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ñ€ÐµÐ¶Ð¸Ð¼Ð° Ð°Ð´Ð°Ð¿Ñ‚Ð¸Ð²Ð½Ð¾Ð¹ ÐºÐ¾Ð¼Ð¿Ð¾Ð½Ð¾Ð²ÐºÐ¸';
 
   @override
-  String get adaptive => 'Адаптивный';
+  String get adaptive => 'ÐÐ´Ð°Ð¿Ñ‚Ð¸Ð²Ð½Ñ‹Ð¹';
 
   @override
-  String get compact => 'Компактный';
+  String get compact => 'ÐšÐ¾Ð¼Ð¿Ð°ÐºÑ‚Ð½Ñ‹Ð¹';
 
   @override
-  String get extended => 'Расширенный';
+  String get extended => 'Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ð¹';
 
   @override
-  String get theme => 'Тема';
+  String get theme => 'Ð¢ÐµÐ¼Ð°';
 
   @override
-  String get dark => 'Тёмная';
+  String get dark => 'Ð¢Ñ‘Ð¼Ð½Ð°Ñ';
 
   @override
-  String get light => 'Светлая';
+  String get light => 'Ð¡Ð²ÐµÑ‚Ð»Ð°Ñ';
 
   @override
-  String get system => 'Системная';
+  String get system => 'Ð¡Ð¸ÑÑ‚ÐµÐ¼Ð½Ð°Ñ';
 
   @override
-  String get accent_color => 'Акцентный цвет';
+  String get accent_color => 'ÐÐºÑ†ÐµÐ½Ñ‚Ð½Ñ‹Ð¹ Ñ†Ð²ÐµÑ‚';
 
   @override
-  String get sync_album_color => 'Синхронизировать цвет альбома';
+  String get sync_album_color =>
+      'Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ñ†Ð²ÐµÑ‚ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ð°';
 
   @override
   String get sync_album_color_description =>
-      'Использует основной цвет обложки альбома как цвет акцента';
+      'Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚ Ð¾ÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ Ñ†Ð²ÐµÑ‚ Ð¾Ð±Ð»Ð¾Ð¶ÐºÐ¸ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ð° ÐºÐ°Ðº Ñ†Ð²ÐµÑ‚ Ð°ÐºÑ†ÐµÐ½Ñ‚Ð°';
 
   @override
-  String get playback => 'Воспроизведение';
+  String get playback => 'Ð’Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get audio_quality => 'Качество звука';
+  String get audio_quality => 'ÐšÐ°Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð·Ð²ÑƒÐºÐ°';
 
   @override
-  String get high => 'Высокое';
+  String get high => 'Ð’Ñ‹ÑÐ¾ÐºÐ¾Ðµ';
 
   @override
-  String get low => 'Низкое';
+  String get low => 'ÐÐ¸Ð·ÐºÐ¾Ðµ';
 
   @override
-  String get pre_download_play => 'Предварительная загрузка и воспроизведение';
+  String get pre_download_play =>
+      'ÐŸÑ€ÐµÐ´Ð²Ð°Ñ€Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð°Ñ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ';
 
   @override
   String get pre_download_play_description =>
-      'Вместо потоковой передачи аудио используйте загруженные байты и воспроизводьте их (рекомендуется для пользователей с высокой пропускной способностью)';
+      'Ð’Ð¼ÐµÑÑ‚Ð¾ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¾Ð²Ð¾Ð¹ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ Ð°ÑƒÐ´Ð¸Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð·Ð°Ð³Ñ€ÑƒÐ¶ÐµÐ½Ð½Ñ‹Ðµ Ð±Ð°Ð¹Ñ‚Ñ‹ Ð¸ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²Ð¾Ð´ÑŒÑ‚Ðµ Ð¸Ñ… (Ñ€ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑƒÐµÑ‚ÑÑ Ð´Ð»Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÐµÐ¹ Ñ Ð²Ñ‹ÑÐ¾ÐºÐ¾Ð¹ Ð¿Ñ€Ð¾Ð¿ÑƒÑÐºÐ½Ð¾Ð¹ ÑÐ¿Ð¾ÑÐ¾Ð±Ð½Ð¾ÑÑ‚ÑŒÑŽ)';
 
   @override
   String get skip_non_music =>
-      'Пропускать немузыкальные сегменты (SponsorBlock)';
+      'ÐŸÑ€Ð¾Ð¿ÑƒÑÐºÐ°Ñ‚ÑŒ Ð½ÐµÐ¼ÑƒÐ·Ñ‹ÐºÐ°Ð»ÑŒÐ½Ñ‹Ðµ ÑÐµÐ³Ð¼ÐµÐ½Ñ‚Ñ‹ (SponsorBlock)';
 
   @override
-  String get blacklist_description => 'Черный список треков и артистов';
+  String get blacklist_description =>
+      'Ð§ÐµÑ€Ð½Ñ‹Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð¸ Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ð¾Ð²';
 
   @override
   String get wait_for_download_to_finish =>
-      'Пожалуйста, дождитесь завершения текущей загрузки';
+      'ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð´Ð¾Ð¶Ð´Ð¸Ñ‚ÐµÑÑŒ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ñ Ñ‚ÐµÐºÑƒÑ‰ÐµÐ¹ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸';
 
   @override
-  String get desktop => 'Компьютер';
+  String get desktop => 'ÐšÐ¾Ð¼Ð¿ÑŒÑŽÑ‚ÐµÑ€';
 
   @override
-  String get close_behavior => 'Поведение при закрытии';
+  String get close_behavior => 'ÐŸÐ¾Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¸ Ð·Ð°ÐºÑ€Ñ‹Ñ‚Ð¸Ð¸';
 
   @override
-  String get close => 'Закрыть';
+  String get close => 'Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ';
 
   @override
-  String get minimize_to_tray => 'Свернуть';
+  String get minimize_to_tray => 'Ð¡Ð²ÐµÑ€Ð½ÑƒÑ‚ÑŒ';
 
   @override
-  String get show_tray_icon => 'Показать значок на панели задач';
+  String get show_tray_icon =>
+      'ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ Ð·Ð½Ð°Ñ‡Ð¾Ðº Ð½Ð° Ð¿Ð°Ð½ÐµÐ»Ð¸ Ð·Ð°Ð´Ð°Ñ‡';
 
   @override
-  String get about => 'О нас';
+  String get about => 'Ðž Ð½Ð°Ñ';
 
   @override
-  String get u_love_spotube => 'Мы знаем что вам нравится Soulful Bhakti';
+  String get u_love_spotube =>
+      'ÐœÑ‹ Ð·Ð½Ð°ÐµÐ¼ Ñ‡Ñ‚Ð¾ Ð²Ð°Ð¼ Ð½Ñ€Ð°Ð²Ð¸Ñ‚ÑÑ Soulful Bhakti';
 
   @override
-  String get check_for_updates => 'Проверьте наличие обновлений';
+  String get check_for_updates =>
+      'ÐŸÑ€Ð¾Ð²ÐµÑ€ÑŒÑ‚Ðµ Ð½Ð°Ð»Ð¸Ñ‡Ð¸Ðµ Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ð¹';
 
   @override
-  String get about_spotube => 'О Soulful Bhakti';
+  String get about_spotube => 'Ðž Soulful Bhakti';
 
   @override
-  String get blacklist => 'Чёрный список';
+  String get blacklist => 'Ð§Ñ‘Ñ€Ð½Ñ‹Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº';
 
   @override
-  String get please_sponsor => 'Стать спосором/поддержать';
+  String get please_sponsor =>
+      'Ð¡Ñ‚Ð°Ñ‚ÑŒ ÑÐ¿Ð¾ÑÐ¾Ñ€Ð¾Ð¼/Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ';
 
   @override
   String get spotube_description =>
-      'Soulful Bhakti – это легкий, кросс-платформенный клиент Spotify, предоставляющий бесплатный доступ для всех пользователей';
+      'Soulful Bhakti â€“ ÑÑ‚Ð¾ Ð»ÐµÐ³ÐºÐ¸Ð¹, ÐºÑ€Ð¾ÑÑ-Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ»Ð¸ÐµÐ½Ñ‚ Spotify, Ð¿Ñ€ÐµÐ´Ð¾ÑÑ‚Ð°Ð²Ð»ÑÑŽÑ‰Ð¸Ð¹ Ð±ÐµÑÐ¿Ð»Ð°Ñ‚Ð½Ñ‹Ð¹ Ð´Ð¾ÑÑ‚ÑƒÐ¿ Ð´Ð»Ñ Ð²ÑÐµÑ… Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÐµÐ¹';
 
   @override
-  String get version => 'Версия';
+  String get version => 'Ð’ÐµÑ€ÑÐ¸Ñ';
 
   @override
-  String get build_number => 'Номер сборки';
+  String get build_number => 'ÐÐ¾Ð¼ÐµÑ€ ÑÐ±Ð¾Ñ€ÐºÐ¸';
 
   @override
-  String get founder => 'Создатель';
+  String get founder => 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÐµÐ»ÑŒ';
 
   @override
-  String get repository => 'Репозиторий';
+  String get repository => 'Ð ÐµÐ¿Ð¾Ð·Ð¸Ñ‚Ð¾Ñ€Ð¸Ð¹';
 
   @override
-  String get bug_issues => 'Ошибки и проблемы';
+  String get bug_issues => 'ÐžÑˆÐ¸Ð±ÐºÐ¸ Ð¸ Ð¿Ñ€Ð¾Ð±Ð»ÐµÐ¼Ñ‹';
 
   @override
-  String get made_with => 'Сделано Bangladesh🇧🇩 с ❤️';
+  String get made_with => 'Ð¡Ð´ÐµÐ»Ð°Ð½Ð¾ BangladeshðŸ‡§ðŸ‡© Ñ â¤ï¸';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return '© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
-  String get license => 'Лицензия';
+  String get license => 'Ð›Ð¸Ñ†ÐµÐ½Ð·Ð¸Ñ';
 
   @override
   String get credentials_will_not_be_shared_disclaimer =>
-      'Не беспокойся, никакая личная информация не собирается и не передается';
+      'ÐÐµ Ð±ÐµÑÐ¿Ð¾ÐºÐ¾Ð¹ÑÑ, Ð½Ð¸ÐºÐ°ÐºÐ°Ñ Ð»Ð¸Ñ‡Ð½Ð°Ñ Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð½Ðµ ÑÐ¾Ð±Ð¸Ñ€Ð°ÐµÑ‚ÑÑ Ð¸ Ð½Ðµ Ð¿ÐµÑ€ÐµÐ´Ð°ÐµÑ‚ÑÑ';
 
   @override
-  String get know_how_to_login => 'Не знаете, как это сделать?';
+  String get know_how_to_login =>
+      'ÐÐµ Ð·Ð½Ð°ÐµÑ‚Ðµ, ÐºÐ°Ðº ÑÑ‚Ð¾ ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ?';
 
   @override
-  String get follow_step_by_step_guide => 'Следуйте пошаговому руководству';
+  String get follow_step_by_step_guide =>
+      'Ð¡Ð»ÐµÐ´ÑƒÐ¹Ñ‚Ðµ Ð¿Ð¾ÑˆÐ°Ð³Ð¾Ð²Ð¾Ð¼Ñƒ Ñ€ÑƒÐºÐ¾Ð²Ð¾Ð´ÑÑ‚Ð²Ñƒ';
 
   @override
   String cookie_name_cookie(Object name) {
@@ -562,752 +594,780 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get fill_in_all_fields => 'Пожалуйста, заполните все поля';
+  String get fill_in_all_fields =>
+      'ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð·Ð°Ð¿Ð¾Ð»Ð½Ð¸Ñ‚Ðµ Ð²ÑÐµ Ð¿Ð¾Ð»Ñ';
 
   @override
-  String get submit => 'Отправить';
+  String get submit => 'ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ';
 
   @override
-  String get exit => 'Выйти';
+  String get exit => 'Ð’Ñ‹Ð¹Ñ‚Ð¸';
 
   @override
-  String get previous => 'Предыдущий';
+  String get previous => 'ÐŸÑ€ÐµÐ´Ñ‹Ð´ÑƒÑ‰Ð¸Ð¹';
 
   @override
-  String get next => 'Следующий';
+  String get next => 'Ð¡Ð»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹';
 
   @override
-  String get done => 'Готово';
+  String get done => 'Ð“Ð¾Ñ‚Ð¾Ð²Ð¾';
 
   @override
-  String get step_1 => 'Шаг 1';
+  String get step_1 => 'Ð¨Ð°Ð³ 1';
 
   @override
-  String get first_go_to => 'Сначала перейдите в';
+  String get first_go_to => 'Ð¡Ð½Ð°Ñ‡Ð°Ð»Ð° Ð¿ÐµÑ€ÐµÐ¹Ð´Ð¸Ñ‚Ðµ Ð²';
 
   @override
-  String get something_went_wrong => 'Что-то пошло не так';
+  String get something_went_wrong => 'Ð§Ñ‚Ð¾-Ñ‚Ð¾ Ð¿Ð¾ÑˆÐ»Ð¾ Ð½Ðµ Ñ‚Ð°Ðº';
 
   @override
-  String get piped_instance => 'Экземпляр сервера Piped';
+  String get piped_instance => 'Ð­ÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ ÑÐµÑ€Ð²ÐµÑ€Ð° Piped';
 
   @override
   String get piped_description =>
-      'Серверный экземпляр Piped для сопоставления треков';
+      'Ð¡ÐµÑ€Ð²ÐµÑ€Ð½Ñ‹Ð¹ ÑÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ Piped Ð´Ð»Ñ ÑÐ¾Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ñ‚Ñ€ÐµÐºÐ¾Ð²';
 
   @override
   String get piped_warning =>
-      'Некоторые из них могут работать неправильно, поэтому используйте на свой страх и риск';
+      'ÐÐµÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ð¸Ð· Ð½Ð¸Ñ… Ð¼Ð¾Ð³ÑƒÑ‚ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½ÐµÐ¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð¾, Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð½Ð° ÑÐ²Ð¾Ð¹ ÑÑ‚Ñ€Ð°Ñ… Ð¸ Ñ€Ð¸ÑÐº';
 
   @override
-  String get invidious_instance => 'Экземпляр сервера Invidious';
+  String get invidious_instance =>
+      'Ð­ÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ ÑÐµÑ€Ð²ÐµÑ€Ð° Invidious';
 
   @override
   String get invidious_description =>
-      'Экземпляр сервера Invidious для сопоставления треков';
+      'Ð­ÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ ÑÐµÑ€Ð²ÐµÑ€Ð° Invidious Ð´Ð»Ñ ÑÐ¾Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ñ‚Ñ€ÐµÐºÐ¾Ð²';
 
   @override
   String get invidious_warning =>
-      'Некоторые могут работать не очень хорошо. Используйте на свой страх и риск';
+      'ÐÐµÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ð¼Ð¾Ð³ÑƒÑ‚ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ Ð½Ðµ Ð¾Ñ‡ÐµÐ½ÑŒ Ñ…Ð¾Ñ€Ð¾ÑˆÐ¾. Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð½Ð° ÑÐ²Ð¾Ð¹ ÑÑ‚Ñ€Ð°Ñ… Ð¸ Ñ€Ð¸ÑÐº';
 
   @override
-  String get generate => 'Генерировать';
+  String get generate => 'Ð“ÐµÐ½ÐµÑ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ';
 
   @override
   String track_exists(Object track) {
-    return 'Трек $track уже существует';
+    return 'Ð¢Ñ€ÐµÐº $track ÑƒÐ¶Ðµ ÑÑƒÑ‰ÐµÑÑ‚Ð²ÑƒÐµÑ‚';
   }
 
   @override
-  String get replace => 'Заменить';
+  String get replace => 'Ð—Ð°Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ';
 
   @override
-  String get skip => 'Пропустить';
+  String get skip => 'ÐŸÑ€Ð¾Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ';
 
   @override
   String select_up_to_count_type(Object count, Object type) {
-    return 'Выберите до $count $type';
+    return 'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð´Ð¾ $count $type';
   }
 
   @override
-  String get select_genres => 'Выберите жанр';
+  String get select_genres => 'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð¶Ð°Ð½Ñ€';
 
   @override
-  String get add_genres => 'Добавить жанр';
+  String get add_genres => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¶Ð°Ð½Ñ€';
 
   @override
-  String get country => 'Страна';
+  String get country => 'Ð¡Ñ‚Ñ€Ð°Ð½Ð°';
 
   @override
-  String get number_of_tracks_generate => 'Количество треков для создания';
+  String get number_of_tracks_generate =>
+      'ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð´Ð»Ñ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ñ';
 
   @override
-  String get acousticness => 'Акустичность';
+  String get acousticness => 'ÐÐºÑƒÑÑ‚Ð¸Ñ‡Ð½Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get danceability => 'Ритмичность';
+  String get danceability => 'Ð Ð¸Ñ‚Ð¼Ð¸Ñ‡Ð½Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get energy => 'Энергичность';
+  String get energy => 'Ð­Ð½ÐµÑ€Ð³Ð¸Ñ‡Ð½Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get instrumentalness => 'Инструментальность';
+  String get instrumentalness => 'Ð˜Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ð°Ð»ÑŒÐ½Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get liveness => 'Живость';
+  String get liveness => 'Ð–Ð¸Ð²Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get loudness => 'Громкость';
+  String get loudness => 'Ð“Ñ€Ð¾Ð¼ÐºÐ¾ÑÑ‚ÑŒ';
 
   @override
-  String get speechiness => 'Речевой характер';
+  String get speechiness => 'Ð ÐµÑ‡ÐµÐ²Ð¾Ð¹ Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€';
 
   @override
-  String get valence => 'Значимость';
+  String get valence => 'Ð—Ð½Ð°Ñ‡Ð¸Ð¼Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get popularity => 'Популярность';
+  String get popularity => 'ÐŸÐ¾Ð¿ÑƒÐ»ÑÑ€Ð½Ð¾ÑÑ‚ÑŒ';
 
   @override
-  String get key => 'Ключ';
+  String get key => 'ÐšÐ»ÑŽÑ‡';
 
   @override
-  String get duration => 'Продолжительность (с)';
+  String get duration => 'ÐŸÑ€Ð¾Ð´Ð¾Ð»Ð¶Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚ÑŒ (Ñ)';
 
   @override
-  String get tempo => 'Темп (BPM)';
+  String get tempo => 'Ð¢ÐµÐ¼Ð¿ (BPM)';
 
   @override
-  String get mode => 'Режим';
+  String get mode => 'Ð ÐµÐ¶Ð¸Ð¼';
 
   @override
-  String get time_signature => 'Тактовый размер';
+  String get time_signature => 'Ð¢Ð°ÐºÑ‚Ð¾Ð²Ñ‹Ð¹ Ñ€Ð°Ð·Ð¼ÐµÑ€';
 
   @override
-  String get short => 'Короткий';
+  String get short => 'ÐšÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹';
 
   @override
-  String get medium => 'Средний';
+  String get medium => 'Ð¡Ñ€ÐµÐ´Ð½Ð¸Ð¹';
 
   @override
-  String get long => 'Длинный';
+  String get long => 'Ð”Ð»Ð¸Ð½Ð½Ñ‹Ð¹';
 
   @override
-  String get min => 'Минимум';
+  String get min => 'ÐœÐ¸Ð½Ð¸Ð¼ÑƒÐ¼';
 
   @override
-  String get max => 'Максимум';
+  String get max => 'ÐœÐ°ÐºÑÐ¸Ð¼ÑƒÐ¼';
 
   @override
-  String get target => 'Цель';
+  String get target => 'Ð¦ÐµÐ»ÑŒ';
 
   @override
-  String get moderate => 'Отобрать';
+  String get moderate => 'ÐžÑ‚Ð¾Ð±Ñ€Ð°Ñ‚ÑŒ';
 
   @override
-  String get deselect_all => 'Убрать выделение со всех';
+  String get deselect_all => 'Ð£Ð±Ñ€Ð°Ñ‚ÑŒ Ð²Ñ‹Ð´ÐµÐ»ÐµÐ½Ð¸Ðµ ÑÐ¾ Ð²ÑÐµÑ…';
 
   @override
-  String get select_all => 'Выделить все';
+  String get select_all => 'Ð’Ñ‹Ð´ÐµÐ»Ð¸Ñ‚ÑŒ Ð²ÑÐµ';
 
   @override
-  String get are_you_sure => 'Вы уверены?';
+  String get are_you_sure => 'Ð’Ñ‹ ÑƒÐ²ÐµÑ€ÐµÐ½Ñ‹?';
 
   @override
-  String get generating_playlist => 'Создание собственного плейлиста...';
+  String get generating_playlist =>
+      'Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ð¾Ð³Ð¾ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ð°...';
 
   @override
   String selected_count_tracks(Object count) {
-    return 'Выбрано $count треков';
+    return 'Ð’Ñ‹Ð±Ñ€Ð°Ð½Ð¾ $count Ñ‚Ñ€ÐµÐºÐ¾Ð²';
   }
 
   @override
   String get download_warning =>
-      'При скачивании всех треков пакетом вы фактически занимаетесь пиратством и наносите ущерб творческому обществу музыки. Надеюсь, что вы осознаете это. Всегда старайтесь уважать и поддерживать усилия исполнителей, вложенные в их творчество';
+      'ÐŸÑ€Ð¸ ÑÐºÐ°Ñ‡Ð¸Ð²Ð°Ð½Ð¸Ð¸ Ð²ÑÐµÑ… Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð¿Ð°ÐºÐµÑ‚Ð¾Ð¼ Ð²Ñ‹ Ñ„Ð°ÐºÑ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ð·Ð°Ð½Ð¸Ð¼Ð°ÐµÑ‚ÐµÑÑŒ Ð¿Ð¸Ñ€Ð°Ñ‚ÑÑ‚Ð²Ð¾Ð¼ Ð¸ Ð½Ð°Ð½Ð¾ÑÐ¸Ñ‚Ðµ ÑƒÑ‰ÐµÑ€Ð± Ñ‚Ð²Ð¾Ñ€Ñ‡ÐµÑÐºÐ¾Ð¼Ñƒ Ð¾Ð±Ñ‰ÐµÑÑ‚Ð²Ñƒ Ð¼ÑƒÐ·Ñ‹ÐºÐ¸. ÐÐ°Ð´ÐµÑŽÑÑŒ, Ñ‡Ñ‚Ð¾ Ð²Ñ‹ Ð¾ÑÐ¾Ð·Ð½Ð°ÐµÑ‚Ðµ ÑÑ‚Ð¾. Ð’ÑÐµÐ³Ð´Ð° ÑÑ‚Ð°Ñ€Ð°Ð¹Ñ‚ÐµÑÑŒ ÑƒÐ²Ð°Ð¶Ð°Ñ‚ÑŒ Ð¸ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð¸Ð²Ð°Ñ‚ÑŒ ÑƒÑÐ¸Ð»Ð¸Ñ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÐµÐ¹, Ð²Ð»Ð¾Ð¶ÐµÐ½Ð½Ñ‹Ðµ Ð² Ð¸Ñ… Ñ‚Ð²Ð¾Ñ€Ñ‡ÐµÑÑ‚Ð²Ð¾';
 
   @override
   String get download_ip_ban_warning =>
-      'Кроме того, стоит учитывать, что из-за чрезмерного количества запросов на скачивание ваш IP-адрес может быть заблокирован на YouTube. Блокировка IP означает, что вы не сможете использовать YouTube (даже если вы вошли в свою учетную запись) в течение, как минимум, 2-3 месяцев с того устройства, с которого были сделаны эти запросы. Важно заметить, что Soulful Bhakti не несет ответственности за такие события';
+      'ÐšÑ€Ð¾Ð¼Ðµ Ñ‚Ð¾Ð³Ð¾, ÑÑ‚Ð¾Ð¸Ñ‚ ÑƒÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°Ñ‚ÑŒ, Ñ‡Ñ‚Ð¾ Ð¸Ð·-Ð·Ð° Ñ‡Ñ€ÐµÐ·Ð¼ÐµÑ€Ð½Ð¾Ð³Ð¾ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð° Ð·Ð°Ð¿Ñ€Ð¾ÑÐ¾Ð² Ð½Ð° ÑÐºÐ°Ñ‡Ð¸Ð²Ð°Ð½Ð¸Ðµ Ð²Ð°Ñˆ IP-Ð°Ð´Ñ€ÐµÑ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½ Ð½Ð° YouTube. Ð‘Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²ÐºÐ° IP Ð¾Ð·Ð½Ð°Ñ‡Ð°ÐµÑ‚, Ñ‡Ñ‚Ð¾ Ð²Ñ‹ Ð½Ðµ ÑÐ¼Ð¾Ð¶ÐµÑ‚Ðµ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ YouTube (Ð´Ð°Ð¶Ðµ ÐµÑÐ»Ð¸ Ð²Ñ‹ Ð²Ð¾ÑˆÐ»Ð¸ Ð² ÑÐ²Ð¾ÑŽ ÑƒÑ‡ÐµÑ‚Ð½ÑƒÑŽ Ð·Ð°Ð¿Ð¸ÑÑŒ) Ð² Ñ‚ÐµÑ‡ÐµÐ½Ð¸Ðµ, ÐºÐ°Ðº Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼, 2-3 Ð¼ÐµÑÑÑ†ÐµÐ² Ñ Ñ‚Ð¾Ð³Ð¾ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð°, Ñ ÐºÐ¾Ñ‚Ð¾Ñ€Ð¾Ð³Ð¾ Ð±Ñ‹Ð»Ð¸ ÑÐ´ÐµÐ»Ð°Ð½Ñ‹ ÑÑ‚Ð¸ Ð·Ð°Ð¿Ñ€Ð¾ÑÑ‹. Ð’Ð°Ð¶Ð½Ð¾ Ð·Ð°Ð¼ÐµÑ‚Ð¸Ñ‚ÑŒ, Ñ‡Ñ‚Ð¾ Soulful Bhakti Ð½Ðµ Ð½ÐµÑÐµÑ‚ Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ð¾ÑÑ‚Ð¸ Ð·Ð° Ñ‚Ð°ÐºÐ¸Ðµ ÑÐ¾Ð±Ñ‹Ñ‚Ð¸Ñ';
 
   @override
   String get by_clicking_accept_terms =>
-      'Нажимая \'принять\', вы соглашаетесь с следующими условиями:';
+      'ÐÐ°Ð¶Ð¸Ð¼Ð°Ñ \'Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑŒ\', Ð²Ñ‹ ÑÐ¾Ð³Ð»Ð°ÑˆÐ°ÐµÑ‚ÐµÑÑŒ Ñ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¼Ð¸ ÑƒÑÐ»Ð¾Ð²Ð¸ÑÐ¼Ð¸:';
 
   @override
   String get download_agreement_1 =>
-      'Я осознаю, что я использую музыку незаконно. Это плохо.';
+      'Ð¯ Ð¾ÑÐ¾Ð·Ð½Ð°ÑŽ, Ñ‡Ñ‚Ð¾ Ñ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÑŽ Ð¼ÑƒÐ·Ñ‹ÐºÑƒ Ð½ÐµÐ·Ð°ÐºÐ¾Ð½Ð½Ð¾. Ð­Ñ‚Ð¾ Ð¿Ð»Ð¾Ñ…Ð¾.';
 
   @override
   String get download_agreement_2 =>
-      'Я бы поддержал исполнителей, где только смог, и делаю это, так как не имею средств на приобретение их творчества';
+      'Ð¯ Ð±Ñ‹ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð°Ð» Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÐµÐ¹, Ð³Ð´Ðµ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ ÑÐ¼Ð¾Ð³, Ð¸ Ð´ÐµÐ»Ð°ÑŽ ÑÑ‚Ð¾, Ñ‚Ð°Ðº ÐºÐ°Ðº Ð½Ðµ Ð¸Ð¼ÐµÑŽ ÑÑ€ÐµÐ´ÑÑ‚Ð² Ð½Ð° Ð¿Ñ€Ð¸Ð¾Ð±Ñ€ÐµÑ‚ÐµÐ½Ð¸Ðµ Ð¸Ñ… Ñ‚Ð²Ð¾Ñ€Ñ‡ÐµÑÑ‚Ð²Ð°';
 
   @override
   String get download_agreement_3 =>
-      'Я полностью осознаю, что мой IP-адрес может быть заблокирован на YouTube, и я не считаю Soulful Bhakti или его владельцев/соавторов ответственными за какие-либо неприятности, вызванные моими текущими действиями';
+      'Ð¯ Ð¿Ð¾Ð»Ð½Ð¾ÑÑ‚ÑŒÑŽ Ð¾ÑÐ¾Ð·Ð½Ð°ÑŽ, Ñ‡Ñ‚Ð¾ Ð¼Ð¾Ð¹ IP-Ð°Ð´Ñ€ÐµÑ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½ Ð½Ð° YouTube, Ð¸ Ñ Ð½Ðµ ÑÑ‡Ð¸Ñ‚Ð°ÑŽ Soulful Bhakti Ð¸Ð»Ð¸ ÐµÐ³Ð¾ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†ÐµÐ²/ÑÐ¾Ð°Ð²Ñ‚Ð¾Ñ€Ð¾Ð² Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ð¼Ð¸ Ð·Ð° ÐºÐ°ÐºÐ¸Ðµ-Ð»Ð¸Ð±Ð¾ Ð½ÐµÐ¿Ñ€Ð¸ÑÑ‚Ð½Ð¾ÑÑ‚Ð¸, Ð²Ñ‹Ð·Ð²Ð°Ð½Ð½Ñ‹Ðµ Ð¼Ð¾Ð¸Ð¼Ð¸ Ñ‚ÐµÐºÑƒÑ‰Ð¸Ð¼Ð¸ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸ÑÐ¼Ð¸';
 
   @override
-  String get decline => 'Отклонить';
+  String get decline => 'ÐžÑ‚ÐºÐ»Ð¾Ð½Ð¸Ñ‚ÑŒ';
 
   @override
-  String get accept => 'Принять';
+  String get accept => 'ÐŸÑ€Ð¸Ð½ÑÑ‚ÑŒ';
 
   @override
-  String get details => 'Детали';
+  String get details => 'Ð”ÐµÑ‚Ð°Ð»Ð¸';
 
   @override
   String get youtube => 'YouTube';
 
   @override
-  String get channel => 'Канал';
+  String get channel => 'ÐšÐ°Ð½Ð°Ð»';
 
   @override
-  String get likes => 'Нравится';
+  String get likes => 'ÐÑ€Ð°Ð²Ð¸Ñ‚ÑÑ';
 
   @override
-  String get dislikes => 'Не нравится';
+  String get dislikes => 'ÐÐµ Ð½Ñ€Ð°Ð²Ð¸Ñ‚ÑÑ';
 
   @override
-  String get views => 'Просмотров';
+  String get views => 'ÐŸÑ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€Ð¾Ð²';
 
   @override
-  String get streamUrl => 'URL-адрес потока';
+  String get streamUrl => 'URL-Ð°Ð´Ñ€ÐµÑ Ð¿Ð¾Ñ‚Ð¾ÐºÐ°';
 
   @override
-  String get stop => 'Остановить';
+  String get stop => 'ÐžÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ';
 
   @override
-  String get sort_newest => 'Сортировать по самым новым добавленным';
+  String get sort_newest =>
+      'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ ÑÐ°Ð¼Ñ‹Ð¼ Ð½Ð¾Ð²Ñ‹Ð¼ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð½Ñ‹Ð¼';
 
   @override
-  String get sort_oldest => 'Сортировать по самым старым добавленным';
+  String get sort_oldest =>
+      'Ð¡Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾ ÑÐ°Ð¼Ñ‹Ð¼ ÑÑ‚Ð°Ñ€Ñ‹Ð¼ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð½Ñ‹Ð¼';
 
   @override
-  String get sleep_timer => 'Таймер сна';
+  String get sleep_timer => 'Ð¢Ð°Ð¹Ð¼ÐµÑ€ ÑÐ½Ð°';
 
   @override
   String mins(Object minutes) {
-    return '$minutes Минут';
+    return '$minutes ÐœÐ¸Ð½ÑƒÑ‚';
   }
 
   @override
   String hours(Object hours) {
-    return '$hours Часы';
+    return '$hours Ð§Ð°ÑÑ‹';
   }
 
   @override
   String hour(Object hours) {
-    return '$hours Час';
+    return '$hours Ð§Ð°Ñ';
   }
 
   @override
-  String get custom_hours => 'Пользовательские часы';
+  String get custom_hours => 'ÐŸÐ¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÑÐºÐ¸Ðµ Ñ‡Ð°ÑÑ‹';
 
   @override
-  String get logs => 'Журналы';
+  String get logs => 'Ð–ÑƒÑ€Ð½Ð°Ð»Ñ‹';
 
   @override
-  String get developers => 'Разработчики';
+  String get developers => 'Ð Ð°Ð·Ñ€Ð°Ð±Ð¾Ñ‚Ñ‡Ð¸ÐºÐ¸';
 
   @override
-  String get not_logged_in => 'Вы не выполнили вход';
+  String get not_logged_in => 'Ð’Ñ‹ Ð½Ðµ Ð²Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ð»Ð¸ Ð²Ñ…Ð¾Ð´';
 
   @override
-  String get search_mode => 'Режим поиска';
+  String get search_mode => 'Ð ÐµÐ¶Ð¸Ð¼ Ð¿Ð¾Ð¸ÑÐºÐ°';
 
   @override
-  String get audio_source => 'Источник аудио';
+  String get audio_source => 'Ð˜ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð°ÑƒÐ´Ð¸Ð¾';
 
   @override
-  String get ok => 'Ок';
+  String get ok => 'ÐžÐº';
 
   @override
-  String get failed_to_encrypt => 'Не удалось зашифровать';
+  String get failed_to_encrypt => 'ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð·Ð°ÑˆÐ¸Ñ„Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ';
 
   @override
   String get encryption_failed_warning =>
-      'Soulful Bhakti использует шифрование для безопасного хранения ваших данных. Однако в этом случае произошла ошибка. Поэтому будет использовано небезопасное хранилище.\nЕсли вы используете Linux, убедитесь, что у вас установлен какой-либо инструмент для работы с секретами (gnome-keyring, kde-wallet, keepassxc и т.д.)';
+      'Soulful Bhakti Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚ ÑˆÐ¸Ñ„Ñ€Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð´Ð»Ñ Ð±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾Ð³Ð¾ Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ð²Ð°ÑˆÐ¸Ñ… Ð´Ð°Ð½Ð½Ñ‹Ñ…. ÐžÐ´Ð½Ð°ÐºÐ¾ Ð² ÑÑ‚Ð¾Ð¼ ÑÐ»ÑƒÑ‡Ð°Ðµ Ð¿Ñ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¾ÑˆÐ¸Ð±ÐºÐ°. ÐŸÐ¾ÑÑ‚Ð¾Ð¼Ñƒ Ð±ÑƒÐ´ÐµÑ‚ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ð½Ð¾ Ð½ÐµÐ±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾Ðµ Ñ…Ñ€Ð°Ð½Ð¸Ð»Ð¸Ñ‰Ðµ.\nÐ•ÑÐ»Ð¸ Ð²Ñ‹ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚Ðµ Linux, ÑƒÐ±ÐµÐ´Ð¸Ñ‚ÐµÑÑŒ, Ñ‡Ñ‚Ð¾ Ñƒ Ð²Ð°Ñ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½ ÐºÐ°ÐºÐ¾Ð¹-Ð»Ð¸Ð±Ð¾ Ð¸Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚ Ð´Ð»Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ñ ÑÐµÐºÑ€ÐµÑ‚Ð°Ð¼Ð¸ (gnome-keyring, kde-wallet, keepassxc Ð¸ Ñ‚.Ð´.)';
 
   @override
-  String get querying_info => 'Запрос информации...';
+  String get querying_info => 'Ð—Ð°Ð¿Ñ€Ð¾Ñ Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¸...';
 
   @override
-  String get piped_api_down => 'Piped API не отвечает';
+  String get piped_api_down => 'Piped API Ð½Ðµ Ð¾Ñ‚Ð²ÐµÑ‡Ð°ÐµÑ‚';
 
   @override
   String piped_down_error_instructions(Object pipedInstance) {
-    return 'Экземпляр Piped $pipedInstance в данный момент недоступен.\n\nВы можете либо изменить экземпляр, либо переключиться на использование официального API YouTube.\n\nНе забудьте перезапустить приложение после внесенных изменений';
+    return 'Ð­ÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ Piped $pipedInstance Ð² Ð´Ð°Ð½Ð½Ñ‹Ð¹ Ð¼Ð¾Ð¼ÐµÐ½Ñ‚ Ð½ÐµÐ´Ð¾ÑÑ‚ÑƒÐ¿ÐµÐ½.\n\nÐ’Ñ‹ Ð¼Ð¾Ð¶ÐµÑ‚Ðµ Ð»Ð¸Ð±Ð¾ Ð¸Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ ÑÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€, Ð»Ð¸Ð±Ð¾ Ð¿ÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ Ð½Ð° Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¾Ñ„Ð¸Ñ†Ð¸Ð°Ð»ÑŒÐ½Ð¾Ð³Ð¾ API YouTube.\n\nÐÐµ Ð·Ð°Ð±ÑƒÐ´ÑŒÑ‚Ðµ Ð¿ÐµÑ€ÐµÐ·Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ Ð¿Ð¾ÑÐ»Ðµ Ð²Ð½ÐµÑÐµÐ½Ð½Ñ‹Ñ… Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ð¹';
   }
 
   @override
-  String get you_are_offline => 'Нет доступа к сети';
+  String get you_are_offline => 'ÐÐµÑ‚ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð° Ðº ÑÐµÑ‚Ð¸';
 
   @override
-  String get connection_restored => 'Ваше интернет-соединение восстановлено';
+  String get connection_restored =>
+      'Ð’Ð°ÑˆÐµ Ð¸Ð½Ñ‚ÐµÑ€Ð½ÐµÑ‚-ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ðµ Ð²Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¾';
 
   @override
-  String get use_system_title_bar => 'Использовать системную панель заголовка';
+  String get use_system_title_bar =>
+      'Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ ÑÐ¸ÑÑ‚ÐµÐ¼Ð½ÑƒÑŽ Ð¿Ð°Ð½ÐµÐ»ÑŒ Ð·Ð°Ð³Ð¾Ð»Ð¾Ð²ÐºÐ°';
 
   @override
-  String get crunching_results => 'Обработка результатов...';
+  String get crunching_results =>
+      'ÐžÐ±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¾Ð²...';
 
   @override
-  String get search_to_get_results => 'Поиск для получения результатов';
+  String get search_to_get_results =>
+      'ÐŸÐ¾Ð¸ÑÐº Ð´Ð»Ñ Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¸Ñ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¾Ð²';
 
   @override
-  String get use_amoled_mode => 'Режим AMOLED';
+  String get use_amoled_mode => 'Ð ÐµÐ¶Ð¸Ð¼ AMOLED';
 
   @override
-  String get pitch_dark_theme => 'Темная тема';
+  String get pitch_dark_theme => 'Ð¢ÐµÐ¼Ð½Ð°Ñ Ñ‚ÐµÐ¼Ð°';
 
   @override
-  String get normalize_audio => 'Нормализовать звук';
+  String get normalize_audio => 'ÐÐ¾Ñ€Ð¼Ð°Ð»Ð¸Ð·Ð¾Ð²Ð°Ñ‚ÑŒ Ð·Ð²ÑƒÐº';
 
   @override
-  String get change_cover => 'Изменить обложку';
+  String get change_cover => 'Ð˜Ð·Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð¾Ð±Ð»Ð¾Ð¶ÐºÑƒ';
 
   @override
-  String get add_cover => 'Добавить обложку';
+  String get add_cover => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¾Ð±Ð»Ð¾Ð¶ÐºÑƒ';
 
   @override
-  String get restore_defaults => 'Восстановить настройки по умолчанию';
+  String get restore_defaults =>
+      'Ð’Ð¾ÑÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
   String get restore_defaults_confirmation =>
-      'Это сбросит все ваши настройки к значениям по умолчанию. Это действие нельзя отменить.';
+      'Ð­Ñ‚Ð¾ ÑÐ±Ñ€Ð¾ÑÐ¸Ñ‚ Ð²ÑÐµ Ð²Ð°ÑˆÐ¸ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ðº Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸ÑÐ¼ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ. Ð­Ñ‚Ð¾ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ Ð½ÐµÐ»ÑŒÐ·Ñ Ð¾Ñ‚Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ.';
 
   @override
-  String get streaming_music_format => 'Формат потоковой музыки';
+  String get streaming_music_format =>
+      'Ð¤Ð¾Ñ€Ð¼Ð°Ñ‚ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¾Ð²Ð¾Ð¹ Ð¼ÑƒÐ·Ñ‹ÐºÐ¸';
 
   @override
-  String get streaming_music_quality => 'Качество стриминга';
+  String get streaming_music_quality => 'ÐšÐ°Ñ‡ÐµÑÑ‚Ð²Ð¾ ÑÑ‚Ñ€Ð¸Ð¼Ð¸Ð½Ð³Ð°';
 
   @override
-  String get connect => 'Подключить';
+  String get connect => 'ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ';
 
   @override
-  String get disconnect => 'Отключить';
+  String get disconnect => 'ÐžÑ‚ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ';
 
   @override
-  String get username => 'Имя пользователя';
+  String get username => 'Ð˜Ð¼Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ';
 
   @override
-  String get password => 'Пароль';
+  String get password => 'ÐŸÐ°Ñ€Ð¾Ð»ÑŒ';
 
   @override
-  String get login => 'Войти';
+  String get login => 'Ð’Ð¾Ð¹Ñ‚Ð¸';
 
   @override
-  String get sign_in => 'Войти';
+  String get sign_in => 'Ð’Ð¾Ð¹Ñ‚Ð¸';
 
   @override
-  String get sign_up => 'Зарегистрироваться';
+  String get sign_up => 'Ð—Ð°Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒÑÑ';
 
   @override
-  String get sign_out => 'Выйти';
+  String get sign_out => 'Ð’Ñ‹Ð¹Ñ‚Ð¸';
 
   @override
-  String get verify => 'Подтвердить';
+  String get verify => 'ÐŸÐ¾Ð´Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ';
 
   @override
-  String get create_account => 'Создать аккаунт';
+  String get create_account => 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚';
 
   @override
-  String get already_have_account => 'Уже есть аккаунт? Войти';
+  String get already_have_account =>
+      'Ð£Ð¶Ðµ ÐµÑÑ‚ÑŒ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚? Ð’Ð¾Ð¹Ñ‚Ð¸';
 
   @override
-  String get dont_have_account => 'Нет аккаунта? Зарегистрироваться';
+  String get dont_have_account =>
+      'ÐÐµÑ‚ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚Ð°? Ð—Ð°Ñ€ÐµÐ³Ð¸ÑÑ‚Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒÑÑ';
 
   @override
   String signed_in_as(Object userId) {
-    return 'Вы вошли как $userId';
+    return 'Ð’Ñ‹ Ð²Ð¾ÑˆÐ»Ð¸ ÐºÐ°Ðº $userId';
   }
 
   @override
-  String get verification_code => 'Код подтверждения';
+  String get verification_code => 'ÐšÐ¾Ð´ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ';
 
   @override
   String get verification_code_hint =>
-      'Введите код, отправленный на вашу почту';
+      'Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÐºÐ¾Ð´, Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð½Ñ‹Ð¹ Ð½Ð° Ð²Ð°ÑˆÑƒ Ð¿Ð¾Ñ‡Ñ‚Ñƒ';
 
   @override
   String get verify_email_code =>
-      'Мы отправили код подтверждения на вашу почту';
+      'ÐœÑ‹ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð¸ ÐºÐ¾Ð´ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ Ð½Ð° Ð²Ð°ÑˆÑƒ Ð¿Ð¾Ñ‡Ñ‚Ñƒ';
 
   @override
-  String get go_to_album => 'Перейти к альбому';
+  String get go_to_album => 'ÐŸÐµÑ€ÐµÐ¹Ñ‚Ð¸ Ðº Ð°Ð»ÑŒÐ±Ð¾Ð¼Ñƒ';
 
   @override
-  String get discord_rich_presence => 'Богатое присутствие в Discord';
+  String get discord_rich_presence =>
+      'Ð‘Ð¾Ð³Ð°Ñ‚Ð¾Ðµ Ð¿Ñ€Ð¸ÑÑƒÑ‚ÑÑ‚Ð²Ð¸Ðµ Ð² Discord';
 
   @override
-  String get browse_all => 'Просмотреть все';
+  String get browse_all => 'ÐŸÑ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€ÐµÑ‚ÑŒ Ð²ÑÐµ';
 
   @override
-  String get genres => 'Жанры';
+  String get genres => 'Ð–Ð°Ð½Ñ€Ñ‹';
 
   @override
-  String get explore_genres => 'Исследовать жанры';
+  String get explore_genres => 'Ð˜ÑÑÐ»ÐµÐ´Ð¾Ð²Ð°Ñ‚ÑŒ Ð¶Ð°Ð½Ñ€Ñ‹';
 
   @override
-  String get friends => 'Друзья';
+  String get friends => 'Ð”Ñ€ÑƒÐ·ÑŒÑ';
 
   @override
   String get no_lyrics_available =>
-      'Извините, не удается найти текст для этого трека';
+      'Ð˜Ð·Ð²Ð¸Ð½Ð¸Ñ‚Ðµ, Ð½Ðµ ÑƒÐ´Ð°ÐµÑ‚ÑÑ Ð½Ð°Ð¹Ñ‚Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð´Ð»Ñ ÑÑ‚Ð¾Ð³Ð¾ Ñ‚Ñ€ÐµÐºÐ°';
 
   @override
-  String get start_a_radio => 'Запустить радио';
+  String get start_a_radio => 'Ð—Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ Ñ€Ð°Ð´Ð¸Ð¾';
 
   @override
-  String get how_to_start_radio => 'Как вы хотите запустить радио?';
+  String get how_to_start_radio =>
+      'ÐšÐ°Ðº Ð²Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð·Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ Ñ€Ð°Ð´Ð¸Ð¾?';
 
   @override
   String get replace_queue_question =>
-      'Хотите заменить текущую очередь или добавить к ней?';
+      'Ð¥Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð·Ð°Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ñ‚ÐµÐºÑƒÑ‰ÑƒÑŽ Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ Ð¸Ð»Ð¸ Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ðº Ð½ÐµÐ¹?';
 
   @override
-  String get endless_playback => 'Бесконечное воспроизведение';
+  String get endless_playback =>
+      'Ð‘ÐµÑÐºÐ¾Ð½ÐµÑ‡Ð½Ð¾Ðµ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get delete_playlist => 'Удалить плейлист';
+  String get delete_playlist => 'Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
   String get delete_playlist_confirmation =>
-      'Вы уверены, что хотите удалить этот плейлист?';
+      'Ð’Ñ‹ ÑƒÐ²ÐµÑ€ÐµÐ½Ñ‹, Ñ‡Ñ‚Ð¾ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚?';
 
   @override
-  String get local_tracks => 'Локальные треки';
+  String get local_tracks => 'Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ðµ Ñ‚Ñ€ÐµÐºÐ¸';
 
   @override
-  String get local_tab => 'Локальное';
+  String get local_tab => 'Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ð¾Ðµ';
 
   @override
-  String get song_link => 'Ссылка на песню';
+  String get song_link => 'Ð¡ÑÑ‹Ð»ÐºÐ° Ð½Ð° Ð¿ÐµÑÐ½ÑŽ';
 
   @override
-  String get skip_this_nonsense => 'Пропустить этот бред';
+  String get skip_this_nonsense => 'ÐŸÑ€Ð¾Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ Ð±Ñ€ÐµÐ´';
 
   @override
-  String get freedom_of_music => '“Свобода музыки”';
+  String get freedom_of_music => 'â€œÐ¡Ð²Ð¾Ð±Ð¾Ð´Ð° Ð¼ÑƒÐ·Ñ‹ÐºÐ¸â€';
 
   @override
-  String get freedom_of_music_palm => '“Свобода музыки в вашей ладони”';
+  String get freedom_of_music_palm =>
+      'â€œÐ¡Ð²Ð¾Ð±Ð¾Ð´Ð° Ð¼ÑƒÐ·Ñ‹ÐºÐ¸ Ð² Ð²Ð°ÑˆÐµÐ¹ Ð»Ð°Ð´Ð¾Ð½Ð¸â€';
 
   @override
-  String get get_started => 'Начнем';
+  String get get_started => 'ÐÐ°Ñ‡Ð½ÐµÐ¼';
 
   @override
   String get youtube_source_description =>
-      'Рекомендуется и лучше всего работает.';
+      'Ð ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑƒÐµÑ‚ÑÑ Ð¸ Ð»ÑƒÑ‡ÑˆÐµ Ð²ÑÐµÐ³Ð¾ Ñ€Ð°Ð±Ð¾Ñ‚Ð°ÐµÑ‚.';
 
   @override
   String get piped_source_description =>
-      'Чувствуете себя свободно? То же самое, что и YouTube, но намного бесплатно.';
+      'Ð§ÑƒÐ²ÑÑ‚Ð²ÑƒÐµÑ‚Ðµ ÑÐµÐ±Ñ ÑÐ²Ð¾Ð±Ð¾Ð´Ð½Ð¾? Ð¢Ð¾ Ð¶Ðµ ÑÐ°Ð¼Ð¾Ðµ, Ñ‡Ñ‚Ð¾ Ð¸ YouTube, Ð½Ð¾ Ð½Ð°Ð¼Ð½Ð¾Ð³Ð¾ Ð±ÐµÑÐ¿Ð»Ð°Ñ‚Ð½Ð¾.';
 
   @override
   String get jiosaavn_source_description =>
-      'Лучший для Южно-Азиатского региона.';
+      'Ð›ÑƒÑ‡ÑˆÐ¸Ð¹ Ð´Ð»Ñ Ð®Ð¶Ð½Ð¾-ÐÐ·Ð¸Ð°Ñ‚ÑÐºÐ¾Ð³Ð¾ Ñ€ÐµÐ³Ð¸Ð¾Ð½Ð°.';
 
   @override
   String get invidious_source_description =>
-      'Похож на Piped, но с более высокой доступностью.';
+      'ÐŸÐ¾Ñ…Ð¾Ð¶ Ð½Ð° Piped, Ð½Ð¾ Ñ Ð±Ð¾Ð»ÐµÐµ Ð²Ñ‹ÑÐ¾ÐºÐ¾Ð¹ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ÑÑ‚ÑŒÑŽ.';
 
   @override
   String highest_quality(Object quality) {
-    return 'Наивысшее качество: $quality';
+    return 'ÐÐ°Ð¸Ð²Ñ‹ÑÑˆÐµÐµ ÐºÐ°Ñ‡ÐµÑÑ‚Ð²Ð¾: $quality';
   }
 
   @override
-  String get select_audio_source => 'Выберите аудиоисточник';
+  String get select_audio_source =>
+      'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð°ÑƒÐ´Ð¸Ð¾Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº';
 
   @override
   String get endless_playback_description =>
-      'Автоматически добавляйте новые песни\nв конец очереди';
+      'ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ð´Ð¾Ð±Ð°Ð²Ð»ÑÐ¹Ñ‚Ðµ Ð½Ð¾Ð²Ñ‹Ðµ Ð¿ÐµÑÐ½Ð¸\nÐ² ÐºÐ¾Ð½ÐµÑ† Ð¾Ñ‡ÐµÑ€ÐµÐ´Ð¸';
 
   @override
-  String get choose_your_region => 'Выберите ваш регион';
+  String get choose_your_region => 'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð²Ð°Ñˆ Ñ€ÐµÐ³Ð¸Ð¾Ð½';
 
   @override
   String get choose_your_region_description =>
-      'Это поможет Soulful Bhakti показать вам правильный контент\nдля вашего местоположения.';
+      'Ð­Ñ‚Ð¾ Ð¿Ð¾Ð¼Ð¾Ð¶ÐµÑ‚ Soulful Bhakti Ð¿Ð¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ Ð²Ð°Ð¼ Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚ÐµÐ½Ñ‚\nÐ´Ð»Ñ Ð²Ð°ÑˆÐµÐ³Ð¾ Ð¼ÐµÑÑ‚Ð¾Ð¿Ð¾Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ.';
 
   @override
-  String get choose_your_language => 'Выберите ваш язык';
+  String get choose_your_language => 'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð²Ð°Ñˆ ÑÐ·Ñ‹Ðº';
 
   @override
-  String get help_project_grow => 'Помогите этому проекту расти';
+  String get help_project_grow =>
+      'ÐŸÐ¾Ð¼Ð¾Ð³Ð¸Ñ‚Ðµ ÑÑ‚Ð¾Ð¼Ñƒ Ð¿Ñ€Ð¾ÐµÐºÑ‚Ñƒ Ñ€Ð°ÑÑ‚Ð¸';
 
   @override
   String get help_project_grow_description =>
-      'Soulful Bhakti - это проект с открытым исходным кодом. Вы можете помочь этому проекту развиваться, внося вклад в проект, сообщая ошибках или предлагая новые функции.';
+      'Soulful Bhakti - ÑÑ‚Ð¾ Ð¿Ñ€Ð¾ÐµÐºÑ‚ Ñ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ñ‹Ð¼ Ð¸ÑÑ…Ð¾Ð´Ð½Ñ‹Ð¼ ÐºÐ¾Ð´Ð¾Ð¼. Ð’Ñ‹ Ð¼Ð¾Ð¶ÐµÑ‚Ðµ Ð¿Ð¾Ð¼Ð¾Ñ‡ÑŒ ÑÑ‚Ð¾Ð¼Ñƒ Ð¿Ñ€Ð¾ÐµÐºÑ‚Ñƒ Ñ€Ð°Ð·Ð²Ð¸Ð²Ð°Ñ‚ÑŒÑÑ, Ð²Ð½Ð¾ÑÑ Ð²ÐºÐ»Ð°Ð´ Ð² Ð¿Ñ€Ð¾ÐµÐºÑ‚, ÑÐ¾Ð¾Ð±Ñ‰Ð°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ°Ñ… Ð¸Ð»Ð¸ Ð¿Ñ€ÐµÐ´Ð»Ð°Ð³Ð°Ñ Ð½Ð¾Ð²Ñ‹Ðµ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸.';
 
   @override
-  String get contribute_on_github => 'Внести вклад на GitHub';
+  String get contribute_on_github => 'Ð’Ð½ÐµÑÑ‚Ð¸ Ð²ÐºÐ»Ð°Ð´ Ð½Ð° GitHub';
 
   @override
-  String get donate_on_open_collective => 'Пожертвовать на Open Collective';
+  String get donate_on_open_collective =>
+      'ÐŸÐ¾Ð¶ÐµÑ€Ñ‚Ð²Ð¾Ð²Ð°Ñ‚ÑŒ Ð½Ð° Open Collective';
 
   @override
-  String get browse_anonymously => 'Анонимно просматривать';
+  String get browse_anonymously =>
+      'ÐÐ½Ð¾Ð½Ð¸Ð¼Ð½Ð¾ Ð¿Ñ€Ð¾ÑÐ¼Ð°Ñ‚Ñ€Ð¸Ð²Ð°Ñ‚ÑŒ';
 
   @override
-  String get enable_connect => 'Включить подключение';
+  String get enable_connect => 'Ð’ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ';
 
   @override
   String get enable_connect_description =>
-      'Управление Soulful Bhakti с других устройств';
+      'Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Soulful Bhakti Ñ Ð´Ñ€ÑƒÐ³Ð¸Ñ… ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²';
 
   @override
-  String get devices => 'Устройства';
+  String get devices => 'Ð£ÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð°';
 
   @override
-  String get select => 'Выбрать';
+  String get select => 'Ð’Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ';
 
   @override
   String connect_client_alert(Object client) {
-    return 'Вас контролирует $client';
+    return 'Ð’Ð°Ñ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð¸Ñ€ÑƒÐµÑ‚ $client';
   }
 
   @override
-  String get this_device => 'Это устройство';
+  String get this_device => 'Ð­Ñ‚Ð¾ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð¾';
 
   @override
-  String get remote => 'Дистанционное управление';
+  String get remote => 'Ð”Ð¸ÑÑ‚Ð°Ð½Ñ†Ð¸Ð¾Ð½Ð½Ð¾Ðµ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get stats => 'Статистика';
+  String get stats => 'Ð¡Ñ‚Ð°Ñ‚Ð¸ÑÑ‚Ð¸ÐºÐ°';
 
   @override
   String and_n_more(Object count) {
-    return 'и $count еще';
+    return 'Ð¸ $count ÐµÑ‰Ðµ';
   }
 
   @override
-  String get recently_played => 'Недавно воспроизведено';
+  String get recently_played => 'ÐÐµÐ´Ð°Ð²Ð½Ð¾ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¾';
 
   @override
-  String get browse_more => 'Посмотреть больше';
+  String get browse_more => 'ÐŸÐ¾ÑÐ¼Ð¾Ñ‚Ñ€ÐµÑ‚ÑŒ Ð±Ð¾Ð»ÑŒÑˆÐµ';
 
   @override
-  String get no_title => 'Без названия';
+  String get no_title => 'Ð‘ÐµÐ· Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ñ';
 
   @override
-  String get not_playing => 'Не воспроизводится';
+  String get not_playing => 'ÐÐµ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²Ð¾Ð´Ð¸Ñ‚ÑÑ';
 
   @override
-  String get epic_failure => 'Эпическое фиаско!';
+  String get epic_failure => 'Ð­Ð¿Ð¸Ñ‡ÐµÑÐºÐ¾Ðµ Ñ„Ð¸Ð°ÑÐºÐ¾!';
 
   @override
   String added_num_tracks_to_queue(Object tracks_length) {
-    return 'Добавлено $tracks_length треков в очередь';
+    return 'Ð”Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¾ $tracks_length Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
   }
 
   @override
-  String get spotube_has_an_update => 'В Soulful Bhakti доступно обновление';
+  String get spotube_has_an_update =>
+      'Ð’ Soulful Bhakti Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get download_now => 'Скачать сейчас';
+  String get download_now => 'Ð¡ÐºÐ°Ñ‡Ð°Ñ‚ÑŒ ÑÐµÐ¹Ñ‡Ð°Ñ';
 
   @override
   String nightly_version(Object nightlyBuildNum) {
-    return 'Soulful Bhakti Nightly $nightlyBuildNum выпущен';
+    return 'Soulful Bhakti Nightly $nightlyBuildNum Ð²Ñ‹Ð¿ÑƒÑ‰ÐµÐ½';
   }
 
   @override
   String release_version(Object version) {
-    return 'Soulful Bhakti v$version выпущен';
+    return 'Soulful Bhakti v$version Ð²Ñ‹Ð¿ÑƒÑ‰ÐµÐ½';
   }
 
   @override
-  String get read_the_latest => 'Читать последние ';
+  String get read_the_latest => 'Ð§Ð¸Ñ‚Ð°Ñ‚ÑŒ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð¸Ðµ ';
 
   @override
-  String get release_notes => 'заметки о версии';
+  String get release_notes => 'Ð·Ð°Ð¼ÐµÑ‚ÐºÐ¸ Ð¾ Ð²ÐµÑ€ÑÐ¸Ð¸';
 
   @override
-  String get pick_color_scheme => 'Выберите цветовую схему';
+  String get pick_color_scheme =>
+      'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ñ†Ð²ÐµÑ‚Ð¾Ð²ÑƒÑŽ ÑÑ…ÐµÐ¼Ñƒ';
 
   @override
-  String get save => 'Сохранить';
+  String get save => 'Ð¡Ð¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ';
 
   @override
-  String get choose_the_device => 'Выберите устройство:';
+  String get choose_the_device => 'Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð¾:';
 
   @override
   String get multiple_device_connected =>
-      'Подключено несколько устройств.\nВыберите устройство, на котором вы хотите выполнить это действие';
+      'ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¾ Ð½ÐµÑÐºÐ¾Ð»ÑŒÐºÐ¾ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð².\nÐ’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð¾, Ð½Ð° ÐºÐ¾Ñ‚Ð¾Ñ€Ð¾Ð¼ Ð²Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð²Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ';
 
   @override
-  String get nothing_found => 'Ничего не найдено';
+  String get nothing_found => 'ÐÐ¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾';
 
   @override
-  String get the_box_is_empty => 'Коробка пуста';
+  String get the_box_is_empty => 'ÐšÐ¾Ñ€Ð¾Ð±ÐºÐ° Ð¿ÑƒÑÑ‚Ð°';
 
   @override
-  String get top_artists => 'Лучшие артисты';
+  String get top_artists => 'Ð›ÑƒÑ‡ÑˆÐ¸Ðµ Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ñ‹';
 
   @override
-  String get top_albums => 'Лучшие альбомы';
+  String get top_albums => 'Ð›ÑƒÑ‡ÑˆÐ¸Ðµ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ñ‹';
 
   @override
-  String get this_week => 'На этой неделе';
+  String get this_week => 'ÐÐ° ÑÑ‚Ð¾Ð¹ Ð½ÐµÐ´ÐµÐ»Ðµ';
 
   @override
-  String get this_month => 'В этом месяце';
+  String get this_month => 'Ð’ ÑÑ‚Ð¾Ð¼ Ð¼ÐµÑÑÑ†Ðµ';
 
   @override
-  String get last_6_months => 'Последние 6 месяцев';
+  String get last_6_months => 'ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ðµ 6 Ð¼ÐµÑÑÑ†ÐµÐ²';
 
   @override
-  String get this_year => 'В этом году';
+  String get this_year => 'Ð’ ÑÑ‚Ð¾Ð¼ Ð³Ð¾Ð´Ñƒ';
 
   @override
-  String get last_2_years => 'Последние 2 года';
+  String get last_2_years => 'ÐŸÐ¾ÑÐ»ÐµÐ´Ð½Ð¸Ðµ 2 Ð³Ð¾Ð´Ð°';
 
   @override
-  String get all_time => 'Все время';
+  String get all_time => 'Ð’ÑÐµ Ð²Ñ€ÐµÐ¼Ñ';
 
   @override
   String powered_by_provider(Object providerName) {
-    return 'При поддержке $providerName';
+    return 'ÐŸÑ€Ð¸ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐµ $providerName';
   }
 
   @override
-  String get email => 'Электронная почта';
+  String get email => 'Ð­Ð»ÐµÐºÑ‚Ñ€Ð¾Ð½Ð½Ð°Ñ Ð¿Ð¾Ñ‡Ñ‚Ð°';
 
   @override
-  String get send_code => 'Отправить код';
+  String get send_code => 'ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð¸Ñ‚ÑŒ ÐºÐ¾Ð´';
 
   @override
-  String get change_identifier => 'Использовать другой email';
+  String get change_identifier => 'Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ Ð´Ñ€ÑƒÐ³Ð¾Ð¹ email';
 
   @override
-  String get sign_in_with_otp => 'Войти с одноразовым кодом';
+  String get sign_in_with_otp =>
+      'Ð’Ð¾Ð¹Ñ‚Ð¸ Ñ Ð¾Ð´Ð½Ð¾Ñ€Ð°Ð·Ð¾Ð²Ñ‹Ð¼ ÐºÐ¾Ð´Ð¾Ð¼';
 
   @override
-  String get enter_otp_sent => 'Введите код, который мы вам отправили';
+  String get enter_otp_sent =>
+      'Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÐºÐ¾Ð´, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ð¹ Ð¼Ñ‹ Ð²Ð°Ð¼ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð¸';
 
   @override
   String get verify_email_reminder =>
-      'Пожалуйста, подтвердите свой адрес электронной почты, чтобы защитить аккаунт';
+      'ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚Ðµ ÑÐ²Ð¾Ð¹ Ð°Ð´Ñ€ÐµÑ ÑÐ»ÐµÐºÑ‚Ñ€Ð¾Ð½Ð½Ð¾Ð¹ Ð¿Ð¾Ñ‡Ñ‚Ñ‹, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð·Ð°Ñ‰Ð¸Ñ‚Ð¸Ñ‚ÑŒ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚';
 
   @override
-  String get verify_now => 'Подтвердить сейчас';
+  String get verify_now => 'ÐŸÐ¾Ð´Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ ÑÐµÐ¹Ñ‡Ð°Ñ';
 
   @override
   String get enter_email_to_verify =>
-      'Введите свой адрес электронной почты, чтобы получить код подтверждения';
+      'Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÑÐ²Ð¾Ð¹ Ð°Ð´Ñ€ÐµÑ ÑÐ»ÐµÐºÑ‚Ñ€Ð¾Ð½Ð½Ð¾Ð¹ Ð¿Ð¾Ñ‡Ñ‚Ñ‹, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð¿Ð¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ ÐºÐ¾Ð´ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ';
 
   @override
-  String get profile_followers => 'Подписчики';
+  String get profile_followers => 'ÐŸÐ¾Ð´Ð¿Ð¸ÑÑ‡Ð¸ÐºÐ¸';
 
   @override
-  String get birthday => 'День рождения';
+  String get birthday => 'Ð”ÐµÐ½ÑŒ Ñ€Ð¾Ð¶Ð´ÐµÐ½Ð¸Ñ';
 
   @override
-  String get subscription => 'Подписка';
+  String get subscription => 'ÐŸÐ¾Ð´Ð¿Ð¸ÑÐºÐ°';
 
   @override
-  String get not_born => 'Не рожден';
+  String get not_born => 'ÐÐµ Ñ€Ð¾Ð¶Ð´ÐµÐ½';
 
   @override
-  String get hacker => 'Хакер';
+  String get hacker => 'Ð¥Ð°ÐºÐµÑ€';
 
   @override
-  String get profile => 'Профиль';
+  String get profile => 'ÐŸÑ€Ð¾Ñ„Ð¸Ð»ÑŒ';
 
   @override
-  String get no_name => 'Без имени';
+  String get no_name => 'Ð‘ÐµÐ· Ð¸Ð¼ÐµÐ½Ð¸';
 
   @override
-  String get edit => 'Редактировать';
+  String get edit => 'Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ';
 
   @override
-  String get user_profile => 'Профиль пользователя';
+  String get user_profile => 'ÐŸÑ€Ð¾Ñ„Ð¸Ð»ÑŒ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ';
 
   @override
   String count_plays(Object count) {
-    return '$count воспроизведений';
+    return '$count Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ð¹';
   }
 
   @override
   String get streaming_fees_hypothetical =>
-      '*Рассчитано на основе выплат Spotify за стрим\nот \$0.003 до \$0.005. Это гипотетический\nрасчет, чтобы показать пользователю, сколько бы он\nзаплатил артистам, если бы слушал их песни на Spotify.';
+      '*Ð Ð°ÑÑÑ‡Ð¸Ñ‚Ð°Ð½Ð¾ Ð½Ð° Ð¾ÑÐ½Ð¾Ð²Ðµ Ð²Ñ‹Ð¿Ð»Ð°Ñ‚ Spotify Ð·Ð° ÑÑ‚Ñ€Ð¸Ð¼\nÐ¾Ñ‚ \$0.003 Ð´Ð¾ \$0.005. Ð­Ñ‚Ð¾ Ð³Ð¸Ð¿Ð¾Ñ‚ÐµÑ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹\nÑ€Ð°ÑÑ‡ÐµÑ‚, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð¿Ð¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ, ÑÐºÐ¾Ð»ÑŒÐºÐ¾ Ð±Ñ‹ Ð¾Ð½\nÐ·Ð°Ð¿Ð»Ð°Ñ‚Ð¸Ð» Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ð°Ð¼, ÐµÑÐ»Ð¸ Ð±Ñ‹ ÑÐ»ÑƒÑˆÐ°Ð» Ð¸Ñ… Ð¿ÐµÑÐ½Ð¸ Ð½Ð° Spotify.';
 
   @override
-  String get minutes_listened => 'Минут прослушивания';
+  String get minutes_listened => 'ÐœÐ¸Ð½ÑƒÑ‚ Ð¿Ñ€Ð¾ÑÐ»ÑƒÑˆÐ¸Ð²Ð°Ð½Ð¸Ñ';
 
   @override
-  String get streamed_songs => 'Стримленные песни';
+  String get streamed_songs => 'Ð¡Ñ‚Ñ€Ð¸Ð¼Ð»ÐµÐ½Ð½Ñ‹Ðµ Ð¿ÐµÑÐ½Ð¸';
 
   @override
   String count_streams(Object count) {
-    return '$count стримов';
+    return '$count ÑÑ‚Ñ€Ð¸Ð¼Ð¾Ð²';
   }
 
   @override
-  String get owned_by_you => 'Ваша собственность';
+  String get owned_by_you => 'Ð’Ð°ÑˆÐ° ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒ';
 
   @override
   String copied_shareurl_to_clipboard(Object shareUrl) {
-    return '$shareUrl скопировано в буфер обмена';
+    return '$shareUrl ÑÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾ Ð² Ð±ÑƒÑ„ÐµÑ€ Ð¾Ð±Ð¼ÐµÐ½Ð°';
   }
 
   @override
   String get hipotetical_calculation =>
-      '*Это рассчитано на основе средней выплаты за прослушивание на онлайн-платформах для потоковой передачи музыки в размере от 0,003 до 0,005 долларов США. Это гипотетический расчет, чтобы дать пользователю представление о том, сколько бы они заплатили артистам, если бы слушали их песни на разных музыкальных стриминговых платформах.';
+      '*Ð­Ñ‚Ð¾ Ñ€Ð°ÑÑÑ‡Ð¸Ñ‚Ð°Ð½Ð¾ Ð½Ð° Ð¾ÑÐ½Ð¾Ð²Ðµ ÑÑ€ÐµÐ´Ð½ÐµÐ¹ Ð²Ñ‹Ð¿Ð»Ð°Ñ‚Ñ‹ Ð·Ð° Ð¿Ñ€Ð¾ÑÐ»ÑƒÑˆÐ¸Ð²Ð°Ð½Ð¸Ðµ Ð½Ð° Ð¾Ð½Ð»Ð°Ð¹Ð½-Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ð°Ñ… Ð´Ð»Ñ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¾Ð²Ð¾Ð¹ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ Ð¼ÑƒÐ·Ñ‹ÐºÐ¸ Ð² Ñ€Ð°Ð·Ð¼ÐµÑ€Ðµ Ð¾Ñ‚ 0,003 Ð´Ð¾ 0,005 Ð´Ð¾Ð»Ð»Ð°Ñ€Ð¾Ð² Ð¡Ð¨Ð. Ð­Ñ‚Ð¾ Ð³Ð¸Ð¿Ð¾Ñ‚ÐµÑ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ€Ð°ÑÑ‡ÐµÑ‚, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð´Ð°Ñ‚ÑŒ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð¾ Ñ‚Ð¾Ð¼, ÑÐºÐ¾Ð»ÑŒÐºÐ¾ Ð±Ñ‹ Ð¾Ð½Ð¸ Ð·Ð°Ð¿Ð»Ð°Ñ‚Ð¸Ð»Ð¸ Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ð°Ð¼, ÐµÑÐ»Ð¸ Ð±Ñ‹ ÑÐ»ÑƒÑˆÐ°Ð»Ð¸ Ð¸Ñ… Ð¿ÐµÑÐ½Ð¸ Ð½Ð° Ñ€Ð°Ð·Ð½Ñ‹Ñ… Ð¼ÑƒÐ·Ñ‹ÐºÐ°Ð»ÑŒÐ½Ñ‹Ñ… ÑÑ‚Ñ€Ð¸Ð¼Ð¸Ð½Ð³Ð¾Ð²Ñ‹Ñ… Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ð°Ñ….';
 
   @override
   String count_mins(Object minutes) {
-    return '$minutes мин';
+    return '$minutes Ð¼Ð¸Ð½';
   }
 
   @override
-  String get summary_minutes => 'минуты';
+  String get summary_minutes => 'Ð¼Ð¸Ð½ÑƒÑ‚Ñ‹';
 
   @override
-  String get summary_listened_to_music => 'Слушанная музыка';
+  String get summary_listened_to_music => 'Ð¡Ð»ÑƒÑˆÐ°Ð½Ð½Ð°Ñ Ð¼ÑƒÐ·Ñ‹ÐºÐ°';
 
   @override
-  String get summary_songs => 'песни';
+  String get summary_songs => 'Ð¿ÐµÑÐ½Ð¸';
 
   @override
-  String get summary_streamed_overall => 'Всего стримов';
+  String get summary_streamed_overall => 'Ð’ÑÐµÐ³Ð¾ ÑÑ‚Ñ€Ð¸Ð¼Ð¾Ð²';
 
   @override
-  String get summary_owed_to_artists => 'К выплате артистам\nв этом месяце';
+  String get summary_owed_to_artists =>
+      'Ðš Ð²Ñ‹Ð¿Ð»Ð°Ñ‚Ðµ Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ð°Ð¼\nÐ² ÑÑ‚Ð¾Ð¼ Ð¼ÐµÑÑÑ†Ðµ';
 
   @override
-  String get summary_top_artist => 'Лучший артист\nза этот период';
+  String get summary_top_artist =>
+      'Ð›ÑƒÑ‡ÑˆÐ¸Ð¹ Ð°Ñ€Ñ‚Ð¸ÑÑ‚\nÐ·Ð° ÑÑ‚Ð¾Ñ‚ Ð¿ÐµÑ€Ð¸Ð¾Ð´';
 
   @override
-  String get summary_artists => 'артиста';
+  String get summary_artists => 'Ð°Ñ€Ñ‚Ð¸ÑÑ‚Ð°';
 
   @override
-  String get summary_music_reached_you => 'Музыка дошла до вас';
+  String get summary_music_reached_you => 'ÐœÑƒÐ·Ñ‹ÐºÐ° Ð´Ð¾ÑˆÐ»Ð° Ð´Ð¾ Ð²Ð°Ñ';
 
   @override
-  String get summary_full_albums => 'полные альбомы';
+  String get summary_full_albums => 'Ð¿Ð¾Ð»Ð½Ñ‹Ðµ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ñ‹';
 
   @override
-  String get summary_got_your_love => 'Получил вашу любовь';
+  String get summary_got_your_love => 'ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ð» Ð²Ð°ÑˆÑƒ Ð»ÑŽÐ±Ð¾Ð²ÑŒ';
 
   @override
-  String get summary_playlists => 'плейлисты';
+  String get summary_playlists => 'Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚Ñ‹';
 
   @override
-  String get summary_were_on_repeat => 'Были на повторе';
+  String get summary_were_on_repeat => 'Ð‘Ñ‹Ð»Ð¸ Ð½Ð° Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ðµ';
 
   @override
-  String get summary_listening_share => 'Доля прослушивания';
+  String get summary_listening_share => 'Ð”Ð¾Ð»Ñ Ð¿Ñ€Ð¾ÑÐ»ÑƒÑˆÐ¸Ð²Ð°Ð½Ð¸Ñ';
 
   @override
   String summary_listening_share_description(Object tracks_length) {
-    return 'Распределение $tracks_length треков, которые вы слушали чаще всего';
+    return 'Ð Ð°ÑÐ¿Ñ€ÐµÐ´ÐµÐ»ÐµÐ½Ð¸Ðµ $tracks_length Ñ‚Ñ€ÐµÐºÐ¾Ð², ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ Ð²Ñ‹ ÑÐ»ÑƒÑˆÐ°Ð»Ð¸ Ñ‡Ð°Ñ‰Ðµ Ð²ÑÐµÐ³Ð¾';
   }
 
   @override
-  String get summary_plays => 'воспроизведений';
+  String get summary_plays => 'Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÐ´ÐµÐ½Ð¸Ð¹';
 
   @override
   String get insights => 'Insights';
@@ -1329,320 +1389,340 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String total_money(Object money) {
-    return 'Всего $money';
+    return 'Ð’ÑÐµÐ³Ð¾ $money';
   }
 
   @override
-  String get webview_not_found => 'Webview не найден';
+  String get webview_not_found => 'Webview Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½';
 
   @override
   String get webview_not_found_description =>
-      'На вашем устройстве не установлена среда выполнения Webview.\nЕсли он установлен, убедитесь, что он находится в environment PATH\n\nПосле установки перезапустите приложение';
+      'ÐÐ° Ð²Ð°ÑˆÐµÐ¼ ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ðµ Ð½Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð° ÑÑ€ÐµÐ´Ð° Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ Webview.\nÐ•ÑÐ»Ð¸ Ð¾Ð½ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½, ÑƒÐ±ÐµÐ´Ð¸Ñ‚ÐµÑÑŒ, Ñ‡Ñ‚Ð¾ Ð¾Ð½ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑÑ Ð² environment PATH\n\nÐŸÐ¾ÑÐ»Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ¸ Ð¿ÐµÑ€ÐµÐ·Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚Ðµ Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get unsupported_platform => 'Платформа не поддерживается';
+  String get unsupported_platform =>
+      'ÐŸÐ»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ð° Ð½Ðµ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð¸Ð²Ð°ÐµÑ‚ÑÑ';
 
   @override
-  String get cache_music => 'Кэшировать музыку';
+  String get cache_music => 'ÐšÑÑˆÐ¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¼ÑƒÐ·Ñ‹ÐºÑƒ';
 
   @override
-  String get open => 'Открыть';
+  String get open => 'ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ';
 
   @override
-  String get cache_folder => 'Папка кэша';
+  String get cache_folder => 'ÐŸÐ°Ð¿ÐºÐ° ÐºÑÑˆÐ°';
 
   @override
-  String get export => 'Экспорт';
+  String get export => 'Ð­ÐºÑÐ¿Ð¾Ñ€Ñ‚';
 
   @override
-  String get clear_cache => 'Очистить кэш';
+  String get clear_cache => 'ÐžÑ‡Ð¸ÑÑ‚Ð¸Ñ‚ÑŒ ÐºÑÑˆ';
 
   @override
-  String get clear_cache_confirmation => 'Вы хотите очистить кэш?';
+  String get clear_cache_confirmation =>
+      'Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð¾Ñ‡Ð¸ÑÑ‚Ð¸Ñ‚ÑŒ ÐºÑÑˆ?';
 
   @override
-  String get export_cache_files => 'Экспортировать кэшированные файлы';
+  String get export_cache_files =>
+      'Ð­ÐºÑÐ¿Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÐºÑÑˆÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ðµ Ñ„Ð°Ð¹Ð»Ñ‹';
 
   @override
   String found_n_files(Object count) {
-    return 'Найдено $count файлов';
+    return 'ÐÐ°Ð¹Ð´ÐµÐ½Ð¾ $count Ñ„Ð°Ð¹Ð»Ð¾Ð²';
   }
 
   @override
   String get export_cache_confirmation =>
-      'Вы хотите экспортировать эти файлы в';
+      'Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑÐºÑÐ¿Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÑÑ‚Ð¸ Ñ„Ð°Ð¹Ð»Ñ‹ Ð²';
 
   @override
   String exported_n_out_of_m_files(Object files, Object filesExported) {
-    return 'Экспортировано $filesExported из $files файлов';
+    return 'Ð­ÐºÑÐ¿Ð¾Ñ€Ñ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾ $filesExported Ð¸Ð· $files Ñ„Ð°Ð¹Ð»Ð¾Ð²';
   }
 
   @override
-  String get undo => 'Отменить';
+  String get undo => 'ÐžÑ‚Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ';
 
   @override
-  String get add_all_to_playlist => 'Добавить все в плейлист';
+  String get add_all_to_playlist =>
+      'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð² Ð¿Ð»ÐµÐ¹Ð»Ð¸ÑÑ‚';
 
   @override
-  String get add_all_to_queue => 'Добавить все в очередь';
+  String get add_all_to_queue => 'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð² Ð¾Ñ‡ÐµÑ€ÐµÐ´ÑŒ';
 
   @override
-  String get play_all_next => 'Воспроизвести все следующее';
+  String get play_all_next =>
+      'Ð’Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²ÐµÑÑ‚Ð¸ Ð²ÑÐµ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐµ';
 
   @override
-  String get pause => 'Пауза';
+  String get pause => 'ÐŸÐ°ÑƒÐ·Ð°';
 
   @override
-  String get view_all => 'Просмотреть все';
+  String get view_all => 'ÐŸÑ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€ÐµÑ‚ÑŒ Ð²ÑÐµ';
 
   @override
   String get no_tracks_added_yet =>
-      'Похоже, вы ещё не добавили ни одного трека';
+      'ÐŸÐ¾Ñ…Ð¾Ð¶Ðµ, Ð²Ñ‹ ÐµÑ‰Ñ‘ Ð½Ðµ Ð´Ð¾Ð±Ð°Ð²Ð¸Ð»Ð¸ Ð½Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ Ñ‚Ñ€ÐµÐºÐ°';
 
   @override
-  String get no_tracks => 'Похоже, здесь нет треков';
+  String get no_tracks => 'ÐŸÐ¾Ñ…Ð¾Ð¶Ðµ, Ð·Ð´ÐµÑÑŒ Ð½ÐµÑ‚ Ñ‚Ñ€ÐµÐºÐ¾Ð²';
 
   @override
-  String get no_tracks_listened_yet => 'Похоже, вы ещё ничего не слушали';
+  String get no_tracks_listened_yet =>
+      'ÐŸÐ¾Ñ…Ð¾Ð¶Ðµ, Ð²Ñ‹ ÐµÑ‰Ñ‘ Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ ÑÐ»ÑƒÑˆÐ°Ð»Ð¸';
 
   @override
-  String get not_following_artists => 'Вы не подписаны на художников';
+  String get not_following_artists =>
+      'Ð’Ñ‹ Ð½Ðµ Ð¿Ð¾Ð´Ð¿Ð¸ÑÐ°Ð½Ñ‹ Ð½Ð° Ñ…ÑƒÐ´Ð¾Ð¶Ð½Ð¸ÐºÐ¾Ð²';
 
   @override
   String get no_favorite_albums_yet =>
-      'Похоже, вы ещё не добавили ни одного альбома в избранное';
+      'ÐŸÐ¾Ñ…Ð¾Ð¶Ðµ, Ð²Ñ‹ ÐµÑ‰Ñ‘ Ð½Ðµ Ð´Ð¾Ð±Ð°Ð²Ð¸Ð»Ð¸ Ð½Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ Ð°Ð»ÑŒÐ±Ð¾Ð¼Ð° Ð² Ð¸Ð·Ð±Ñ€Ð°Ð½Ð½Ð¾Ðµ';
 
   @override
-  String get no_logs_found => 'Логи не найдены';
+  String get no_logs_found => 'Ð›Ð¾Ð³Ð¸ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ñ‹';
 
   @override
-  String get youtube_engine => 'YouTube Движок';
+  String get youtube_engine => 'YouTube Ð”Ð²Ð¸Ð¶Ð¾Ðº';
 
   @override
   String youtube_engine_not_installed_title(Object engine) {
-    return '$engine не установлен';
+    return '$engine Ð½Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½';
   }
 
   @override
   String youtube_engine_not_installed_message(Object engine) {
-    return '$engine не установлен в вашей системе.';
+    return '$engine Ð½Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½ Ð² Ð²Ð°ÑˆÐµÐ¹ ÑÐ¸ÑÑ‚ÐµÐ¼Ðµ.';
   }
 
   @override
   String youtube_engine_set_path(Object engine) {
-    return 'Убедитесь, что он доступен в переменной PATH или\nустановите абсолютный путь к исполнимому файлу $engine ниже';
+    return 'Ð£Ð±ÐµÐ´Ð¸Ñ‚ÐµÑÑŒ, Ñ‡Ñ‚Ð¾ Ð¾Ð½ Ð´Ð¾ÑÑ‚ÑƒÐ¿ÐµÐ½ Ð² Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð¾Ð¹ PATH Ð¸Ð»Ð¸\nÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚Ðµ Ð°Ð±ÑÐ¾Ð»ÑŽÑ‚Ð½Ñ‹Ð¹ Ð¿ÑƒÑ‚ÑŒ Ðº Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ð¼Ð¾Ð¼Ñƒ Ñ„Ð°Ð¹Ð»Ñƒ $engine Ð½Ð¸Ð¶Ðµ';
   }
 
   @override
   String get youtube_engine_unix_issue_message =>
-      'В macOS/Linux/Unix-подобных ОС, установка пути в .zshrc/.bashrc/.bash_profile и т.д. не будет работать.\nВы должны установить путь в файле конфигурации оболочки';
+      'Ð’ macOS/Linux/Unix-Ð¿Ð¾Ð´Ð¾Ð±Ð½Ñ‹Ñ… ÐžÐ¡, ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ð¿ÑƒÑ‚Ð¸ Ð² .zshrc/.bashrc/.bash_profile Ð¸ Ñ‚.Ð´. Ð½Ðµ Ð±ÑƒÐ´ÐµÑ‚ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ñ‚ÑŒ.\nÐ’Ñ‹ Ð´Ð¾Ð»Ð¶Ð½Ñ‹ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿ÑƒÑ‚ÑŒ Ð² Ñ„Ð°Ð¹Ð»Ðµ ÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð°Ñ†Ð¸Ð¸ Ð¾Ð±Ð¾Ð»Ð¾Ñ‡ÐºÐ¸';
 
   @override
-  String get download => 'Скачать';
+  String get download => 'Ð¡ÐºÐ°Ñ‡Ð°Ñ‚ÑŒ';
 
   @override
-  String get file_not_found => 'Файл не найден';
+  String get file_not_found => 'Ð¤Ð°Ð¹Ð» Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½';
 
   @override
-  String get custom => 'Пользовательский';
+  String get custom => 'ÐŸÐ¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÑÐºÐ¸Ð¹';
 
   @override
-  String get add_custom_url => 'Добавить пользовательский URL';
+  String get add_custom_url =>
+      'Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÑÐºÐ¸Ð¹ URL';
 
   @override
-  String get edit_port => 'Редактировать порт';
+  String get edit_port => 'Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¿Ð¾Ñ€Ñ‚';
 
   @override
   String get port_helper_msg =>
-      'По умолчанию -1, что означает случайное число. Если у вас настроен брандмауэр, рекомендуется установить это.';
+      'ÐŸÐ¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ -1, Ñ‡Ñ‚Ð¾ Ð¾Ð·Ð½Ð°Ñ‡Ð°ÐµÑ‚ ÑÐ»ÑƒÑ‡Ð°Ð¹Ð½Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾. Ð•ÑÐ»Ð¸ Ñƒ Ð²Ð°Ñ Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐ½ Ð±Ñ€Ð°Ð½Ð´Ð¼Ð°ÑƒÑÑ€, Ñ€ÐµÐºÐ¾Ð¼ÐµÐ½Ð´ÑƒÐµÑ‚ÑÑ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾.';
 
   @override
   String connect_request(Object client) {
-    return 'Разрешить $client подключение?';
+    return 'Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ $client Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ?';
   }
 
   @override
   String get connection_request_denied =>
-      'Подключение отклонено. Пользователь отказал в доступе.';
+      'ÐŸÐ¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ð¾Ñ‚ÐºÐ»Ð¾Ð½ÐµÐ½Ð¾. ÐŸÐ¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒ Ð¾Ñ‚ÐºÐ°Ð·Ð°Ð» Ð² Ð´Ð¾ÑÑ‚ÑƒÐ¿Ðµ.';
 
   @override
-  String get an_error_occurred => 'Произошла ошибка';
+  String get an_error_occurred => 'ÐŸÑ€Ð¾Ð¸Ð·Ð¾ÑˆÐ»Ð° Ð¾ÑˆÐ¸Ð±ÐºÐ°';
 
   @override
-  String get copy_to_clipboard => 'Скопировать в буфер обмена';
+  String get copy_to_clipboard =>
+      'Ð¡ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð² Ð±ÑƒÑ„ÐµÑ€ Ð¾Ð±Ð¼ÐµÐ½Ð°';
 
   @override
-  String get view_logs => 'Просмотреть журналы';
+  String get view_logs => 'ÐŸÑ€Ð¾ÑÐ¼Ð¾Ñ‚Ñ€ÐµÑ‚ÑŒ Ð¶ÑƒÑ€Ð½Ð°Ð»Ñ‹';
 
   @override
-  String get retry => 'Повторить';
+  String get retry => 'ÐŸÐ¾Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‚ÑŒ';
 
   @override
   String get no_default_metadata_provider_selected =>
-      'Вы не выбрали поставщика метаданных по умолчанию';
+      'Ð’Ñ‹ Ð½Ðµ Ð²Ñ‹Ð±Ñ€Ð°Ð»Ð¸ Ð¿Ð¾ÑÑ‚Ð°Ð²Ñ‰Ð¸ÐºÐ° Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get manage_metadata_providers => 'Управление поставщиками метаданных';
+  String get manage_metadata_providers =>
+      'Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð¿Ð¾ÑÑ‚Ð°Ð²Ñ‰Ð¸ÐºÐ°Ð¼Ð¸ Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ…';
 
   @override
-  String get open_link_in_browser => 'Открыть ссылку в браузере?';
+  String get open_link_in_browser =>
+      'ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ ÑÑÑ‹Ð»ÐºÑƒ Ð² Ð±Ñ€Ð°ÑƒÐ·ÐµÑ€Ðµ?';
 
   @override
   String get do_you_want_to_open_the_following_link =>
-      'Вы хотите открыть следующую ссылку';
+      'Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚ÑŒ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÑƒÑŽ ÑÑÑ‹Ð»ÐºÑƒ';
 
   @override
   String get unsafe_url_warning =>
-      'Открытие ссылок из ненадежных источников может быть небезопасным. Будьте осторожны!\nВы также можете скопировать ссылку в буфер обмена.';
+      'ÐžÑ‚ÐºÑ€Ñ‹Ñ‚Ð¸Ðµ ÑÑÑ‹Ð»Ð¾Ðº Ð¸Ð· Ð½ÐµÐ½Ð°Ð´ÐµÐ¶Ð½Ñ‹Ñ… Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÐ¾Ð² Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð½ÐµÐ±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ñ‹Ð¼. Ð‘ÑƒÐ´ÑŒÑ‚Ðµ Ð¾ÑÑ‚Ð¾Ñ€Ð¾Ð¶Ð½Ñ‹!\nÐ’Ñ‹ Ñ‚Ð°ÐºÐ¶Ðµ Ð¼Ð¾Ð¶ÐµÑ‚Ðµ ÑÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÑÑÑ‹Ð»ÐºÑƒ Ð² Ð±ÑƒÑ„ÐµÑ€ Ð¾Ð±Ð¼ÐµÐ½Ð°.';
 
   @override
-  String get copy_link => 'Копировать ссылку';
+  String get copy_link => 'ÐšÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÑÑÑ‹Ð»ÐºÑƒ';
 
   @override
   String get building_your_timeline =>
-      'Создание вашей временной шкалы на основе ваших прослушиваний...';
+      'Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Ð²Ð°ÑˆÐµÐ¹ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾Ð¹ ÑˆÐºÐ°Ð»Ñ‹ Ð½Ð° Ð¾ÑÐ½Ð¾Ð²Ðµ Ð²Ð°ÑˆÐ¸Ñ… Ð¿Ñ€Ð¾ÑÐ»ÑƒÑˆÐ¸Ð²Ð°Ð½Ð¸Ð¹...';
 
   @override
-  String get official => 'Официальный';
+  String get official => 'ÐžÑ„Ð¸Ñ†Ð¸Ð°Ð»ÑŒÐ½Ñ‹Ð¹';
 
   @override
   String author_name(Object author) {
-    return 'Автор: $author';
+    return 'ÐÐ²Ñ‚Ð¾Ñ€: $author';
   }
 
   @override
-  String get third_party => 'Сторонний';
+  String get third_party => 'Ð¡Ñ‚Ð¾Ñ€Ð¾Ð½Ð½Ð¸Ð¹';
 
   @override
-  String get plugin_requires_authentication => 'Плагин требует аутентификации';
+  String get plugin_requires_authentication =>
+      'ÐŸÐ»Ð°Ð³Ð¸Ð½ Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ Ð°ÑƒÑ‚ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¸';
 
   @override
-  String get update_available => 'Доступно обновление';
+  String get update_available => 'Ð”Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ';
 
   @override
-  String get supports_scrobbling => 'Поддерживает скробблинг';
+  String get supports_scrobbling =>
+      'ÐŸÐ¾Ð´Ð´ÐµÑ€Ð¶Ð¸Ð²Ð°ÐµÑ‚ ÑÐºÑ€Ð¾Ð±Ð±Ð»Ð¸Ð½Ð³';
 
   @override
   String get plugin_scrobbling_info =>
-      'Этот плагин скробблит вашу музыку для создания вашей истории прослушиваний.';
+      'Ð­Ñ‚Ð¾Ñ‚ Ð¿Ð»Ð°Ð³Ð¸Ð½ ÑÐºÑ€Ð¾Ð±Ð±Ð»Ð¸Ñ‚ Ð²Ð°ÑˆÑƒ Ð¼ÑƒÐ·Ñ‹ÐºÑƒ Ð´Ð»Ñ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ñ Ð²Ð°ÑˆÐµÐ¹ Ð¸ÑÑ‚Ð¾Ñ€Ð¸Ð¸ Ð¿Ñ€Ð¾ÑÐ»ÑƒÑˆÐ¸Ð²Ð°Ð½Ð¸Ð¹.';
 
   @override
-  String get default_metadata_source => 'Источник метаданных по умолчанию';
+  String get default_metadata_source =>
+      'Ð˜ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
   String get set_default_metadata_source =>
-      'Задать источник метаданных по умолчанию';
+      'Ð—Ð°Ð´Ð°Ñ‚ÑŒ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get default_audio_source => 'Источник аудио по умолчанию';
+  String get default_audio_source =>
+      'Ð˜ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð°ÑƒÐ´Ð¸Ð¾ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get set_default_audio_source => 'Задать источник аудио по умолчанию';
+  String get set_default_audio_source =>
+      'Ð—Ð°Ð´Ð°Ñ‚ÑŒ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð°ÑƒÐ´Ð¸Ð¾ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get set_default => 'Установить по умолчанию';
+  String get set_default => 'Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ';
 
   @override
-  String get support => 'Поддержка';
+  String get support => 'ÐŸÐ¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°';
 
   @override
-  String get support_plugin_development => 'Поддержать разработку плагина';
+  String get support_plugin_development =>
+      'ÐŸÐ¾Ð´Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ€Ð°Ð·Ñ€Ð°Ð±Ð¾Ñ‚ÐºÑƒ Ð¿Ð»Ð°Ð³Ð¸Ð½Ð°';
 
   @override
   String can_access_name_api(Object name) {
-    return '- Может получить доступ к API **$name**';
+    return '- ÐœÐ¾Ð¶ÐµÑ‚ Ð¿Ð¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð´Ð¾ÑÑ‚ÑƒÐ¿ Ðº API **$name**';
   }
 
   @override
   String get do_you_want_to_install_this_plugin =>
-      'Вы хотите установить этот плагин?';
+      'Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ Ð¿Ð»Ð°Ð³Ð¸Ð½?';
 
   @override
   String get third_party_plugin_warning =>
-      'Этот плагин из стороннего репозитория. Пожалуйста, убедитесь, что вы доверяете источнику перед установкой.';
+      'Ð­Ñ‚Ð¾Ñ‚ Ð¿Ð»Ð°Ð³Ð¸Ð½ Ð¸Ð· ÑÑ‚Ð¾Ñ€Ð¾Ð½Ð½ÐµÐ³Ð¾ Ñ€ÐµÐ¿Ð¾Ð·Ð¸Ñ‚Ð¾Ñ€Ð¸Ñ. ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, ÑƒÐ±ÐµÐ´Ð¸Ñ‚ÐµÑÑŒ, Ñ‡Ñ‚Ð¾ Ð²Ñ‹ Ð´Ð¾Ð²ÐµÑ€ÑÐµÑ‚Ðµ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÑƒ Ð¿ÐµÑ€ÐµÐ´ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ¾Ð¹.';
 
   @override
-  String get author => 'Автор';
+  String get author => 'ÐÐ²Ñ‚Ð¾Ñ€';
 
   @override
   String get this_plugin_can_do_following =>
-      'Этот плагин может выполнять следующее';
+      'Ð­Ñ‚Ð¾Ñ‚ Ð¿Ð»Ð°Ð³Ð¸Ð½ Ð¼Ð¾Ð¶ÐµÑ‚ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÑÑ‚ÑŒ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐµ';
 
   @override
-  String get install => 'Установить';
+  String get install => 'Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ';
 
   @override
-  String get install_a_metadata_provider => 'Установить поставщика метаданных';
+  String get install_a_metadata_provider =>
+      'Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿Ð¾ÑÑ‚Ð°Ð²Ñ‰Ð¸ÐºÐ° Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ…';
 
   @override
   String get no_tracks_playing =>
-      'В настоящее время не воспроизводится ни один трек';
+      'Ð’ Ð½Ð°ÑÑ‚Ð¾ÑÑ‰ÐµÐµ Ð²Ñ€ÐµÐ¼Ñ Ð½Ðµ Ð²Ð¾ÑÐ¿Ñ€Ð¾Ð¸Ð·Ð²Ð¾Ð´Ð¸Ñ‚ÑÑ Ð½Ð¸ Ð¾Ð´Ð¸Ð½ Ñ‚Ñ€ÐµÐº';
 
   @override
   String get synced_lyrics_not_available =>
-      'Синхронизированные тексты недоступны для этой песни. Пожалуйста, используйте вкладку';
+      'Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ðµ Ñ‚ÐµÐºÑÑ‚Ñ‹ Ð½ÐµÐ´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹ Ð´Ð»Ñ ÑÑ‚Ð¾Ð¹ Ð¿ÐµÑÐ½Ð¸. ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð²ÐºÐ»Ð°Ð´ÐºÑƒ';
 
   @override
-  String get plain_lyrics => 'Простые тексты';
+  String get plain_lyrics => 'ÐŸÑ€Ð¾ÑÑ‚Ñ‹Ðµ Ñ‚ÐµÐºÑÑ‚Ñ‹';
 
   @override
-  String get tab_instead => 'вместо этого.';
+  String get tab_instead => 'Ð²Ð¼ÐµÑÑ‚Ð¾ ÑÑ‚Ð¾Ð³Ð¾.';
 
   @override
-  String get disclaimer => 'Отказ от ответственности';
+  String get disclaimer => 'ÐžÑ‚ÐºÐ°Ð· Ð¾Ñ‚ Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ð¾ÑÑ‚Ð¸';
 
   @override
   String get third_party_plugin_dmca_notice =>
-      'Команда Soulful Bhakti не несет никакой ответственности (в том числе юридической) за какие-либо \"сторонние\" плагины.\nПожалуйста, используйте их на свой страх и риск. О любых ошибках/проблемах сообщайте в репозиторий плагина.\n\nЕсли какой-либо \"сторонний\" плагин нарушает ToS/DMCA какого-либо сервиса/юридического лица, пожалуйста, попросите автора плагина \"стороннего\" или хостинговую платформу, например, GitHub/Codeberg, принять меры. Перечисленные выше (помеченные как \"сторонние\") являются общедоступными/поддерживаемыми сообществом плагинами. Мы не курируем их, поэтому не можем принимать по ним никаких мер.\n\n';
+      'ÐšÐ¾Ð¼Ð°Ð½Ð´Ð° Soulful Bhakti Ð½Ðµ Ð½ÐµÑÐµÑ‚ Ð½Ð¸ÐºÐ°ÐºÐ¾Ð¹ Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ð¾ÑÑ‚Ð¸ (Ð² Ñ‚Ð¾Ð¼ Ñ‡Ð¸ÑÐ»Ðµ ÑŽÑ€Ð¸Ð´Ð¸Ñ‡ÐµÑÐºÐ¾Ð¹) Ð·Ð° ÐºÐ°ÐºÐ¸Ðµ-Ð»Ð¸Ð±Ð¾ \"ÑÑ‚Ð¾Ñ€Ð¾Ð½Ð½Ð¸Ðµ\" Ð¿Ð»Ð°Ð³Ð¸Ð½Ñ‹.\nÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð¸Ñ… Ð½Ð° ÑÐ²Ð¾Ð¹ ÑÑ‚Ñ€Ð°Ñ… Ð¸ Ñ€Ð¸ÑÐº. Ðž Ð»ÑŽÐ±Ñ‹Ñ… Ð¾ÑˆÐ¸Ð±ÐºÐ°Ñ…/Ð¿Ñ€Ð¾Ð±Ð»ÐµÐ¼Ð°Ñ… ÑÐ¾Ð¾Ð±Ñ‰Ð°Ð¹Ñ‚Ðµ Ð² Ñ€ÐµÐ¿Ð¾Ð·Ð¸Ñ‚Ð¾Ñ€Ð¸Ð¹ Ð¿Ð»Ð°Ð³Ð¸Ð½Ð°.\n\nÐ•ÑÐ»Ð¸ ÐºÐ°ÐºÐ¾Ð¹-Ð»Ð¸Ð±Ð¾ \"ÑÑ‚Ð¾Ñ€Ð¾Ð½Ð½Ð¸Ð¹\" Ð¿Ð»Ð°Ð³Ð¸Ð½ Ð½Ð°Ñ€ÑƒÑˆÐ°ÐµÑ‚ ToS/DMCA ÐºÐ°ÐºÐ¾Ð³Ð¾-Ð»Ð¸Ð±Ð¾ ÑÐµÑ€Ð²Ð¸ÑÐ°/ÑŽÑ€Ð¸Ð´Ð¸Ñ‡ÐµÑÐºÐ¾Ð³Ð¾ Ð»Ð¸Ñ†Ð°, Ð¿Ð¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð¿Ð¾Ð¿Ñ€Ð¾ÑÐ¸Ñ‚Ðµ Ð°Ð²Ñ‚Ð¾Ñ€Ð° Ð¿Ð»Ð°Ð³Ð¸Ð½Ð° \"ÑÑ‚Ð¾Ñ€Ð¾Ð½Ð½ÐµÐ³Ð¾\" Ð¸Ð»Ð¸ Ñ…Ð¾ÑÑ‚Ð¸Ð½Ð³Ð¾Ð²ÑƒÑŽ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñƒ, Ð½Ð°Ð¿Ñ€Ð¸Ð¼ÐµÑ€, GitHub/Codeberg, Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑŒ Ð¼ÐµÑ€Ñ‹. ÐŸÐµÑ€ÐµÑ‡Ð¸ÑÐ»ÐµÐ½Ð½Ñ‹Ðµ Ð²Ñ‹ÑˆÐµ (Ð¿Ð¾Ð¼ÐµÑ‡ÐµÐ½Ð½Ñ‹Ðµ ÐºÐ°Ðº \"ÑÑ‚Ð¾Ñ€Ð¾Ð½Ð½Ð¸Ðµ\") ÑÐ²Ð»ÑÑŽÑ‚ÑÑ Ð¾Ð±Ñ‰ÐµÐ´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹Ð¼Ð¸/Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶Ð¸Ð²Ð°ÐµÐ¼Ñ‹Ð¼Ð¸ ÑÐ¾Ð¾Ð±Ñ‰ÐµÑÑ‚Ð²Ð¾Ð¼ Ð¿Ð»Ð°Ð³Ð¸Ð½Ð°Ð¼Ð¸. ÐœÑ‹ Ð½Ðµ ÐºÑƒÑ€Ð¸Ñ€ÑƒÐµÐ¼ Ð¸Ñ…, Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ Ð½Ðµ Ð¼Ð¾Ð¶ÐµÐ¼ Ð¿Ñ€Ð¸Ð½Ð¸Ð¼Ð°Ñ‚ÑŒ Ð¿Ð¾ Ð½Ð¸Ð¼ Ð½Ð¸ÐºÐ°ÐºÐ¸Ñ… Ð¼ÐµÑ€.\n\n';
 
   @override
   String get input_does_not_match_format =>
-      'Введенные данные не соответствуют требуемому формату';
+      'Ð’Ð²ÐµÐ´ÐµÐ½Ð½Ñ‹Ðµ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð½Ðµ ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‚ Ñ‚Ñ€ÐµÐ±ÑƒÐµÐ¼Ð¾Ð¼Ñƒ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ñƒ';
 
   @override
-  String get plugins => 'Плагины';
+  String get plugins => 'ÐŸÐ»Ð°Ð³Ð¸Ð½Ñ‹';
 
   @override
   String get paste_plugin_download_url =>
-      'Вставьте URL-адрес для загрузки или URL-адрес репозитория GitHub/Codeberg или прямую ссылку на файл .smplug';
+      'Ð’ÑÑ‚Ð°Ð²ÑŒÑ‚Ðµ URL-Ð°Ð´Ñ€ÐµÑ Ð´Ð»Ñ Ð·Ð°Ð³Ñ€ÑƒÐ·ÐºÐ¸ Ð¸Ð»Ð¸ URL-Ð°Ð´Ñ€ÐµÑ Ñ€ÐµÐ¿Ð¾Ð·Ð¸Ñ‚Ð¾Ñ€Ð¸Ñ GitHub/Codeberg Ð¸Ð»Ð¸ Ð¿Ñ€ÑÐ¼ÑƒÑŽ ÑÑÑ‹Ð»ÐºÑƒ Ð½Ð° Ñ„Ð°Ð¹Ð» .smplug';
 
   @override
   String get download_and_install_plugin_from_url =>
-      'Загрузить и установить плагин по URL-адресу';
+      'Ð—Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð¸ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿Ð»Ð°Ð³Ð¸Ð½ Ð¿Ð¾ URL-Ð°Ð´Ñ€ÐµÑÑƒ';
 
   @override
   String failed_to_add_plugin_error(Object error) {
-    return 'Не удалось добавить плагин: $error';
+    return 'ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð´Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð¿Ð»Ð°Ð³Ð¸Ð½: $error';
   }
 
   @override
-  String get upload_plugin_from_file => 'Загрузить плагин из файла';
+  String get upload_plugin_from_file =>
+      'Ð—Ð°Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ Ð¿Ð»Ð°Ð³Ð¸Ð½ Ð¸Ð· Ñ„Ð°Ð¹Ð»Ð°';
 
   @override
-  String get installed => 'Установлено';
+  String get installed => 'Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð¾';
 
   @override
-  String get available_plugins => 'Доступные плагины';
+  String get available_plugins => 'Ð”Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹Ðµ Ð¿Ð»Ð°Ð³Ð¸Ð½Ñ‹';
 
   @override
   String get configure_plugins =>
-      'Настройте собственные плагины провайдеров метаданных и источников аудио';
+      'ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹Ñ‚Ðµ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ðµ Ð¿Ð»Ð°Ð³Ð¸Ð½Ñ‹ Ð¿Ñ€Ð¾Ð²Ð°Ð¹Ð´ÐµÑ€Ð¾Ð² Ð¼ÐµÑ‚Ð°Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¸ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÐ¾Ð² Ð°ÑƒÐ´Ð¸Ð¾';
 
   @override
-  String get source => 'Источник: ';
+  String get source => 'Ð˜ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº: ';
 
   @override
-  String get uncompressed => 'Несжатый';
+  String get uncompressed => 'ÐÐµÑÐ¶Ð°Ñ‚Ñ‹Ð¹';
 
   @override
   String get dab_music_source_description =>
-      'Для аудиофилов. Предоставляет высококачественные/lossless аудиопотоки. Точное совпадение треков по ISRC.';
+      'Ð”Ð»Ñ Ð°ÑƒÐ´Ð¸Ð¾Ñ„Ð¸Ð»Ð¾Ð². ÐŸÑ€ÐµÐ´Ð¾ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ Ð²Ñ‹ÑÐ¾ÐºÐ¾ÐºÐ°Ñ‡ÐµÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ðµ/lossless Ð°ÑƒÐ´Ð¸Ð¾Ð¿Ð¾Ñ‚Ð¾ÐºÐ¸. Ð¢Ð¾Ñ‡Ð½Ð¾Ðµ ÑÐ¾Ð²Ð¿Ð°Ð´ÐµÐ½Ð¸Ðµ Ñ‚Ñ€ÐµÐºÐ¾Ð² Ð¿Ð¾ ISRC.';
 
   @override
-  String get summary_top_track => 'Лучший трек\nза этот период';
+  String get summary_top_track =>
+      'Ð›ÑƒÑ‡ÑˆÐ¸Ð¹ Ñ‚Ñ€ÐµÐº\nÐ·Ð° ÑÑ‚Ð¾Ñ‚ Ð¿ÐµÑ€Ð¸Ð¾Ð´';
 
   @override
-  String get local => 'Локальный';
+  String get local => 'Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹';
 
   @override
   String get set_as_ringtone => 'Set as ringtone';
@@ -1652,4 +1732,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }

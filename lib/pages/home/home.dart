@@ -17,6 +17,7 @@ import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
+import 'package:sangeet/modules/home/sections/specials_carousel.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
@@ -137,6 +138,11 @@ class HomePage extends HookConsumerWidget {
                   const SliverGap(10),
                   const HomeRecentlyPlayedTracksSection(),
                   const HomePlaylistsSection(),
+                  // Curated "Specials" carousels (Ganesha Special, Krishna
+                  // Special, ...) sit directly above the Albums shelf. The
+                  // widget collapses to nothing when no shelf has tracks, so
+                  // an empty catalogue never shows a blank carousel.
+                  const HomeSpecialsCarousel(),
                   ...switch (sectionsAsync) {
                     AsyncData(value: final sections) => [
                         HomeAlbumsSection(albums: sections.albums),

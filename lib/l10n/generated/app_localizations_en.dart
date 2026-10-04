@@ -531,14 +531,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bug_issues => 'Bug+Issues';
 
   @override
-  String get made_with => 'Made with â¤ï¸ in BangladeshðŸ‡§ðŸ‡©';
+  String get made_with =>
+      'Made with Ã¢ÂÂ¤Ã¯Â¸Â in BangladeshÃ°Å¸â€¡Â§Ã°Å¸â€¡Â©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return 'Â© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Ã‚Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -982,11 +983,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skip_this_nonsense => 'Skip this nonsense';
 
   @override
-  String get freedom_of_music => 'â€œFreedom of Musicâ€';
+  String get freedom_of_music => 'Ã¢â‚¬Å“Freedom of MusicÃ¢â‚¬Â';
 
   @override
   String get freedom_of_music_palm =>
-      'â€œFreedom of Music in the palm of your handâ€';
+      'Ã¢â‚¬Å“Freedom of Music in the palm of your handÃ¢â‚¬Â';
 
   @override
   String get get_started => 'Let\'s get started';
@@ -1642,4 +1643,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ringtone_failed => 'Could not set ringtone';
+
+  @override
+  String get specials => 'Specials';
+
+  @override
+  String get play_now => 'Play Now';
+
+  @override
+  String songs_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+    );
+    return '$_temp0';
+  }
 }
