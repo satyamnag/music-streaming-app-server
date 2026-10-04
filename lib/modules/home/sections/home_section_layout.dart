@@ -14,13 +14,21 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 abstract final class HomeSectionLayout {
   /// Global size multiplier for every home/grid track+album card.
   ///
-  /// The cards were reduced to ~75% of their original footprint so a row shows
-  /// noticeably more artwork (the home rows and grids now read as a full,
-  /// deep library rather than a handful of oversized tiles). Everything that
-  /// defines the card — artwork, padding, internal gaps — is derived from
-  /// [imageSize] and [cardPadding] through this factor, so the card geometry
-  /// stays exact and self-consistent at any value.
-  static const double cardScale = 0.75;
+  /// 5/6 of the original 150px footprint, which is *exactly* a 125px square
+  /// cover — raised from the 112.5px (0.75) the cards had been reduced to, so
+  /// the artwork reads larger on the home rows and in the grids. 5/6 is exact
+  /// in IEEE754 here, so `150 * cardScale` lands on 125.0 and not
+  /// 125.00000000000001. Everything that defines the card — artwork, padding,
+  /// internal gaps — is derived from [imageSize] and [cardPadding] through this
+  /// factor, so the card geometry stays exact and self-consistent at any value.
+  ///
+  /// Raising it also raises `minCardWidth` in
+  /// `components/track_card/track_card.dart`, which `trackGridCrossAxisCount`
+  /// divides the screen width by — so the track grids (search, home see-all)
+  /// fit fewer, larger columns. That is the intended consequence of bigger
+  /// cards, not a side effect to chase: the 411–447dp phones move from 3
+  /// columns to 2, and 540/720/840/960/1024dp each lose one column.
+  static const double cardScale = 5 / 6;
 
   /// The square artwork width/height of every home card, in logical pixels at
   /// scale == 1 (cards multiply by `theme.scaling` themselves).
@@ -82,7 +90,7 @@ abstract final class HomeSectionLayout {
   /// The text block is padded on ALL four sides (see `TrackCard`'s
   /// `EdgeInsets.fromLTRB`), so [cardPadding] is added twice: once as the gap
   /// between the cover and the title, and once as the bottom padding. Omitting
-  /// the bottom padding made every card 7.5px (10 * 0.75) taller than the height
+  /// the bottom padding made every card one [cardPadding] taller than the height
   /// computed here, which overflowed the card's own Column by exactly that much.
   static double _cardHeightFor(
     BuildContext context,
