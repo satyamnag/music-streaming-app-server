@@ -5,7 +5,9 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/lyrics/lyrics_ornament_divider.dart';
 import 'package:sangeet/models/lyrics.dart';
+import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -130,19 +132,42 @@ class PlainLyrics extends HookConsumerWidget {
                           return e.text;
                         }).join("\n");
 
+                        // A line wrapped in single braces ({Pallavi}) becomes an
+                        // ornament divider instead of sung text. Only the marked
+                        // lines need per-line rendering, so an unmarked song keeps
+                        // the original single selectable text block.
+                        final markLines = lyrics
+                            .split('\n')
+                            .map(parseMarkedLyricsLine)
+                            .where((l) => l.mark == LyricsLineMark.heading)
+                            .isNotEmpty;
+
+                        final bodyStyle = TextStyle(
+                          color: isModal == true
+                              ? context.theme.colorScheme.foreground
+                              : palette.bodyTextColor,
+                          fontSize: 24 * textZoomLevel.value / 100,
+                          height: textZoomLevel.value < 70
+                              ? 1.5
+                              : textZoomLevel.value > 150
+                                  ? 1.7
+                                  : 2,
+                        );
+
+                        if (markLines) {
+                          return AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            style: bodyStyle,
+                            child: _MarkedPlainLyrics(
+                              lyrics: lyrics,
+                              style: bodyStyle,
+                            ),
+                          );
+                        }
+
                         return AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 200),
-                          style: TextStyle(
-                            color: isModal == true
-                                ? context.theme.colorScheme.foreground
-                                : palette.bodyTextColor,
-                            fontSize: 24 * textZoomLevel.value / 100,
-                            height: textZoomLevel.value < 70
-                                ? 1.5
-                                : textZoomLevel.value > 150
-                                    ? 1.7
-                                    : 2,
-                          ),
+                          style: bodyStyle,
                           child: SelectableText(
                             playlist.activeTrack == null
                                 ? context.l10n.no_tracks_playing
@@ -167,6 +192,41 @@ class PlainLyrics extends HookConsumerWidget {
             max: 200,
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// Renders plain lyrics one line at a time so lines the author wrapped in
+/// single braces (`{Pallavi}`) can be drawn as ornament dividers while every
+/// other line stays ordinary centred text.
+///
+/// Only used when at least one marked line exists: a song without marks keeps
+/// the original single [SelectableText], which stays selectable as a whole and
+/// avoids per-line layout cost.
+class _MarkedPlainLyrics extends StatelessWidget {
+  final String lyrics;
+  final TextStyle style;
+
+  const _MarkedPlainLyrics({required this.lyrics, required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = lyrics.split('\n');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final line in lines)
+          if (parseMarkedLyricsLine(line).mark == LyricsLineMark.heading)
+            LyricsOrnamentDivider(label: parseMarkedLyricsLine(line).label)
+          else
+            SelectableText(
+              line,
+              textAlign: TextAlign.center,
+              style: style,
+            ),
       ],
     );
   }

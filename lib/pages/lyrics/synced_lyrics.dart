@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
+import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -147,18 +149,33 @@ class SyncedLyrics extends HookConsumerWidget {
                       preferPosition: AutoScrollPosition.middle,
                     );
                   }
+                  // A line the author wrapped in double braces ({{Music}})
+                  // renders as a short "♪ Music ♪" banner instead of sung text.
+                  // Checked before the empty-line branch so a banner is never
+                  // swallowed as a spacer.
+                  final marked = parseMarkedLyricsLine(lyricSlice.text);
+
                   return AutoScrollTag(
                     key: ValueKey(index),
                     index: index,
                     controller: controller,
-                    child: lyricSlice.text.isEmpty && subLines.isEmpty
-                        ? Container(
-                            padding: index == lyricValue.lyrics.length - 1
-                                ? EdgeInsets.only(
-                                    bottom: mediaQuery.height / 2,
-                                  )
-                                : null,
+                    child: marked.mark == LyricsLineMark.banner
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
+                            child: LyricsMusicBanner(label: marked.label),
                           )
+                        : lyricSlice.text.isEmpty && subLines.isEmpty
+                            ? Container(
+                                padding:
+                                    index == lyricValue.lyrics.length - 1
+                                        ? EdgeInsets.only(
+                                            bottom: mediaQuery.height / 2,
+                                          )
+                                        : null,
+                              )
                         : Center(
                             child: Padding(
                               padding: index == lyricValue.lyrics.length - 1

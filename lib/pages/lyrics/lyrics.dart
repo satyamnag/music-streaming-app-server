@@ -111,7 +111,7 @@ class LyricsPage extends HookConsumerWidget {
               fit: BoxFit.cover,
             ),
           ),
-          margin: const EdgeInsets.only(bottom: 10),
+          margin: EdgeInsets.only(bottom: 10 + context.bottomPlayerReserve),
           child: SurfaceCard(
             surfaceBlur: context.theme.surfaceBlur,
             surfaceOpacity: context.theme.surfaceOpacity,
