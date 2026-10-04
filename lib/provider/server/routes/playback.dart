@@ -25,12 +25,26 @@ void _log(String msg) {
   print('[SANGEET] $msg');
 }
 
-/// In-memory cache for resolved sourced tracks. Keyed by trackId, maps to
-/// the resolved [SourcedTrack]. This prevents mpv's HEAD + GET + retry
-/// requests from hitting Supabase 3-4× per track (saving ~2-3 seconds per
-/// track switch). The cache is cleared when the playlist changes.
+/// In-memory cache for resolved sourced tracks. Keyed by a VARIANT-AWARE cache
+/// key (see [_cacheKey]), mapping to the resolved [SourcedTrack]. This prevents
+/// mpv's HEAD + GET + retry requests from hitting Supabase 3-4× per track
+/// (saving ~2-3 seconds per track switch). The cache is cleared when the
+/// playlist changes.
 final Map<String, SourcedTrack> _sourcedTrackCache = {};
 final Map<String, DateTime> _sourcedTrackFetchAt = {};
+
+/// Cache key for a resolved stream.
+///
+/// A track can be streamed as its ORIGINAL or as its KARAOKE variant, and the
+/// two are different audio files. Keying on the track id alone made the karaoke
+/// request reuse the original's cached URL (and vice versa) for up to
+/// [_streamUrlMaxAge], so toggling variants could silently play the wrong file.
+/// The variant is therefore part of the key.
+///
+/// The variant is a prefix (not a suffix) so the two namespaces can never
+/// collide, even if a track id happened to contain the marker text itself.
+String _cacheKey(String trackId, {bool karaoke = false}) =>
+    karaoke ? 'karaoke\u0000$trackId' : 'original\u0000$trackId';
 
 /// How long a resolved stream URL is considered fresh. Signed URLs from
 /// Supabase expire (~1h) and the upstream cache is 30 min; re-resolving after
@@ -38,9 +52,11 @@ final Map<String, DateTime> _sourcedTrackFetchAt = {};
 /// cannot get stuck on an expired URL in low-network conditions.
 const Duration _streamUrlMaxAge = Duration(minutes: 20);
 
-void _cacheSourcedTrack(String trackId, SourcedTrack track) {
-  _sourcedTrackCache[trackId] = track;
-  _sourcedTrackFetchAt[trackId] = DateTime.now();
+void _cacheSourcedTrack(String trackId, SourcedTrack track,
+    {bool karaoke = false}) {
+  final key = _cacheKey(trackId, karaoke: karaoke);
+  _sourcedTrackCache[key] = track;
+  _sourcedTrackFetchAt[key] = DateTime.now();
 }
 
 void clearSourcedTrackCache() {
@@ -77,39 +93,51 @@ class ServerPlaybackRoutes {
 
   Future<SourcedTrack?> _getSourcedTrack(
     Request request,
-    String trackId,
-  ) async {
+    String trackId, {
+    bool karaoke = false,
+  }) async {
+    final key = _cacheKey(trackId, karaoke: karaoke);
+
     // Return cached result if available — mpv sends HEAD, GET, and retries,
     // so without caching we hit Supabase 3-4× per track (~2-3s wasted each).
     // A cached URL older than [_streamUrlMaxAge] is treated as a miss so a
     // stale/expired URL is re-resolved fresh on retry.
-    final cached = _sourcedTrackCache[trackId];
-    final fetchedAt = _sourcedTrackFetchAt[trackId];
+    final cached = _sourcedTrackCache[key];
+    final fetchedAt = _sourcedTrackFetchAt[key];
     if (cached != null &&
         fetchedAt != null &&
         DateTime.now().difference(fetchedAt) < _streamUrlMaxAge) {
-      _log('_getSourcedTrack: cache hit for $trackId');
+      _log('_getSourcedTrack: cache hit for $key');
       return cached;
     }
     if (cached != null) {
-      _log('_getSourcedTrack: cached URL stale for $trackId, re-resolving...');
+      _log('_getSourcedTrack: cached URL stale for $key, re-resolving...');
     }
 
     _log(
-        '_getSourcedTrack: trackId=$trackId, playlist.tracks=${playlist.tracks.length}');
+        '_getSourcedTrack: trackId=$trackId (karaoke=$karaoke), playlist.tracks=${playlist.tracks.length}');
 
     // Fast path: resolve the stream URL directly from Supabase. This avoids
     // the metadata-plugin bytecode interpreter entirely, which keeps playback
     // fast and immune to plugin/bytecode incompatibilities.
     try {
-      final direct = await _resolveStreamFromSupabase(trackId);
+      final direct = await _resolveStreamFromSupabase(trackId, karaoke: karaoke);
       if (direct != null) {
         _log('_getSourcedTrack: resolved directly from the music source');
-        _cacheSourcedTrack(trackId, direct);
+        _cacheSourcedTrack(trackId, direct, karaoke: karaoke);
         return direct;
       }
     } catch (e) {
       _log('_getSourcedTrack: direct music source resolve failed: $e');
+    }
+
+    // A karaoke request must never silently fall back to the ORIGINAL audio:
+    // the caller asked for the karaoke variant specifically, and playing the
+    // wrong file is worse than reporting "unavailable". Returning null lets the
+    // route report it clearly (see the stream handler).
+    if (karaoke) {
+      _log('_getSourcedTrack: no karaoke source for $trackId');
+      return null;
     }
 
     try {
@@ -518,17 +546,25 @@ class ServerPlaybackRoutes {
   }
 
   /// Returns the [SourcedTrack] to stream for a request, honouring the
-  /// `?variant=karaoke` query param (resolves the karaoke file when present;
-  /// falls back to the original otherwise so nothing breaks).
+  /// `?variant=karaoke` query param.
+  ///
+  /// Karaoke resolution goes through the same variant-aware cache as the
+  /// original, so mpv's HEAD + GET + retry sequence for a karaoke stream is
+  /// served from memory instead of re-resolving and re-signing the URL three
+  /// times (which is what made karaoke feel slow to start). It still falls back
+  /// to the original when a track has no karaoke file, so playback never breaks.
   Future<SourcedTrack?> _sourcedTrackForVariant(
     Request request,
     String trackId,
     SourcedTrack? fallback,
   ) async {
-    if (request.url.queryParameters['variant'] == 'karaoke') {
-      final karaoke = await _resolveStreamFromSupabase(trackId, karaoke: true);
-      if (karaoke != null) return karaoke;
-    }
+    if (request.url.queryParameters['variant'] != 'karaoke') return fallback;
+
+    final karaoke = await _getSourcedTrack(request, trackId, karaoke: true);
+    if (karaoke != null) return karaoke;
+
+    // No karaoke file for this track: keep playing the original rather than
+    // failing the request.
     return fallback;
   }
 

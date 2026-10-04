@@ -25,7 +25,14 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
   /// Fraction of the viewport width one slide occupies (~90% as requested).
   static const double slideWidthFraction = 0.9;
 
-  /// Slide height, sized to hold the artwork band + title + subtitle + button.
+  /// Aspect ratio of an admin-uploaded landscape banner: 8:3 (2.667:1).
+  ///
+  /// This is enforced on upload (WebP only, 8:3), so the slide can size itself
+  /// from the artwork's own ratio and never letterbox or stretch a banner.
+  static const double bannerAspectRatio = 8 / 3;
+
+  /// Slide height when the shelf has NO banner and falls back to square track
+  /// art: sized to hold the square artwork band plus the title/subtitle/button.
   static const double slideHeight = 190;
 
   const HomeSpecialsCarousel({super.key});
@@ -58,6 +65,10 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
               ),
             ),
             Gap(8 * scale),
+            // The row is tall enough for the tallest slide shape: a banner is
+            // 8:3 (short), while a shelf without a banner falls back to the
+            // square-art layout (taller). Each slide centres itself in the row,
+            // so a banner is never stretched to fill someone else's height.
             SizedBox(
               height: slideHeight * scale,
               child: PageView.builder(
@@ -102,14 +113,197 @@ class _SpecialSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-
     // Prefer the shelf cover; otherwise use the first track's artwork.
     final cover = special.imageUrl.isNotEmpty
         ? special.imageUrl
         : special.tracks.first.album.images
             .smallest(ImagePlaceholder.albumArt);
+
+    // A shelf with an admin landscape banner renders the banner full-bleed
+    // with the text laid over it. Its height follows the banner's own 8:3
+    // ratio (enforced on upload), so the image is never stretched or cropped
+    // to an unrelated shape.
+    if (special.hasBanner) {
+      return Center(
+        child: AspectRatio(
+          aspectRatio: HomeSpecialsCarousel.bannerAspectRatio,
+          child: _BannerSlide(special: special, cover: cover, onPlay: onPlay),
+        ),
+      );
+    }
+
+    return _SquareSlide(special: special, cover: cover, onPlay: onPlay);
+  }
+}
+
+/// A slide backed by an admin-uploaded landscape banner (8:3 WebP).
+///
+/// The artwork fills the slide and a gradient scrim sits underneath the text
+/// so the copy stays legible whatever the banner's brightness — banners are
+/// photographs/illustrations, so the copy cannot rely on the theme palette.
+class _BannerSlide extends StatelessWidget {
+  final HomeSpecial special;
+  final String cover;
+  final VoidCallback onPlay;
+
+  const _BannerSlide({
+    required this.special,
+    required this.cover,
+    required this.onPlay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14 * scale),
+        boxShadow: [
+          BoxShadow(
+            color: theme.brightness == Brightness.light
+                ? Colors.black.withValues(alpha: 0.16)
+                : theme.colorScheme.primary.withValues(alpha: 0.20),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          UniversalImage(path: cover, fit: BoxFit.cover),
+          // Scrim: darkens the left/bottom so white copy reads on any banner.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xCC000000),
+                  Color(0x99000000),
+                  Color(0x33000000),
+                ],
+                stops: [0.0, 0.55, 1.0],
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 14 * scale,
+              vertical: 10 * scale,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        special.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.typography.base.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(color: Color(0x99000000), blurRadius: 4),
+                          ],
+                        ),
+                      ),
+                      Gap(1 * scale),
+                      Text(
+                        special.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.typography.xSmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.88),
+                          shadows: const [
+                            Shadow(color: Color(0x99000000), blurRadius: 4),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Gap(8 * scale),
+                _PlayNowButton(onPlay: onPlay),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The "Play Now" pill, shared by both slide layouts.
+class _PlayNowButton extends StatelessWidget {
+  final VoidCallback onPlay;
+
+  const _PlayNowButton({required this.onPlay});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+
+    return GestureDetector(
+      onTap: onPlay,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 12 * scale,
+          vertical: 6 * scale,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(20 * scale),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              SangeetIcons.play,
+              size: 14 * scale,
+              color: theme.colorScheme.primaryForeground,
+            ),
+            Gap(6 * scale),
+            Text(
+              context.l10n.play_now,
+              style: theme.typography.small.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primaryForeground,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The fallback slide for a shelf with no banner: square track art on the left,
+/// title/subtitle/button on the right.
+class _SquareSlide extends StatelessWidget {
+  final HomeSpecial special;
+  final String cover;
+  final VoidCallback onPlay;
+
+  const _SquareSlide({
+    required this.special,
+    required this.cover,
+    required this.onPlay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
 
     // The slide takes the first track's admin-configured colors, so a special
     // matches how its tracks look elsewhere in the app.
@@ -195,38 +389,7 @@ class _SpecialSlide extends StatelessWidget {
                     ],
                   ),
                   // "Play Now" starts the whole shelf as the play queue.
-                  GestureDetector(
-                    onTap: onPlay,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12 * scale,
-                        vertical: 6 * scale,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(20 * scale),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            SangeetIcons.play,
-                            size: 14 * scale,
-                            color: theme.colorScheme.primaryForeground,
-                          ),
-                          Gap(6 * scale),
-                          Text(
-                            context.l10n.play_now,
-                            style: theme.typography.small.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.primaryForeground,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _PlayNowButton(onPlay: onPlay),
                 ],
               ),
             ),

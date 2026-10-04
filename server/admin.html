@@ -169,6 +169,39 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .palette-swatch.is-active { border-color: #111; box-shadow: 0 0 0 2px #fff inset; }
 .palette-loading { font-size: 11px; color: #2563eb; }
 .palette-error { font-size: 11px; color: #dc2626; }
+
+/* ---- Specials (home carousel shelves + landscape banners) ---------- */
+.special-card {
+  display: flex; gap: 16px; background: #fff; border: 1px solid #ddd;
+  border-radius: 8px; padding: 14px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.special-banner-wrap { flex: none; width: 320px; max-width: 100%; }
+.special-banner {
+  width: 100%; aspect-ratio: 8 / 3; object-fit: cover;
+  border-radius: 6px; border: 1px solid #e5e7eb; display: block;
+}
+.special-banner-empty {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  background: #f8fafc; border: 1px dashed #cbd5e1; color: #94a3b8;
+  font-size: 12px; line-height: 1.5;
+}
+.special-banner-empty small { font-size: 11px; opacity: .85; }
+.special-body { flex: 1; min-width: 260px; }
+.special-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 15px; }
+.special-hidden-badge {
+  background: #fee2e2; color: #b91c1c; border-radius: 999px;
+  padding: 1px 8px; font-size: 11px; font-weight: 600;
+}
+.special-label { display: block; font-size: 12px; color: #555; margin: 6px 0 3px; }
+.special-input {
+  width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px;
+  font-size: 13px; box-sizing: border-box;
+}
+.special-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.special-toggle { font-size: 12px; color: #444; display: flex; align-items: center; gap: 4px; }
+.special-hint { font-size: 11px; color: #666; margin-top: 8px; line-height: 1.5; }
+.special-hint.is-error { color: #dc2626; font-weight: 600; }
+.special-hint.is-busy { color: #2563eb; }
 .color-preview-card {
   width: 118px; border-radius: 12px; overflow: hidden; flex: none;
   background: #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,.18);
@@ -218,6 +251,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-albums" title="Albums" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Albums</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-specials" title="Specials" onclick="showView('specials')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h6M6 14h4"/><circle cx="17" cy="12" r="2"/></svg></span><span class="label">Specials</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
   </nav>
@@ -304,6 +339,16 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <h3 style="margin-bottom:8px;">All albums â€” pin to feature</h3>
     <div id="arrangeAlbumResults"></div>
   </div>
+</div>
+
+<div id="specialsPanel" class="view">
+  <h2 style="margin-bottom:4px;">Specials</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:14px;">
+    Each Special is a landscape banner carousel on the home screen. Upload a
+    banner to give a shelf its own artwork; without one it falls back to its
+    tracks' cover art. A shelf appears only when tracks match its theme.
+  </p>
+  <div id="specialsList"></div>
 </div>
 
 <div id="affiliatesPanel" class="view">
@@ -1102,6 +1147,7 @@ function showView(view) {
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (view === 'specials') { loadSpecials(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
@@ -1109,8 +1155,259 @@ function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (currentView === 'specials') { loadSpecials(); }
   else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
+
+// ==================================================================
+// Specials (home carousel shelves + landscape banners)
+// ==================================================================
+// The shelf list mirrors the app's built-in definitions
+// (lib/modules/home/sections/specials.dart). The admin can override each
+// shelf's title/subtitle, upload a landscape banner, reorder shelves and hide
+// them. A shelf with no override keeps its built-in defaults.
+
+const SPECIAL_SHELVES = [
+  { id: 'soulful-bhakti', title: 'Soulful Bhakti Special', subtitle: 'Devotional favourites across every deity' },
+  { id: 'ganesha', title: 'Ganesha Special', subtitle: 'Vinayaka chants and songs' },
+  { id: 'venkateswara', title: 'Venkateswara Special', subtitle: 'Balaji and Govinda songs' },
+  { id: 'krishna', title: 'Krishna Special', subtitle: 'Krishna bhajans and kirtans' },
+  { id: 'rama', title: 'Rama Special', subtitle: 'Rama bhajans and stotras' },
+  { id: 'shiva', title: 'Shiva Special', subtitle: 'Shiva chants and stotras' },
+  { id: 'lakshmi', title: 'Lakshmi Special', subtitle: 'Lakshmi and wealth stotras' },
+  { id: 'vishnu', title: 'Vishnu Special', subtitle: 'Vishnu sahasranamam and more' },
+  { id: 'parvati', title: 'Parvati Special', subtitle: 'Devi and Shakti songs' },
+  { id: 'ganga', title: 'Ganga Special', subtitle: 'Ganga and Gange stotras' },
+];
+
+// The accepted banner geometry. Must match the server constants
+// (SPECIAL_BANNER_RATIO / _WIDTH / _HEIGHT in server.js).
+const SPECIAL_BANNER_RATIO = 8 / 3;
+const SPECIAL_BANNER_WIDTH = 1440;
+const SPECIAL_BANNER_HEIGHT = 540;
+const SPECIAL_BANNER_LABEL = '8:3 landscape';
+
+let specialRows = [];
+
+async function loadSpecials() {
+  const box = document.getElementById('specialsList');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading…</div>';
+  try {
+    const res = await authedFetch('/api/admin/specials', { credentials: 'same-origin' });
+    specialRows = res.ok ? (await res.json()) : [];
+    if (!Array.isArray(specialRows)) specialRows = [];
+  } catch (e) {
+    specialRows = [];
+  }
+  renderSpecials();
+}
+
+function renderSpecials() {
+  const box = document.getElementById('specialsList');
+  if (!box) return;
+  const byId = {};
+  specialRows.forEach(function (r) { byId[r.id] = r; });
+
+  box.innerHTML = SPECIAL_SHELVES.map(function (shelf) {
+    const row = byId[shelf.id] || {};
+    const banner = row.banner_url || '';
+    const title = row.title || shelf.title;
+    const subtitle = row.subtitle || shelf.subtitle;
+    const hidden = row.is_hidden === true;
+    const order = row.sort_order == null ? '' : row.sort_order;
+
+    return '' +
+      '<div class="special-card" data-shelf="' + esc(shelf.id) + '">' +
+        '<div class="special-banner-wrap">' +
+          (banner
+            ? '<img class="special-banner" src="' + esc(banner) + '" alt="' + esc(title) + ' banner">'
+            : '<div class="special-banner special-banner-empty">' +
+                '<span>No banner yet<br><small>Falls back to the tracks\' cover art</small></span>' +
+              '</div>') +
+        '</div>' +
+        '<div class="special-body">' +
+          '<div class="special-head">' +
+            '<strong>' + esc(title) + '</strong>' +
+            (hidden ? '<span class="special-hidden-badge">Hidden</span>' : '') +
+          '</div>' +
+          '<label class="special-label">Title</label>' +
+          '<input class="special-input" id="spTitle-' + esc(shelf.id) + '" value="' + esc(title) + '" placeholder="' + esc(shelf.title) + '">' +
+          '<label class="special-label">Subtitle</label>' +
+          '<input class="special-input" id="spSub-' + esc(shelf.id) + '" value="' + esc(subtitle) + '" placeholder="' + esc(shelf.subtitle) + '">' +
+          '<label class="special-label">Sort order (lower shows first)</label>' +
+          '<input class="special-input" type="number" id="spOrder-' + esc(shelf.id) + '" value="' + esc(order) + '" placeholder="default">' +
+          '<div class="special-actions">' +
+            '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'spBanner-' + esc(shelf.id) + '\').click()">Upload banner</button>' +
+            (banner ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearSpecialBanner(\'' + esc(shelf.id) + '\')">Remove banner</button>' : '') +
+            '<label class="special-toggle"><input type="checkbox" id="spHidden-' + esc(shelf.id) + '"' + (hidden ? ' checked' : '') + '> Hide shelf</label>' +
+          '</div>' +
+          '<input type="file" id="spBanner-' + esc(shelf.id) + '" accept=".webp,image/webp" style="display:none" onchange="handleSpecialBannerUpload(this, \'' + esc(shelf.id) + '\')">' +
+          '<div class="special-hint" id="spHint-' + esc(shelf.id) + '">' +
+            'Banner must be <strong>WebP</strong>, <strong>' + SPECIAL_BANNER_LABEL + '</strong> ' +
+            '(' + SPECIAL_BANNER_WIDTH + '×' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
+          '</div>' +
+          '<div class="special-actions" style="margin-top:8px;">' +
+            '<button class="btn btn-success btn-sm" type="button" onclick="saveSpecial(\'' + esc(shelf.id) + '\')">Save</button>' +
+            '<button class="btn btn-secondary btn-sm" type="button" onclick="resetSpecial(\'' + esc(shelf.id) + '\')">Reset to defaults</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function specialHint(id, text, cls) {
+  const el = document.getElementById('spHint-' + id);
+  if (!el) return;
+  el.innerHTML = text;
+  el.className = 'special-hint' + (cls ? ' ' + cls : '');
+}
+
+async function saveSpecial(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const body = {
+      title: document.getElementById('spTitle-' + id).value.trim() || null,
+      subtitle: document.getElementById('spSub-' + id).value.trim() || null,
+      sort_order: document.getElementById('spOrder-' + id).value === ''
+        ? null : Number(document.getElementById('spOrder-' + id).value),
+      is_hidden: document.getElementById('spHidden-' + id).checked,
+    };
+    const res = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { const e = await res.json().catch(function () { return {}; }); throw new Error(e.error || 'Save failed'); }
+    toast('Saved');
+    loadSpecials();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+async function resetSpecial(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
+      method: 'DELETE', credentials: 'same-origin',
+    });
+    if (!res.ok) throw new Error('Reset failed');
+    toast('Reset to defaults');
+    loadSpecials();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+// Clears just the banner (keeps the title/order/hidden overrides).
+async function clearSpecialBanner(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ banner_url: null }),
+    });
+    if (!res.ok) throw new Error('Could not remove the banner');
+    toast('Banner removed');
+    loadSpecials();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+// Uploads one Special's landscape banner.
+//
+// The file is validated in the browser FIRST (WebP + exact 8:3) so the admin
+// gets an immediate, specific error instead of a failed upload — and the server
+// re-validates the same rules from the file header, so the rule holds even if
+// the API is called directly.
+async function handleSpecialBannerUpload(input, id) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  try {
+    // 1) Format: WebP only.
+    const isWebp = file.type === 'image/webp' || /\.webp$/i.test(file.name);
+    if (!isWebp) {
+      specialHint(id, '✗ That is not a WebP file. Export the banner as WebP and try again.', 'is-error');
+      input.value = '';
+      return;
+    }
+
+    // 2) Geometry: exactly 8:3 landscape, within 2% so real-world rounding
+    //    (e.g. 1440x540 and 1200x450) passes while any other shape fails.
+    specialHint(id, 'Checking dimensions…', 'is-busy');
+    const dims = await readImageSize(file);
+    const ratio = dims.width / dims.height;
+    if (Math.abs(ratio - SPECIAL_BANNER_RATIO) / SPECIAL_BANNER_RATIO > 0.02) {
+      specialHint(id,
+        '✗ Wrong aspect ratio: got ' + dims.width + '×' + dims.height + ' (' + ratio.toFixed(2) + ':1). ' +
+        'Banner must be ' + SPECIAL_BANNER_LABEL + ' — ' + SPECIAL_BANNER_WIDTH + '×' + SPECIAL_BANNER_HEIGHT + ' recommended.',
+        'is-error');
+      input.value = '';
+      return;
+    }
+
+    // 3) Upload and attach it to this shelf.
+    specialHint(id, 'Uploading…', 'is-busy');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('kind', 'special_banner');
+
+    const up = await authedFetch('/api/admin/upload', {
+      method: 'POST', credentials: 'same-origin', body: form,
+    });
+    if (!up.ok) {
+      const e = await up.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Upload failed');
+    }
+    const uploaded = await up.json();
+    const url = uploaded.thumbnail_url;
+    if (!url) throw new Error('Upload returned no URL');
+
+    const save = await authedFetch('/api/admin/specials/' + encodeURIComponent(id), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ banner_url: url }),
+    });
+    if (!save.ok) {
+      const e = await save.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Saving the banner failed');
+    }
+    toast('Banner uploaded');
+    loadSpecials();
+  } catch (e) {
+    specialHint(id, '✗ ' + e.message, 'is-error');
+  } finally {
+    input.value = '';
+  }
+}
+
+// Reads an image's intrinsic size in the browser (works for WebP).
+function readImageSize(file) {
+  return new Promise(function (resolve, reject) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function () {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      reject(new Error('Could not read that image file'));
+    };
+    img.src = url;
+  });
+}
+
 
 // ----- Clerk email sign-in (optional, fail-safe) -----
 // The Frontend API host is encoded inside the publishable key:

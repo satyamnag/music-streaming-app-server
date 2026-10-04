@@ -10,6 +10,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, Head
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
+import { readWebpSize, matchesAspectRatio } from './webp_size.js'
 
 dotenv.config()
 
@@ -1186,6 +1187,81 @@ async function requireAdmin(req, res, next) {
 // Supabase Storage (the previous behaviour).
 const R2_BUCKET = process.env.R2_BUCKET_NAME || 'soulful-bhakti-music'
 
+// ------------------------------------------------------------------
+// Specials (curated home shelves + their landscape banners)
+// ------------------------------------------------------------------
+// The shelves themselves are derived in the app from track keywords; this
+// table only stores PER-SHELF OVERRIDES: a display title/subtitle, ordering,
+// hidden state, and the admin-uploaded landscape banner.
+//
+// The endpoints are deliberately tolerant of migration/027 not being applied
+// yet: a missing table degrades to "no overrides" rather than a 500, so the
+// home screen keeps working and the admin panel can still show its editor.
+
+// Reads special override rows, returning [] when the table is absent.
+async function readSpecialRows() {
+  try {
+    const { data, error } = await supabase
+      .from('specials')
+      .select('*')
+      .order('sort_order', { ascending: true, nullsFirst: false })
+    if (error) return []
+    return data || []
+  } catch (_) {
+    return []
+  }
+}
+
+// Admin: list the special overrides.
+app.get('/api/admin/specials', requireAdmin, async (req, res, next) => {
+  try {
+    res.json(await readSpecialRows())
+  } catch (err) { next(err) }
+})
+
+// Admin: create or update one shelf's override (upsert by id).
+app.put('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const id = String(req.params.id || '').trim()
+    if (!id) return res.status(400).json({ error: 'id is required' })
+    const { title, subtitle, banner_url, sort_order, is_hidden } = req.body || {}
+    const updates = {}
+    if (title !== undefined) {
+      updates.title = typeof title === 'string' && title.trim() ? title.trim() : null
+    }
+    if (subtitle !== undefined) {
+      updates.subtitle = typeof subtitle === 'string' && subtitle.trim() ? subtitle.trim() : null
+    }
+    if (banner_url !== undefined) {
+      updates.banner_url = typeof banner_url === 'string' && banner_url.trim() ? banner_url.trim() : null
+    }
+    if (sort_order !== undefined) {
+      updates.sort_order = sort_order == null ? null
+        : (Number.isFinite(Number(sort_order)) ? Math.floor(Number(sort_order)) : null)
+    }
+    if (is_hidden !== undefined) updates.is_hidden = Boolean(is_hidden)
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'nothing to update' })
+    updates.updated_at = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('specials')
+      .upsert({ id, ...updates }, { onConflict: 'id' })
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Admin: clear one shelf's overrides (reverts it to the built-in defaults).
+app.delete('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('specials').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
 // Public CDN base for the R2 bucket, e.g. https://music.soulfulbhakti.com
 // Audio is served from here ONLY. Supabase Storage must never serve audio:
 // signed-URL audio exhausted the Storage CDN (cached) egress quota in Aug 2026,
@@ -1289,6 +1365,21 @@ const upload = multer({
   // with headroom; oversized uploads are rejected with a 413.
   limits: { fileSize: 110 * 1024 * 1024 },
 })
+
+// ------------------------------------------------------------------
+// Specials carousel banner geometry
+// ------------------------------------------------------------------
+// A Specials slide is a full-width (~90% of the viewport) landscape banner.
+// 8:3 was chosen so the slide is clearly a banner without dominating the home
+// screen: on a 360dp phone the slide is ~340dp wide, so 8:3 makes it ~128dp
+// tall — substantial but leaving the shelf below visible above the fold.
+//
+// 1440x540 is the canonical size the admin panel exports (2x of 720x270, so it
+// stays crisp on high-density screens while remaining a small file).
+const SPECIAL_BANNER_RATIO = 8 / 3
+const SPECIAL_BANNER_LABEL = '8:3 (2.67:1)'
+const SPECIAL_BANNER_WIDTH = 1440
+const SPECIAL_BANNER_HEIGHT = 540
 
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).
@@ -2008,6 +2099,26 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     // unaffected (they omit the kind flag).
     if (req.body && req.body.kind === 'track_thumb' && ext !== 'webp') {
       return res.status(400).json({ error: 'Track thumbnail must be a WebP file' })
+    }
+
+    // Specials carousel banners are STRICTLY WebP AND strictly landscape at
+    // 8:3 (2.667:1). Enforced here from the file header so the rule holds even
+    // when the API is called directly, not just through the admin panel.
+    if (req.body && req.body.kind === 'special_banner') {
+      if (ext !== 'webp') {
+        return res.status(400).json({ error: 'Special banner must be a WebP file' })
+      }
+      const size = readWebpSize(req.file.buffer)
+      if (!size) {
+        return res.status(400).json({ error: 'Could not read that WebP image (is the file complete?)' })
+      }
+      if (!matchesAspectRatio(size, SPECIAL_BANNER_RATIO)) {
+        return res.status(400).json({
+          error: `Special banner must be landscape ${SPECIAL_BANNER_LABEL} `
+            + `(got ${size.width}x${size.height}). `
+            + `Recommended ${SPECIAL_BANNER_WIDTH}x${SPECIAL_BANNER_HEIGHT}.`,
+        })
+      }
     }
 
     const fileName = `${Date.now()}-${req.file.originalname}`

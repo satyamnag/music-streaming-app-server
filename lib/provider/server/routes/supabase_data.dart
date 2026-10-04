@@ -1312,6 +1312,59 @@ class ServerSupabaseDataRoutes {
     }
   }
 
+  /// GET /supabase/specials
+  ///
+  /// Returns the admin-managed overrides for the curated home "Specials"
+  /// shelves: `{items: [{id, title, subtitle, bannerUrl, sortOrder,
+  /// isHidden}]}`.
+  ///
+  /// The shelves themselves are derived in the app from track keywords; this
+  /// only carries per-shelf overrides. A missing table (migration 027 not yet
+  /// applied) degrades to an empty list so the home screen keeps working.
+  Future<Response> getSpecials(Request request) async {
+    try {
+      final sb = await _supabase;
+      List<Map<String, dynamic>> rows = const [];
+      try {
+        final raw = await sb
+            .from('specials')
+            .select('*')
+            .order('sort_order', ascending: true, nullsFirst: false);
+        rows = (raw as List<dynamic>).cast<Map<String, dynamic>>();
+      } catch (_) {
+        // Table absent or unreachable: no overrides, defaults still apply.
+        rows = const [];
+      }
+
+      final items = rows
+          .map((r) => {
+                'id': r['id']?.toString() ?? '',
+                'title': (r['title']?.toString().trim().isNotEmpty ?? false)
+                    ? r['title'].toString().trim()
+                    : null,
+                'subtitle':
+                    (r['subtitle']?.toString().trim().isNotEmpty ?? false)
+                        ? r['subtitle'].toString().trim()
+                        : null,
+                'bannerUrl':
+                    (r['banner_url']?.toString().trim().isNotEmpty ?? false)
+                        ? r['banner_url'].toString().trim()
+                        : null,
+                'sortOrder': r['sort_order'],
+                'isHidden': r['is_hidden'] == true,
+              })
+          .where((m) => (m['id'] as String).isNotEmpty)
+          .toList();
+
+      return Response.ok(
+        jsonEncode({'items': items}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
   /// POST /supabase/api/playlists
   ///
   /// Creates a user playlist in the local drift DB. Body: `{name, description}`.

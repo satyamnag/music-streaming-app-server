@@ -1,6 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
+import 'package:sangeet/provider/server/server.dart';
+import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/dio/dio.dart';
 
 /// One curated "Special" shelf shown as a full-width carousel on the home
 /// screen (e.g. "Ganesha Special").
@@ -14,8 +18,14 @@ class HomeSpecial {
   /// Short supporting line under the title.
   final String subtitle;
 
-  /// Cover for the slide: the most-played track's art in this shelf.
+  /// Cover for the slide: the admin-uploaded landscape banner when set,
+  /// otherwise the most-played track's art in this shelf.
   final String imageUrl;
+
+  /// True when [imageUrl] is an admin-uploaded landscape banner (8:3 WebP)
+  /// rather than a square track cover. The slide uses it as a full-bleed
+  /// background instead of a square thumbnail.
+  final bool hasBanner;
 
   /// The shelf's tracks, most played first. Never empty (empty shelves are
   /// dropped by the provider).
@@ -26,8 +36,41 @@ class HomeSpecial {
     required this.title,
     required this.subtitle,
     required this.imageUrl,
+    this.hasBanner = false,
     required this.tracks,
   });
+}
+
+/// An admin-managed override for one shelf, from the `specials` table.
+class HomeSpecialOverride {
+  final String id;
+  final String? title;
+  final String? subtitle;
+  final String? bannerUrl;
+  final int? sortOrder;
+  final bool isHidden;
+
+  const HomeSpecialOverride({
+    required this.id,
+    this.title,
+    this.subtitle,
+    this.bannerUrl,
+    this.sortOrder,
+    this.isHidden = false,
+  });
+
+  factory HomeSpecialOverride.fromJson(Map<String, dynamic> json) {
+    return HomeSpecialOverride(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString(),
+      subtitle: json['subtitle']?.toString(),
+      bannerUrl: json['bannerUrl']?.toString(),
+      sortOrder: json['sortOrder'] is int
+          ? json['sortOrder'] as int
+          : int.tryParse(json['sortOrder']?.toString() ?? ''),
+      isHidden: json['isHidden'] == true,
+    );
+  }
 }
 
 /// A curated shelf definition: the deity/theme, how to match tracks for it,
@@ -150,8 +193,9 @@ bool _keywordMatches(String haystack, String keyword) {
 /// track's artwork, then by name for stability.
 List<HomeSpecial> _buildSpecials(
   List<SangeetTrackObject> tracks,
-  Map<String, int> playCounts,
-) {
+  Map<String, int> playCounts, {
+  Map<String, HomeSpecialOverride> overrides = const {},
+}) {
   if (tracks.isEmpty) return const [];
 
   // Pre-compute one lowercase haystack per track (name + album + artists +
@@ -163,6 +207,11 @@ List<HomeSpecial> _buildSpecials(
 
   final specials = <HomeSpecial>[];
   for (final def in _specialDefinitions) {
+    final override = overrides[def.id];
+
+    // An admin-hidden shelf is dropped regardless of how many tracks match.
+    if (override?.isHidden == true) continue;
+
     final matched = tracks.where((t) {
       final haystack = haystacks[t.id] ?? '';
       return def.keywords.any((k) => _keywordMatches(haystack, k));
@@ -176,14 +225,35 @@ List<HomeSpecial> _buildSpecials(
       return a.name.compareTo(b.name);
     });
 
+    // The admin banner (if any) wins; otherwise the shelf's own track art.
+    final overrideTitle = override?.title?.trim();
+    final overrideSubtitle = override?.subtitle?.trim();
+    final bannerUrl = override?.bannerUrl?.trim();
+    final hasBanner = bannerUrl != null && bannerUrl.isNotEmpty;
+
     specials.add(HomeSpecial(
       id: def.id,
-      title: def.title,
-      subtitle: def.subtitle,
-      imageUrl: _coverFor(matched),
+      title: (overrideTitle?.isNotEmpty ?? false) ? overrideTitle! : def.title,
+      subtitle: (overrideSubtitle?.isNotEmpty ?? false)
+          ? overrideSubtitle!
+          : def.subtitle,
+      imageUrl: hasBanner ? bannerUrl : _coverFor(matched),
+      hasBanner: hasBanner,
       tracks: matched,
     ));
   }
+
+  // Admin-defined ordering first (shelves without an explicit order keep their
+  // curated default position, stably, after the ordered ones).
+  specials.sort((a, b) {
+    final ao = overrides[a.id]?.sortOrder;
+    final bo = overrides[b.id]?.sortOrder;
+    if (ao != null && bo != null && ao != bo) return ao.compareTo(bo);
+    if (ao != null && bo == null) return -1;
+    if (ao == null && bo != null) return 1;
+    return 0;
+  });
+
   return specials;
 }
 
@@ -208,11 +278,44 @@ String _coverFor(List<SangeetTrackObject> tracks) {
   return '';
 }
 
+/// The admin-managed shelf overrides (title/subtitle/banner/order/hidden).
+///
+/// Reads them through the app's own local server (`/supabase/specials`) like
+/// every other catalogue call. A failure (server not up yet, or migration 027
+/// not applied) resolves to an empty map, so the shelves simply fall back to
+/// their built-in defaults instead of disappearing.
+final homeSpecialOverridesProvider =
+    FutureProvider<Map<String, HomeSpecialOverride>>((ref) async {
+  await ref.watch(serverProvider.future);
+  await SangeetMedia.ensurePortReady();
+
+  try {
+    final response = await globalDio.get(
+      'http://127.0.0.1:${SangeetMedia.serverPort}/supabase/specials',
+      options: Options(
+        validateStatus: (status) => status != null && status < 500,
+        headers: {'accept': 'application/json'},
+      ),
+    );
+    if (response.statusCode != 200) return const {};
+    final data = response.data as Map<String, dynamic>;
+    final items = (data['items'] as List<dynamic>? ?? const [])
+        .map((e) =>
+            HomeSpecialOverride.fromJson(Map<String, dynamic>.from(e as Map)))
+        .where((o) => o.id.isNotEmpty);
+    return {for (final o in items) o.id: o};
+  } catch (_) {
+    return const {};
+  }
+});
+
 /// The home "Specials" carousels: curated deity/theme shelves built from the
 /// same catalogue the rest of the home screen uses, so they always reflect
 /// what the admin has published.
 final homeSpecialsProvider = Provider<List<HomeSpecial>>((ref) {
   final tracks = ref.watch(homeTracksProvider).valueOrNull ?? const [];
   final playCounts = ref.watch(globalPlayCountsProvider).valueOrNull ?? const {};
-  return _buildSpecials(tracks, playCounts);
+  final overrides =
+      ref.watch(homeSpecialOverridesProvider).valueOrNull ?? const {};
+  return _buildSpecials(tracks, playCounts, overrides: overrides);
 });
