@@ -1608,6 +1608,97 @@ function cleanTags(v) {
 }
 
 // ------------------------------------------------------------------
+// Cover image proxy (admin only) — powers the "From cover" palette picker.
+// ------------------------------------------------------------------
+// The admin panel extracts a palette from a cover by drawing it to a canvas
+// and reading the pixels. That requires the image host to send CORS headers;
+// Supabase Storage public buckets do (`Access-Control-Allow-Origin: *`), but
+// a custom R2/CDN hostname may not. When the browser cannot read the image
+// directly it asks this endpoint instead, which fetches the bytes
+// server-side (no browser CORS involved) and streams them back same-origin.
+//
+// Hardened deliberately:
+//  - admin-only (requireAdmin)
+//  - https only, and only the known cover hosts (Supabase Storage public
+//    objects + the configured R2 CDN), so this can never become an open
+//    proxy for arbitrary URLs
+//  - images only, with a byte cap and a timeout
+const COVER_PROXY_MAX_BYTES = 8 * 1024 * 1024
+const COVER_PROXY_TIMEOUT_MS = 10000
+
+function isAllowedCoverUrl(raw) {
+  let url
+  try {
+    url = new URL(raw)
+  } catch {
+    return false
+  }
+  if (url.protocol !== 'https:') return false
+
+  // The configured R2/CDN host.
+  if (R2_PUBLIC_BASE_URL) {
+    try {
+      if (url.hostname === new URL(R2_PUBLIC_BASE_URL).hostname) return true
+    } catch (_) { /* ignore a malformed env value */ }
+  }
+
+  // Supabase Storage public objects (covers currently live in these buckets).
+  if (/\.supabase\.co$/i.test(url.hostname) &&
+      url.pathname.startsWith('/storage/v1/object/public/')) {
+    return true
+  }
+  return false
+}
+
+app.get('/api/admin/cover-proxy', requireAdmin, async (req, res, next) => {
+  try {
+    const target = String(req.query.url || '')
+    if (!target) return res.status(400).json({ error: 'url is required' })
+    if (!isAllowedCoverUrl(target)) {
+      return res.status(400).json({ error: 'Only https Supabase Storage or CDN cover URLs are allowed' })
+    }
+
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), COVER_PROXY_TIMEOUT_MS)
+    let upstream
+    try {
+      upstream = await fetch(target, { signal: controller.signal, redirect: 'follow' })
+    } finally {
+      clearTimeout(timer)
+    }
+    if (!upstream.ok) {
+      return res.status(502).json({ error: `Cover fetch failed (${upstream.status})` })
+    }
+
+    const type = upstream.headers.get('content-type') || ''
+    if (!/^image\//i.test(type)) {
+      return res.status(415).json({ error: 'That URL is not an image' })
+    }
+    const declared = Number(upstream.headers.get('content-length') || 0)
+    if (declared && declared > COVER_PROXY_MAX_BYTES) {
+      return res.status(413).json({ error: 'Cover image is too large' })
+    }
+
+    const buffer = Buffer.from(await upstream.arrayBuffer())
+    if (buffer.length > COVER_PROXY_MAX_BYTES) {
+      return res.status(413).json({ error: 'Cover image is too large' })
+    }
+
+    // Same-origin delivery so the admin canvas is never tainted.
+    res.set('Content-Type', type)
+    res.set('Cache-Control', 'private, max-age=300')
+    res.send(buffer)
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      return res.status(504).json({ error: 'Cover fetch timed out' })
+    }
+    next(err)
+  }
+})
+
+
+
+// ------------------------------------------------------------------
 // Card colors (admin-configurable box + text color per track/album)
 // ------------------------------------------------------------------
 

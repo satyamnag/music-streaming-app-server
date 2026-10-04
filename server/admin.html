@@ -158,6 +158,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 }
 .color-preset:hover { transform: scale(1.1); }
 .color-live-preview { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.cover-palette-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.cover-palette-hint { font-size: 11px; color: #777; }
+.cover-palette-swatches { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.palette-swatch {
+  width: 26px; height: 26px; border-radius: 6px; cursor: pointer; padding: 0;
+  border: 2px solid rgba(0,0,0,.18); transition: transform .12s ease;
+}
+.palette-swatch:hover { transform: scale(1.12); }
+.palette-swatch.is-active { border-color: #111; box-shadow: 0 0 0 2px #fff inset; }
+.palette-loading { font-size: 11px; color: #2563eb; }
+.palette-error { font-size: 11px; color: #dc2626; }
 .color-preview-card {
   width: 118px; border-radius: 12px; overflow: hidden; flex: none;
   background: #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,.18);
@@ -397,6 +408,13 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="thumbStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
 <div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024Ã—1024.</div>
 <label>Card colors (Android + web app)</label>
+<div class="cover-palette-bar">
+  <button type="button" class="btn btn-secondary btn-sm" id="trackPaletteBtn" onclick="loadTrackPalette()">
+    &#127912; From cover
+  </button>
+  <span class="cover-palette-hint" id="trackPaletteHint">Pick the box color from this track's cover art.</span>
+  <span class="cover-palette-swatches" id="trackPaletteSwatches"></span>
+</div>
 <div class="color-picker-row">
   <div class="color-field">
     <span class="color-field-label">Box background</span>
@@ -535,6 +553,13 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div id="alCoverStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
     <label>Subscription</label><select id="alStatus"><option value="free">Free</option><option value="paid">Paid (Premium)</option></select>
     <label>Card colors (Android + web app)</label>
+    <div class="cover-palette-bar">
+      <button type="button" class="btn btn-secondary btn-sm" id="albumPaletteBtn" onclick="loadAlbumPalette()">
+        &#127912; From cover
+      </button>
+      <span class="cover-palette-hint" id="albumPaletteHint">Pick the box color from this album's cover art.</span>
+      <span class="cover-palette-swatches" id="albumPaletteSwatches"></span>
+    </div>
     <div class="color-picker-row">
       <div class="color-field">
         <span class="color-field-label">Box background</span>
@@ -1738,9 +1763,175 @@ function contrastRatio(a, b) {
   const hi = Math.max(la, lb), lo = Math.min(la, lb);
   return (hi + 0.05) / (lo + 0.05);
 }
-// Picks black or white, whichever reads better on [bg].
+// Picks black or white for text on [bg], choosing whichever yields the HIGHER
+// contrast ratio rather than guessing from a luminance threshold.
+//
+// A threshold on luminance (e.g. "dark background -> white text") picks white
+// for mid-tone colors like teal (#07a7a9) where black actually gives 7.1:1 and
+// white only 2.95:1. Comparing the two real ratios is exact and always picks
+// the readable option.
 function readableTextOnHex(bg) {
-  return hexLuminance(bg) > 0.5 ? '#000000' : '#ffffff';
+  return contrastRatio(bg, '#000000') >= contrastRatio(bg, '#ffffff')
+    ? '#000000'
+    : '#ffffff';
+}
+
+// ------------------------------------------------------------------
+// Cover palette extraction
+// ------------------------------------------------------------------
+// Reads a track/album cover and derives a small palette the admin can pick
+// the card background from, so the box color can match the artwork.
+//
+// Design notes:
+//  - The image is drawn to an offscreen canvas at a small fixed size, so
+//    extraction cost is constant regardless of the source resolution.
+//  - Colors are bucketed into a coarse RGB histogram (4 bits/channel), then
+//    ranked by a score that favours *saturated, mid-brightness* colors. A
+//    plain "most frequent color" pass would return near-white or near-black
+//    for most covers (backgrounds and shadows), which make poor card colors.
+//  - `crossOrigin='anonymous'` is required or the canvas is tainted and
+//    reading pixels throws. If the cover host does not send CORS headers the
+//    extraction fails cleanly and the admin keeps the manual picker.
+
+const PALETTE_SAMPLE_SIZE = 64;   // downscale target (64x64 = 4096 samples)
+const PALETTE_MAX_SWATCHES = 8;
+
+function rgbToHex(r, g, b) {
+  const h = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+  return '#' + h(r) + h(g) + h(b);
+}
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+
+// Saturation (0..1) and value/brightness (0..1), HSV-style.
+function hsvOf(r, g, b) {
+  const rn = r/255, gn = g/255, bn = b/255;
+  const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+  const d = max - min;
+  const s = max === 0 ? 0 : d / max;
+  return { s, v: max };
+}
+
+// How good a color is as a CARD BACKGROUND. Prefers colorful, mid-tone
+// colors; heavily penalises near-white and near-black so the swatches stay
+// interesting and the card text has room to contrast.
+//
+// The score is multiplied by a hard contrast factor: a card background is only
+// useful if a single text color can reach readable contrast on it (WCAG AA,
+// 4.5:1). Mid-tone teals/golds sit in the "neither black nor white reads well"
+// band, so they are pushed down in favour of colors that genuinely work.
+function backgroundSuitability(r, g, b) {
+  const hex = rgbToHex(r, g, b);
+  const { s, v } = hsvOf(r, g, b);
+  // Brightness window: ideal around 0.35-0.7, tapering off at both extremes.
+  let brightnessScore;
+  if (v < 0.08 || v > 0.95) brightnessScore = 0.05;      // almost black/white
+  else if (v >= 0.3 && v <= 0.75) brightnessScore = 1;   // sweet spot
+  else if (v < 0.3) brightnessScore = 0.35 + (v / 0.3) * 0.65;
+  else brightnessScore = 1 - ((v - 0.75) / 0.2) * 0.75;
+  // Saturation: some color is desirable; greys are still allowed but rank lower.
+  const saturationScore = 0.25 + s * 0.75;
+
+  // Contrast viability: best achievable ratio with either black or white text.
+  const bestRatio = Math.max(contrastRatio(hex, '#000000'), contrastRatio(hex, '#ffffff'));
+  // Full credit at >= 7:1 (AAA), zero credit below 4.5:1 (fails AA), tapering
+  // between so borderline colors rank last rather than disappearing entirely.
+  const contrastScore = bestRatio >= 7 ? 1 : (bestRatio <= 4.5 ? 0.05 : 0.05 + ((bestRatio - 4.5) / 2.5) * 0.95);
+
+  return brightnessScore * saturationScore * contrastScore;
+}
+
+// Extracts up to [PALETTE_MAX_SWATCHES] candidate colors from [img].
+// Returns an array of '#rrggbb', best-first. Throws on a tainted canvas or a
+// failed draw so the caller can show a clear message.
+function extractPaletteFromImage(img) {
+  const canvas = document.createElement('canvas');
+  canvas.width = PALETTE_SAMPLE_SIZE;
+  canvas.height = PALETTE_SAMPLE_SIZE;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Canvas is not supported in this browser');
+  ctx.drawImage(img, 0, 0, PALETTE_SAMPLE_SIZE, PALETTE_SAMPLE_SIZE);
+  // Throws a SecurityError when the image host sent no CORS headers.
+  const { data } = ctx.getImageData(0, 0, PALETTE_SAMPLE_SIZE, PALETTE_SAMPLE_SIZE);
+
+  // Coarse 4-bit/channel histogram keeps near-identical shades together.
+  const buckets = new Map();
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    if (a < 125) continue; // ignore transparent pixels
+    const r = data[i], g = data[i + 1], b = data[i + 2];
+    const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+    let entry = buckets.get(key);
+    if (!entry) {
+      entry = { r: 0, g: 0, b: 0, n: 0 };
+      buckets.set(key, entry);
+    }
+    entry.r += r; entry.g += g; entry.b += b; entry.n += 1;
+  }
+  if (buckets.size === 0) return [];
+
+  const scored = [];
+  for (const entry of buckets.values()) {
+    const r = entry.r / entry.n, g = entry.g / entry.n, b = entry.b / entry.n;
+    // Popularity matters, but suitability dominates so we don't just return
+    // the most common (usually background) color.
+    const share = entry.n / (PALETTE_SAMPLE_SIZE * PALETTE_SAMPLE_SIZE);
+    const score = backgroundSuitability(r, g, b) * (0.45 + 0.55 * Math.min(1, share * 6));
+    scored.push({ hex: rgbToHex(r, g, b), score, r, g, b });
+  }
+  scored.sort((a, b) => b.score - a.score);
+
+  // Drop colors that are visually near-duplicates of an already-kept swatch
+  // so the row shows a spread of options rather than eight similar blues.
+  const kept = [];
+  for (const candidate of scored) {
+    const tooClose = kept.some((k) => {
+      const dr = k.r - candidate.r, dg = k.g - candidate.g, db = k.b - candidate.b;
+      return Math.sqrt(dr*dr + dg*dg + db*db) < 42;
+    });
+    if (tooClose) continue;
+    kept.push(candidate);
+    if (kept.length >= PALETTE_MAX_SWATCHES) break;
+  }
+
+  // Every swatch we offer must be able to carry readable text (WCAG AA 4.5:1
+  // against either black or white). Mid-tone colors that cannot are dropped so
+  // the admin is never handed a choice that produces an unreadable card. If
+  // that filter would leave nothing, fall back to the unfiltered list rather
+  // than showing no swatches at all.
+  const readable = kept.filter((k) => {
+    const hex = rgbToHex(k.r, k.g, k.b);
+    return Math.max(contrastRatio(hex, '#000000'), contrastRatio(hex, '#ffffff')) >= 4.5;
+  });
+  return (readable.length ? readable : kept).map((k) => k.hex);
+}
+
+// Loads [url] with CORS enabled and resolves with the decoded <img>.
+function loadImageForPalette(url) {
+  return new Promise((resolve, reject) => {
+    if (!url) { reject(new Error('No cover image for this item')); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Could not load the cover image'));
+    img.src = url;
+  });
+}
+
+// Same as above, but pulls the bytes through the admin-only same-origin proxy
+// when the cover host does not allow cross-origin reads. This is the fallback
+// that makes the picker work on any host (e.g. an R2/CDN domain without CORS).
+function loadImageViaProxyForPalette(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Could not load the cover via the server'));
+    img.src = '/api/admin/cover-proxy?url=' + encodeURIComponent(url);
+  });
 }
 
 // Creates a color controller bound to one form.
@@ -1934,6 +2125,99 @@ function clearAlbumColor(which) {
   initColorControllers();
   if (which === 'bg') albumColorCtl.setBg('');
   else albumColorCtl.setText('');
+}
+
+// ------------------------------------------------------------------
+// "From cover" palette loading (track + album forms)
+// ------------------------------------------------------------------
+
+// Renders the extracted swatches into [containerId]. Clicking one sets the
+// card background (and leaves the text color to auto-contrast if unset).
+function renderPaletteSwatches(containerId, colors, ctl) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  box.innerHTML = colors.map((c) =>
+    '<button type="button" class="palette-swatch" title="Use ' + c + '" data-color="' + c + '" style="background:' + c + '"></button>'
+  ).join('');
+  box.querySelectorAll('.palette-swatch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      ctl.setBg(btn.dataset.color);
+      // Only auto-pick text when the admin has not chosen one explicitly.
+      if (!ctl.getText()) ctl.setText(readableTextOnHex(btn.dataset.color));
+      box.querySelectorAll('.palette-swatch').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+    });
+  });
+  // Pre-select the best swatch so the admin sees the recommendation applied.
+  const first = box.querySelector('.palette-swatch');
+  if (first) {
+    ctl.setBg(first.dataset.color);
+    if (!ctl.getText()) ctl.setText(readableTextOnHex(first.dataset.color));
+    first.classList.add('is-active');
+  }
+}
+
+function setPaletteHint(id, text, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'cover-palette-' + (cls || 'hint');
+}
+
+// Shared loader: [url] is the cover, [hintId]/[swatchId] the UI targets.
+//
+// Two-tier by design: try the direct (cross-origin) read first, which needs no
+// server round-trip; if the cover host blocks canvas reads, retry through the
+// admin-only same-origin proxy so the feature still works on every host.
+async function loadPaletteFor(url, hintId, swatchId, ctl, label) {
+  if (!url) {
+    setPaletteHint(hintId, 'No cover uploaded for this ' + label + ' yet — set a color manually below.', 'error');
+    return;
+  }
+  setPaletteHint(hintId, 'Reading cover…', 'loading');
+
+  const collect = (img) => extractPaletteFromImage(img);
+  let colors = null;
+  let firstError = null;
+
+  try {
+    colors = collect(await loadImageForPalette(url));
+  } catch (err) {
+    // Most likely a tainted canvas (host sent no CORS headers). Fall back to
+    // the proxy rather than giving up.
+    firstError = err;
+    try {
+      colors = collect(await loadImageViaProxyForPalette(url));
+    } catch (proxyErr) {
+      colors = null;
+    }
+  }
+
+  if (!colors || !colors.length) {
+    const reason = firstError ? firstError.message : 'no usable colors found';
+    setPaletteHint(hintId, 'Could not read this cover (' + reason + '). Use the picker below.', 'error');
+    return;
+  }
+  renderPaletteSwatches(swatchId, colors, ctl);
+  setPaletteHint(hintId, 'Top colors from the cover — click one to use it:', 'hint');
+}
+
+// The cover currently shown in the track form: the uploaded thumbnail, or the
+// saved one when editing.
+function currentTrackCoverUrl() {
+  return (document.getElementById('fThumbnail').value || '').trim();
+}
+function currentAlbumCoverUrl() {
+  return (document.getElementById('alCover').value || '').trim();
+}
+
+async function loadTrackPalette() {
+  initColorControllers();
+  await loadPaletteFor(currentTrackCoverUrl(), 'trackPaletteHint', 'trackPaletteSwatches', trackColorCtl, 'track');
+}
+async function loadAlbumPalette() {
+  initColorControllers();
+  await loadPaletteFor(currentAlbumCoverUrl(), 'albumPaletteHint', 'albumPaletteSwatches', albumColorCtl, 'album');
 }
 
 function showAdd() {

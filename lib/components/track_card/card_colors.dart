@@ -41,11 +41,30 @@ double _relativeLuminance(Color color) {
       0.0722 * channel(color.b);
 }
 
-/// Whether black or white text contrasts better against [background].
+/// WCAG contrast ratio between two colors (1..21).
+double contrastRatio(Color a, Color b) {
+  final la = _relativeLuminance(a);
+  final lb = _relativeLuminance(b);
+  final hi = math.max(la, lb);
+  final lo = math.min(la, lb);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const Color _black = Color(0xFF000000);
+const Color _white = Color(0xFFFFFFFF);
+
+/// Whether black or white text reads better on [background].
 ///
-/// Used only as a safety net: when an admin picks a background but leaves the
-/// text color unset, the card still gets readable text instead of inheriting a
+/// Used as a safety net: when an admin picks a background but leaves the text
+/// color unset, the card still gets readable text instead of inheriting a
 /// foreground that disappears into the new background.
-Color readableTextOn(Color background) => _relativeLuminance(background) > 0.5
-    ? const Color(0xFF000000)
-    : const Color(0xFFFFFFFF);
+///
+/// The choice compares the two real WCAG contrast ratios rather than testing a
+/// luminance threshold. A threshold picks white for mid-tone colors such as
+/// teal (#07a7a9), where black actually scores 7.1:1 and white only 2.95:1 —
+/// i.e. the threshold would produce unreadable text on a perfectly good
+/// background.
+Color readableTextOn(Color background) =>
+    contrastRatio(background, _black) >= contrastRatio(background, _white)
+        ? _black
+        : _white;
