@@ -206,6 +206,9 @@ List<HomeSpecial> _buildSpecials(
   };
 
   final specials = <HomeSpecial>[];
+  // Covers already claimed by an earlier shelf, so no two shelves show the same
+  // artwork when they have no admin banner of their own.
+  final usedCovers = <String>{};
   for (final def in _specialDefinitions) {
     final override = overrides[def.id];
 
@@ -237,7 +240,7 @@ List<HomeSpecial> _buildSpecials(
       subtitle: (overrideSubtitle?.isNotEmpty ?? false)
           ? overrideSubtitle!
           : def.subtitle,
-      imageUrl: hasBanner ? bannerUrl : _coverFor(matched),
+      imageUrl: hasBanner ? bannerUrl : _coverFor(matched, usedCovers),
       hasBanner: hasBanner,
       tracks: matched,
     ));
@@ -269,8 +272,22 @@ String _haystackFor(SangeetTrackObject track) {
 }
 
 /// Best available cover for a shelf: the first (most played) track that has
-/// artwork, falling back to the shared album-art placeholder.
-String _coverFor(List<SangeetTrackObject> tracks) {
+/// artwork, skipping any cover already used by an earlier shelf; falling back
+/// to the shared album-art placeholder.
+///
+/// [used] is mutated so the caller can keep one cover per shelf. Without it two
+/// shelves whose lead track is shared (Venkateswara and Krishna both leading
+/// with the same track) rendered identical tiles in the carousel.
+String _coverFor(List<SangeetTrackObject> tracks, Set<String> used) {
+  for (final track in tracks) {
+    final url = track.album.images.smallest(ImagePlaceholder.albumArt);
+    if (url.isNotEmpty && !used.contains(url)) {
+      used.add(url);
+      return url;
+    }
+  }
+  // Every cover this shelf could use is already taken; reuse its first one
+  // rather than showing nothing.
   for (final track in tracks) {
     final url = track.album.images.smallest(ImagePlaceholder.albumArt);
     if (url.isNotEmpty) return url;

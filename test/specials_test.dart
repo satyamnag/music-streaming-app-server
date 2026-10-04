@@ -118,6 +118,63 @@ void main() {
     });
   });
 
+  group('Specials shelf covers are distinct', () {
+    /// Mirrors `_coverFor`: first cover not already claimed by an earlier shelf,
+    /// falling back to the shelf's own first cover when every one is taken.
+    String coverFor(List<String> covers, Set<String> used) {
+      for (final url in covers) {
+        if (url.isNotEmpty && !used.contains(url)) {
+          used.add(url);
+          return url;
+        }
+      }
+      for (final url in covers) {
+        if (url.isNotEmpty) return url;
+      }
+      return '';
+    }
+
+    test('a shelf skips a cover an earlier shelf already used', () {
+      // The real regression: Venkateswara and Krishna both led with the same
+      // Garuda track, so both tiles rendered the identical image.
+      final used = <String>{};
+      final venkateswara = coverFor(['garuda.jpg', 'balaji.jpg'], used);
+      final krishna = coverFor(['garuda.jpg', 'krishna.jpg'], used);
+
+      expect(venkateswara, equals('garuda.jpg'));
+      expect(krishna, equals('krishna.jpg'),
+          reason: 'the shared lead cover must not be reused');
+      expect(venkateswara, isNot(equals(krishna)));
+    });
+
+    test('a shelf whose only cover is taken reuses it rather than showing none', () {
+      final used = <String>{'only.jpg'};
+      expect(coverFor(['only.jpg'], used), equals('only.jpg'));
+    });
+
+    test('blank covers are skipped in favour of a real one', () {
+      final used = <String>{};
+      expect(coverFor(['', 'real.jpg'], used), equals('real.jpg'));
+    });
+
+    test('a shelf with no covers at all yields an empty string', () {
+      final used = <String>{};
+      expect(coverFor(['', ''], used), isEmpty);
+      expect(used, isEmpty, reason: 'nothing was claimed');
+    });
+
+    test('every shelf in a run of five gets its own cover', () {
+      final used = <String>{};
+      // Each shelf leads with the same shared track but has a distinct second
+      // cover, so all five must resolve to different images.
+      final shelves = ['s1', 's2', 's3', 's4', 's5']
+          .map((id) => coverFor(['shared.jpg', '$id.jpg'], used))
+          .toList();
+      expect(shelves.toSet().length, equals(5));
+      expect(shelves.first, equals('shared.jpg'));
+    });
+  });
+
   group('Track model carries the fields the shelves need', () {
     test('full track exposes tags for keyword matching', () {
       final track = SangeetTrackObject.full(

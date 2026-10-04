@@ -78,6 +78,12 @@ abstract final class HomeSectionLayout {
   /// is the cover plus a padded text block underneath — there is no padding
   /// above the cover or beside it. [coverWidth] is therefore both the card's
   /// width and the cover's height.
+  ///
+  /// The text block is padded on ALL four sides (see `TrackCard`'s
+  /// `EdgeInsets.fromLTRB`), so [cardPadding] is added twice: once as the gap
+  /// between the cover and the title, and once as the bottom padding. Omitting
+  /// the bottom padding made every card 7.5px (10 * 0.75) taller than the height
+  /// computed here, which overflowed the card's own Column by exactly that much.
   static double _cardHeightFor(
     BuildContext context,
     double coverWidth, {
@@ -95,7 +101,8 @@ abstract final class HomeSectionLayout {
         (cardTextGap * scale) +
         titleLine +
         (subtitleGap * scale) +
-        subtitleLine;
+        subtitleLine +
+        (cardPadding * scale);
   }
 
   /// The exact height a home card row needs so cards are never stretched

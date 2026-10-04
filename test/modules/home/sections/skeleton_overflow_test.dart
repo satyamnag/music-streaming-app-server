@@ -72,8 +72,18 @@ class _PlaybuttonSkeletonRow extends StatelessWidget {
   }
 }
 
-/// Mirrors the home card anatomy (10 padding + 150 art + 4 gap + title line)
-/// so the skeleton exercise covers the exact geometry rowHeight measures.
+/// Mirrors the real home card anatomy so the skeleton exercise covers the exact
+/// geometry `rowHeight` measures: a full-width square cover that bleeds to the
+/// card's top/left/right edges, then a text block padded on the left, right and
+/// bottom only.
+///
+/// This stub previously hard-coded a 175px-wide card with a 150px cover inside
+/// `EdgeInsets.all(10)`, which does not match `TrackCard` at all (the cover is
+/// `cardWidth` wide, not 150, and there is no padding above or beside it). It
+/// only avoided overflowing `rowHeight` while `_cardHeightFor` under-counted the
+/// text block's bottom padding; once that was corrected the stub's own mismatch
+/// surfaced as a 34px overflow. Deriving every value from the shared constants
+/// keeps the stub honest at any `cardScale`.
 class _HomeCardSkeletonRow extends StatelessWidget {
   const _HomeCardSkeletonRow();
 
@@ -81,6 +91,7 @@ class _HomeCardSkeletonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final cardWidth = HomeSectionLayout.cardWidth * scale;
     return Skeletonizer(
       enabled: true,
       child: SizedBox(
@@ -89,22 +100,43 @@ class _HomeCardSkeletonRow extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           children: [
             Container(
-              width: 175 * scale,
-              child: Padding(
-                padding: EdgeInsets.all(10 * scale),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(height: 150 * scale, width: 150 * scale),
-                    const Gap(4),
-                    Text(
-                      'A good track',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.typography.small,
+              width: cardWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // The cover bleeds to the card's top/left/right edges.
+                  Container(height: cardWidth, width: cardWidth),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      HomeSectionLayout.cardPadding * scale,
+                      HomeSectionLayout.cardTextGap * scale,
+                      HomeSectionLayout.cardPadding * scale,
+                      HomeSectionLayout.cardPadding * scale,
                     ),
-                  ],
-                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'A good track',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.typography.small.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Gap(HomeSectionLayout.titleSubtitleGap * scale),
+                        Text(
+                          'An album',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.typography.xSmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
