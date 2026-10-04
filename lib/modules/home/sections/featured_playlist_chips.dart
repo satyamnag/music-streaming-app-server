@@ -20,7 +20,12 @@ class FeaturedPlaylistChips extends HookConsumerWidget {
   const FeaturedPlaylistChips({super.key});
 
   /// Diameter of the colored circle.
-  static const double chipDiameter = 62;
+  ///
+  /// Sized so six chips fit a 360dp phone screen with the name underneath,
+  /// matching the reference design's row (which shows six). A larger circle
+  /// pushed the row to four visible chips and made the row feel oversized next
+  /// to the album cards below it.
+  static const double chipDiameter = 52;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -44,7 +49,7 @@ class FeaturedPlaylistChips extends HookConsumerWidget {
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 16 * scale),
             itemCount: chips.length,
-            separatorBuilder: (_, __) => Gap(14 * scale),
+            separatorBuilder: (_, __) => Gap(10 * scale),
             itemBuilder: (context, index) {
               final chip = chips[index];
               return _FeaturedChip(
@@ -268,50 +273,47 @@ class _GlyphPainter extends CustomPainter {
     canvas.drawCircle(Offset(s * 0.80, s * 0.20), s * 0.055, p);
   }
 
-  /// A Ganesha head: ears, trunk and crown, read as a silhouette.
+  /// A Ganesha head: a rounded face, two fan ears, a curling trunk and a crown.
+  ///
+  /// Drawn as separate strokes rather than one silhouette so the trunk and ears
+  /// stay distinguishable at chip size instead of merging into a blob.
   void _ganesha(Canvas canvas, double s, Paint p) {
-    // Head.
+    // Face.
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(s * 0.50, s * 0.42),
-        width: s * 0.44,
-        height: s * 0.46,
+        center: Offset(s * 0.50, s * 0.46),
+        width: s * 0.40,
+        height: s * 0.44,
       ),
       p,
     );
-    // Left ear, right ear.
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(s * 0.20, s * 0.42),
-        width: s * 0.26,
-        height: s * 0.40,
-      ),
-      -math.pi / 2,
-      math.pi,
-      false,
-      p,
-    );
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(s * 0.80, s * 0.42),
-        width: s * 0.26,
-        height: s * 0.40,
-      ),
-      math.pi / 2,
-      math.pi,
-      false,
-      p,
-    );
-    // Trunk curling to the left.
+
+    // Ears: broad fans either side, drawn as open arcs facing outward.
+    for (final sign in [-1.0, 1.0]) {
+      final ear = Path()
+        ..moveTo(s * 0.50 + s * 0.22 * sign, s * 0.30)
+        ..cubicTo(
+          s * (0.50 + 0.46 * sign),
+          s * 0.22,
+          s * (0.50 + 0.46 * sign),
+          s * 0.66,
+          s * 0.50 + s * 0.22 * sign,
+          s * 0.60,
+        );
+      canvas.drawPath(ear, p);
+    }
+
+    // Trunk: descends from the centre and curls to the left.
     final trunk = Path()
-      ..moveTo(s * 0.50, s * 0.58)
-      ..cubicTo(s * 0.50, s * 0.80, s * 0.34, s * 0.86, s * 0.34, s * 0.70);
+      ..moveTo(s * 0.50, s * 0.56)
+      ..cubicTo(s * 0.50, s * 0.78, s * 0.34, s * 0.90, s * 0.28, s * 0.74);
     canvas.drawPath(trunk, p);
-    // Crown.
+
+    // Crown: a small pointed tier above the face.
     final crown = Path()
-      ..moveTo(s * 0.34, s * 0.24)
+      ..moveTo(s * 0.36, s * 0.24)
       ..lineTo(s * 0.50, s * 0.06)
-      ..lineTo(s * 0.66, s * 0.24);
+      ..lineTo(s * 0.64, s * 0.24);
     canvas.drawPath(crown, p);
   }
 
@@ -378,32 +380,37 @@ class _GlyphPainter extends CustomPainter {
     canvas.drawPath(base, p);
   }
 
-  /// The Om symbol, drawn as a stylised glyph.
+  /// The Om symbol (ॐ), drawn as the familiar three-part glyph.
+  ///
+  /// Om is the one glyph here with a fixed, widely recognised form, so it is
+  /// built from its actual anatomy rather than a decorative approximation: the
+  /// large lower bowl on the left, the smaller upper curve that hooks over it,
+  /// the crescent + tail sweeping out to the right, and the dot (bindu) above.
   void _om(Canvas canvas, double s, Paint p) {
-    // The lower loop.
+    // Lower bowl: a large open arc on the left, open at the top-right.
     canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(s * 0.42, s * 0.62),
-        width: s * 0.62,
-        height: s * 0.50,
-      ),
-      0,
-      math.pi * 1.55,
+      Rect.fromLTRB(s * 0.06, s * 0.34, s * 0.62, s * 0.92),
+      math.pi * 0.62,
+      math.pi * 1.30,
       false,
       p,
     );
-    // The upper curve.
+
+    // Upper curve: hooks from the left over the top of the bowl.
     final upper = Path()
-      ..moveTo(s * 0.16, s * 0.40)
-      ..cubicTo(s * 0.34, s * 0.18, s * 0.62, s * 0.20, s * 0.60, s * 0.40);
+      ..moveTo(s * 0.20, s * 0.30)
+      ..cubicTo(s * 0.38, s * 0.10, s * 0.66, s * 0.16, s * 0.60, s * 0.38);
     canvas.drawPath(upper, p);
-    // The tail sweeping right.
+
+    // Crescent on the right, then the tail sweeping down and left.
     final tail = Path()
-      ..moveTo(s * 0.66, s * 0.50)
-      ..cubicTo(s * 0.80, s * 0.60, s * 0.70, s * 0.80, s * 0.56, s * 0.80);
+      ..moveTo(s * 0.62, s * 0.44)
+      ..cubicTo(s * 0.92, s * 0.44, s * 0.94, s * 0.66, s * 0.76, s * 0.70)
+      ..cubicTo(s * 0.62, s * 0.73, s * 0.46, s * 0.68, s * 0.36, s * 0.62);
     canvas.drawPath(tail, p);
-    // The dot.
-    canvas.drawCircle(Offset(s * 0.82, s * 0.22), s * 0.07, p);
+
+    // Bindu (the dot) above the crescent.
+    canvas.drawCircle(Offset(s * 0.68, s * 0.16), s * 0.075, p);
   }
 
   /// Fallback glyph: a quaver, used for an unknown `icon` name.

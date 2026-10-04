@@ -276,15 +276,24 @@ class _FeaturedEyebrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Text(
-      context.l10n.featured_playlist.toUpperCase(),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: theme.typography.xSmall.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.4,
-        color: Colors.white.withValues(alpha: 0.85),
-        shadows: const [Shadow(color: Color(0x99000000), blurRadius: 4)],
+    // FittedBox so the label shrinks to fit a narrow slide instead of
+    // truncating to "FEATURED PL…" (which is what a fixed size did on a
+    // 360dp phone, where the slide is ~330dp and the copy column ~200dp).
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Text(
+          context.l10n.featured_playlist.toUpperCase(),
+          maxLines: 1,
+          style: theme.typography.xSmall.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: Colors.white.withValues(alpha: 0.85),
+            shadows: const [Shadow(color: Color(0x99000000), blurRadius: 4)],
+          ),
+        ),
       ),
     );
   }
