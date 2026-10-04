@@ -94,7 +94,22 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
             ),
             if (specials.length > 1) ...[
               Gap(8 * scale),
-              _PageDots(count: specials.length, active: page.value),
+              _PageDots(
+                count: specials.length,
+                active: page.value,
+                // Tapping a dot pages the carousel to that slide. The dots were
+                // previously inert (a plain AnimatedContainer with no gesture),
+                // so they looked like navigation but did nothing.
+                onSelect: (index) {
+                  if (!controller.hasClients) return;
+                  controller.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 280),
+                    curve: Curves.easeOutCubic,
+                  );
+                  page.value = index;
+                },
+              ),
             ],
           ],
         ),
@@ -401,29 +416,55 @@ class _SquareSlide extends StatelessWidget {
 }
 
 /// Small dot indicator showing which slide is active.
+///
+/// Each dot is a real control: tapping it pages the carousel to that slide.
+/// The dot itself stays visually tiny, but is wrapped in a 44x44 (scaled) tap
+/// target so it meets the minimum comfortable touch size on a phone.
 class _PageDots extends StatelessWidget {
   final int count;
   final int active;
+  final ValueChanged<int> onSelect;
 
-  const _PageDots({required this.count, required this.active});
+  const _PageDots({
+    required this.count,
+    required this.active,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scale = theme.scaling;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(count, (index) {
         final isActive = index == active;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          height: 6,
-          width: isActive ? 18 : 6,
-          decoration: BoxDecoration(
-            color: isActive
-                ? theme.colorScheme.primary
-                : theme.colorScheme.mutedForeground.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(3),
+        return Semantics(
+          button: true,
+          selected: isActive,
+          label: 'Show slide ${index + 1} of $count',
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onSelect(index),
+            child: SizedBox(
+              height: 32 * scale,
+              width: 26 * scale,
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 6,
+                  width: isActive ? 18 : 6,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.mutedForeground
+                            .withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
           ),
         );
       }),
