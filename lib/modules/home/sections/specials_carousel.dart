@@ -12,8 +12,9 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// Full-width "Featured Playlist" carousel shown above the Albums shelf on the
 /// home screen. Each slide is a curated shelf (e.g. "Ganesha Special") rendered
-/// as a large banner with a "FEATURED PLAYLIST" eyebrow, the title, its song
-/// count and a "Play Now" button that starts the whole queue.
+/// as a banner carrying a "FEATURED PLAYLIST" eyebrow, the title, its song count
+/// and a "Play Now" button that starts the whole queue — all of it set on the
+/// RIGHT of the artwork.
 ///
 /// Layout notes:
 ///  - Each slide occupies ~92% of the viewport width so the neighbouring slide
@@ -21,7 +22,12 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 ///  - The list uses a [PageView] with `viewportFraction`, giving natural
 ///    snap-to-slide paging plus a dot indicator, rather than a free-scrolling
 ///    ListView that would not snap or report its page.
-///  - Page dots appear only when there is more than one slide.
+///  - The page dots are painted INSIDE each slide's artwork, at its bottom
+///    centre, and only when there is more than one slide. They used to sit in a
+///    band beneath the carousel, which put them outside the banner they label.
+///  - Nothing darkens the artwork. The banner is shown at full brightness and
+///    the white copy carries its own text shadows, so an uploaded banner looks
+///    exactly as the admin exported it.
 class HomeSpecialsCarousel extends HookConsumerWidget {
   /// Fraction of the viewport width one slide occupies (~92%).
   static const double slideWidthFraction = 0.92;
@@ -54,60 +60,59 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
     // Nothing to show until the catalogue resolves, or when no shelf matched.
     if (specials.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
+    // One dot row, handed to each slide so the dots are painted INSIDE the
+    // slide's own artwork at its bottom centre, rather than in a separate band
+    // below the carousel. A single instance is shared because only one slide is
+    // ever fully visible, and every dot tap drives the same controller.
+    final dots = specials.length > 1
+        ? _PageDots(
+            count: specials.length,
+            active: page.value,
+            // Tapping a dot pages the carousel to that slide. The dots were
+            // previously inert (a plain AnimatedContainer with no gesture),
+            // so they looked like navigation but did nothing.
+            onSelect: (index) {
+              if (!controller.hasClients) return;
+              controller.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+              );
+              page.value = index;
+            },
+          )
+        : null;
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 4 * scale),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The row is tall enough for the tallest slide shape: a banner is
-            // 8:3 (short), while a shelf without a banner falls back to the
-            // square-art layout (taller). Each slide centres itself in the row,
-            // so a banner is never stretched to fill someone else's height.
-            SizedBox(
-              height: slideHeight * scale,
-              child: PageView.builder(
-                controller: controller,
-                itemCount: specials.length,
-                onPageChanged: (index) => page.value = index,
-                itemBuilder: (context, index) {
-                  final special = specials[index];
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5 * scale),
-                    child: _SpecialSlide(
-                      key: ValueKey(special.id),
-                      special: special,
-                      onPlay: () async {
-                        await ref
-                            .read(audioPlayerProvider.notifier)
-                            .load(special.tracks, initialIndex: 0, autoPlay: true);
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (specials.length > 1) ...[
-              Gap(8 * scale),
-              _PageDots(
-                count: specials.length,
-                active: page.value,
-                // Tapping a dot pages the carousel to that slide. The dots were
-                // previously inert (a plain AnimatedContainer with no gesture),
-                // so they looked like navigation but did nothing.
-                onSelect: (index) {
-                  if (!controller.hasClients) return;
-                  controller.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 280),
-                    curve: Curves.easeOutCubic,
-                  );
-                  page.value = index;
-                },
-              ),
-            ],
-          ],
+        // The row is tall enough for the tallest slide shape: a banner is 8:3
+        // (short), while a shelf without a banner falls back to the square-art
+        // layout (taller). Each slide centres itself in the row, so a banner is
+        // never stretched to fill someone else's height.
+        child: SizedBox(
+          height: slideHeight * scale,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: specials.length,
+            onPageChanged: (index) => page.value = index,
+            itemBuilder: (context, index) {
+              final special = specials[index];
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5 * scale),
+                child: _SpecialSlide(
+                  key: ValueKey(special.id),
+                  special: special,
+                  dots: dots,
+                  onPlay: () async {
+                    await ref
+                        .read(audioPlayerProvider.notifier)
+                        .load(special.tracks, initialIndex: 0, autoPlay: true);
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -120,7 +125,16 @@ class _SpecialSlide extends StatelessWidget {
   final HomeSpecial special;
   final VoidCallback onPlay;
 
-  const _SpecialSlide({super.key, required this.special, required this.onPlay});
+  /// The shared page-dot row, painted inside this slide's artwork. Null when
+  /// there is only one slide (nothing to page between).
+  final Widget? dots;
+
+  const _SpecialSlide({
+    super.key,
+    required this.special,
+    required this.onPlay,
+    this.dots,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,30 +152,48 @@ class _SpecialSlide extends StatelessWidget {
       return Center(
         child: AspectRatio(
           aspectRatio: HomeSpecialsCarousel.bannerAspectRatio,
-          child: _BannerSlide(special: special, cover: cover, onPlay: onPlay),
+          child: _BannerSlide(
+            special: special,
+            cover: cover,
+            onPlay: onPlay,
+            dots: dots,
+          ),
         ),
       );
     }
 
-    return _SquareSlide(special: special, cover: cover, onPlay: onPlay);
+    return _SquareSlide(
+      special: special,
+      cover: cover,
+      onPlay: onPlay,
+      dots: dots,
+    );
   }
 }
 
 /// A slide backed by an admin-uploaded landscape banner (8:3 WebP).
 ///
-/// Matches the reference design: the artwork fills the slide, a scrim darkens
-/// the left so the copy stays legible whatever the banner's brightness, and the
-/// copy block reads as an eyebrow ("FEATURED PLAYLIST"), the playlist name in a
-/// large display face, its song count, then the "Play Now" button.
+/// The artwork fills the slide and the copy sits on the RIGHT of it: the
+/// eyebrow ("FEATURED PLAYLIST"), the playlist name, its song count and the
+/// "Play Now" button, right-aligned as one block.
+///
+/// There is deliberately NO scrim over the artwork. A left-to-right black
+/// gradient (up to 90% opacity) used to darken the copy's half of the banner,
+/// which read as an ugly wash across the admin's artwork — the banner is now
+/// shown at full brightness and legibility is carried by the text's own shadows,
+/// which cost the image nothing. The page dots sit inside the banner at its
+/// bottom centre.
 class _BannerSlide extends StatelessWidget {
   final HomeSpecial special;
   final String cover;
   final VoidCallback onPlay;
+  final Widget? dots;
 
   const _BannerSlide({
     required this.special,
     required this.cover,
     required this.onPlay,
+    this.dots,
   });
 
   @override
@@ -178,65 +210,64 @@ class _BannerSlide extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           UniversalImage(path: cover, fit: BoxFit.cover),
-          // Scrim: darkens the left so white copy reads on any banner.
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xE6000000),
-                  Color(0xB3000000),
-                  Color(0x1A000000),
-                ],
-                stops: [0.0, 0.55, 1.0],
-              ),
-            ),
-          ),
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 14 * scale,
               vertical: 10 * scale,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _FeaturedEyebrow(scale: scale),
-                Gap(3 * scale),
-                Text(
-                  // The shelf titles already end in "Special"; the design shows
-                  // a bare playlist name, so the suffix is dropped for display.
-                  _displayTitle(special.title),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.typography.h3.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.05,
-                    shadows: const [
-                      Shadow(color: Color(0x99000000), blurRadius: 6),
-                    ],
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _FeaturedEyebrow(scale: scale),
+                  Gap(3 * scale),
+                  Text(
+                    // The shelf titles already end in "Special"; the design shows
+                    // a bare playlist name, so the suffix is dropped for display.
+                    _displayTitle(special.title),
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.typography.h3.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 1.05,
+                      // The shadow is what keeps white text readable now that
+                      // the scrim is gone. It darkens only the glyph edges.
+                      shadows: const [
+                        Shadow(color: Color(0xCC000000), blurRadius: 8),
+                      ],
+                    ),
                   ),
-                ),
-                Gap(2 * scale),
-                Text(
-                  context.l10n.songs_count(special.tracks.length),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.typography.xSmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.90),
-                    shadows: const [
-                      Shadow(color: Color(0x99000000), blurRadius: 4),
-                    ],
+                  Gap(2 * scale),
+                  Text(
+                    context.l10n.songs_count(special.tracks.length),
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.typography.xSmall.copyWith(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      shadows: const [
+                        Shadow(color: Color(0xCC000000), blurRadius: 6),
+                      ],
+                    ),
                   ),
-                ),
-                Gap(8 * scale),
-                _PlayNowButton(onPlay: onPlay),
-              ],
+                  Gap(8 * scale),
+                  _PlayNowButton(onPlay: onPlay),
+                ],
+              ),
             ),
           ),
+          if (dots != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 2 * scale,
+              child: dots!,
+            ),
         ],
       ),
     );
@@ -270,19 +301,20 @@ class _FeaturedEyebrow extends StatelessWidget {
     // FittedBox so the label shrinks to fit a narrow slide instead of
     // truncating to "FEATURED PL…" (which is what a fixed size did on a
     // 360dp phone, where the slide is ~330dp and the copy column ~200dp).
+    // Aligned right because the whole copy block sits on the banner's right.
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: FittedBox(
         fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.centerRight,
         child: Text(
           context.l10n.featured_playlist.toUpperCase(),
           maxLines: 1,
           style: theme.typography.xSmall.copyWith(
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: Colors.white.withValues(alpha: 0.85),
-            shadows: const [Shadow(color: Color(0x99000000), blurRadius: 4)],
+            color: Colors.white.withValues(alpha: 0.95),
+            shadows: const [Shadow(color: Color(0xCC000000), blurRadius: 6)],
           ),
         ),
       ),
@@ -338,15 +370,21 @@ class _PlayNowButton extends StatelessWidget {
 
 /// The fallback slide for a shelf with no banner: square track art on the left,
 /// title/subtitle/button on the right.
+///
+/// The page dots ride inside the square artwork so they stay within the card,
+/// matching where they sit on a banner slide, instead of hanging in a band
+/// underneath the carousel.
 class _SquareSlide extends StatelessWidget {
   final HomeSpecial special;
   final String cover;
   final VoidCallback onPlay;
+  final Widget? dots;
 
   const _SquareSlide({
     required this.special,
     required this.cover,
     required this.onPlay,
+    this.dots,
   });
 
   @override
@@ -379,10 +417,22 @@ class _SquareSlide extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Square-ish artwork band on the left.
+          // Square-ish artwork band on the left, with the page dots inside it.
           SizedBox(
             width: HomeSpecialsCarousel.slideHeight * scale,
-            child: UniversalImage(path: cover, fit: BoxFit.cover),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                UniversalImage(path: cover, fit: BoxFit.cover),
+                if (dots != null)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 6 * scale,
+                    child: dots!,
+                  ),
+              ],
+            ),
           ),
           Expanded(
             child: Padding(
@@ -444,10 +494,19 @@ class _SquareSlide extends StatelessWidget {
 
 /// Small dot indicator showing which slide is active.
 ///
+/// The dots are drawn ON the slide's artwork, so they are styled for an image
+/// background rather than for the page: white on any banner, with a soft shadow
+/// so they survive a pale photo. A theme-coloured dot (the previous styling)
+/// disappeared entirely against a bright banner.
+///
 /// Each dot is a real control: tapping it pages the carousel to that slide.
-/// The dot itself stays visually tiny, but is wrapped in a 44x44 (scaled) tap
-/// target so it meets the minimum comfortable touch size on a phone.
+/// The dot itself stays visually tiny, but sits in a 44x44 (scaled) tap target so
+/// it meets the minimum comfortable touch size on a phone.
 class _PageDots extends StatelessWidget {
+  /// Side of the square tap target around each dot, at scale == 1. 44 is the
+  /// floor both Material and the app's other icon buttons use.
+  static const double tapTarget = 44;
+
   final int count;
   final int active;
   final ValueChanged<int> onSelect;
@@ -465,6 +524,7 @@ class _PageDots extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: List.generate(count, (index) {
         final isActive = index == active;
         return Semantics(
@@ -475,8 +535,8 @@ class _PageDots extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: () => onSelect(index),
             child: SizedBox(
-              height: 32 * scale,
-              width: 26 * scale,
+              height: tapTarget * scale,
+              width: tapTarget * scale,
               child: Center(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -484,10 +544,12 @@ class _PageDots extends StatelessWidget {
                   width: isActive ? 18 : 6,
                   decoration: BoxDecoration(
                     color: isActive
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.mutedForeground
-                            .withValues(alpha: 0.35),
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(3),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x66000000), blurRadius: 4),
+                    ],
                   ),
                 ),
               ),

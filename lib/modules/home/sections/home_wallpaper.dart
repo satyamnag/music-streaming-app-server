@@ -1,4 +1,3 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:sangeet/components/image/universal_image.dart';
@@ -13,15 +12,18 @@ import 'package:sangeet/components/image/universal_image.dart';
 /// band now matches what is actually shown, and the server accepts landscape
 /// (anywhere from 1.3:1 to 3.2:1 — see `WALLPAPER_MIN_RATIO` in the server).
 ///
-/// Two things keep the UI readable over an arbitrary photo:
-///  - `BoxFit.cover` fills the band without letterboxing, so the small ratio
-///    difference between the upload and [bandAspectRatio] is just an edge crop.
-///  - A scrim is layered over it, strongest at the very top where the header
-///    text sits, so the header stays legible whatever the artwork's brightness.
+/// Deliberately NOT dimmed. An earlier revision laid a three-stop black scrim
+/// (up to 55% opacity) over the artwork so the header text stayed legible on a
+/// bright photo. On screen that read as a grey wash across the top of the home
+/// page rather than as artwork, and the fix belongs to the HEADER, not to the
+/// image: the header draws its own text shadows (see `HomeHeader`), which keep
+/// white text readable over any wallpaper without dimming a single pixel of it.
+/// [home_wallpaper_test.dart] asserts there is no overlay layer here, so the
+/// scrim cannot quietly come back.
 ///
 /// Deliberately NON-interactive: it is wrapped in an `IgnorePointer` so it can
 /// never swallow a tap meant for a card or the carousel beneath it.
-class HomeWallpaper extends ConsumerWidget {
+class HomeWallpaper extends StatelessWidget {
   /// Display shape of the band, as width : height. 2:1 leaves room for the
   /// status bar plus the logo/tagline header row on a phone without pushing the
   /// first shelf off the fold.
@@ -35,6 +37,9 @@ class HomeWallpaper extends ConsumerWidget {
   ///
   /// Width-derived so the band keeps [bandAspectRatio] on every phone, capped by
   /// [maxHeightFraction] so it can never crowd out the content beneath it.
+  ///
+  /// The home screen uses this as its scrolling header's `expandedHeight`, so
+  /// the band and the header row above it leave the screen together.
   static double heightFor(Size size) {
     final byRatio = size.width / bandAspectRatio;
     final cap = size.height * maxHeightFraction;
@@ -48,34 +53,13 @@ class HomeWallpaper extends ConsumerWidget {
   const HomeWallpaper({super.key, required this.url});
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context) {
     return IgnorePointer(
-      child: SizedBox(
-        width: double.infinity,
-        height: heightFor(MediaQuery.sizeOf(context)),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            UniversalImage(path: url, fit: BoxFit.cover),
-            // Scrim: darkest along the top edge where the header row sits,
-            // easing off towards the bottom of the band so the artwork still
-            // reads instead of being uniformly dimmed.
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x8C000000),
-                    Color(0x59000000),
-                    Color(0x2E000000),
-                  ],
-                  stops: [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
-          ],
-        ),
+      // Expand so the band fills whatever box it is given — the scrolling
+      // header's flexible space on the home screen, or a plain box in a test —
+      // instead of taking its size from the image's intrinsic dimensions.
+      child: SizedBox.expand(
+        child: UniversalImage(path: url, fit: BoxFit.cover),
       ),
     );
   }
