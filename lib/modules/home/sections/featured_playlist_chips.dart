@@ -128,7 +128,7 @@ class _FeaturedChip extends StatelessWidget {
                 child: Center(
                   child: CustomPaint(
                     size: Size(diameter * 0.5, diameter * 0.5),
-                    painter: _GlyphPainter(
+                    painter: FeaturedChipGlyphPainter(
                       name: chip.icon ?? '',
                       color: glyphColor,
                     ),
@@ -175,11 +175,14 @@ double _contrastRatio(Color a, Color b) {
 /// Every glyph is stroke-based line art so a single painter covers all of them
 /// and each stays crisp at any size. Unknown names draw the fallback music
 /// note, which is also what an admin typo lands on.
-class _GlyphPainter extends CustomPainter {
+///
+/// Public (not private) so the glyph sheet can be rendered to an image in a
+/// test and actually looked at, rather than only asserted not to throw.
+class FeaturedChipGlyphPainter extends CustomPainter {
   final String name;
   final Color color;
 
-  const _GlyphPainter({required this.name, required this.color});
+  const FeaturedChipGlyphPainter({required this.name, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -249,71 +252,73 @@ class _GlyphPainter extends CustomPainter {
     canvas.drawPath(path, p);
   }
 
-  /// Krishna's bansuri: a diagonal flute with a peacock feather.
+  /// Krishna's bansuri: a long diagonal flute with a peacock-feather eye.
+  ///
+  /// The first attempt drew a short shaft with a large oval at the end, which
+  /// read as a lollipop/magnifying glass at chip size. The flute is now a long
+  /// shaft across the full box with the feather as a small teardrop, so the
+  /// two parts stay distinct.
   void _flute(Canvas canvas, double s, Paint p) {
-    // Flute body.
+    // Flute shaft: a long diagonal across the box.
     final flute = Path()
-      ..moveTo(s * 0.16, s * 0.80)
-      ..lineTo(s * 0.84, s * 0.28);
+      ..moveTo(s * 0.08, s * 0.86)
+      ..lineTo(s * 0.80, s * 0.34);
     canvas.drawPath(flute, p);
 
-    // Two finger holes.
-    canvas.drawCircle(Offset(s * 0.44, s * 0.60), s * 0.045, p);
-    canvas.drawCircle(Offset(s * 0.60, s * 0.48), s * 0.045, p);
+    // Finger holes along the shaft.
+    canvas.drawCircle(Offset(s * 0.36, s * 0.66), s * 0.04, p);
+    canvas.drawCircle(Offset(s * 0.54, s * 0.54), s * 0.04, p);
 
-    // Peacock feather eye at the top end.
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(s * 0.80, s * 0.20),
-        width: s * 0.26,
-        height: s * 0.34,
-      ),
-      p,
-    );
-    canvas.drawCircle(Offset(s * 0.80, s * 0.20), s * 0.055, p);
+    // Peacock-feather eye: a small teardrop at the top end, plus a short stem
+    // linking it to the shaft so it reads as a feather rather than a ball.
+    final feather = Path()
+      ..moveTo(s * 0.80, s * 0.34)
+      ..cubicTo(s * 0.84, s * 0.16, s * 0.96, s * 0.14, s * 0.94, s * 0.28)
+      ..cubicTo(s * 0.92, s * 0.40, s * 0.86, s * 0.40, s * 0.80, s * 0.34);
+    canvas.drawPath(feather, p);
+    canvas.drawCircle(Offset(s * 0.89, s * 0.26), s * 0.035, p);
   }
 
-  /// A Ganesha head: a rounded face, two fan ears, a curling trunk and a crown.
+  /// A Ganesha head, built around the two features that make an elephant
+  /// readable at a glance: the big side ears and the curling trunk.
   ///
-  /// Drawn as separate strokes rather than one silhouette so the trunk and ears
-  /// stay distinguishable at chip size instead of merging into a blob.
+  /// Earlier attempts (a face oval with overlapping arcs, then a dome with a
+  /// separate crown triangle) both read as abstract shapes. Here the ears are
+  /// wide open curves that clearly flank the head, and the trunk is a thick
+  /// hanging curl - so the silhouette says "elephant" even without the crown.
   void _ganesha(Canvas canvas, double s, Paint p) {
-    // Face.
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(s * 0.50, s * 0.46),
-        width: s * 0.40,
-        height: s * 0.44,
-      ),
-      p,
-    );
+    // Head: a rounded dome, sized to leave room for the ears on both sides.
+    final head = Path()
+      ..moveTo(s * 0.34, s * 0.56)
+      ..cubicTo(s * 0.34, s * 0.26, s * 0.66, s * 0.26, s * 0.66, s * 0.56);
+    canvas.drawPath(head, p);
 
-    // Ears: broad fans either side, drawn as open arcs facing outward.
+    // Ears: wide open curves flanking the head - the strongest elephant cue.
     for (final sign in [-1.0, 1.0]) {
       final ear = Path()
-        ..moveTo(s * 0.50 + s * 0.22 * sign, s * 0.30)
+        ..moveTo(s * 0.50 + s * 0.16 * sign, s * 0.34)
         ..cubicTo(
-          s * (0.50 + 0.46 * sign),
-          s * 0.22,
-          s * (0.50 + 0.46 * sign),
-          s * 0.66,
-          s * 0.50 + s * 0.22 * sign,
-          s * 0.60,
+          s * (0.50 + 0.48 * sign),
+          s * 0.34,
+          s * (0.50 + 0.48 * sign),
+          s * 0.68,
+          s * 0.50 + s * 0.16 * sign,
+          s * 0.62,
         );
       canvas.drawPath(ear, p);
     }
 
-    // Trunk: descends from the centre and curls to the left.
+    // Trunk: hangs from the head and curls left, clearly separate from the ears.
     final trunk = Path()
-      ..moveTo(s * 0.50, s * 0.56)
-      ..cubicTo(s * 0.50, s * 0.78, s * 0.34, s * 0.90, s * 0.28, s * 0.74);
+      ..moveTo(s * 0.50, s * 0.54)
+      ..cubicTo(s * 0.46, s * 0.76, s * 0.34, s * 0.92, s * 0.24, s * 0.80);
     canvas.drawPath(trunk, p);
 
-    // Crown: a small pointed tier above the face.
+    // Crown: a small pointed tier on top, the last Ganesha-specific cue.
     final crown = Path()
-      ..moveTo(s * 0.36, s * 0.24)
-      ..lineTo(s * 0.50, s * 0.06)
-      ..lineTo(s * 0.64, s * 0.24);
+      ..moveTo(s * 0.40, s * 0.30)
+      ..lineTo(s * 0.50, s * 0.10)
+      ..lineTo(s * 0.60, s * 0.30);
     canvas.drawPath(crown, p);
   }
 
@@ -380,37 +385,53 @@ class _GlyphPainter extends CustomPainter {
     canvas.drawPath(base, p);
   }
 
-  /// The Om symbol (ॐ), drawn as the familiar three-part glyph.
+  /// The Om symbol (ॐ), drawn as thick strokes in the symbol's real form.
   ///
-  /// Om is the one glyph here with a fixed, widely recognised form, so it is
-  /// built from its actual anatomy rather than a decorative approximation: the
-  /// large lower bowl on the left, the smaller upper curve that hooks over it,
-  /// the crescent + tail sweeping out to the right, and the dot (bindu) above.
+  /// Two earlier attempts failed for opposite reasons: thin arcs came out as an
+  /// unreadable squiggle, and a single filled outline came out as a solid blob.
+  /// The form that reads is the middle path - a heavy stroke weight (roughly
+  /// double the other glyphs') tracing the recognised parts: the big lower
+  /// bowl, the hood curving over it, the crescent and tail to the right, and
+  /// the bindu dot.
   void _om(Canvas canvas, double s, Paint p) {
-    // Lower bowl: a large open arc on the left, open at the top-right.
+    // Heavier than the shared stroke: Om's calligraphic weight is what makes it
+    // recognisable, and a hairline loses the shape entirely at chip size.
+    final heavy = Paint()
+      ..color = p.color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = s * 0.15
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Lower bowl: a big open circle occupying the left two-thirds.
     canvas.drawArc(
-      Rect.fromLTRB(s * 0.06, s * 0.34, s * 0.62, s * 0.92),
-      math.pi * 0.62,
-      math.pi * 1.30,
+      Rect.fromLTRB(s * 0.10, s * 0.40, s * 0.66, s * 0.94),
+      math.pi * 0.50,
+      math.pi * 1.45,
       false,
-      p,
+      heavy,
     );
 
-    // Upper curve: hooks from the left over the top of the bowl.
-    final upper = Path()
-      ..moveTo(s * 0.20, s * 0.30)
-      ..cubicTo(s * 0.38, s * 0.10, s * 0.66, s * 0.16, s * 0.60, s * 0.38);
-    canvas.drawPath(upper, p);
+    // Hood: sweeps from the left, over the top, hooking down to the right.
+    final hood = Path()
+      ..moveTo(s * 0.16, s * 0.44)
+      ..cubicTo(s * 0.24, s * 0.14, s * 0.62, s * 0.16, s * 0.58, s * 0.42);
+    canvas.drawPath(hood, heavy);
 
-    // Crescent on the right, then the tail sweeping down and left.
+    // Crescent: opens to the left, sitting above the bowl's right shoulder.
+    final crescent = Path()
+      ..moveTo(s * 0.62, s * 0.50)
+      ..cubicTo(s * 0.82, s * 0.44, s * 0.86, s * 0.62, s * 0.70, s * 0.62);
+    canvas.drawPath(crescent, heavy);
+
+    // Tail: drops from the crescent and flicks left under it.
     final tail = Path()
-      ..moveTo(s * 0.62, s * 0.44)
-      ..cubicTo(s * 0.92, s * 0.44, s * 0.94, s * 0.66, s * 0.76, s * 0.70)
-      ..cubicTo(s * 0.62, s * 0.73, s * 0.46, s * 0.68, s * 0.36, s * 0.62);
-    canvas.drawPath(tail, p);
+      ..moveTo(s * 0.70, s * 0.62)
+      ..cubicTo(s * 0.72, s * 0.78, s * 0.54, s * 0.80, s * 0.50, s * 0.68);
+    canvas.drawPath(tail, heavy);
 
-    // Bindu (the dot) above the crescent.
-    canvas.drawCircle(Offset(s * 0.68, s * 0.16), s * 0.075, p);
+    // Bindu: the dot above the crescent.
+    canvas.drawCircle(Offset(s * 0.70, s * 0.18), s * 0.075, heavy);
   }
 
   /// Fallback glyph: a quaver, used for an unknown `icon` name.
@@ -431,6 +452,6 @@ class _GlyphPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _GlyphPainter old) =>
+  bool shouldRepaint(covariant FeaturedChipGlyphPainter old) =>
       old.name != name || old.color != color;
 }
