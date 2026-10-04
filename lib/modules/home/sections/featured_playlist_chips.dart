@@ -11,14 +11,15 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 /// matching the reference design: a colored circle with the admin's icon inside
 /// and the name underneath. Tapping a chip plays that chip's tracks.
 ///
-/// Every chip is admin-defined. Its icon is either an image the admin uploaded
-/// (`icon_url`) or one of the glyphs the painter below knows; the glyphs are
-/// drawn with a [CustomPainter] rather than pulled from an icon font, because
-/// the design uses devotional symbols (a temple gopuram, a flute, a lotus, an
-/// Om, a trishul, a conch, a diya, a bell) that no bundled icon set provides —
-/// and drawing them means the row renders identically offline with no extra
-/// asset weight. An unknown `icon` name falls back to a music glyph, so an admin
-/// typo can never produce an empty circle.
+/// Every chip is admin-defined. Its icon is the image the admin uploaded
+/// (`icon_url`); if there is none, or it fails to load, the chip falls back to
+/// one of the glyphs the painter below knows. The glyphs are drawn with a
+/// [CustomPainter] rather than pulled from an icon font, because the design uses
+/// devotional symbols (a temple gopuram, a flute, a lotus, an Om, a trishul, a
+/// conch, a diya, a bell) that no bundled icon set provides — and drawing them
+/// means the row renders identically offline with no extra asset weight. An
+/// unknown `icon` name falls back to a music glyph, so the circle is never
+/// empty.
 class FeaturedPlaylistChips extends HookConsumerWidget {
   const FeaturedPlaylistChips({super.key});
 
@@ -205,10 +206,12 @@ double _contrastRatio(Color a, Color b) {
 /// and each stays crisp at any size. Unknown names draw the fallback music
 /// note, which is also what an admin typo lands on.
 ///
-/// The recognised names — `temple`, `flute`, `ganesha`, `bow`, `lotus`, `om`,
-/// `trishul`, `conch`, `diya`, `bell` and `music` — must stay in step with
-/// `CHIP_ICON_GLYPHS` in `server/admin.html`; a name offered there that is
-/// missing here would silently render the fallback note.
+/// This is the FALLBACK vocabulary, not a menu: an icon is now an image the
+/// admin uploads in the panel (`featured_playlists.icon_url`), and the glyph is
+/// only drawn when a playlist has no uploaded icon or that icon fails to load.
+/// The admin panel deliberately offers no glyph picker, so this set exists to
+/// keep the already-stored `icon` values working — including the glyphs the
+/// migration seeded onto the six original playlists.
 ///
 /// Public (not private) so the glyph sheet can be rendered to an image in a
 /// test and actually looked at, rather than only asserted not to throw.

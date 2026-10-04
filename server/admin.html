@@ -412,8 +412,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     source of truth: the app ships no built-in playlist list, so every chip below
     comes from here. Each chip plays the ordered tracks you pick for it; keywords
     are an optional extra rule. A playlist with <b>no tracks</b> does not appear
-    on the home screen at all. An uploaded icon image wins over the built-in
-    glyph, which stays as the fallback.
+    on the home screen at all. Each playlist's icon is an image you upload
+    (square WebP); until one is uploaded the app draws a built-in symbol.
   </p>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
     <h3 style="margin-bottom:8px;">New playlist</h3>
@@ -423,16 +423,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
       <div><label>Keywords (comma separated)</label><input id="fpNewKeywords" placeholder="hanuman, bajrang, maruti"></div>
       <div><label>Color from</label><input id="fpNewFrom" placeholder="#ef4444" title="Optional. Leave blank to use the app accent color."></div>
       <div><label>Color to</label><input id="fpNewTo" placeholder="#b91c1c"></div>
-      <div><label>Glyph</label><select id="fpNewIcon">
-        <option value="">(default)</option>
-        <option value="temple">temple</option>
-        <option value="flute">flute</option>
-        <option value="ganesha">ganesha</option>
-        <option value="bow">bow</option>
-        <option value="lotus">lotus</option>
-        <option value="om">om</option>
-        <option value="music">music</option>
-      </select></div>
       <button class="btn btn-success" type="button" onclick="createFeaturedChip()">Create playlist</button>
     </div>
     <div class="special-hint" id="fpNewHint">
@@ -1588,14 +1578,12 @@ function readImageSize(file) {
 // A row is addressed as <kind>:<id> below; the element ids it owns are prefixed
 // sp- for specials and fp- for featured playlists.
 
-// The glyphs the app can paint itself. An uploaded icon image wins over these.
-// Must stay in step with the switch in FeaturedChipGlyphPainter
-// (lib/modules/home/sections/featured_playlist_chips.dart): a name offered here
-// that the painter does not know silently renders the fallback music note.
-const CHIP_ICON_GLYPHS = [
-  '', 'temple', 'flute', 'ganesha', 'bow', 'lotus', 'om',
-  'trishul', 'conch', 'diya', 'bell', 'music',
-];
+// The glyphs the app can paint itself. NOT offered in this panel: an icon is an
+// image the admin uploads (see handleChipIconUpload). These names remain the
+// app's built-in fallback symbol for a playlist with no uploaded icon, and the
+// seeded playlists use them, so the app's painter still knows them - see the
+// switch in FeaturedChipGlyphPainter
+// (lib/modules/home/sections/featured_playlist_chips.dart).
 
 let trackCatalog = null;
 let pickDrafts = {};
@@ -1931,8 +1919,8 @@ function uniqueRowId(base, taken) {
 // This panel IS the catalogue: the app ships no built-in chip list any more, so
 // every chip on the home screen comes from the `featured_playlists` table and is
 // created, edited and deleted here. Membership is the ordered track list picked
-// for each chip; keywords are an optional extra rule. An uploaded icon image
-// wins over the built-in glyph.
+// for each chip; keywords are an optional extra rule. Each chip's icon is an
+// uploaded square WebP image (`icon_url`).
 
 // The accepted wallpaper geometry. Must match the server constants
 // (WALLPAPER_* in server.js).
@@ -1985,7 +1973,9 @@ function renderFeaturedChips() {
     const matchKeywords = row.match_keywords === true;
     const from = row.color_from || '';
     const to = row.color_to || '';
-    const icon = row.icon || '';
+    // `row.icon` (the app's built-in fallback glyph name) is deliberately not
+    // read here: icons are uploaded images now, so this panel neither shows nor
+    // edits the glyph.
     const iconUrl = row.icon_url || '';
     const hidden = row.is_hidden === true;
     const orderValue = row.sort_order == null ? '' : String(row.sort_order);
@@ -1998,11 +1988,13 @@ function renderFeaturedChips() {
       '<div class="special-card" data-chip="' + esc(id) + '">' +
         '<div class="special-banner-wrap" style="display:flex;align-items:center;justify-content:center;background:#f3f4f6;">' +
           (iconUrl
-            // An uploaded image wins; the glyph below is only the fallback.
+            // The uploaded image is what the app draws. With no image the app
+            // falls back to its own built-in symbol, so the preview shows a
+            // neutral "no icon" state rather than guessing at that symbol.
             ? '<img src="' + esc(iconUrl) + '" alt="' + esc(title) + ' icon" ' +
                 'style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;display:block;">'
-            : '<div style="width:86px;height:86px;border-radius:50%;' + grad + 'display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;">' +
-                esc(icon || 'music') +
+            : '<div style="width:86px;height:86px;border-radius:50%;' + grad + 'display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:1.2;padding:4px;box-sizing:border-box;">' +
+                'No icon yet' +
               '</div>') +
         '</div>' +
         '<div class="special-body">' +
@@ -2026,23 +2018,14 @@ function renderFeaturedChips() {
             '<div style="flex:1;"><label class="special-label">Color to</label>' +
             '<input class="special-input" id="fpTo-' + esc(id) + '" value="' + esc(to) + '" placeholder="#b91c1c"></div>' +
           '</div>' +
-          '<label class="special-label">Glyph (fallback when no icon image is uploaded)</label>' +
-          '<select class="special-input" id="fpIcon-' + esc(id) + '">' +
-            CHIP_ICON_GLYPHS.map(function (v) {
-              // The stored value stays the lowercase painter name; only the
-              // label is prettified for the admin.
-              const label = v ? v.charAt(0).toUpperCase() + v.slice(1) : '(default)';
-              return '<option value="' + v + '"' + (v === icon ? ' selected' : '') + '>' + label + '</option>';
-            }).join('') +
-          '</select>' +
           '<label class="special-label">Icon image (square WebP)</label>' +
           '<div class="special-actions" style="margin-top:0;">' +
             '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'fpIconInput-' + esc(id) + '\').click()">Upload icon</button>' +
             (iconUrl ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearChipIcon(\'' + esc(id) + '\')">Remove icon</button>' : '') +
             '<span class="special-hint" style="margin-top:0;">' +
               (iconUrl
-                ? 'Uploaded image in use: it is drawn instead of the glyph.'
-                : 'No image uploaded, so the glyph above is drawn on the gradient.') +
+                ? 'Uploaded image in use: the app draws it inside the circle.'
+                : 'No icon uploaded yet: the app falls back to a built-in symbol until you upload one.') +
             '</span>' +
           '</div>' +
           '<input type="file" id="fpIconInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipIconUpload(this, \'' + esc(id) + '\')">' +
@@ -2079,7 +2062,10 @@ async function saveFeaturedChip(id) {
       keywords: document.getElementById('fpKeywords-' + id).value,
       color_from: document.getElementById('fpFrom-' + id).value,
       color_to: document.getElementById('fpTo-' + id).value,
-      icon: document.getElementById('fpIcon-' + id).value,
+      // `icon` is deliberately NOT sent: the built-in glyph is no longer
+      // editable here. Leaving it out of the payload keeps whatever value the
+      // row already has, so the seeded playlists keep their fallback symbol and
+      // an upload can never be fought over by a stale form field.
       sort_order: document.getElementById('fpOrder-' + id).value === ''
         ? null : Number(document.getElementById('fpOrder-' + id).value),
       is_hidden: document.getElementById('fpHidden-' + id).checked,
@@ -2143,7 +2129,8 @@ async function createFeaturedChip() {
       keywords: keywords,
       color_from: document.getElementById('fpNewFrom').value,
       color_to: document.getElementById('fpNewTo').value,
-      icon: document.getElementById('fpNewIcon').value,
+      // No `icon`: a new playlist has no uploaded icon yet, and the app draws
+      // its built-in symbol until one is uploaded on the row below.
       sort_order: null,
       is_hidden: false,
       // Keywords typed at creation time are used straight away; the row's
@@ -2212,13 +2199,13 @@ async function handleChipIconUpload(input, id) {
   }
 }
 
-// Clears the uploaded icon so the glyph is drawn again.
+// Clears the uploaded icon, so the app goes back to its built-in symbol.
 async function clearChipIcon(id) {
   if (!lock()) return;
   try {
     showLoading(true);
     await putRow('featured', id, { icon_url: null });
-    toast('Icon removed - the glyph is used again');
+    toast('Icon removed - the app falls back to its built-in symbol');
     loadFeaturedChips();
   } catch (e) {
     if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
