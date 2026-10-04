@@ -1365,6 +1365,92 @@ class ServerSupabaseDataRoutes {
     }
   }
 
+  /// GET /supabase/home-wallpaper
+  ///
+  /// Returns the admin-managed home-screen wallpaper as
+  /// `{url: string|null}`. Stored in `app_settings` under
+  /// `home_wallpaper_url` (migration 028). A missing table, a missing row or an
+  /// empty value all resolve to `null`, so the home screen simply renders
+  /// without a wallpaper rather than failing.
+  Future<Response> getHomeWallpaper(Request request) async {
+    try {
+      final sb = await _supabase;
+      String? url;
+      try {
+        final raw = await sb
+            .from('app_settings')
+            .select('value')
+            .eq('key', 'home_wallpaper_url')
+            .maybeSingle();
+        final value = raw?['value']?.toString().trim();
+        if (value != null && value.isNotEmpty) url = value;
+      } catch (_) {
+        // Table absent or unreachable: no wallpaper.
+        url = null;
+      }
+
+      return Response.ok(
+        jsonEncode({'url': url}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
+  /// GET /supabase/featured-playlists
+  ///
+  /// Returns the admin-managed "Featured Playlist" chips shown as round
+  /// buttons under the home carousel: `{items: [{id, title, keywords,
+  /// colorFrom, colorTo, icon, sortOrder, isHidden}]}`.
+  ///
+  /// The chips' TRACKS are not resolved here — the app matches `keywords`
+  /// against the catalogue with the same word-start rule the Specials shelves
+  /// use, so this endpoint stays cheap. A missing table (migration 028 not
+  /// applied) degrades to an empty list and the app falls back to its built-in
+  /// chip defaults.
+  Future<Response> getFeaturedPlaylists(Request request) async {
+    try {
+      final sb = await _supabase;
+      List<Map<String, dynamic>> rows = const [];
+      try {
+        final raw = await sb
+            .from('featured_playlists')
+            .select('*')
+            .order('sort_order', ascending: true, nullsFirst: false);
+        rows = (raw as List<dynamic>).cast<Map<String, dynamic>>();
+      } catch (_) {
+        rows = const [];
+      }
+
+      String? trimmed(dynamic v) {
+        final s = v?.toString().trim();
+        return (s == null || s.isEmpty) ? null : s;
+      }
+
+      final items = rows
+          .map((r) => {
+                'id': r['id']?.toString() ?? '',
+                'title': trimmed(r['title']),
+                'keywords': trimmed(r['keywords']) ?? '',
+                'colorFrom': trimmed(r['color_from']),
+                'colorTo': trimmed(r['color_to']),
+                'icon': trimmed(r['icon']),
+                'sortOrder': r['sort_order'],
+                'isHidden': r['is_hidden'] == true,
+              })
+          .where((m) => (m['id'] as String).isNotEmpty)
+          .toList();
+
+      return Response.ok(
+        jsonEncode({'items': items}),
+        headers: {'content-type': 'application/json'},
+      );
+    } catch (e) {
+      return Response.internalServerError(body: '{"error":"${e.toString()}"}');
+    }
+  }
+
   /// POST /supabase/api/playlists
   ///
   /// Creates a user playlist in the local drift DB. Body: `{name, description}`.

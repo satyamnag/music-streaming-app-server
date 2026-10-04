@@ -1704,6 +1704,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'قائمة تشغيل مميزة';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

@@ -1777,6 +1777,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'फ़ीचर्ड प्लेलिस्ट';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

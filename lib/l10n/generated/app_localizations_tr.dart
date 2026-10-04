@@ -1666,6 +1666,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Öne Çıkan Çalma Listesi';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

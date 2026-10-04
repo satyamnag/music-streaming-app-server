@@ -1676,6 +1676,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Danh sách phát nổi bật';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

@@ -496,6 +496,10 @@
   "ringtone_set": "Ringtone set",
   "ringtone_failed": "Could not set ringtone",
   "specials": "Specials",
+  "featured_playlist": "Featured Playlist",
+  "@featured_playlist": {
+    "description": "Eyebrow label above a featured playlist banner"
+  },
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

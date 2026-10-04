@@ -523,6 +523,7 @@
   "summary_top_track": "En iyi parÃ§a\nbu dÃ¶nem",
   "local": "Yerel",
   "specials": "Specials",
+  "featured_playlist": "Öne Çıkan Çalma Listesi",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

@@ -1655,6 +1655,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Playlist Unggulan';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

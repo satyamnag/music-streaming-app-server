@@ -523,6 +523,7 @@
   "summary_top_track": "à¤¶à¥€à¤°à¥à¤· à¤Ÿà¥à¤°à¥ˆà¤•\nà¤‡à¤¸ à¤…à¤µà¤§à¤¿ à¤®à¥‡à¤‚",
   "local": "à¤¸à¥à¤¥à¤¾à¤¨à¥€à¤¯",
   "specials": "Specials",
+  "featured_playlist": "फ़ीचर्ड प्लेलिस्ट",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

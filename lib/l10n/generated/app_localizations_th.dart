@@ -1759,6 +1759,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'เพลย์ลิสต์แนะนำ';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

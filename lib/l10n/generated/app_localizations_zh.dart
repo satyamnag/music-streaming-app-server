@@ -1645,6 +1645,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => '精选播放列表';
+
+  @override
   String get play_now => 'Play Now';
 
   @override
@@ -3275,6 +3278,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get specials => 'Specials';
+
+  @override
+  String get featured_playlist => '精選播放清單';
 
   @override
   String get play_now => 'Play Now';

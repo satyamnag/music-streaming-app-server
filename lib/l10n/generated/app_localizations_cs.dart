@@ -1654,6 +1654,9 @@ class AppLocalizationsCs extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Doporučený playlist';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

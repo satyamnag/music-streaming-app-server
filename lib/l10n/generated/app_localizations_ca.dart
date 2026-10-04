@@ -1662,6 +1662,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Llista de reproducció destacada';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

@@ -17,6 +17,9 @@ import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
+import 'package:sangeet/modules/home/sections/featured_playlist_chips.dart';
+import 'package:sangeet/modules/home/sections/featured_playlists.dart';
+import 'package:sangeet/modules/home/sections/home_wallpaper.dart';
 import 'package:sangeet/modules/home/sections/specials_carousel.dart';
 import 'package:sangeet/modules/home/sections/track_section.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
@@ -45,6 +48,9 @@ class HomePage extends HookConsumerWidget {
     ref.watch(prewarmHomeStreamsProvider);
     final clerkAuth = ref.watch(clerkAuthProvider);
     final clerkState = clerkAuth.valueOrNull ?? const ClerkAuthState();
+    // Admin-managed home wallpaper. Null (unset, table absent, or a failed
+    // fetch) simply renders the normal themed background.
+    final wallpaperUrl = ref.watch(homeWallpaperProvider).valueOrNull;
 
     return PopScope(
       canPop: !kIsAndroid,
@@ -58,7 +64,15 @@ class HomePage extends HookConsumerWidget {
           headers: [
             if (kTitlebarVisible) const TitleBar(height: 30),
           ],
-          child: material.RefreshIndicator.adaptive(
+          child: Stack(
+            children: [
+              // The wallpaper sits behind everything and does not scroll with
+              // the content, so the header stays legible over it.
+              if (wallpaperUrl != null)
+                Positioned.fill(
+                  child: HomeWallpaper(url: wallpaperUrl),
+                ),
+              material.RefreshIndicator.adaptive(
             // Theme the Material refresh spinner so it matches the app instead
             // of rendering the default grey overlay on pull-down.
             color: context.theme.colorScheme.primary,
@@ -113,6 +127,16 @@ class HomePage extends HookConsumerWidget {
                       elevation: 0,
                       foregroundColor: theme.colorScheme.foreground,
                       actions: [
+                        // Search: opens the app's search page. Placed first so
+                        // the row reads logo | title | search | account |
+                        // settings, matching the design.
+                        IconButton.ghost(
+                          icon: const Icon(SangeetIcons.search, size: 20),
+                          onPressed: () {
+                            context.navigateTo(const SearchRoute());
+                          },
+                        ),
+                        const Gap(10),
                         // Signed-in users see their account avatar (same as the
                         // Google account); signed-out users see the user icon.
                         IconButton.ghost(
@@ -153,6 +177,10 @@ class HomePage extends HookConsumerWidget {
                   // widget collapses to nothing when no shelf has tracks, so
                   // an empty catalogue never shows a blank carousel.
                   const HomeSpecialsCarousel(),
+                  // Round "Featured Playlist" chips (Venkateswara, Krishna,
+                  // Ganesha, ...) directly under the carousel, per the design.
+                  // Collapses to nothing when no chip has matching tracks.
+                  const FeaturedPlaylistChips(),
                   ...switch (sectionsAsync) {
                     AsyncData(value: final sections) => [
                         HomeAlbumsSection(albums: sections.albums),
@@ -223,10 +251,12 @@ class HomePage extends HookConsumerWidget {
                   ),
                 ],
               ),
-            ),
+                  ),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 
   /// Shows a confirmation dialog before the Android back button exits the app.

@@ -1674,6 +1674,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => '추천 재생목록';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

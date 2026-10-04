@@ -523,6 +523,7 @@
   "summary_top_track": "Bester Titel\ndiesen Zeitraum",
   "local": "Lokal",
   "specials": "Specials",
+  "featured_playlist": "Empfohlene Playlist",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

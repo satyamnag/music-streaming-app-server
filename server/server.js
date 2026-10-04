@@ -1262,6 +1262,148 @@ app.delete('/api/admin/specials/:id', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// ------------------------------------------------------------------
+// Home wallpaper (a single app_settings row)
+//
+// The wallpaper is one URL stored under app_settings['home_wallpaper_url'].
+// Key/value rather than a dedicated table so future single-value app settings
+// need no migration. Readers treat NULL and '' as "no wallpaper".
+// ------------------------------------------------------------------
+const WALLPAPER_KEY = 'home_wallpaper_url'
+
+// Admin: read the current wallpaper.
+app.get('/api/admin/wallpaper', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', WALLPAPER_KEY)
+      .maybeSingle()
+    // A missing table (migration 028 not applied) degrades to "no wallpaper"
+    // rather than a 500, so the admin panel still loads.
+    if (error) return res.json({ url: null })
+    res.json({ url: (data && data.value) ? data.value : null })
+  } catch (err) { next(err) }
+})
+
+// Admin: set (or clear, with an empty url) the wallpaper.
+app.put('/api/admin/wallpaper', requireAdmin, async (req, res, next) => {
+  try {
+    const { url } = req.body || {}
+    if (url !== undefined && url !== null && typeof url !== 'string') {
+      return res.status(400).json({ error: 'url must be a string' })
+    }
+    const value = typeof url === 'string' ? url.trim() : ''
+    const { error } = await supabase
+      .from('app_settings')
+      .upsert({ key: WALLPAPER_KEY, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ url: value || null })
+  } catch (err) { next(err) }
+})
+
+// ------------------------------------------------------------------
+// Featured Playlists (the round chips under the home carousel)
+// ------------------------------------------------------------------
+// Reads every featured-playlist row, newest-safe: a missing table degrades to
+// an empty list so an un-migrated project keeps its built-in chips.
+async function readFeaturedPlaylistRows() {
+  try {
+    const { data, error } = await supabase.from('featured_playlists').select('*')
+    if (error || !Array.isArray(data)) return []
+    return data
+  } catch (_) {
+    return []
+  }
+}
+
+// Admin: list the featured playlists.
+app.get('/api/admin/featured-playlists', requireAdmin, async (req, res, next) => {
+  try {
+    res.json(await readFeaturedPlaylistRows())
+  } catch (err) { next(err) }
+})
+
+// Validates one featured-playlist payload. Returns { error } or { row }.
+// Keywords are stored as a comma-separated string; the app splits them. Both
+// colors are optional and validated as hex when present.
+function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
+  const row = {}
+
+  if (body.title !== undefined) {
+    if (typeof body.title !== 'string' || !body.title.trim()) {
+      return { error: 'title must be a non-empty string' }
+    }
+    row.title = body.title.trim()
+  } else if (requireTitle) {
+    return { error: 'title is required' }
+  }
+
+  if (body.keywords !== undefined) {
+    const raw = body.keywords
+    const list = Array.isArray(raw) ? raw : String(raw ?? '').split(',')
+    row.keywords = list
+      .map(k => String(k).trim().toLowerCase())
+      .filter(Boolean)
+      .join(',')
+  }
+
+  for (const key of ['color_from', 'color_to']) {
+    if (!(key in body)) continue
+    const value = body[key]
+    if (value == null || value === '') { row[key] = null; continue }
+    const res = cleanHexColor(value)
+    if (!res.ok) return { error: `${key} must be a hex color like #RRGGBB` }
+    row[key] = res.value
+  }
+
+  if (body.icon !== undefined) {
+    row.icon = typeof body.icon === 'string' && body.icon.trim() ? body.icon.trim() : null
+  }
+
+  if (body.sort_order !== undefined) {
+    row.sort_order = body.sort_order == null ? null
+      : (Number.isFinite(Number(body.sort_order)) ? Math.floor(Number(body.sort_order)) : null)
+  }
+
+  if (body.is_hidden !== undefined) row.is_hidden = Boolean(body.is_hidden)
+
+  return { row }
+}
+
+// Admin: create or update one featured playlist (upsert by id).
+app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const id = String(req.params.id || '').trim()
+    if (!id) return res.status(400).json({ error: 'id is required' })
+    if (!/^[a-z0-9-]{1,64}$/.test(id)) {
+      return res.status(400).json({ error: 'id must be lowercase letters, digits or dashes' })
+    }
+    const { error: payloadError, row } = readFeaturedPlaylistPayload(req.body || {})
+    if (payloadError) return res.status(400).json({ error: payloadError })
+    if (Object.keys(row).length === 0) return res.status(400).json({ error: 'nothing to update' })
+
+    row.updated_at = new Date().toISOString()
+    const { data, error } = await supabase
+      .from('featured_playlists')
+      .upsert({ id, ...row }, { onConflict: 'id' })
+      .select()
+      .single()
+    if (error) return res.status(500).json({ error: error.message })
+    res.json(data)
+  } catch (err) { next(err) }
+})
+
+// Admin: delete one featured playlist (it reverts to the built-in default when
+// its id matches one, otherwise it simply disappears).
+app.delete('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { error } = await supabase.from('featured_playlists').delete().eq('id', req.params.id)
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
 // Public CDN base for the R2 bucket, e.g. https://music.soulfulbhakti.com
 // Audio is served from here ONLY. Supabase Storage must never serve audio:
 // signed-URL audio exhausted the Storage CDN (cached) egress quota in Aug 2026,
@@ -1380,6 +1522,20 @@ const SPECIAL_BANNER_RATIO = 8 / 3
 const SPECIAL_BANNER_LABEL = '8:3 (2.67:1)'
 const SPECIAL_BANNER_WIDTH = 1440
 const SPECIAL_BANNER_HEIGHT = 540
+
+// The home wallpaper is a full-screen phone background, so it is PORTRAIT 9:16.
+// A portrait image avoids letterboxing or a hard crop on any phone aspect: the
+// app applies a slight cover-scale and dims it, so small deviations are safe.
+//
+// 1080x1920 is the canonical export size (a standard phone resolution, crisp on
+// high-density screens without being a large file).
+const WALLPAPER_ASPECT_RATIO = 9 / 16
+const WALLPAPER_LABEL = '9:16 (0.5625:1)'
+const WALLPAPER_WIDTH = 1080
+const WALLPAPER_HEIGHT = 1920
+// Phone screens vary from 9:16 to 9:21, so accept a slightly wider band than
+// the Specials banner's 2%: a 9:19.5 phone wallpaper must not be rejected.
+const WALLPAPER_RATIO_TOLERANCE = 0.22
 
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).
@@ -2117,6 +2273,27 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
           error: `Special banner must be landscape ${SPECIAL_BANNER_LABEL} `
             + `(got ${size.width}x${size.height}). `
             + `Recommended ${SPECIAL_BANNER_WIDTH}x${SPECIAL_BANNER_HEIGHT}.`,
+        })
+      }
+    }
+
+    // The home wallpaper is a full-screen background: STRICTLY WebP and
+    // STRICTLY portrait, so it fills a phone screen without letterboxing. The
+    // ratio is enforced from the file header so the rule holds even when the
+    // API is called directly rather than through the admin panel.
+    if (req.body && req.body.kind === 'home_wallpaper') {
+      if (ext !== 'webp') {
+        return res.status(400).json({ error: 'Wallpaper must be a WebP file' })
+      }
+      const size = readWebpSize(req.file.buffer)
+      if (!size) {
+        return res.status(400).json({ error: 'Could not read that WebP image (is the file complete?)' })
+      }
+      if (!matchesAspectRatio(size, WALLPAPER_ASPECT_RATIO, WALLPAPER_RATIO_TOLERANCE)) {
+        return res.status(400).json({
+          error: `Wallpaper must be portrait ${WALLPAPER_LABEL} `
+            + `(got ${size.width}x${size.height}). `
+            + `Recommended ${WALLPAPER_WIDTH}x${WALLPAPER_HEIGHT}.`,
         })
       }
     }

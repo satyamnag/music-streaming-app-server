@@ -10,20 +10,21 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/specials.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
-/// Full-width "Specials" carousel shown above the Albums shelf on the home
-/// screen. Each slide is a curated shelf (e.g. "Ganesha Special") with a
-/// "Play Now" button that starts its whole queue.
+/// Full-width "Featured Playlist" carousel shown above the Albums shelf on the
+/// home screen. Each slide is a curated shelf (e.g. "Ganesha Special") rendered
+/// as a large banner with a "FEATURED PLAYLIST" eyebrow, the title, its song
+/// count and a "Play Now" button that starts the whole queue.
 ///
 /// Layout notes:
-///  - Each slide occupies ~90% of the viewport width so the neighbouring slide
-///    peeks in, signalling that the row scrolls.
+///  - Each slide occupies ~92% of the viewport width so the neighbouring slide
+///    peeks in, signalling that the row scrolls (matching the reference design).
 ///  - The list uses a [PageView] with `viewportFraction`, giving natural
 ///    snap-to-slide paging plus a dot indicator, rather than a free-scrolling
 ///    ListView that would not snap or report its page.
 ///  - Page dots appear only when there is more than one slide.
 class HomeSpecialsCarousel extends HookConsumerWidget {
-  /// Fraction of the viewport width one slide occupies (~90% as requested).
-  static const double slideWidthFraction = 0.9;
+  /// Fraction of the viewport width one slide occupies (~92%).
+  static const double slideWidthFraction = 0.92;
 
   /// Aspect ratio of an admin-uploaded landscape banner: 8:3 (2.667:1).
   ///
@@ -31,8 +32,13 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
   /// from the artwork's own ratio and never letterbox or stretch a banner.
   static const double bannerAspectRatio = 8 / 3;
 
-  /// Slide height when the shelf has NO banner and falls back to square track
-  /// art: sized to hold the square artwork band plus the title/subtitle/button.
+  /// Aspect ratio of a slide that has NO admin banner and falls back to its
+  /// track artwork. Taller than the 8:3 banner because the copy block (eyebrow
+  /// + title + count + button) needs room beside a square cover.
+  static const double fallbackAspectRatio = 16 / 9;
+
+  /// Slide height when the shelf has NO banner: sized to hold the square
+  /// artwork band plus the title/subtitle/button.
   static const double slideHeight = 190;
 
   const HomeSpecialsCarousel({super.key});
@@ -55,16 +61,6 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16 * scale),
-              child: Text(
-                context.l10n.specials,
-                style: theme.typography.h4.copyWith(
-                  color: theme.colorScheme.foreground,
-                ),
-              ),
-            ),
-            Gap(8 * scale),
             // The row is tall enough for the tallest slide shape: a banner is
             // 8:3 (short), while a shelf without a banner falls back to the
             // square-art layout (taller). Each slide centres itself in the row,
@@ -153,9 +149,10 @@ class _SpecialSlide extends StatelessWidget {
 
 /// A slide backed by an admin-uploaded landscape banner (8:3 WebP).
 ///
-/// The artwork fills the slide and a gradient scrim sits underneath the text
-/// so the copy stays legible whatever the banner's brightness — banners are
-/// photographs/illustrations, so the copy cannot rely on the theme palette.
+/// Matches the reference design: the artwork fills the slide, a scrim darkens
+/// the left so the copy stays legible whatever the banner's brightness, and the
+/// copy block reads as an eyebrow ("FEATURED PLAYLIST"), the playlist name in a
+/// large display face, its song count, then the "Play Now" button.
 class _BannerSlide extends StatelessWidget {
   final HomeSpecial special;
   final String cover;
@@ -190,16 +187,16 @@ class _BannerSlide extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           UniversalImage(path: cover, fit: BoxFit.cover),
-          // Scrim: darkens the left/bottom so white copy reads on any banner.
+          // Scrim: darkens the left so white copy reads on any banner.
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  Color(0xCC000000),
-                  Color(0x99000000),
-                  Color(0x33000000),
+                  Color(0xE6000000),
+                  Color(0xB3000000),
+                  Color(0x1A000000),
                 ],
                 stops: [0.0, 0.55, 1.0],
               ),
@@ -210,38 +207,37 @@ class _BannerSlide extends StatelessWidget {
               horizontal: 14 * scale,
               vertical: 10 * scale,
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        special.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.typography.base.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(color: Color(0x99000000), blurRadius: 4),
-                          ],
-                        ),
-                      ),
-                      Gap(1 * scale),
-                      Text(
-                        special.subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.typography.xSmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.88),
-                          shadows: const [
-                            Shadow(color: Color(0x99000000), blurRadius: 4),
-                          ],
-                        ),
-                      ),
+                _FeaturedEyebrow(scale: scale),
+                Gap(3 * scale),
+                Text(
+                  // The shelf titles already end in "Special"; the design shows
+                  // a bare playlist name, so the suffix is dropped for display.
+                  _displayTitle(special.title),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.typography.h3.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.05,
+                    shadows: const [
+                      Shadow(color: Color(0x99000000), blurRadius: 6),
+                    ],
+                  ),
+                ),
+                Gap(2 * scale),
+                Text(
+                  context.l10n.songs_count(special.tracks.length),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.typography.xSmall.copyWith(
+                    color: Colors.white.withValues(alpha: 0.90),
+                    shadows: const [
+                      Shadow(color: Color(0x99000000), blurRadius: 4),
                     ],
                   ),
                 ),
@@ -251,6 +247,44 @@ class _BannerSlide extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Strips a trailing " Special" from a shelf title for the banner headline.
+///
+/// The curated shelves are named "Ganesha Special", "Rama Special", ... which
+/// is correct in the admin panel but reads as a label rather than a playlist
+/// name on the banner. An admin-set title without the suffix is left untouched.
+String _displayTitle(String title) {
+  final trimmed = title.trim();
+  const suffix = ' special';
+  if (trimmed.toLowerCase().endsWith(suffix)) {
+    final stripped = trimmed.substring(0, trimmed.length - suffix.length).trim();
+    if (stripped.isNotEmpty) return stripped;
+  }
+  return trimmed;
+}
+
+/// The small uppercase "FEATURED PLAYLIST" label above a banner's title.
+class _FeaturedEyebrow extends StatelessWidget {
+  final double scale;
+
+  const _FeaturedEyebrow({required this.scale});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      context.l10n.featured_playlist.toUpperCase(),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.typography.xSmall.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.4,
+        color: Colors.white.withValues(alpha: 0.85),
+        shadows: const [Shadow(color: Color(0x99000000), blurRadius: 4)],
       ),
     );
   }
@@ -376,21 +410,23 @@ class _SquareSlide extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        special.title,
+                        context.l10n.featured_playlist.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.typography.xSmall.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.4,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Gap(2 * scale),
+                      Text(
+                        _displayTitle(special.title),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.typography.base.copyWith(
                           fontWeight: FontWeight.w700,
                           color: titleColor,
-                        ),
-                      ),
-                      Gap(2 * scale),
-                      Text(
-                        special.subtitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.typography.xSmall.copyWith(
-                          color: subtitleColor,
                         ),
                       ),
                       Gap(2 * scale),

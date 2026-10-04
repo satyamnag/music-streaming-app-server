@@ -522,6 +522,7 @@
   "summary_top_track": "ãƒˆãƒƒãƒ—æ›²\nã“ã®æœŸé–“",
   "local": "ãƒ­ãƒ¼ã‚«ãƒ«",
   "specials": "Specials",
+  "featured_playlist": "おすすめプレイリスト",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

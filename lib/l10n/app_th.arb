@@ -524,6 +524,7 @@
   "summary_top_track": "à¹€à¸žà¸¥à¸‡à¸­à¸±à¸™à¸”à¸±à¸šà¸•à¹‰à¸™\nà¸Šà¹ˆà¸§à¸‡à¹€à¸§à¸¥à¸²à¸™à¸µà¹‰",
   "local": "à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡",
   "specials": "Specials",
+  "featured_playlist": "เพลย์ลิสต์แนะนำ",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

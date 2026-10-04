@@ -521,6 +521,7 @@
   "summary_top_track": "Nangungunang track\nngayong panahon",
   "local": "Lokal",
   "specials": "Specials",
+  "featured_playlist": "Tampok na Playlist",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

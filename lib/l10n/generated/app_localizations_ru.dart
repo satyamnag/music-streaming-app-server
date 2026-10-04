@@ -1737,6 +1737,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Рекомендуемый плейлист';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

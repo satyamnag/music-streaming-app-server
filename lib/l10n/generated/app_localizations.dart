@@ -3135,6 +3135,12 @@ abstract class AppLocalizations {
   /// **'Specials'**
   String get specials;
 
+  /// Eyebrow label above a featured playlist banner
+  ///
+  /// In en, this message translates to:
+  /// **'Featured Playlist'**
+  String get featured_playlist;
+
   /// No description provided for @play_now.
   ///
   /// In en, this message translates to:

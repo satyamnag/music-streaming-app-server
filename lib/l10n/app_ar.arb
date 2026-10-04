@@ -523,6 +523,7 @@
   "summary_top_track": "Ø£ÙØ¶Ù„ Ø£ØºÙ†ÙŠØ©\nÙ‡Ø°Ù‡ Ø§Ù„ÙØªØ±Ø©",
   "local": "Ù…Ø­Ù„ÙŠ",
   "specials": "Specials",
+  "featured_playlist": "قائمة تشغيل مميزة",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

@@ -523,6 +523,7 @@
   "summary_top_track": "BÃ i hÃ¡t hÃ ng Ä‘áº§u\nká»³ nÃ y",
   "local": "Cá»¥c bá»™",
   "specials": "Specials",
+  "featured_playlist": "Danh sách phát nổi bật",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

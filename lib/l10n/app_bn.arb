@@ -523,6 +523,7 @@
   "summary_top_track": "à¦¶à§€à¦°à§à¦· à¦Ÿà§à¦°à§à¦¯à¦¾à¦•\nà¦à¦‡ à¦¸à¦®à¦¯à¦¼à§‡",
   "local": "à¦¸à§à¦¥à¦¾à¦¨à§€à¦¯à¦¼",
   "specials": "Specials",
+  "featured_playlist": "ফিচার্ড প্লেলিস্ট",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

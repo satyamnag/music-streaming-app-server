@@ -1668,6 +1668,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Playlist en vedette';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

@@ -523,6 +523,7 @@
   "summary_top_track": "æœ€ä½³æ›²ç›®\næœ¬æ™‚æœŸ",
   "local": "æœ¬æ©Ÿ",
   "specials": "Specials",
+  "featured_playlist": "精選播放清單",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {

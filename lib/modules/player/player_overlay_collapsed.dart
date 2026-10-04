@@ -19,9 +19,13 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
   /// minHeight with it) so the panel geometry and the content can never drift
   /// apart — a mismatch would clip the timeline or leave dead space.
   ///
-  /// Budget: artwork/title row + [TimelineBar] (~20px slider + ~17px label row)
-  /// + the 5px outer padding above and below.
-  static const double collapsedHeight = 104;
+  /// Budget: artwork/title row + [TimelineBar] (one row: the elapsed and total
+  /// labels flank the slider) + the 5px outer padding above and below.
+  ///
+  /// Reduced from 104 once the timeline became a single row instead of a slider
+  /// with a second label row beneath it, so the bar sits tight under the track
+  /// name exactly as in the design.
+  static const double collapsedHeight = 86;
 
   final PanelController panelController;
   const PlayerOverlayCollapsedSection({

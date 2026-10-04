@@ -1820,6 +1820,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'சிறப்பு பிளேலிஸ்ட்';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

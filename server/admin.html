@@ -254,6 +254,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-specials" title="Specials" onclick="showView('specials')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h6M6 14h4"/><circle cx="17" cy="12" r="2"/></svg></span><span class="label">Specials</span></button>
     <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-featured" title="Featured Playlists" onclick="showView('featured')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span><span class="label">Featured Playlists</span></button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-item" id="nav-appearance" title="Appearance" onclick="showView('appearance')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="label">Appearance</span></button>
+    <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
   </nav>
   <div class="content">
@@ -349,6 +353,50 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     tracks' cover art. A shelf appears only when tracks match its theme.
   </p>
   <div id="specialsList"></div>
+</div>
+
+<div id="featuredPanel" class="view">
+  <h2 style="margin-bottom:4px;">Featured Playlists</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:14px;">
+    The round buttons shown in a row under the home carousel
+    ("Venkateswara", "Krishna", "Ganesha", ...). Each chip plays the tracks
+    whose title, album, artist or tags match its keywords. A chip is hidden
+    automatically when nothing matches, so the row never shows a dead button.
+    Leave a field blank to use the built-in default.
+  </p>
+  <div id="featuredList"></div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-top:16px;">
+    <h3 style="margin-bottom:8px;">Add a custom chip</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label>Id *</label><input id="fpNewId" placeholder="e.g. hanuman" title="Lowercase letters, digits or dashes. Used as the stable id."></div>
+      <div><label>Name *</label><input id="fpNewTitle" placeholder="e.g. Hanuman"></div>
+      <div><label>Keywords (comma separated) *</label><input id="fpNewKeywords" placeholder="hanuman, bajrang, maruti"></div>
+      <div><label>Color from</label><input id="fpNewFrom" placeholder="#ef4444" title="Optional. Leave blank to use the app accent color."></div>
+      <div><label>Color to</label><input id="fpNewTo" placeholder="#b91c1c"></div>
+      <div><label>Icon</label><select id="fpNewIcon">
+        <option value="">(default)</option>
+        <option value="temple">temple</option>
+        <option value="flute">flute</option>
+        <option value="ganesha">ganesha</option>
+        <option value="bow">bow</option>
+        <option value="lotus">lotus</option>
+        <option value="om">om</option>
+        <option value="music">music</option>
+      </select></div>
+      <button class="btn btn-success" onclick="createFeaturedChip()">Add chip</button>
+    </div>
+  </div>
+</div>
+
+<div id="appearancePanel" class="view">
+  <h2 style="margin-bottom:4px;">Appearance</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:14px;">
+    The home screen wallpaper, shown behind everything on the app's home page.
+    Upload a portrait 9:16 WebP; the app fits it to the screen and dims it so
+    the headings and cards stay readable. Remove it to return to the plain
+    themed background.
+  </p>
+  <div id="wallpaperBox"></div>
 </div>
 
 <div id="affiliatesPanel" class="view">
@@ -1148,6 +1196,8 @@ function showView(view) {
   else if (view === 'albums') loadAlbums();
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (view === 'specials') { loadSpecials(); }
+  else if (view === 'featured') { loadFeaturedChips(); }
+  else if (view === 'appearance') { loadWallpaper(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
@@ -1156,6 +1206,8 @@ function refreshCurrent() {
   else if (currentView === 'albums') loadAlbums();
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
   else if (currentView === 'specials') { loadSpecials(); }
+  else if (currentView === 'featured') { loadFeaturedChips(); }
+  else if (currentView === 'appearance') { loadWallpaper(); }
   else if (currentView === 'affiliates') { loadAffiliates(); loadCommissions(); }
 }
 
@@ -1406,6 +1458,374 @@ function readImageSize(file) {
     };
     img.src = url;
   });
+}
+
+// ==================================================================
+// Featured Playlists (the round chips under the home carousel)
+// ==================================================================
+// Mirrors the app's built-in chip defaults
+// (lib/modules/home/sections/featured_playlists.dart). The admin can override
+// any built-in chip's name/keywords/colors/icon, reorder or hide it, and add
+// extra chips. A chip with no row keeps its built-in defaults.
+const FEATURED_CHIPS = [
+  { id: 'venkateswara', title: 'Venkateswara', keywords: 'venkateswara, venkateshwara, balaji, govinda, tirupati, srinivasa, niluvadu', colorFrom: '#f2a33c', colorTo: '#d97706', icon: 'temple' },
+  { id: 'krishna', title: 'Krishna', keywords: 'krishna, govardhan, radha, murali, gopala, madhav, keshav, gopika', colorFrom: '#3b82f6', colorTo: '#1d4ed8', icon: 'flute' },
+  { id: 'ganesha', title: 'Ganesha', keywords: 'ganesh, ganapati, ganapathi, vinayaka, vighnesh, gajanana, vakratunda, lambodara', colorFrom: '#ef4444', colorTo: '#b91c1c', icon: 'ganesha' },
+  { id: 'rama', title: 'Rama', keywords: 'rama, sita, hanuman, ayodhya, raghu', colorFrom: '#fb923c', colorTo: '#ea580c', icon: 'bow' },
+  { id: 'devi', title: 'Devi', keywords: 'devi, durga, lakshmi, laxmi, parvati, shakti, ambika, bhavani, mahalakshmi', colorFrom: '#ec4899', colorTo: '#be185d', icon: 'lotus' },
+  { id: 'chants', title: 'Chants', keywords: 'mantra, stotram, stotra, ashtakam, sahasranama, suprabhatam, sloka, chants', colorFrom: '#8b5cf6', colorTo: '#6d28d9', icon: 'om' },
+];
+
+// The accepted wallpaper geometry. Must match the server constants
+// (WALLPAPER_* in server.js).
+const WALLPAPER_RATIO = 9 / 16;
+const WALLPAPER_WIDTH = 1080;
+const WALLPAPER_HEIGHT = 1920;
+const WALLPAPER_LABEL = '9:16 portrait';
+// Phone screens range from 9:16 to about 9:21, so the ratio band is wider than
+// the banner's (0.22 = ~22%), matching the server's tolerance.
+const WALLPAPER_RATIO_TOLERANCE = 0.22;
+
+let featuredRows = [];
+
+async function loadFeaturedChips() {
+  const box = document.getElementById('featuredList');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading…</div>';
+  try {
+    const res = await authedFetch('/api/admin/featured-playlists', { credentials: 'same-origin' });
+    featuredRows = res.ok ? (await res.json()) : [];
+    if (!Array.isArray(featuredRows)) featuredRows = [];
+  } catch (e) {
+    featuredRows = [];
+  }
+  renderFeaturedChips();
+}
+
+function renderFeaturedChips() {
+  const box = document.getElementById('featuredList');
+  if (!box) return;
+  const byId = {};
+  featuredRows.forEach(function (r) { byId[r.id] = r; });
+
+  // Built-in chips first (in curated order), then any extra admin-only chips,
+  // exactly how the app composes the row.
+  const known = FEATURED_CHIPS.map(function (c) { return c.id; });
+  const extras = featuredRows.filter(function (r) { return known.indexOf(r.id) === -1; })
+    .map(function (r) { return { id: r.id, title: r.title, keywords: '', colorFrom: '', colorTo: '', icon: '' }; });
+  const all = FEATURED_CHIPS.concat(extras);
+
+  box.innerHTML = all.map(function (chip) {
+    const row = byId[chip.id] || {};
+    const title = row.title || chip.title;
+    const keywords = row.keywords != null && row.keywords !== '' ? row.keywords : chip.keywords;
+    const from = row.color_from || chip.colorFrom || '';
+    const to = row.color_to || chip.colorTo || '';
+    const icon = row.icon || chip.icon || '';
+    const hidden = row.is_hidden === true;
+    const order = row.sort_order == null ? '' : row.sort_order;
+    const isBuiltIn = known.indexOf(chip.id) !== -1;
+    const grad = (from && to)
+      ? 'background:linear-gradient(135deg,' + esc(from) + ',' + esc(to) + ');'
+      : 'background:#9ca3af;';
+
+    return '' +
+      '<div class="special-card" data-chip="' + esc(chip.id) + '">' +
+        '<div class="special-banner-wrap" style="display:flex;align-items:center;justify-content:center;background:#f3f4f6;">' +
+          '<div style="width:86px;height:86px;border-radius:50%;' + grad + 'display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;">' +
+            esc(icon || 'music') +
+          '</div>' +
+        '</div>' +
+        '<div class="special-body">' +
+          '<div class="special-head">' +
+            '<strong>' + esc(title) + '</strong>' +
+            (hidden ? '<span class="special-hidden-badge">Hidden</span>' : '') +
+            (isBuiltIn ? '' : '<span class="special-hidden-badge" style="background:#e0e7ff;color:#3730a3;">Custom</span>') +
+          '</div>' +
+          '<label class="special-label">Name</label>' +
+          '<input class="special-input" id="fpTitle-' + esc(chip.id) + '" value="' + esc(title) + '" placeholder="' + esc(chip.title) + '">' +
+          '<label class="special-label">Keywords (comma separated)</label>' +
+          '<input class="special-input" id="fpKeywords-' + esc(chip.id) + '" value="' + esc(keywords) + '" placeholder="e.g. krishna, govinda">' +
+          '<div style="display:flex;gap:8px;">' +
+            '<div style="flex:1;"><label class="special-label">Color from</label>' +
+            '<input class="special-input" id="fpFrom-' + esc(chip.id) + '" value="' + esc(from) + '" placeholder="#ef4444"></div>' +
+            '<div style="flex:1;"><label class="special-label">Color to</label>' +
+            '<input class="special-input" id="fpTo-' + esc(chip.id) + '" value="' + esc(to) + '" placeholder="#b91c1c"></div>' +
+          '</div>' +
+          '<label class="special-label">Icon</label>' +
+          '<select class="special-input" id="fpIcon-' + esc(chip.id) + '">' +
+            ['', 'temple', 'flute', 'ganesha', 'bow', 'lotus', 'om', 'music'].map(function (v) {
+              return '<option value="' + v + '"' + (v === icon ? ' selected' : '') + '>' + (v || '(default)') + '</option>';
+            }).join('') +
+          '</select>' +
+          '<label class="special-label">Sort order (lower shows first)</label>' +
+          '<input class="special-input" type="number" id="fpOrder-' + esc(chip.id) + '" value="' + esc(order) + '" placeholder="default">' +
+          '<div class="special-actions">' +
+            '<button class="btn btn-success btn-sm" type="button" onclick="saveFeaturedChip(\'' + esc(chip.id) + '\')">Save</button>' +
+            (isBuiltIn ? '<button class="btn btn-secondary btn-sm" type="button" onclick="resetFeaturedChip(\'' + esc(chip.id) + '\')">Reset to defaults</button>' : '') +
+            '<button class="btn btn-danger btn-sm" type="button" onclick="deleteFeaturedChip(\'' + esc(chip.id) + '\')">Delete</button>' +
+            '<label class="special-toggle"><input type="checkbox" id="fpHidden-' + esc(chip.id) + '"' + (hidden ? ' checked' : '') + '> Hide chip</label>' +
+          '</div>' +
+          '<div class="special-hint" id="fpHint-' + esc(chip.id) + '"></div>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function featuredHint(id, message, cls) {
+  const el = document.getElementById('fpHint-' + id);
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'special-hint' + (cls ? ' ' + cls : '');
+}
+
+async function saveFeaturedChip(id) {
+  const payload = {
+    title: document.getElementById('fpTitle-' + id).value,
+    keywords: document.getElementById('fpKeywords-' + id).value,
+    color_from: document.getElementById('fpFrom-' + id).value,
+    color_to: document.getElementById('fpTo-' + id).value,
+    icon: document.getElementById('fpIcon-' + id).value,
+    sort_order: document.getElementById('fpOrder-' + id).value,
+    is_hidden: document.getElementById('fpHidden-' + id).checked,
+  };
+  featuredHint(id, 'Saving…', 'is-busy');
+  try {
+    const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Save failed');
+    }
+    toast('Chip saved');
+    loadFeaturedChips();
+  } catch (e) {
+    featuredHint(id, '✗ ' + e.message, 'is-error');
+  }
+}
+
+async function resetFeaturedChip(id) {
+  openConfirm('Reset chip', 'Reset this chip to its built-in defaults?', async function () {
+    try {
+      const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
+        method: 'DELETE', credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(function () { return {}; });
+        throw new Error(e.error || 'Reset failed');
+      }
+      toast('Chip reset');
+      loadFeaturedChips();
+    } catch (e) {
+      featuredHint(id, '✗ ' + e.message, 'is-error');
+    }
+  }, 'Reset');
+}
+
+async function deleteFeaturedChip(id) {
+  const isBuiltIn = FEATURED_CHIPS.some(function (c) { return c.id === id; });
+  openConfirm(
+    'Delete chip',
+    isBuiltIn
+      ? 'Delete this chip? The built-in default returns until you hide it instead.'
+      : 'Delete this custom chip?',
+    async function () {
+      try {
+        const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const e = await res.json().catch(function () { return {}; });
+          throw new Error(e.error || 'Delete failed');
+        }
+        toast('Chip deleted');
+        loadFeaturedChips();
+      } catch (e) {
+        featuredHint(id, '✗ ' + e.message, 'is-error');
+      }
+    },
+    'Delete');
+}
+
+async function createFeaturedChip() {
+  const id = (document.getElementById('fpNewId').value || '').trim().toLowerCase();
+  const title = (document.getElementById('fpNewTitle').value || '').trim();
+  const keywords = (document.getElementById('fpNewKeywords').value || '').trim();
+  if (!id) return toast('An id is required');
+  if (!/^[a-z0-9-]{1,64}$/.test(id)) return toast('Id must be lowercase letters, digits or dashes');
+  if (!title) return toast('A name is required');
+  if (!keywords) return toast('At least one keyword is required');
+
+  try {
+    const res = await authedFetch('/api/admin/featured-playlists/' + encodeURIComponent(id), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: title,
+        keywords: keywords,
+        color_from: document.getElementById('fpNewFrom').value,
+        color_to: document.getElementById('fpNewTo').value,
+        icon: document.getElementById('fpNewIcon').value,
+      }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Could not add the chip');
+    }
+    ['fpNewId', 'fpNewTitle', 'fpNewKeywords', 'fpNewFrom', 'fpNewTo'].forEach(function (f) {
+      document.getElementById(f).value = '';
+    });
+    toast('Chip added');
+    loadFeaturedChips();
+  } catch (e) {
+    toast('✗ ' + e.message);
+  }
+}
+
+// ==================================================================
+// Appearance (home-screen wallpaper)
+// ==================================================================
+
+async function loadWallpaper() {
+  const box = document.getElementById('wallpaperBox');
+  if (!box) return;
+  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading…</div>';
+  let url = null;
+  try {
+    const res = await authedFetch('/api/admin/wallpaper', { credentials: 'same-origin' });
+    if (res.ok) {
+      const data = await res.json();
+      url = data && data.url ? data.url : null;
+    }
+  } catch (e) {
+    url = null;
+  }
+  renderWallpaper(url);
+}
+
+function renderWallpaper(url) {
+  const box = document.getElementById('wallpaperBox');
+  if (!box) return;
+  box.innerHTML = '' +
+    '<div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">' +
+      '<h3 style="margin-bottom:8px;">Home wallpaper</h3>' +
+      '<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">' +
+        '<div style="width:150px;height:266px;border-radius:10px;overflow:hidden;border:1px solid #ddd;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">' +
+          (url
+            ? '<img src="' + esc(url) + '" alt="Home wallpaper" style="width:100%;height:100%;object-fit:cover;">'
+            : '<span style="color:#9ca3af;font-size:12px;text-align:center;padding:8px;">No wallpaper<br><small>Using the plain themed background</small></span>') +
+        '</div>' +
+        '<div style="flex:1;min-width:260px;">' +
+          '<p style="font-size:12px;color:#666;margin-bottom:10px;">' +
+            'Portrait ' + WALLPAPER_LABEL + ' WebP, ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' recommended. ' +
+            'The app fits it to the screen and dims the top and bottom so the header and mini player stay readable.' +
+          '</p>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+            '<button class="btn btn-primary" type="button" onclick="document.getElementById(\'wallpaperInput\').click()">' +
+              (url ? 'Replace wallpaper' : 'Upload wallpaper') +
+            '</button>' +
+            (url ? '<button class="btn btn-danger" type="button" onclick="clearWallpaper()">Remove wallpaper</button>' : '') +
+            '<button class="btn btn-secondary" type="button" onclick="loadWallpaper()">Refresh</button>' +
+          '</div>' +
+          '<input type="file" id="wallpaperInput" accept=".webp,image/webp" style="display:none" onchange="handleWallpaperUpload(this)">' +
+          '<div class="special-hint" id="wallpaperHint"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function wallpaperHint(message, cls) {
+  const el = document.getElementById('wallpaperHint');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'special-hint' + (cls ? ' ' + cls : '');
+}
+
+async function handleWallpaperUpload(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  try {
+    // 1) Format: WebP only, matching the server's rule.
+    const isWebp = file.type === 'image/webp' || /\.webp$/i.test(file.name);
+    if (!isWebp) {
+      wallpaperHint('✗ That is not a WebP file. Export the wallpaper as WebP and try again.', 'is-error');
+      return;
+    }
+
+    // 2) Geometry: portrait 9:16 within the server's tolerance, so a 9:19.5
+    //    phone wallpaper is accepted while a landscape image is rejected.
+    wallpaperHint('Checking dimensions…', 'is-busy');
+    const dims = await readImageSize(file);
+    const ratio = dims.width / dims.height;
+    if (Math.abs(ratio - WALLPAPER_RATIO) / WALLPAPER_RATIO > WALLPAPER_RATIO_TOLERANCE) {
+      wallpaperHint(
+        '✗ Wrong aspect ratio: got ' + dims.width + '×' + dims.height + ' (' + ratio.toFixed(2) + ':1). ' +
+        'Wallpaper must be ' + WALLPAPER_LABEL + ' — ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' recommended.',
+        'is-error');
+      return;
+    }
+
+    // 3) Upload, then store the URL.
+    wallpaperHint('Uploading…', 'is-busy');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('kind', 'home_wallpaper');
+
+    const up = await authedFetch('/api/admin/upload', {
+      method: 'POST', credentials: 'same-origin', body: form,
+    });
+    if (!up.ok) {
+      const e = await up.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Upload failed');
+    }
+    const uploaded = await up.json();
+    const url = uploaded.thumbnail_url;
+    if (!url) throw new Error('Upload returned no URL');
+
+    const save = await authedFetch('/api/admin/wallpaper', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url }),
+    });
+    if (!save.ok) {
+      const e = await save.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Saving the wallpaper failed');
+    }
+    toast('Wallpaper uploaded');
+    loadWallpaper();
+  } catch (e) {
+    wallpaperHint('✗ ' + e.message, 'is-error');
+  } finally {
+    input.value = '';
+  }
+}
+
+function clearWallpaper() {
+  openConfirm('Remove wallpaper', 'Remove the home wallpaper and return to the plain background?', async function () {
+    try {
+      const res = await authedFetch('/api/admin/wallpaper', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: '' }),
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(function () { return {}; });
+        throw new Error(e.error || 'Could not remove the wallpaper');
+      }
+      toast('Wallpaper removed');
+      loadWallpaper();
+    } catch (e) {
+      wallpaperHint('✗ ' + e.message, 'is-error');
+    }
+  }, 'Remove');
 }
 
 

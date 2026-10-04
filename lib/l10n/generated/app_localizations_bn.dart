@@ -1792,6 +1792,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'ফিচার্ড প্লেলিস্ট';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

@@ -1657,6 +1657,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Playlist em destaque';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

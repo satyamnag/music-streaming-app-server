@@ -1800,6 +1800,9 @@ class AppLocalizationsKa extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'გამორჩეული დასაკრავი სია';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

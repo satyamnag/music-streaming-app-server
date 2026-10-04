@@ -1650,6 +1650,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get specials => 'Specials';
 
   @override
+  String get featured_playlist => 'Suositeltu soittolista';
+
+  @override
   String get play_now => 'Play Now';
 
   @override

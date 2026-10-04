@@ -523,6 +523,7 @@
   "summary_top_track": "Ð›ÑƒÑ‡ÑˆÐ¸Ð¹ Ñ‚Ñ€ÐµÐº\nÐ·Ð° ÑÑ‚Ð¾Ñ‚ Ð¿ÐµÑ€Ð¸Ð¾Ð´",
   "local": "Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹",
   "specials": "Specials",
+  "featured_playlist": "Рекомендуемый плейлист",
   "play_now": "Play Now",
   "songs_count": "{count, plural, =1{1 song} other{{count} songs}}",
   "@songs_count": {
