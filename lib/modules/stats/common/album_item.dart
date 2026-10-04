@@ -1,12 +1,12 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:sangeet/components/links/artist_link.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
-import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/components/track_card/home_album_card.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
-import 'package:sangeet/components/image/universal_image.dart';
 
+/// One row of a stats list: the shared home album card — same cover, card shape
+/// and text as the home screen's album rows — with the row's own stat (its play
+/// count) beside it.
 class StatsAlbumItem extends HookConsumerWidget {
   final SangeetSimpleAlbumObject album;
   final Widget info;
@@ -15,38 +15,13 @@ class StatsAlbumItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final locked = PremiumAccess.isAlbumLocked(album, ref);
-    return ButtonTile(
-      style: ButtonVariance.ghost,
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: Stack(
-          children: [
-            UniversalImage(
-              path: (album.images).asUrlString(
-                placeholder: ImagePlaceholder.albumArt,
-              ),
-              width: 40,
-              height: 40,
-            ),
-            LockedBadge(locked: locked),
-          ],
-        ),
-      ),
-      title: Text(album.name),
-      subtitle: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("${album.albumType.formatted} • "),
-          Flexible(
-            child: ArtistLink(
-              artists: album.artists,
-              mainAxisAlignment: WrapAlignment.start,
-            ),
-          ),
-        ],
-      ),
-      trailing: info,
-      onPressed: () {
+
+    // The row stays tappable around the card. Like the tile it replaces, a
+    // stats album row only opens the payment gate for a locked album; it does
+    // not navigate.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
         if (locked) {
           PremiumAccess.gateAlbumPlay(
             context: context,
@@ -56,6 +31,24 @@ class StatsAlbumItem extends HookConsumerWidget {
           );
         }
       },
+      child: Row(
+        children: [
+          HomeAlbumCard(
+            album: album,
+            imageUrl: album.images.smallest(ImagePlaceholder.albumArt),
+            subtitle: '${album.albumType.formatted} • ',
+            onTap: () {},
+          ),
+          // The stat keeps its place at the row's trailing edge; the flexible
+          // side is the gap, so a long stat wraps instead of overflowing.
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: info,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

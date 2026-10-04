@@ -2,12 +2,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
-import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
-import 'package:sangeet/components/ui/button_tile.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
+import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 
+/// One row of a stats list: the shared home track card — same cover, card shape
+/// and text as the home screen's track rows — with the row's own stat (its play
+/// count, minutes, …) beside it.
 class StatsTrackItem extends HookConsumerWidget {
   final SangeetTrackObject track;
   final Widget info;
@@ -20,28 +22,14 @@ class StatsTrackItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final locked = PremiumAccess.isTrackLocked(track, ref);
-    return ButtonTile(
-      style: ButtonVariance.ghost,
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: Stack(
-          children: [
-            UniversalImage(
-              path: (track.album.images).asUrlString(
-                placeholder: ImagePlaceholder.albumArt,
-              ),
-              width: 40,
-              height: 40,
-            ),
-            LockedBadge(locked: locked),
-          ],
-        ),
-      ),
-      title: Text(track.name),
-      subtitle: const SizedBox.shrink(),
-      trailing: info,
-      onPressed: () {
-        void open() => context.navigateTo(TrackRoute(trackId: track.id));
+
+    void open() => context.navigateTo(TrackRoute(trackId: track.id));
+
+    // The row stays tappable around the card, so the play count opens the track
+    // like the rest of the row always has.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
         if (locked) {
           PremiumAccess.gateTrackPlay(
             context: context,
@@ -53,6 +41,23 @@ class StatsTrackItem extends HookConsumerWidget {
         }
         open();
       },
+      child: Row(
+        children: [
+          HomeTrackCard(
+            track: track,
+            imageUrl: trackCardImageUrl(track),
+            onTap: open,
+          ),
+          // The stat keeps its place at the row's trailing edge; the flexible
+          // side is the gap, so a long stat wraps instead of overflowing.
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: info,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

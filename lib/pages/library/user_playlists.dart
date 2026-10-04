@@ -7,18 +7,37 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' hide Image;
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/assets.gen.dart';
 
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_view.dart';
+import 'package:sangeet/components/track_card/track_card.dart';
+import 'package:sangeet/extensions/string.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
-import 'package:sangeet/modules/playlist/playlist_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
+
+/// Skeleton card for the library's loading state: the same shared home card the
+/// library renders once loaded, so the placeholder matches the loaded grid.
+class _LoadingCard extends StatelessWidget {
+  const _LoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return TrackCard(
+      imageUrl: '',
+      title: 'Loading',
+      subtitle: 'Loading',
+      onTap: () {},
+    );
+  }
+}
 
 @RoutePage()
 class UserPlaylistsPage extends HookConsumerWidget {
@@ -73,6 +92,25 @@ class UserPlaylistsPage extends HookConsumerWidget {
       () => filter(userPlaylistsQuery.asData?.value ?? []),
       [userPlaylistsQuery, searchText.value],
     );
+
+    // The library's collection cards are the same shared home card the home
+    // screen's album and track rows render, so the cover, card shape and text
+    // match those rows exactly.
+    Widget playlistCard(SangeetSimplePlaylistObject playlist) {
+      return TrackCard(
+        width: HomeSectionLayout.cardWidth * context.theme.scaling,
+        imageUrl: playlist.images.from200PxTo300PxOrSmallestImage(
+          ImagePlaceholder.collection,
+        ),
+        title: playlist.name,
+        subtitle: playlist.description.unescapeHtml().cleanHtml(),
+        onTap: () {
+          context.navigateTo(
+            PlaylistRoute(id: playlist.id, playlist: playlist),
+          );
+        },
+      );
+    }
 
     final controller = useScrollController();
 
@@ -135,7 +173,12 @@ class UserPlaylistsPage extends HookConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 sliver: SliverToBoxAdapter(
-                  child: PlaylistCard.tile(likedTracksPlaylist),
+                  // The card is the home screen's card, so the row keeps the
+                  // cover's size instead of stretching it to the page width.
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: playlistCard(likedTracksPlaylist),
+                  ),
                 ),
               ),
               const SliverGap(16),
@@ -164,10 +207,30 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   isLoading: userPlaylistsQuery.isLoading,
                   onRequestMore: () {},
                   itemCount: userPlaylists.length,
+                  // Home-card geometry: the shared card's height follows its
+                  // tile width, so the tiles are sized from the same helpers
+                  // the other card grids use.
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: trackGridCrossAxisCount(context),
+                    mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                      context,
+                      crossAxisCount: trackGridCrossAxisCount(context),
+                      horizontalPadding: 8,
+                    ),
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                  ),
+                  gridPlaceholder: const _LoadingCard(),
+                  listPlaceholder: const Align(
+                    alignment: Alignment.centerLeft,
+                    child: _LoadingCard(),
+                  ),
                   gridItemBuilder: (context, index) =>
-                      PlaylistCard(userPlaylists[index]),
-                  listItemBuilder: (context, index) =>
-                      PlaylistCard.tile(userPlaylists[index]),
+                      playlistCard(userPlaylists[index]),
+                  listItemBuilder: (context, index) => Align(
+                    alignment: Alignment.centerLeft,
+                    child: playlistCard(userPlaylists[index]),
+                  ),
                 ),
               ),
               const SliverSafeArea(sliver: SliverGap(10)),

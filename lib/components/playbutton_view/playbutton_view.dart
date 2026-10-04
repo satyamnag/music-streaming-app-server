@@ -43,6 +43,21 @@ class PlaybuttonView extends StatelessWidget {
 
   final Widget? leading;
 
+  /// Optional grid geometry for callers whose grid items are not
+  /// [PlaybuttonCard]s. The library renders the shared home cards, whose height
+  /// is derived from the tile width, so it passes the home grid delegate; null
+  /// keeps the [PlaybuttonCard] geometry these tiles default to.
+  final SliverGridDelegate? gridDelegate;
+
+  /// Optional card shown in the grid's place of a [PlaybuttonCard] while
+  /// loading (and at the trailing "load more" waypoint), so a grid of a
+  /// different card keeps its own skeleton shape.
+  final Widget? gridPlaceholder;
+
+  /// Optional row shown in the list's place of a [PlaybuttonTile] while
+  /// loading.
+  final Widget? listPlaceholder;
+
   const PlaybuttonView({
     super.key,
     required this.itemCount,
@@ -53,6 +68,9 @@ class PlaybuttonView extends StatelessWidget {
     required this.onRequestMore,
     required this.controller,
     this.leading,
+    this.gridDelegate,
+    this.gridPlaceholder,
+    this.listPlaceholder,
   });
 
   @override
@@ -130,18 +148,19 @@ class PlaybuttonView extends StatelessWidget {
                   : SliverGrid.builder(
                       itemCount:
                           isLoading ? 6 : (hasMore ? itemCount + 1 : itemCount),
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 150 * scale,
-                        mainAxisExtent:
-                            HomeSectionLayout.playbuttonCardHeight(context),
-                        crossAxisSpacing: 12 * scale,
-                        mainAxisSpacing: 12 * scale,
-                      ),
+                      gridDelegate: gridDelegate ??
+                          SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 150 * scale,
+                            mainAxisExtent: HomeSectionLayout
+                                .playbuttonCardHeight(context),
+                            crossAxisSpacing: 12 * scale,
+                            mainAxisSpacing: 12 * scale,
+                          ),
                       itemBuilder: (context, index) {
                         if (isLoading) {
-                          return const Skeletonizer(
+                          return Skeletonizer(
                             enabled: true,
-                            child: _dummyPlaybuttonCard,
+                            child: gridPlaceholder ?? _dummyPlaybuttonCard,
                           );
                         }
 
@@ -151,9 +170,9 @@ class PlaybuttonView extends StatelessWidget {
                             controller: controller,
                             isGrid: true,
                             onTouchEdge: onRequestMore,
-                            child: const Skeletonizer(
+                            child: Skeletonizer(
                               enabled: true,
-                              child: _dummyPlaybuttonCard,
+                              child: gridPlaceholder ?? _dummyPlaybuttonCard,
                             ),
                           );
                         }
@@ -165,16 +184,17 @@ class PlaybuttonView extends StatelessWidget {
                   enabled: true,
                   child: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _dummyPlaybuttonTile,
+                      (context, index) =>
+                          listPlaceholder ?? _dummyPlaybuttonTile,
                       childCount: 6,
                     ),
                   ),
                 ),
               (false, false) => SliverInfiniteList(
                   itemCount: itemCount,
-                  loadingBuilder: (context) => const Skeletonizer(
+                  loadingBuilder: (context) => Skeletonizer(
                     enabled: true,
-                    child: _dummyPlaybuttonTile,
+                    child: listPlaceholder ?? _dummyPlaybuttonTile,
                   ),
                   itemBuilder: listItemBuilder,
                   onFetchData: onRequestMore,

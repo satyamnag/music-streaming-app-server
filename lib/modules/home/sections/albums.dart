@@ -4,13 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
-import 'package:sangeet/components/track_card/card_colors.dart';
+import 'package:sangeet/components/track_card/home_album_card.dart';
+import 'package:sangeet/components/track_card/home_card_row.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
@@ -46,172 +44,57 @@ class HomeAlbumsSection extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: theme.typography.h4.copyWith(
-                        color: theme.colorScheme.foreground,
-                      ),
-                      child: Text(context.l10n.albums),
-                    ),
-                  ),
-                  if (albums.length > 5)
-                    IconButton.ghost(
-                      size: ButtonSize.small,
-                      icon: const Icon(SangeetIcons.angleRight, size: 18),
-                      onPressed: () {
-                        context.navigateTo(
-                          HomeSeeAllRoute(kind: HomeSeeAllKind.albums),
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-            Gap(8 * scale),
-            SizedBox(
-              height: HomeSectionLayout.rowHeight(context),
-              child: ListView.separated(
+            HomeCardRow(
+              header: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-                scrollDirection: Axis.horizontal,
-                itemCount: shown.length + (hasMore ? 1 : 0),
-                separatorBuilder: (_, __) => Gap(6 * scale),
-                itemBuilder: (context, index) {
-                  if (hasMore && index == shown.length) {
-                    return _SeeMoreCard(
-                      onTap: () {
-                        visibleCount.value += HomeAlbumsSection.pageSize;
-                      },
-                    );
-                  }
-                  final album = shown[index].album;
-                  final tracks = shown[index].tracks;
-                  final imageUrl =
-                      album.images.smallest(ImagePlaceholder.albumArt);
-
-                  return _AlbumCard(
-                    album: album,
-                    trackCount: tracks.length,
-                    imageUrl: imageUrl,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: DefaultTextStyle(
+                        style: theme.typography.h4.copyWith(
+                          color: theme.colorScheme.foreground,
+                        ),
+                        child: Text(context.l10n.albums),
+                      ),
+                    ),
+                    if (albums.length > 5)
+                      IconButton.ghost(
+                        size: ButtonSize.small,
+                        icon: const Icon(SangeetIcons.angleRight, size: 18),
+                        onPressed: () {
+                          context.navigateTo(
+                            HomeSeeAllRoute(kind: HomeSeeAllKind.albums),
+                          );
+                        },
+                      ),
+                  ],
+                ),
+              ),
+              itemCount: shown.length + (hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (hasMore && index == shown.length) {
+                  return _SeeMoreCard(
                     onTap: () {
-                      // Open the album screen listing its songs (like a
-                      // playlist) instead of immediately playing the album.
-                      context
-                          .navigateTo(AlbumRoute(id: album.id, album: album));
+                      visibleCount.value += HomeAlbumsSection.pageSize;
                     },
                   );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+                }
+                final album = shown[index].album;
+                final tracks = shown[index].tracks;
+                final imageUrl =
+                    album.images.smallest(ImagePlaceholder.albumArt);
 
-class _AlbumCard extends HookConsumerWidget {
-  final SangeetSimpleAlbumObject album;
-  final int trackCount;
-  final String imageUrl;
-  final VoidCallback onTap;
-
-  const _AlbumCard({
-    required this.album,
-    required this.trackCount,
-    required this.imageUrl,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-    final locked = PremiumAccess.isAlbumLocked(album, ref);
-
-    // Admin-configured card colors (null = keep the theme defaults).
-    final bg = cardBackgroundColor(album.cardBgColor, theme.colorScheme.card);
-    final titleColor = cardTextColor(album.cardTextColor,
-        album.cardBgColor != null
-            ? readableTextOn(bg)
-            : theme.colorScheme.foreground);
-    final subtitleColor = cardTextColor(album.cardTextColor,
-        album.cardBgColor != null
-            ? readableTextOn(bg).withValues(alpha: 0.75)
-            : theme.colorScheme.mutedForeground);
-
-    return Container(
-      width: HomeSectionLayout.cardWidth * scale,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12 * scale),
-        color: bg,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
-        onTap: () async {
-          if (locked) {
-            await PremiumAccess.gateAlbumPlay(
-              context: context,
-              ref: ref,
-              album: album,
-              feature: () async => onTap(),
-            );
-            return;
-          }
-          onTap();
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The cover bleeds to the card's top/left/right edges; the card's
-            // own Clip.antiAlias gives it the outer rounded corners at the top.
-            AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
-                  LockedBadge(locked: locked, borderRadius: 0),
-                ],
-              ),
-            ),
-            // Only the text block is padded, so the cover stays flush.
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardTextGap * scale,
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardPadding * scale,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    album.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.typography.small.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
-                    ),
-                  ),
-                  Gap(2 * scale),
-                  Text(
-                    '$trackCount songs',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.typography.xSmall.copyWith(
-                      color: subtitleColor,
-                    ),
-                  ),
-                ],
-              ),
+                return HomeAlbumCard(
+                  album: album,
+                  subtitle: '${tracks.length} songs',
+                  imageUrl: imageUrl,
+                  onTap: () {
+                    // Open the album screen listing its songs (like a
+                    // playlist) instead of immediately playing the album.
+                    context.navigateTo(AlbumRoute(id: album.id, album: album));
+                  },
+                );
+              },
             ),
           ],
         ),

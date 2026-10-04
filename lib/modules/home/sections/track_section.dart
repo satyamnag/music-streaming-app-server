@@ -4,13 +4,11 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
-import 'package:sangeet/components/track_card/card_colors.dart';
+import 'package:sangeet/components/track_card/home_card_row.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// A titled horizontal row of track cards used for the home screen sections
@@ -72,7 +70,7 @@ class HomeTrackSection extends HookConsumerWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
                     separatorBuilder: (_, __) => const Gap(6),
-                    itemBuilder: (context, index) => _TrackCard(
+                    itemBuilder: (context, index) => HomeTrackCard(
                       track: FakeData.track,
                       imageUrl: '',
                       onTap: () {},
@@ -100,170 +98,51 @@ class HomeTrackSection extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: theme.typography.h4.copyWith(
-                        color: theme.colorScheme.foreground,
-                      ),
-                      child: Text(title),
-                    ),
-                  ),
-                  if (onSeeAll != null)
-                    IconButton.ghost(
-                      size: ButtonSize.small,
-                      icon: const Icon(SangeetIcons.angleRight, size: 18),
-                      onPressed: onSeeAll,
-                    ),
-                ],
-              ),
-            ),
-            Gap(8 * scale),
-            SizedBox(
-              height: HomeSectionLayout.rowHeight(context),
-              child: ListView.separated(
+            HomeCardRow(
+              header: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-                scrollDirection: Axis.horizontal,
-                itemCount: shown.length + (hasMore ? 1 : 0),
-                separatorBuilder: (_, __) => Gap(6 * scale),
-                itemBuilder: (context, index) {
-                  if (hasMore && index == shown.length) {
-                    return _SeeMoreCard(
-                      onTap: () {
-                        visibleCount.value += HomeTrackSection.pageSize;
-                      },
-                    );
-                  }
-                  final track = shown[index];
-                  final imageUrl =
-                      track.album.images.smallest(ImagePlaceholder.albumArt);
-
-                  return _TrackCard(
-                    track: track,
-                    imageUrl: imageUrl,
-                    onTap: () async {
-                      await ref
-                          .read(audioPlayerProvider.notifier)
-                          .load(tracks, initialIndex: index, autoPlay: true);
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: DefaultTextStyle(
+                        style: theme.typography.h4.copyWith(
+                          color: theme.colorScheme.foreground,
+                        ),
+                        child: Text(title),
+                      ),
+                    ),
+                    if (onSeeAll != null)
+                      IconButton.ghost(
+                        size: ButtonSize.small,
+                        icon: const Icon(SangeetIcons.angleRight, size: 18),
+                        onPressed: onSeeAll,
+                      ),
+                  ],
+                ),
+              ),
+              itemCount: shown.length + (hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (hasMore && index == shown.length) {
+                  return _SeeMoreCard(
+                    onTap: () {
+                      visibleCount.value += HomeTrackSection.pageSize;
                     },
                   );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+                }
+                final track = shown[index];
+                final imageUrl =
+                    track.album.images.smallest(ImagePlaceholder.albumArt);
 
-class _TrackCard extends HookConsumerWidget {
-  final SangeetTrackObject track;
-  final String imageUrl;
-  final VoidCallback onTap;
-
-  const _TrackCard({
-    required this.track,
-    required this.imageUrl,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-    final locked = PremiumAccess.isTrackLocked(track, ref);
-
-    // Admin-configured card colors (null = keep the theme defaults).
-    // Bind to a local first: Dart cannot type-promote a `final` field.
-    final currentTrack = track;
-    final String? configured =
-        currentTrack is SangeetFullTrackObject ? currentTrack.cardBgColor : null;
-    final String? configuredText = currentTrack is SangeetFullTrackObject
-        ? currentTrack.cardTextColor
-        : null;
-    final bg = cardBackgroundColor(configured, theme.colorScheme.card);
-    final titleColor = parseCardColor(configuredText) ??
-        (configured != null
-            ? readableTextOn(bg)
-            : theme.colorScheme.foreground);
-    final subtitleColor = parseCardColor(configuredText) ??
-        (configured != null
-            ? readableTextOn(bg).withValues(alpha: 0.75)
-            : theme.colorScheme.mutedForeground);
-
-    return Container(
-      width: HomeSectionLayout.cardWidth * scale,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12 * scale),
-        color: bg,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
-        onTap: () async {
-          if (locked) {
-            await PremiumAccess.gateTrackPlay(
-              context: context,
-              ref: ref,
-              track: track,
-              feature: () async => onTap(),
-            );
-            return;
-          }
-          onTap();
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The cover bleeds to the card's top/left/right edges; the card's
-            // own Clip.antiAlias gives it the outer rounded corners at the top.
-            AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
-                  LockedBadge(locked: locked, borderRadius: 0),
-                ],
-              ),
-            ),
-            // Only the text block is padded, so the cover stays flush.
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardTextGap * scale,
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardPadding * scale,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    track.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.typography.small.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
-                    ),
-                  ),
-                  Gap(2 * scale),
-                  Text(
-                    track.album.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.typography.xSmall.copyWith(
-                      color: subtitleColor,
-                    ),
-                  ),
-                ],
-              ),
+                return HomeTrackCard(
+                  track: track,
+                  imageUrl: imageUrl,
+                  onTap: () async {
+                    await ref
+                        .read(audioPlayerProvider.notifier)
+                        .load(tracks, initialIndex: index, autoPlay: true);
+                  },
+                );
+              },
             ),
           ],
         ),
