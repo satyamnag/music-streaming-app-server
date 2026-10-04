@@ -135,6 +135,13 @@ final homeAdminAlbumsProvider =
         albumType: SangeetAlbumType.album,
         releaseDate: null,
         status: (item['status'] ?? 'free').toString(),
+        // Admin-configured card colors for this album. These MUST be carried
+        // through: `_AlbumCard` reads them off the album object, so dropping
+        // them here (as this constructor originally did) silently disabled the
+        // per-album box background and text colors while the per-track ones
+        // kept working.
+        cardBgColor: item['cardBgColor'] as String?,
+        cardTextColor: item['cardTextColor'] as String?,
       );
       final albumTracks = (item['tracks'] as List<dynamic>? ?? const [])
           .map((e) => SangeetTrackObject.fromJson(
@@ -254,6 +261,18 @@ List<HomeAlbum> _buildAlbums(
       }
     }
 
+    // Album colors: the admin sets them per album AND per track. An auto-grouped
+    // album has no `albums` row of its own, so take the most-played track's
+    // colors (the same track that supplies the cover, keeping one consistent
+    // visual identity for the card). Carrying these through is required -
+    // `_AlbumCard` reads them off the album object, so leaving them unset made
+    // the per-album colors appear to do nothing.
+    final cover = coverTrack;
+    final coverBg =
+        cover is SangeetFullTrackObject ? cover.cardBgColor : null;
+    final coverText =
+        cover is SangeetFullTrackObject ? cover.cardTextColor : null;
+
     return (
       totalPlays: totalPlays,
       album: SangeetSimpleAlbumObject(
@@ -264,6 +283,8 @@ List<HomeAlbum> _buildAlbums(
         images: coverTrack.album.images,
         albumType: SangeetAlbumType.album,
         releaseDate: coverTrack.album.releaseDate,
+        cardBgColor: coverBg,
+        cardTextColor: coverText,
       ),
       tracks: albumTracks,
     );

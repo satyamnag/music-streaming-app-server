@@ -280,8 +280,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th class="sortable" onclick="sortTracks('album')">Album<span id="arrow-album" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('language')">Language<span id="arrow-language" class="sort-arrow"></span></th>
   <th class="sortable" onclick="sortTracks('status')">Subscription<span id="arrow-status" class="sort-arrow"></span></th>
-  <th title="P = Plain lyrics, S = Sync lyrics Â· TE = Telugu, EN-T = English (Translation), EN-TR = English (Transliteration)">Lyrics</th>
-  <th title="Audio file status â€” O = Original Audio File, K = Karaoke Audio File, R = Ringtone File. Green = updated, red = not updated. Click the refresh icon to re-verify against the CDN (R2).">Audio Files (O/K/R)</th>
+  <th title="P = Plain lyrics, S = Sync lyrics · TE = Telugu, EN-T = English (Translation), EN-TR = English (Transliteration)">Lyrics</th>
+  <th title="Audio file status — O = Original Audio File, K = Karaoke Audio File, R = Ringtone File. Green = updated, red = not updated. Click the refresh icon to re-verify against the CDN (R2).">Audio Files (O/K/R)</th>
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
@@ -336,7 +336,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div id="featuredAlbumsList"></div>
   </div>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
-    <h3 style="margin-bottom:8px;">All albums â€” pin to feature</h3>
+    <h3 style="margin-bottom:8px;">All albums — pin to feature</h3>
     <div id="arrangeAlbumResults"></div>
   </div>
 </div>
@@ -361,7 +361,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
       <div><label>Name *</label><input id="afName" placeholder="e.g. My YouTube Channel"></div>
       <div><label>Contact email</label><input id="afEmail" placeholder="channel@example.com"></div>
-      <div><label>Commission per yearly sale (â‚¹)</label><input id="afAmount" type="number" min="0" placeholder="e.g. 100"></div>
+      <div><label>Commission per yearly sale (₹)</label><input id="afAmount" type="number" min="0" placeholder="e.g. 100"></div>
       <div><label>Referrer code (optional)</label><input id="afRef" placeholder="e.g. YT-CHANNEL1" title="3-32 letters, numbers or hyphens. Blank = auto-generated."></div>
       <button class="btn btn-success" onclick="createAffiliate()">Create Affiliate</button>
     </div>
@@ -377,11 +377,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     </div>
   </div>
   <table><thead><tr>
-    <th>Affiliate</th><th>Referrer Code</th><th>Coupon Code</th><th>Commission/Yearly Sale (â‚¹)</th><th>Redemptions</th><th>Status</th><th>Actions</th>
+    <th>Affiliate</th><th>Referrer Code</th><th>Coupon Code</th><th>Commission/Yearly Sale (₹)</th><th>Redemptions</th><th>Status</th><th>Actions</th>
   </tr></thead><tbody id="affTbody"></tbody></table>
   <h3 style="margin:20px 0 8px;">Commission Ledger (credited from webhooks)</h3>
   <table><thead><tr>
-    <th>Date</th><th>Affiliate</th><th>Customer</th><th>Plan</th><th>Amount (â‚¹)</th><th>Status</th>
+    <th>Date</th><th>Affiliate</th><th>Customer</th><th>Plan</th><th>Amount (₹)</th><th>Status</th>
   </tr></thead><tbody id="commTbody"></tbody></table>
 </div>
   </div>
@@ -400,7 +400,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
  <label>Title *</label><input id="fTitle" placeholder="Track title">
  <label>Albums</label>
  <div class="album-picker">
-   <button type="button" class="btn btn-secondary btn-sm" id="albumsToggleBtn" onclick="toggleAlbumsPicker()">Select Albums â–¾</button>
+   <button type="button" class="btn btn-secondary btn-sm" id="albumsToggleBtn" onclick="toggleAlbumsPicker()">Select Albums ▾</button>
    <div id="albumCheckboxes" class="album-checkboxes" style="display:none;max-height:160px;overflow-y:auto;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:13px;margin-top:6px;"></div>
  </div>
  <label>Duration (seconds) *</label><input id="fDuration" type="number" placeholder="e.g. 240">
@@ -443,7 +443,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 </select>
 <label>Tags (comma separated)</label>
 <input id="fTags" placeholder="e.g. bhajan, devotional, morning">
-<label>Thumbnail (1024Ã—1024 pixels recommended)</label>
+<label>Thumbnail (1024×1024 pixels recommended)</label>
 <div class="upload-row">
   <input id="fThumbnail" type="hidden" placeholder="URL or upload an image">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('thumbInput').click()">Upload</button>
@@ -451,7 +451,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <input type="file" id="thumbInput" accept=".webp,image/webp" style="display:none" onchange="handleThumbUpload(this)">
 <div id="thumbPreviewContainer"></div>
 <div id="thumbStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
-<div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024Ã—1024.</div>
+<div style="font-size:11px;color:#999;margin-top:2px;">Thumbnail must be WebP, exactly 1024×1024.</div>
 <label>Card colors (Android + web app)</label>
 <div class="cover-palette-bar">
   <button type="button" class="btn btn-secondary btn-sm" id="trackPaletteBtn" onclick="loadTrackPalette()">
@@ -481,7 +481,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="color-presets" id="trackColorPresets"></div>
 <div class="color-live-preview">
   <div class="color-preview-card" id="trackColorPreview">
-    <div class="color-preview-art" id="trackPreviewArt">â™ª</div>
+    <div class="color-preview-art" id="trackPreviewArt">♪</div>
     <div class="color-preview-meta">
       <div class="color-preview-title" id="trackPreviewTitle">Track name</div>
       <div class="color-preview-sub" id="trackPreviewSub">Album name</div>
@@ -497,7 +497,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="upload-row">
   <input id="fStorage" type="hidden" placeholder="e.g. song.opus">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('audioInput').click()">Upload</button>
-  <button class="btn btn-secondary btn-sm" id="audioPlayBtn" onclick="playAudioUpload('original')">â–¶ Play</button>
+  <button class="btn btn-secondary btn-sm" id="audioPlayBtn" onclick="playAudioUpload('original')">▶ Play</button>
 </div>
 <input type="file" id="audioInput" accept=".opus" style="display:none" onchange="handleAudioUpload(this)">
 <div id="audioStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
@@ -506,7 +506,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div class="upload-row">
   <input id="fKaraoke" type="hidden" placeholder="e.g. song-karaoke.opus (optional)">
   <button class="btn btn-secondary btn-sm" onclick="document.getElementById('karaokeInput').click()">Upload</button>
-  <button class="btn btn-secondary btn-sm" id="karaokePlayBtn" onclick="playAudioUpload('karaoke')">â–¶ Play</button>
+  <button class="btn btn-secondary btn-sm" id="karaokePlayBtn" onclick="playAudioUpload('karaoke')">▶ Play</button>
 </div>
 <input type="file" id="karaokeInput" accept=".opus" style="display:none" onchange="handleKaraokeUpload(this)">
 <div id="karaokeStatus" style="font-size:12px;color:#666;margin-top:4px;"></div>
@@ -528,7 +528,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
    </div>
      </div>
       <div id="lyricsPane" class="edit-pane">
-        <div class="sync-header"><h2>Lyrics â€” <span id="syncTrackTitle"></span></h2></div>
+        <div class="sync-header"><h2>Lyrics — <span id="syncTrackTitle"></span></h2></div>
         <p id="syncMsg" style="color:#555;font-size:13px;"></p>
         <div class="lyrics-nested">
           <div class="lyrics-sidebar">
@@ -626,7 +626,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="color-presets" id="albumColorPresets"></div>
     <div class="color-live-preview">
       <div class="color-preview-card" id="albumColorPreview">
-        <div class="color-preview-art" id="albumPreviewArt">â™ª</div>
+        <div class="color-preview-art" id="albumPreviewArt">♪</div>
         <div class="color-preview-meta">
           <div class="color-preview-title" id="albumPreviewTitle">Album name</div>
           <div class="color-preview-sub" id="albumPreviewSub">12 songs</div>
@@ -785,7 +785,7 @@ function buildPlainLyrics(entries) {
 
 function syncListHtml(entries, editing) {
   if (!entries.length) {
-    return '<tr><td colspan="8" class="sync-empty">No lines yet â€” use the fields below to add a line.</td></tr>';
+    return '<tr><td colspan="8" class="sync-empty">No lines yet — use the fields below to add a line.</td></tr>';
   }
   return entries.map((e, i) => {
     if (i === editing) {
@@ -806,14 +806,14 @@ function syncListHtml(entries, editing) {
     return `<tr data-i="${i}">
       <td>${i + 1}</td>
       <td>${esc(formatLrcTime(e.time))}</td>
-      <td>${esc(e.te) || '<span class="sync-muted">â€”</span>'}</td>
-      <td>${esc(e.en) || '<span class="sync-muted">â€”</span>'}</td>
-      <td>${esc(e.hi) || '<span class="sync-muted">â€”</span>'}</td>
-      <td>${esc(e.enTr) || '<span class="sync-muted">â€”</span>'}</td>
-      <td>${esc(e.hiTr) || '<span class="sync-muted">â€”</span>'}</td>
+      <td>${esc(e.te) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.en) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.hi) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.enTr) || '<span class="sync-muted">—</span>'}</td>
+      <td>${esc(e.hiTr) || '<span class="sync-muted">—</span>'}</td>
       <td>
         <button class="btn btn-primary btn-sm" type="button" onclick="syncStartEdit(${i})">Edit</button>
-        <button class="btn btn-danger btn-sm" type="button" onclick="syncDelete(${i})">Del</button>
+        <button class="btn btn-danger btn-sm" type="button" onclick="syncDelete(${i})">Delete</button>
       </td>
     </tr>`;
   }).join('');
@@ -836,7 +836,7 @@ function syncSaveEdit(i) {
   const enTr = document.getElementById('syncEnTr' + i).value;
   const hiTr = document.getElementById('syncHiTr' + i).value;
   const sec = parseLrcTime(document.getElementById('syncTime' + i).value);
-  if (sec === null) { toast('Invalid time format â€” use MM:SS.cc'); return; }
+  if (sec === null) { toast('Invalid time format — use MM:SS.cc'); return; }
   e.te = te; e.en = en; e.hi = hi; e.enTr = enTr; e.hiTr = hiTr; e.time = sec;
   syncEntries.sort((a, b) => a.time - b.time);
   syncEditing = -1;
@@ -855,7 +855,7 @@ function syncAddLine() {
   let sec = 0;
   if (rawTime) {
     sec = parseLrcTime(rawTime);
-    if (sec === null) { toast('Invalid time format â€” use MM:SS.cc'); return; }
+    if (sec === null) { toast('Invalid time format — use MM:SS.cc'); return; }
   }
   syncEntries.push({ time: Math.max(0, sec), te: te, en: en, hi: hi, enTr: enTr, hiTr: hiTr });
   syncEntries.sort((a, b) => a.time - b.time);
@@ -971,7 +971,7 @@ async function saveLyricsPane() {
     await loadTracks();
     loadLyricsText();
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
   } finally {
     showLoading(false);
     unlock();
@@ -1018,7 +1018,7 @@ function sortTracks(key) {
   if (trackSortKey === key) { trackSortDir *= -1; } else { trackSortKey = key; trackSortDir = 1; }
   document.querySelectorAll('th.sortable .sort-arrow').forEach(a => a.textContent = '');
   const arrow = document.getElementById('arrow-' + key);
-  if (arrow) arrow.textContent = trackSortDir === 1 ? 'â–²' : 'â–¼';
+  if (arrow) arrow.textContent = trackSortDir === 1 ? '▲' : '▼';
   trackPage = 1;
   renderTracks();
 }
@@ -1057,7 +1057,7 @@ function filteredTracks() {
   if (filterSync) {
     list = list.filter(t => {
       // "Updated" means at least one line carries real text after its
-      // timestamp â€” timestamp-only LRCs (from before the save fix) are NOT
+      // timestamp — timestamp-only LRCs (from before the save fix) are NOT
       // treated as having that language's lyrics.
       const has = (v) => typeof v === 'string' &&
         v.split('\n').some(l => /\]\s*\S/.test(l));
@@ -1106,7 +1106,7 @@ async function checkSession() {
     const res = await fetch('/api/admin/session', { credentials: 'same-origin' });
     const data = await res.json();
     if (res.status === 503) {
-      // ADMIN_TOKEN not configured server-side â€” fail closed.
+      // ADMIN_TOKEN not configured server-side — fail closed.
       const errBox = document.getElementById('loginError');
       document.getElementById('login').style.display = 'block';
       document.getElementById('app').style.display = 'none';
@@ -1192,7 +1192,7 @@ let specialRows = [];
 async function loadSpecials() {
   const box = document.getElementById('specialsList');
   if (!box) return;
-  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading…</div>';
+  box.innerHTML = '<div style="color:#666;font-size:13px;">Loading�</div>';
   try {
     const res = await authedFetch('/api/admin/specials', { credentials: 'same-origin' });
     specialRows = res.ok ? (await res.json()) : [];
@@ -1245,7 +1245,7 @@ function renderSpecials() {
           '<input type="file" id="spBanner-' + esc(shelf.id) + '" accept=".webp,image/webp" style="display:none" onchange="handleSpecialBannerUpload(this, \'' + esc(shelf.id) + '\')">' +
           '<div class="special-hint" id="spHint-' + esc(shelf.id) + '">' +
             'Banner must be <strong>WebP</strong>, <strong>' + SPECIAL_BANNER_LABEL + '</strong> ' +
-            '(' + SPECIAL_BANNER_WIDTH + '×' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
+            '(' + SPECIAL_BANNER_WIDTH + '�' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
           '</div>' +
           '<div class="special-actions" style="margin-top:8px;">' +
             '<button class="btn btn-success btn-sm" type="button" onclick="saveSpecial(\'' + esc(shelf.id) + '\')">Save</button>' +
@@ -1284,7 +1284,7 @@ async function saveSpecial(id) {
     toast('Saved');
     loadSpecials();
   } catch (e) {
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired � sign in again.') toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 
@@ -1299,7 +1299,7 @@ async function resetSpecial(id) {
     toast('Reset to defaults');
     loadSpecials();
   } catch (e) {
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired � sign in again.') toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 
@@ -1318,14 +1318,14 @@ async function clearSpecialBanner(id) {
     toast('Banner removed');
     loadSpecials();
   } catch (e) {
-    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired � sign in again.') toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 
 // Uploads one Special's landscape banner.
 //
 // The file is validated in the browser FIRST (WebP + exact 8:3) so the admin
-// gets an immediate, specific error instead of a failed upload — and the server
+// gets an immediate, specific error instead of a failed upload � and the server
 // re-validates the same rules from the file header, so the rule holds even if
 // the API is called directly.
 async function handleSpecialBannerUpload(input, id) {
@@ -1343,20 +1343,20 @@ async function handleSpecialBannerUpload(input, id) {
 
     // 2) Geometry: exactly 8:3 landscape, within 2% so real-world rounding
     //    (e.g. 1440x540 and 1200x450) passes while any other shape fails.
-    specialHint(id, 'Checking dimensions…', 'is-busy');
+    specialHint(id, 'Checking dimensions�', 'is-busy');
     const dims = await readImageSize(file);
     const ratio = dims.width / dims.height;
     if (Math.abs(ratio - SPECIAL_BANNER_RATIO) / SPECIAL_BANNER_RATIO > 0.02) {
       specialHint(id,
-        '✗ Wrong aspect ratio: got ' + dims.width + '×' + dims.height + ' (' + ratio.toFixed(2) + ':1). ' +
-        'Banner must be ' + SPECIAL_BANNER_LABEL + ' — ' + SPECIAL_BANNER_WIDTH + '×' + SPECIAL_BANNER_HEIGHT + ' recommended.',
+        '✗ Wrong aspect ratio: got ' + dims.width + '�' + dims.height + ' (' + ratio.toFixed(2) + ':1). ' +
+        'Banner must be ' + SPECIAL_BANNER_LABEL + ' � ' + SPECIAL_BANNER_WIDTH + '�' + SPECIAL_BANNER_HEIGHT + ' recommended.',
         'is-error');
       input.value = '';
       return;
     }
 
     // 3) Upload and attach it to this shelf.
-    specialHint(id, 'Uploading…', 'is-busy');
+    specialHint(id, 'Uploading�', 'is-busy');
     const form = new FormData();
     form.append('file', file);
     form.append('kind', 'special_banner');
@@ -1459,15 +1459,15 @@ async function clerkAdminLogin() {
   if (!config.clerkEnabled || !config.publishableKey) {
     if (msg) {
       if (!config.clerkEnabled) {
-        msg.textContent = 'Email login is not enabled â€” the admin server has not loaded a Clerk secret key. Restart the server after storing CLERK_SECRET_KEY in the Supabase Vault.';
+        msg.textContent = 'Email login is not enabled — the admin server has not loaded a Clerk secret key. Restart the server after storing CLERK_SECRET_KEY in the Supabase Vault.';
       } else {
-        msg.textContent = 'Email login is not fully configured â€” set CLERK_PUBLISHABLE_KEY (Vault secret "clerk_publishable_key" or Render env var), then restart the server.';
+        msg.textContent = 'Email login is not fully configured — set CLERK_PUBLISHABLE_KEY (Vault secret "clerk_publishable_key" or Render env var), then restart the server.';
       }
     }
     return;
   }
   try {
-    if (msg) msg.textContent = 'Loading Clerkâ€¦';
+    if (msg) msg.textContent = 'Loading Clerk…';
     await loadClerk(config.publishableKey);
     window.Clerk.openSignIn({ afterSignInUrl: window.location.href, afterSignUpUrl: window.location.href });
   } catch (e) {
@@ -1524,7 +1524,7 @@ async function doLogout() {
 // If any admin API call returns 401 (session expired), return to login.
 async function authedFetch(url, options) {
   const res = await fetch(url, options);
-  if (res.status === 401) { showLogin(); throw new Error('Session expired â€” sign in again.'); }
+  if (res.status === 401) { showLogin(); throw new Error('Session expired — sign in again.'); }
   return res;
 }
 
@@ -1536,7 +1536,7 @@ async function loadTracks() {
     populateTrackFilterDropdowns();
     renderTracks();
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Failed: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message);
   } finally {
     showLoading(false);
   }
@@ -1553,7 +1553,7 @@ async function loadAlbums() {
     if (box) {
       const selected = new Set((readAlbumCheckboxes()).map((v) => String(v)));
       box.innerHTML = albums.length === 0
-        ? '<div style="color:#888;">No albums yet â€” create one in the Albums section.</div>'
+        ? '<div style="color:#888;">No albums yet — create one in the Albums section.</div>'
         : albums.map(a => `<label style="display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer;">
             <input type="checkbox" value="${a.id}" data-album-checkbox ${selected.has(String(a.id)) ? 'checked' : ''}>
             <span>${esc(a.name)}</span>
@@ -1562,7 +1562,7 @@ async function loadAlbums() {
       updateAlbumsCount();
     }
     renderAlbums();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Failed to load albums: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message); }
 }
 
 // ----- Albums list (pagination / sort / filter) -----
@@ -1607,13 +1607,13 @@ function renderAlbums() {
       <td>${a.status === 'paid' ? '<span class="badge badge-paid">Paid</span>' : '<span class="badge badge-free">Free</span>'}</td>
       <td>${countAlbumTracks(a.id)}</td>
       <td class="actions">
-        <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="openAlbumEdit('${a.id}')">âœŽ</button>
+        <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="openAlbumEdit('${a.id}')">✎</button>
         <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteAlbum('${a.id}', '${esc(a.name)}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
       </td>
     </tr>`).join('');
   const pag = document.getElementById('albumsPagination');
   if (pag) {
-    document.getElementById('albumsPageInfo').textContent = 'Page ' + albumPage + ' of ' + totalPages + ' â€” ' + list.length + ' album(s)';
+    document.getElementById('albumsPageInfo').textContent = 'Page ' + albumPage + ' of ' + totalPages + ' — ' + list.length + ' album(s)';
     document.getElementById('albumsPrevBtn').disabled = albumPage <= 1;
     document.getElementById('albumsNextBtn').disabled = albumPage >= totalPages;
     pag.style.display = list.length > albumPageSize ? 'block' : 'none';
@@ -1624,7 +1624,7 @@ function sortAlbums(key) {
   if (albumSortKey === key) albumSortDir *= -1; else { albumSortKey = key; albumSortDir = 1; }
   document.querySelectorAll('#albumsPanel th.sortable .sort-arrow').forEach(a => a.textContent = '');
   const arrow = document.getElementById('arrow-album' + (key === 'name' ? 'Name' : 'Status'));
-  if (arrow) arrow.textContent = albumSortDir === 1 ? 'â–²' : 'â–¼';
+  if (arrow) arrow.textContent = albumSortDir === 1 ? '▲' : '▼';
   albumPage = 1;
   renderAlbums();
 }
@@ -1665,7 +1665,7 @@ async function saveAlbumEdit() {
     toast('Album updated');
     closeAlbumEdit();
     loadAlbums();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -1698,7 +1698,7 @@ async function saveNewAlbum() {
     toast('Album created');
     closeAlbumEdit();
     loadAlbums();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -1714,7 +1714,7 @@ async function deleteAlbum(id) {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Delete failed'); }
     toast('Album deleted');
     loadAlbums();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -1738,7 +1738,7 @@ async function handleAlbumCoverUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('alCover').value = data.thumbnail_url;
-    const st = document.getElementById('alCoverStatus'); if (st) st.textContent = 'Uploaded âœ“';
+    const st = document.getElementById('alCoverStatus'); if (st) st.textContent = 'Uploaded ✓';
   } catch (e) { const st = document.getElementById('alCoverStatus'); if (st) st.textContent = 'Error: ' + e.message; }
   input.value = '';
 }
@@ -1763,7 +1763,7 @@ function updateAlbumsCount() {
   const btn = document.getElementById('albumsToggleBtn');
   if (!btn) return;
   const n = readAlbumCheckboxes().length;
-  btn.textContent = 'Select Albums' + (n ? ' (' + n + ')' : '') + ' â–¾';
+  btn.textContent = 'Select Albums' + (n ? ' (' + n + ')' : '') + ' ▾';
 }
 
 // Read the currently checked album ids from the track form.
@@ -1905,7 +1905,7 @@ async function refreshModalAudioStatus(id) {
 
 // Renders a track's comma-separated tags as small chips (or a dash when empty).
 function tagsChips(raw) {
-  if (typeof raw !== 'string' || !raw.trim()) return '<span style="color:#aaa;">â€”</span>';
+  if (typeof raw !== 'string' || !raw.trim()) return '<span style="color:#aaa;">—</span>';
   return raw.split(',').map(s => s.trim()).filter(Boolean)
     .map(t => '<span class="sync-chip sync-yes" style="background:#e0e7ff;color:#3730a3;">' + esc(t) + '</span>')
     .join(' ');
@@ -1935,12 +1935,12 @@ function renderTracks() {
     <td class="thumb-cell">${t.thumbnail ? '<img class="track-thumb" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : '<span style="color:#ef4444;font-weight:600;cursor:pointer;" onclick="showEdit(\''+t.id+'\')">Upload thumbnail</span>'}</td>
     <td>${esc(t.title)}</td>
     <td>${esc(t.album || '')}</td>
-    <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">â€”</span>'}</td>
+    <td>${t.language ? esc(t.language) : '<span style="color:#aaa;">—</span>'}</td>
     <td>${t.status === 'paid' ? '<span style="color:#ef4444;font-weight:600;">Paid</span>' : '<span style="color:#22c55e;">Free</span>'}</td>
     <td>${lyricsStatusCell(t)}</td>
     <td id="af-${t.id}">${audioFilesCell(t)}</td>
     <td class="actions">
-      <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">âœŽ</button>
+      <button class="btn btn-primary btn-sm icon-btn" title="Edit" onclick="showEdit('${t.id}')">✎</button>
       <button class="btn btn-danger btn-sm icon-btn" title="Delete" onclick="confirmDeleteTrack('${t.id}')"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6"/></svg></button>
     </td>
   </tr>`).join('');
@@ -1948,7 +1948,7 @@ function renderTracks() {
   if (pageSizeSel && String(pageSizeSel.value) !== String(trackPageSize)) pageSizeSel.value = String(trackPageSize);
   document.getElementById('count').innerHTML = 'Total tracks: ' + tracks.length + '<br>Page: ' + trackPage + ' of ' + totalPages;
   if (pag) {
-    document.getElementById('trackPageInfo').textContent = `${start + 1}â€“${start + pageList.length} of ${list.length}`;
+    document.getElementById('trackPageInfo').textContent = `${start + 1}–${start + pageList.length} of ${list.length}`;
     document.getElementById('trackPrevBtn').disabled = trackPage <= 1;
     document.getElementById('trackNextBtn').disabled = trackPage >= totalPages;
     pag.style.display = 'block';
@@ -2276,7 +2276,7 @@ function createCardColorController(cfg) {
         const ratio = contrastRatio(bg, text);
         const ok = ratio >= 4.5;
         contrastEl.textContent =
-          'Contrast ' + ratio.toFixed(1) + ':1' + (ok ? ' â€” readable' : ' â€” too low, text may be hard to read');
+          'Contrast ' + ratio.toFixed(1) + ':1' + (ok ? ' — readable' : ' — too low, text may be hard to read');
         contrastEl.className = ok ? 'contrast-ok' : 'contrast-bad';
       } else if (bg) {
         contrastEl.textContent = 'Text color auto (contrast ' +
@@ -2468,10 +2468,10 @@ function setPaletteHint(id, text, cls) {
 // admin-only same-origin proxy so the feature still works on every host.
 async function loadPaletteFor(url, hintId, swatchId, ctl, label) {
   if (!url) {
-    setPaletteHint(hintId, 'No cover uploaded for this ' + label + ' yet — set a color manually below.', 'error');
+    setPaletteHint(hintId, 'No cover uploaded for this ' + label + ' yet � set a color manually below.', 'error');
     return;
   }
-  setPaletteHint(hintId, 'Reading cover…', 'loading');
+  setPaletteHint(hintId, 'Reading cover�', 'loading');
 
   const collect = (img) => extractPaletteFromImage(img);
   let colors = null;
@@ -2496,7 +2496,7 @@ async function loadPaletteFor(url, hintId, swatchId, ctl, label) {
     return;
   }
   renderPaletteSwatches(swatchId, colors, ctl);
-  setPaletteHint(hintId, 'Top colors from the cover — click one to use it:', 'hint');
+  setPaletteHint(hintId, 'Top colors from the cover � click one to use it:', 'hint');
 }
 
 // The cover currently shown in the track form: the uploaded thumbnail, or the
@@ -2616,7 +2616,7 @@ async function saveTrack() {
     toast(id ? 'Updated' : 'Created');
     closeModal();
     loadTracks();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { unlock(); }
 }
 
@@ -2628,7 +2628,7 @@ async function deleteTrack(id) {
     if (!res.ok) throw new Error('Delete failed');
     toast('Deleted');
     loadTracks();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -2660,17 +2660,17 @@ function playAudioUpload(kind) {
   const isPlaying = !audio.paused && !audio.ended;
   if (isPlaying) {
     audio.pause();
-    if (btn) btn.textContent = 'â–¶ Play';
+    if (btn) btn.textContent = '▶ Play';
     if (statusEl) statusEl.textContent = 'Paused';
     return;
   }
   audio.pause();
   audio.src = '/api/admin/audio/file?path=' + encodeURIComponent(path);
   audio.play().then(function () {
-    if (btn) btn.textContent = 'â¸ Pause';
-    if (statusEl) statusEl.textContent = 'Playing â–¶';
+    if (btn) btn.textContent = '⏸ Pause';
+    if (statusEl) statusEl.textContent = 'Playing ▶';
   }).catch(function () {
-    if (btn) btn.textContent = 'â–¶ Play';
+    if (btn) btn.textContent = '▶ Play';
     if (statusEl) statusEl.textContent = 'Playback error';
   });
 }
@@ -2699,7 +2699,7 @@ async function handleKaraokeUpload(input) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
     document.getElementById('fKaraoke').value = data.storage_path;
-    document.getElementById('karaokeStatus').textContent = 'Uploaded âœ“ ' + (data.storage_path.split('/').pop() || '');
+    document.getElementById('karaokeStatus').textContent = 'Uploaded ✓ ' + (data.storage_path.split('/').pop() || '');
   } catch (e) { document.getElementById('karaokeStatus').textContent = 'Error: ' + e.message; }
   input.value = '';
 }
@@ -2743,7 +2743,7 @@ function playRingtoneUpload() {
 async function handleThumbUpload(input) {
   const file = input.files[0];
   if (!file) return;
-  // Strict: track thumbnails must be WebP and exactly 1024Ã—1024.
+  // Strict: track thumbnails must be WebP and exactly 1024×1024.
   if (!file.type || file.type !== 'image/webp') { toast('Thumbnail must be a WebP image'); input.value = ''; return; }
   const dims = await new Promise((resolve) => {
     const img = new Image();
@@ -2753,7 +2753,7 @@ async function handleThumbUpload(input) {
     img.src = url;
   });
   if (!dims) { toast('Could not read the thumbnail image'); input.value = ''; return; }
-  if (dims.w !== 1024 || dims.h !== 1024) { toast('Thumbnail must be exactly 1024Ã—1024 pixels'); input.value = ''; return; }
+  if (dims.w !== 1024 || dims.h !== 1024) { toast('Thumbnail must be exactly 1024×1024 pixels'); input.value = ''; return; }
   document.getElementById('thumbStatus').textContent = 'Uploading...';
   const form = new FormData(); form.append('file', file); form.append('kind', 'track_thumb');
   try {
@@ -2784,8 +2784,8 @@ async function loadAffiliates() {
     // Populate the coupon-affiliate dropdown
     const sel = document.getElementById('cpAffiliate');
     sel.innerHTML = data.length === 0
-      ? '<option value="">â€” no affiliates yet â€”</option>'
-      : data.map(a => `<option value="${a.id}">${esc(a.name)}${a.commission_amount ? ' (â‚¹' + a.commission_amount + '/sale)' : ''}</option>`).join('');
+      ? '<option value="">— no affiliates yet —</option>'
+      : data.map(a => `<option value="${a.id}">${esc(a.name)}${a.commission_amount ? ' (₹' + a.commission_amount + '/sale)' : ''}</option>`).join('');
 
     const couponsRes = await authedFetch('/api/admin/coupons', { credentials: 'same-origin' });
     const coupons = await couponsRes.json();
@@ -2794,24 +2794,24 @@ async function loadAffiliates() {
 
     const tbody = document.getElementById('affTbody');
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No affiliates yet â€” create one above.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No affiliates yet — create one above.</td></tr>';
       return;
     }
     const rows = [];
     data.forEach(a => {
       const ac = couponByAff[a.id] || [];
-      const refCode = a.referrer_code ? `<b>${esc(a.referrer_code)}</b>` : '<span style="color:#aaa;">â€” none â€”</span>';
+      const refCode = a.referrer_code ? `<b>${esc(a.referrer_code)}</b>` : '<span style="color:#aaa;">— none —</span>';
       if (ac.length === 0) {
         rows.push(`<tr>
           <td>${esc(a.name)}</td>
           <td>${refCode}</td>
-          <td style="color:#aaa;">â€” no coupon yet â€”</td>
-          <td>â‚¹${a.commission_amount || 0}</td>
+          <td style="color:#aaa;">— no coupon yet —</td>
+          <td>₹${a.commission_amount || 0}</td>
           <td>-</td>
           <td>-</td>
           <td class="actions">
             <button class="btn btn-secondary btn-sm" onclick="showAffiliateQr('${a.id}', '${esc(a.name)}')">QR</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Delete</button>
           </td>
         </tr>`);
       } else {
@@ -2819,13 +2819,13 @@ async function loadAffiliates() {
           <td>${esc(a.name)}</td>
           <td>${refCode}</td>
           <td><b>${esc(c.code)}</b></td>
-          <td>â‚¹${a.commission_amount || 0}</td>
+          <td>₹${a.commission_amount || 0}</td>
           <td>${c.redemption_count || 0}${c.max_redemptions ? ' / ' + c.max_redemptions : ''}</td>
           <td>${c.status === 'active' ? '<span style="color:#22c55e;">active</span>' : '<span style="color:#ef4444;">paused</span>'}</td>
           <td class="actions">
             <button class="btn btn-secondary btn-sm" onclick="showAffiliateQr('${a.id}', '${esc(a.name)}')">QR</button>
             <button class="btn btn-secondary btn-sm" onclick="toggleCoupon('${c.id}', '${c.status === 'active' ? 'paused' : 'active'}')">${c.status === 'active' ? 'Pause' : 'Resume'}</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Del</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAffiliate('${a.id}', '${esc(a.name)}')">Delete</button>
           </td>
         </tr>`));
       }
@@ -2841,13 +2841,13 @@ async function loadCommissions() {
     const data = await res.json();
     const tbody = document.getElementById('commTbody');
     tbody.innerHTML = data.length === 0
-      ? '<tr><td colspan="6" class="empty-state">No commissions yet â€” they appear after verified yearly purchases.</td></tr>'
+      ? '<tr><td colspan="6" class="empty-state">No commissions yet — they appear after verified yearly purchases.</td></tr>'
       : data.map(c => `<tr>
           <td>${c.created_at ? new Date(c.created_at).toLocaleString() : ''}</td>
           <td>${esc(c.affiliate?.name || c.affiliate_id)}</td>
           <td>${esc(c.purchaser_user_id)}</td>
           <td>${esc(c.product_id)}</td>
-          <td><b>â‚¹${c.commission_amount || 0}</b></td>
+          <td><b>₹${c.commission_amount || 0}</b></td>
           <td>${esc(c.status)}</td>
         </tr>`).join('');
   } catch (e) { toast('Failed to load commissions: ' + e.message); }
@@ -2877,7 +2877,7 @@ async function createAffiliate() {
     document.getElementById('afAmount').value = '';
     document.getElementById('afRef').value = '';
     loadAffiliates();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -2893,9 +2893,9 @@ async function showAffiliateQr(id, name) {
     const dl = document.getElementById('qrDownload');
     dl.href = url;
     dl.setAttribute('download', (name || 'affiliate').replace(/[^a-z0-9]+/gi, '-') + '-qr.png');
-    document.getElementById('qrTitle').textContent = 'QR Code â€” ' + name;
+    document.getElementById('qrTitle').textContent = 'QR Code — ' + name;
     document.getElementById('qrModal').style.display = 'flex';
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
 }
 
 function closeQrModal() { document.getElementById('qrModal').style.display = 'none'; }
@@ -2923,7 +2923,7 @@ async function createCoupon() {
     document.getElementById('cpMax').value = '';
     document.getElementById('cpExpires').value = '';
     loadAffiliates();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -2938,7 +2938,7 @@ async function toggleCoupon(id, status) {
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Update failed'); }
     toast('Coupon ' + status);
     loadAffiliates();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { unlock(); }
 }
 
@@ -2954,7 +2954,7 @@ async function deleteAffiliate(id) {
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }
     toast('Affiliate deleted');
     loadAffiliates();
-  } catch (e) { if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message); }
+  } catch (e) { if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message); }
   finally { showLoading(false); unlock(); }
 }
 
@@ -2998,13 +2998,13 @@ function arrangeTrackSearchResults() {
   }
   const el = document.getElementById('arrangeTrackResults');
   if (!list.length) {
-    el.innerHTML = '<span class="empty-state" style="color:#999;">' + (q ? 'No matching songs.' : 'No songs left â€” every song is already featured.') + '</span>';
+    el.innerHTML = '<span class="empty-state" style="color:#999;">' + (q ? 'No matching songs.' : 'No songs left — every song is already featured.') + '</span>';
     return;
   }
   // Show at most 50 search hits so the panel stays light even with 10k tracks.
   el.innerHTML = list.slice(0, 50).map((t) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">
     ${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}
-    <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${esc(t.artist_names_text || (t.artist_names || []).join(', '))}${t.album ? ' Â· ' + esc(t.album) : ''}</div></div>
+    <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${esc(t.artist_names_text || (t.artist_names || []).join(', '))}${t.album ? ' · ' + esc(t.album) : ''}</div></div>
     <button class="btn btn-primary btn-sm" onclick="pinTrack('${t.id}')">Pin</button>
   </div>`).join('');
 }
@@ -3021,8 +3021,8 @@ function renderArrangeTracks() {
       ${t.thumbnail ? '<img class="thumb-preview" src="'+esc(t.thumbnail)+'" onerror="this.style.display=\'none\'">' : ''}
       <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${esc(t.artist_names_text || (t.artist_names || []).join(', '))}</div></div>
       <div class="actions">
-        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveTrack('${t.id}', -1)" title="Move up">â–²</button>
-        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveTrack('${t.id}', 1)" title="Move down">â–¼</button>
+        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveTrack('${t.id}', -1)" title="Move up">▲</button>
+        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveTrack('${t.id}', 1)" title="Move down">▼</button>
         <button class="btn btn-danger btn-sm" onclick="unpinTrack('${t.id}')">Remove</button>
       </div>
     </div>`).join('');
@@ -3042,8 +3042,8 @@ function renderArrangeAlbums() {
       ${a.cover_url ? '<img class="thumb-preview" src="'+esc(a.cover_url)+'" onerror="this.style.display=\'none\'">' : ''}
       <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(a.name)}</b></div>
       <div class="actions">
-        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', -1)" title="Move up">â–²</button>
-        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', 1)" title="Move down">â–¼</button>
+        <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', -1)" title="Move up">▲</button>
+        <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveAlbum('${a.id}', 1)" title="Move down">▼</button>
         <button class="btn btn-danger btn-sm" onclick="unpinAlbum('${a.id}')">Remove</button>
       </div>
     </div>`).join('');
@@ -3068,7 +3068,7 @@ async function loadArrangeTracks() {
     renderTracks();
     renderArrangeTracks();
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Failed: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Failed: ' + e.message);
   } finally { showLoading(false); }
 }
 
@@ -3079,7 +3079,7 @@ async function loadArrangeAlbums() {
     albums = await res.json();
     renderArrangeAlbums();
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Failed to load albums: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Failed to load albums: ' + e.message);
   } finally { showLoading(false); }
 }
 
@@ -3098,7 +3098,7 @@ async function saveFeaturedTracks() {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
     toast('Song order saved');
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 
@@ -3116,7 +3116,7 @@ async function saveFeaturedAlbums() {
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
     toast('Album order saved');
   } catch (e) {
-    if (e.message !== 'Session expired â€” sign in again.') toast('Error: ' + e.message);
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
   } finally { showLoading(false); unlock(); }
 }
 

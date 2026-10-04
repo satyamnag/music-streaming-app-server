@@ -15,7 +15,7 @@ import 'package:sangeet/pages/home/home_see_all.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
-/// Home screen components Ã¢â‚¬â€ one titled horizontal row per language (e.g.
+/// Home screen components — one titled horizontal row per language (e.g.
 /// "Telugu Songs", "Kannada Songs"). Each language's songs appear under its own
 /// component heading, so a catalog with several languages yields several
 /// separate components. Tapping a track plays the language's songs from that

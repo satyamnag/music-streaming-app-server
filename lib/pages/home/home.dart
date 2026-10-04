@@ -100,7 +100,17 @@ class HomePage extends HookConsumerWidget {
                           ),
                         ],
                       ),
-                      backgroundColor: theme.colorScheme.background,
+                      // Transparent so the app bar never paints an opaque slab
+                      // over the page. `floating: true` keeps this bar pinned
+                      // above the scrolling content, so an opaque background
+                      // read as a permanent white band across the top of the
+                      // home screen - including behind the section headings
+                      // once they scrolled under it. The title, logo and icons
+                      // still draw on top of the normal page background.
+                      backgroundColor: Colors.transparent,
+                      surfaceTintColor: Colors.transparent,
+                      scrolledUnderElevation: 0,
+                      elevation: 0,
                       foregroundColor: theme.colorScheme.foreground,
                       actions: [
                         // Signed-in users see their account avatar (same as the
