@@ -1666,13 +1666,20 @@ const upload = multer({
 // ------------------------------------------------------------------
 // Specials carousel banner geometry
 // ------------------------------------------------------------------
-// A Specials slide is a full-width (~90% of the viewport) landscape banner.
-// 8:3 was chosen so the slide is clearly a banner without dominating the home
-// screen: on a 360dp phone the slide is ~340dp wide, so 8:3 makes it ~128dp
-// tall — substantial but leaving the shelf below visible above the fold.
+// A Specials slide is a full-width landscape banner: the screen width less
+// slideMargin (12dp) each side, so 336dp on a 360dp phone. 8:3 makes that 126dp
+// tall — substantial, but it leaves the shelf below visible above the fold.
+// See HomeSpecialsCarousel.bannerAspectRatio for the render side.
 //
-// 1440x540 is the canonical size the admin panel exports (2x of 720x270, so it
-// stays crisp on high-density screens while remaining a small file).
+// 1440x540 is DERIVED rather than round. A slide is (screen width - 24dp), so
+// 336dp on a 360dp phone and 387dp on a 411dp one; at 1440px wide the artwork is
+// therefore 1:1 or better up to 4x density on a 360dp phone and up to 3.5x on a
+// 411dp one, which is every mainstream phone. 1080x405 is the smallest that still
+// looks sharp, 2160x810 the largest worth uploading (2.25x the bytes for no phone
+// benefit — only a tablet would ever use them). The admin panel shows the same
+// numbers as a spec table and validates the ratio to within 2%, because the app
+// sizes the slide from the artwork's own ratio and would otherwise letterbox or
+// stretch it.
 const SPECIAL_BANNER_RATIO = 8 / 3
 const SPECIAL_BANNER_LABEL = '8:3 (2.67:1)'
 const SPECIAL_BANNER_WIDTH = 1440

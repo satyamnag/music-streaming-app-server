@@ -388,6 +388,39 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     optional extra rule. A shelf with <b>no tracks</b> does not appear on the
     home screen at all.
   </p>
+  <div style="background:#fff;border:1px solid #ddd;border-left:4px solid #b91c1c;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+    <h3 style="margin:0 0 8px;">Banner format &mdash; the spec to export to</h3>
+    <table style="border-collapse:collapse;font-size:12.5px;color:#333;margin-bottom:10px;">
+      <tr>
+        <td style="padding:2px 14px 2px 0;color:#666;">Format</td>
+        <td style="padding:2px 0;"><b>WebP</b>, lossy, quality <b>80&ndash;85</b>, sRGB, <b>no alpha</b> (the banner is opaque and always fills its box), metadata stripped</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 14px 2px 0;color:#666;">Aspect ratio</td>
+        <td style="padding:2px 0;"><b>8:3 (2.667:1)</b> &mdash; exact, within 2%. Enforced on upload, because the app sizes the slide from the artwork's own ratio and never letterboxes or stretches it</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 14px 2px 0;color:#666;">Pixels</td>
+        <td style="padding:2px 0;"><b>1440&times;540</b> is the export size. <b>1080&times;405</b> is the minimum that still looks sharp; <b>2160&times;810</b> is the largest worth uploading</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 14px 2px 0;color:#666;">Why 1440&times;540</td>
+        <td style="padding:2px 0;">The slide is the screen width less 12dp each side, so <b>336dp</b> on a 360dp phone, and 8:3 makes it 126dp tall. At 1440px the artwork is 1:1 or better up to 4&times; density on a 360dp phone and up to 3.5&times; on a 411dp one &mdash; every mainstream phone, with no upscaling</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 14px 2px 0;color:#666;vertical-align:top;">Keep clear</td>
+        <td style="padding:2px 0;">
+          <b>Right ~half:</b> the copy sits there &mdash; &ldquo;FEATURED PLAYLIST&rdquo;, the shelf name (up to 2 lines), the song count and the Play Now button, all right-aligned and vertically centred.<br>
+          <b>Bottom centre:</b> the page dots are drawn inside the artwork there.<br>
+          <b>Contrast:</b> the app deliberately draws <b>no dark scrim</b> &mdash; the white copy carries its own text shadow instead &mdash; so keep the right half away from near-white and busy areas or the text will be hard to read.
+        </td>
+      </tr>
+    </table>
+    <div style="font-size:12px;color:#666;">
+      Composition that works: put the subject on the <b>left two-thirds</b> and leave the right third calm
+      and mid-to-dark toned. The banner is shown at full brightness, so export it looking the way you want it seen.
+    </div>
+  </div>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
     <h3 style="margin-bottom:8px;">New shelf</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
@@ -1302,10 +1335,22 @@ function refreshCurrent() {
 
 // The accepted banner geometry. Must match the server constants
 // (SPECIAL_BANNER_RATIO / _WIDTH / _HEIGHT in server.js).
+//
+// 1440x540 is DERIVED, not arbitrary. The carousel slide is the screen width less
+// slideMargin (12dp) each side — 336dp on a 360dp phone, 387dp on a 411dp one — and
+// the app sizes it from the artwork's own 8:3 ratio, so the slide renders 336x126dp
+// and the artwork is never letterboxed or stretched. At 1440px wide the artwork is
+// 1:1 or better up to 4x density on a 360dp phone and up to 3.5x on a 411dp one,
+// i.e. every mainstream phone. 1080x405 is the smallest that still looks sharp;
+// 2160x810 is the largest worth uploading — 2.25x the bytes that only a tablet
+// would ever use.
+//
+// The same numbers appear in the spec table at the top of the Specials panel —
+// keep the two in step if either ever changes.
 const SPECIAL_BANNER_RATIO = 8 / 3;
 const SPECIAL_BANNER_WIDTH = 1440;
 const SPECIAL_BANNER_HEIGHT = 540;
-const SPECIAL_BANNER_LABEL = '8:3 landscape';
+const SPECIAL_BANNER_LABEL = '8:3 landscape (2.667:1)';
 
 let specialRows = [];
 
@@ -1389,8 +1434,9 @@ function renderSpecials() {
           '</div>' +
           '<input type="file" id="spBanner-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleSpecialBannerUpload(this, \'' + esc(id) + '\')">' +
           '<div class="special-hint" id="spHint-' + esc(id) + '">' +
-            'Banner must be <strong>WebP</strong>, <strong>' + SPECIAL_BANNER_LABEL + '</strong> ' +
-            '(' + SPECIAL_BANNER_WIDTH + '&times;' + SPECIAL_BANNER_HEIGHT + ' recommended).' +
+            '<strong>WebP</strong> (lossy, quality 80&ndash;85, no alpha), <strong>' + SPECIAL_BANNER_LABEL + '</strong>, ' +
+            '<strong>' + SPECIAL_BANNER_WIDTH + '&times;' + SPECIAL_BANNER_HEIGHT + '</strong>. ' +
+            'Keep the right half clear for the copy and the bottom centre clear for the dots &mdash; see the banner spec above.' +
           '</div>' +
           '<div class="special-actions" style="margin-top:8px;">' +
             '<button class="btn btn-success btn-sm" type="button" onclick="saveSpecial(\'' + esc(id) + '\')">Save</button>' +
