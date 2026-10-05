@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/fake.dart';
+import 'package:sangeet/components/track_card/home_album_card.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/l10n/l10n.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
@@ -99,47 +101,79 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 3));
 
-    // For the first card of each section: the row (horizontal ListView) must
-    // be exactly as tall as its card, and the card must leave no more than
-    // its own design padding (10 logical px) below the subtitle text.
-    void expectTightFit(Widget sectionWidget, String titleText) {
-      final section = find.byWidgetPredicate(
-        (w) => w.runtimeType == sectionWidget.runtimeType,
-      );
-      final row = tester.getRect(
-        find.descendant(of: section, matching: find.byType(ListView)).first,
-      );
-      final card = find
-          .ancestor(
-            of: find.descendant(of: section, matching: find.text(titleText)),
-            matching: find.byType(Container),
-          )
-          .first;
-      final cardRect = tester.getRect(card);
-      // The second Text inside the card is the subtitle ("N songs" /
-      // album name), scoped to this card so the measurement never leaks
-      // across sections.
-      final subtitle =
-          find.descendant(of: card, matching: find.byType(Text)).at(1);
-      final subtitleRect = tester.getRect(subtitle);
+    // The row (horizontal ListView) of a section, and the first card inside it.
+    //
+    // Cards are located by their WIDGET TYPE, not by their title text. The track
+    // card splits its name across up to two Text widgets — first word on line one,
+    // the rest on line two — so `find.text(fullName)` no longer matches anything,
+    // and a test that matched on the name would silently stop testing the card it
+    // was written for.
+    Finder sectionOf(Widget sectionWidget) => find.byWidgetPredicate(
+          (w) => w.runtimeType == sectionWidget.runtimeType,
+        );
+    Rect rowOf(Widget sectionWidget) => tester.getRect(
+          find
+              .descendant(
+                of: sectionOf(sectionWidget),
+                matching: find.byType(ListView),
+              )
+              .first,
+        );
+    Rect cardOf(Widget sectionWidget, Type cardType) => tester.getRect(
+          find
+              .descendant(
+                of: sectionOf(sectionWidget),
+                matching: find.byType(cardType),
+              )
+              .first,
+        );
 
-      expect(cardRect.height, row.height,
-          reason: 'card must fill the row height exactly');
-      // Dead space = row height - (content bottom from card top) - the card's
-      // own bottom padding (HomeSectionLayout.cardPadding).
-      final contentBottom = subtitleRect.bottom - cardRect.top;
-      final dead = row.height - contentBottom - HomeSectionLayout.cardPadding;
-      expect(dead.abs(), lessThanOrEqualTo(1.0),
-          reason: 'no dead band between the subtitle and the card bottom');
-    }
+    // ALBUM row: the card carries a title AND a subtitle, and the original
+    // invariant still applies to it unchanged — no dead band between the
+    // subtitle and the card's bottom beyond the card's own bottom padding.
+    const albumSection = HomeAlbumsSection(albums: []);
+    final albumRow = rowOf(albumSection);
+    final albumCardRect = cardOf(albumSection, HomeAlbumCard);
+    expect(albumCardRect.height, albumRow.height,
+        reason: 'album card must fill the row height exactly');
+    final subtitle = find
+        .descendant(
+          of: find
+              .descendant(
+                of: sectionOf(albumSection),
+                matching: find.byType(HomeAlbumCard),
+              )
+              .first,
+          matching: find.byType(Text),
+        )
+        .at(1);
+    final subtitleRect = tester.getRect(subtitle);
+    final dead = albumRow.height -
+        (subtitleRect.bottom - albumCardRect.top) -
+        HomeSectionLayout.cardPadding;
+    expect(dead.abs(), lessThanOrEqualTo(1.0),
+        reason: 'no dead band between the album subtitle and the card bottom');
 
-    expectTightFit(const HomeAlbumsSection(albums: []), 'Album Zero');
-    expectTightFit(
-        const HomeLanguageSongsSections(languages: []), 'A good track');
-    expectTightFit(
+    // TRACK rows: the track card has NO subtitle any more (the album line was
+    // removed so the name could use the full width) and its name is split across
+    // up to two Text widgets, so the subtitle-based measurement above cannot
+    // apply to it. The invariants that must still hold are that the card fills
+    // the row exactly, and that the row is exactly the height the layout
+    // publishes for a two-line track card — which is what keeps these rows free
+    // of the dead band this test exists to catch, whatever a name does.
+    final context = tester.element(find.byType(HomeTrackSection).first);
+    final expectedRow = HomeSectionLayout.twoLineTrackRowHeight(context);
+    for (final section in <Widget>[
+      const HomeLanguageSongsSections(languages: []),
       const HomeTrackSection(title: '', tracks: []),
-      'A good track',
-    );
+    ]) {
+      final row = rowOf(section);
+      final card = cardOf(section, HomeTrackCard);
+      expect(card.height, row.height,
+          reason: '${section.runtimeType}: track card must fill the row height');
+      expect(row.height, closeTo(expectedRow, 0.5),
+          reason: '${section.runtimeType}: row must be the published track-row height');
+    }
   });
 
   testWidgets(
