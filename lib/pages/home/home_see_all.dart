@@ -7,10 +7,10 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_card/home_album_card.dart';
+import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -160,13 +160,15 @@ class HomeSeeAllPage extends HookConsumerWidget {
                   itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: trackGridCrossAxisCount(context),
+                    // The tile presents the card at the home rows' own fixed
+                    // width (see HomeCardTile), so the tile height has to come
+                    // from that width and not from the fluid tile width.
                     // Both branches render a card WITH its subtitle line (see
                     // HomeAlbumCard/HomeTrackCard), so the tile is sized to the
                     // card variant that includes it.
-                    mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                    mainAxisExtent: homeCardTileExtent(
                       context,
-                      crossAxisCount: trackGridCrossAxisCount(context),
-                      horizontalPadding: 12 * scale,
+                      withSubtitle: true,
                     ),
                     crossAxisSpacing: 6,
                     mainAxisSpacing: 6,
@@ -177,23 +179,27 @@ class HomeSeeAllPage extends HookConsumerWidget {
                       final album = homeAlbum.album;
                       // The shared home album card resolves the album's lock
                       // state and gates its own tap, then opens the album.
-                      return HomeAlbumCard(
-                        album: album,
-                        imageUrl:
-                            album.images.smallest(ImagePlaceholder.albumArt),
-                        subtitle: '${homeAlbum.tracks.length} songs',
-                        onTap: () {
-                          context.navigateTo(
-                            AlbumRoute(id: album.id, album: album),
-                          );
-                        },
+                      return HomeCardTile(
+                        child: HomeAlbumCard(
+                          album: album,
+                          imageUrl:
+                              album.images.smallest(ImagePlaceholder.albumArt),
+                          subtitle: '${homeAlbum.tracks.length} songs',
+                          onTap: () {
+                            context.navigateTo(
+                              AlbumRoute(id: album.id, album: album),
+                            );
+                          },
+                        ),
                       );
                     }
                     final track = shownTracks[index];
-                    return HomeTrackCard(
-                      track: track,
-                      imageUrl: trackCardImageUrl(track),
-                      onTap: () => playFrom(index, filteredTracks),
+                    return HomeCardTile(
+                      child: HomeTrackCard(
+                        track: track,
+                        imageUrl: trackCardImageUrl(track),
+                        onTap: () => playFrom(index, filteredTracks),
+                      ),
                     );
                   },
                 ),

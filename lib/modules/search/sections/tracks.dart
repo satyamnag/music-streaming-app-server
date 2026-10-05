@@ -6,10 +6,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
+import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/pages/search/search.dart';
 import 'package:sangeet/provider/connect/connect.dart';
@@ -111,10 +111,9 @@ class SearchTracksSection extends HookConsumerWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: trackGridCrossAxisCount(context),
-                  mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                  mainAxisExtent: homeCardTileExtent(
                     context,
-                    crossAxisCount: trackGridCrossAxisCount(context),
-                    horizontalPadding: 8,
+                    withSubtitle: true,
                   ),
                   crossAxisSpacing: 6,
                   mainAxisSpacing: 6,
@@ -133,20 +132,21 @@ class SearchTracksSection extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: trackGridCrossAxisCount(context),
-              mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+              mainAxisExtent: homeCardTileExtent(
                 context,
-                crossAxisCount: trackGridCrossAxisCount(context),
-                horizontalPadding: 8,
+                withSubtitle: true,
               ),
               crossAxisSpacing: 6,
               mainAxisSpacing: 6,
             ),
             children: [
               for (final (index, track) in shown.indexed)
-                HomeTrackCard(
-                  track: track,
-                  imageUrl: trackCardImageUrl(track),
-                  onTap: () => playTrack(index),
+                HomeCardTile(
+                  child: HomeTrackCard(
+                    track: track,
+                    imageUrl: trackCardImageUrl(track),
+                    onTap: () => playTrack(index),
+                  ),
                 ),
             ],
           ),
@@ -177,11 +177,16 @@ class _SkeletonCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TrackCard(
-      imageUrl: '',
-      title: 'Loading',
-      subtitle: 'Loading',
-      onTap: () {},
+    // The loaded grid presents its cards through HomeCardTile (and is sized by
+    // homeCardTileExtent for that width), so the loading cell uses the same
+    // tile to keep the placeholder the same size as the card it stands in for.
+    return HomeCardTile(
+      child: TrackCard(
+        imageUrl: '',
+        title: 'Loading',
+        subtitle: 'Loading',
+        onTap: () {},
+      ),
     );
   }
 }

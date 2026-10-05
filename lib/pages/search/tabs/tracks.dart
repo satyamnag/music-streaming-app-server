@@ -6,10 +6,10 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
+import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
@@ -135,20 +135,24 @@ class SearchPageTracksTab extends HookConsumerWidget {
                 itemCount: shown.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: trackGridCrossAxisCount(context),
-                  mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                  // Home-card geometry: the tile presents the card at the home
+                  // rows' fixed width (see HomeCardTile), so the extent comes
+                  // from that width, not from the fluid tile width.
+                  mainAxisExtent: homeCardTileExtent(
                     context,
-                    crossAxisCount: trackGridCrossAxisCount(context),
-                    horizontalPadding: 8,
+                    withSubtitle: true,
                   ),
                   crossAxisSpacing: 6,
                   mainAxisSpacing: 6,
                 ),
                 itemBuilder: (context, index) {
                   final track = shown[index];
-                  return HomeTrackCard(
-                    track: track,
-                    imageUrl: trackCardImageUrl(track),
-                    onTap: () => playTrack(index),
+                  return HomeCardTile(
+                    child: HomeTrackCard(
+                      track: track,
+                      imageUrl: trackCardImageUrl(track),
+                      onTap: () => playTrack(index),
+                    ),
                   );
                 },
               ),

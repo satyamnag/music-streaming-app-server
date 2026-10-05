@@ -12,6 +12,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_view.dart';
+import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/string.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -207,26 +208,27 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   isLoading: userPlaylistsQuery.isLoading,
                   onRequestMore: () {},
                   itemCount: userPlaylists.length,
-                  // Home-card geometry: the shared card's height follows its
-                  // tile width, so the tiles are sized from the same helpers
-                  // the other card grids use.
+                  // Home-card geometry: the grid presents the shared card at
+                  // the home rows' own fixed width (see HomeCardTile), so the
+                  // tile height comes from that width instead of the fluid tile
+                  // width the delegate hands out.
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: trackGridCrossAxisCount(context),
-                    mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+                    mainAxisExtent: homeCardTileExtent(
                       context,
-                      crossAxisCount: trackGridCrossAxisCount(context),
-                      horizontalPadding: 8,
+                      withSubtitle: true,
                     ),
                     crossAxisSpacing: 6,
                     mainAxisSpacing: 6,
                   ),
-                  gridPlaceholder: const _LoadingCard(),
+                  gridPlaceholder: const HomeCardTile(child: _LoadingCard()),
                   listPlaceholder: const Align(
                     alignment: Alignment.centerLeft,
                     child: _LoadingCard(),
                   ),
-                  gridItemBuilder: (context, index) =>
-                      playlistCard(userPlaylists[index]),
+                  gridItemBuilder: (context, index) => HomeCardTile(
+                    child: playlistCard(userPlaylists[index]),
+                  ),
                   listItemBuilder: (context, index) => Align(
                     alignment: Alignment.centerLeft,
                     child: playlistCard(userPlaylists[index]),
