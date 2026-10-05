@@ -1875,7 +1875,14 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       tags: cleanTags(tags),
       featured_order: cleanFeatured,
     }).select().single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) {
+      // A save that carries the mini player colour before migrations/030 has been
+      // run lands here. Name the migration instead of echoing PostgREST.
+      if (isMissingColumnError(error, 'miniplayer_bg_color')) {
+        return res.status(409).json({ error: MINIPLAYER_COLUMN_HINT })
+      }
+      return res.status(500).json({ error: error.message })
+    }
 
     // Record full album membership (multi-album). Best-effort: if migration
     // 015 is not applied, the track still keeps its primary album_id.
@@ -1955,6 +1962,11 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'no fields to update' })
     const { data, error } = await supabase.from('tracks').update(updates).eq('id', req.params.id).select().single()
     if (error) {
+      // Checked BEFORE the transliteration retry below: that retry strips columns
+      // and reports success, which would silently discard the admin's colour.
+      if (isMissingColumnError(error, 'miniplayer_bg_color')) {
+        return res.status(409).json({ error: MINIPLAYER_COLUMN_HINT })
+      }
       // The transliteration columns need migrations/012 to be run once in
       // Supabase. If they are missing, retry without them so saving the
       // translations still works (transliterations are simply not stored yet).
@@ -2165,6 +2177,27 @@ const TRACK_COLOR_KEYS = [
   'card_text_color',
   'miniplayer_bg_color',
 ]
+
+// PostgREST's "no such column" code, and the raw Postgres one. Either appears when
+// a migration that adds a column has not been run against the database yet.
+function isMissingColumnError(error, column) {
+  if (!error) return false
+  if (error.code !== 'PGRST204' && error.code !== '42703') return false
+  // Both codes name the column in the message; matching on it keeps this from
+  // claiming a migration is missing when something else is wrong.
+  return !column || String(error.message || '').includes(column)
+}
+
+// Shown when the mini player colour is written before migrations/030 has been run.
+// The whole point is to name the file to run: an admin who has never heard of
+// `miniplayer_bg_color` learns nothing from a raw PostgREST error, and would
+// reasonably conclude the feature is broken rather than un-migrated.
+const MINIPLAYER_COLUMN_HINT =
+  'The tracks table has no miniplayer_bg_color column yet, so this save was ' +
+  'refused rather than quietly dropping the colour. Run ' +
+  'server/migrations/030_track_miniplayer_bg_color.sql once in the Supabase SQL ' +
+  'Editor (Dashboard > SQL Editor), then save again. Clearing the Mini player ' +
+  'background field will also let the rest of the form save without it.'
 
 const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
 
