@@ -43,12 +43,17 @@ on:
         default: false
       flavor:
         description: >-
-          Product flavor. Use stable for the Play build (com.soulfulbhakti.app).
-          Use dev or nightly to sideload a test build: those install as SEPARATE
-          apps (com.soulfulbhakti.app.dev / .nightly), which is the only way to
-          test a locally-built APK on a phone that already has the Play build,
-          because Play re-signs with its own key and an upload-key APK can never
-          update the Play one in place.
+          Product flavor. Keep `stable` for the Play build (com.soulfulbhakti.app).
+          IMPORTANT: `dev` and `nightly` DO NOT BUILD YET - they fail at
+          :app:processDevReleaseGoogleServices with "No matching client found for
+          package name 'com.soulfulbhakti.app.dev'", because android/app/
+          google-services.json contains a Firebase client for com.soulfulbhakti.app
+          only. To make them usable, register an Android app for each additional
+          package name in the Firebase console and replace google-services.json;
+          after that they install side-by-side with the Play build (they carry an
+          applicationIdSuffix), which is the only way to test on a phone that
+          already has the Play build: Play re-signs with its own key, so an
+          upload-key APK can never update the Play one in place.
         type: choice
         options:
           - stable
