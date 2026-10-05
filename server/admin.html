@@ -576,6 +576,18 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     </div>
   </div>
 </div>
+<div class="color-field" style="margin-top:10px;max-width:340px;">
+  <span class="color-field-label">Mini player background (this track)</span>
+  <div class="color-input-wrap">
+    <input type="color" id="fMiniBg" value="#1f2937">
+    <input type="text" id="fMiniBgHex" class="color-hex" maxlength="7" placeholder="default">
+    <button type="button" class="btn btn-secondary btn-sm" onclick="clearTrackColor('mini')">Clear</button>
+  </div>
+  <div style="font-size:11px;color:#999;margin-top:2px;">
+    The bar at the bottom of the screen while THIS track is playing. Leave empty to
+    keep the theme's own surface. Independent of the card colours above.
+  </div>
+</div>
 <div class="color-presets" id="trackColorPresets"></div>
 <div class="color-live-preview">
   <div class="color-preview-card" id="trackColorPreview">
@@ -3442,12 +3454,58 @@ function initColorControllers() {
 function clearTrackColor(which) {
   initColorControllers();
   if (which === 'bg') trackColorCtl.setBg('');
+  else if (which === 'mini') setTrackMiniBg('');
   else trackColorCtl.setText('');
 }
 function clearAlbumColor(which) {
   initColorControllers();
   if (which === 'bg') albumColorCtl.setBg('');
   else albumColorCtl.setText('');
+}
+
+// ------------------------------------------------------------------
+// The mini player's own background colour for one track.
+//
+// Deliberately NOT folded into trackColorCtl. That controller is a
+// background+TEXT PAIR with a live preview of a CARD, whereas this is a single
+// colour for a different surface — the compact player bar at the bottom of the
+// screen. Sharing the pair would make its live preview claim to show something it
+// does not control, and would put a "text color" field on the form that the mini
+// player has no use for.
+let trackMiniBg = '';
+
+function setTrackMiniBg(value) {
+  trackMiniBg = value || '';
+  const swatch = document.getElementById('fMiniBg');
+  const hex = document.getElementById('fMiniBgHex');
+  if (swatch && trackMiniBg) swatch.value = trackMiniBg;
+  if (hex) {
+    hex.value = trackMiniBg;
+    hex.classList.remove('is-invalid');
+  }
+}
+
+function initTrackMiniBg() {
+  const swatch = document.getElementById('fMiniBg');
+  if (swatch && !swatch.dataset.bound) {
+    swatch.dataset.bound = '1';
+    swatch.addEventListener('input', function () { setTrackMiniBg(swatch.value); });
+  }
+  const hex = document.getElementById('fMiniBgHex');
+  if (hex && !hex.dataset.bound) {
+    hex.dataset.bound = '1';
+    hex.addEventListener('input', function () {
+      const v = normalizeHexColor(hex.value);
+      if (v === null) { hex.classList.add('is-invalid'); return; }
+      hex.classList.remove('is-invalid');
+      setTrackMiniBg(v);
+    });
+    hex.addEventListener('blur', function () {
+      const v = normalizeHexColor(hex.value);
+      if (v === null) { hex.value = trackMiniBg; hex.classList.remove('is-invalid'); }
+      else { hex.value = v; }
+    });
+  }
 }
 
 // ------------------------------------------------------------------
@@ -3553,6 +3611,8 @@ function showAdd() {
   // New tracks start on the app's default card colors.
   initColorControllers();
   trackColorCtl.load(null, null);
+  initTrackMiniBg();
+  setTrackMiniBg('');
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = '';
   document.getElementById('karaokeStatus').textContent = '';
@@ -3582,6 +3642,8 @@ function showEdit(id) {
   // Load this track's saved card colors (null -> app default).
   initColorControllers();
   trackColorCtl.load(t.card_bg_color, t.card_text_color);
+  initTrackMiniBg();
+  setTrackMiniBg(normalizeHexColor(t.miniplayer_bg_color) || '');
   document.getElementById('thumbStatus').textContent = '';
   document.getElementById('audioStatus').textContent = t.storage_path ? 'Current: ' + (t.storage_path.split('/').pop() || t.storage_path) : '';
   document.getElementById('karaokeStatus').textContent = t.karaoke_storage_path ? 'Current: ' + (t.karaoke_storage_path.split('/').pop() || t.karaoke_storage_path) : '';
@@ -3624,6 +3686,8 @@ async function saveTrack() {
   const body = { title, album, album_id, album_ids: albumIds, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, language, tags };
   // Per-track card colors (box background + text); null = app default.
   Object.assign(body, trackColorCtl.payload());
+  // The mini player's own background for this track; null = theme surface.
+  body.miniplayer_bg_color = trackMiniBg || null;
   // Persist the currently-edited lyric column too, so "Save" (Track or Lyrics
   // tab) saves both the track fields and the lyrics in one request.
   const lyrCol = lyricsColumn();

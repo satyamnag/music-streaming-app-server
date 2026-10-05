@@ -35,6 +35,14 @@ class SangeetTrackObject with _$SangeetTrackObject {
     String? cardBgColor,
     /// Admin-configurable card text color (`#rrggbb`), or null for the default.
     String? cardTextColor,
+    /// Admin-configurable background color (`#rrggbb`) for the MINI PLAYER while
+    /// this track is the active one, or null to keep the theme's own surface.
+    ///
+    /// Separate from [cardBgColor] on purpose: the card colour is the tile the
+    /// track sits on in a grid or shelf, this is the bar at the bottom of the
+    /// screen while it plays, and a track can reasonably want one but not the
+    /// other.
+    String? miniplayerBgColor,
     /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
     /// the home "Specials" shelves to group tracks by deity/theme.
     String? tags,

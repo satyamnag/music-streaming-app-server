@@ -104,6 +104,10 @@ Map<String, dynamic> _trackToJson(Map<String, dynamic> t) {
     // Admin-configurable card colors (null = use the app's default theme).
     'cardBgColor': t['card_bg_color'],
     'cardTextColor': t['card_text_color'],
+    // Admin-configurable MINI PLAYER background for this track (null = keep the
+    // theme's own surface). A separate column from the card colors above: this
+    // paints the bar at the bottom of the screen while the track plays.
+    'miniplayerBgColor': t['miniplayer_bg_color'],
     'album': {
       'id': _albumId(albumName),
       'name': albumName,

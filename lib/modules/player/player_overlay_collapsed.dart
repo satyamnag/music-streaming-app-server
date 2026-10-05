@@ -4,6 +4,8 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:sangeet/collections/intents.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/track_card/card_colors.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_track_details.dart';
 import 'package:sangeet/modules/player/ringtone_action_button.dart';
 import 'package:sangeet/modules/player/timeline_bar.dart';
@@ -50,6 +52,15 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
 
     final theme = Theme.of(context);
 
+    // Admin-configured background for the mini player while THIS track plays.
+    // Bound to a local first: Dart cannot type-promote a field, and only the
+    // server's "full" track carries the column at all.
+    final activeTrack = playlist.activeTrack;
+    final configuredMiniBg = activeTrack is SangeetFullTrackObject
+        ? activeTrack.miniplayerBgColor
+        : null;
+    final miniBg = parseCardColor(configuredMiniBg);
+
     final shouldShow = useState(true);
 
     ref.listen(navigationPanelHeight, (_, height) {
@@ -66,6 +77,15 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
                 surfaceOpacity: theme.surfaceOpacity,
                 padding: EdgeInsets.zero,
                 borderRadius: theme.borderRadiusLg,
+                // An admin-configured colour FILLS the bar. The surface blur and
+                // opacity are dropped in that case on purpose: they exist so the
+                // artwork behind the bar shows through, and an author who picked
+                // this colour wants to see that colour. With no colour set the
+                // card keeps exactly the appearance it had before, because
+                // `filled: false` with the theme's own card colour is what the
+                // default resolved to anyway.
+                filled: miniBg != null,
+                fillColor: miniBg ?? theme.colorScheme.card,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

@@ -5153,6 +5153,7 @@ mixin _$SangeetTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)
         full,
   }) =>
@@ -5188,6 +5189,7 @@ mixin _$SangeetTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
   }) =>
@@ -5223,6 +5225,7 @@ mixin _$SangeetTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
     required TResult orElse(),
@@ -5524,6 +5527,7 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)
         full,
   }) {
@@ -5562,6 +5566,7 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
   }) {
@@ -5600,6 +5605,7 @@ class _$SangeetLocalTrackObjectImpl implements SangeetLocalTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
     required TResult orElse(),
@@ -5713,6 +5719,7 @@ abstract class _$$SangeetFullTrackObjectImplCopyWith<$Res>
       String? plainLyricsHiTr,
       String? cardBgColor,
       String? cardTextColor,
+      String? miniplayerBgColor,
       String? tags});
 
   @override
@@ -5752,6 +5759,7 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
     Object? plainLyricsHiTr = freezed,
     Object? cardBgColor = freezed,
     Object? cardTextColor = freezed,
+    Object? miniplayerBgColor = freezed,
     Object? tags = freezed,
   }) {
     return _then(_$SangeetFullTrackObjectImpl(
@@ -5831,6 +5839,10 @@ class __$$SangeetFullTrackObjectImplCopyWithImpl<$Res>
           ? _value.cardTextColor
           : cardTextColor // ignore: cast_nullable_to_non_nullable
               as String?,
+      miniplayerBgColor: freezed == miniplayerBgColor
+          ? _value.miniplayerBgColor
+          : miniplayerBgColor // ignore: cast_nullable_to_non_nullable
+              as String?,
       tags: freezed == tags
           ? _value.tags
           : tags // ignore: cast_nullable_to_non_nullable
@@ -5862,6 +5874,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
       this.plainLyricsHiTr,
       this.cardBgColor,
       this.cardTextColor,
+      this.miniplayerBgColor,
       this.tags,
       final String? $type})
       : _artists = artists,
@@ -5922,6 +5935,16 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
   @override
   final String? cardTextColor;
 
+  /// Admin-configurable background color (`#rrggbb`) for the MINI PLAYER while
+  /// this track is the active one, or null to keep the theme's own surface.
+  ///
+  /// Separate from [cardBgColor] on purpose: the card colour is the tile the
+  /// track sits on in a grid or shelf, this is the bar at the bottom of the
+  /// screen while it plays, and a track can reasonably want one but not the
+  /// other.
+  @override
+  final String? miniplayerBgColor;
+
   /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
   /// the home "Specials" shelves to group tracks by deity/theme.
   @override
@@ -5932,7 +5955,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
 
   @override
   String toString() {
-    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor, tags: $tags)';
+    return 'SangeetTrackObject.full(id: $id, name: $name, externalUri: $externalUri, artists: $artists, album: $album, durationMs: $durationMs, isrc: $isrc, explicit: $explicit, status: $status, language: $language, featuredOrder: $featuredOrder, karaokeStoragePath: $karaokeStoragePath, plainLyrics: $plainLyrics, plainLyricsEn: $plainLyricsEn, plainLyricsHi: $plainLyricsHi, plainLyricsEnTr: $plainLyricsEnTr, plainLyricsHiTr: $plainLyricsHiTr, cardBgColor: $cardBgColor, cardTextColor: $cardTextColor, miniplayerBgColor: $miniplayerBgColor, tags: $tags)';
   }
 
   @override
@@ -5972,6 +5995,8 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
                 other.cardBgColor == cardBgColor) &&
             (identical(other.cardTextColor, cardTextColor) ||
                 other.cardTextColor == cardTextColor) &&
+            (identical(other.miniplayerBgColor, miniplayerBgColor) ||
+                other.miniplayerBgColor == miniplayerBgColor) &&
             (identical(other.tags, tags) || other.tags == tags));
   }
 
@@ -5998,6 +6023,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsHiTr,
         cardBgColor,
         cardTextColor,
+        miniplayerBgColor,
         tags
       ]);
 
@@ -6042,6 +6068,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)
         full,
   }) {
@@ -6065,6 +6092,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsHiTr,
         cardBgColor,
         cardTextColor,
+        miniplayerBgColor,
         tags);
   }
 
@@ -6100,6 +6128,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
   }) {
@@ -6123,6 +6152,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
         plainLyricsHiTr,
         cardBgColor,
         cardTextColor,
+        miniplayerBgColor,
         tags);
   }
 
@@ -6158,6 +6188,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
             String? plainLyricsHiTr,
             String? cardBgColor,
             String? cardTextColor,
+            String? miniplayerBgColor,
             String? tags)?
         full,
     required TResult orElse(),
@@ -6183,6 +6214,7 @@ class _$SangeetFullTrackObjectImpl implements SangeetFullTrackObject {
           plainLyricsHiTr,
           cardBgColor,
           cardTextColor,
+          miniplayerBgColor,
           tags);
     }
     return orElse();
@@ -6248,6 +6280,7 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
       final String? plainLyricsHiTr,
       final String? cardBgColor,
       final String? cardTextColor,
+      final String? miniplayerBgColor,
       final String? tags}) = _$SangeetFullTrackObjectImpl;
 
   factory SangeetFullTrackObject.fromJson(Map<String, dynamic> json) =
@@ -6283,6 +6316,15 @@ abstract class SangeetFullTrackObject implements SangeetTrackObject {
 
   /// Admin-configurable card text color (`#rrggbb`), or null for the default.
   String? get cardTextColor;
+
+  /// Admin-configurable background color (`#rrggbb`) for the MINI PLAYER while
+  /// this track is the active one, or null to keep the theme's own surface.
+  ///
+  /// Separate from [cardBgColor] on purpose: the card colour is the tile the
+  /// track sits on in a grid or shelf, this is the bar at the bottom of the
+  /// screen while it plays, and a track can reasonably want one but not the
+  /// other.
+  String? get miniplayerBgColor;
 
   /// Admin-authored comma-separated tags (e.g. "ganesha, vinayaka"). Used by
   /// the home "Specials" shelves to group tracks by deity/theme.

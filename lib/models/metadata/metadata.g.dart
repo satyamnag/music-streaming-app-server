@@ -521,6 +521,7 @@ _$SangeetFullTrackObjectImpl _$$SangeetFullTrackObjectImplFromJson(Map json) =>
       plainLyricsHiTr: json['plainLyricsHiTr'] as String?,
       cardBgColor: json['cardBgColor'] as String?,
       cardTextColor: json['cardTextColor'] as String?,
+      miniplayerBgColor: json['miniplayerBgColor'] as String?,
       tags: json['tags'] as String?,
       $type: json['runtimeType'] as String?,
     );
@@ -547,6 +548,7 @@ Map<String, dynamic> _$$SangeetFullTrackObjectImplToJson(
       'plainLyricsHiTr': instance.plainLyricsHiTr,
       'cardBgColor': instance.cardBgColor,
       'cardTextColor': instance.cardTextColor,
+      'miniplayerBgColor': instance.miniplayerBgColor,
       'tags': instance.tags,
       'runtimeType': instance.$type,
     };

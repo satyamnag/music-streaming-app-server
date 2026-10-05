@@ -1836,7 +1836,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
     const cleanFeatured = featured_order == null ? null
       : (Number.isInteger(Number(featured_order)) && Number(featured_order) > 0 ? Math.floor(Number(featured_order)) : null)
     const albumIds = albumIdsFrom({ album_ids, album_id })
-    const createColors = readCardColors(req.body || {})
+    const createColors = readCardColors(req.body || {}, TRACK_COLOR_KEYS)
     if (createColors.error) return res.status(400).json({ error: createColors.error })
     const { data, error } = await supabase.from('tracks').insert({
       title: cleanTitle,
@@ -1852,6 +1852,7 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
       status: cleanStatus,
       card_bg_color: createColors.colors.card_bg_color ?? null,
       card_text_color: createColors.colors.card_text_color ?? null,
+      miniplayer_bg_color: createColors.colors.miniplayer_bg_color ?? null,
       lyrics: typeof lyrics === 'string' && lyrics.trim() ? lyrics : null,
       synced_lyrics: typeof synced_lyrics === 'string' && synced_lyrics.trim() ? synced_lyrics : null,
       synced_lyrics_en: typeof synced_lyrics_en === 'string' && synced_lyrics_en.trim() ? synced_lyrics_en : null,
@@ -1933,9 +1934,11 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (plain_lyrics_hi_tr !== undefined) updates.plain_lyrics_hi_tr = typeof plain_lyrics_hi_tr === 'string' && plain_lyrics_hi_tr.trim() ? plain_lyrics_hi_tr : null
     if (language !== undefined) updates.language = typeof language === 'string' && language.trim() ? language.trim() : null
     if (tags !== undefined) updates.tags = cleanTags(tags)
-    // Optional per-track card colors (box background + text). Malformed values
-    // are rejected rather than silently dropped.
-    const colorResult = readCardColors(req.body || {})
+    // Optional per-track colors (card box background + text, and the mini
+    // player's own background). Malformed values are rejected rather than
+    // silently dropped. Only the keys actually supplied are assigned, so a
+    // request that changes one colour never clears the others.
+    const colorResult = readCardColors(req.body || {}, TRACK_COLOR_KEYS)
     if (colorResult.error) return res.status(400).json({ error: colorResult.error })
     Object.assign(updates, colorResult.colors)
     if (featured_order !== undefined) {
@@ -2127,13 +2130,17 @@ function cleanHexColor(v) {
   return { ok: true, value: `#${hex}` }
 }
 
-// Reads the two optional color fields off an admin request body and returns
-// either `{ error }` (bad value -> 400) or `{ colors }` containing only the
-// keys the caller actually supplied, so a PATCH-style update never clobbers
-// a color the admin did not touch.
-function readCardColors(body) {
+// Reads the optional color fields off an admin request body and returns either
+// `{ error }` (bad value -> 400) or `{ colors }` containing only the keys the
+// caller actually supplied, so a PATCH-style update never clobbers a color the
+// admin did not touch.
+//
+// [keys] is a parameter because the TRACK-only `miniplayer_bg_color` is not a
+// column on `albums`: the album routes keep the default list, so a value the
+// admin never sends can not reach an album write and be rejected by PostgREST.
+function readCardColors(body, keys = ['card_bg_color', 'card_text_color']) {
   const colors = {}
-  for (const key of ['card_bg_color', 'card_text_color']) {
+  for (const key of keys) {
     if (!(key in body)) continue
     const res = cleanHexColor(body[key])
     if (!res.ok) {
@@ -2143,6 +2150,14 @@ function readCardColors(body) {
   }
   return { colors }
 }
+
+// The color fields a TRACK accepts: the two shared card colors plus the mini
+// player's own background, which only a track has.
+const TRACK_COLOR_KEYS = [
+  'card_bg_color',
+  'card_text_color',
+  'miniplayer_bg_color',
+]
 
 const GOOGLE_TRANSLATE_KEY = () => secrets.google_translate_api_key || ''
 
