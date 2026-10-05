@@ -41,28 +41,35 @@ const int trackGridColumns = 3;
 /// pixels: the app's reference phone.
 const double trackGridReferenceWidth = 360;
 
-/// Side padding of those grids, in logical pixels: the smallest inset that
-/// still separates the outermost cards from the screen edge.
-const double trackGridPadding = 2;
+/// Side padding of those grids, in logical pixels: the inset that keeps the
+/// outermost cards clear of the screen edge without wasting the width the cards
+/// could use. 4dp is the balance the user settled on — visibly separate from the
+/// edge, where 2dp read as almost flush.
+const double trackGridPadding = 4;
 
-/// Gutter between the columns of those grids, in logical pixels. Deliberately
-/// tighter than the house [cardGap] (6dp) and than [HomeSectionLayout.cardGap]:
-/// the user asked for three cards per row with the MINIMUM gap that still reads
-/// as separate cards, so the gutter is squeezed to give the cards the width.
-const double trackGridGutter = 1.75;
+/// Gutter between the columns of those grids, in logical pixels. Tighter than
+/// the house [cardGap] (6dp) and than [HomeSectionLayout.cardGap], but no longer
+/// squeezed to the bare minimum: the user first asked for the smallest possible
+/// gap at 117.5dp per card and then traded 2.5dp of card width back for visible
+/// space between the columns, which is where this 3.5dp comes from.
+const double trackGridGutter = 3.5;
 
 /// Card width those three numbers produce on the [trackGridReferenceWidth]
 /// reference phone, where the arithmetic closes exactly:
 ///
-///   3 * 117.5 (cards) + 2 * 2 (side padding) + 2 * 1.75 (gutters) = 360
-///   => (360 - 4 - 3.5) / 3 = 117.5dp per card
+///   3 * 115 (cards) + 2 * 4 (side padding) + 2 * 3.5 (gutters) = 360
+///   => (360 - 8 - 7) / 3 = 115dp per card
 ///
-/// 117.5dp is the largest card that fits three per row on such a screen: the
-/// cards FILL their grid tile (no fixed-width wrapper), so the card width IS
-/// the tile width. Exactly 120dp — the size the user originally asked for —
-/// would need 3 * 120 = 360dp of cards alone, i.e. zero side padding and zero
-/// gutters, which is why the grid gives up 2.5dp per card to keep both.
-const double trackGridTileWidth = 117.5;
+/// The cards FILL their grid tile (no fixed-width wrapper), so the card width IS
+/// the tile width, and this number is a result of the three above rather than an
+/// input — the assert in [trackGridDelegate] fails loudly if they stop agreeing.
+///
+/// History, so the numbers are not mysterious later: the user asked for three per
+/// row, then for 120dp (which needs 3 * 120 = 360dp of cards alone, i.e. zero
+/// padding and zero gutters — impossible), then 117.5dp, and finally 115dp for
+/// more space between the cards. 115dp gives up 2.5dp of card per column to buy
+/// 4dp side margins and 3.5dp gutters.
+const double trackGridTileWidth = 115;
 
 /// The grid delegate every NON-HOME track/album grid renders with.
 ///

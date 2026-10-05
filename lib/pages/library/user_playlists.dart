@@ -214,7 +214,7 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   isLoading: userPlaylistsQuery.isLoading,
                   onRequestMore: () {},
                   itemCount: userPlaylists.length,
-                  // Three cards per row with the minimum padding and gutter
+                  // Three cards per row with the shared padding and gutter
                   // (see trackGridDelegate), and the same padding above, so the
                   // cards fill their tiles and the tile height is the card's
                   // exact height — nothing clips, no dead band.

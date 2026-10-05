@@ -1,4 +1,4 @@
-﻿import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -123,7 +123,7 @@ class SearchTracksSection extends HookConsumerWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: trackGridPadding),
-            // Three cards per row with the minimum padding and gutter (see
+            // Three cards per row with the shared padding and gutter (see
             // trackGridDelegate): the cards fill their tiles, so the tile width
             // IS the card width and the tile height is the card's exact
             // height — nothing clips, no dead band.

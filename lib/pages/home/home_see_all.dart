@@ -157,7 +157,7 @@ class HomeSeeAllPage extends HookConsumerWidget {
                 ),
                 sliver: SliverGrid.builder(
                   itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
-                  // Three cards per row with the minimum padding and gutter
+                  // Three cards per row with the shared padding and gutter
                   // (see trackGridDelegate): the cards fill their tiles, so the
                   // tile width IS the card width and the tile height is the
                   // card's exact height — nothing clips, no dead band.

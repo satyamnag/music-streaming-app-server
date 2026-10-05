@@ -1,4 +1,4 @@
-﻿import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_undraw/flutter_undraw.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -132,7 +132,7 @@ class SearchPageTracksTab extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: trackGridPadding),
               sliver: SliverGrid.builder(
                 itemCount: shown.length,
-                // Three cards per row with the minimum padding and gutter (see
+                // Three cards per row with the shared padding and gutter (see
                 // trackGridDelegate): the cards fill their tiles, so the tile
                 // width IS the card width and the tile height is the card's
                 // exact height — nothing clips, no dead band.
