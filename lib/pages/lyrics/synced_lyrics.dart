@@ -35,7 +35,6 @@ class SyncedLyrics extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final mediaQuery = MediaQuery.sizeOf(context);
-    final theme = Theme.of(context);
 
     final playlist = ref.watch(audioPlayerProvider);
 
@@ -82,6 +81,24 @@ class SyncedLyrics extends HookConsumerWidget {
 
     final bodyTextTheme = typography.large.copyWith(
       color: palette.bodyTextColor,
+    );
+
+    // Ink for every synced lyric line, and the halo that keeps it legible where
+    // the album art behind it is uneven.
+    //
+    // `bodyTextColor` is the colour palette_generator computed for a guaranteed
+    // 4.5:1 against `palette.color` — and `palette.color` at 70% over the blurred
+    // card is what the lyrics are actually drawn on, so it is the only colour here
+    // with a guarantee attached. The halo is the OPPOSITE shade of the ink (white
+    // text gets a dark halo and vice versa), the same trick the home header uses
+    // over its wallpaper, so a glyph never loses its edge against a bright or busy
+    // patch of artwork.
+    final lyricColor = palette.bodyTextColor;
+    final lyricShadow = Shadow(
+      color: lyricColor.computeLuminance() > 0.5
+          ? const Color(0x8A000000)
+          : const Color(0x8AFFFFFF),
+      blurRadius: 6,
     );
 
     useEffect(() {
@@ -186,15 +203,28 @@ class SyncedLyrics extends HookConsumerWidget {
                               child: AnimatedDefaultTextStyle(
                                 duration: const Duration(milliseconds: 250),
                                 style: TextStyle(
-                                  color: isActive
-                                      ? theme.colorScheme.foreground
-                                      : theme.colorScheme.mutedForeground,
+                                  // The palette's OWN body colour, for every line.
+                                  //
+                                  // The lyric backdrop is album-art derived — the
+                                  // blurred card plus `palette.color` at 70% — and
+                                  // palette_generator picks black or white for a
+                                  // guaranteed 4.5:1 against exactly that colour.
+                                  // The theme's `foreground` is chosen against the
+                                  // app surface instead, and its `mutedForeground`
+                                  // is a mid grey that lands well under 4.5:1 here,
+                                  // which is why the inactive lines and the
+                                  // translations used to be hard to read.
+                                  //
+                                  // The active line is distinguished by SIZE and
+                                  // WEIGHT rather than by dimming the others, because
+                                  // dimming is precisely what costs contrast.
+                                  color: lyricColor,
+                                  shadows: [lyricShadow],
                                   fontWeight: isActive
                                       ? FontWeight.w600
                                       : FontWeight.normal,
                                   // The playing line is clearly ZOOMED for
-                                  // instant recognition; the rest stays at a
-                                  // smaller, dimmer size.
+                                  // instant recognition.
                                   fontSize: (isActive ? 30 : 24) *
                                       (textZoomLevel.value / 100),
                                   height: isActive ? 1.35 : 1.25,
@@ -217,10 +247,7 @@ class SyncedLyrics extends HookConsumerWidget {
                                     child: _SyncedLine(
                                       mainText: lyricSlice.text,
                                       subLines: subLines,
-                                      isActive: isActive,
-                                      activeColor: theme.colorScheme.foreground,
-                                      inactiveColor:
-                                          theme.colorScheme.mutedForeground,
+                                      color: lyricColor,
                                       mainFontSize: (isActive ? 28 : 26) *
                                           (textZoomLevel.value / 100),
                                     ),
@@ -318,32 +345,33 @@ class SyncedLyrics extends HookConsumerWidget {
   }
 }
 
-/// Renders one synced lyric line. The [mainText] is the Telugu (or primary)
-/// line shown large; [subLines] carries the non-empty English/Hindi
-/// translations & transliterations rendered smaller beneath it, so the full
-/// multi-language set for a timestamp stays visible at a glance. When there
-/// are no sub-lines it simply renders the single [mainText] (existing
-/// behaviour).
+/// Renders one synced lyric line. [mainText] is the Telugu (or primary) line shown
+/// large; [subLines] carries the non-empty English/Hindi translations &
+/// transliterations rendered smaller beneath it. When there are no sub-lines it
+/// simply renders the single [mainText].
 class _SyncedLine extends StatelessWidget {
   final String mainText;
   final List<String> subLines;
-  final bool isActive;
-  final Color activeColor;
-  final Color inactiveColor;
+
+  /// Ink for the translation sub-lines.
+  ///
+  /// [mainText] deliberately carries NO style of its own. It inherits colour,
+  /// weight and size from the [AnimatedDefaultTextStyle] that wraps this widget,
+  /// which is where the active/inactive distinction lives — passing colours in
+  /// here as well would look like it controlled the main line while doing nothing.
+  final Color color;
+
   final double mainFontSize;
 
   const _SyncedLine({
     required this.mainText,
     required this.subLines,
-    required this.isActive,
-    required this.activeColor,
-    required this.inactiveColor,
+    required this.color,
     required this.mainFontSize,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (subLines.isEmpty) {
       return Text(mainText);
     }
@@ -360,9 +388,11 @@ class _SyncedLine extends StatelessWidget {
               line,
               style: TextStyle(
                 fontSize: (mainFontSize * 0.62),
-                color: isActive
-                    ? theme.colorScheme.mutedForeground
-                    : theme.colorScheme.mutedForeground.withValues(alpha: 0.7),
+                // The SAME ink as the main line, at ~62% of its size. These used
+                // to be a muted grey at 70% opacity on the inactive lines, which
+                // was the lowest-contrast text on the screen and the hardest to
+                // read; a translation is not decoration.
+                color: color,
                 fontWeight: FontWeight.normal,
               ),
             ),
