@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' show Color;
 import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/player/player_overlay_collapsed.dart';
 
 SangeetTrackObject _track({String? cardBg, String? miniBg}) {
   return SangeetTrackObject.full(
@@ -140,6 +141,57 @@ void main() {
     test('short hex and a missing # are both accepted', () {
       expect(parseCardColor('#0a7'), const Color(0xFF00AA77));
       expect(parseCardColor('0a7d55'), const Color(0xFF0A7D55));
+    });
+  });
+
+  group('the mini player resolves whatever track it is playing', () {
+    test('a configured colour on the active track is used', () {
+      expect(
+        miniplayerBackgroundFor(_track(miniBg: '#0a7d55')),
+        const Color(0xFF0A7D55),
+      );
+    });
+
+    test('an unset colour keeps the theme surface', () {
+      expect(miniplayerBackgroundFor(_track()), isNull);
+    });
+
+    test('a LOCAL file track is safe and keeps the theme surface', () {
+      // The guard that actually matters, and it is reachable in production: the
+      // player bar renders whatever is playing, including a file opened from the
+      // device. A local track never came from the database and has no such
+      // column, so reading it without the type guard would throw.
+      final local = SangeetTrackObject.local(
+        id: '/music/a.mp3',
+        name: 'Local Song',
+        externalUri: 'file:///music/a.mp3',
+        album: SangeetSimpleAlbumObject(
+          id: 'a1',
+          name: 'Album',
+          externalUri: '',
+          artists: const [],
+          images: const [],
+          albumType: SangeetAlbumType.album,
+        ),
+        durationMs: 0,
+        path: '/music/a.mp3',
+      );
+      expect(local, isA<SangeetLocalTrackObject>());
+      expect(miniplayerBackgroundFor(local), isNull);
+    });
+
+    test('nothing playing resolves to nothing', () {
+      expect(miniplayerBackgroundFor(null), isNull);
+    });
+
+    test('a malformed stored value keeps the theme surface', () {
+      for (final bad in <String>['not-a-color', '', '   ', '#12']) {
+        expect(
+          miniplayerBackgroundFor(_track(miniBg: bad)),
+          isNull,
+          reason: 'value: "$bad"',
+        );
+      }
     });
   });
 }

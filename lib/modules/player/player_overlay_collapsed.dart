@@ -14,6 +14,19 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 
+/// The admin-configured mini player background for [track], or null to keep the
+/// theme's own surface.
+///
+/// A named function rather than three inline lines for two reasons. It carries the
+/// type guard — only the server's "full" track object has the column at all, since
+/// a local file track never came from the database — and being outside the widget
+/// means that guard can be TESTED without standing up the player's providers,
+/// streams and panel controller, which is otherwise the only way to reach this
+/// line.
+Color? miniplayerBackgroundFor(SangeetTrackObject? track) => parseCardColor(
+      track is SangeetFullTrackObject ? track.miniplayerBgColor : null,
+    );
+
 class PlayerOverlayCollapsedSection extends HookConsumerWidget {
   /// Height of the collapsed mini player.
   ///
@@ -53,13 +66,7 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     // Admin-configured background for the mini player while THIS track plays.
-    // Bound to a local first: Dart cannot type-promote a field, and only the
-    // server's "full" track carries the column at all.
-    final activeTrack = playlist.activeTrack;
-    final configuredMiniBg = activeTrack is SangeetFullTrackObject
-        ? activeTrack.miniplayerBgColor
-        : null;
-    final miniBg = parseCardColor(configuredMiniBg);
+    final miniBg = miniplayerBackgroundFor(playlist.activeTrack);
 
     final shouldShow = useState(true);
 
