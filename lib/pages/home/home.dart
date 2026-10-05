@@ -93,157 +93,58 @@ class HomePage extends HookConsumerWidget {
               controller: controller,
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                if (mediaQuery.smAndDown || layoutMode == LayoutMode.compact)
-                  SliverAppBar(
-                    // The header is part of the page, not furniture on top of it.
-                    //
-                    // `pinned: false` + `floating: false` is the whole point of
-                    // this bar: the wallpaper, the logo, the "Soulful Bhakti"
-                    // title and the three icons leave the screen together when
-                    // the user scrolls down, and come back as one unit when they
-                    // scroll up. Previously the wallpaper sat in a fixed
-                    // Positioned band behind the scroll view while the bar was
-                    // `floating: true` (pinned), so the page scrolled underneath
-                    // a header and a wallpaper that never moved.
-                    pinned: false,
-                    floating: false,
-                    // As tall as the wallpaper band itself, so the artwork fills
-                    // the header edge to edge and the title row overlays its top.
-                    // With no wallpaper the bar collapses to a plain toolbar,
-                    // which is exactly what a header over the page surface should
-                    // be.
-                    //
-                    // Both ternaries test `wallpaperUrl` directly rather than the
-                    // `hasWallpaper` flag: a null check on the variable itself is
-                    // what lets Dart promote it to a non-null String on the other
-                    // branch, which a stored bool cannot do.
-                    expandedHeight: wallpaperUrl == null
-                        ? null
-                        : HomeWallpaper.heightFor(mediaQuery.size),
-                    flexibleSpace: wallpaperUrl == null
-                        ? null
-                        : material.FlexibleSpaceBar(
-                            // Parallax keeps the photo at its own size while the
-                            // header collapses, so the artwork slides out of view
-                            // instead of being squashed as the bar shrinks.
-                            collapseMode: material.CollapseMode.parallax,
-                            background: HomeWallpaper(url: wallpaperUrl),
-                          ),
-                    titleSpacing: 0,
-                    title: Row(
-                      mainAxisSize: MainAxisSize.min,
+                // The wallpaper, the header row and the carousel are ONE block.
+                //
+                // The wallpaper is not the app bar's background any more: it is a
+                // full-width band behind this whole block, so the carousel sits
+                // ON the artwork the way the design shows, with the header above
+                // it. Because it is a single sliver, scrolling moves the
+                // wallpaper, the logo, the title, the icons and the carousel up
+                // the screen together and none of them is pinned.
+                SliverToBoxAdapter(
+                  child: ConstrainedBox(
+                    // At least the wallpaper's own band height, so the artwork
+                    // still reads as a band rather than a thin strip when no
+                    // shelf has any tracks and the carousel collapses to nothing.
+                    // With shelves present the block is taller than this and the
+                    // wallpaper fills it exactly.
+                    constraints: BoxConstraints(
+                      minHeight: wallpaperUrl == null
+                          ? 0
+                          : HomeWallpaper.heightFor(mediaQuery.size),
+                    ),
+                    child: Stack(
                       children: [
-                        const SizedBox(width: 16),
-                        ClipOval(
-                          child: Image.asset(
-                            'assets/branding/sangeet-logo.png',
-                            height: 32,
-                            width: 32,
-                            fit: BoxFit.cover,
+                        if (wallpaperUrl != null)
+                          Positioned.fill(
+                            child: HomeWallpaper(url: wallpaperUrl),
                           ),
-                        ),
-                        const Gap(8),
-                        Text(
-                          'Soulful Bhakti',
-                          style: TextStyle(
-                            fontFamily: "Cookie",
-                            fontSize: 30,
-                            letterSpacing: 1.8,
-                            color: headerColor,
-                            shadows: headerShadows,
-                          ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (mediaQuery.smAndDown ||
+                                layoutMode == LayoutMode.compact)
+                              _HomeHeaderRow(
+                                color: headerColor,
+                                shadows: headerShadows,
+                                clerkState: clerkState,
+                              )
+                            else if (kIsMacOS)
+                              const Gap(10),
+                            // The carousel paints no background, so the wallpaper
+                            // shows through behind and around the banner.
+                            const HomeSpecialsCarousel(),
+                          ],
                         ),
                       ],
                     ),
-                    // Transparent so the app bar never paints an opaque slab
-                    // over the wallpaper or the page: the title, logo and icons
-                    // draw straight onto the artwork behind them.
-                    backgroundColor: Colors.transparent,
-                    surfaceTintColor: Colors.transparent,
-                    scrolledUnderElevation: 0,
-                    elevation: 0,
-                    foregroundColor: headerColor,
-                    actions: [
-                      // Search: opens the app's search page. Placed first so
-                      // the row reads logo | title | search | account |
-                      // settings, matching the design.
-                      IconButton.ghost(
-                        icon: Icon(
-                          SangeetIcons.search,
-                          size: 20,
-                          color: headerColor,
-                          shadows: headerShadows,
-                        ),
-                        onPressed: () {
-                          context.navigateTo(const SearchRoute());
-                        },
-                      ),
-                      const Gap(10),
-                      // Signed-in users see their account avatar (same as the
-                      // Google account); signed-out users see the user icon.
-                      IconButton.ghost(
-                        icon: (clerkState.signedIn &&
-                                clerkState.imageUrl != null)
-                            ? Container(
-                                // A hairline white ring keeps a photo avatar
-                                // legible against a photo wallpaper, which a
-                                // bare circle is not.
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: ClipOval(
-                                  child: UniversalImage(
-                                    path: clerkState.imageUrl!,
-                                    height: 26,
-                                    width: 26,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              )
-                            : Icon(
-                                SangeetIcons.user,
-                                size: 20,
-                                color: headerColor,
-                                shadows: headerShadows,
-                              ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => const ProfileDialog(),
-                          );
-                        },
-                      ),
-                      const Gap(10),
-                      IconButton.ghost(
-                        icon: Icon(
-                          SangeetIcons.settings,
-                          size: 20,
-                          color: headerColor,
-                          shadows: headerShadows,
-                        ),
-                        onPressed: () {
-                          context.navigateTo(const SettingsRoute());
-                        },
-                      ),
-                      const Gap(10),
-                    ],
-                  )
-                else if (kIsMacOS)
-                  const SliverGap(10),
+                  ),
+                ),
                 const SliverGap(10),
                 const HomeRecentlyPlayedTracksSection(),
                 const HomePlaylistsSection(),
-                // Curated "Specials" carousels (Ganesha Special, Krishna
-                // Special, ...) sit directly above the Albums shelf. The
-                // widget collapses to nothing when no shelf has tracks, so
-                // an empty catalogue never shows a blank carousel.
-                const HomeSpecialsCarousel(),
                 // Round "Featured Playlist" chips (Venkateswara, Krishna,
-                // Ganesha, ...) directly under the carousel, per the design.
+                // Ganesha, ...) sit directly under the carousel, per the design.
                 // Collapses to nothing when no chip has matching tracks.
                 const FeaturedPlaylistChips(),
                 ...switch (sectionsAsync) {
@@ -348,5 +249,126 @@ class HomePage extends HookConsumerWidget {
     if (exit == true) {
       SystemNavigator.pop();
     }
+  }
+}
+
+/// The home screen's header row: the brand logo, the app name and the three
+/// actions, drawn over the wallpaper.
+///
+/// It replaces a `SliverAppBar` because the header had to become part of the
+/// wallpaper block: the artwork runs behind the header AND the carousel, so the
+/// header can no longer be a bar of its own with the wallpaper behind it. The
+/// geometry is the app bar's own — [material.kToolbarHeight] tall, contents
+/// flush to the leading edge.
+///
+/// [color] and [shadows] come from the caller, which derives them from whether a
+/// wallpaper is configured: white with a shadow over artwork, the theme's
+/// foreground on the plain page surface, where white would be invisible.
+class _HomeHeaderRow extends StatelessWidget {
+  final Color color;
+  final List<Shadow> shadows;
+  final ClerkAuthState clerkState;
+
+  const _HomeHeaderRow({
+    required this.color,
+    required this.shadows,
+    required this.clerkState,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: material.kToolbarHeight,
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          ClipOval(
+            child: Image.asset(
+              'assets/branding/sangeet-logo.png',
+              height: 32,
+              width: 32,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const Gap(8),
+          // Expanded so a narrow screen ellipsises the long script name rather
+          // than overflowing the row; with room to spare it renders identically.
+          Expanded(
+            child: Text(
+              'Soulful Bhakti',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: "Cookie",
+                fontSize: 30,
+                letterSpacing: 1.8,
+                color: color,
+                shadows: shadows,
+              ),
+            ),
+          ),
+          // Search: opens the app's search page. Placed first so the row reads
+          // logo | title | search | account | settings, matching the design.
+          IconButton.ghost(
+            icon: Icon(
+              SangeetIcons.search,
+              size: 20,
+              color: color,
+              shadows: shadows,
+            ),
+            onPressed: () {
+              context.navigateTo(const SearchRoute());
+            },
+          ),
+          const Gap(10),
+          // Signed-in users see their account avatar (same as the Google
+          // account); signed-out users see the user icon.
+          IconButton.ghost(
+            icon: (clerkState.signedIn && clerkState.imageUrl != null)
+                ? Container(
+                    // A hairline white ring keeps a photo avatar legible against
+                    // a photo wallpaper, which a bare circle is not.
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                    child: ClipOval(
+                      child: UniversalImage(
+                        path: clerkState.imageUrl!,
+                        height: 26,
+                        width: 26,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    SangeetIcons.user,
+                    size: 20,
+                    color: color,
+                    shadows: shadows,
+                  ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => const ProfileDialog(),
+              );
+            },
+          ),
+          const Gap(10),
+          IconButton.ghost(
+            icon: Icon(
+              SangeetIcons.settings,
+              size: 20,
+              color: color,
+              shadows: shadows,
+            ),
+            onPressed: () {
+              context.navigateTo(const SettingsRoute());
+            },
+          ),
+          const Gap(10),
+        ],
+      ),
+    );
   }
 }

@@ -16,21 +16,39 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 /// and a "Play Now" button that starts the whole queue — all of it set on the
 /// RIGHT of the artwork.
 ///
+/// This is a plain BOX widget, not a sliver: the home screen lays it inside the
+/// wallpaper's stack so the carousel sits ON the artwork, and it paints no
+/// background of its own so the wallpaper shows around the banner.
+///
 /// Layout notes:
-///  - Each slide occupies ~92% of the viewport width so the neighbouring slide
-///    peeks in, signalling that the row scrolls (matching the reference design).
-///  - The list uses a [PageView] with `viewportFraction`, giving natural
-///    snap-to-slide paging plus a dot indicator, rather than a free-scrolling
-///    ListView that would not snap or report its page.
+///  - One slide fills the carousel exactly ([slideWidthFraction] is 1). It used
+///    to be 0.92 so the neighbouring slide peeked in at the screen edges to
+///    signal that the row scrolls — which instead meant a swipe brought artwork
+///    in from OUTSIDE the carousel. [slideMargin] now supplies the gutter, so the
+///    banner slides within the carousel and nothing enters from beyond it.
+///  - The list uses a [PageView], which clips its viewport and snaps to a slide,
+///    rather than a free-scrolling ListView that would neither snap nor report
+///    its page.
 ///  - The page dots are painted INSIDE each slide's artwork, at its bottom
-///    centre, and only when there is more than one slide. They used to sit in a
-///    band beneath the carousel, which put them outside the banner they label.
+///    centre, and only when there is more than one slide.
 ///  - Nothing darkens the artwork. The banner is shown at full brightness and
 ///    the white copy carries its own text shadows, so an uploaded banner looks
 ///    exactly as the admin exported it.
 class HomeSpecialsCarousel extends HookConsumerWidget {
-  /// Fraction of the viewport width one slide occupies (~92%).
-  static const double slideWidthFraction = 0.92;
+  /// Fraction of the viewport one slide occupies.
+  ///
+  /// A full 1.0 deliberately: at 0.92 the next and previous banners were visible
+  /// at the left and right edges of the screen, which reads as the carousel
+  /// leaking outside itself. At 1.0 exactly one banner occupies the carousel and
+  /// [slideMargin] provides the gutter.
+  static const double slideWidthFraction = 1;
+
+  /// Horizontal margin around a slide, at scale == 1.
+  ///
+  /// This is what separates the banner from the carousel's edge now that a slide
+  /// fills the viewport. 12 matches the gutter the design shows on a 360dp
+  /// phone.
+  static const double slideMargin = 12;
 
   /// Aspect ratio of an admin-uploaded landscape banner: 8:3 (2.667:1).
   ///
@@ -58,7 +76,9 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
     final page = useState(0);
 
     // Nothing to show until the catalogue resolves, or when no shelf matched.
-    if (specials.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    // A zero-size box, not a sliver: this widget is laid inside the home
+    // screen's wallpaper stack.
+    if (specials.isEmpty) return const SizedBox.shrink();
 
     // One dot row, handed to each slide so the dots are painted INSIDE the
     // slide's own artwork at its bottom centre, rather than in a separate band
@@ -83,36 +103,34 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
           )
         : null;
 
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4 * scale),
-        // The row is tall enough for the tallest slide shape: a banner is 8:3
-        // (short), while a shelf without a banner falls back to the square-art
-        // layout (taller). Each slide centres itself in the row, so a banner is
-        // never stretched to fill someone else's height.
-        child: SizedBox(
-          height: slideHeight * scale,
-          child: PageView.builder(
-            controller: controller,
-            itemCount: specials.length,
-            onPageChanged: (index) => page.value = index,
-            itemBuilder: (context, index) {
-              final special = specials[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5 * scale),
-                child: _SpecialSlide(
-                  key: ValueKey(special.id),
-                  special: special,
-                  dots: dots,
-                  onPlay: () async {
-                    await ref
-                        .read(audioPlayerProvider.notifier)
-                        .load(special.tracks, initialIndex: 0, autoPlay: true);
-                  },
-                ),
-              );
-            },
-          ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4 * scale),
+      // The row is tall enough for the tallest slide shape: a banner is 8:3
+      // (short), while a shelf without a banner falls back to the square-art
+      // layout (taller). Each slide centres itself in the row, so a banner is
+      // never stretched to fill someone else's height.
+      child: SizedBox(
+        height: slideHeight * scale,
+        child: PageView.builder(
+          controller: controller,
+          itemCount: specials.length,
+          onPageChanged: (index) => page.value = index,
+          itemBuilder: (context, index) {
+            final special = specials[index];
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: slideMargin * scale),
+              child: _SpecialSlide(
+                key: ValueKey(special.id),
+                special: special,
+                dots: dots,
+                onPlay: () async {
+                  await ref
+                      .read(audioPlayerProvider.notifier)
+                      .load(special.tracks, initialIndex: 0, autoPlay: true);
+                },
+              ),
+            );
+          },
         ),
       ),
     );
