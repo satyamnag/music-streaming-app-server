@@ -641,6 +641,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
             <button type="button" class="lyrics-l2" id="lang-hiTr" onclick="lyricsSetLang('hiTr')">Hindi (Transliteration)</button>
           </div>
           <div class="lyrics-editor">
+            <p style="font-size:12px;color:#666;margin:0 0 8px;line-height:1.6;">
+              <strong>Markup.</strong>
+              A line that is only <code>{Pallavi}</code> in <em>Plain</em> lyrics becomes a
+              section divider. In <em>Sync</em> lyrics, a cue whose <em>text</em> is
+              <code>{{Music}}</code> becomes a &#9834; Music &#9834; banner &mdash; write it as
+              the text of a normal timed cue, for example a
+              <code>00:00:10,000 --&gt; 00:00:20,000</code> line followed by
+              <code>{{Music}}</code> on the next line. A bare <code>{{Music}}</code> line with
+              no timestamp is rejected, because nothing would tell the app when to show it.
+              (Legacy cues that already read &#9834; Music &#9834; are shown as the banner too.)
+            </p>
             <textarea id="lyricsText" placeholder="Enter lyrics here..." style="width:100%;min-height:260px;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;line-height:1.6;box-sizing:border-box;"></textarea>
             <div class="btn-row">
               <button class="btn btn-secondary" type="button" onclick="closeModal()">Close</button>

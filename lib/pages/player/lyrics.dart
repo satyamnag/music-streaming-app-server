@@ -4,8 +4,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
+import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/lyrics.dart';
+import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/pages/lyrics/multilang_lyrics.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/lyrics/synced.dart';
@@ -456,6 +458,17 @@ class _SingleSyncView extends HookConsumerWidget {
       itemBuilder: (context, index) {
         final text = LyricLanguages.fieldOf(variants[index], lang).trim();
         if (text.isEmpty) return const SizedBox(height: 8);
+        // A line the author wrapped in double braces ({{Music}}) is a banner, not
+        // sung text. This tab renders the variant fields directly, so it never saw
+        // the markup rules and printed `{{Music}}` verbatim — the same song showed
+        // a banner on the lyrics page and raw braces here.
+        final marked = parseMarkedLyricsLine(text);
+        if (marked.mark == LyricsLineMark.banner) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: LyricsMusicBanner(label: marked.label),
+          );
+        }
         final isActive = index == currentIndex;
         return GestureDetector(
           onTap: () {

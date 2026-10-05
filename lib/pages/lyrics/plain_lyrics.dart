@@ -6,6 +6,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/lyrics/lyrics_ornament_divider.dart';
+import 'package:sangeet/components/lyrics/marked_plain_lyrics.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
@@ -136,11 +137,7 @@ class PlainLyrics extends HookConsumerWidget {
                         // ornament divider instead of sung text. Only the marked
                         // lines need per-line rendering, so an unmarked song keeps
                         // the original single selectable text block.
-                        final markLines = lyrics
-                            .split('\n')
-                            .map(parseMarkedLyricsLine)
-                            .where((l) => l.mark == LyricsLineMark.heading)
-                            .isNotEmpty;
+                        final markLines = MarkedPlainLyrics.hasMarks(lyrics);
 
                         final bodyStyle = TextStyle(
                           color: isModal == true
@@ -158,7 +155,7 @@ class PlainLyrics extends HookConsumerWidget {
                           return AnimatedDefaultTextStyle(
                             duration: const Duration(milliseconds: 200),
                             style: bodyStyle,
-                            child: _MarkedPlainLyrics(
+                            child: MarkedPlainLyrics(
                               lyrics: lyrics,
                               style: bodyStyle,
                             ),
@@ -197,41 +194,6 @@ class PlainLyrics extends HookConsumerWidget {
   }
 }
 
-/// Renders plain lyrics one line at a time so lines the author wrapped in
-/// single braces (`{Pallavi}`) can be drawn as ornament dividers while every
-/// other line stays ordinary centred text.
-///
-/// Only used when at least one marked line exists: a song without marks keeps
-/// the original single [SelectableText], which stays selectable as a whole and
-/// avoids per-line layout cost.
-class _MarkedPlainLyrics extends StatelessWidget {
-  final String lyrics;
-  final TextStyle style;
-
-  const _MarkedPlainLyrics({required this.lyrics, required this.style});
-
-  @override
-  Widget build(BuildContext context) {
-    final lines = lyrics.split('\n');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final line in lines)
-          if (parseMarkedLyricsLine(line).mark == LyricsLineMark.heading)
-            LyricsOrnamentDivider(label: parseMarkedLyricsLine(line).label)
-          else
-            SelectableText(
-              line,
-              textAlign: TextAlign.center,
-              style: style,
-            ),
-      ],
-    );
-  }
-}
-
 /// Renders one plain (all-languages) block for a single timestamp: the Telugu
 /// text plus the English / Hindi translations & transliterations, each with a
 /// muted heading so a listener can read the full multi-language set at a
@@ -250,6 +212,33 @@ class _PlainVariantBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // A timestamp whose line the author wrapped in single braces (`{Pallavi}`) is
+    // a section heading, not sung text.
+    //
+    // This check has to live here, in the multi-language block, because this is
+    // the ONLY plain path a multi-language track ever takes: `PlainLyrics` returns
+    // the variant blocks before it reaches its own heading handling, and `variants`
+    // is populated for every server lyric, so that handling was dead code in
+    // practice and `{Pallavi}` was printed as literal text.
+    //
+    // The heading is written in the Telugu cell and repeats in the translation and
+    // transliteration cells of the same timestamp, so the FIRST non-empty cell
+    // decides and the whole group renders as one divider rather than five.
+    final headingSource = <String>[
+      variant.te,
+      variant.en,
+      variant.hi,
+      variant.enTr,
+      variant.hiTr,
+    ]
+        .map((text) => text.trim())
+        .firstWhere((text) => text.isNotEmpty, orElse: () => '');
+    final marked = parseMarkedLyricsLine(headingSource);
+    if (marked.mark == LyricsLineMark.heading) {
+      return LyricsOrnamentDivider(label: marked.label);
+    }
+
     final headingStyle = TextStyle(
       fontSize: (20 * zoom / 100) * 0.72,
       color: theme.colorScheme.mutedForeground,

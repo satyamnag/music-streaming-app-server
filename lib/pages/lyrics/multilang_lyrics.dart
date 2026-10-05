@@ -3,11 +3,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
+import 'package:sangeet/components/lyrics/marked_plain_lyrics.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/use_synced_lyrics.dart';
 import 'package:sangeet/provider/lyrics/synced.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
@@ -199,14 +202,28 @@ class PlainLanguageViewBuilder extends HookConsumerWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
-          child: SelectableText(
-            text,
-            textAlign: TextAlign.center,
-            style: theme.typography.base.copyWith(
-              color: theme.colorScheme.foreground,
-              fontSize: 20,
-              height: 1.9,
-            ),
+          child: Builder(
+            builder: (context) {
+              final style = theme.typography.base.copyWith(
+                color: theme.colorScheme.foreground,
+                fontSize: 20,
+                height: 1.9,
+              );
+              // A line the author wrapped in single braces ({Pallavi}) is a
+              // section heading, not sung text. This tab used to print the braces
+              // verbatim, so the same song showed a divider on the lyrics page and
+              // raw `{Pallavi}` here. Only a song that really has a heading pays
+              // for the per-line rendering; the rest keep the single selectable
+              // block, which stays selectable as a whole.
+              if (!MarkedPlainLyrics.hasMarks(text)) {
+                return SelectableText(
+                  text,
+                  textAlign: TextAlign.center,
+                  style: style,
+                );
+              }
+              return MarkedPlainLyrics(lyrics: text, style: style);
+            },
           ),
         ),
       ),
@@ -336,6 +353,19 @@ class _SyncedLines extends HookWidget {
       itemBuilder: (context, index) {
         final variant = variants[index];
         final isActive = index == currentIndex;
+
+        // A timestamp whose line the author wrapped in double braces ({{Music}})
+        // is a banner, not sung text. Checked before the per-language blocks so a
+        // banner can never be rendered as five copies of the raw markup. The mark
+        // is read from the primary (Telugu) field, which is where every other
+        // synced surface reads it too.
+        final marked = parseMarkedLyricsLine(variant.te);
+        if (marked.mark == LyricsLineMark.banner) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: LyricsMusicBanner(label: marked.label),
+          );
+        }
 
         final blocks = <Widget>[];
         for (final def in kLyricLanguages) {

@@ -60,6 +60,53 @@ void main() {
     });
   });
 
+  group('the banner written in its own glyphs -> banner', () {
+    // `♪ Music ♪` is what the banner RENDERS, and it is also what the catalogue
+    // actually stores as the cue text of both synced songs. Without this rule the
+    // marker the author typed came out as an ordinary sung line, which is
+    // indistinguishable from "the double-brace formula does not work".
+    test('the rendered spelling is recognised', () {
+      final r = parseMarkedLyricsLine('\u266A Music \u266A');
+      expect(r.mark, LyricsLineMark.banner);
+      expect(r.label, 'Music');
+    });
+
+    test('a missing space between label and note is still a banner', () {
+      // One cue in the live data is stored as `♪ Music♪` with no space.
+      final r = parseMarkedLyricsLine('\u266A Music\u266A');
+      expect(r.mark, LyricsLineMark.banner);
+      expect(r.label, 'Music');
+    });
+
+    test('surrounding whitespace and other labels are handled', () {
+      expect(parseMarkedLyricsLine('  \u266A Interlude \u266A  ').label,
+          'Interlude');
+      expect(parseMarkedLyricsLine('\u266AInstrumental Break\u266A').label,
+          'Instrumental Break');
+    });
+
+    test('an empty label is not a banner', () {
+      expect(parseMarkedLyricsLine('\u266A \u266A').mark, LyricsLineMark.none);
+      expect(parseMarkedLyricsLine('\u266A\u266A').mark, LyricsLineMark.none);
+    });
+
+    test('a sung line that merely mentions a note is untouched', () {
+      // Only a line that is *entirely* note-wrapped counts, exactly like braces.
+      for (final line in [
+        '\u266A Om Namah Shivaya', // opens but never closes
+        'Om Namah Shivaya \u266A', // closes but never opens
+        '\u266A a \u266A b \u266A', // a note in the middle
+        'Sing \u266A along',
+      ]) {
+        expect(
+          parseMarkedLyricsLine(line).mark,
+          LyricsLineMark.none,
+          reason: 'line: "$line"',
+        );
+      }
+    });
+  });
+
   group('ordinary lyric lines are untouched', () {
     test('plain text passes through', () {
       for (final line in [
