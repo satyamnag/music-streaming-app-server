@@ -41,6 +41,20 @@ on:
         description: Split APK per CPU architecture (smaller downloads)
         type: boolean
         default: false
+      flavor:
+        description: >-
+          Product flavor. Use stable for the Play build (com.soulfulbhakti.app).
+          Use dev or nightly to sideload a test build: those install as SEPARATE
+          apps (com.soulfulbhakti.app.dev / .nightly), which is the only way to
+          test a locally-built APK on a phone that already has the Play build,
+          because Play re-signs with its own key and an upload-key APK can never
+          update the Play one in place.
+        type: choice
+        options:
+          - stable
+          - dev
+          - nightly
+        default: stable
 
 env:
   FLUTTER_VERSION: 3.35.2
@@ -115,12 +129,12 @@ jobs:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
           if [ "${{ inputs.split_per_abi }}" = "true" ]; then
-            flutter build apk --release --flavor stable \
+            flutter build apk --release --flavor ${{ inputs.flavor }} \
               --build-number ${{ inputs.version_code }} \
               --build-name ${{ inputs.version_name }} \
               --split-per-abi
           else
-            flutter build apk --release --flavor stable \
+            flutter build apk --release --flavor ${{ inputs.flavor }} \
               --build-number ${{ inputs.version_code }} \
               --build-name ${{ inputs.version_name }}
           fi
@@ -130,7 +144,7 @@ jobs:
         env:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
-          flutter build appbundle --release --flavor stable \
+          flutter build appbundle --release --flavor ${{ inputs.flavor }} \
             --build-number ${{ inputs.version_code }} \
             --build-name ${{ inputs.version_name }}
 
@@ -147,7 +161,10 @@ jobs:
         with:
           if-no-files-found: error
           name: soulful-bhakti-apk
-          path: build/app/outputs/flutter-apk/*stable*.apk
+          # Flavor-agnostic: the APK is app-<flavor>-release.apk, and
+          # --split-per-abi appends -<abi>. Naming it after a fixed flavor here
+          # is what would silently upload nothing for a dev build.
+          path: build/app/outputs/flutter-apk/*.apk
 
       - name: Upload AAB artifact
         if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
@@ -155,4 +172,5 @@ jobs:
         with:
           if-no-files-found: error
           name: soulful-bhakti-aab
-          path: build/app/outputs/bundle/*Release/*.aab
+          # build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab
+          path: build/app/outputs/bundle/*/*.aab
