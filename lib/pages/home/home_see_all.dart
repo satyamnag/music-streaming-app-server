@@ -5,13 +5,12 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
-import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/components/track_card/home_album_card.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -20,11 +19,12 @@ import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 enum HomeSeeAllKind { albums, newestArrivals, topTrending, language }
 
 /// A full-screen "see all" page reached from the arrow on a home section
-/// header. Every kind renders as a responsive GRID of 1.25x cards (matching
-/// the home covers) with a search box, an initial page of [pageSize] items
-/// and a "load more" button that reveals the next page — no list view.
-/// Data comes from the shared [homeSectionsProvider], so the section always
-/// matches what the home screen shows and no extra fetch is needed.
+/// header. Every kind renders as a responsive GRID of the SAME shared home
+/// cards as the section it expands (cover, corner radius, typography and gaps
+/// included) with a search box, an initial page of [pageSize] items and a
+/// "load more" button that reveals the next page — no list view. Data comes
+/// from the shared [homeSectionsProvider], so the section always matches what
+/// the home screen shows and no extra fetch is needed.
 @RoutePage()
 class HomeSeeAllPage extends HookConsumerWidget {
   /// Items revealed per page.
@@ -96,24 +96,11 @@ class HomeSeeAllPage extends HookConsumerWidget {
     final hasMore = (isAlbums ? filteredAlbums.length : filteredTracks.length) >
         visibleCount.value;
 
-    Future<void> playFrom(HomeSeeAllKind useKind, int index,
-        List<SangeetTrackObject> list) async {
-      final track = list[index];
-      if (PremiumAccess.isTrackLocked(track, ref)) {
-        await PremiumAccess.gateTrackPlay(
-          context: context,
-          ref: ref,
-          track: track,
-          feature: () async {
-            await ref.read(audioPlayerProvider.notifier).load(
-                  list,
-                  initialIndex: index,
-                  autoPlay: true,
-                );
-          },
-        );
-        return;
-      }
+    // The shared home cards resolve the lock state and run the payment gate on
+    // their own tap, so this only loads the tapped track's list — exactly like
+    // the home rows. Gating here as well would present the paywall twice when
+    // the purchase has not propagated to the cached subscription status yet.
+    Future<void> playFrom(int index, List<SangeetTrackObject> list) async {
       await ref.read(audioPlayerProvider.notifier).load(
             list,
             initialIndex: index,
@@ -173,42 +160,29 @@ class HomeSeeAllPage extends HookConsumerWidget {
                   itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: trackGridCrossAxisCount(context),
+                    // Both branches render a card WITH its subtitle line (see
+                    // HomeAlbumCard/HomeTrackCard), so the tile is sized to the
+                    // card variant that includes it.
                     mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
                       context,
                       crossAxisCount: trackGridCrossAxisCount(context),
                       horizontalPadding: 12 * scale,
-                      withSubtitle: !isAlbums,
                     ),
                     crossAxisSpacing: 6,
                     mainAxisSpacing: 6,
                   ),
                   itemBuilder: (context, index) {
                     if (isAlbums) {
-                      final album = shownAlbums[index].album;
-                      final locked = PremiumAccess.isAlbumLocked(album, ref);
-                      return _SeeAllAlbumCard(
+                      final homeAlbum = shownAlbums[index];
+                      final album = homeAlbum.album;
+                      // The shared home album card resolves the album's lock
+                      // state and gates its own tap, then opens the album.
+                      return HomeAlbumCard(
                         album: album,
                         imageUrl:
                             album.images.smallest(ImagePlaceholder.albumArt),
-                        locked: locked,
+                        subtitle: '${homeAlbum.tracks.length} songs',
                         onTap: () {
-                          if (locked) {
-                            // Paid album: payment gate first (paywall for free
-                            // users), then open the album only after access.
-                            PremiumAccess.gateAlbumPlay(
-                              context: context,
-                              ref: ref,
-                              album: album,
-                              feature: () async {
-                                if (context.mounted) {
-                                  context.navigateTo(
-                                    AlbumRoute(id: album.id, album: album),
-                                  );
-                                }
-                              },
-                            );
-                            return;
-                          }
                           context.navigateTo(
                             AlbumRoute(id: album.id, album: album),
                           );
@@ -216,18 +190,10 @@ class HomeSeeAllPage extends HookConsumerWidget {
                       );
                     }
                     final track = shownTracks[index];
-                    return TrackCard(
+                    return HomeTrackCard(
+                      track: track,
                       imageUrl: trackCardImageUrl(track),
-                      title: track.name,
-                      subtitle: track.album.name,
-                      locked: PremiumAccess.isTrackLocked(track, ref),
-                      cardBgColor: track is SangeetFullTrackObject
-                          ? track.cardBgColor
-                          : null,
-                      cardTextColor: track is SangeetFullTrackObject
-                          ? track.cardTextColor
-                          : null,
-                      onTap: () => playFrom(kind, index, filteredTracks),
+                      onTap: () => playFrom(index, filteredTracks),
                     );
                   },
                 ),
@@ -258,72 +224,6 @@ class HomeSeeAllPage extends HookConsumerWidget {
             // last grid row.
             SliverToBoxAdapter(
               child: SizedBox(height: context.bottomPlayerReserve),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A compact album card for the "see all albums" grid (1.25x art, same as the
-/// home album cards). Tapping it opens the album screen.
-class _SeeAllAlbumCard extends HookWidget {
-  final SangeetSimpleAlbumObject album;
-  final String imageUrl;
-  final bool locked;
-  final VoidCallback onTap;
-
-  const _SeeAllAlbumCard({
-    required this.album,
-    required this.imageUrl,
-    required this.locked,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12 * scale),
-          color: theme.colorScheme.card,
-        ),
-        padding: EdgeInsets.all(10 * scale),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8 * scale),
-                child: Stack(
-                  children: [
-                    UniversalImage(
-                      path: imageUrl,
-                      height: 150 * scale,
-                      width: 150 * scale,
-                      fit: BoxFit.cover,
-                    ),
-                    LockedBadge(locked: locked, borderRadius: 0),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 4 * scale),
-            Text(
-              album.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.typography.small.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.foreground,
-              ),
             ),
           ],
         ),

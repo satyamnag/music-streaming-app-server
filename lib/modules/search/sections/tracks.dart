@@ -6,10 +6,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/pages/search/search.dart';
 import 'package:sangeet/provider/connect/connect.dart';
@@ -82,16 +82,10 @@ class SearchTracksSection extends HookConsumerWidget {
     }
 
     Future<void> playTrack(int index) async {
-      final track = shown[index];
-      if (PremiumAccess.isTrackLocked(track, ref)) {
-        await PremiumAccess.gateTrackPlay(
-          context: context,
-          ref: ref,
-          track: track,
-          feature: () async => loadOnDeviceOrRemote(index),
-        );
-        return;
-      }
+      // The shared home card resolves the track's lock state and runs the
+      // payment gate on its own tap, so this only runs the original device /
+      // queue flow. Gating here as well would present the paywall twice when
+      // the purchase has not propagated to the cached subscription status yet.
       await loadOnDeviceOrRemote(index);
     }
 
@@ -149,13 +143,9 @@ class SearchTracksSection extends HookConsumerWidget {
             ),
             children: [
               for (final (index, track) in shown.indexed)
-                TrackCard(
+                HomeTrackCard(
+                  track: track,
                   imageUrl: trackCardImageUrl(track),
-                  title: track.name,
-                  subtitle: track.album.name,
-                  locked: PremiumAccess.isTrackLocked(track, ref),
-                  cardBgColor: track.cardBgColor,
-                  cardTextColor: track.cardTextColor,
                   onTap: () => playTrack(index),
                 ),
             ],

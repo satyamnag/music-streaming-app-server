@@ -6,10 +6,10 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
@@ -17,8 +17,9 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/metadata_plugin/search/tracks.dart';
 
-/// Songs tab: a responsive GRID of 1.25x track cards (matching the home
-/// covers), paged with a "See more" button and a "nothing found" empty state.
+/// Songs tab: a responsive GRID of the shared home track cards (same cover,
+/// card shape and text as the home rows), paged with a "See more" button and a
+/// "nothing found" empty state.
 class SearchPageTracksTab extends HookConsumerWidget {
   /// Number of tracks revealed per page (even -> balanced grid rows).
   static const int pageSize = 8;
@@ -93,16 +94,10 @@ class SearchPageTracksTab extends HookConsumerWidget {
     }
 
     Future<void> playTrack(int index) async {
-      final track = shown[index];
-      if (PremiumAccess.isTrackLocked(track, ref)) {
-        await PremiumAccess.gateTrackPlay(
-          context: context,
-          ref: ref,
-          track: track,
-          feature: () async => loadOnDeviceOrRemote(index),
-        );
-        return;
-      }
+      // The shared home card resolves the track's lock state and runs the
+      // payment gate on its own tap, so this only runs the original device /
+      // queue flow. Gating here as well would present the paywall twice when
+      // the purchase has not propagated to the cached subscription status yet.
       await loadOnDeviceOrRemote(index);
     }
 
@@ -150,13 +145,9 @@ class SearchPageTracksTab extends HookConsumerWidget {
                 ),
                 itemBuilder: (context, index) {
                   final track = shown[index];
-                  return TrackCard(
+                  return HomeTrackCard(
+                    track: track,
                     imageUrl: trackCardImageUrl(track),
-                    title: track.name,
-                    subtitle: track.album.name,
-                    locked: PremiumAccess.isTrackLocked(track, ref),
-                    cardBgColor: track.cardBgColor,
-                    cardTextColor: track.cardTextColor,
                     onTap: () => playTrack(index),
                   );
                 },
