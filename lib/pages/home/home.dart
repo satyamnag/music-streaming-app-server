@@ -291,19 +291,26 @@ class _HomeHeaderRow extends StatelessWidget {
             ),
           ),
           const Gap(8),
-          // Expanded so a narrow screen ellipsises the long script name rather
-          // than overflowing the row; with room to spare it renders identically.
+          // FittedBox(scaleDown) rather than an ellipsis. The script name IS the
+          // app's identity on its own home screen, and `Expanded` + ellipsis
+          // truncated it to "Soulful B..." on a 360dp phone, where the name, the
+          // logo and three action icons together need slightly more width than
+          // the row has. Scaling down keeps the whole name at every width, and
+          // only scales when it must, so nothing changes when there is room.
           Expanded(
-            child: Text(
-              'Soulful Bhakti',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: "Cookie",
-                fontSize: 30,
-                letterSpacing: 1.8,
-                color: color,
-                shadows: shadows,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Soulful Bhakti',
+                maxLines: 1,
+                style: TextStyle(
+                  fontFamily: "Cookie",
+                  fontSize: 30,
+                  letterSpacing: 1.8,
+                  color: color,
+                  shadows: shadows,
+                ),
               ),
             ),
           ),
