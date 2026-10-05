@@ -320,37 +320,135 @@ class TrackCard extends StatelessWidget {
     // Bound to a local because Dart only promotes local variables, not fields.
     final play = onPlay;
 
-    // TRACK card (titleLines == 2): no album line, and the name may run to two
-    // lines that must show it in full.
+    // TRACK card (titleLines == 2): no album line, and the name gets at most two
+    // lines — never a third.
     //
-    // The title's box is a FIXED [HomeSectionLayout.trackTitleBlockHeight] — two
-    // line boxes of an explicit `height` multiplier, each rounded up — so a name
-    // that lands on one line and one that wraps to two produce cards of exactly
-    // the same height. That fixed box is also why the explicit multiplier
-    // matters: it makes a line box `fontSize * height` by contract, so the
-    // reserve cannot come up short of the text whatever font or text scale the
-    // platform supplies (the house helper measures bare styles, which is the
-    // ~3.5dp trap a reserved box would otherwise fall into).
+    // Line one holds the first word and line two holds every remaining word, and
+    // if the name still does not fit, line two ellipsizes. A name short enough to
+    // fit beside the control keeps its single line instead of being split for the
+    // sake of the rule.
     //
-    // The control then sits on its OWN line under the title, right aligned,
-    // rather than beside it: that is what gives the name the card's full width —
-    // 110dp tiles leave nothing to spare — and it is also what puts the control
-    // at the card's bottom-right corner. Its line is reserved even when the card
-    // has no control, so cards with and without one are the same height too.
-    final titleBox = titleLines > 1
-        ? SizedBox(
-            height: HomeSectionLayout.trackTitleBlockHeight(context),
-            child: Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.typography.small.copyWith(
-                fontWeight: FontWeight.w600,
-                color: titleColor,
-                height: HomeSectionLayout.trackTitleLineHeight,
-              ),
+    // The play control shares line one, right aligned, which is what places it at
+    // the right of the first word. Sharing the line costs line one the control's
+    // width, so the card MEASURES each name before choosing a shape.
+    //
+    // Both lines live in a FIXED [HomeSectionLayout.trackTitleBlockHeight], so a
+    // one-line name and a two-line name produce cards of exactly the same height,
+    // and the block is tall enough for the control whichever line it lands on.
+    // The explicit `height` multiplier is what makes that reserve exact: it makes
+    // a line box `fontSize * height` by contract, so the reserve cannot come up
+    // short of the text whatever font or text scale the platform supplies.
+    //
+    // The shape is decided by measuring the name with the very style it renders
+    // in, at the very width this card will give it — a [TextPainter] with the same
+    // style, the same text scaler and the same maxWidth the [Text] below is laid
+    // out with. No rule of thumb can do this job: the catalogue's first words
+    // alone span 25dp to 93dp, and the line they share with the control is only
+    // 75.2dp wide in a 110dp tile.
+    final cardTitleStyle = theme.typography.small.copyWith(
+      fontWeight: FontWeight.w600,
+      color: titleColor,
+      height: HomeSectionLayout.trackTitleLineHeight,
+    );
+    final titleScaler = MediaQuery.textScalerOf(context);
+
+    final controlDiameter = HomeSectionLayout.trackPlayButtonDiameter(context);
+
+    /// One title line, optionally sharing its row with the play control. The
+    /// control's room is reserved even when the card has no control, so cards
+    /// with and without one are exactly the same height.
+    Widget titleLine(String text, {required bool withControl}) {
+      final label = Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: cardTitleStyle,
+      );
+      if (!withControl) return label;
+      return Row(
+        children: [
+          Flexible(child: label),
+          Gap(HomeSectionLayout.trackPlayButtonGap * scale),
+          if (play == null)
+            SizedBox(height: controlDiameter, width: controlDiameter)
+          else
+            _CardPlayButton(
+              diameter: controlDiameter,
+              title: title,
+              onPlay: play,
             ),
-          )
+        ],
+      );
+    }
+
+    /// The fixed two-line title block, split for the width it is ACTUALLY handed.
+    ///
+    /// [LayoutBuilder] reports the padded text column — the padding around the
+    /// block sits outside it — so this needs no arithmetic about the card's outer
+    /// width or its insets, and cannot drift from the width the [Text] widgets are
+    /// really laid out with.
+    Widget trackTitleBlock() {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          /// True when [text] paints on ONE line inside [maxWidth] with the
+          /// card's own title style — the same measurement the [Text] widgets
+          /// below perform, because it is the same engine call.
+          bool fitsOneLine(String text, double maxWidth) {
+            final painter = TextPainter(
+              text: TextSpan(text: text, style: cardTitleStyle),
+              maxLines: 1,
+              textDirection: TextDirection.ltr,
+              textScaler: titleScaler,
+            )..layout(maxWidth: maxWidth);
+            final fits = !painter.didExceedMaxLines;
+            painter.dispose();
+            return fits;
+          }
+
+          // Line one loses the control and the gap before it when they share it.
+          final besideControl = constraints.maxWidth -
+              ((HomeSectionLayout.trackPlayButtonGap + controlDiameter) * scale);
+          final words = title.trim().split(RegExp(r'\s+'));
+          final firstWord = words.first;
+          // One line when the whole name fits beside the control; otherwise the
+          // first word takes line one and every remaining word takes line two.
+          final onOneLine = fitsOneLine(title, besideControl);
+          final splits = !onOneLine && words.length > 1;
+          // The control may only share line one when the word it shares it with
+          // leaves it room. For the catalogue names whose first word does not —
+          // eight of 63 at a 110dp tile — the control drops to line two and line
+          // one keeps the full width, because truncating the FRONT of a name to
+          // keep the control up there would lose characters the author typed,
+          // where moving the control never loses any.
+          final controlOnLine1 =
+              onOneLine || fitsOneLine(firstWord, besideControl);
+          // Null when line two has neither text nor a control to carry, so a
+          // one-line name leaves that line blank rather than rendering it empty.
+          final secondLine = splits
+              ? words.skip(1).join(' ')
+              : (controlOnLine1 ? null : '');
+
+          return SizedBox(
+            height: HomeSectionLayout.trackTitleBlockHeight(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                titleLine(
+                  onOneLine ? title : firstWord,
+                  withControl: controlOnLine1,
+                ),
+                if (secondLine != null)
+                  titleLine(secondLine, withControl: !controlOnLine1),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    final titleBox = titleLines > 1
+        ? trackTitleBlock()
         // ALBUM/playlist card: one title line over the subtitle, unchanged.
         : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,26 +477,11 @@ class TrackCard extends StatelessWidget {
             ],
           );
 
-    final trackPlayDiameter = HomeSectionLayout.trackPlayButtonDiameter(context);
+    // The track card's control now lives INSIDE [titleBox], sharing one of its
+    // two lines, so the card's column is the block alone. The album card keeps
+    // its control beside its block.
     final content = titleLines > 1
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              titleBox,
-              Gap(HomeSectionLayout.trackPlayButtonGap * scale),
-              Align(
-                alignment: Alignment.centerRight,
-                child: play == null
-                    ? SizedBox(height: trackPlayDiameter, width: trackPlayDiameter)
-                    : _CardPlayButton(
-                        diameter: trackPlayDiameter,
-                        title: title,
-                        onPlay: play,
-                      ),
-              ),
-            ],
-          )
+        ? titleBox
         : play == null
             ? titleBox
             // The album card keeps its control beside the block, bottom aligned,
