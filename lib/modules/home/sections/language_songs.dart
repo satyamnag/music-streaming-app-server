@@ -65,6 +65,8 @@ class _LanguageSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           HomeCardRow(
+            // TRACK cards: two reserved title lines, no album line.
+            height: HomeSectionLayout.twoLineTrackRowHeight(context),
             header: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
               child: Row(

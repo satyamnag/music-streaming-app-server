@@ -64,8 +64,9 @@ class HomeTrackSection extends HookConsumerWidget {
               Skeletonizer(
                 enabled: true,
                 child: SizedBox(
-                  height: HomeSectionLayout.rowHeight(context) +
-                      HomeSectionLayout.skeletonHeadroom,
+                  height:
+                      HomeSectionLayout.twoLineTrackRowHeight(context) +
+                          HomeSectionLayout.skeletonHeadroom,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
@@ -99,6 +100,10 @@ class HomeTrackSection extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             HomeCardRow(
+              // These are TRACK cards: two reserved title lines and no album
+              // line, so the row is sized to that card rather than to the
+              // one-line album card the default fits.
+              height: HomeSectionLayout.twoLineTrackRowHeight(context),
               header: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 child: Row(

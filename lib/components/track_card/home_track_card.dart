@@ -72,7 +72,14 @@ class HomeTrackCard extends HookConsumerWidget {
       width: width ?? HomeSectionLayout.cardWidth * scale,
       imageUrl: imageUrl,
       title: track.name,
-      subtitle: track.album.name,
+      // No album line, and room for the name in full: a track card shows only
+      // the track's own name, on up to two lines. The album it belongs to is
+      // still one tap away on the card, and repeating it here cost the name the
+      // width it needed — with the album line gone the name fits in one line
+      // when it can and wraps to two when it must, and because the card always
+      // reserves two lines every track card is exactly the same height either
+      // way. See TrackCard.titleLines and HomeSectionLayout.twoLineTrackCardHeight.
+      titleLines: 2,
       locked: locked,
       cardBgColor: configured,
       cardTextColor: configuredText,

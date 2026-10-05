@@ -43,22 +43,22 @@ const double trackGridReferenceWidth = 360;
 
 /// Side padding of those grids, in logical pixels: the inset that keeps the
 /// outermost cards clear of the screen edge without wasting the width the cards
-/// could use. 4dp is the balance the user settled on — visibly separate from the
-/// edge, where 2dp read as almost flush.
-const double trackGridPadding = 4;
+/// could use. 9dp is visibly separate from the edge while still leaving the
+/// three columns 110dp each.
+const double trackGridPadding = 9;
 
-/// Gutter between the columns of those grids, in logical pixels. Tighter than
-/// the house [cardGap] (6dp) and than [HomeSectionLayout.cardGap], but no longer
-/// squeezed to the bare minimum: the user first asked for the smallest possible
-/// gap at 117.5dp per card and then traded 2.5dp of card width back for visible
-/// space between the columns, which is where this 3.5dp comes from.
-const double trackGridGutter = 3.5;
+/// Gutter between the columns of those grids, in logical pixels: exactly the
+/// house [cardGap], which is also what [trackGridDelegate] already uses for its
+/// `mainAxisSpacing`. Horizontal and vertical rhythm therefore finally match
+/// instead of the gutter being 2.5dp tighter than the rows below it.
+const double trackGridGutter = cardGap;
 
 /// Card width those three numbers produce on the [trackGridReferenceWidth]
 /// reference phone, where the arithmetic closes exactly:
 ///
-///   3 * 115 (cards) + 2 * 4 (side padding) + 2 * 3.5 (gutters) = 360
-///   => (360 - 8 - 7) / 3 = 115dp per card
+///   3 * 110 (cards) + 2 * 9 (side padding) + 2 * 6 (gutters) = 330 + 18 + 12
+///   = 360
+///   => (360 - 18 - 12) / 3 = 110dp per card
 ///
 /// The cards FILL their grid tile (no fixed-width wrapper), so the card width IS
 /// the tile width, and this number is a result of the three above rather than an
@@ -66,10 +66,11 @@ const double trackGridGutter = 3.5;
 ///
 /// History, so the numbers are not mysterious later: the user asked for three per
 /// row, then for 120dp (which needs 3 * 120 = 360dp of cards alone, i.e. zero
-/// padding and zero gutters — impossible), then 117.5dp, and finally 115dp for
-/// more space between the cards. 115dp gives up 2.5dp of card per column to buy
-/// 4dp side margins and 3.5dp gutters.
-const double trackGridTileWidth = 115;
+/// padding and zero gutters — impossible), then 117.5dp, then 115dp for more
+/// space between the cards, and finally 110dp for a 6dp gutter on both axes with
+/// a 9dp side inset. Every pixel of card width given up here is what pays for
+/// the grid's own spacing.
+const double trackGridTileWidth = 110;
 
 /// The grid delegate every NON-HOME track/album grid renders with.
 ///
@@ -77,11 +78,12 @@ const double trackGridTileWidth = 115;
 /// how tall a tile is, so the four grids can never disagree about the cards
 /// they show. Callers apply [trackGridPadding] themselves (as their
 /// `SliverPadding`/`GridView` padding) — the padding is part of the geometry
-/// [HomeSectionLayout.trackCardGridExtent] measures the tile width from, so a
+/// [HomeSectionLayout.trackGridCardExtent] measures the tile width from, so a
 /// grid that pads differently would clip its cards.
 ///
-/// `mainAxisSpacing` stays at the house [HomeSectionLayout.cardGap]; only the
-/// horizontal gutter is tightened, so rows keep the vertical rhythm they had.
+/// `mainAxisSpacing` is the house [HomeSectionLayout.cardGap] and, since
+/// [trackGridGutter] is now the same number, the grid's vertical and horizontal
+/// spacing match.
 SliverGridDelegate trackGridDelegate(BuildContext context) {
   // The four numbers are one system: three cards plus the padding and the
   // gutters have to fill the reference width, or the cards stop being the size
@@ -100,8 +102,11 @@ SliverGridDelegate trackGridDelegate(BuildContext context) {
     mainAxisSpacing: HomeSectionLayout.cardGap,
     // The card fills the tile, so the tile width IS the card width and this
     // extent is the card's exact height — derived from the tile width the grid
-    // really produces rather than from an assumed one.
-    mainAxisExtent: HomeSectionLayout.trackCardGridExtent(
+    // really produces rather than from an assumed one. These grids show the
+    // two-line track card AND the one-line title + subtitle album/playlist card,
+    // so the extent is the taller of the two (see
+    // [HomeSectionLayout.trackGridCardExtent]).
+    mainAxisExtent: HomeSectionLayout.trackGridCardExtent(
       context,
       crossAxisCount: trackGridColumns,
       horizontalPadding: trackGridPadding,
@@ -114,6 +119,20 @@ SliverGridDelegate trackGridDelegate(BuildContext context) {
 /// and horizontal home rows. Provider-free: the caller resolves artwork,
 /// handles taps and any premium gating, so search and see-all screens keep
 /// their own play logic.
+///
+/// ## The two anatomies
+/// The card renders one of two layouts, chosen by [titleLines]:
+///
+///  * [titleLines] == 1 (the default, and every album/playlist card): the card
+///    this widget has always rendered — one ellipsized title line, the 2dp gap,
+///    one subtitle line, and the play control inside that same row.
+///  * [titleLines] == 2 (the TRACK card): no subtitle line at all, the title in
+///    a FIXED two-line box that fills the card's width, and the play control on
+///    its own line at the card's bottom-right corner. The fixed box is what
+///    makes a one-line and a two-line track card exactly the same height; the
+///    explicit line height the title style pins (see
+///    [HomeSectionLayout.trackTitleLineHeight]) is what makes the text agree
+///    with that box at any font and any system text scale.
 ///
 /// ## Why the artwork is fluid
 /// This card used to lay out a hard-coded 150px artwork inside a fixed 175px
@@ -129,8 +148,19 @@ SliverGridDelegate trackGridDelegate(BuildContext context) {
 class TrackCard extends StatelessWidget {
   final String imageUrl;
   final String title;
+
+  /// The card's second line. The track variant ([titleLines] == 2) renders no
+  /// subtitle at all — the album name it used to show under the track name is
+  /// gone — so this is empty there.
   final String subtitle;
   final VoidCallback onTap;
+
+  /// How many lines the title is allowed to occupy, and which anatomy the card
+  /// renders: 1 (the default) for the one-line title + subtitle album/playlist
+  /// card, 2 for the two-line, no-subtitle TRACK card. Only those two values are
+  /// meaningful — the track variant reserves exactly two line boxes — and the
+  /// constructor asserts it.
+  final int titleLines;
 
   /// What the card's own play control does, or null to render no control at
   /// all (the card then looks exactly as it did before the control existed).
@@ -155,10 +185,13 @@ class TrackCard extends StatelessWidget {
   /// default foreground/muted colors.
   final String? cardTextColor;
 
-  /// Target diameter of the card's play control at scale == 1. It is only a
-  /// ceiling: [_playButtonDiameter] shrinks it to fit the text block it sits
-  /// beside, which is what keeps the card exactly as tall as
+  /// Target diameter of the ALBUM/playlist card's play control at scale == 1.
+  /// It is only a ceiling: [_playButtonDiameter] shrinks it to fit the text block
+  /// it sits beside, which is what keeps the card exactly as tall as
   /// [HomeSectionLayout] computes.
+  ///
+  /// The track variant uses 0.75 x this — [HomeSectionLayout.trackPlayButtonSize]
+  /// — because its control sits on its own line rather than beside the title.
   static const double playButtonSize = 30;
 
   /// How much shorter than the text block the play control is kept, at scale
@@ -168,22 +201,35 @@ class TrackCard extends StatelessWidget {
   static const double playButtonClearance = 4;
 
   /// Gap between the title/subtitle block and the play control, at scale == 1.
+  /// The track variant names the same number separately as
+  /// [HomeSectionLayout.trackPlayButtonGap], the way [cardGap] is named in both
+  /// files, so neither card's geometry has to reach into the other's.
   static const double playButtonGap = 4;
 
   const TrackCard({
     super.key,
     required this.imageUrl,
     required this.title,
-    required this.subtitle,
+    this.subtitle = '',
+    this.titleLines = 1,
     required this.onTap,
     this.onPlay,
     this.locked = false,
     this.width,
     this.cardBgColor,
     this.cardTextColor,
-  });
+  }) : assert(
+          titleLines == 1 || titleLines == 2,
+          'the track card renders either one title line or the reserved '
+          'two-line track title, nothing else',
+        );
 
   /// Diameter of this card's play control.
+  ///
+  /// The two-line track variant takes its control's diameter from
+  /// [HomeSectionLayout.trackPlayButtonDiameter] instead — the same derivation
+  /// against the block the card reserves, so the control still can never be the
+  /// taller child.
   ///
   /// ## Why it is measured and not just "30dp"
   /// The card's height is decided by the text block, and every grid tile and
@@ -210,6 +256,10 @@ class TrackCard extends StatelessWidget {
   /// control sized from that number would be the taller child — exactly the
   /// case this measurement exists to keep out.
   double _playButtonDiameter(BuildContext context) {
+    if (titleLines > 1) {
+      return HomeSectionLayout.trackPlayButtonDiameter(context);
+    }
+
     final theme = Theme.of(context);
     final scale = theme.scaling;
     final textScaler = MediaQuery.textScalerOf(context);
@@ -267,38 +317,105 @@ class TrackCard extends StatelessWidget {
             ? readableTextOn(bg).withValues(alpha: 0.75)
             : theme.colorScheme.mutedForeground);
 
-    // The title + subtitle block. Built once and used either bare (no play
-    // control: byte-for-byte the card this widget has always rendered) or as
-    // the flexible side of the row below.
-    final textBlock = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.typography.small.copyWith(
-            fontWeight: FontWeight.w600,
-            color: titleColor,
-          ),
-        ),
-        // From the shared layout constant, not a literal 2, so the gap the card
-        // renders is the same number the tile height is computed from.
-        SizedBox(height: HomeSectionLayout.titleSubtitleGap * scale),
-        Text(
-          subtitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.typography.xSmall.copyWith(
-            color: subtitleColor,
-          ),
-        ),
-      ],
-    );
-
     // Bound to a local because Dart only promotes local variables, not fields.
     final play = onPlay;
+
+    // TRACK card (titleLines == 2): no album line, and the name may run to two
+    // lines that must show it in full.
+    //
+    // The title's box is a FIXED [HomeSectionLayout.trackTitleBlockHeight] — two
+    // line boxes of an explicit `height` multiplier, each rounded up — so a name
+    // that lands on one line and one that wraps to two produce cards of exactly
+    // the same height. That fixed box is also why the explicit multiplier
+    // matters: it makes a line box `fontSize * height` by contract, so the
+    // reserve cannot come up short of the text whatever font or text scale the
+    // platform supplies (the house helper measures bare styles, which is the
+    // ~3.5dp trap a reserved box would otherwise fall into).
+    //
+    // The control then sits on its OWN line under the title, right aligned,
+    // rather than beside it: that is what gives the name the card's full width —
+    // 110dp tiles leave nothing to spare — and it is also what puts the control
+    // at the card's bottom-right corner. Its line is reserved even when the card
+    // has no control, so cards with and without one are the same height too.
+    final titleBox = titleLines > 1
+        ? SizedBox(
+            height: HomeSectionLayout.trackTitleBlockHeight(context),
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.typography.small.copyWith(
+                fontWeight: FontWeight.w600,
+                color: titleColor,
+                height: HomeSectionLayout.trackTitleLineHeight,
+              ),
+            ),
+          )
+        // ALBUM/playlist card: one title line over the subtitle, unchanged.
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.typography.small.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: titleColor,
+                ),
+              ),
+              // From the shared layout constant, not a literal 2, so the gap the
+              // card renders is the same number the tile height is computed from.
+              SizedBox(height: HomeSectionLayout.titleSubtitleGap * scale),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.typography.xSmall.copyWith(
+                  color: subtitleColor,
+                ),
+              ),
+            ],
+          );
+
+    final trackPlayDiameter = HomeSectionLayout.trackPlayButtonDiameter(context);
+    final content = titleLines > 1
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              titleBox,
+              Gap(HomeSectionLayout.trackPlayButtonGap * scale),
+              Align(
+                alignment: Alignment.centerRight,
+                child: play == null
+                    ? SizedBox(height: trackPlayDiameter, width: trackPlayDiameter)
+                    : _CardPlayButton(
+                        diameter: trackPlayDiameter,
+                        title: title,
+                        onPlay: play,
+                      ),
+              ),
+            ],
+          )
+        : play == null
+            ? titleBox
+            // The album card keeps its control beside the block, bottom aligned,
+            // so it reads as part of the title/subtitle block rather than as a
+            // floating badge.
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: titleBox),
+                  Gap(playButtonGap * scale),
+                  _CardPlayButton(
+                    diameter: _playButtonDiameter(context),
+                    title: title,
+                    onPlay: play,
+                  ),
+                ],
+              );
 
     return Container(
       width: width,
@@ -328,31 +445,24 @@ class TrackCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Only the text block is padded, so the cover stays flush.
+            // Only the text block is padded, so the cover stays flush. The track
+            // card insets its text more tightly than the album card
+            // ([HomeSectionLayout.trackCardTextPadding]) because the two-line
+            // name needs every pixel of a 110dp tile to fit in full.
             Padding(
               padding: EdgeInsets.fromLTRB(
-                HomeSectionLayout.cardPadding * scale,
+                (titleLines > 1
+                        ? HomeSectionLayout.trackCardTextPadding
+                        : HomeSectionLayout.cardPadding) *
+                    scale,
                 HomeSectionLayout.cardTextGap * scale,
-                HomeSectionLayout.cardPadding * scale,
+                (titleLines > 1
+                        ? HomeSectionLayout.trackCardTextPadding
+                        : HomeSectionLayout.cardPadding) *
+                    scale,
                 HomeSectionLayout.cardPadding * scale,
               ),
-              child: play == null
-                  ? textBlock
-                  // The control sits at the block's trailing edge, bottom
-                  // aligned, so it reads as part of the title/subtitle block
-                  // rather than as a floating badge.
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(child: textBlock),
-                        Gap(playButtonGap * scale),
-                        _CardPlayButton(
-                          diameter: _playButtonDiameter(context),
-                          title: title,
-                          onPlay: play,
-                        ),
-                      ],
-                    ),
+              child: content,
             ),
           ],
         ),

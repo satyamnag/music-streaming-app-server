@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// Shared geometry for the home-screen horizontal card rows ("Recently
@@ -181,6 +183,184 @@ abstract final class HomeSectionLayout {
         gutter: gutter,
       ),
       withSubtitle: withSubtitle,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // The two-line TRACK card variant.
+  //
+  // The album/playlist cards keep the anatomy every helper above describes: one
+  // ellipsized title line, the 2dp gap, one subtitle line and the play control
+  // inside that row. The TRACK card drops the subtitle entirely, reserves two
+  // whole lines for the title (so a one-line and a two-line name produce exactly
+  // the same card) and moves the control onto its own line at the card's
+  // bottom-right corner, which is what gives the title the card's full width.
+  //
+  // Everything below is derived from the same typography and the same constants
+  // the card itself renders with, so the card and this helper can never drift.
+  // ---------------------------------------------------------------------------
+
+  /// Explicit line-height multiplier of the two-line track title: one rendered
+  /// line box is exactly `fontSize * this` logical pixels tall.
+  ///
+  /// ## Why the track title pins its own line height
+  /// The card reserves a FIXED two-line box for its title — that is the whole
+  /// reason a one-line and a two-line card measure the same — so the reserve has
+  /// to agree with what the [Text] inside it really renders. Measuring a line
+  /// with a [TextPainter] (what every other helper here does) does NOT agree:
+  /// [Text] merges its style over the ambient `DefaultTextStyle`, so the card
+  /// inherits Material's `height: 1.43` and whatever font family the platform
+  /// hands us, while a bare `TextStyle` measures with the font's own metrics
+  /// (~1.17em). On the device that difference is ~3.5px per line, which is
+  /// exactly how a "reserved" two-line title ends up overflowing the box it was
+  /// reserved in.
+  ///
+  /// `TextStyle.height` removes the guesswork by contract: Flutter renders such
+  /// a line exactly `fontSize * height` tall whatever the font's metrics are, so
+  /// the card reserves `2 *` that number and the text fits BY CONSTRUCTION — at
+  /// any font family, any platform metrics and any system text scale.
+  static const double trackTitleLineHeight = 1.2;
+
+  /// Horizontal padding of the two-line track title block, at scale == 1: half
+  /// the album card's [cardPadding].
+  ///
+  /// The track title has to show the full track name on at most two lines, and
+  /// in a 110dp grid tile every pixel of width counts. Measured at the title's
+  /// own style (14px/w600, no tracking, real Roboto metrics) over this
+  /// catalogue's names: "Sri Rama Nama Sudha Lahala" needs 97.5dp of width to
+  /// break over two lines and "Niluvadu Manasu" 55.5dp. This padding leaves the
+  /// title 110 - 2 * 4.17 = 101.7dp in a 110dp tile — ~4dp of slack on the
+  /// longest one — where the full [cardPadding] would leave 93.3dp and ellipsize
+  /// it. The card's cover bleeds to its edges, so the tighter inset also keeps
+  /// the title closer to the artwork it belongs to.
+  static const double trackCardTextPadding = cardPadding / 2;
+
+  /// Target diameter of the track card's play control at scale == 1: 0.75 x the
+  /// 30dp control the album/playlist cards still render
+  /// (`TrackCard.playButtonSize`).
+  ///
+  /// The control sits on its own line under the title (see
+  /// [twoLineTrackCardHeight]), so shrinking it is what keeps that extra line
+  /// cheap, and the title — which no longer shares its row with the control —
+  /// keeps the card's full width.
+  static const double trackPlayButtonSize = 22.5;
+
+  /// Gap between the two-line title and the track's play control, at scale == 1.
+  /// The same number as `TrackCard.playButtonGap`, which the album card uses
+  /// inside its own row — these two files both name the gap they render with, so
+  /// neither card's geometry has to reach into the other's.
+  static const double trackPlayButtonGap = 4;
+
+  /// How much shorter than the title block the track control is kept, at scale
+  /// == 1. Same role as `TrackCard.playButtonClearance`: the control can never
+  /// be the taller child of the card's column, so it can never add a pixel to
+  /// the height derived in [twoLineTrackCardHeight].
+  static const double trackPlayButtonClearance = 4;
+
+  /// One rendered line box of the two-line track title, in logical pixels.
+  ///
+  /// `fontSize * height` is what Flutter renders such a line as (see
+  /// [trackTitleLineHeight]). The [TextScaler] is applied to the font size
+  /// first, because that is the order Flutter's own line-height calculation uses
+  /// — so a system text scale enlarges the reserve exactly as much as it
+  /// enlarges the text.
+  static double trackTitleLineBox(BuildContext context) {
+    final fontSize = Theme.of(context).typography.small.fontSize ?? 0;
+    return MediaQuery.textScalerOf(context).scale(fontSize) *
+        trackTitleLineHeight;
+  }
+
+  /// The height of the box the two-line track title renders in — the SAME number
+  /// the card gives it, because both call this.
+  ///
+  /// Two whole line boxes, each rounded UP. The engine rounds a rendered line
+  /// box to whole logical pixels, so a fractional line (14 * 1.2 = 16.8) would
+  /// otherwise leave a reserve up to a pixel short of the text it holds. Rounding
+  /// each line up keeps `reserve >= rendered text` at every text scale, so the
+  /// title can never be clipped or ellipsized for lack of room; the cost is at
+  /// most one pixel per line, and every card pays it identically, which is what
+  /// keeps all the cards the same height.
+  static double trackTitleBlockHeight(BuildContext context) {
+    return 2 * trackTitleLineBox(context).ceilToDouble();
+  }
+
+  /// Diameter of the track card's play control, derived so it can never be the
+  /// taller child of the card's column:
+  ///
+  ///   control <= block - clearance < block
+  ///
+  /// where the block is the fixed two-line title box above. The `min` with
+  /// [trackPlayButtonSize] means the ordinary case renders exactly 0.75 x the
+  /// album card's control; the clearance only bites at a text scale so small —
+  /// or a theme so tight — that the title block is shorter than the control.
+  static double trackPlayButtonDiameter(BuildContext context) {
+    final scale = Theme.of(context).scaling;
+    final block = trackTitleBlockHeight(context);
+    return math.max(
+      0,
+      math.min(
+        trackPlayButtonSize * scale,
+        block - (trackPlayButtonClearance * scale),
+      ),
+    );
+  }
+
+  /// Exact height of the two-line TRACK card whose square cover is [coverWidth]
+  /// wide: the cover, the padded two-line title block, the control's own line
+  /// and the card's bottom padding.
+  ///
+  /// Every term is either a constant or a value the card itself computes through
+  /// the helpers above, so a one-line title and a two-line title produce exactly
+  /// the same card: the title's box is a fixed [trackTitleBlockHeight] whichever
+  /// way the text wraps, and the control's line is reserved whether or not the
+  /// card has a control.
+  static double twoLineTrackCardHeight(
+    BuildContext context,
+    double coverWidth,
+  ) {
+    final scale = Theme.of(context).scaling;
+    return coverWidth +
+        (cardTextGap * scale) +
+        trackTitleBlockHeight(context) +
+        (trackPlayButtonGap * scale) +
+        trackPlayButtonDiameter(context) +
+        (cardPadding * scale);
+  }
+
+  /// Exact height of one card in a home TRACK row: the same two-line card at the
+  /// rows' fixed [cardWidth] box, which is also the card's cover width.
+  static double twoLineTrackRowHeight(BuildContext context) {
+    final scale = Theme.of(context).scaling;
+    return twoLineTrackCardHeight(context, cardWidth * scale);
+  }
+
+  /// Exact tile height for the shared track/album grids.
+  ///
+  /// Those grids have ONE tile extent but render two card anatomies: the
+  /// two-line, no-subtitle track card on their track surfaces and the one-line
+  /// title + subtitle album/playlist card on the others. Taking the taller of the
+  /// two derived heights is what keeps either one from overflowing its tile.
+  ///
+  /// At scale 1 and a 110dp tile the two-line track card is the taller one —
+  /// 110 + 6 + 34 + 4 + 22.5 + 8.33 = 184.83dp against the album card's
+  /// 110 + 6 + 16.41 + 2 + 14.06 + 8.33 = 156.80dp — so the album and playlist
+  /// cards simply have room to spare at the bottom of their own background
+  /// instead of a clipped text block. Both cards FILL the tile either way.
+  static double trackGridCardExtent(
+    BuildContext context, {
+    required int crossAxisCount,
+    required double horizontalPadding,
+    double gutter = cardGap,
+  }) {
+    final tileWidth = trackCardTileWidth(
+      context,
+      crossAxisCount: crossAxisCount,
+      horizontalPadding: horizontalPadding,
+      gutter: gutter,
+    );
+    return math.max(
+      twoLineTrackCardHeight(context, tileWidth),
+      trackCardHeightFor(context, tileWidth),
     );
   }
 

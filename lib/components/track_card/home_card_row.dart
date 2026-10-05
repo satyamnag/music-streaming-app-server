@@ -16,11 +16,23 @@ class HomeCardRow extends StatelessWidget {
   final int itemCount;
   final Widget Function(BuildContext context, int index) itemBuilder;
 
+  /// Exact row height, or null to take the one-card-height default
+  /// ([HomeSectionLayout.rowHeight]).
+  ///
+  /// A row must be exactly as tall as the card it holds: too short clips the
+  /// card, too tall leaves a dead band under it. The default fits the one-line
+  /// title + subtitle album/playlist card; a row of TRACK cards has to pass
+  /// [HomeSectionLayout.twoLineTrackRowHeight] instead, because those cards
+  /// reserve two title lines and carry no subtitle. The caller knows which card
+  /// it renders, so the choice is made there rather than guessed here.
+  final double? height;
+
   const HomeCardRow({
     super.key,
     required this.itemCount,
     required this.itemBuilder,
     this.header,
+    this.height,
   });
 
   @override
@@ -36,7 +48,7 @@ class HomeCardRow extends StatelessWidget {
           Gap(8 * scale),
         ],
         SizedBox(
-          height: HomeSectionLayout.rowHeight(context),
+          height: height ?? HomeSectionLayout.rowHeight(context),
           child: ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
             scrollDirection: Axis.horizontal,
