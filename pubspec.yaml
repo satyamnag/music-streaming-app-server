@@ -1,9 +1,9 @@
-name: sangeet
+﻿name: sangeet
 description: Open source extensible music streaming platform and app, based on BYOMM (Bring your own music metadata) concept
 
 publish_to: "none"
 
-version: 1.0.0+76
+version: 1.0.0+77
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
