@@ -440,8 +440,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <p style="font-size:13px;color:#666;margin-bottom:14px;">
     The home screen wallpaper: a landscape band across the top of the home page,
     behind the &ldquo;Soulful Bhakti&rdquo; header. Upload a landscape WebP
-    (16:9, 1920&times;1080 recommended); the app crops it to that band and dims
-    it so the header text stays readable. Remove it to return to the plain
+    (16:9 is fine; 1920&times;720 recommended). The band is 8:3, so the upload is
+    automatically trimmed to that shape before it is stored &mdash; what you see
+    in the preview below is exactly what the phone draws, at full brightness with
+    the header text carrying its own shadow. Remove it to return to the plain
     themed background.
   </p>
   <div id="wallpaperBox"></div>
@@ -1926,14 +1928,21 @@ function uniqueRowId(base, taken) {
 // (WALLPAPER_* in server.js).
 //
 // The wallpaper is a LANDSCAPE band across the top of the home screen, not a
-// full-screen background, so the upload is landscape. The ratio is a RANGE, not
-// one exact value: the app crops the band with BoxFit.cover, which is forgiving
-// enough that 16:9 and 8:3 artwork both land with only a small edge crop.
+// full-screen background, so the upload is landscape. The band is 8:3 — three
+// quarters of the height of the 2:1 band it used to be, at the same width — and
+// every upload is centre-cropped to exactly that shape before it is stored, so
+// the preview here is what the phone draws. The range below is the tolerance for
+// that crop, not a requirement on the author: 16:9 artwork is accepted and
+// trimmed, never rejected.
 const WALLPAPER_MIN_RATIO = 1.3;
 const WALLPAPER_MAX_RATIO = 3.2;
 const WALLPAPER_WIDTH = 1920;
-const WALLPAPER_HEIGHT = 1080;
-const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1';
+const WALLPAPER_HEIGHT = 720;
+// Width : height of the band the app draws, and the shape every upload is
+// normalised to. Kept in step with HomeWallpaper.bandAspectRatio in the app and
+// WALLPAPER_TARGET_RATIO in server.js.
+const WALLPAPER_TARGET_RATIO = 8 / 3;
+const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1, stored at 8:3';
 
 let featuredRows = [];
 
@@ -2247,8 +2256,8 @@ function renderWallpaper(url) {
         '</div>' +
         '<div style="flex:1;min-width:260px;">' +
           '<p style="font-size:12px;color:#666;margin-bottom:10px;">' +
-            'Landscape WebP, ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' (16:9) recommended — ' + WALLPAPER_LABEL + '. ' +
-            'The app draws it as a 2:1 band across the top of the home screen and dims it so the header text stays readable.' +
+            'Landscape WebP, ' + WALLPAPER_WIDTH + '×' + WALLPAPER_HEIGHT + ' (8:3) recommended — ' + WALLPAPER_LABEL + '. ' +
+            'Trimmed to the 8:3 band automatically on upload. The app draws that band across the top of the home screen at full brightness.' +
           '</p>' +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
             '<button class="btn btn-primary" type="button" onclick="document.getElementById(\'wallpaperInput\').click()">' +
@@ -2269,6 +2278,59 @@ function wallpaperHint(message, cls) {
   if (!el) return;
   el.textContent = message;
   el.className = 'special-hint' + (cls ? ' ' + cls : '');
+}
+
+// Centre-crops an uploaded wallpaper to the band's own 8:3 shape, so the stored
+// artwork has the length the app actually draws and nothing is left to a
+// BoxFit.cover crop on each device. The band is 0.75 of the height the old 2:1
+// band had at the same width, which is exactly what this trim produces from a
+// 16:9 export: 1920x1080 in, 1920x720 out.
+//
+// Deliberately forgiving. Every step falls back to the ORIGINAL file rather than
+// failing the upload: an already-8:3 image is passed through untouched (no
+// re-encode, so no generation loss), and if the browser cannot decode the image
+// or cannot encode WebP, the original bytes are uploaded as before and the
+// server's own validation still applies. Losing the trim is a cosmetic loss;
+// losing the upload would not be.
+async function normaliseWallpaper(file, dims) {
+  const current = dims.width / dims.height;
+  // Already the band's shape (within half a percent): keep the original bytes.
+  if (Math.abs(current - WALLPAPER_TARGET_RATIO) < 0.005) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    let sx = 0, sy = 0, sw = dims.width, sh = dims.height;
+    if (current > WALLPAPER_TARGET_RATIO) {
+      // Wider than the band: keep the full height, trim both sides equally.
+      sw = Math.round(sh * WALLPAPER_TARGET_RATIO);
+      sx = Math.round((dims.width - sw) / 2);
+    } else {
+      // Taller than the band: keep the full width, trim top and bottom equally.
+      sh = Math.round(sw / WALLPAPER_TARGET_RATIO);
+      sy = Math.round((dims.height - sh) / 2);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = sw;
+    canvas.height = sh;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, sw, sh);
+    if (bitmap.close) bitmap.close();
+
+    const blob = await new Promise(function (resolve) {
+      canvas.toBlob(resolve, 'image/webp', 0.92);
+    });
+    // toBlob falls back to PNG where WebP encoding is unavailable, and the
+    // server only accepts WebP — so a wrong type means "keep the original".
+    if (!blob || blob.type !== 'image/webp') return file;
+
+    return new File([blob], file.name.replace(/\.webp$/i, '') + '.webp', {
+      type: 'image/webp',
+    });
+  } catch (e) {
+    return file;
+  }
 }
 
 async function handleWallpaperUpload(input) {
@@ -2297,10 +2359,17 @@ async function handleWallpaperUpload(input) {
       return;
     }
 
-    // 3) Upload, then store the URL.
+    // 3) Trim the artwork to the band's own 8:3 shape before it is stored, so the
+    //    image keeps 0.75 of the length an upload used to keep and the app has
+    //    nothing left to crop. A no-op for artwork that is already 8:3, and it
+    //    falls back to the original bytes on any failure, so it can never cost an
+    //    author their upload.
+    const stored = await normaliseWallpaper(file, dims);
+
+    // 4) Upload, then store the URL.
     wallpaperHint('Uploading…', 'is-busy');
     const form = new FormData();
-    form.append('file', file);
+    form.append('file', stored);
     form.append('kind', 'home_wallpaper');
 
     const up = await authedFetch('/api/admin/upload', {

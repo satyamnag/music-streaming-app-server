@@ -106,8 +106,6 @@ class HomePage extends HookConsumerWidget {
                     // At least the wallpaper's own band height, so the artwork
                     // still reads as a band rather than a thin strip when no
                     // shelf has any tracks and the carousel collapses to nothing.
-                    // With shelves present the block is taller than this and the
-                    // wallpaper fills it exactly.
                     constraints: BoxConstraints(
                       minHeight: wallpaperUrl == null
                           ? 0
@@ -116,7 +114,20 @@ class HomePage extends HookConsumerWidget {
                     child: Stack(
                       children: [
                         if (wallpaperUrl != null)
-                          Positioned.fill(
+                          // The band, NOT the whole block. The artwork used to be
+                          // `Positioned.fill`, which stretched it behind the
+                          // carousel as well and made it as tall as the header and
+                          // the carousel together (~273dp on a 360x800 phone) —
+                          // far more of the screen than the band it is meant to
+                          // be. It is now exactly HomeWallpaper.heightFor tall and
+                          // anchored to the top, so the header row sits on the
+                          // artwork and the carousel sits below it on the page
+                          // surface.
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: HomeWallpaper.heightFor(mediaQuery.size),
                             child: HomeWallpaper(url: wallpaperUrl),
                           ),
                         Column(
@@ -131,8 +142,9 @@ class HomePage extends HookConsumerWidget {
                               )
                             else if (kIsMacOS)
                               const Gap(10),
-                            // The carousel paints no background, so the wallpaper
-                            // shows through behind and around the banner.
+                            // The carousel paints no background of its own, so
+                            // whatever is behind it shows through: now the page
+                            // surface, since the band stops above it.
                             const HomeSpecialsCarousel(),
                           ],
                         ),

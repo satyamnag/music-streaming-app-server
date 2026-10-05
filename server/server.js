@@ -1684,16 +1684,17 @@ const SPECIAL_BANNER_HEIGHT = 540
 // below paints its own surface, so a full-screen image was only ever visible as
 // that strip anyway. The upload is therefore landscape.
 //
-// One exact ratio is deliberately NOT enforced. The band crops with
-// BoxFit.cover, which is forgiving enough that an 8:3 export and a 16:9 export
-// both land with only a small edge crop, so a range admits the artwork people
-// actually have instead of rejecting it over a few percent. 1920x1080 (16:9)
-// is the canonical export size.
+// The band is 8:3 — 0.75 of the height of the 2:1 band it used to be, at the same
+// width — and the admin trims every upload to that shape before sending it here,
+// so 1920x720 is the canonical stored size. One exact ratio is still deliberately
+// NOT enforced at this layer: a client that skips the trim (an older admin page,
+// a direct API call) must still be able to upload the artwork people actually
+// have, and BoxFit.cover crops it acceptably. The range is the tolerance.
 const WALLPAPER_MIN_RATIO = 1.3
 const WALLPAPER_MAX_RATIO = 3.2
-const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1'
+const WALLPAPER_LABEL = 'landscape, 1.3:1 to 3.2:1, stored at 8:3'
 const WALLPAPER_WIDTH = 1920
-const WALLPAPER_HEIGHT = 1080
+const WALLPAPER_HEIGHT = 720
 
 // Serve admin HTML. The page itself gates on the session (checks
 // /api/admin/session on load and shows a login form when unauthenticated).

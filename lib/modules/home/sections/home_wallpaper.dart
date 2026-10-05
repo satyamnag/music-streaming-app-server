@@ -23,15 +23,27 @@ import 'package:sangeet/components/image/universal_image.dart';
 ///
 /// Deliberately NON-interactive: it is wrapped in an `IgnorePointer` so it can
 /// never swallow a tap meant for a card or the carousel beneath it.
+///
+/// Its HEIGHT is [heightFor], and the caller anchors it to the top of the home
+/// header at exactly that height. It used to be painted with `Positioned.fill`,
+/// which stretched the artwork behind the carousel too and made it as tall as the
+/// header and the carousel together — around 273dp, a third of the screen, which
+/// crowded the shelves below it. The widget's own height is the band; only the
+/// caller decides how much of the page it covers.
 class HomeWallpaper extends StatelessWidget {
-  /// Display shape of the band, as width : height. 2:1 leaves room for the
-  /// status bar plus the logo/tagline header row on a phone without pushing the
-  /// first shelf off the fold.
-  static const double bandAspectRatio = 2;
+  /// Display shape of the band, as width : height. 8:3 is 2:1 reduced to 0.75 of
+  /// its height — the band was taking 34% of the viewport and crowding the
+  /// shelves, so it is now exactly three quarters of the height it used to be at
+  /// the same width. 135dp on a 360dp-wide phone.
+  static const double bandAspectRatio = 8 / 3;
 
   /// Never let the band take more than this share of the viewport height, so a
   /// short or landscape-oriented viewport still shows content below it.
-  static const double maxHeightFraction = 0.34;
+  ///
+  /// 0.34 scaled by the same 0.75 as [bandAspectRatio]: both terms of
+  /// [heightFor] move together, so the band is three quarters of its old height
+  /// on EVERY viewport, not just the ones wide enough for the ratio to decide.
+  static const double maxHeightFraction = 0.34 * 0.75;
 
   /// Height the band occupies in a viewport of [size].
   ///

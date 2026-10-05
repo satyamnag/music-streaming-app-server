@@ -63,16 +63,30 @@ void main() {
   });
 
   test('the band keeps its aspect ratio, capped by the viewport', () {
-    // A 400x800 viewport: 400/2 = 200 by ratio, 800 * 0.34 = 272 cap, so the
-    // ratio wins.
-    expect(HomeWallpaper.heightFor(const material.Size(400, 800)), 200);
+    // The band was reduced to 0.75 of its old height at the same width: 2:1
+    // became 8:3, and the viewport cap moved with it. On the reference phone this
+    // is the number the change was asked for — 180dp of artwork became 135dp.
+    expect(
+      HomeWallpaper.heightFor(const material.Size(360, 800)),
+      closeTo(135, 0.001),
+      reason: 'the band must be exactly 0.75x the 180dp it used to be',
+    );
 
-    // A short/landscape viewport: 900/2 = 450 by ratio would eat the screen, so
-    // the 34% cap wins instead.
+    // A 400x800 viewport: 400 / (8/3) = 150 by ratio, 800 * 0.255 = 204 cap, so
+    // the ratio wins.
+    expect(HomeWallpaper.heightFor(const material.Size(400, 800)), 150);
+
+    // A short/landscape viewport: 900 / (8/3) = 337.5 by ratio would eat the
+    // screen, so the cap wins instead.
     expect(
       HomeWallpaper.heightFor(const material.Size(900, 400)),
       closeTo(400 * HomeWallpaper.maxHeightFraction, 0.001),
     );
+
+    // Both terms were scaled by the same 0.75, so the band is three quarters of
+    // its old height whichever term decides — not just where the ratio does.
+    expect(HomeWallpaper.bandAspectRatio, closeTo(2 / 0.75, 0.0001));
+    expect(HomeWallpaper.maxHeightFraction, closeTo(0.34 * 0.75, 0.0001));
   });
 
   testWidgets('an empty url still renders without throwing', (tester) async {
