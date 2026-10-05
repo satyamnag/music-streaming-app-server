@@ -38,7 +38,15 @@ on:
         type: string
         default: "75"
       split_per_abi:
-        description: Split APK per CPU architecture (smaller downloads)
+        description: >-
+          Split APK per CPU architecture (smaller downloads). DOES NOT WORK YET:
+          android/app/build.gradle pins ndk.abiFilters, and Gradle rejects that
+          alongside splits - "Conflicting configuration : 'armeabi-v7a,arm64-v8a,
+          x86_64' in ndk abiFilters cannot be present when splits abi filters are
+          set". It fails in 13 seconds at configuration time, before any compile.
+          Fixing it means making abiFilters conditional in build.gradle, which
+          would touch the Play release's ABI set, so it is left alone; the
+          universal APK already ships arm64-v8a + armeabi-v7a.
         type: boolean
         default: false
       flavor:
