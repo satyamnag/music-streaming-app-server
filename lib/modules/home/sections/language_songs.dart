@@ -104,15 +104,19 @@ class _LanguageSection extends HookConsumerWidget {
               final track = shown[index];
               final imageUrl =
                   track.album.images.smallest(ImagePlaceholder.albumArt);
+
+              // One play action for the card and for its play control: the
+              // language's songs, from this track. Defined once so they cannot
+              // drift.
+              Future<void> play() => ref
+                  .read(audioPlayerProvider.notifier)
+                  .load(group.tracks, initialIndex: index, autoPlay: true);
+
               return HomeTrackCard(
                 track: track,
                 imageUrl: imageUrl,
-                onTap: () async {
-                  await ref.read(audioPlayerProvider.notifier).load(
-                      group.tracks,
-                      initialIndex: index,
-                      autoPlay: true);
-                },
+                onTap: play,
+                onPlay: play,
               );
             },
           ),

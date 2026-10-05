@@ -6,7 +6,6 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
-import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -130,29 +129,23 @@ class SearchPageTracksTab extends HookConsumerWidget {
             )
           else ...[
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: trackGridPadding),
               sliver: SliverGrid.builder(
                 itemCount: shown.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: trackGridCrossAxisCount(context),
-                  // Home-card geometry: the tile presents the card at the home
-                  // rows' fixed width (see HomeCardTile), so the extent comes
-                  // from that width, not from the fluid tile width.
-                  mainAxisExtent: homeCardTileExtent(
-                    context,
-                    withSubtitle: true,
-                  ),
-                  crossAxisSpacing: 6,
-                  mainAxisSpacing: 6,
-                ),
+                // Three cards per row with the minimum padding and gutter (see
+                // trackGridDelegate): the cards fill their tiles, so the tile
+                // width IS the card width and the tile height is the card's
+                // exact height — nothing clips, no dead band.
+                gridDelegate: trackGridDelegate(context),
                 itemBuilder: (context, index) {
                   final track = shown[index];
-                  return HomeCardTile(
-                    child: HomeTrackCard(
-                      track: track,
-                      imageUrl: trackCardImageUrl(track),
-                      onTap: () => playTrack(index),
-                    ),
+                  return HomeTrackCard(
+                    track: track,
+                    imageUrl: trackCardImageUrl(track),
+                    // The card's tap already runs the device/queue flow for
+                    // this track, so the play control does the same.
+                    onTap: () => playTrack(index),
+                    onPlay: () => playTrack(index),
                   );
                 },
               ),

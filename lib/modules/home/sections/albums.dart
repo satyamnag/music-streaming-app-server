@@ -10,6 +10,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
 import 'package:sangeet/pages/home/home_see_all.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A horizontal "Albums" row shown on the home screen. Songs that share the
@@ -93,6 +94,11 @@ class HomeAlbumsSection extends HookConsumerWidget {
                     // playlist) instead of immediately playing the album.
                     context.navigateTo(AlbumRoute(id: album.id, album: album));
                   },
+                  // The card's tap opens the album; the play control plays it
+                  // instead, which is the only thing the circle can mean.
+                  onPlay: () => ref
+                      .read(audioPlayerProvider.notifier)
+                      .load(tracks, autoPlay: true),
                 );
               },
             ),

@@ -133,14 +133,17 @@ class HomeTrackSection extends HookConsumerWidget {
                 final imageUrl =
                     track.album.images.smallest(ImagePlaceholder.albumArt);
 
+                // One play action for the card and for its play control: this
+                // list, from this track. Defined once so they cannot drift.
+                Future<void> play() => ref
+                    .read(audioPlayerProvider.notifier)
+                    .load(tracks, initialIndex: index, autoPlay: true);
+
                 return HomeTrackCard(
                   track: track,
                   imageUrl: imageUrl,
-                  onTap: () async {
-                    await ref
-                        .read(audioPlayerProvider.notifier)
-                        .load(tracks, initialIndex: index, autoPlay: true);
-                  },
+                  onTap: play,
+                  onPlay: play,
                 );
               },
             ),

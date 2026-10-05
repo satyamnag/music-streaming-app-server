@@ -6,6 +6,7 @@ import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// One row of a stats list: the shared home track card — same cover, card shape
 /// and text as the home screen's track rows — with the row's own stat (its play
@@ -47,6 +48,12 @@ class StatsTrackItem extends HookConsumerWidget {
             track: track,
             imageUrl: trackCardImageUrl(track),
             onTap: open,
+            // The row's tap opens the track, so the play control plays it —
+            // the app's usual single-track play (the search results load the
+            // same way). The card gates both through the premium check.
+            onPlay: () => ref
+                .read(audioPlayerProvider.notifier)
+                .load([track], autoPlay: true),
           ),
           // The stat keeps its place at the row's trailing edge; the flexible
           // side is the gap, so a long stat wraps instead of overflowing.

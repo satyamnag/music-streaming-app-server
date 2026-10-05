@@ -6,7 +6,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/select_device_dialog.dart';
-import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -105,19 +104,13 @@ class SearchTracksSection extends HookConsumerWidget {
           Skeletonizer(
             enabled: true,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: trackGridPadding),
               child: GridView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: trackGridCrossAxisCount(context),
-                  mainAxisExtent: homeCardTileExtent(
-                    context,
-                    withSubtitle: true,
-                  ),
-                  crossAxisSpacing: 6,
-                  mainAxisSpacing: 6,
-                ),
+                // Same delegate as the loaded grid below, so the placeholder
+                // tiles are exactly the size of the cards they stand in for.
+                gridDelegate: trackGridDelegate(context),
                 children: const [
                   _SkeletonCell(),
                   _SkeletonCell(),
@@ -129,24 +122,21 @@ class SearchTracksSection extends HookConsumerWidget {
           GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: trackGridCrossAxisCount(context),
-              mainAxisExtent: homeCardTileExtent(
-                context,
-                withSubtitle: true,
-              ),
-              crossAxisSpacing: 6,
-              mainAxisSpacing: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: trackGridPadding),
+            // Three cards per row with the minimum padding and gutter (see
+            // trackGridDelegate): the cards fill their tiles, so the tile width
+            // IS the card width and the tile height is the card's exact
+            // height — nothing clips, no dead band.
+            gridDelegate: trackGridDelegate(context),
             children: [
               for (final (index, track) in shown.indexed)
-                HomeCardTile(
-                  child: HomeTrackCard(
-                    track: track,
-                    imageUrl: trackCardImageUrl(track),
-                    onTap: () => playTrack(index),
-                  ),
+                HomeTrackCard(
+                  track: track,
+                  imageUrl: trackCardImageUrl(track),
+                  // The card's tap already runs the device/queue flow for this
+                  // track, so the play control does the same.
+                  onTap: () => playTrack(index),
+                  onPlay: () => playTrack(index),
                 ),
             ],
           ),
@@ -177,16 +167,14 @@ class _SkeletonCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The loaded grid presents its cards through HomeCardTile (and is sized by
-    // homeCardTileExtent for that width), so the loading cell uses the same
-    // tile to keep the placeholder the same size as the card it stands in for.
-    return HomeCardTile(
-      child: TrackCard(
-        imageUrl: '',
-        title: 'Loading',
-        subtitle: 'Loading',
-        onTap: () {},
-      ),
+    // The loaded grid renders bare TrackCards that fill their tiles (see
+    // trackGridDelegate), so the loading cell is the same bare card: it takes
+    // the same tile size as the card it stands in for.
+    return TrackCard(
+      imageUrl: '',
+      title: 'Loading',
+      subtitle: 'Loading',
+      onTap: () {},
     );
   }
 }

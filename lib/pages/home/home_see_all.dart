@@ -7,7 +7,6 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_card/home_album_card.dart';
-import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -153,53 +152,46 @@ class HomeSeeAllPage extends HookConsumerWidget {
             else ...[
               SliverPadding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: 12 * scale,
+                  horizontal: trackGridPadding,
                   vertical: 4 * scale,
                 ),
                 sliver: SliverGrid.builder(
                   itemCount: isAlbums ? shownAlbums.length : shownTracks.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: trackGridCrossAxisCount(context),
-                    // The tile presents the card at the home rows' own fixed
-                    // width (see HomeCardTile), so the tile height has to come
-                    // from that width and not from the fluid tile width.
-                    // Both branches render a card WITH its subtitle line (see
-                    // HomeAlbumCard/HomeTrackCard), so the tile is sized to the
-                    // card variant that includes it.
-                    mainAxisExtent: homeCardTileExtent(
-                      context,
-                      withSubtitle: true,
-                    ),
-                    crossAxisSpacing: 6,
-                    mainAxisSpacing: 6,
-                  ),
+                  // Three cards per row with the minimum padding and gutter
+                  // (see trackGridDelegate): the cards fill their tiles, so the
+                  // tile width IS the card width and the tile height is the
+                  // card's exact height — nothing clips, no dead band.
+                  gridDelegate: trackGridDelegate(context),
                   itemBuilder: (context, index) {
                     if (isAlbums) {
                       final homeAlbum = shownAlbums[index];
                       final album = homeAlbum.album;
+                      final albumTracks = homeAlbum.tracks;
                       // The shared home album card resolves the album's lock
                       // state and gates its own tap, then opens the album.
-                      return HomeCardTile(
-                        child: HomeAlbumCard(
-                          album: album,
-                          imageUrl:
-                              album.images.smallest(ImagePlaceholder.albumArt),
-                          subtitle: '${homeAlbum.tracks.length} songs',
-                          onTap: () {
-                            context.navigateTo(
-                              AlbumRoute(id: album.id, album: album),
-                            );
-                          },
-                        ),
+                      return HomeAlbumCard(
+                        album: album,
+                        imageUrl:
+                            album.images.smallest(ImagePlaceholder.albumArt),
+                        subtitle: '${albumTracks.length} songs',
+                        onTap: () {
+                          context.navigateTo(
+                            AlbumRoute(id: album.id, album: album),
+                          );
+                        },
+                        // The card's tap opens the album; the play control
+                        // starts it, which is what the circle means here.
+                        onPlay: () => playFrom(0, albumTracks),
                       );
                     }
                     final track = shownTracks[index];
-                    return HomeCardTile(
-                      child: HomeTrackCard(
-                        track: track,
-                        imageUrl: trackCardImageUrl(track),
-                        onTap: () => playFrom(index, filteredTracks),
-                      ),
+                    return HomeTrackCard(
+                      track: track,
+                      imageUrl: trackCardImageUrl(track),
+                      // The card's tap already plays its list from this track,
+                      // so the play control does the same thing.
+                      onTap: () => playFrom(index, filteredTracks),
+                      onPlay: () => playFrom(index, filteredTracks),
                     );
                   },
                 ),

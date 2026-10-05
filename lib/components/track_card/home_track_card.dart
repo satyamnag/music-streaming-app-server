@@ -18,6 +18,11 @@ class HomeTrackCard extends HookConsumerWidget {
   final String imageUrl;
   final VoidCallback onTap;
 
+  /// What the card's play control does. Null (the default) renders no control.
+  /// It runs through the same premium gate as [onTap], so a locked track can
+  /// never be played by tapping the circle instead of the card.
+  final VoidCallback? onPlay;
+
   /// Card width. Defaults to the home rows' fixed [HomeSectionLayout.cardWidth]
   /// box, which is also the cover's width; a grid passes its own tile width.
   final double? width;
@@ -27,6 +32,7 @@ class HomeTrackCard extends HookConsumerWidget {
     required this.track,
     required this.imageUrl,
     required this.onTap,
+    this.onPlay,
     this.width,
   });
 
@@ -44,6 +50,24 @@ class HomeTrackCard extends HookConsumerWidget {
         ? currentTrack.cardTextColor
         : null;
 
+    // Both of the card's tap targets play the track, so both have to clear the
+    // paywall first. One gate for the two of them keeps them from drifting.
+    VoidCallback? gated(VoidCallback? action) {
+      if (action == null) return null;
+      return () async {
+        if (locked) {
+          await PremiumAccess.gateTrackPlay(
+            context: context,
+            ref: ref,
+            track: track,
+            feature: () async => action(),
+          );
+          return;
+        }
+        action();
+      };
+    }
+
     return TrackCard(
       width: width ?? HomeSectionLayout.cardWidth * scale,
       imageUrl: imageUrl,
@@ -52,18 +76,8 @@ class HomeTrackCard extends HookConsumerWidget {
       locked: locked,
       cardBgColor: configured,
       cardTextColor: configuredText,
-      onTap: () async {
-        if (locked) {
-          await PremiumAccess.gateTrackPlay(
-            context: context,
-            ref: ref,
-            track: track,
-            feature: () async => onTap(),
-          );
-          return;
-        }
-        onTap();
-      },
+      onTap: gated(onTap)!,
+      onPlay: gated(onPlay),
     );
   }
 }

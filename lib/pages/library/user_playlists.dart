@@ -12,7 +12,6 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/fallbacks/no_default_metadata_plugin.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_view.dart';
-import 'package:sangeet/components/track_card/home_card_tile.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/string.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -97,6 +96,12 @@ class UserPlaylistsPage extends HookConsumerWidget {
     // The library's collection cards are the same shared home card the home
     // screen's album and track rows render, so the cover, card shape and text
     // match those rows exactly.
+    //
+    // No `onPlay`: a playlist's tracks are only fetched when its page is
+    // opened (metadataPluginPlaylistTracksProvider), so this screen has no
+    // playable list in hand and nothing to hand the card's play control. All
+    // the cards here stay consistent that way instead of only some of them
+    // growing a play button.
     Widget playlistCard(SangeetSimplePlaylistObject playlist) {
       return TrackCard(
         width: HomeSectionLayout.cardWidth * context.theme.scaling,
@@ -194,7 +199,8 @@ class UserPlaylistsPage extends HookConsumerWidget {
               ),
               const SliverGap(8),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: trackGridPadding),
                 sliver: PlaybuttonView(
                   leading: const Expanded(
                     child: Row(
@@ -208,27 +214,18 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   isLoading: userPlaylistsQuery.isLoading,
                   onRequestMore: () {},
                   itemCount: userPlaylists.length,
-                  // Home-card geometry: the grid presents the shared card at
-                  // the home rows' own fixed width (see HomeCardTile), so the
-                  // tile height comes from that width instead of the fluid tile
-                  // width the delegate hands out.
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: trackGridCrossAxisCount(context),
-                    mainAxisExtent: homeCardTileExtent(
-                      context,
-                      withSubtitle: true,
-                    ),
-                    crossAxisSpacing: 6,
-                    mainAxisSpacing: 6,
-                  ),
-                  gridPlaceholder: const HomeCardTile(child: _LoadingCard()),
+                  // Three cards per row with the minimum padding and gutter
+                  // (see trackGridDelegate), and the same padding above, so the
+                  // cards fill their tiles and the tile height is the card's
+                  // exact height — nothing clips, no dead band.
+                  gridDelegate: trackGridDelegate(context),
+                  gridPlaceholder: const _LoadingCard(),
                   listPlaceholder: const Align(
                     alignment: Alignment.centerLeft,
                     child: _LoadingCard(),
                   ),
-                  gridItemBuilder: (context, index) => HomeCardTile(
-                    child: playlistCard(userPlaylists[index]),
-                  ),
+                  gridItemBuilder: (context, index) =>
+                      playlistCard(userPlaylists[index]),
                   listItemBuilder: (context, index) => Align(
                     alignment: Alignment.centerLeft,
                     child: playlistCard(userPlaylists[index]),
