@@ -354,32 +354,16 @@ class TrackCard extends StatelessWidget {
 
     final controlDiameter = HomeSectionLayout.trackPlayButtonDiameter(context);
 
-    /// One title line, optionally sharing its row with the play control. The
-    /// control's room is reserved even when the card has no control, so cards
-    /// with and without one are exactly the same height.
-    Widget titleLine(String text, {required bool withControl}) {
-      final label = Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: cardTitleStyle,
-      );
-      if (!withControl) return label;
-      return Row(
-        children: [
-          Flexible(child: label),
-          Gap(HomeSectionLayout.trackPlayButtonGap * scale),
-          if (play == null)
-            SizedBox(height: controlDiameter, width: controlDiameter)
-          else
-            _CardPlayButton(
-              diameter: controlDiameter,
-              title: title,
-              onPlay: play,
-            ),
-        ],
-      );
-    }
+    /// One title line. The play control does NOT share a text line any more — it
+    /// sits at the card's bottom-right in the row beside this block — so each line
+    /// gets the block's full width, which is what lets long names use the space the
+    /// control used to take.
+    Widget titleLine(String text) => Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: cardTitleStyle,
+        );
 
     /// The fixed two-line title block, split for the width it is ACTUALLY handed.
     ///
@@ -405,28 +389,13 @@ class TrackCard extends StatelessWidget {
             return fits;
           }
 
-          // Line one loses the control and the gap before it when they share it.
-          final besideControl = constraints.maxWidth -
-              ((HomeSectionLayout.trackPlayButtonGap + controlDiameter) * scale);
           final words = title.trim().split(RegExp(r'\s+'));
-          final firstWord = words.first;
-          // One line when the whole name fits beside the control; otherwise the
-          // first word takes line one and every remaining word takes line two.
-          final onOneLine = fitsOneLine(title, besideControl);
+          // A name that fits on one line keeps it; otherwise the first word takes
+          // line one and every remaining word takes line two, ellipsized if even
+          // that is not enough. Never a third line.
+          final onOneLine = fitsOneLine(title, constraints.maxWidth);
           final splits = !onOneLine && words.length > 1;
-          // The control may only share line one when the word it shares it with
-          // leaves it room. For the catalogue names whose first word does not —
-          // eight of 63 at a 110dp tile — the control drops to line two and line
-          // one keeps the full width, because truncating the FRONT of a name to
-          // keep the control up there would lose characters the author typed,
-          // where moving the control never loses any.
-          final controlOnLine1 =
-              onOneLine || fitsOneLine(firstWord, besideControl);
-          // Null when line two has neither text nor a control to carry, so a
-          // one-line name leaves that line blank rather than rendering it empty.
-          final secondLine = splits
-              ? words.skip(1).join(' ')
-              : (controlOnLine1 ? null : '');
+          final secondLine = splits ? words.skip(1).join(' ') : null;
 
           return SizedBox(
             height: HomeSectionLayout.trackTitleBlockHeight(context),
@@ -434,12 +403,8 @@ class TrackCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                titleLine(
-                  onOneLine ? title : firstWord,
-                  withControl: controlOnLine1,
-                ),
-                if (secondLine != null)
-                  titleLine(secondLine, withControl: !controlOnLine1),
+                titleLine(onOneLine ? title : words.first),
+                if (secondLine != null) titleLine(secondLine),
               ],
             ),
           );
@@ -480,23 +445,41 @@ class TrackCard extends StatelessWidget {
     // The track card's control now lives INSIDE [titleBox], sharing one of its
     // two lines, so the card's column is the block alone. The album card keeps
     // its control beside its block.
-    final content = titleLines > 1
-        ? titleBox
-        : play == null
+    // The play control sits at the card's BOTTOM-RIGHT for the track card and the
+    // album card alike — beside the text block, bottom aligned, so it reads as part
+    // of the block rather than as a floating badge. The track card used to place it
+    // at the end of the title's first line; sharing a text line cost that line the
+    // control's width, which is exactly what pushed long first words onto a second
+    // fallback line. Beside the block it costs the title nothing it cannot spare.
+    //
+    // The room is reserved even when the card has NO control (`play == null`), so
+    // cards with and without one stay exactly the same height.
+    final content =
+        play == null && titleLines == 1
             ? titleBox
-            // The album card keeps its control beside the block, bottom aligned,
-            // so it reads as part of the title/subtitle block rather than as a
-            // floating badge.
             : Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(child: titleBox),
-                  Gap(playButtonGap * scale),
-                  _CardPlayButton(
-                    diameter: _playButtonDiameter(context),
-                    title: title,
-                    onPlay: play,
+                  Gap(
+                    (titleLines > 1
+                            ? HomeSectionLayout.trackPlayButtonGap
+                            : playButtonGap) *
+                        scale,
                   ),
+                  if (play == null)
+                    SizedBox(
+                      height: controlDiameter,
+                      width: controlDiameter,
+                    )
+                  else
+                    _CardPlayButton(
+                      diameter: titleLines > 1
+                          ? controlDiameter
+                          : _playButtonDiameter(context),
+                      title: title,
+                      onPlay: play,
+                    ),
                 ],
               );
 

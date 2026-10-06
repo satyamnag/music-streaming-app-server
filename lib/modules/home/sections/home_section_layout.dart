@@ -239,21 +239,24 @@ abstract final class HomeSectionLayout {
   /// 30dp control the album/playlist cards still render
   /// (`TrackCard.playButtonSize`).
   ///
-  /// The control shares the title's FIRST line, right-aligned, so on a card
-  /// whose name needs two lines it sits beside the first word rather than on a
-  /// line of its own. [trackTitleBlockHeight] is derived FROM this diameter, so
-  /// a control taller than a line box simply makes the title block taller on
-  /// every card alike and can never overflow the block it lives in.
+  /// The control sits at the card's BOTTOM-RIGHT, in the same row as the title
+  /// block and bottom-aligned with it — exactly how the album card arranges its
+  /// own control. That row is why [trackPlayButtonClearance] exists: the control
+  /// must never be the taller child, or it would add its own height to the card
+  /// and break the "every card is the same height" guarantee.
   static const double trackPlayButtonSize = 22.5;
 
-  /// Gap between a title line and the play control sharing that line, at scale
-  /// == 1. The same number as `TrackCard.playButtonGap`, which the album card
-  /// uses inside its own row — these two files both name the gap they render
-  /// with, so neither card's geometry has to reach into the other's.
-  ///
-  /// Together with the control's diameter it is also what the control costs the
-  /// line it shares: see [trackTitleWidthBesideControl].
+  /// Gap between the title block and the play control beside it, at scale == 1.
+  /// The same number as `TrackCard.playButtonGap`, which the album card uses
+  /// inside its own row — these two files both name the gap they render with, so
+  /// neither card's geometry has to reach into the other's.
   static const double trackPlayButtonGap = 4;
+
+  /// How much shorter than the title block the track control is kept, at scale
+  /// == 1. Same role as `TrackCard.playButtonClearance`: the control can never be
+  /// the taller child of the card's row, so it can never add a pixel to the
+  /// height derived in [twoLineTrackCardHeight].
+  static const double trackPlayButtonClearance = 4;
 
   /// One rendered line box of the two-line track title, in logical pixels.
   ///
@@ -271,37 +274,51 @@ abstract final class HomeSectionLayout {
   /// The height of the box the track title renders in — the SAME number the card
   /// gives it, because both call this.
   ///
-  /// The first title line, then one more line box. The first line is at least
-  /// [trackPlayButtonDiameter] tall because the play control shares that line;
-  /// the second is a plain line box, because only text ever goes there. Line
-  /// boxes are rounded UP: the engine rounds a rendered line box to whole logical
-  /// pixels, so a fractional line (14 * 1.2 = 16.8) would otherwise leave a
-  /// reserve up to a pixel short of the text it holds. Rounding keeps
-  /// `reserve >= rendered text` at every text scale, so the title can never be
-  /// clipped for lack of room; the cost is at most one pixel per line, and every
+  /// Two whole line boxes, each rounded UP. The engine rounds a rendered line box
+  /// to whole logical pixels, so a fractional line (14 * 1.2 = 16.8) would
+  /// otherwise leave a reserve up to a pixel short of the text it holds. Rounding
+  /// keeps `reserve >= rendered text` at every text scale, so the title can never
+  /// be clipped for lack of room; the cost is at most one pixel per line, and every
   /// card pays it identically, which is what keeps all the cards the same height.
+  ///
+  /// The play control does NOT live in this box: it sits beside the block, in the
+  /// card's row, so the block is purely the two title lines.
   static double trackTitleBlockHeight(BuildContext context) {
-    final line = trackTitleLineBox(context).ceilToDouble();
-    return line + math.max(line, trackPlayButtonDiameter(context));
+    return 2 * trackTitleLineBox(context).ceilToDouble();
   }
 
-  /// Diameter of the track card's play control: 0.75 x the album card's, scaled.
+  /// Diameter of the track card's play control, derived so it can never be the
+  /// taller child of the card's row:
   ///
-  /// Nothing constrains it against the title block any more. The block is derived
-  /// FROM this value by [trackTitleBlockHeight], so a control taller than a line
-  /// box makes the block taller on every card alike instead of overflowing it.
-  static double trackPlayButtonDiameter(BuildContext context) =>
-      trackPlayButtonSize * Theme.of(context).scaling;
+  ///   control <= block - clearance < block
+  ///
+  /// where the block is the fixed two-line title box above. The `min` with
+  /// [trackPlayButtonSize] means the ordinary case renders exactly 0.75 x the
+  /// album card's control; the clearance only bites at a text scale so small — or a
+  /// theme so tight — that the title block is shorter than the control.
+  static double trackPlayButtonDiameter(BuildContext context) {
+    final scale = Theme.of(context).scaling;
+    final block = trackTitleBlockHeight(context);
+    return math.max(
+      0,
+      math.min(
+        trackPlayButtonSize * scale,
+        block - (trackPlayButtonClearance * scale),
+      ),
+    );
+  }
 
   /// Exact height of the TRACK card whose square cover is [coverWidth] wide: the
-  /// cover, the padded title block and the card's bottom padding.
+  /// cover, the padded title/control row and the card's bottom padding.
   ///
   /// Every term is either a constant or a value the card itself computes through
-  /// the helpers above, so a one-word title, a one-line title and a two-line
-  /// title produce exactly the same card. The title's box is a fixed
-  /// [trackTitleBlockHeight] whichever way the text wraps, the play control lives
-  /// INSIDE that block beside the first line, and the room the control takes is
-  /// reserved whether or not the card has one.
+  /// the helpers above, so a one-word title, a one-line title and a two-line title
+  /// produce exactly the same card: the title's box is a fixed
+  /// [trackTitleBlockHeight] whichever way the text wraps, and the control beside
+  /// it is clamped by [trackPlayButtonDiameter] to be shorter than that block, so
+  /// the row is always the block. The `max` is written out anyway rather than
+  /// assumed, so the derivation stays correct even if those constants are ever
+  /// retuned to make the control the taller child.
   static double twoLineTrackCardHeight(
     BuildContext context,
     double coverWidth,
@@ -309,7 +326,10 @@ abstract final class HomeSectionLayout {
     final scale = Theme.of(context).scaling;
     return coverWidth +
         (cardTextGap * scale) +
-        trackTitleBlockHeight(context) +
+        math.max(
+          trackTitleBlockHeight(context),
+          trackPlayButtonDiameter(context),
+        ) +
         (cardPadding * scale);
   }
 

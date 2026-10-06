@@ -5,13 +5,15 @@
 //   * the name gets at most TWO lines and never a third;
 //   * line one holds the first word and line two holds the rest;
 //   * a name short enough to fit on one line keeps its single line;
-//   * the play control is right-aligned on line ONE, and only drops to line two
-//     when the first word would not fit beside it;
-//   * every card is EXACTLY the same height, whatever the name does.
+//   * the play control is FIXED AT THE CARD'S BOTTOM-RIGHT CORNER, beside the
+//     title block and bottom-aligned with it, exactly like the album card — it
+//     does not share a text line, so it costs the title no width;
+//   * every card is EXACTLY the same height, whatever the name does and whether
+//     or not it has a control.
 //
 // These are render-box assertions against the real widget, so a change to the
-// measuring rule, the split rule or the reserved block fails here rather than
-// only being visible as a clipped name on a device.
+// measuring rule, the split rule or the reserved block fails here rather than only
+// being visible as a clipped name on a device.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/assets.gen.dart';
@@ -30,8 +32,8 @@ const List<String> _names = <String>[
   'Niluvadu Manasu', // two words, wraps under natural wrapping
   'Bhadradri Ramayya Nidra Levayya', // five words, line two overflows
   'Vandanam Sreeraama! Inakula Soma', // the longest name in the catalogue
-  'Sooryavamsha Ratna', // first word too wide to sit beside the control
-  'Haaratulettare Sreeraamuniki', // first word too wide, 14 characters
+  'Sooryavamsha Ratna', // a wide FIRST word: it must not be truncated
+  'Haaratulettare Sreeraamuniki', // a 14-character first word
 ];
 
 Widget _harness(Widget child) {
@@ -89,9 +91,8 @@ void main() {
       heights[name] = tester.getSize(find.byType(TrackCard)).height;
     }
 
-    final distinct = heights.values.toSet();
     expect(
-      distinct.length,
+      heights.values.toSet().length,
       1,
       reason: 'all cards must be the same height, got $heights',
     );
@@ -105,73 +106,75 @@ void main() {
     );
   });
 
-  testWidgets('the reserved block and the control keep their sizes',
-      (tester) async {
+  testWidgets('the control is 0.75x the album control', (tester) async {
     await tester.pumpWidget(_harness(_card('Niluvadu Manasu')));
     final context = tester.element(find.byType(TrackCard));
-
-    // The control is still 0.75x the album card's 30dp.
-    expect(
-      tester.getSize(_controlFor('Niluvadu Manasu')).width,
-      closeTo(HomeSectionLayout.trackPlayButtonDiameter(context), 0.01),
-    );
     expect(
       HomeSectionLayout.trackPlayButtonDiameter(context),
       closeTo(22.5, 0.01),
     );
-  });
-
-  testWidgets('the control sits on line one when the first word fits beside it',
-      (tester) async {
-    // "Maya" is deliberately short. `flutter test` renders with a fixed-width
-    // fallback font whose every glyph is one em wide, so a first word that fits
-    // beside the control under Roboto on a device can still be "too wide" here.
-    // Four characters fit under either font, which keeps this assertion about the
-    // LAYOUT rather than about the test font's metrics.
-    const name = 'Maya Kadali';
-    await tester.pumpWidget(_harness(_card(name)));
-    final context = tester.element(find.byType(TrackCard));
-
-    final cardTop = tester.getTopLeft(find.byType(TrackCard)).dy;
-    final blockTop = cardTop +
-        _tile +
-        (HomeSectionLayout.cardTextGap * Theme.of(context).scaling);
-    final lineBox = HomeSectionLayout.trackTitleLineBox(context);
-    // Line one is as tall as the control, which is taller than a text line.
-    final diameter = HomeSectionLayout.trackPlayButtonDiameter(context);
-
-    final controlTop = tester.getTopLeft(_controlFor(name)).dy;
     expect(
-      controlTop,
-      closeTo(blockTop, 0.5),
-      reason: 'a short first word must leave the control on line one',
-    );
-    expect(
-      controlTop,
-      lessThan(blockTop + math_max(lineBox, diameter)),
+      tester.getSize(_controlFor('Niluvadu Manasu')).width,
+      closeTo(HomeSectionLayout.trackPlayButtonDiameter(context), 0.01),
     );
   });
 
-  testWidgets('the control drops to line two when the first word is too wide',
+  testWidgets('the control is pinned to the card BOTTOM-RIGHT corner',
       (tester) async {
-    // "Sooryavamsha" alone is ~93dp against the ~75dp line one has beside a
-    // 22.5dp control, so the control must move rather than truncate the word.
-    const name = 'Sooryavamsha Ratna';
+    const name = 'Niluvadu Manasu';
     await tester.pumpWidget(_harness(_card(name)));
     final context = tester.element(find.byType(TrackCard));
+    final scale = Theme.of(context).scaling;
 
-    final cardTop = tester.getTopLeft(find.byType(TrackCard)).dy;
-    final blockTop = cardTop +
+    final card = tester.getRect(find.byType(TrackCard));
+    final control = tester.getRect(_controlFor(name));
+
+    // Bottom: flush with the title block's bottom edge, which is the card's
+    // content bottom.
+    final blockTop = card.top +
         _tile +
-        (HomeSectionLayout.cardTextGap * Theme.of(context).scaling);
-    final lineBox = HomeSectionLayout.trackTitleLineBox(context);
-
-    final controlTop = tester.getTopLeft(_controlFor(name)).dy;
+        (HomeSectionLayout.cardTextGap * scale);
+    final blockBottom =
+        blockTop + HomeSectionLayout.trackTitleBlockHeight(context);
     expect(
-      controlTop,
-      greaterThanOrEqualTo(blockTop + lineBox - 0.5),
-      reason: 'a first word too wide for line one pushes the control to line two',
+      control.bottom,
+      closeTo(blockBottom, 0.5),
+      reason: 'the control must sit on the block bottom, not float above it',
     );
+
+    // Right: the card's right edge less the card's own text inset.
+    final inset = HomeSectionLayout.trackCardTextPadding * scale;
+    expect(
+      control.right,
+      closeTo(card.right - inset, 0.5),
+      reason: 'the control must be flush with the card right edge',
+    );
+
+    // And it must be INSIDE the bottom half of the card — the placement is the
+    // bottom corner, not the middle of the text block.
+    expect(control.bottom, greaterThan(card.top + _tile));
+  });
+
+  testWidgets('a wide first word is NOT truncated by the control',
+      (tester) async {
+    // The reason the control moved off the text line: 8 of the catalogue's first
+    // words are 76-93dp wide, and a 110dp tile only left ~75dp once the control
+    // shared the line, which truncated the front of those names. Beside the block
+    // the whole line is available, so the first word must render in full.
+    const name = 'Haaratulettare Sreeraamuniki';
+    await tester.pumpWidget(_harness(_card(name)));
+    expect(tester.takeException(), isNull);
+
+    // Both the first word and the remainder are rendered as separate Text widgets
+    // with no ellipsis on the first, i.e. it is given the block's full width.
+    final texts = tester
+        .widgetList<Text>(find.descendant(
+          of: find.byType(TrackCard),
+          matching: find.byType(Text),
+        ))
+        .toList();
+    expect(texts.any((t) => t.data == 'Haaratulettare'), isTrue,
+        reason: 'the first word must be rendered whole');
   });
 
   testWidgets('a card without a control is the same height as one with it',
@@ -208,6 +211,3 @@ void main() {
     }
   });
 }
-
-/// Local helper so the assertions above read the way the layout does.
-double math_max(double a, double b) => a > b ? a : b;
