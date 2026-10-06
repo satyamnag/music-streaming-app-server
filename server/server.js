@@ -1512,6 +1512,21 @@ function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
   return { row }
 }
 
+// The upsert payload for `featured_playlists` must ALWAYS carry a title.
+// `title` is `NOT NULL` with no default, and PostgreSQL enforces NOT NULL on
+// the tuple PROPOSED for insertion even when `ON CONFLICT DO UPDATE` ends up
+// updating an existing row (verified against Postgres: an icon-only payload
+// fails with `null value in column "title" ... violates not-null constraint`
+// on an existing row too). So when the payload omits a title and the row
+// already exists, carry the existing title through — a content no-op, but it
+// keeps the insert proposal constraint-valid on every branch.
+function ensureFeaturedTitle(row, existing) {
+  if (!('title' in row) && existing && typeof existing.title === 'string') {
+    row.title = existing.title
+  }
+  return row
+}
+
 // Admin: create or update one featured playlist (upsert by id).
 app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next) => {
   try {
@@ -1527,17 +1542,22 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
     // specials endpoint, whose banner upload works the same way. A lookup
     // failure keeps requireTitle=true so the fail-closed default is unchanged.
     let requireTitle = true
+    let existing = null
     try {
-      const { data: existing } = await supabase
+      const { data } = await supabase
         .from('featured_playlists')
-        .select('id')
+        .select('id, title')
         .eq('id', id)
         .maybeSingle()
+      existing = data || null
       if (existing) requireTitle = false
     } catch (_) { /* keep requireTitle=true */ }
     const { error: payloadError, row } = readFeaturedPlaylistPayload(req.body || {}, { requireTitle })
     if (payloadError) return res.status(400).json({ error: payloadError })
     if (Object.keys(row).length === 0) return res.status(400).json({ error: 'nothing to update' })
+    // Carry the existing title into the upsert when the payload omits it (icon
+    // upload / remove-icon only send { icon_url }) — see ensureFeaturedTitle.
+    ensureFeaturedTitle(row, existing)
 
     row.updated_at = new Date().toISOString()
     const { data, error } = await supabase

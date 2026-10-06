@@ -67,6 +67,11 @@ const readFeaturedPlaylistPayload = loadFunction(
   'readFeaturedPlaylistPayload',
 )
 
+const ensureFeaturedTitle = loadFunction(
+  readFileSync(SERVER_JS, 'utf8'),
+  'ensureFeaturedTitle',
+)
+
 test('an icon-only payload is rejected when the row would be CREATED', () => {
   // Creation without a name must still fail loudly (fail-closed default).
   const result = readFeaturedPlaylistPayload({ icon_url: 'https://cdn/x.webp' })
@@ -104,4 +109,45 @@ test('title and icon_url survive a partial update together', () => {
   )
   assert.equal(result.error, undefined)
   assert.deepEqual(result.row, { title: 'Bhajans', icon_url: 'https://cdn/x.webp' })
+})
+
+// -----------------------------------------------------------------
+// ensureFeaturedTitle — the upsert payload must always carry a title,
+// because featured_playlists.title is NOT NULL and PostgreSQL checks that
+// constraint on the proposed tuple even when ON CONFLICT updates an
+// existing row (proven against a real Postgres build).
+// -----------------------------------------------------------------
+
+test('an icon-only row carries the existing title through', () => {
+  const row = ensureFeaturedTitle({ icon_url: 'https://cdn/x.webp' }, { id: 'krishna', title: 'Krishna' })
+  assert.deepEqual(row, { icon_url: 'https://cdn/x.webp', title: 'Krishna' })
+})
+
+test('an icon-removal row (icon_url null) carries the existing title through', () => {
+  const row = ensureFeaturedTitle({ icon_url: null }, { id: 'krishna', title: 'Krishna' })
+  assert.deepEqual(row, { icon_url: null, title: 'Krishna' })
+})
+
+test('a provided title is NEVER overwritten by the carried one', () => {
+  const row = ensureFeaturedTitle({ title: 'New Name', icon_url: 'u' }, { id: 'krishna', title: 'Old Name' })
+  assert.deepEqual(row, { title: 'New Name', icon_url: 'u' })
+})
+
+test('no existing row means nothing is carried (create path still needs title)', () => {
+  const row = ensureFeaturedTitle({ icon_url: 'u' }, null)
+  assert.deepEqual(row, { icon_url: 'u' })
+  const row2 = ensureFeaturedTitle({ icon_url: 'u' }, undefined)
+  assert.deepEqual(row2, { icon_url: 'u' })
+})
+
+test('an existing row without a string title is not trusted', () => {
+  const row = ensureFeaturedTitle({ icon_url: 'u' }, { id: 'x' })
+  assert.deepEqual(row, { icon_url: 'u' })
+})
+
+test('an existing empty-string title is carried (still satisfies NOT NULL)', () => {
+  // '' is not NULL, so it keeps the insert proposal constraint-valid while
+  // being a content no-op (the DB already holds '').
+  const row = ensureFeaturedTitle({ icon_url: 'u' }, { id: 'x', title: '' })
+  assert.deepEqual(row, { icon_url: 'u', title: '' })
 })
