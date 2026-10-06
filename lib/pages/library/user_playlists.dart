@@ -20,6 +20,7 @@ import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
+import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
 
@@ -97,12 +98,17 @@ class UserPlaylistsPage extends HookConsumerWidget {
     // screen's album and track rows render, so the cover, card shape and text
     // match those rows exactly.
     //
-    // No `onPlay`: a playlist's tracks are only fetched when its page is
-    // opened (metadataPluginPlaylistTracksProvider), so this screen has no
-    // playable list in hand and nothing to hand the card's play control. All
-    // the cards here stay consistent that way instead of only some of them
-    // growing a play button.
-    Widget playlistCard(SangeetSimplePlaylistObject playlist) {
+    // `onPlay` is supplied only where this screen actually holds a playable list.
+    // A saved playlist's tracks are not fetched until its page is opened
+    // (metadataPluginPlaylistTracksProvider), so those cards have nothing to hand
+    // a play control and stay control-less — all of them alike, rather than only
+    // some growing a button. LIKED SONGS is different: its tracks are already in
+    // hand, so its card gets the same bottom-right control every other track
+    // surface has, and tapping it plays the liked list from the first song.
+    Widget playlistCard(
+      SangeetSimplePlaylistObject playlist, {
+      VoidCallback? onPlay,
+    }) {
       return TrackCard(
         width: HomeSectionLayout.cardWidth * context.theme.scaling,
         imageUrl: playlist.images.from200PxTo300PxOrSmallestImage(
@@ -110,6 +116,7 @@ class UserPlaylistsPage extends HookConsumerWidget {
         ),
         title: playlist.name,
         subtitle: playlist.description.unescapeHtml().cleanHtml(),
+        onPlay: onPlay,
         onTap: () {
           context.navigateTo(
             PlaylistRoute(id: playlist.id, playlist: playlist),
@@ -183,7 +190,18 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   // cover's size instead of stretching it to the page width.
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: playlistCard(likedTracksPlaylist),
+                    child: playlistCard(
+                      likedTracksPlaylist,
+                      // The liked list is already in hand, so its card gets the
+                      // play control too. Guarded on emptiness because there is
+                      // nothing to play (and nothing to gate) with no songs.
+                      onPlay: (likedSongsQuery.asData?.value.isNotEmpty ?? false)
+                          ? () => ref.read(audioPlayerProvider.notifier).load(
+                                likedSongsQuery.asData!.value,
+                                autoPlay: true,
+                              )
+                          : null,
+                    ),
                   ),
                 ),
               ),
