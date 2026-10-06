@@ -1,15 +1,18 @@
 import 'dart:math' as math;
 
+import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/modules/home/sections/featured_playlists.dart';
-import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// The row of round "Featured Playlist" chips shown under the home carousel,
 /// matching the reference design: a colored circle with the admin's icon inside
-/// and the name underneath. Tapping a chip plays that chip's tracks.
+/// and the name underneath. Tapping a chip opens that deity's playlist screen —
+/// its tracks in the same cards the home shelves use — instead of starting
+/// playback immediately; playing is one tap further, on a card.
 ///
 /// Every chip is admin-defined. Its icon is the image the admin uploaded
 /// (`icon_url`); if there is none, or it fails to load, the chip falls back to
@@ -46,7 +49,7 @@ class FeaturedPlaylistChips extends HookConsumerWidget {
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.only(top: 10 * scale, bottom: 4 * scale),
+        padding: EdgeInsets.only(top: 2 * scale, bottom: 4 * scale),
         child: SizedBox(
           height: (chipDiameter + 30) * scale,
           child: ListView.separated(
@@ -58,12 +61,14 @@ class FeaturedPlaylistChips extends HookConsumerWidget {
               final chip = chips[index];
               return _FeaturedChip(
                 chip: chip,
-                onTap: () async {
-                  await ref.read(audioPlayerProvider.notifier).load(
-                        chip.tracks,
-                        initialIndex: 0,
-                        autoPlay: true,
-                      );
+                onTap: () {
+                  // A chip is the door to that deity's playlist: tapping it
+                  // opens the full-screen playlist (its tracks rendered with
+                  // the same cards the home shelves use) rather than starting
+                  // playback on the spot.
+                  context.navigateTo(
+                    FeaturedPlaylistRoute(id: chip.id),
+                  );
                 },
               );
             },
@@ -102,7 +107,7 @@ class _FeaturedChip extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Play ${chip.title}',
+      label: 'Open ${chip.title} playlist',
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,

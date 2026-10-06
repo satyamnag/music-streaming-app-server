@@ -252,10 +252,12 @@ class _PlainVariantBlock extends StatelessWidget {
 
     final rows = <({String label, String text})>[
       (label: 'Telugu', text: variant.te),
-      (label: 'English (Translation)', text: variant.en),
-      (label: 'Hindi (Translation)', text: variant.hi),
+      // Transliteration comes before Translation: a listener reads the
+      // original script, then how it sounds, then what it means.
       (label: 'English (Transliteration)', text: variant.enTr),
+      (label: 'English (Translation)', text: variant.en),
       (label: 'Hindi (Transliteration)', text: variant.hiTr),
+      (label: 'Hindi (Translation)', text: variant.hi),
     ].where((row) => row.text.trim().isNotEmpty).toList();
 
     if (rows.isEmpty) {

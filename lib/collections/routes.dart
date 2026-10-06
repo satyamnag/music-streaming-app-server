@@ -33,6 +33,10 @@ class AppRouter extends RootStackRouter {
               page: HomeSeeAllRoute.page,
             ),
             AutoRoute(
+              path: "featured-playlist/:id",
+              page: FeaturedPlaylistRoute.page,
+            ),
+            AutoRoute(
               path: "search",
               page: SearchRoute.page,
             ),

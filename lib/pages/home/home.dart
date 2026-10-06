@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
+import 'package:sangeet/collections/fonts.gen.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
@@ -71,7 +72,12 @@ class HomePage extends HookConsumerWidget {
     final headerColor =
         hasWallpaper ? Colors.white : theme.colorScheme.foreground;
     final headerShadows = hasWallpaper
-        ? const [Shadow(color: Color(0xCC000000), blurRadius: 6)]
+        ? const [
+            Shadow(
+                color: Color(0xCC000000),
+                blurRadius: 5,
+                offset: Offset(0, 1.5)),
+          ]
         : const <Shadow>[];
 
     return PopScope(
@@ -166,20 +172,20 @@ class HomePage extends HookConsumerWidget {
                 const SliverGap(2),
                 // Collapses to nothing when no chip has matching tracks.
                 const FeaturedPlaylistChips(),
-                // ONE slot below that: Recently Played when there is any, otherwise
-                // Albums. They are mutually exclusive here so the home screen never
-                // opens with two overlapping shelves of the same covers, and a
-                // first-time install with no history still leads with Albums rather
-                // than an empty gap where Recently Played would be.
-                if (recentlyPlayed.isEmpty)
-                  ...switch (sectionsAsync) {
-                    AsyncData(value: final sections) => [
-                        HomeAlbumsSection(albums: sections.albums),
-                      ],
-                    _ => [const HomeAlbumsSection(albums: [])],
-                  }
-                else
+                // Recently Played sits right under the chips when the listener
+                // has history; Albums is ALWAYS rendered beneath it — below
+                // Recently Played when there is history, directly under Featured
+                // Playlists when there is not. Albums is the catalogue's front
+                // shelf and must never vanish, so the condition only decides
+                // whether Recently Played takes the slot above it.
+                if (recentlyPlayed.isNotEmpty)
                   const HomeRecentlyPlayedTracksSection(),
+                ...switch (sectionsAsync) {
+                  AsyncData(value: final sections) => [
+                      HomeAlbumsSection(albums: sections.albums),
+                    ],
+                  _ => [const HomeAlbumsSection(albums: [])],
+                },
                 const HomePlaylistsSection(),
                 ...switch (sectionsAsync) {
                   AsyncData(value: final sections) => [
@@ -329,6 +335,12 @@ class _HomeHeaderRow extends StatelessWidget {
           // the row has. Scaling down keeps the whole name at every width, and
           // only scales when it must, so nothing changes when there is room.
           Expanded(
+            // scaleDown restores the brand name to its fixed 30px Cookie size —
+            // the styling earlier builds used — and only shrinks it, as a last
+            // resort, on a screen so narrow that the row physically cannot hold
+            // it: never cropped, never truncated, never wrapped. The scale is
+            // exactly 1.0 whenever the name fits, so normal phones render the
+            // name at its full, untouched size.
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -336,9 +348,10 @@ class _HomeHeaderRow extends StatelessWidget {
                 'Soulful Bhakti',
                 maxLines: 1,
                 style: TextStyle(
-                  fontFamily: "Cookie",
+                  fontFamily: FontFamily.cookie,
                   fontSize: 30,
                   letterSpacing: 1.8,
+                  fontWeight: FontWeight.w500,
                   color: color,
                   shadows: shadows,
                 ),

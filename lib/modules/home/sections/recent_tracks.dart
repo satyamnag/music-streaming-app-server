@@ -6,6 +6,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/track_card/home_card_row.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -92,107 +93,90 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: theme.typography.h4.copyWith(
-                        color: theme.colorScheme.foreground,
-                      ),
-                      child: Text(context.l10n.recently_played),
+        child: HomeCardRow(
+          // These are TRACK cards: two reserved title lines and no album line,
+          // so the row is sized to that card — exactly like the "Newest
+          // Arrivals" and "Top Trending" rows, and the same shared layout the
+          // Albums row uses.
+          height: HomeSectionLayout.twoLineTrackRowHeight(context),
+          header: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DefaultTextStyle(
+                    style: theme.typography.h4.copyWith(
+                      color: theme.colorScheme.foreground,
                     ),
+                    child: Text(context.l10n.recently_played),
                   ),
-                  Tooltip(
-                    tooltip: TooltipContainer(
-                      child: Text(context.l10n.recently_played),
-                    ).call,
-                    child: IconButton.ghost(
-                      size: ButtonSize.small,
-                      icon: const Icon(SangeetIcons.clock, size: 18),
-                      onPressed: () {
-                        context.navigateTo(const RecentlyPlayedRoute());
-                      },
-                    ),
+                ),
+                if (tracks.length > 5)
+                  IconButton.ghost(
+                    size: ButtonSize.small,
+                    icon: const Icon(SangeetIcons.angleRight, size: 18),
+                    onPressed: () {
+                      context.navigateTo(const RecentlyPlayedRoute());
+                    },
                   ),
-                ],
-              ),
+              ],
             ),
-            Gap(8 * scale),
-            SizedBox(
-              height: HomeSectionLayout.rowHeight(
-                context,
-                withSubtitle: false,
-              ),
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
-                scrollDirection: Axis.horizontal,
-                itemCount: shown.length + (hasMore ? 1 : 0),
-                separatorBuilder: (_, __) => Gap(6 * scale),
-                itemBuilder: (context, index) {
-                  if (hasMore && index == shown.length) {
-                    return _SeeMoreCard(
-                      onTap: () {
-                        visibleCount.value +=
-                            HomeRecentlyPlayedTracksSection.pageSize;
-                      },
-                    );
-                  }
-                  final track = shown[index];
-                  final historyTrack = catalogByTrackId[track.id];
-                  final images = track.album.images.isNotEmpty
-                      ? track.album.images
-                      : (historyTrack?.album.images ?? const []);
-                  final imageUrl = images.smallest(ImagePlaceholder.albumArt);
-
-                  // Play the LIVE CATALOGUE object, not the history snapshot.
-                  //
-                  // History rows are snapshots taken when the track was last
-                  // played, so they carry only what the row stored — none of the
-                  // admin-configured fields (the mini player background, the card
-                  // colours). Loading them made the mini player fall back to the
-                  // theme even though the track HAD a colour set in the admin,
-                  // which is exactly the "background does not work from Recently
-                  // Played" bug. The catalogue is already fetched above for the
-                  // cover art, so this costs nothing; the history object stays the
-                  // fallback for a track that is no longer in the catalogue.
-                  final playable = [
-                    for (final t in tracks) catalogByTrackId[t.id] ?? t,
-                  ];
-
-                  // The SHARED track card, so Recently Played gets the same
-                  // bottom-right play control, typography, admin colours and
-                  // two-line name as every other shelf. This used to be a
-                  // hand-rolled lookalike with no play control at all, which is
-                  // exactly why the icon was missing on this one shelf.
-                  //
-                  // The CATALOGUE object is used for the card as well as for
-                  // playback, so a track's admin-configured colours apply here the
-                  // same way they do everywhere else.
-                  final cardTrack = playable[index];
-                  void playThis() => ref
-                      .read(audioPlayerProvider.notifier)
-                      .load(playable, initialIndex: index, autoPlay: true);
-
-                  // No explicit premium gate: HomeTrackCard gates BOTH of its tap
-                  // targets through PremiumAccess itself, so gating here as well
-                  // would be the same check twice.
-                  return HomeTrackCard(
-                    track: cardTrack,
-                    imageUrl: imageUrl,
-                    width: HomeSectionLayout.cardWidth * scale,
-                    onTap: playThis,
-                    onPlay: playThis,
-                  );
+          ),
+          itemCount: shown.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (hasMore && index == shown.length) {
+              return _SeeMoreCard(
+                onTap: () {
+                  visibleCount.value +=
+                      HomeRecentlyPlayedTracksSection.pageSize;
                 },
-              ),
-            ),
-          ],
+              );
+            }
+            final track = shown[index];
+            final historyTrack = catalogByTrackId[track.id];
+            final images = track.album.images.isNotEmpty
+                ? track.album.images
+                : (historyTrack?.album.images ?? const []);
+            final imageUrl = images.smallest(ImagePlaceholder.albumArt);
+
+            // Play the LIVE CATALOGUE object, not the history snapshot.
+            //
+            // History rows are snapshots taken when the track was last
+            // played, so they carry only what the row stored — none of the
+            // admin-configured fields (the mini player background, the card
+            // colours). Loading them made the mini player fall back to the
+            // theme even though the track HAD a colour set in the admin,
+            // which is exactly the "background does not work from Recently
+            // Played" bug. The catalogue is already fetched above for the
+            // cover art, so this costs nothing; the history object stays the
+            // fallback for a track that is no longer in the catalogue.
+            final playable = [
+              for (final t in tracks) catalogByTrackId[t.id] ?? t,
+            ];
+
+            // The SHARED track card, so Recently Played gets the same
+            // bottom-right play control, typography, admin colours and
+            // two-line name as every other shelf, and the header is the same
+            // h4 + "see all" arrow the Albums and Track rows carry.
+            //
+            // The CATALOGUE object is used for the card as well as for
+            // playback, so a track's admin-configured colours apply here the
+            // same way they do everywhere else.
+            final cardTrack = playable[index];
+            void playThis() => ref
+                .read(audioPlayerProvider.notifier)
+                .load(playable, initialIndex: index, autoPlay: true);
+
+            // No explicit premium gate: HomeTrackCard gates BOTH of its tap
+            // targets through PremiumAccess itself, so gating here as well
+            // would be the same check twice.
+            return HomeTrackCard(
+              track: cardTrack,
+              imageUrl: imageUrl,
+              onTap: playThis,
+              onPlay: playThis,
+            );
+          },
         ),
       ),
     );

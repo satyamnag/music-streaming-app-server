@@ -27,25 +27,27 @@ class LyricLanguageDef {
 
 /// The five supported lyric languages, in display order. Keys map 1:1 to the
 /// [LyricLanguages] constants and therefore to the server's `synced_lyrics_*`
-/// columns.
+/// columns. Transliteration comes before its translation: a listener reads the
+/// original script, then how it sounds, then what it means — the same order
+/// the plain-lyrics blocks use.
 const List<LyricLanguageDef> kLyricLanguages = [
   LyricLanguageDef(LyricLanguages.te, 'Telugu', Color(0xFFD4AF37)),
-  LyricLanguageDef(
-    LyricLanguages.en,
-    'English Translation',
-    Color(0xFF22C55E),
-  ),
-  LyricLanguageDef(LyricLanguages.hi, 'Hindi Translation', Color(0xFF43A047)),
   LyricLanguageDef(
     LyricLanguages.enTr,
     'English Transliteration',
     Color(0xFF2196F3),
   ),
   LyricLanguageDef(
+    LyricLanguages.en,
+    'English Translation',
+    Color(0xFF22C55E),
+  ),
+  LyricLanguageDef(
     LyricLanguages.hiTr,
     'Hindi Transliteration',
     Color(0xFF8E24AA),
   ),
+  LyricLanguageDef(LyricLanguages.hi, 'Hindi Translation', Color(0xFF43A047)),
 ];
 
 /// A small, appropriate icon for a lyric language (used in the Sync picker).

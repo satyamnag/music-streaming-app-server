@@ -33,7 +33,8 @@ class LyricsOrnamentDivider extends StatelessWidget {
     );
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10 * scale, horizontal: 8 * scale),
+      padding:
+          EdgeInsets.symmetric(vertical: 10 * scale, horizontal: 8 * scale),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -61,7 +62,7 @@ class LyricsOrnamentDivider extends StatelessWidget {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: labelStyle,
               ),
