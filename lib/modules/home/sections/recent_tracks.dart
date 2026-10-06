@@ -6,12 +6,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/fake.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/track_card/card_colors.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
-import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/history/recent_tracks.dart';
@@ -67,9 +65,11 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: 4,
                     separatorBuilder: (_, __) => const Gap(6),
-                    itemBuilder: (context, index) => _RecentTrackCard(
+                    itemBuilder: (context, index) => HomeTrackCard(
                       track: FakeData.track,
                       imageUrl: '',
+                      width: HomeSectionLayout.cardWidth *
+                          Theme.of(context).scaling,
                       onTap: () {},
                     ),
                   ),
@@ -150,113 +150,46 @@ class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
                       : (historyTrack?.album.images ?? const []);
                   final imageUrl = images.smallest(ImagePlaceholder.albumArt);
 
-                  return _RecentTrackCard(
-                    track: track,
-                    imageUrl: imageUrl,
-                    onTap: () async {
-                      if (PremiumAccess.isTrackLocked(track, ref)) {
-                        await PremiumAccess.gateTrackPlay(
-                          context: context,
-                          ref: ref,
-                          track: track,
-                          feature: () async {
-                            await ref.read(audioPlayerProvider.notifier).load(
-                                tracks,
-                                initialIndex: index,
-                                autoPlay: true);
-                          },
-                        );
-                        return;
-                      }
+                  // Play the LIVE CATALOGUE object, not the history snapshot.
+                  //
+                  // History rows are snapshots taken when the track was last
+                  // played, so they carry only what the row stored — none of the
+                  // admin-configured fields (the mini player background, the card
+                  // colours). Loading them made the mini player fall back to the
+                  // theme even though the track HAD a colour set in the admin,
+                  // which is exactly the "background does not work from Recently
+                  // Played" bug. The catalogue is already fetched above for the
+                  // cover art, so this costs nothing; the history object stays the
+                  // fallback for a track that is no longer in the catalogue.
+                  final playable = [
+                    for (final t in tracks) catalogByTrackId[t.id] ?? t,
+                  ];
 
-                      await ref
-                          .read(audioPlayerProvider.notifier)
-                          .load(tracks, initialIndex: index, autoPlay: true);
-                    },
+                  // The SHARED track card, so Recently Played gets the same
+                  // bottom-right play control, typography, admin colours and
+                  // two-line name as every other shelf. This used to be a
+                  // hand-rolled lookalike with no play control at all, which is
+                  // exactly why the icon was missing on this one shelf.
+                  //
+                  // The CATALOGUE object is used for the card as well as for
+                  // playback, so a track's admin-configured colours apply here the
+                  // same way they do everywhere else.
+                  final cardTrack = playable[index];
+                  void playThis() => ref
+                      .read(audioPlayerProvider.notifier)
+                      .load(playable, initialIndex: index, autoPlay: true);
+
+                  // No explicit premium gate: HomeTrackCard gates BOTH of its tap
+                  // targets through PremiumAccess itself, so gating here as well
+                  // would be the same check twice.
+                  return HomeTrackCard(
+                    track: cardTrack,
+                    imageUrl: imageUrl,
+                    width: HomeSectionLayout.cardWidth * scale,
+                    onTap: playThis,
+                    onPlay: playThis,
                   );
                 },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RecentTrackCard extends HookWidget {
-  final SangeetTrackObject track;
-  final String imageUrl;
-  final VoidCallback onTap;
-
-  const _RecentTrackCard({
-    required this.track,
-    required this.imageUrl,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-
-    // Admin-configured card colors (null = keep the theme defaults). Bind to a
-    // local first: Dart cannot type-promote a `final` field.
-    final currentTrack = track;
-    final String? configured =
-        currentTrack is SangeetFullTrackObject ? currentTrack.cardBgColor : null;
-    final String? configuredText = currentTrack is SangeetFullTrackObject
-        ? currentTrack.cardTextColor
-        : null;
-    final bg = cardBackgroundColor(configured, theme.colorScheme.card);
-    final titleColor = parseCardColor(configuredText) ??
-        (configured != null
-            ? readableTextOn(bg)
-            : theme.colorScheme.foreground);
-
-    return Container(
-      width: HomeSectionLayout.cardWidth * scale,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12 * scale),
-        color: bg,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The cover bleeds to the card's top/left/right edges; the card's
-            // own Clip.antiAlias gives it the outer rounded corners at the top.
-            AspectRatio(
-              aspectRatio: 1,
-              child: UniversalImage(path: imageUrl, fit: BoxFit.cover),
-            ),
-            // Only the text block is padded, so the cover stays flush.
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardTextGap * scale,
-                HomeSectionLayout.cardPadding * scale,
-                HomeSectionLayout.cardPadding * scale,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    track.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.typography.small.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: titleColor,
-                    ),
-                  ),
-                  const SizedBox.shrink(),
-                ],
               ),
             ),
           ],

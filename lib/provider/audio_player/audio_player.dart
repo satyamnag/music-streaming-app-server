@@ -10,7 +10,6 @@ import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/provider/discord_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
-import 'package:sangeet/provider/server/routes/playback.dart' show clearSourcedTrackCache;
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -383,9 +382,21 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     _log('load() called: ${tracks.length} tracks, port=${SangeetMedia.serverPort}');
     _assertAllowedTracks(tracks);
 
-    // Clear cached sourced tracks from previous playlist so stale URLs
-    // (which expire after 1 hour) are not reused for a new playlist.
-    clearSourcedTrackCache();
+    // The resolved-stream cache is deliberately NOT cleared here any more.
+    //
+    // It used to be, to stop a stale signed URL from a previous playlist being
+    // reused. That is already handled per entry: the playback server treats a
+    // cached URL older than _streamUrlMaxAge (20 min) as a MISS and re-resolves it
+    // (see _getSourcedTrack), so an expired URL can never be served whatever the
+    // playlist. Clearing the whole map on every tap only guaranteed that the very
+    // track the user just tapped was a cache MISS, forcing a fresh network resolve
+    // before the first byte could be sent — and it threw away the work
+    // prewarmHomeStreamsProvider had just done, whose entire purpose is "so that
+    // tapping a song starts playback almost instantly (the signed URL is already
+    // resolved and cached)". That is the delay this removes.
+    //
+    // The map is bounded by the catalogue size, so letting entries expire on their
+    // own age costs a few dozen small objects rather than growing without limit.
 
     _log('load(): ensuring port ready...');
     await SangeetMedia.ensurePortReady();

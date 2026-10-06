@@ -11,6 +11,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
@@ -52,6 +53,12 @@ class HomePage extends HookConsumerWidget {
     // fetch) simply renders the normal themed background.
     final wallpaperUrl = ref.watch(homeWallpaperProvider).valueOrNull;
     final hasWallpaper = wallpaperUrl != null && wallpaperUrl.isNotEmpty;
+    // Drives which shelf takes the slot under Featured Playlists: Recently Played
+    // when the user has history, Albums when they do not. Read here rather than
+    // inside the section so the DECISION is made in one place.
+    final recentlyPlayed =
+        ref.watch(recentlyPlayedTracksProvider).asData?.value ??
+            const <SangeetTrackObject>[];
 
     // The header rides ON the wallpaper, so over artwork its text and icons are
     // white with a shadow. With no wallpaper the page background is the light
@@ -152,16 +159,30 @@ class HomePage extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                const SliverGap(10),
-                const HomeRecentlyPlayedTracksSection(),
-                const HomePlaylistsSection(),
-                // Round "Featured Playlist" chips (Venkateswara, Krishna,
-                // Ganesha, ...) sit directly under the carousel, per the design.
+                // Featured Playlists sit DIRECTLY under the carousel, as close to
+                // it as the layout allows — the two are one block visually, so the
+                // gap is the minimum the carousel's own slide margin leaves rather
+                // than a section break.
+                const SliverGap(2),
                 // Collapses to nothing when no chip has matching tracks.
                 const FeaturedPlaylistChips(),
+                // ONE slot below that: Recently Played when there is any, otherwise
+                // Albums. They are mutually exclusive here so the home screen never
+                // opens with two overlapping shelves of the same covers, and a
+                // first-time install with no history still leads with Albums rather
+                // than an empty gap where Recently Played would be.
+                if (recentlyPlayed.isEmpty)
+                  ...switch (sectionsAsync) {
+                    AsyncData(value: final sections) => [
+                        HomeAlbumsSection(albums: sections.albums),
+                      ],
+                    _ => [const HomeAlbumsSection(albums: [])],
+                  }
+                else
+                  const HomeRecentlyPlayedTracksSection(),
+                const HomePlaylistsSection(),
                 ...switch (sectionsAsync) {
                   AsyncData(value: final sections) => [
-                      HomeAlbumsSection(albums: sections.albums),
                       HomeLanguageSongsSections(languages: sections.languages),
                       HomeTrackSection(
                         title: context.l10n.newest_arrivals,
@@ -187,7 +208,6 @@ class HomePage extends HookConsumerWidget {
                       ),
                     ],
                   AsyncLoading() => [
-                      const HomeAlbumsSection(albums: []),
                       const HomeLanguageSongsSections(languages: []),
                       HomeTrackSection(
                         title: context.l10n.newest_arrivals,
@@ -212,7 +232,6 @@ class HomePage extends HookConsumerWidget {
                       ),
                     ],
                   _ => [
-                      const HomeAlbumsSection(albums: []),
                       const HomeLanguageSongsSections(languages: []),
                       HomeTrackSection(
                         title: context.l10n.newest_arrivals,

@@ -8,6 +8,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/history/recent_tracks.dart';
+import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 
 /// A full-screen list of all recently played tracks.
 ///
@@ -24,6 +25,17 @@ class RecentlyPlayedPage extends HookConsumerWidget {
     final tracks = history.asData?.value ?? const <SangeetTrackObject>[];
     final playlist = ref.watch(audioPlayerProvider);
     final theme = Theme.of(context);
+
+    // Play the LIVE CATALOGUE object where one exists, not the history snapshot.
+    //
+    // History rows are snapshots taken when a track was last played, so they hold
+    // none of the admin-configured fields (the mini player background, the card
+    // colours). Loading them made the mini player fall back to the theme even when
+    // the track HAD a colour set in the admin. The same resolution is done on the
+    // home shelf's Recently Played row, so the two agree.
+    final catalog = ref.watch(homeTracksProvider).asData?.value ?? const [];
+    final byId = {for (final t in catalog) t.id: t};
+    final playable = [for (final t in tracks) byId[t.id] ?? t];
 
     return SafeArea(
       bottom: false,
@@ -53,7 +65,7 @@ class RecentlyPlayedPage extends HookConsumerWidget {
                     playlist: playlist,
                     onTap: () async {
                       await ref.read(audioPlayerProvider.notifier).load(
-                            tracks,
+                            playable,
                             initialIndex: index,
                             autoPlay: true,
                           );
