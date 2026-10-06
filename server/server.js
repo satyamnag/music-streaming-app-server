@@ -1520,7 +1520,22 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
     if (!/^[a-z0-9-]{1,64}$/.test(id)) {
       return res.status(400).json({ error: 'id must be lowercase letters, digits or dashes' })
     }
-    const { error: payloadError, row } = readFeaturedPlaylistPayload(req.body || {})
+    // A PUT is an upsert: it either creates the chip or edits an existing one.
+    // Only CREATION really needs a name — an existing chip is edited
+    // field-by-field (the icon upload/remove paths send `icon_url` alone), so a
+    // missing title is fine once the row already exists. This mirrors the
+    // specials endpoint, whose banner upload works the same way. A lookup
+    // failure keeps requireTitle=true so the fail-closed default is unchanged.
+    let requireTitle = true
+    try {
+      const { data: existing } = await supabase
+        .from('featured_playlists')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle()
+      if (existing) requireTitle = false
+    } catch (_) { /* keep requireTitle=true */ }
+    const { error: payloadError, row } = readFeaturedPlaylistPayload(req.body || {}, { requireTitle })
     if (payloadError) return res.status(400).json({ error: payloadError })
     if (Object.keys(row).length === 0) return res.status(400).json({ error: 'nothing to update' })
 
