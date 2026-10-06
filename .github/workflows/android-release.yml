@@ -82,6 +82,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Record which commit was ACTUALLY checked out, into the run summary.
+      #
+      # Without this the artifact has no provenance at all, and the run's own
+      # head_sha is misleading: it records the dispatch, while actions/checkout
+      # (no `ref:` here) resolves the BRANCH TIP at the moment the job reaches
+      # this step. Dispatch a build and push a commit while it waits for a runner,
+      # and the two disagree — which is exactly how a build once produced an AAB
+      # that did not contain the commit the run claimed to be building. Nobody can
+      # tell which code is in an artifact from the artifact alone, so log it here
+      # and make the question answerable.
+      - name: Record the built commit
+        run: |
+          SHA="$(git rev-parse HEAD)"
+          SUBJECT="$(git log -1 --pretty=%s)"
+          echo "Building commit: ${SHA}"
+          echo "Subject: ${SUBJECT}"
+          {
+            echo "### Built commit"
+            echo ""
+            echo '```'
+            echo "${SHA}"
+            echo "${SUBJECT}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
