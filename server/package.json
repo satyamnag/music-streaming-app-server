@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node test/admin-filters.test.cjs",
+    "test:e2e": "node test/admin-filters.e2e.cjs",
+    "test:all": "node test/admin-filters.test.cjs && node test/admin-filters.e2e.cjs",
+    "verify": "node test/admin-static-verify.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",

@@ -321,12 +321,12 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <th>Actions</th>
 </tr><tr class="filter-row">
   <th></th>
-  <th></th>
+  <th><select id="filterArtist" class="col-filter" onchange="applyTrackFilters()"><option value="">All artists</option></select></th>
   <th><select id="filterAlbum" class="col-filter" onchange="applyTrackFilters()"><option value="">All albums</option></select></th>
   <th><select id="filterLanguage" class="col-filter" onchange="applyTrackFilters()"><option value="">All languages</option></select></th>
   <th><select id="filterStatus" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="free">Free</option><option value="paid">Paid</option></select></th>
   <th><select id="filterSync" class="col-filter" onchange="applyTrackFilters()"><option value="">All</option><option value="any">All Synced</option><option value="none">None</option><option value="te">Telugu</option><option value="en">English</option><option value="hi">Hindi</option></select></th>
-  <th style="display:flex;flex-direction:column;gap:2px;"><select id="filterKaraoke" class="col-filter" onchange="applyTrackFilters()"><option value="">Karaoke: All</option><option value="yes">With</option><option value="no">Without</option></select><select id="filterRingtone" class="col-filter" onchange="applyTrackFilters()"><option value="">Ringtone: All</option><option value="yes">With</option><option value="no">Without</option></select></th>
+  <th style="display:flex;flex-direction:column;gap:2px;"><div class="duration-filter" title="Filter by duration in seconds"><input id="filterDurMin" class="col-filter" type="number" min="0" step="1" inputmode="numeric" placeholder="Min s" aria-label="Minimum duration in seconds" oninput="applyTrackFilters()" onchange="applyTrackFilters()"><input id="filterDurMax" class="col-filter" type="number" min="0" step="1" inputmode="numeric" placeholder="Max s" aria-label="Maximum duration in seconds" oninput="applyTrackFilters()" onchange="applyTrackFilters()"></div><select id="filterKaraoke" class="col-filter" onchange="applyTrackFilters()"><option value="">Karaoke: All</option><option value="yes">With</option><option value="no">Without</option></select><select id="filterRingtone" class="col-filter" onchange="applyTrackFilters()"><option value="">Ringtone: All</option><option value="yes">With</option><option value="no">Without</option></select></th>
   <th></th>
 </tr></thead><tbody id="tbody"></tbody></table>
     <div class="pagination" id="trackPagination" style="display:none;">
@@ -1198,11 +1198,23 @@ function filteredTracks() {
     list = list.filter(t => (t.language || '').trim() === filterLanguage);
   }
   if (filterDurMin !== '' || filterDurMax !== '') {
-    const min = filterDurMin === '' ? -Infinity : (Number(filterDurMin) || 0);
-    const max = filterDurMax === '' ? Infinity : (Number(filterDurMax) || 0);
+    // Parse defensively: an empty or non-numeric bound is "unbounded" rather
+    // than 0, so typing a partial value never silently drops every track.
+    const parseBound = (v) => {
+      if (v === '' || v == null) return null;
+      const n = Number(v);
+      return Number.isFinite(n) && n >= 0 ? n : null;
+    };
+    let min = parseBound(filterDurMin);
+    let max = parseBound(filterDurMax);
+    // A reversed range matches nothing; swap so the user sees results for the
+    // range they evidently meant instead of an empty table.
+    if (min !== null && max !== null && min > max) { const t = min; min = max; max = t; }
     list = list.filter(t => {
       const d = Number(t.duration) || 0;
-      return d >= min && d <= max;
+      if (min !== null && d < min) return false;
+      if (max !== null && d > max) return false;
+      return true;
     });
   }
   if (filterStatus) {
@@ -3002,7 +3014,11 @@ function renderTracks() {
   const list = filteredTracks();
   const tbody = document.getElementById('tbody');
   const pag = document.getElementById('trackPagination');
-  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage || filterStatus || filterSync || filterKaraoke || filterDurMin !== '' || filterDurMax !== '');
+  // Must list EVERY filter that filteredTracks() honours, otherwise "Clear
+  // filters" stays hidden while a filter is still narrowing the result set.
+  const hasFilters = !!(trackSearch || filterArtist || filterAlbum || filterLanguage ||
+    filterStatus || filterSync || filterKaraoke || filterRingtone ||
+    filterDurMin !== '' || filterDurMax !== '');
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) clearBtn.style.display = hasFilters ? 'inline-block' : 'none';
   if (list.length === 0) {
@@ -3048,24 +3064,33 @@ function setTrackPageSize(v) {
 }
 
 function changeTrackPage(dir) {
+  // Clamp into [1, totalPages] instead of rejecting the whole step: a jump of
+  // more than one page (or an out-of-range dir) previously did nothing at all,
+  // leaving Prev/Next looking broken. Compute against the SAME filtered list
+  // the renderer will use so the bounds can never disagree with what is drawn.
   const list = filteredTracks();
   const totalPages = Math.max(1, Math.ceil(list.length / trackPageSize));
-  const newPage = trackPage + dir;
-  if (newPage < 1 || newPage > totalPages) return;
+  const newPage = Math.min(totalPages, Math.max(1, trackPage + dir));
+  if (newPage === trackPage) return;
   trackPage = newPage;
   renderTracks();
 }
 
 function applyTrackFilters() {
-  filterArtist = document.getElementById('filterArtist').value;
-  filterAlbum = document.getElementById('filterAlbum').value;
-  filterDurMin = document.getElementById('filterDurMin').value.trim();
-  filterDurMax = document.getElementById('filterDurMax').value.trim();
-  filterLanguage = document.getElementById('filterLanguage').value;
-  filterStatus = document.getElementById('filterStatus').value;
-  filterSync = document.getElementById('filterSync').value;
-  filterKaraoke = document.getElementById('filterKaraoke').value;
-  filterRingtone = document.getElementById('filterRingtone').value;
+  // Every control is looked up defensively: a filter that is present in the
+  // toolbar but absent from this build's markup must not abort the whole
+  // update, which would silently freeze every other filter. Read through a
+  // helper so a missing node degrades to "" instead of throwing.
+  const val = (id) => { const el = document.getElementById(id); return el && typeof el.value === 'string' ? el.value : ''; };
+  filterArtist = val('filterArtist');
+  filterAlbum = val('filterAlbum');
+  filterDurMin = val('filterDurMin').trim();
+  filterDurMax = val('filterDurMax').trim();
+  filterLanguage = val('filterLanguage');
+  filterStatus = val('filterStatus');
+  filterSync = val('filterSync');
+  filterKaraoke = val('filterKaraoke');
+  filterRingtone = val('filterRingtone');
   trackPage = 1;
   renderTracks();
 }
