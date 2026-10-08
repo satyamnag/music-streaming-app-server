@@ -4,6 +4,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
+import 'package:sangeet/components/track_card/card_border.dart';
 import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
@@ -485,53 +486,84 @@ class TrackCard extends StatelessWidget {
 
     return Container(
       width: width,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12 * scale),
-        color: bg,
+      // The card's background box — fill and themed gradient — is built by
+      // [CardBorder], which owns the effect shared by every card.
+      decoration: CardBorder.decoration(
+        context: context,
+        background: bg,
+        radius: 12 * scale,
+        // An admin-configured background is an explicit instruction, so the
+        // themed gradient steps aside for it.
+        usesConfiguredBackground: cardBgColor != null,
       ),
       clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // The cover bleeds to the card's top, left and right edges. The
-            // card itself clips with `Clip.antiAlias`, so the artwork takes the
-            // card's outer rounded corners at the top while its bottom corners
-            // stay square where it meets the text area.
-            AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
-                  LockedBadge(locked: locked, borderRadius: 0),
-                ],
-              ),
+      // The card is a Stack so the outline can be painted OVER the content as its
+      // last child. Three constraints force this shape:
+      //
+      //  * it must be painted on top, because the cover bleeds to the card's
+      //    edges and would completely hide an outline drawn underneath it;
+      //  * it must NOT be a border on `decoration`, because a border there
+      //    inflates the Container's child padding by its width and pushes the
+      //    play control off the text block it is pinned to (see
+      //    CardBorder.outline);
+      //  * it must not be `foregroundDecoration`, because a gradient stroke
+      //    cannot be expressed as a single `Decoration` — it needs two stacked
+      //    rounded rectangles, which is a widget tree.
+      //
+      // A `Stack` child is the one placement that satisfies all three.
+      child: Stack(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // The cover bleeds to the card's top, left and right edges. The
+                // card itself clips with `Clip.antiAlias`, so the artwork takes
+                // the card's outer rounded corners at the top while its bottom
+                // corners stay square where it meets the text area.
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      UniversalImage(path: imageUrl, fit: BoxFit.cover),
+                      LockedBadge(locked: locked, borderRadius: 0),
+                    ],
+                  ),
+                ),
+                // Only the text block is padded, so the cover stays flush. The
+                // track card insets its text more tightly than the album card
+                // ([HomeSectionLayout.trackCardTextPadding]) because the
+                // two-line name needs every pixel of a 110dp tile to fit in full.
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    (titleLines > 1
+                            ? HomeSectionLayout.trackCardTextPadding
+                            : HomeSectionLayout.cardPadding) *
+                        scale,
+                    HomeSectionLayout.cardTextGap * scale,
+                    (titleLines > 1
+                            ? HomeSectionLayout.trackCardTextPadding
+                            : HomeSectionLayout.cardPadding) *
+                        scale,
+                    HomeSectionLayout.cardPadding * scale,
+                  ),
+                  child: content,
+                ),
+              ],
             ),
-            // Only the text block is padded, so the cover stays flush. The track
-            // card insets its text more tightly than the album card
-            // ([HomeSectionLayout.trackCardTextPadding]) because the two-line
-            // name needs every pixel of a 110dp tile to fit in full.
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                (titleLines > 1
-                        ? HomeSectionLayout.trackCardTextPadding
-                        : HomeSectionLayout.cardPadding) *
-                    scale,
-                HomeSectionLayout.cardTextGap * scale,
-                (titleLines > 1
-                        ? HomeSectionLayout.trackCardTextPadding
-                        : HomeSectionLayout.cardPadding) *
-                    scale,
-                HomeSectionLayout.cardPadding * scale,
-              ),
-              child: content,
-            ),
-          ],
-        ),
+          ),
+          // Painted last, so it sits over the cover and the text. It swallows no
+          // taps (`IgnorePointer` inside), so the card and its play control keep
+          // their own hit targets.
+          CardBorder.outline(
+            context: context,
+            radius: 12 * scale,
+          ),
+        ],
       ),
     );
   }
