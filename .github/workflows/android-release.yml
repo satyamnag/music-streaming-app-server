@@ -155,12 +155,50 @@ jobs:
             echo "::error::Secrets KEYSTORE and/or KEY_PROPERTIES are not set."
             exit 1
           fi
-          # The workflow writes the keystore here; key.properties must reference
-          # this exact relative path (storeFile=upload-keystore.jks).
-          echo "$KEYSTORE_B64" | base64 --decode > android/app/upload-keystore.jks
+
+          # Normalise the base64 before decoding.
+          #
+          # `base64 --decode` is strict: it rejects any character outside the
+          # alphabet, including a CR, a stray space, or a line that a shell or a
+          # secret store re-wrapped. That strictness failed this workflow twice
+          # with the opaque message "base64: invalid input", which says nothing
+          # about WHICH byte was wrong.
+          #
+          # Stripping all whitespace first makes the decode independent of how
+          # the value was transported, and the diagnostics below report the shape
+          # of what actually arrived when it still fails, so the next failure is
+          # diagnosable instead of a guess.
+          CLEAN="$(printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]')"
+          echo "keystore b64 length: ${#CLEAN}"
+
+          if ! printf '%s' "$CLEAN" | base64 --decode > android/app/upload-keystore.jks 2>/dev/null; then
+            echo "::error::Could not base64-decode the KEYSTORE secret."
+            echo "Length after whitespace strip: ${#CLEAN}"
+            echo "Non-base64 characters present: $(printf '%s' "$CLEAN" | tr -d 'A-Za-z0-9+/=' | wc -c)"
+            echo "First 8 characters: $(printf '%s' "$CLEAN" | cut -c1-8)"
+            exit 1
+          fi
+
           printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
+
+          # A keystore is never empty and always starts with the JKS or PKCS12
+          # magic, so check both rather than only the size: an empty decode and a
+          # wrong-file decode are different failures.
           test -s android/app/upload-keystore.jks || { echo "::error::keystore decode produced an empty file"; exit 1; }
-          echo "Signing files written."
+          echo "keystore bytes: $(wc -c < android/app/upload-keystore.jks)"
+          echo "key.properties keys: $(grep -oE '^[A-Za-z]+' android/key.properties | tr '\n' ' ')"
+
+          # Prove the keystore is readable and that the alias/passwords in
+          # key.properties actually open it, here rather than 15 minutes into a
+          # Gradle build. `keytool -list` is non-destructive.
+          ALIAS="$(grep -E '^keyAlias=' android/key.properties | cut -d= -f2-)"
+          STOREPASS="$(grep -E '^storePassword=' android/key.properties | cut -d= -f2-)"
+          if ! keytool -list -keystore android/app/upload-keystore.jks \
+                 -storepass "$STOREPASS" -alias "$ALIAS" > /dev/null 2>&1; then
+            echo "::error::The keystore could not be opened with the alias and store password in KEY_PROPERTIES."
+            exit 1
+          fi
+          echo "Signing files written and verified (alias: ${ALIAS})."
 
       - name: Install dependencies
         run: flutter pub get
