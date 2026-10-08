@@ -75,6 +75,56 @@ class JustAudioEngine implements AudioEngine {
   ja.AudioSource _source(SangeetTrackObject t) =>
       ja.AudioSource.uri(Uri.parse(SangeetMedia.uriFor(t, karaoke: _karaoke)));
 
+  /// Whether the playlist is prepared EAGERLY rather than lazily.
+  ///
+  /// ## Why this is false
+  /// `useLazyPreparation` defaults to true, and the official docs describe that
+  /// as loading each child "as late as possible before needed for playback".
+  /// For a gapless playlist that is the wrong default: the next track is only
+  /// requested when the current one is about to end, so the transition waits on
+  /// a fresh network round trip and the listener hears a gap — the buffering
+  /// seam between tracks.
+  ///
+  /// Preparing eagerly makes ExoPlayer hold the following item ready, which is
+  /// what "gapless playlist playback" actually requires.
+  ///
+  /// Note this does NOT mean downloading the whole queue: ExoPlayer still
+  /// streams each item and keeps its own bounded buffer. It only removes the
+  /// "start fetching at the last moment" behaviour.
+  ///
+  /// Verified against the just_audio API docs for `ConcatenatingAudioSource`
+  /// (`useLazyPreparation`) and `AudioPlayer.setAudioSources`.
+  static const bool _eagerPreparation = false;
+
+  /// The live playlist object handed to the platform, when one is loaded.
+  ///
+  /// Kept so queue edits can be applied INCREMENTALLY through its own
+  /// `add`/`insert`/`removeAt`/`move`/`clear` methods. The just_audio API docs
+  /// state that a `ConcatenatingAudioSource`'s "audio sources can be dynamically
+  /// added, removed and reordered while the audio is playing" — which is what
+  /// lets a queue edit leave the playing item's decoder and buffer untouched.
+  ja.ConcatenatingAudioSource? _queue;
+
+  /// Builds the playback queue, prepared EAGERLY — see [_eagerPreparation].
+  ///
+  /// Centralised so the eager setting cannot be applied on one code path
+  /// (initial load) and forgotten on another (rebuild), which is exactly the
+  /// drift that would bring the seam back after a karaoke toggle.
+  ja.ConcatenatingAudioSource _concat() => ja.ConcatenatingAudioSource(
+        children: _tracks.map(_source).toList(),
+        useLazyPreparation: _eagerPreparation,
+      );
+
+  /// Applies the current loop/shuffle state.
+  ///
+  /// Set AFTER the source (the order matters: replacing the source resets these
+  /// on the platform side), and awaited together so a caller cannot observe a
+  /// half-configured player.
+  Future<void> _applyModes() async {
+    await _player.setLoopMode(toJa(_loopMode));
+    await _player.setShuffleModeEnabled(_shuffle);
+  }
+
   @override
   Future<void> openPlaylist(
     List<SangeetTrackObject> tracks, {
@@ -83,33 +133,41 @@ class JustAudioEngine implements AudioEngine {
   }) async {
     _tracks = List.of(tracks);
     _tracksCtrl.add(_tracks);
-    final concat = ja.ConcatenatingAudioSource(
-      children: tracks.map(_source).toList(),
-      useLazyPreparation: true,
-    );
+    final queue = _concat();
+    _queue = queue;
     await _player.setAudioSource(
-      concat,
+      queue,
       initialIndex: initialIndex,
       initialPosition: Duration.zero,
     );
     _index = initialIndex;
     _indexCtrl.add(initialIndex);
-    await _player.setLoopMode(toJa(_loopMode));
-    await _player.setShuffleModeEnabled(_shuffle);
+    await _applyModes();
     if (autoPlay) _player.play();
   }
 
+  /// Rebuilds the queue, keeping the current track and position.
+  ///
+  /// ## When this is needed at all
+  /// Only when the set of URIs genuinely changes for items already queued —
+  /// in practice, switching original <-> karaoke, which rewrites every URI.
+  /// Queue edits (add/remove/move) go through the live
+  /// [ja.ConcatenatingAudioSource] instead, so they never come here.
+  ///
+  /// `setAudioSource` releases the decoder and the whole buffer, so it is
+  /// audible; the position is therefore captured BEFORE the swap and restored
+  /// after, and playback resumes only if it was actually playing.
   Future<void> _rebuild({int? atIndex}) async {
     final wasPlaying = _player.playing;
     final position = _player.position;
-    final current = (atIndex ?? _index).clamp(0, _tracks.length - 1);
+    final queue = _concat();
+    _queue = queue;
     await _player.setAudioSource(
-      ja.ConcatenatingAudioSource(children: _tracks.map(_source).toList()),
-      initialIndex: current,
+      queue,
+      initialIndex: (atIndex ?? _index).clamp(0, _tracks.length - 1),
       initialPosition: position,
     );
-    await _player.setLoopMode(toJa(_loopMode));
-    await _player.setShuffleModeEnabled(_shuffle);
+    await _applyModes();
     // Restore playback: rebuilding the source (e.g. when "Endless playback"
     // radio-appends tracks at the end of the queue) must never restart the
     // currently playing track at 0:00.
@@ -120,7 +178,18 @@ class JustAudioEngine implements AudioEngine {
   Future<void> addTrack(SangeetTrackObject track, {int? index}) async {
     _tracks = List.of(_tracks)..add(track);
     _tracksCtrl.add(_tracks);
-    await _rebuild();
+    final queue = _queue;
+    if (queue == null) {
+      await _rebuild();
+      return;
+    }
+    // Mutate the LIVE queue. The playing item keeps its decoder and its buffer,
+    // so appending (e.g. "Endless playback" radio) is inaudible.
+    if (index != null && index >= 0 && index < queue.length) {
+      await queue.insert(index, _source(track));
+    } else {
+      await queue.add(_source(track));
+    }
   }
 
   @override
@@ -128,7 +197,18 @@ class JustAudioEngine implements AudioEngine {
     if (index < 0 || index >= _tracks.length) return;
     _tracks = List.of(_tracks)..removeAt(index);
     _tracksCtrl.add(_tracks);
-    await _rebuild();
+    final queue = _queue;
+    if (queue == null) return;
+    if (_tracks.isEmpty) {
+      // Nothing left to play: clear the live queue rather than leaving a
+      // dangling source the UI would still show.
+      await queue.clear();
+      _queue = null;
+      _index = -1;
+      _indexCtrl.add(-1);
+      return;
+    }
+    await queue.removeAt(index);
   }
 
   @override
@@ -141,7 +221,9 @@ class JustAudioEngine implements AudioEngine {
     list.insert(to, t);
     _tracks = list;
     _tracksCtrl.add(_tracks);
-    await _rebuild();
+    // Reordering is a platform-side move: no decoder, buffer or connection is
+    // touched, so the currently playing track is not interrupted at all.
+    await _queue?.move(from, to);
   }
 
   @override
@@ -183,12 +265,24 @@ class JustAudioEngine implements AudioEngine {
   /// currently playing track switches between its original and karaoke audio.
   /// Preserves the playing track (index and position) so playback is seamless.
   /// This is a no-op when there is nothing loaded.
+  ///
+  /// ## Why the no-op guards matter
+  /// Every URI in the queue changes when this flips, so the source genuinely has
+  /// to be replaced — but only when the value ACTUALLY changes. The engine is
+  /// called from the UI on every rebuild, so without the first guard a track
+  /// would be torn down and re-buffered on unrelated frames.
+  ///
+  /// The second guard covers a track that has no karaoke file: `uriFor` returns
+  /// the same URI for both variants, so the queue is identical and the audibly
+  /// expensive reload would buy nothing.
   Future<void> setKaraoke(bool karaoke) async {
     if (_tracks.isEmpty) return;
-    _karaoke = karaoke;
+    if (_karaoke == karaoke) return;
+    if (_karaokeVariantAvailable() == false) return;
     final wasPlaying = _player.playing;
     final position = _player.position;
     final index = _index.clamp(0, _tracks.length - 1);
+    _karaoke = karaoke;
     await _rebuild(atIndex: index);
     if (position > Duration.zero) {
       await _player.seek(position);
@@ -196,8 +290,23 @@ class JustAudioEngine implements AudioEngine {
     if (wasPlaying) _player.play();
   }
 
+  /// Whether flipping the karaoke flag would change ANY track's URI.
+  ///
+  /// Mirrors the rule `SangeetMedia.uriFor` applies: the karaoke suffix is only
+  /// added for a full track that actually has a karaoke file. When no track in
+  /// the queue has one, the flag cannot alter a single URI, so the reload would
+  /// cost the listener a buffer for no audible difference at all.
+  bool _karaokeVariantAvailable() {
+    for (final t in _tracks) {
+      if (t is! SangeetFullTrackObject) continue;
+      if (t.karaokeStoragePath?.trim().isNotEmpty ?? false) return true;
+    }
+    return false;
+  }
+
   @override
   Future<void> dispose() async {
+    _queue = null;
     await _player.dispose();
     for (final s in _subs) {
       await s.cancel();
