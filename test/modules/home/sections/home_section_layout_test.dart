@@ -42,22 +42,30 @@ SangeetSimpleAlbumObject _album(String id, String name) {
   );
 }
 
-Widget _harness(Widget child) {
+Widget _harness(Widget child, {double textScale = 1.0}) {
   return ProviderScope(
     child: material.MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: L10n.all,
       locale: const Locale('en'),
       home: Builder(
-        builder: (context) => Theme(
-          data: ThemeData(
-            radius: .5,
-            iconTheme: const IconThemeProperties(),
-            colorScheme: BhaktiColorSchemes.lightMaroon(),
-            surfaceOpacity: .8,
-            surfaceBlur: 10,
+        builder: (context) => MediaQuery(
+          // The system font size. The card's `Text` widgets scale with this, so
+          // the layout's own measurements must too — the device overflow this
+          // pins only appears at scales other than 1.0.
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
           ),
-          child: child,
+          child: Theme(
+            data: ThemeData(
+              radius: .5,
+              iconTheme: const IconThemeProperties(),
+              colorScheme: BhaktiColorSchemes.lightMaroon(),
+              surfaceOpacity: .8,
+              surfaceBlur: 10,
+            ),
+            child: child,
+          ),
         ),
       ),
     ),
@@ -237,6 +245,74 @@ void main() {
       ),
     );
     expect(full! - slim!, moreOrLessEquals(expectedDelta!, epsilon: 0.5));
+  });
+
+  testWidgets(
+      'the published row height matches the card at a NON-1.0 text scale',
+      (tester) async {
+    // ## Why this test exists
+    // The album card overflowed its row by 2dp ON A REAL PHONE — Flutter's
+    // yellow-and-black "BOTTOM OVERFLOWED BY 2.0 PIXEL" stripes across every
+    // card in the home Albums row — while the whole suite stayed green.
+    //
+    // The cause was that `HomeSectionLayout._lineHeight` measured text WITHOUT
+    // `MediaQuery.textScalerOf(context)`, while the card's own `Text` widgets
+    // render WITH it. The harness runs at textScaler 1.0, where the two
+    // measurements happen to agree, so every existing assertion passed; the
+    // device runs at its own system font size, where they differ by 2dp.
+    //
+    // So this test deliberately renders at a text scale other than 1.0 — that is
+    // the only condition under which the bug is observable at all.
+    for (final textScale in <double>[1.0, 1.15, 1.3, 1.5]) {
+      // A NON-empty section: an empty album list renders `SizedBox.shrink`, so
+      // there would be no card to measure at all.
+      final albums = <HomeAlbum>[
+        (
+          album: _album('a0', 'Ganesha Lahari'),
+          tracks: [FakeData.track, FakeData.track]
+        ),
+        (
+          album: _album('a1', 'Ganapati Vaibhavam'),
+          tracks: [FakeData.track, FakeData.track]
+        ),
+      ];
+      await tester.pumpWidget(
+        _harness(
+          // The section is a SLIVER, so it needs a sliver host to render into.
+          CustomScrollView(
+            slivers: [
+              HomeAlbumsSection(albums: albums),
+            ],
+          ),
+          textScale: textScale,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final section = find.byWidgetPredicate(
+        (w) => w.runtimeType == HomeAlbumsSection,
+      );
+      final row = tester.getRect(
+        find.descendant(of: section, matching: find.byType(ListView)).first,
+      );
+      final card = tester.getRect(
+        find
+            .descendant(of: section, matching: find.byType(HomeAlbumCard))
+            .first,
+      );
+
+      expect(
+        card.height,
+        closeTo(row.height, 0.5),
+        reason: 'at textScale $textScale the album card must fit its row; '
+            'a card taller than its row is the overflow reported on device',
+      );
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'at textScale $textScale the card must not overflow',
+      );
+    }
   });
 
   testWidgets('card/artist metrics keep their internal invariants',

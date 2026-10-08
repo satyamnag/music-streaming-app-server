@@ -72,14 +72,36 @@ abstract final class HomeSectionLayout {
   /// loaded rows stay exact.
   static const double skeletonHeadroom = 4;
 
-  /// Measured height of one line rendered with [style].
-  static double _lineHeight(TextStyle style) {
+  /// Measured height of one line rendered with [style], at the text scale the
+  /// card's own `Text` widgets will actually use.
+  ///
+  /// ## Why the [TextScaler] is applied here
+  /// Every `Text` in the card renders under `MediaQuery.textScalerOf(context)`,
+  /// so the height this function reports must be measured at that same scale or
+  /// the reserve will not match what is rendered. Measuring WITHOUT the scaler
+  /// made the row 2dp shorter than the album card's real text block on a device,
+  /// which surfaced as Flutter's "BOTTOM OVERFLOWED BY 2.0 PIXEL" stripes across
+  /// every card in the home Albums row.
+  ///
+  /// The mismatched magnitude is a real device property, not a test artefact: the
+  /// harness runs at textScaler 1.0, where the two measurements happen to agree,
+  /// so no unit test could see it. It only appears at the system font sizes real
+  /// phones use.
+  ///
+  /// [style] must be the style the `Text` renders with; the caller is responsible
+  /// for including any `copyWith` the card applies (font weight, colour) so the
+  /// measurement matches the render.
+  static double _lineHeight(BuildContext context, TextStyle style) {
     final painter = TextPainter(
       text: TextSpan(text: 'Ag', style: style),
       maxLines: 1,
       textDirection: TextDirection.ltr,
+      // The same scaler the card's Text widgets use — see the note above.
+      textScaler: MediaQuery.textScalerOf(context),
     )..layout();
-    return painter.height;
+    final height = painter.height;
+    painter.dispose();
+    return height;
   }
 
   /// Height of one home card whose square cover is [coverWidth] wide.
@@ -123,7 +145,7 @@ abstract final class HomeSectionLayout {
     final theme = Theme.of(context);
     final scale = theme.scaling;
     final subtitleLine =
-        withSubtitle ? _lineHeight(theme.typography.xSmall) : 0.0;
+        withSubtitle ? _lineHeight(context, theme.typography.xSmall) : 0.0;
     final subtitleGap = withSubtitle ? titleSubtitleGap : 0.0;
     return coverWidth +
         (cardTextGap * scale) +
@@ -395,8 +417,8 @@ abstract final class HomeSectionLayout {
   static double playbuttonCardHeight(BuildContext context) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
-    final titleLine = _lineHeight(theme.typography.small);
-    final subtitleLine = _lineHeight(theme.typography.xSmall);
+    final titleLine = _lineHeight(context, theme.typography.small);
+    final subtitleLine = _lineHeight(context, theme.typography.xSmall);
     // 150 artwork + 12 CardImage gap + title + 2 title/subtitle gap +
     // subtitle (reserve two lines so long playlist descriptions never clip).
     return (150 + 12 + titleLine + 2 + subtitleLine * 2) * scale;
@@ -416,7 +438,7 @@ abstract final class HomeSectionLayout {
     final theme = Theme.of(context);
     final scale = theme.scaling;
     // Badge line + SecondaryBadge's internal padding (~8px).
-    final badgeLine = _lineHeight(theme.typography.small) + 8;
+    final badgeLine = _lineHeight(context, theme.typography.small) + 8;
     return (16 + 130 + 10 + badgeLine + 16) * scale;
   }
 
