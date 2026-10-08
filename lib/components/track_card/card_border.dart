@@ -45,11 +45,14 @@ class CardBorder {
 
   /// Thickness of the outline at scale == 1, in logical pixels.
   ///
-  /// One pixel: at the 110dp grid tile this is the finest line the display can
-  /// render without aliasing into a grey smear, and it stays a hairline rather
-  /// than a frame. The card is 110dp wide, so anything thicker starts to read as
-  /// a picture frame and eats the cover.
-  static const double width = 1;
+  /// 1.5dp, and it was 1dp. Raised after a device check: this phone reports
+  /// `density 320` (2 physical pixels per logical pixel), so a 1dp stroke is a
+  /// 2px line on a 125dp card — and against dark, detailed album artwork even a
+  /// correctly-coloured 2px line reads as a faint edge rather than a border. At
+  /// 1.5dp the stroke is 3px, which is the thinnest line that still reads as a
+  /// deliberate rim at this density while staying far short of a picture frame
+  /// on a 125dp card.
+  static const double width = 1.5;
 
   /// Opacity of the soft inner halo at scale == 1.
   ///
@@ -92,6 +95,11 @@ class CardBorder {
   /// This is what strokes the card's edge. Both stops come from the theme, so a
   /// theme change moves the border with it rather than leaving a hard-coded
   /// colour behind.
+  ///
+  /// ## This gradient is NOT used for the outline stroke
+  /// It is kept because it is the card's FILL gradient (see [decoration]), where
+  /// a wide gold-to-maroon wash reads as intended. It must never stroke the rim —
+  /// see [rimColors] for the measurement that rules it out.
   static Gradient gradient(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return LinearGradient(
@@ -99,6 +107,45 @@ class CardBorder {
       end: Alignment.bottomRight,
       colors: <Color>[scheme.accent, scheme.primary],
     );
+  }
+
+  /// The two colours the rim stroke interpolates between, light to dark.
+  ///
+  /// ## Why the rim is GOLD, not the gold-to-maroon fill gradient
+  /// The first version stroked the rim with [gradient] — the same gold→maroon
+  /// ramp the card's box is filled with. On a device it was INVISIBLE over
+  /// 95% of the rim, and the pixels say exactly why:
+  ///
+  ///   * the ramp's dark end is `primary` = `#520101` (RGB 82,1,1), which is
+  ///     near-identical to the dark album artwork sitting against it. On the
+  ///     phone the card's left edge went `(255,255,255)` → `(34,4,2)` and its
+  ///     bottom edge `(72,5,0)` → `(255,255,255)`: page to artwork with no rim
+  ///     line in between;
+  ///   * a pixel probe of the rendered card found accent-gold pixels confined to
+  ///     rows 0..19 of a ~634px-tall raster — the top-left corner only. The rest
+  ///     of the stroke was maroon on maroon.
+  ///
+  /// A rim's whole job is to separate the card from what is behind it, so its
+  /// colour must contrast with BOTH the page and the artwork. Gold does; the
+  /// theme's maroon does not, because the app's own cover art is shaded in the
+  /// same maroon.
+  ///
+  /// So the stroke stays inside one hue and varies only its LIGHTNESS: a lighter
+  /// gold at the top-left falling to a deeper gold at the bottom-right. That
+  /// keeps the top-left-to-bottom-right shading the fill gradient establishes,
+  /// while keeping every point on the rim a gold that reads against dark
+  /// artwork. Both ends are derived from `scheme.accent`, so a theme change moves
+  /// the rim with it and neither end is a hard-coded colour.
+  ///
+  /// The lightness shift is a fixed factor rather than a second theme colour so
+  /// it cannot collapse to the background in either light or dark mode.
+  static List<Color> rimColors(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.accent;
+    final hsl = HSLColor.fromColor(accent);
+    // Deepen toward the bottom-right by lightness only, clamped so the dark end
+    // can never approach black (which would reintroduce the invisibility above).
+    final deep = hsl.withLightness((hsl.lightness * 0.72).clamp(0.30, 1.0));
+    return <Color>[accent, deep.toColor()];
   }
 
   /// The card's background box: the theme fill and the themed gradient.
@@ -176,21 +223,52 @@ class CardBorder {
     required BuildContext context,
     required double radius,
   }) {
-    final scheme = Theme.of(context).colorScheme;
     final scale = Theme.of(context).scaling;
+    // The rim varies in LIGHTNESS only, never in hue — see [rimColors] for the
+    // device measurement that rules the gold-to-maroon fill ramp out here.
+    final rim = rimColors(context);
 
-    return IgnorePointer(
-      child: CustomPaint(
-        painter: _CardOutlinePainter(
-          radius: radius,
-          stroke: width * scale,
-          haloWidth: haloWidth * scale,
-          haloOpacity: haloOpacity,
-          // The gradient is handed over as its two stops rather than as a
-          // `Gradient` object, because the painter needs a `Shader` sized to the
-          // card's own rect, which only exists at paint time.
-          from: scheme.accent,
-          to: scheme.primary,
+    // ## Why this is a Positioned.fill, and not a bare Stack child
+    // This is THE defect that made the outline invisible on the device, and it
+    // is subtle because every unit test still passed.
+    //
+    // The card is a `Stack` whose FIRST child is the content `Column`. A `Stack`
+    // with the default `StackFit.loose` sizes itself from its largest
+    // non-positioned child, and lays out every other non-positioned child with
+    // LOOSE constraints. A `CustomPaint` with no `child` and no explicit `size`
+    // has no intrinsic size, so under loose constraints it collapses to 0x0 —
+    // and `_CardOutlinePainter.paint` is then handed `Size.zero`, where
+    // `outer.isEmpty` is true and it returns immediately having drawn NOTHING.
+    //
+    // Measured on this very card: the outline's `CustomPaint` reported
+    // `Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)` while the card was
+    // `Rect.fromLTRB(0.0, 0.0, 110.0, 172.3)`. The painter was correct and was
+    // simply never given a rectangle to draw into.
+    //
+    // `Positioned.fill` is the fix: it forces the child to the Stack's full size
+    // (tight constraints), so the painter always receives the card's real rect.
+    // It contributes no layout padding and cannot move the card's content, so
+    // the geometry contract in this file's header still holds.
+    //
+    // The old unit tests could not catch this: they asserted that a painter
+    // EXISTS and that the Stack's last child is a widget, both of which were true
+    // of a zero-sized, painting-nothing CustomPaint. The gold-pixel probe in
+    // `test/track_card_border_visibility_probe_test.dart` is what catches it, by
+    // measuring paint instead of configuration.
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: CustomPaint(
+          painter: _CardOutlinePainter(
+            radius: radius,
+            stroke: width * scale,
+            haloWidth: haloWidth * scale,
+            haloOpacity: haloOpacity,
+            // The rim is handed over as its two stops rather than as a
+            // `Gradient` object, because the painter needs a `Shader` sized to
+            // the card's own rect, which only exists at paint time.
+            from: rim.first,
+            to: rim.last,
+          ),
         ),
       ),
     );
@@ -235,6 +313,11 @@ class _CardOutlinePainter extends CustomPainter {
     );
 
     // 1. The gradient stroke, following the card's own corner radius.
+    //
+    //    Drawn at FULL opacity: this is the rim the card is identified by, and
+    //    the earlier failure was precisely that it did not read against dark
+    //    artwork. Both stops are gold (see [rimColors]), so the stroke stays
+    //    visible all the way round rather than fading into the cover.
     canvas.drawRRect(
       outerRRect,
       Paint()
@@ -254,6 +337,12 @@ class _CardOutlinePainter extends CustomPainter {
     //    softens the edge into the card. Drawn only when it has a positive width,
     //    since a zero-width stroke with a visible colour would paint a hairline
     //    at the wrong radius.
+    //
+    //    [from] is the rim's LIGHT gold end (see [CardBorder.rimColors]), so the
+    //    halo always picks up the brighter of the two rim colours regardless of
+    //    where on the card it sits — a halo tinted with the darker end would
+    //    disappear against dark artwork, which is the exact failure this whole
+    //    file exists to avoid.
     if (haloWidth <= 0) return;
     final haloInset = inset + stroke / 2 + haloWidth / 2;
     final haloRect =

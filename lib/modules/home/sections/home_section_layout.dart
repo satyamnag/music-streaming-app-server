@@ -94,6 +94,27 @@ abstract final class HomeSectionLayout {
   /// between the cover and the title, and once as the bottom padding. Omitting
   /// the bottom padding made every card one [cardPadding] taller than the height
   /// computed here, which overflowed the card's own Column by exactly that much.
+  ///
+  /// ## Why the title reserves TWO lines, measured as the CARD's block
+  /// The album card's title is split across two measured lines so the real album
+  /// names are not truncated (see `TrackCard.albumTitleBlock`), and the card
+  /// renders that title in `HomeSectionLayout.trackTitleBlockHeight` — the same
+  /// fixed two-line box the track card uses.
+  ///
+  /// So the reserve here must be **that same box**, not `2 * <natural line
+  /// height>`. The two are NOT equal: the block pins an explicit `height: 1.2`
+  /// multiplier and rounds each line box up to a whole pixel, while the natural
+  /// line height of `typography.small` is a different number. Reserving the
+  /// natural height left the card 6dp taller than its row, which is exactly the
+  /// overflow this function exists to prevent — measured by
+  /// `track_card_border_test.dart`'s "EXACTLY the reserved height" checks.
+  ///
+  /// Delegating to [trackTitleBlockHeight] makes the reserve and the render the
+  /// same call, so they cannot drift apart again.
+  ///
+  /// The block is a FIXED two lines whichever way the name wraps, so a one-line
+  /// name ("Soulful") and a two-line name ("Ganesha Lahari") still produce cards
+  /// of exactly the same height.
   static double _cardHeightFor(
     BuildContext context,
     double coverWidth, {
@@ -101,15 +122,12 @@ abstract final class HomeSectionLayout {
   }) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
-    final titleLine = _lineHeight(
-      theme.typography.small.copyWith(fontWeight: FontWeight.w600),
-    );
     final subtitleLine =
         withSubtitle ? _lineHeight(theme.typography.xSmall) : 0.0;
     final subtitleGap = withSubtitle ? titleSubtitleGap : 0.0;
     return coverWidth +
         (cardTextGap * scale) +
-        titleLine +
+        trackTitleBlockHeight(context) +
         (subtitleGap * scale) +
         subtitleLine +
         (cardPadding * scale);

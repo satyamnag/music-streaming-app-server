@@ -128,14 +128,43 @@ void main() {
               .first,
         );
 
-    // ALBUM row: the card carries a title AND a subtitle, and the original
-    // invariant still applies to it unchanged — no dead band between the
-    // subtitle and the card's bottom beyond the card's own bottom padding.
+    // ALBUM row: the card carries a title AND a subtitle. The invariant this
+    // test exists to protect is that the row has no DEAD BAND — no reserved
+    // space the card does not actually fill.
+    //
+    // ## Why this no longer measures from the subtitle's bottom
+    // The album title is now a FIXED two-line block (so the real album names are
+    // not truncated — see `TrackCard.albumTitleBlock`). A name that fits on one
+    // line therefore leaves its second line unused INSIDE the block. Measuring
+    // "subtitle bottom to card bottom" would read that unused line as a dead
+    // band, but it is not one: it is the deliberate reserve that makes a
+    // one-line name ("Soulful") and a two-line name ("Ganesha Lahari") render
+    // cards of exactly the same height.
+    //
+    // The invariant that still matters, and that a dead band would break, is that
+    // the card fills its row EXACTLY: the row is derived from the card's own
+    // geometry, so any reserve the card does not use shows up as the card being
+    // shorter than its row.
     const albumSection = HomeAlbumsSection(albums: []);
     final albumRow = rowOf(albumSection);
     final albumCardRect = cardOf(albumSection, HomeAlbumCard);
     expect(albumCardRect.height, albumRow.height,
-        reason: 'album card must fill the row height exactly');
+        reason: 'album card must fill the row height exactly — a row taller '
+            'than its card is the dead band this test exists to catch');
+    expect(
+      albumRow.height,
+      closeTo(
+        HomeSectionLayout.rowHeight(
+          tester.element(find.byType(HomeAlbumCard).first),
+        ),
+        0.5,
+      ),
+      reason: 'the album row must be exactly the published row height',
+    );
+
+    // The card's text block must still be fully inside the card: the fixed
+    // two-line title plus the subtitle and the bottom padding is what the row
+    // height is derived from.
     final subtitle = find
         .descendant(
           of: find
@@ -148,11 +177,11 @@ void main() {
         )
         .at(1);
     final subtitleRect = tester.getRect(subtitle);
-    final dead = albumRow.height -
-        (subtitleRect.bottom - albumCardRect.top) -
-        HomeSectionLayout.cardPadding;
-    expect(dead.abs(), lessThanOrEqualTo(1.0),
-        reason: 'no dead band between the album subtitle and the card bottom');
+    expect(
+      subtitleRect.bottom,
+      lessThanOrEqualTo(albumCardRect.bottom),
+      reason: 'the subtitle must never be pushed past the card bottom',
+    );
 
     // TRACK rows: the track card has NO subtitle any more (the album line was
     // removed so the name could use the full width) and its name is split across

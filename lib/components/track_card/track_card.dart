@@ -413,35 +413,53 @@ class TrackCard extends StatelessWidget {
       );
     }
 
+    /// The ALBUM/playlist title: the same two-line block the track card uses,
+    /// with the subtitle kept underneath it.
+    ///
+    /// ## Why this is no longer a single ellipsized line
+    /// A device screenshot of the home Albums row showed three consecutive cards
+    /// reading "Ganesha …", "Ganapati …" and "Venkates…". The album card was a
+    /// fixed 125dp box whose title got ONE line at the body size, so the catalogue's
+    /// real names — "Ganesha Lahari", "Ganapati Vaibhavam", "Venkatesa Mahima" —
+    /// were all cut off mid-word even though the card had an empty second line's
+    /// worth of room beneath it. Truncating the artist's own album name on the
+    /// main browse surface is a content failure, not a layout preference, so the
+    /// title now gets the same measured two-line treatment as a track name.
+    ///
+    /// Reuses [trackTitleBlock] rather than re-deriving the split: that function
+    /// already measures the name with the very style and scaler the [Text]
+    /// widgets render with, and already guarantees the first word takes line one
+    /// and the remainder line two, never a third. One implementation means the
+    /// album and track cards cannot drift apart.
+    Widget albumTitleBlock() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // The title block is a FIXED two-line box, so a one-line name and a
+          // two-line name produce cards of exactly the same height — the same
+          // contract the track card's block keeps, and the number
+          // [HomeSectionLayout] reserves the tile from.
+          trackTitleBlock(),
+          // From the shared layout constant, not a literal 2, so the gap the
+          // card renders is the same number the tile height is computed from.
+          SizedBox(height: HomeSectionLayout.titleSubtitleGap * scale),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.typography.xSmall.copyWith(
+              color: subtitleColor,
+            ),
+          ),
+        ],
+      );
+    }
+
     final titleBox = titleLines > 1
         ? trackTitleBlock()
-        // ALBUM/playlist card: one title line over the subtitle, unchanged.
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.typography.small.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: titleColor,
-                ),
-              ),
-              // From the shared layout constant, not a literal 2, so the gap the
-              // card renders is the same number the tile height is computed from.
-              SizedBox(height: HomeSectionLayout.titleSubtitleGap * scale),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.typography.xSmall.copyWith(
-                  color: subtitleColor,
-                ),
-              ),
-            ],
-          );
+        // ALBUM/playlist card: two title lines over the subtitle.
+        : albumTitleBlock();
 
     // The track card's control now lives INSIDE [titleBox], sharing one of its
     // two lines, so the card's column is the block alone. The album card keeps
