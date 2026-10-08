@@ -335,12 +335,10 @@ class _HomeHeaderRow extends StatelessWidget {
           // the row has. Scaling down keeps the whole name at every width, and
           // only scales when it must, so nothing changes when there is room.
           Expanded(
-            // scaleDown restores the brand name to its fixed 30px Cookie size —
-            // the styling earlier builds used — and only shrinks it, as a last
-            // resort, on a screen so narrow that the row physically cannot hold
-            // it: never cropped, never truncated, never wrapped. The scale is
-            // exactly 1.0 whenever the name fits, so normal phones render the
-            // name at its full, untouched size.
+            // scaleDown keeps the whole brand name visible at every width — it
+            // only shrinks, as a last resort, on a screen so narrow that the row
+            // physically cannot hold it: never cropped, never truncated, never
+            // wrapped. The scale is exactly 1.0 whenever the name fits.
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -348,10 +346,25 @@ class _HomeHeaderRow extends StatelessWidget {
                 'Soulful Bhakti',
                 maxLines: 1,
                 style: TextStyle(
-                  fontFamily: FontFamily.cookie,
-                  fontSize: 30,
-                  letterSpacing: 1.8,
-                  fontWeight: FontWeight.w500,
+                  // Dancing Script — the brand name's typeface.
+                  //
+                  // A script face, so its glyphs are much NARROWER per point than
+                  // the geometric Cookie it replaces while its ascenders and
+                  // descenders run far outside the em box. 26px (down from
+                  // Cookie's 30) keeps the name the same optical height and
+                  // roughly the same width in the header row; the taller
+                  // line-height below stops the flourishes on the 'S', 'f' and
+                  // 'k' from being clipped by the row's fixed toolbar height.
+                  fontFamily: FontFamily.dancingScript,
+                  fontSize: 26,
+                  height: 1.35,
+                  // Script faces are joined by design, so the word-spacing should
+                  // read as handwriting rather than as tracked-out capitals.
+                  // Cookie's 1.8 letter-spacing made Dancing Script look spaced
+                  // apart; 0.4 keeps the two words distinct without breaking the
+                  // cursive flow.
+                  letterSpacing: 0.4,
+                  fontWeight: FontWeight.w600,
                   color: color,
                   shadows: shadows,
                 ),

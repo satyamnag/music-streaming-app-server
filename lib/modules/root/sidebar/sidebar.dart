@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import 'package:sangeet/collections/fonts.gen.dart';
 import 'package:sangeet/collections/side_bar_tiles.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -55,9 +56,15 @@ class Sidebar extends HookConsumerWidget {
         child: mediaQuery.lgAndUp
             ? DefaultTextStyle(
                 style: TextStyle(
-                  fontFamily: "Cookie",
-                  fontSize: 30,
-                  letterSpacing: 1.8,
+                  // Dancing Script — the brand name's typeface, matching the home
+                  // header and the splash screen. Sized/spaced for the script
+                  // face rather than Cookie's 30/1.8; see the home header for
+                  // the full reasoning.
+                  fontFamily: FontFamily.dancingScript,
+                  fontSize: 26,
+                  height: 1.35,
+                  letterSpacing: 0.4,
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.foreground,
                 ),
                 child: const Text("Soulful Bhakti"),
