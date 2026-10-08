@@ -72,36 +72,59 @@ abstract final class HomeSectionLayout {
   /// loaded rows stay exact.
   static const double skeletonHeadroom = 4;
 
-  /// Measured height of one line rendered with [style], at the text scale the
-  /// card's own `Text` widgets will actually use.
+  /// Measured height of one line rendered with [style], rounded UP to a whole
+  /// pixel, at the font and text scale the card's own `Text` widgets use.
   ///
-  /// ## Why the [TextScaler] is applied here
-  /// Every `Text` in the card renders under `MediaQuery.textScalerOf(context)`,
-  /// so the height this function reports must be measured at that same scale or
-  /// the reserve will not match what is rendered. Measuring WITHOUT the scaler
-  /// made the row 2dp shorter than the album card's real text block on a device,
-  /// which surfaced as Flutter's "BOTTOM OVERFLOWED BY 2.0 PIXEL" stripes across
-  /// every card in the home Albums row.
+  /// ## Why the reserve did not match the card (the device overflow)
+  /// On a real phone every album card in the home row overflowed its row:
   ///
-  /// The mismatched magnitude is a real device property, not a test artefact: the
-  /// harness runs at textScaler 1.0, where the two measurements happen to agree,
-  /// so no unit test could see it. It only appears at the system font sizes real
-  /// phones use.
+  ///   A RenderFlex overflowed by 2.0 pixels on the bottom.
+  ///   Column:lib/components/track_card/track_card.dart:537
+  ///   constraints: BoxConstraints(0.0<=w<=125.0, 0.0<=h<=189.3)
   ///
-  /// [style] must be the style the `Text` renders with; the caller is responsible
-  /// for including any `copyWith` the card applies (font weight, colour) so the
-  /// measurement matches the render.
+  /// Working back from those numbers, the card's subtitle line was RESERVED as
+  /// 13.97dp but RENDERED as 15.97dp — exactly the 2dp reported. The two numbers
+  /// come from the same font:
+  ///
+  ///   13.9667 / 14 = 0.9976   <- a bare `TextStyle`'s own ascent + descent
+  ///   15.9667 / 14 = 1.1405   <- the line box the theme's text style produces
+  ///
+  /// A `Text` does not render with the bare style it is given: it MERGES that
+  /// style over the ambient `DefaultTextStyle`, and the theme's default text
+  /// style carries its own font family and line-height. A `TextPainter` handed
+  /// the bare style therefore measures a DIFFERENT font than the one the screen
+  /// paints, and the difference is per line.
+  ///
+  /// ## The fix
+  /// Measure the style as the card will RENDER it — merged over
+  /// `DefaultTextStyle.of(context).style`, exactly as `Text` does — and pass the
+  /// same [TextScaler]. [TrackCard] already measures its play control this way
+  /// (see `TrackCard._playButtonDiameter`), so this brings the layout's
+  /// measurement in line with the card's own.
+  ///
+  /// Rounding UP is the second half of the guard: the engine lays a line out in
+  /// whole logical pixels, so a fractional measurement can be up to a pixel short
+  /// of the box it stands for. [trackTitleBlockHeight] already rounds each title
+  /// line up for that reason; the subtitle line had no such guard.
+  ///
+  /// [style] must be the style the `Text` is given, including any `copyWith` the
+  /// card applies (font weight, colour), so that the merge reproduces the render.
   static double _lineHeight(BuildContext context, TextStyle style) {
+    // `Text` merges its own style over the ambient default, so measuring the
+    // bare style measures the wrong font. Mirror the merge.
+    final rendered = DefaultTextStyle.of(context).style.merge(style);
     final painter = TextPainter(
-      text: TextSpan(text: 'Ag', style: style),
+      text: TextSpan(text: 'Ag', style: rendered),
       maxLines: 1,
       textDirection: TextDirection.ltr,
-      // The same scaler the card's Text widgets use — see the note above.
+      // The same scaler the card's Text widgets use.
       textScaler: MediaQuery.textScalerOf(context),
     )..layout();
     final height = painter.height;
     painter.dispose();
-    return height;
+    // Ceil, so the reserve can never be a fraction of a pixel short of the
+    // whole-pixel line box the engine actually lays out.
+    return height.ceilToDouble();
   }
 
   /// Height of one home card whose square cover is [coverWidth] wide.
