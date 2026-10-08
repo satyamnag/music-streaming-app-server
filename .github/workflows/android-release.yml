@@ -30,13 +30,20 @@ on:
           - both
         default: appbundle
       version_code:
-        description: Android versionCode (monotonic, must increase per Play upload)
-        type: number
-        default: 75
-      version_name:
-        description: Android versionName (user-visible, e.g. 75 or 75.0)
+        description: >-
+          Android versionCode. LEAVE BLANK to use pubspec.yaml's `version:`
+          (recommended). Supplying a value here OVERRIDES pubspec via
+          --build-number, which is how an AAB ends up disagreeing with the
+          "buildNumber (version)" line the About screen reads at runtime. Only
+          set this to recover a specific upload.
         type: string
-        default: "75"
+        default: ""
+      version_name:
+        description: >-
+          Android versionName. LEAVE BLANK to use pubspec.yaml's `version:`
+          (recommended). Supplying a value OVERRIDES pubspec via --build-name.
+        type: string
+        default: ""
       split_per_abi:
         description: >-
           Split APK per CPU architecture (smaller downloads). DOES NOT WORK YET:
@@ -161,20 +168,62 @@ jobs:
       - name: Generate code (routes, drift, envied)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # Resolve the version ONCE, from pubspec, and export it for both build
+      # steps and for the verification step at the end.
+      #
+      # WHY: the About screen renders `"<buildNumber> (<version>)"` from
+      # PackageInfo, which is the Android versionCode/versionName baked in at
+      # build time. If the workflow passes --build-number/--build-name, those
+      # OVERRIDE pubspec and the artifact can ship a version that does not match
+      # the source it was built from. Reading pubspec here and passing nothing
+      # unless the operator explicitly asked for an override makes the artifact
+      # and the About screen the same number by construction.
+      - name: Resolve version
+        id: version
+        run: |
+          SPEC="$(grep -E '^version:' pubspec.yaml | head -n1 | sed -E 's/^version:[[:space:]]*//')"
+          if [ -z "$SPEC" ]; then
+            echo "::error::pubspec.yaml has no top-level 'version:' line"
+            exit 1
+          fi
+          NAME="${SPEC%%+*}"
+          CODE="${SPEC##*+}"
+          if [ "$CODE" = "$SPEC" ]; then
+            echo "::error::pubspec version '$SPEC' has no +buildNumber part"
+            exit 1
+          fi
+
+          # An explicit input wins, so a specific upload can still be reproduced.
+          if [ -n "${{ inputs.version_code }}" ]; then CODE="${{ inputs.version_code }}"; fi
+          if [ -n "${{ inputs.version_name }}" ]; then NAME="${{ inputs.version_name }}"; fi
+
+          case "$CODE" in
+            ''|*[!0-9]*) echo "::error::versionCode '$CODE' must be a positive integer"; exit 1 ;;
+          esac
+
+          echo "version_name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "version_code=${CODE}" >> "$GITHUB_OUTPUT"
+          echo "About screen will show: ${CODE} (${NAME})"
+          {
+            echo "### Version"
+            echo ""
+            echo '```'
+            echo "versionName : ${NAME}"
+            echo "versionCode : ${CODE}"
+            echo "About screen: ${CODE} (${NAME})"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Build APK
         if: ${{ inputs.format == 'apk' || inputs.format == 'both' }}
         env:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
+          ARGS="--build-number ${{ steps.version.outputs.version_code }} --build-name ${{ steps.version.outputs.version_name }}"
           if [ "${{ inputs.split_per_abi }}" = "true" ]; then
-            flutter build apk --release --flavor ${{ inputs.flavor }} \
-              --build-number ${{ inputs.version_code }} \
-              --build-name ${{ inputs.version_name }} \
-              --split-per-abi
+            flutter build apk --release --flavor ${{ inputs.flavor }} $ARGS --split-per-abi
           else
-            flutter build apk --release --flavor ${{ inputs.flavor }} \
-              --build-number ${{ inputs.version_code }} \
-              --build-name ${{ inputs.version_name }}
+            flutter build apk --release --flavor ${{ inputs.flavor }} $ARGS
           fi
 
       - name: Build App Bundle (Play upload)
@@ -183,8 +232,8 @@ jobs:
           RELEASE_CHANNEL: ${{ inputs.channel }}
         run: |
           flutter build appbundle --release --flavor ${{ inputs.flavor }} \
-            --build-number ${{ inputs.version_code }} \
-            --build-name ${{ inputs.version_name }}
+            --build-number ${{ steps.version.outputs.version_code }} \
+            --build-name ${{ steps.version.outputs.version_name }}
 
       - name: List build outputs
         run: |
@@ -192,6 +241,70 @@ jobs:
           find build/app/outputs/flutter-apk -type f -name '*.apk' -exec ls -lh {} \; 2>/dev/null || true
           echo "--- bundle ---"
           find build/app/outputs/bundle -type f -name '*.aab' -exec ls -lh {} \; 2>/dev/null || true
+
+      # Verify the ARTIFACT, not the build log.
+      #
+      # The point of these steps is that "the build succeeded" says nothing about
+      # what is inside the bundle. A Play AAB must carry the intended
+      # versionCode/versionName and must be signed with the upload key. Both are
+      # read back out of the produced file here, so a mismatch fails the run
+      # rather than being discovered in the Play Console.
+      - name: Verify AAB
+        if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
+        run: |
+          AAB="$(find build/app/outputs/bundle -maxdepth 2 -type f -name '*.aab' | head -n1)"
+          test -n "$AAB" || { echo "::error::No AAB produced"; exit 1; }
+          echo "AAB      : $AAB"
+          ls -lh "$AAB"
+          echo "SHA-256  : $(sha256sum "$AAB" | awk '{print $1}')"
+
+          # `bundletool` is the canonical tool for inspecting a bundle; the
+          # Android SDK ships it. Fall back to unzipping the manifest if the SDK
+          # path is unavailable, so the check never silently no-ops.
+          BT="$(find "$ANDROID_HOME" -name 'bundletool*.jar' 2>/dev/null | head -n1)"
+          if [ -n "$BT" ]; then
+            echo "Using bundletool: $BT"
+            java -jar "$BT" dump manifest --bundle "$AAB" > manifest.xml
+            grep -E 'versionCode|versionName|package=' manifest.xml | head -n5
+            ACTUAL_CODE="$(grep -oE 'versionCode="[0-9]+"' manifest.xml | head -n1 | grep -oE '[0-9]+')"
+          else
+            echo "::warning::bundletool not found; reading the version from the AAB's base manifest instead."
+            unzip -o -q "$AAB" -d aab_extract
+            ACTUAL_CODE="$(grep -aoE 'versionCode[^0-9]{0,8}[0-9]+' aab_extract/base/manifest/AndroidManifest.xml | head -n1 | grep -oE '[0-9]+$')"
+          fi
+
+          EXPECTED="${{ steps.version.outputs.version_code }}"
+          echo "Expected versionCode: $EXPECTED"
+          echo "Actual   versionCode: ${ACTUAL_CODE:-<unreadable>}"
+          if [ "$ACTUAL_CODE" != "$EXPECTED" ]; then
+            echo "::error::the AAB carries versionCode '${ACTUAL_CODE}' but '$EXPECTED' was requested"
+            exit 1
+          fi
+
+      - name: Verify AAB signature
+        if: ${{ inputs.format == 'appbundle' || inputs.format == 'both' }}
+        run: |
+          AAB="$(find build/app/outputs/bundle -maxdepth 2 -type f -name '*.aab' | head -n1)"
+          # A Play upload must be signed with the UPLOAD key (Play re-signs with
+          # the app signing key). An unsigned bundle is rejected by the Console.
+          #
+          # `jarsigner -verify` is the right tool for a bundle: it is a JAR, and
+          # apksigner does not read .aab.
+          jarsigner -verify -verbose -certs "$AAB" > js.txt 2>&1 || true
+          if ! grep -qE 'jar verified|verified' js.txt; then
+            echo "::error::the AAB is not signed"
+            tail -n 40 js.txt
+            exit 1
+          fi
+          echo "AAB is signed."
+          grep -E 'CN=|SHA-256 digest' js.txt | head -n5
+          {
+            echo "### AAB signature"
+            echo ""
+            echo '```'
+            grep -E 'jar verified|CN=' js.txt | head -n5
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload APK artifact
         if: ${{ inputs.format == 'apk' || inputs.format == 'both' }}
@@ -212,3 +325,13 @@ jobs:
           name: soulful-bhakti-aab
           # build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab
           path: build/app/outputs/bundle/*/*.aab
+
+      # Signing material and the compile-time .env are written into the workspace
+      # above. Remove them whatever happened, so an artifact or a subsequent step
+      # can never pick them up.
+      - name: Clean up secrets (always)
+        if: always()
+        run: |
+          rm -f android/key.properties android/app/upload-keystore.jks .env manifest.xml js.txt
+          rm -rf aab_extract
+          echo "Signing files and .env removed from the workspace."

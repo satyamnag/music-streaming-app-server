@@ -3,7 +3,12 @@ description: Open source extensible music streaming platform and app, based on B
 
 publish_to: "none"
 
-version: 1.0.0+77
+# versionName+buildNumber. The About screen renders these as
+# "<buildNumber> (<version>)" — see lib/pages/settings/about.dart — so the
+# `+78` half is what puts "78 (1.0.0)" on that screen, and it is also the
+# Android versionCode Google Play uses to order uploads. It must increase by at
+# least one on every Play upload; 78 follows the previous 1.0.0+77.
+version: 1.0.0+78
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
@@ -198,6 +203,14 @@ flutter:
     - assets/branding/sangeet-logo.png
     - assets/branding/sangeet-logo-light.png
     - assets/branding/sangeet-logo.ico
+    # The Dancing Script license, bundled as an asset.
+    #
+    # `fonts:` below ships the .ttf, but it does NOT ship this license file —
+    # an entry under `fonts:` only bundles the font binaries. The OFL-1.1
+    # requires the license to accompany the font wherever it is distributed, so
+    # it is listed here as a regular asset as well. Without this the license
+    # would exist only in the source tree and not in the built app.
+    - assets/fonts/DancingScript-OFL.txt
     - assets/plugins/sangeet-supabase-audio/plugin.smplug
     - LICENSE
     - packages/flutter_undraw/assets/undraw/access_denied.svg
@@ -230,6 +243,27 @@ flutter:
         - asset: assets/fonts/Cookie-Regular.ttf
           style: normal
           weight: 500
+    # Dancing Script — the brand name's typeface ("Soulful Bhakti").
+    #
+    # A VARIABLE font: one file carries the whole `wght` axis, 400..700, default
+    # 400 (verified by reading the font's own `fvar` table). Flutter maps a
+    # requested `FontWeight` onto that axis, so the name can be weighted without
+    # shipping a second file. Declaring the range with two entries is what tells
+    # Flutter the file is variable and that weights inside the range are
+    # available; a single `weight: 400` entry would make every heavier weight
+    # synthesise a fake bold on top of the real outlines.
+    #
+    # OFL-1.1 licensed (see assets/fonts/DancingScript-OFL.txt); the license file
+    # ships alongside the font because the OFL requires the license to travel
+    # with the font.
+    - family: DancingScript
+      fonts:
+        - asset: assets/fonts/DancingScript-VariableFont_wght.ttf
+          style: normal
+          weight: 400
+        - asset: assets/fonts/DancingScript-VariableFont_wght.ttf
+          style: normal
+          weight: 700
 
 
 flutter_gen:
