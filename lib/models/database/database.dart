@@ -430,6 +430,8 @@ class AppDatabase extends _$AppDatabase {
   ) async {
     final rows = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
     final present = rows.map((row) => row.read<String>('name')).toSet();
+    // ignore: avoid_print
+    print('DIAGADD ${table.actualTableName}.${column.name} exists=${present.contains(column.name)} all=$present');
     if (present.contains(column.name)) return;
     await m.addColumn(table, column);
   }
