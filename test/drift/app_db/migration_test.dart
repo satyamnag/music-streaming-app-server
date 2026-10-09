@@ -1,6 +1,6 @@
 // ignore_for_file: unused_local_variable, unused_import
 import 'package:drift/drift.dart';
-import 'package:drift_dev/api/migrations.dart';
+import 'package:drift_dev/api/migrations_native.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:test/test.dart';
 import 'generated/schema.dart';
@@ -38,21 +38,36 @@ void main() {
     // the whole `onUpgrade` chain from its starting version, the intermediate
     // steps are still exercised - every `from < version` branch is taken on the
     // way up.
-    final versions = GeneratedHelper.versions;
+    // `GeneratedHelper.versions` is a `static const`, so this is a const list.
+    const versions = GeneratedHelper.versions;
+    // Derived on purpose: hardcoding the number would silently keep validating
+    // an older target after a schemaVersion bump, which is the exact drift this
+    // file exists to prevent.
+    // ignore: prefer_const_declarations
     final currentVersion = versions.last;
 
     for (final fromVersion in versions) {
       if (fromVersion == currentVersion) continue;
       test('from $fromVersion migrates to $currentVersion', () async {
-        final schema = await verifier.schemaAt(fromVersion);
-        // `AppDatabase.forTesting` takes the executor the verifier hands out, so
-        // the migration runs against the historical schema while the migration
-        // code under test is the app's real one.
+        // `startAt` gives a connection whose schema really IS `fromVersion`.
         //
-        // The previous `Database(...)` here referenced a name that exists nowhere
-        // in the project, so this file never compiled and no migration hop had
-        // ever actually run.
-        final db = AppDatabase.forTesting(schema.newConnection());
+        // This was `schemaAt(fromVersion)`, and that was the whole reason these
+        // tests disagreed with reality: `schemaAt` returns an
+        // `InitializedSchema`, and handing `schema.newConnection()` to
+        // `AppDatabase` produced a database whose `preferences_table` already
+        // carried every CURRENT column. The migration then re-added columns that
+        // were already present, and the failure surfaced as
+        //
+        //     duplicate column name: cache_music
+        //
+        // on a recent SQLite - which builds its message lazily, so the bare
+        // "SQL logic error (code 1)" an older SQLite reported was the same
+        // duplicate wearing a different hat.
+        //
+        // The connection from `startAt` is the v[fromVersion] schema, so the
+        // step chain does the work it is meant to do.
+        final connection = await verifier.startAt(fromVersion);
+        final db = AppDatabase.forTesting(connection);
         await verifier.migrateAndValidate(db, currentVersion);
         await db.close();
       });
