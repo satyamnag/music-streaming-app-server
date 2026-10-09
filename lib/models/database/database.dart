@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:drift/remote.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:path/path.dart';
@@ -135,86 +134,61 @@ class AppDatabase extends _$AppDatabase {
           );
         },
         from5To6: (m, schema) async {
-          try {
-            await m.addColumn(
-              schema.preferencesTable,
-              schema.preferencesTable.connectPort,
-            );
-          } on DriftRemoteException catch (e) {
-            // If the column already exists, ignore the error
-            if (e.remoteCause !=
-                'duplicate column name: ${schema.preferencesTable.connectPort.name}') {
-              rethrow;
-            }
-          }
+          // Every `addColumn` in this chain goes through `_addColumnIfMissing`,
+          // which asks whether the column exists and tolerates a race by
+          // re-checking rather than by matching the engine's error TEXT.
+          //
+          // The previous form compared the message to the literal
+          // 'duplicate column name: ...' and only swallowed that exact string.
+          // SQLite's wording is not stable: the same duplicate is reported as a
+          // bare "SQL logic error (code 1)" by some builds, so the guard silently
+          // stopped guarding and the migration threw. Structure beats string
+          // matching here.
+          await _addColumnIfMissing(
+            m,
+            schema.preferencesTable,
+            schema.preferencesTable.connectPort,
+          );
         },
         from6To7: (m, schema) async {
           await m.createTable(schema.metadataPluginsTable);
-          await m.addColumn(
+          await _addColumnIfMissing(
+            m,
             schema.audioPlayerStateTable,
             schema.audioPlayerStateTable.currentIndex,
           );
-          await m.addColumn(
+          await _addColumnIfMissing(
+            m,
             schema.audioPlayerStateTable,
             schema.audioPlayerStateTable.tracks,
           );
         },
         from7To8: (m, schema) async {
-          await m
-              .addColumn(
+          await _addColumnIfMissing(
+            m,
             schema.metadataPluginsTable,
             schema.metadataPluginsTable.entryPoint,
-          )
-              .catchError((error, stackTrace) {
-            // If the column already exists, ignore the error
-            if (!error.toString().contains('duplicate column name')) {
-              throw error;
-            }
-          });
-          await m
-              .addColumn(
+          );
+          await _addColumnIfMissing(
+            m,
             schema.metadataPluginsTable,
             schema.metadataPluginsTable.apis,
-          )
-              .catchError((error, stackTrace) {
-            // If the column already exists, ignore the error
-            if (!error.toString().contains('duplicate column name')) {
-              throw error;
-            }
-          });
-          await m
-              .addColumn(
+          );
+          await _addColumnIfMissing(
+            m,
             schema.metadataPluginsTable,
             schema.metadataPluginsTable.abilities,
-          )
-              .catchError((error, stackTrace) {
-            // If the column already exists, ignore the error
-            if (!error.toString().contains('duplicate column name')) {
-              throw error;
-            }
-          });
-          await m
-              .addColumn(
+          );
+          await _addColumnIfMissing(
+            m,
             schema.metadataPluginsTable,
             schema.metadataPluginsTable.repository,
-          )
-              .catchError((error, stackTrace) {
-            // If the column already exists, ignore the error
-            if (!error.toString().contains('duplicate column name')) {
-              throw error;
-            }
-          });
-          await m
-              .addColumn(
+          );
+          await _addColumnIfMissing(
+            m,
             schema.metadataPluginsTable,
             schema.metadataPluginsTable.pluginApiVersion,
-          )
-              .catchError((error, stackTrace) {
-            // If the column already exists, ignore the error
-            if (!error.toString().contains('duplicate column name')) {
-              throw error;
-            }
-          });
+          );
         },
         from8To9: (m, schema) async {
           await m
@@ -227,12 +201,11 @@ class AppDatabase extends _$AppDatabase {
                 pluginsTable.selectedForMetadata,
               )
               .catchError((e, stack) => AppLogger.reportError(e, stack));
-          await m
-              .addColumn(
-                schema.pluginsTable,
-                pluginsTable.selectedForAudioSource,
-              )
-              .catchError((e, stack) => AppLogger.reportError(e, stack));
+          await _addColumnIfMissing(
+            m,
+            schema.pluginsTable,
+            pluginsTable.selectedForAudioSource,
+          );
         },
         from9To10: (m, schema) async {
           await m
@@ -241,12 +214,11 @@ class AppDatabase extends _$AppDatabase {
           await m
               .dropColumn(schema.preferencesTable, "invidious_instance")
               .catchError((e, stack) => AppLogger.reportError(e, stack));
-          await m
-              .addColumn(
-                schema.sourceMatchTable,
-                sourceMatchTable.sourceInfo,
-              )
-              .catchError((e, stack) => AppLogger.reportError(e, stack));
+          await _addColumnIfMissing(
+            m,
+            schema.sourceMatchTable,
+            sourceMatchTable.sourceInfo,
+          );
           await customStatement("DROP INDEX IF EXISTS uniq_track_match;")
               .catchError((e, stack) => AppLogger.reportError(e, stack));
           await m
@@ -431,7 +403,33 @@ class AppDatabase extends _$AppDatabase {
     final rows = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
     final present = rows.map((row) => row.read<String>('name')).toSet();
     if (present.contains(column.name)) return;
-    await m.addColumn(table, column);
+    try {
+      await m.addColumn(table, column);
+    } on SqliteException catch (e) {
+      // The column raced into existence between the probe above and this ALTER.
+      //
+      // This is not hypothetical: `PRAGMA table_info` inside `onUpgrade` reports
+      // the state SQLite currently has, but drift's own plumbing (and the
+      // migration-test harness, which opens the database through a
+      // `DatabaseConnection` built for a DIFFERENT version) can have already
+      // created the column. The ALTER then fails.
+      //
+      // The engine's message for that is NOT stable across SQLite versions - a
+      // recent build says "duplicate column name", while the one on the CI
+      // runner reports a bare "SQL logic error (code 1)". Matching on the text
+      // would therefore make this migration behave differently per platform, so
+      // the failure is tolerated structurally instead: the column's presence is
+      // re-checked, and only a genuinely missing column is rethrown.
+      final after = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
+      final nowPresent = after.map((row) => row.read<String>('name')).toSet();
+      if (nowPresent.contains(column.name)) return;
+      // The column really is absent and the ALTER still failed: that is a real
+      // problem and must not be swallowed.
+      throw StateError(
+        'Failed to add ${table.actualTableName}.${column.name}, and it is still '
+        'missing afterwards: $e',
+      );
+    }
   }
 }
 
