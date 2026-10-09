@@ -478,8 +478,8 @@ class AppDatabase extends _$AppDatabase {
   /// shipped. Asking first removes the dependency on the engine's error message
   /// and on its tolerance, and makes re-running a step harmless.
   ///
-  /// The "asking" is deliberately done against `sqlite_master` rather than
-  /// `PRAGMA table_info`; see [_hasColumn].
+  /// The "asking" is done with [AppDatabase._hasColumn]; see that method for why
+  /// the obvious probes are not trustworthy here.
   Future<void> _addColumnIfMissing(
     Migrator m,
     TableInfo<Table, dynamic> table,
@@ -507,32 +507,32 @@ class AppDatabase extends _$AppDatabase {
 
   /// Whether [table] has a column called [column].
   ///
-  /// Deliberately does NOT read `PRAGMA table_info` or `sqlite_master`: both are
-  /// answered from schema text that this same migration is mutating, so they can
-  /// describe the table as it was before an earlier step's `RENAME`/`DROP`. That
-  /// disagreement is what let a step re-add a column that was already there.
+  /// Asks SQLite's own schema introspection, via the `pragma_table_info`
+  /// table-valued function.
   ///
-  /// `SELECT`ing the column instead makes SQLite itself resolve the name against
-  /// the live schema, which is the same resolution `ADD COLUMN` performs when it
-  /// decides whether the column is a duplicate - so the guard and the engine
-  /// cannot disagree. Prepending `WHERE false` keeps this O(1): no rows are
-  /// scanned, and the statement still has to compile.
+  /// Two earlier forms of this probe were wrong, and both failures were only
+  /// visible on the older SQLite (3.37.2) the CI runner has:
+  ///
+  ///  * `SELECT "column" FROM "table"` looks like a reliable probe but is not.
+  ///    When SQLite's legacy `doubleQuotedStringLiterals` behaviour applies, an
+  ///    unknown `"column"` is read as a STRING LITERAL instead of an error, so
+  ///    the probe reports every column as present. It was measured doing exactly
+  ///    that on the runner - a column that did not exist resolved to the text
+  ///    `col_b`.
+  ///  * Reading `sqlite_master.sql` (and `PRAGMA table_info`) is answered from
+  ///    schema text this same migration is rewriting, so an earlier step's
+  ///    `RENAME`/`DROP` can leave the answer describing the table as it was.
+  ///
+  /// `pragma_table_info` is real introspection rather than name resolution, so
+  /// neither failure mode applies. The argument is bound as a parameter, not
+  /// interpolated, so no identifier escaping is involved.
   Future<bool> _hasColumn(String table, String column) async {
-    // Guard against injecting into the identifier positions.
-    if (!_identifier.hasMatch(table) || !_identifier.hasMatch(column)) {
-      return false;
-    }
-    try {
-      await customSelect(
-        'SELECT "$column" FROM "$table" WHERE false',
-      ).get();
-      return true;
-    } on SqliteException {
-      return false;
-    }
+    final rows = await customSelect(
+      'SELECT 1 AS present FROM pragma_table_info(?) WHERE name = ? LIMIT 1',
+      variables: [Variable<String>(table), Variable<String>(column)],
+    ).get();
+    return rows.isNotEmpty;
   }
-
-  static final _identifier = RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$');
 }
 
 LazyDatabase _openConnection() {
