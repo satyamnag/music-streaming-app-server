@@ -219,27 +219,55 @@ void main() {
     final spanX = (right - cornerSkip) - (left + cornerSkip);
     final spanY = (bottom - cornerSkip) - (top + cornerSkip);
 
-    // Antialiasing and artwork that itself contains warm tones mean a perfect
-    // clean sweep is not a fair bar; "a clear majority of sampled positions"
-    // is, and it still fails loudly when an edge paints no rim at all (the
-    // bottom edge measured 0 before this fix).
-    expect(topGold, greaterThan(spanX * 0.7),
-        reason: 'the top rim must be gold along its length');
-    expect(bottomGold, greaterThan(spanX * 0.7),
-        reason: 'the BOTTOM rim must be gold too — the old maroon end '
-            'disappeared into the dark cover here');
-    expect(leftGold, greaterThan(spanY * 0.7),
-        reason: 'the left rim must be gold along its length');
-    expect(rightGold, greaterThan(spanY * 0.7),
-        reason: 'the right rim must be gold along its length');
+    // ---------------------------------------------------------------------
+    // INVERTED: the card must now paint NO gold rim on any edge.
+    //
+    // This test used to assert the opposite - that all four edges carried a
+    // gold rim - and it is kept, with its pixel-probe machinery intact, because
+    // a removal is exactly the kind of change that silently comes back. The
+    // outline was dropped by request: the gold edge read as a yellow frame
+    // around every album and track tile rather than as subtle separation.
+    //
+    // WHAT THIS CAN AND CANNOT PROVE, measured rather than assumed: the test
+    // cover (`Assets.images.placeholder`) is itself full of warm gold pixels, so
+    // a raw "is there gold near the edge" count cannot distinguish a rim from
+    // artwork. Probing this card, the top edge reports 161 gold samples and the
+    // left 286 - with the values CONSTANT for 8+ pixels inward
+    // (`203,137,0` then `172,103,0`), which is a photograph, not a 1.5dp stroke;
+    // the bottom and right edges sit on the bare backdrop at 128,128,128.
+    //
+    // So the pixel count is reported for diagnosis, and the ASSERTION is made on
+    // the thing that is actually unambiguous: the painter. A rim cannot exist
+    // without `CardBorder.outline`'s CustomPaint in the tree, and that is exact.
+    // ---------------------------------------------------------------------
+    // ignore: avoid_print
+    print('NO-RIM PROBE (artwork makes these counts noisy; the painter '
+        'assertion below is the real guard): '
+        'top=$topGold bottom=$bottomGold left=$leftGold right=$rightGold');
+
+    final outlinePaint = find.descendant(
+      of: find.byType(TrackCard),
+      matching: find.byWidgetPredicate(
+        (w) => w is CustomPaint && w.painter != null,
+      ),
+    );
+    expect(
+      outlinePaint,
+      findsNothing,
+      reason: 'no painter may be laid over the card. This is the exact guard: '
+          'the gold outline was drawn by a CustomPaint here, so its absence is '
+          'what proves the rim is gone — a pixel count cannot, because the '
+          'cover artwork contains gold of its own',
+    );
   });
 
-  testWidgets('the outline CustomPaint is given the card\'s full rect',
-      (tester) async {
-    // The zero-size defect, pinned directly. A bare Stack child with no intrinsic
-    // size collapses to 0x0 under loose constraints, and the painter then returns
-    // early having drawn nothing — while every "a painter exists" assertion still
-    // passes.
+  testWidgets('the card no longer builds any outline painter', (tester) async {
+    // The old zero-size defect is now unreachable by construction, and this
+    // pins that directly: a bare Stack child with no intrinsic size collapsed
+    // to 0x0 under loose constraints, so the painter returned early having
+    // drawn nothing while every "a painter exists" assertion still passed.
+    // There is no outline painter any more, so the failure mode cannot recur -
+    // and this asserts its absence rather than trusting it.
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.reset);
@@ -278,15 +306,20 @@ void main() {
         (w) => w is CustomPaint && w.painter != null,
       ),
     );
-    expect(outlinePaint, findsWidgets,
-        reason: 'the outline painter must be in the tree');
 
-    final paintRect = tester.getRect(outlinePaint.first);
+    // INVERTED with the rim's removal. This used to require the outline painter
+    // to exist and to be given the card's full rect. There is no outline now, so
+    // the guard is that no foreground painter is placed over the card at all -
+    // which also covers the zero-size defect it was written for: a painter that
+    // does not exist cannot collapse to 0x0 and silently draw nothing.
     expect(
-      paintRect.size,
-      card.size,
-      reason: 'the outline painter must receive the card\'s full rect; a '
-          'zero-sized CustomPaint draws nothing and the border vanishes',
+      outlinePaint,
+      findsNothing,
+      reason: 'no painter may be laid over the card; the gold outline was '
+          'removed and this is what stops it reappearing unnoticed',
     );
+
+    expect(card.width, greaterThan(0),
+        reason: 'the card itself must still be laid out');
   });
 }

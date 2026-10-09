@@ -29,6 +29,70 @@ void main() {
       expect(FontFamily.dancingScript, 'DancingScript');
     });
 
+    test('ships STATIC instances, never a variable font', () async {
+      // Guards the fix for the bug this suite could not catch on its own.
+      //
+      // The brand name rendered in the platform sans-serif on a real Android
+      // device while every test here passed, because `flutter_test` measures
+      // with fonts pushed in through `FontLoader` - which succeeds even when the
+      // engine's own asset font loading does not. The variable font was the
+      // difference: its outlines were never applied on device and the text
+      // silently fell back.
+      //
+      // So this asserts the property that removes that failure mode: each
+      // bundled brand font must be a static TrueType with NO `fvar` table. A
+      // variable file carries one; a static instance does not.
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final fonts = manifest
+          .listAssets()
+          .where((a) =>
+              a.toLowerCase().contains('dancingscript') &&
+              a.toLowerCase().endsWith('.ttf'))
+          .toList();
+
+      expect(fonts, isNotEmpty, reason: 'the brand fonts must be bundled');
+
+      for (final asset in fonts) {
+        final bytes = await rootBundle.load(asset);
+        final data = bytes.buffer.asUint8List();
+
+        expect(
+          asset.toLowerCase().contains('variablefont'),
+          isFalse,
+          reason: '$asset is a variable font; the device fell back to a default '
+              'face with it. Ship a static instance instead.',
+        );
+
+        // A TrueType file starts with the 0x00010000 sfnt version.
+        expect(
+          data[0] == 0x00 && data[1] == 0x01 && data[2] == 0x00,
+          isTrue,
+          reason: '$asset is not a TrueType font',
+        );
+
+        // Scan the table directory for a `fvar` entry (the variation axis
+        // table). Its presence means the file is variable.
+        final entryCount = (data[4] << 8) | data[5];
+        var hasFvar = false;
+        for (var i = 0; i < entryCount; i++) {
+          final offset = 12 + i * 16;
+          if (offset + 4 > data.length) break;
+          final tag = String.fromCharCodes(data.sublist(offset, offset + 4));
+          if (tag == 'fvar') {
+            hasFvar = true;
+            break;
+          }
+        }
+        expect(
+          hasFvar,
+          isFalse,
+          reason: '$asset carries an `fvar` table, so it is a VARIABLE font. '
+              'Variable fonts are what caused the on-device fallback; the brand '
+              'name must ship static instances.',
+        );
+      }
+    });
+
     test('is bundled into the asset manifest', () async {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
       final assets = manifest.listAssets();
@@ -67,7 +131,7 @@ void main() {
       // mean something.
       final loader = FontLoader(FontFamily.dancingScript);
       loader.addFont(
-        rootBundle.load('assets/fonts/DancingScript-VariableFont_wght.ttf'),
+        rootBundle.load('assets/fonts/DancingScript-SemiBold.ttf'),
       );
       await loader.load();
 

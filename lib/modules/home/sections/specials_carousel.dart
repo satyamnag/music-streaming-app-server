@@ -24,7 +24,8 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 ///  - One slide fills the carousel exactly ([slideWidthFraction] is 1). It used
 ///    to be 0.92 so the neighbouring slide peeked in at the screen edges to
 ///    signal that the row scrolls — which instead meant a swipe brought artwork
-///    in from OUTSIDE the carousel. [slideMargin] now supplies the gutter, so the
+///    in from OUTSIDE the carousel. The gutter is now applied OUTSIDE the pager
+///    (see [slideMargin]) and the pager is clipped to the inset box, so the
 ///    banner slides within the carousel and nothing enters from beyond it.
 ///  - The list uses a [PageView], which clips its viewport and snaps to a slide,
 ///    rather than a free-scrolling ListView that would neither snap nor report
@@ -48,6 +49,12 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
   /// This is what separates the banner from the carousel's edge now that a slide
   /// fills the viewport. 12 matches the gutter the design shows on a 360dp
   /// phone.
+  ///
+  /// Applied as padding AROUND the pager, not inside each page: padding inside a
+  /// page leaves the page's own edge flush with the carousel's edge, so during a
+  /// swipe the incoming banner is clipped at the carousel edge and reads as
+  /// sliding in from beside the app. Padding outside insets the clip itself, so
+  /// a slide can only ever be seen inside the box the resting banner occupies.
   static const double slideMargin = 12;
 
   /// Aspect ratio of an admin-uploaded landscape banner: 8:3 (2.667:1).
@@ -111,26 +118,55 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
       // never stretched to fill someone else's height.
       child: SizedBox(
         height: slideHeight * scale,
-        child: PageView.builder(
-          controller: controller,
-          itemCount: specials.length,
-          onPageChanged: (index) => page.value = index,
-          itemBuilder: (context, index) {
-            final special = specials[index];
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: slideMargin * scale),
-              child: _SpecialSlide(
-                key: ValueKey(special.id),
-                special: special,
-                dots: dots,
-                onPlay: () async {
-                  await ref
-                      .read(audioPlayerProvider.notifier)
-                      .load(special.tracks, initialIndex: 0, autoPlay: true);
-                },
-              ),
-            );
-          },
+        // ---------------------------------------------------------------------
+        // The carousel CLIPS to its own bounds, and the gutter lives OUTSIDE
+        // the pager rather than inside each page.
+        //
+        // WHY, because the previous arrangement looked correct and was not:
+        // the margin used to be the padding of each PAGE, so a page filled the
+        // viewport and its 12dp gutter sat INSIDE the pager's own rect. During a
+        // swipe the incoming page's left edge therefore landed exactly on the
+        // carousel's right edge, and what the reader saw was the next banner
+        // appearing at the extreme right of the PHONE and sliding in — the page
+        // was clipped at the screen edge, so it read as arriving from outside the
+        // app rather than as a card moving within its own row. Measured on a
+        // 360dp viewport: mid-swipe the incoming page's rect was L=502..R=838
+        // against a carousel at 220..580, i.e. 258dp of it painted beyond the
+        // carousel's right edge before any clip was applied.
+        //
+        // Moving the margin to `Padding` around the pager insets the CLIP itself,
+        // so the visible area of the carousel is the visible area of a slide:
+        // nothing a slide paints can appear anywhere the resting banner does not
+        // already occupy. `ClipRect` then makes that guarantee structural - the
+        // pager can no longer paint a single pixel outside the box it was given,
+        // whatever the page transformer does.
+        //
+        // The gutter stays identical to before (12dp each side), and the resting
+        // banner keeps exactly the size and position it had, so nothing about the
+        // settled layout changes - only what is visible mid-swipe.
+        // ---------------------------------------------------------------------
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: slideMargin * scale),
+          child: ClipRect(
+            child: PageView.builder(
+              controller: controller,
+              itemCount: specials.length,
+              onPageChanged: (index) => page.value = index,
+              itemBuilder: (context, index) {
+                final special = specials[index];
+                return _SpecialSlide(
+                  key: ValueKey(special.id),
+                  special: special,
+                  dots: dots,
+                  onPlay: () async {
+                    await ref
+                        .read(audioPlayerProvider.notifier)
+                        .load(special.tracks, initialIndex: 0, autoPlay: true);
+                  },
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

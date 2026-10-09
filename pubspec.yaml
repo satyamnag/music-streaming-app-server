@@ -5,15 +5,16 @@ publish_to: "none"
 
 # versionName+buildNumber. The About screen renders these as
 # "<buildNumber> (<version>)" — see lib/pages/settings/about.dart — so the
-# `+79` half is what puts "79 (1.0.0)" on that screen, and it is also the
+# `+80` half is what puts "80 (1.0.0)" on that screen, and it is also the
 # Android versionCode Google Play uses to order uploads. It must increase by at
-# least one on every Play upload; 79 follows the released 1.0.0+78.
+# least one on every Play upload; 80 follows the released 1.0.0+79.
 #
-# 79 carries the fix for the CI-only migration failure: `ALTER TABLE ... ADD
-# COLUMN` with a drift-generated CHECK is accepted by SQLite 3.50.4 but rejected
-# by the older engine on the CI runner, which failed every v1..v8 hop there. See
-# `_addColumnWithoutCheck` in lib/models/database/database.dart.
-version: 1.0.0+79
+# 80 carries four UI fixes: the brand name now ships Dancing Script as STATIC
+# instances (the variable font silently fell back on device), the home carousel
+# clips to its own bounds so a banner can no longer appear to slide in from the
+# screen edge, braced lyric labels (`{...}` / `{{...}}`) render whole instead of
+# being ellipsised, and the gold rim was removed from the album/track cards.
+version: 1.0.0+80
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
@@ -250,23 +251,37 @@ flutter:
           weight: 500
     # Dancing Script — the brand name's typeface ("Soulful Bhakti").
     #
-    # A VARIABLE font: one file carries the whole `wght` axis, 400..700, default
-    # 400 (verified by reading the font's own `fvar` table). Flutter maps a
-    # requested `FontWeight` onto that axis, so the name can be weighted without
-    # shipping a second file. Declaring the range with two entries is what tells
-    # Flutter the file is variable and that weights inside the range are
-    # available; a single `weight: 400` entry would make every heavier weight
-    # synthesise a fake bold on top of the real outlines.
+    # STATIC instances, one file per weight. This replaced a single VARIABLE font
+    # (`DancingScript-VariableFont_wght.ttf`, one file carrying the whole `wght`
+    # axis).
+    #
+    # WHY it was replaced: with the variable file the brand name rendered in the
+    # platform sans-serif on a real device while every test passed. The tests
+    # passed because `flutter_test` measures with fonts loaded explicitly through
+    # `FontLoader`, which succeeds where the engine's own asset font loading on
+    # Android did NOT: the variable font's outlines were never applied and the
+    # text silently fell back. A script face is unmistakable, which is how the
+    # fallback was caught - in a screenshot, not in CI.
+    #
+    # Static instances remove that failure mode: each file is a plain TrueType
+    # with no `fvar`/`gvar` tables, so there is no variation axis for the engine
+    # to resolve. Three weights are shipped (400/600/700) because the brand name
+    # is drawn at `w600`, which no single static file covers; declaring the
+    # nearest neighbours lets Flutter pick the real SemiBold outline instead of
+    # synthesising a fake bold over Regular.
     #
     # OFL-1.1 licensed (see assets/fonts/DancingScript-OFL.txt); the license file
     # ships alongside the font because the OFL requires the license to travel
     # with the font.
     - family: DancingScript
       fonts:
-        - asset: assets/fonts/DancingScript-VariableFont_wght.ttf
+        - asset: assets/fonts/DancingScript-Regular.ttf
           style: normal
           weight: 400
-        - asset: assets/fonts/DancingScript-VariableFont_wght.ttf
+        - asset: assets/fonts/DancingScript-SemiBold.ttf
+          style: normal
+          weight: 600
+        - asset: assets/fonts/DancingScript-Bold.ttf
           style: normal
           weight: 700
 

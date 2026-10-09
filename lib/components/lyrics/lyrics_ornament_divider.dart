@@ -62,8 +62,15 @@ class LyricsOrnamentDivider extends StatelessWidget {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                // The label is author-written section text and must be shown
+                // WHOLE. It was `maxLines: 1` with `TextOverflow.ellipsis`,
+                // which silently cut any heading longer than the pill to
+                // "{Vachan…" - the braces are a markup instruction, so a
+                // truncated label reads as a rendering fault rather than as a
+                // long heading. Wrapping is the correct behaviour: the pill
+                // grows to a second line and the rule/flourish row stays
+                // vertically centred beside it.
+                softWrap: true,
                 style: labelStyle,
               ),
             ),

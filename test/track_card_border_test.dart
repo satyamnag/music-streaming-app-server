@@ -156,17 +156,32 @@ void main() {
     });
   });
 
-  group('the border is actually rendered', () {
-    testWidgets('the card carries an outline over its content', (tester) async {
+  group('the card paints NO outline', () {
+    // The card used to wear a gold rim over its content. It was removed by
+    // request: the gold edge read as a yellow frame around every album and
+    // track tile rather than as subtle separation.
+    //
+    // These assertions are the inverse of the ones that guarded the rim, and
+    // they are kept here - rather than the file being deleted - because the
+    // geometry guarantees below them still matter and still have to hold.
+    testWidgets('the card carries no outline over its content', (tester) async {
       await tester.pumpWidget(_harness(_card()));
-      expect(_outlineRoot(tester), isA<Widget>());
+      expect(
+        find.descendant(
+          of: find.byType(TrackCard),
+          matching: find.byType(CustomPaint),
+        ),
+        findsNothing,
+        reason: 'an outline CustomPaint over the card is what drew the gold rim',
+      );
     });
 
     testWidgets('the background decoration carries NO border', (tester) async {
-      // The first real defect. A border on `decoration` inflates the Container's
-      // child padding by its width, which insets the content and shifts the play
+      // Still asserted: a border on `decoration` inflates the Container's child
+      // padding by its width, which insets the content and shifts the play
       // control off the text block's bottom edge. Nothing in HomeSectionLayout
-      // accounts for that inset.
+      // accounts for that inset. Removing the outline must not be "fixed" by
+      // adding a border here instead.
       await tester.pumpWidget(_harness(_card()));
       expect(
         _decorationOf(tester).border,
@@ -175,36 +190,28 @@ void main() {
       );
     });
 
-    testWidgets('the outline strokes the card edge with a painter',
-        (tester) async {
+    testWidgets('the card is not wrapped in an overlay Stack', (tester) async {
+      // The Stack existed ONLY to paint the outline over the content as its last
+      // child. With no outline there is nothing to overlay, and the card is a
+      // plain child again. Asserting that keeps the structure honest: if a Stack
+      // reappears, so has an overlay.
       await tester.pumpWidget(_harness(_card()));
-      final paint = _outlinePaint(tester);
-      expect(paint.painter, isNotNull,
-          reason: 'the edge is stroked by a CustomPainter');
-      // It must not carry an explicit size, or it would become a Stack child
-      // that sizes the card and change the geometry the layout depends on.
-      expect(paint.size, Size.zero);
-    });
-
-    testWidgets('the outline is wrapped in an IgnorePointer', (tester) async {
-      await tester.pumpWidget(_harness(_card()));
-      // The outline paints over the whole card; if it took hits, both the card
-      // tap and the play control would stop working. Looked up from the card
-      // itself, because the Stack's last child is a fresh widget instance each
-      // build and cannot be matched by identity.
       expect(
         find.descendant(
           of: find.byType(TrackCard),
-          matching: find.byType(IgnorePointer),
+          matching: find.byType(Stack),
         ),
-        findsWidgets,
+        // One Stack remains - the cover's, which layers the LockedBadge over the
+        // artwork. A second would be the removed outline layer.
+        findsOneWidget,
+        reason: 'only the cover keeps a Stack; an extra one is an overlay',
       );
     });
 
-    testWidgets('the play control stays pinned after the border',
+    testWidgets('the play control stays pinned WITHOUT a border',
         (tester) async {
-      // The exact assertion the existing suite caught the first defect with, kept
-      // here so the reason lives with the feature that caused it.
+      // The exact assertion the suite caught the original defect with, kept so
+      // the geometry guarantee survives the outline's removal.
       await tester.pumpWidget(_harness(_card()));
       final context = tester.element(find.byType(TrackCard));
       final scale = Theme.of(context).scaling;

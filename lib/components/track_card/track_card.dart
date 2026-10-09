@@ -505,7 +505,19 @@ class TrackCard extends StatelessWidget {
     return Container(
       width: width,
       // The card's background box — fill and themed gradient — is built by
-      // [CardBorder], which owns the effect shared by every card.
+      // [CardBorder], which owns the fill shared by every card.
+      //
+      // The card deliberately carries NO outline. It previously wore a gold rim
+      // (`CardBorder.outline`), which is no longer wanted: the gold edge read as
+      // a yellow frame around every album and track tile rather than as a subtle
+      // separation, and the app's own artwork is already framed in gold. The
+      // cards are separated from the page by the themed fill and by the artwork
+      // itself, with nothing stroking the card's edge.
+      //
+      // `CardBorder.outline` and the rim helpers it needs are kept in
+      // `card_border.dart` — they are still exercised by the border test suite
+      // and remain the documented way to reinstate a rim — but nothing in the
+      // app calls them, so no card paints an outline.
       decoration: CardBorder.decoration(
         context: context,
         background: bg,
@@ -515,73 +527,56 @@ class TrackCard extends StatelessWidget {
         usesConfiguredBackground: cardBgColor != null,
       ),
       clipBehavior: Clip.antiAlias,
-      // The card is a Stack so the outline can be painted OVER the content as its
-      // last child. Three constraints force this shape:
-      //
-      //  * it must be painted on top, because the cover bleeds to the card's
-      //    edges and would completely hide an outline drawn underneath it;
-      //  * it must NOT be a border on `decoration`, because a border there
-      //    inflates the Container's child padding by its width and pushes the
-      //    play control off the text block it is pinned to (see
-      //    CardBorder.outline);
-      //  * it must not be `foregroundDecoration`, because a gradient stroke
-      //    cannot be expressed as a single `Decoration` — it needs two stacked
-      //    rounded rectangles, which is a widget tree.
-      //
-      // A `Stack` child is the one placement that satisfies all three.
-      child: Stack(
-        children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // The cover bleeds to the card's top, left and right edges. The
-                // card itself clips with `Clip.antiAlias`, so the artwork takes
-                // the card's outer rounded corners at the top while its bottom
-                // corners stay square where it meets the text area.
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      UniversalImage(path: imageUrl, fit: BoxFit.cover),
-                      LockedBadge(locked: locked, borderRadius: 0),
-                    ],
-                  ),
-                ),
-                // Only the text block is padded, so the cover stays flush. The
-                // track card insets its text more tightly than the album card
-                // ([HomeSectionLayout.trackCardTextPadding]) because the
-                // two-line name needs every pixel of a 110dp tile to fit in full.
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    (titleLines > 1
-                            ? HomeSectionLayout.trackCardTextPadding
-                            : HomeSectionLayout.cardPadding) *
-                        scale,
-                    HomeSectionLayout.cardTextGap * scale,
-                    (titleLines > 1
-                            ? HomeSectionLayout.trackCardTextPadding
-                            : HomeSectionLayout.cardPadding) *
-                        scale,
-                    HomeSectionLayout.cardPadding * scale,
-                  ),
-                  child: content,
-                ),
-              ],
+      // A plain child again, not a Stack. The Stack existed ONLY so the outline
+      // could be painted over the content as its last child; with no outline
+      // there is nothing to overlay, and a single child keeps the paint order
+      // obvious. The geometry is unchanged: the Stack was a plain `Stack`, whose
+      // first child is laid out against the same constraints the Container would
+      // have handed it directly, so removing it cannot move a single pixel. (It
+      // matters that it was NOT `StackFit.expand` or a `Positioned.fill` - either
+      // of those would have changed the child's constraints.)
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The cover bleeds to the card's top, left and right edges. The
+            // card itself clips with `Clip.antiAlias`, so the artwork takes
+            // the card's outer rounded corners at the top while its bottom
+            // corners stay square where it meets the text area.
+            AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
+                  LockedBadge(locked: locked, borderRadius: 0),
+                ],
+              ),
             ),
-          ),
-          // Painted last, so it sits over the cover and the text. It swallows no
-          // taps (`IgnorePointer` inside), so the card and its play control keep
-          // their own hit targets.
-          CardBorder.outline(
-            context: context,
-            radius: 12 * scale,
-          ),
-        ],
+            // Only the text block is padded, so the cover stays flush. The
+            // track card insets its text more tightly than the album card
+            // ([HomeSectionLayout.trackCardTextPadding]) because the
+            // two-line name needs every pixel of a 110dp tile to fit in full.
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                (titleLines > 1
+                        ? HomeSectionLayout.trackCardTextPadding
+                        : HomeSectionLayout.cardPadding) *
+                    scale,
+                HomeSectionLayout.cardTextGap * scale,
+                (titleLines > 1
+                        ? HomeSectionLayout.trackCardTextPadding
+                        : HomeSectionLayout.cardPadding) *
+                    scale,
+                HomeSectionLayout.cardPadding * scale,
+              ),
+              child: content,
+            ),
+          ],
+        ),
       ),
     );
   }
