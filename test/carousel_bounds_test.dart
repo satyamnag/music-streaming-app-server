@@ -27,6 +27,7 @@ void main() {
   /// are what make that a decision rather than an accident.
   Widget harness({required double width, double height = 190}) {
     const margin = HomeSpecialsCarousel.slideMargin;
+    const radius = HomeSpecialsCarousel.slideRadius;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -36,7 +37,12 @@ void main() {
           height: height,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: margin),
-            child: ClipRect(
+            // ClipRRect with the SAME radius the slides round their own corners
+            // with - mirroring `HomeSpecialsCarousel.build`. A plain ClipRect
+            // here would cut across a slide's rounded corner with right angles
+            // during a swipe, which is the defect the radius guards.
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
               child: PageView.builder(
                 itemCount: 3,
                 itemBuilder: (context, index) => Container(
@@ -56,7 +62,7 @@ void main() {
     await tester.pumpWidget(harness(width: screenWidth));
     await tester.pumpAndSettle();
 
-    final clip = tester.getRect(find.byType(ClipRect));
+    final clip = tester.getRect(find.byType(ClipRRect));
 
     expect(clip.left, HomeSpecialsCarousel.slideMargin,
         reason: 'the carousel must start at its own gutter, not at the screen '
@@ -71,7 +77,7 @@ void main() {
     await tester.pumpWidget(harness(width: 360));
     await tester.pumpAndSettle();
 
-    final clip = tester.getRect(find.byType(ClipRect));
+    final clip = tester.getRect(find.byType(ClipRRect));
 
     Rect rectOf(int i) {
       final f = find.byKey(ValueKey('slide$i'));
@@ -117,7 +123,7 @@ void main() {
     await tester.pumpWidget(harness(width: 360));
     await tester.pumpAndSettle();
 
-    final clip = tester.getRect(find.byType(ClipRect));
+    final clip = tester.getRect(find.byType(ClipRRect));
     final resting = tester.getRect(find.byKey(const ValueKey('slide0')));
 
     expect(resting, clip,
@@ -133,9 +139,48 @@ void main() {
     await tester.pumpWidget(harness(width: narrow));
     await tester.pumpAndSettle();
 
-    final clip = tester.getRect(find.byType(ClipRect));
+    final clip = tester.getRect(find.byType(ClipRRect));
     expect(clip.width, greaterThan(0));
     expect(clip.left, greaterThan(0));
     expect(clip.right, lessThan(narrow));
+  });
+
+  testWidgets('the carousel clip is ROUNDED with the slides\' own radius',
+      (tester) async {
+    // The defect this guards: the pager was clipped with a plain `ClipRect`, so
+    // during a swipe a slide's rounded corner was intersected with a square edge
+    // and the banner showed right-angled corners exactly while moving - at rest
+    // the slide sits fully inside the clip and its own radius shows, which is why
+    // the problem was only visible mid-slide.
+    await tester.pumpWidget(harness(width: 360));
+    await tester.pumpAndSettle();
+
+    final clipper = tester.widget<ClipRRect>(find.byType(ClipRRect));
+
+    expect(
+      clipper.borderRadius,
+      BorderRadius.circular(HomeSpecialsCarousel.slideRadius),
+      reason: 'the clip must be rounded with the SAME radius the slides use, so '
+          'the two curves coincide and a corner reads as curved at every point '
+          'of the slide animation',
+    );
+
+    // A square clip is the specific regression.
+    expect(
+      clipper.borderRadius,
+      isNot(BorderRadius.zero),
+      reason: 'a square clip is what made the corners look right-angled',
+    );
+  });
+
+  testWidgets('the slide radius is the single source of truth', (tester) async {
+    // If a slide rounded its corners with a different value than the clip, a
+    // swipe would show background through the slide's square corner (slide
+    // squarer than clip) or clip the slide's curve (clip squarer than slide).
+    expect(
+      HomeSpecialsCarousel.slideRadius,
+      greaterThan(0),
+      reason: 'the banner is curved, so the radius must be non-zero',
+    );
   });
 }

@@ -57,6 +57,20 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
   /// a slide can only ever be seen inside the box the resting banner occupies.
   static const double slideMargin = 12;
 
+  /// Corner radius of a slide, and of the carousel's own clip.
+  ///
+  /// ONE constant for both, deliberately. Every slide rounds its corners with
+  /// this radius, and the pager is clipped with the same value, so the two curves
+  /// coincide and a corner reads as curved at every point of a swipe. If the clip
+  /// were the plain `ClipRect` this replaced, its right angles would cut across
+  /// the slide's rounded corner mid-slide, which is exactly the "the corners are
+  /// right angled while sliding" defect.
+  ///
+  /// Keeping it shared is what stops the two drifting apart later: a clip rounder
+  /// than the slide would reveal background through the slide's own square
+  /// corner, and a squarer clip would bring the right angle back.
+  static const double slideRadius = 14;
+
   /// Aspect ratio of an admin-uploaded landscape banner: 8:3 (2.667:1).
   ///
   /// This is enforced on upload (WebP only, 8:3), so the slide can size itself
@@ -147,7 +161,25 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
         // ---------------------------------------------------------------------
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: slideMargin * scale),
-          child: ClipRect(
+          // ClipRRect with the SAME radius a slide rounds its own corners with
+          // ([slideRadius]), not a plain ClipRect.
+          //
+          // WHY: every slide draws its corners with `BorderRadius.circular(14)`.
+          // A `ClipRect` cuts the carousel with RIGHT ANGLES, so while a slide is
+          // moving, its rounded corner is intersected with a square edge and the
+          // visible corner is square - the banner's own curves disappear exactly
+          // during the slide, which is when they are most noticeable. At rest the
+          // slide is fully inside the clip and its own radius shows, so the
+          // defect is only visible mid-swipe. Matching the clip's radius to the
+          // slide's makes the two curves coincide, so the corner reads as curved
+          // at every point of the animation.
+          //
+          // The radius is a shared constant so the clip and the slides cannot
+          // drift apart: a clip rounder than the slide would show background
+          // through the slide's square corner, and a squarer clip reintroduces
+          // the right angle this replaces.
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(slideRadius * scale),
             child: PageView.builder(
               controller: controller,
               itemCount: specials.length,
@@ -257,7 +289,7 @@ class _BannerSlide extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14 * scale),
+        borderRadius: BorderRadius.circular(HomeSpecialsCarousel.slideRadius * scale),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -465,7 +497,7 @@ class _SquareSlide extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(14 * scale),
+        borderRadius: BorderRadius.circular(HomeSpecialsCarousel.slideRadius * scale),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
