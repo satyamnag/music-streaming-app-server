@@ -449,23 +449,13 @@ class AppDatabase extends _$AppDatabase {
   /// the current columns BY NAME, so it is only valid once the table has all of
   /// them.
   ///
-  /// Like [_hasColumn] this reads the stored DDL from `sqlite_master` rather than
-  /// `PRAGMA table_info`, because the pragma is served from the connection's
-  /// schema cache and can be stale while a migration is in flight.
+  /// Like [_hasColumn] this asks the engine to resolve each column name against
+  /// the live schema rather than reading cached schema text.
   Future<bool> _hasAllColumns(String table, TableInfo<Table, dynamic> definition) async {
-    final rows = await customSelect(
-      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
-      variables: [Variable<String>(table)],
-    ).get();
-    if (rows.isEmpty) return false;
-    final ddl = rows.first.read<String?>('sql');
-    if (ddl == null) return false;
-    return definition.$columns.every(
-      (column) => RegExp(
-        '(?:"${RegExp.escape(column.name)}"|\\b${RegExp.escape(column.name)}\\b)\\s',
-        caseSensitive: false,
-      ).hasMatch(ddl),
-    );
+    for (final column in definition.$columns) {
+      if (!await _hasColumn(table, column.name)) return false;
+    }
+    return true;
   }
 
   /// Adds [column] to [table] only when it is not already there.
@@ -499,17 +489,17 @@ class AppDatabase extends _$AppDatabase {
     try {
       await m.addColumn(table, column);
     } on SqliteException {
-      // The column raced into existence between the probe above and this ALTER,
-      // OR the probe could not see it. This is not hypothetical: the migration
-      // test harness opens the database through a connection already built for
-      // a DIFFERENT version, so the target column can exist before the step
-      // runs. The ALTER then fails.
+      // The column already existed, even though the probe above could not see
+      // it. That is not hypothetical - the migration chain is re-entered (drift
+      // records `user_version` after each step, so an interrupted or re-opened
+      // database resumes), and a step that already ran will try to add its
+      // column a second time.
       //
-      // The engine's message for that is NOT stable - a recent SQLite says
-      // "duplicate column name: x", while the one on an older CI build reports
-      // only "SQL logic error (code 1)". Matching on the text would make this
+      // The engine's message is NOT stable: a recent SQLite says
+      // "duplicate column name: x", an older build reports only
+      // "SQL logic error (code 1)". Matching on the text would make this
       // migration behave differently per platform, so the outcome is decided
-      // structurally instead, and only a genuinely missing column is rethrown.
+      // structurally instead, and a genuinely missing column is rethrown.
       if (await _hasColumn(table.actualTableName, column.name)) return;
       rethrow;
     }
@@ -517,27 +507,32 @@ class AppDatabase extends _$AppDatabase {
 
   /// Whether [table] has a column called [column].
   ///
-  /// Reads the stored `CREATE TABLE` text from `sqlite_master`, NOT
-  /// `PRAGMA table_info`. The pragma is served from the connection's schema
-  /// cache and can disagree with the engine's own view of the table while a
-  /// migration is running - which is precisely the situation this guard has to
-  /// survive. The DDL text is the same source SQLite parses when it decides
-  /// whether `ADD COLUMN` is a duplicate, so the two can no longer disagree.
+  /// Deliberately does NOT read `PRAGMA table_info` or `sqlite_master`: both are
+  /// answered from schema text that this same migration is mutating, so they can
+  /// describe the table as it was before an earlier step's `RENAME`/`DROP`. That
+  /// disagreement is what let a step re-add a column that was already there.
+  ///
+  /// `SELECT`ing the column instead makes SQLite itself resolve the name against
+  /// the live schema, which is the same resolution `ADD COLUMN` performs when it
+  /// decides whether the column is a duplicate - so the guard and the engine
+  /// cannot disagree. Prepending `WHERE false` keeps this O(1): no rows are
+  /// scanned, and the statement still has to compile.
   Future<bool> _hasColumn(String table, String column) async {
-    final rows = await customSelect(
-      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
-      variables: [Variable<String>(table)],
-    ).get();
-    if (rows.isEmpty) return false;
-    final ddl = rows.first.read<String?>('sql');
-    if (ddl == null) return false;
-    // Match the column as a quoted identifier, the form drift emits, and also
-    // the bare form, so this holds for tables created by older releases.
-    return RegExp(
-      '(?:"${RegExp.escape(column)}"|\\b${RegExp.escape(column)}\\b)\\s',
-      caseSensitive: false,
-    ).hasMatch(ddl);
+    // Guard against injecting into the identifier positions.
+    if (!_identifier.hasMatch(table) || !_identifier.hasMatch(column)) {
+      return false;
+    }
+    try {
+      await customSelect(
+        'SELECT "$column" FROM "$table" WHERE false',
+      ).get();
+      return true;
+    } on SqliteException {
+      return false;
+    }
   }
+
+  static final _identifier = RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$');
 }
 
 LazyDatabase _openConnection() {
