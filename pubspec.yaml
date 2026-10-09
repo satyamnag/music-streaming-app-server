@@ -5,10 +5,15 @@ publish_to: "none"
 
 # versionName+buildNumber. The About screen renders these as
 # "<buildNumber> (<version>)" — see lib/pages/settings/about.dart — so the
-# `+78` half is what puts "78 (1.0.0)" on that screen, and it is also the
+# `+79` half is what puts "79 (1.0.0)" on that screen, and it is also the
 # Android versionCode Google Play uses to order uploads. It must increase by at
-# least one on every Play upload; 78 follows the previous 1.0.0+77.
-version: 1.0.0+78
+# least one on every Play upload; 79 follows the released 1.0.0+78.
+#
+# 79 carries the fix for the CI-only migration failure: `ALTER TABLE ... ADD
+# COLUMN` with a drift-generated CHECK is accepted by SQLite 3.50.4 but rejected
+# by the older engine on the CI runner, which failed every v1..v8 hop there. See
+# `_addColumnWithoutCheck` in lib/models/database/database.dart.
+version: 1.0.0+79
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
