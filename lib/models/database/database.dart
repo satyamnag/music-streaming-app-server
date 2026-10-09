@@ -107,6 +107,47 @@ class AppDatabase extends _$AppDatabase {
           );
         },
         from4To5: (m, schema) async {
+          // v4 -> v5 changed the default for `accent_color_scheme` from the
+          // literal 'Blue:0xFF2196F3' to the theme-keyed 'Slate:0xff64748b'.
+          //
+          // SQLite cannot ALTER a DEFAULT in place, so the original rewrite was
+          // a rename / add / copy / drop dance. It ran UNCONDITIONALLY, which is
+          // wrong for two reasons:
+          //
+          //   1. A hop that starts BELOW v4 (v1..v3) reaches this step with a
+          //      table that already has the correct default, and the dance still
+          //      rewrote it - dropping and re-adding a column on a table the
+          //      later steps then had to reason about.
+          //   2. Re-running it (a partially-applied migration resumes from the
+          //      recorded `user_version`) renamed an already-renamed column and
+          //      failed.
+          //
+          // It is now driven by the data: only a table that still carries the
+          // legacy default is rewritten, and the rewrite is skipped entirely if
+          // the legacy column is already gone.
+          final columns = await customSelect(
+            'PRAGMA table_info(preferences_table)',
+          ).get();
+          final present = columns.map((row) => row.read<String>('name')).toSet();
+          if (present.contains('accent_color_scheme_old')) return;
+
+          final legacy = await customSelect(
+            "SELECT COUNT(*) AS c FROM preferences_table "
+            "WHERE accent_color_scheme = 'Blue:0xFF2196F3'",
+          ).getSingle();
+          final ddl = await customSelect(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' "
+            "AND name = 'preferences_table'",
+          ).getSingle();
+          final text = ddl.read<String?>('sql') ?? '';
+          final hasLegacyDefault =
+              text.contains("DEFAULT 'Blue:0xFF2196F3'") ||
+                  text.contains('DEFAULT \'Blue:0xFF2196F3\'');
+
+          // Nothing to do when neither the stored default nor any stored value
+          // is the legacy one.
+          if (!hasLegacyDefault && legacy.read<int>('c') == 0) return;
+
           final columnName = schema.preferencesTable.accentColorScheme
               .escapedNameFor(SqlDialect.sqlite);
           final columnNameOld =
@@ -458,14 +499,17 @@ class AppDatabase extends _$AppDatabase {
     try {
       await m.addColumn(table, column);
     } on SqliteException {
-      // TEMP DIAG
-      final rows = await customSelect(
-        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
-        variables: [Variable<String>(table.actualTableName)],
-      ).get();
-      // ignore: avoid_print
-      print('DIAG add ${table.actualTableName}.${column.name} failed; '
-          'ddl=${rows.isEmpty ? "<no such table>" : rows.first.read<String?>('sql')}');
+      // The column raced into existence between the probe above and this ALTER,
+      // OR the probe could not see it. This is not hypothetical: the migration
+      // test harness opens the database through a connection already built for
+      // a DIFFERENT version, so the target column can exist before the step
+      // runs. The ALTER then fails.
+      //
+      // The engine's message for that is NOT stable - a recent SQLite says
+      // "duplicate column name: x", while the one on an older CI build reports
+      // only "SQL logic error (code 1)". Matching on the text would make this
+      // migration behave differently per platform, so the outcome is decided
+      // structurally instead, and only a genuinely missing column is rethrown.
       if (await _hasColumn(table.actualTableName, column.name)) return;
       rethrow;
     }
