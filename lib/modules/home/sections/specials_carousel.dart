@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/track_card/card_colors.dart';
@@ -191,9 +193,31 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
                   special: special,
                   dots: dots,
                   onPlay: () async {
+                    // Start the shelf's queue FIRST, then open its screen.
+                    //
+                    // The order matters. Playback is started here rather than
+                    // being handed to the destination, so the audio begins from
+                    // the very first track of the admin's ordered list without
+                    // waiting for that screen to build its own providers - the
+                    // destination only has to RENDER the queue, never start it,
+                    // and the two cannot disagree about what is playing.
+                    //
+                    // `special.tracks` is already in the admin's order: the
+                    // explicit `trackIds` first, in their stored `position`
+                    // sequence, followed by any keyword matches (see
+                    // `_buildSpecials`). `initialIndex: 0` therefore starts at
+                    // the first track, and the player walks the list to the last
+                    // one one after another as the queue advances.
                     await ref
                         .read(audioPlayerProvider.notifier)
                         .load(special.tracks, initialIndex: 0, autoPlay: true);
+
+                    // Then show the shelf's own screen, so the listener sees the
+                    // tracks that just started and can pick any of them. The same
+                    // destination the Featured Playlist chips open, reached only
+                    // when the artist has not already been disposed mid-await.
+                    if (!context.mounted) return;
+                    context.navigateTo(FeaturedPlaylistRoute(id: special.id));
                   },
                 );
               },

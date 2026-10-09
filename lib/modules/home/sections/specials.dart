@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
@@ -215,6 +216,24 @@ List<HomeSpecial> _buildSpecials(
 
   return specials;
 }
+
+/// Builds the shelves from [tracks] and [rows] with no play counts.
+///
+/// Exists so a test can drive the REAL shelf assembly - the exact code the home
+/// carousel consumes - rather than a copy of it. A copy would keep passing after
+/// the ordering logic changed, which is the failure this is meant to catch: the
+/// admin's `position` order must reach `HomeSpecial.tracks`, because that list
+/// is what "Play Now" hands to the player starting at index 0.
+///
+/// [playCounts] is empty here on purpose: it only affects keyword-matched
+/// extras' relative order and each shelf's cover choice, never the position of
+/// the admin's explicit list, which is the property under test.
+@visibleForTesting
+List<HomeSpecial> buildSpecialsForTest(
+  List<SangeetTrackObject> tracks,
+  List<HomeSpecialRow> rows,
+) =>
+    _buildSpecials(tracks, const <String, int>{}, rows);
 
 /// Lowercase searchable text for a track: its name, album, artists and tags.
 String _haystackFor(SangeetTrackObject track) {
