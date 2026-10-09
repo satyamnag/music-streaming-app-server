@@ -53,13 +53,30 @@ class PlayerLyricsPage extends HookConsumerWidget {
       return false;
     }
 
-    // All 5 languages in display order (matches kLyricLanguages)
+    // All 5 languages in display order.
+    //
+    // The order is Telugu, then English TRANSLITERATION, then English
+    // TRANSLATION, then the Hindi pair - the same order `kLyricLanguages` uses
+    // and the same order the plain-lyrics blocks use.
+    //
+    // This list previously read `te, en, hi, enTr, hiTr`, i.e. both TRANSLATIONS
+    // before both TRANSLITERATIONS, while its comment claimed it "matches
+    // kLyricLanguages". It did not, so the Plain and Sync sub-tabs read
+    // "Telugu, English (Translation), English (Transliteration)" - the exact
+    // reversal reported. The comment is what let it survive review: it asserted
+    // the list was already correct, so nobody re-read the list.
+    //
+    // Transliteration-first is the deliberate rule (see `kLyricLanguages`): a
+    // listener reads the original script, then how it sounds, then what it
+    // means. Ordering is asserted by `lyrics_subtab_order_test.dart`, which
+    // compares this sequence against `kLyricLanguages` so the two cannot drift
+    // apart again.
     const allLangs = [
       LyricLanguages.te,
-      LyricLanguages.en,
-      LyricLanguages.hi,
       LyricLanguages.enTr,
+      LyricLanguages.en,
       LyricLanguages.hiTr,
+      LyricLanguages.hi,
     ];
 
     final availablePlain =

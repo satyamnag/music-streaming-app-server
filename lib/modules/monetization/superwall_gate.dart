@@ -27,8 +27,9 @@ enum GateResult {
   declined,
 
   /// The paywall could not be presented (e.g. billing unavailable, products
-  /// not configured, no campaign). The user should be shown a message instead
-  /// of an endless spinner.
+  /// not configured, no campaign, or the build has no Superwall API key). The
+  /// user should be shown a message instead of an endless spinner - and, just as
+  /// importantly, must NOT be given the gated feature for free.
   failed,
 }
 
@@ -55,15 +56,28 @@ Future<GateResult> gateFeature({
       error = true;
     });
 
-  await SuperwallService.instance.registerPlacement(
-    placement,
-    params: params,
-    handler: handler,
-    feature: () async {
-      featureRan = true;
-      await feature();
-    },
-  );
+  try {
+    await SuperwallService.instance.registerPlacement(
+      placement,
+      params: params,
+      handler: handler,
+      feature: () async {
+        featureRan = true;
+        await feature();
+      },
+    );
+  } on SuperwallNotConfiguredError {
+    // The build has no Superwall API key, so there is no paywall to show. The
+    // service throws rather than granting the feature, and this must NOT be a
+    // silent pass: reporting `failed` makes the caller surface an error, so the
+    // user learns the plan is unavailable instead of being shown a track that
+    // appears free. A missing key is a build misconfiguration, and turning it
+    // into visibly broken behaviour is what gets it fixed.
+    //
+    // Deliberately NOT rethrown: an unhandled exception here would surface as a
+    // crash or an unhandled-zone log rather than as the intended message.
+    return GateResult.failed;
+  }
 
   if (featureRan) return GateResult.success;
   if (error) return GateResult.failed;

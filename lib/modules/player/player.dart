@@ -11,6 +11,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/framework/app_pop_scope.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_actions.dart';
+import 'package:sangeet/services/share/track_share.dart';
 import 'package:sangeet/modules/player/player_controls.dart';
 import 'package:sangeet/modules/player/volume_slider.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
@@ -224,6 +225,32 @@ class PlayerView extends HookConsumerWidget {
                           },
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      // Share sits with Queue and Lyrics because it acts on the
+                      // track that is playing, which is what this whole screen is
+                      // about - the user should not have to open a menu to send
+                      // the song they are listening to.
+                      //
+                      // The message carries the Play Store listing, so a
+                      // recipient WITHOUT the app gets something they can act on.
+                      // The previous share sent only the track's name, which gave
+                      // them nothing to tap.
+                      Expanded(
+                        child: OutlineButton(
+                          leading: const Icon(SangeetIcons.share),
+                          child: Text(context.l10n.share),
+                          onPressed: () {
+                            final track = currentActiveTrack;
+                            if (track == null) return;
+                            TrackShare.shareTrack(
+                              track,
+                              // iPad presents the sheet as a popover anchored to
+                              // a rectangle; without one `share` throws there.
+                              sharePositionOrigin: _shareAnchorFor(context),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -252,6 +279,20 @@ class PlayerView extends HookConsumerWidget {
 }
 
 /// Original / Karaoke switch shown between the cover art and the track name.
+/// A rectangle to anchor the share sheet popover to, from [context]'s own box.
+///
+/// iPadOS presents the share sheet as a popover and UIKit requires an anchor
+/// rect; `share_plus` throws if none is supplied. The player's own render box is
+/// the correct anchor - it is the screen the user tapped from - and it is
+/// measured rather than guessed so the popover points at the right place at any
+/// window size. Returns null (letting the plugin decide) when the element is not
+/// laid out yet, which is the one case where measuring is impossible.
+Rect? _shareAnchorFor(BuildContext context) {
+  final box = context.findRenderObject();
+  if (box is! RenderBox || !box.hasSize) return null;
+  return box.localToGlobal(Offset.zero) & box.size;
+}
+
 /// "Original" is the default (current playback, unchanged). "Karaoke" replays
 /// the track's karaoke variant when one exists; otherwise it is disabled.
 class _OriginalKaraokeToggle extends HookConsumerWidget {

@@ -2,6 +2,29 @@ import 'dart:async';
 
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
+/// Thrown when a gated placement is attempted while the Superwall SDK has no
+/// API key.
+///
+/// A dedicated type rather than a bare [StateError] so a caller can tell "this
+/// build was shipped without monetisation configured" apart from a genuine
+/// SDK failure, and so the distinction is greppable.
+///
+/// See [SuperwallService.registerPlacement] for why this is thrown rather than
+/// letting the gated feature run.
+class SuperwallNotConfiguredError extends Error {
+  /// The placement that could not be evaluated.
+  final String placement;
+
+  SuperwallNotConfiguredError(this.placement);
+
+  @override
+  String toString() =>
+      'SuperwallNotConfiguredError: placement "$placement" was requested but the '
+      'Superwall SDK has no API key. Add SUPERWALL_API_KEY to the build '
+      'environment (CI: the DOTENV_RELEASE secret). The gated feature was '
+      'NOT granted.';
+}
+
 /// Centralized wrapper around the Superwall Flutter SDK.
 ///
 /// All Superwall interactions go through this class so the SDK surface is
@@ -68,8 +91,27 @@ class SuperwallService {
   /// remotely decides whether a paywall is shown; if the user has access,
   /// [feature] runs immediately.
   ///
-  /// When unconfigured there is no paywall to show, so the feature is allowed
-  /// through immediately: the app must stay usable without monetisation.
+  /// ## The unconfigured case GATES, it does not grant
+  /// This used to run [feature] and return when the SDK was unconfigured, on the
+  /// reasoning that "the app must stay usable without monetisation".
+  ///
+  /// That was wrong, and it is the bug this fixes. A paid track then played for
+  /// anyone, in a build whose `.env` simply lacked `SUPERWALL_API_KEY` - which
+  /// is precisely what the CI builds shipped: the release `.env` carried
+  /// CLERK_PUBLISHABLE_KEY, SUPABASE_URL and five others, and no Superwall key
+  /// at all. So every released build silently gave away the paid catalogue while
+  /// every check looked green, because "no paywall shown" is indistinguishable
+  /// from "user already entitled" from the outside.
+  ///
+  /// Failing CLOSED is the right default for a gate. A missing key is a build
+  /// misconfiguration, and the honest outcomes are (a) the listener sees the
+  /// paywall, or (b) they see an error explaining it is unavailable - never (c)
+  /// they get premium content for free without anyone noticing. Callers already
+  /// handle this: `gateFeature` reports [GateResult.failed] and the app shows a
+  /// clear message rather than an endless spinner.
+  ///
+  /// The error is reported through [handler] as well as by throwing, so a caller
+  /// that only set `onError` still learns what happened.
   Future<void> registerPlacement(
     String placement, {
     Map<String, Object>? params,
@@ -77,8 +119,9 @@ class SuperwallService {
     Future<void> Function()? feature,
   }) async {
     if (!_isConfigured) {
-      if (feature != null) await feature();
-      return;
+      // Deliberately does NOT call `feature()`: granting premium access because
+      // the paywall is unavailable would give the paid catalogue away.
+      throw SuperwallNotConfiguredError(placement);
     }
     await Superwall.shared.registerPlacement(
       placement,

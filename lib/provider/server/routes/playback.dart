@@ -286,6 +286,19 @@ class ServerPlaybackRoutes {
       isrc: '',
       explicit: false,
       status: (row['status'] ?? 'free').toString(),
+      // The karaoke variant MUST be carried onto the track object, not just used
+      // to pick a stream.
+      //
+      // This constructor used to omit it, so the row's `karaoke_storage_path`
+      // was read for the STREAM (see `karaokePath` above, which is why karaoke
+      // audio played) and then dropped from the TRACK the UI receives. The
+      // player decides whether to show the Original/Karaoke switch with
+      // `track.karaokeStoragePath?.trim().isNotEmpty` (see
+      // `modules/player/player.dart`), so a null here hid the control entirely -
+      // the feature looked removed while both halves of it were present. The
+      // column is already selected above, so this is the missing link, not a
+      // new query.
+      karaokeStoragePath: row['karaoke_storage_path']?.toString(),
     );
 
     final match = SangeetAudioSourceMatchObject(
@@ -366,6 +379,11 @@ class ServerPlaybackRoutes {
         isrc: '',
         explicit: false,
         status: (data['status'] ?? 'free').toString(),
+        // Carried for the same reason as the branch above: without it the
+        // Original/Karaoke switch never renders, however the track was reached.
+        // `_resolveFromMusicSource` reads the whole row (`select()` with no
+        // projection), so the column is present here too.
+        karaokeStoragePath: data['karaoke_storage_path']?.toString(),
       );
 
       final sourcedTrack = await SourcedTrack.fetchFromTrack(

@@ -15,7 +15,20 @@ abstract final class LyricLanguages {
   static const hiTr = 'hi_transliteration';
 
   /// Display order used by the Synced & Plain lyrics screens.
-  static const order = [te, en, hi, enTr, hiTr];
+  ///
+  /// Telugu, then English TRANSLITERATION, then English TRANSLATION, then the
+  /// Hindi pair: a listener reads the original script, then how it sounds, then
+  /// what it means.
+  ///
+  /// This read `[te, en, hi, enTr, hiTr]` — both TRANSLATIONS before both
+  /// TRANSLITERATIONS — which is the reversal reported on the Plain and Sync
+  /// sub-tabs. The order was wrong in more than one place at once (here, and the
+  /// player's own `allLangs`), which is exactly the drift one ordered constant
+  /// exists to prevent.
+  ///
+  /// `lyrics_subtab_order_test.dart` asserts every surface's list equals
+  /// `kLyricLanguages`, so another copy cannot appear unnoticed.
+  static const order = [te, enTr, en, hiTr, hi];
 
   /// Reads a field value from [entry] by its [language] key.
   static String fieldOf(LyricVariant entry, String language) {
