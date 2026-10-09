@@ -95,7 +95,7 @@ jobs:
       # head_sha is misleading: it records the dispatch, while actions/checkout
       # (no `ref:` here) resolves the BRANCH TIP at the moment the job reaches
       # this step. Dispatch a build and push a commit while it waits for a runner,
-      # and the two disagree â€” which is exactly how a build once produced an AAB
+      # and the two disagree Ã¢â‚¬â€ which is exactly how a build once produced an AAB
       # that did not contain the commit the run claimed to be building. Nobody can
       # tell which code is in an artifact from the artifact alone, so log it here
       # and make the question answerable.
@@ -229,7 +229,7 @@ jobs:
         run: pwsh -NoProfile -File ./tool/fix_drift_schema_enums.ps1
 
       - name: Verify database migrations
-        run: flutter test test/_ci_diag_test.dart
+        run: flutter test test/drift/app_db/migration_test.dart
 
       # Resolve the version ONCE, from pubspec, and export it for both build
       # steps and for the verification step at the end.
