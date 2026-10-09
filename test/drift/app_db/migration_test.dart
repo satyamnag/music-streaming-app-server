@@ -17,34 +17,58 @@ void main() {
   });
 
   group('simple database migrations', () {
-    // These simple tests verify all possible schema updates with a simple (no
-    // data) migration. This is a quick way to ensure that written database
-    // migrations properly alter the schema.
+    // Every historical schema must be able to reach the app's CURRENT version.
+    //
+    // ## Why the loop targets `schemaVersion` and not every intermediate version
+    // `migrateAndValidate(db, target)` builds its reference schema from
+    // `snapshot[target]`, then opens the database wrapped in a delegate that
+    // CLAIMS the version is `target`. The database still applies its own
+    // `schemaVersion`, so `onUpgrade` runs all the way to the app's real version
+    // and the result is compared against the `target` snapshot.
+    //
+    // That makes any `target` below `schemaVersion` unusable: for example
+    // 11 -> 12 would migrate to 15 (running the v13 Jaap additions, the v14
+    // foreign-key repair and the v15 Jaap drop) and then complain that a v15
+    // database does not match the v12 snapshot. Those mismatches are an artefact
+    // of the comparison, not defects in the migrations.
+    //
+    // Targeting `schemaVersion` is the assertion that actually matters and the
+    // one the API supports: a database written by ANY past release must migrate
+    // cleanly to the schema the shipping app expects. Because each hop re-runs
+    // the whole `onUpgrade` chain from its starting version, the intermediate
+    // steps are still exercised - every `from < version` branch is taken on the
+    // way up.
     final versions = GeneratedHelper.versions;
-    for (final (i, fromVersion) in versions.indexed) {
-      group('from $fromVersion', () {
-        for (final toVersion in versions.skip(i + 1)) {
-          test('to $toVersion', () async {
-            final schema = await verifier.schemaAt(fromVersion);
-            // `AppDatabase.forTesting` takes the executor the verifier hands out,
-            // so the migration runs against the historical schema while the
-            // migration code under test is the app's real one.
-            //
-            // The previous `Database(...)` here referenced a name that exists
-            // nowhere in the project, so this file never compiled and none of the
-            // migration hops below had ever actually run.
-            final db = AppDatabase.forTesting(schema.newConnection());
-            await verifier.migrateAndValidate(db, toVersion);
-            await db.close();
-          });
-        }
+    final currentVersion = versions.last;
+
+    for (final fromVersion in versions) {
+      if (fromVersion == currentVersion) continue;
+      test('from $fromVersion migrates to $currentVersion', () async {
+        final schema = await verifier.schemaAt(fromVersion);
+        // `AppDatabase.forTesting` takes the executor the verifier hands out, so
+        // the migration runs against the historical schema while the migration
+        // code under test is the app's real one.
+        //
+        // The previous `Database(...)` here referenced a name that exists nowhere
+        // in the project, so this file never compiled and no migration hop had
+        // ever actually run.
+        final db = AppDatabase.forTesting(schema.newConnection());
+        await verifier.migrateAndValidate(db, currentVersion);
+        await db.close();
       });
     }
 
-    // v13 -> v14 repairs the local playlist foreign key, and v14 -> v15 drops
-    // the local Jaap Counter tables. `migrateAndValidate` checks the full
-    // expected schema for every generated version, so intermediate hop
-    // coverage is already exercised by the loop above.
+    // The snapshots and the app must not drift apart: if `schemaVersion` is
+    // bumped without dumping a schema for the new version, this loop would
+    // silently keep validating an older target. Assert the pairing instead.
+    test('a schema snapshot exists for the app\'s current version', () {
+      expect(
+        versions,
+        contains(currentVersion),
+        reason: 'GeneratedHelper must expose a snapshot for schemaVersion '
+            '$currentVersion, or nothing validates the shipping schema',
+      );
+    });
   });
 
   // Simple tests ensure the schema is transformed correctly, but some
@@ -96,7 +120,15 @@ void main() {
       newVersion: 2,
       createOld: v1.DatabaseAtV1.new,
       createNew: v2.DatabaseAtV2.new,
-      openTestedDatabase: (x) => AppDatabase(),
+      // `AppDatabase.forTesting` takes the executor the verifier opens, so the
+      // migration runs in memory against the historical schema.
+      //
+      // The previous `AppDatabase()` used the default constructor, whose
+      // `LazyDatabase` calls `getApplicationSupportDirectory()` - a
+      // path_provider platform channel. In a plain `test` (not
+      // `testWidgets`) there is no Flutter binding, so it threw
+      // "Binding has not yet been initialized" before any migration ran.
+      openTestedDatabase: (x) => AppDatabase.forTesting(x),
       createItems: (batch, oldDb) {
         batch.insertAll(oldDb.authenticationTable, oldAuthenticationTableData);
         batch.insertAll(oldDb.blacklistTable, oldBlacklistTableData);

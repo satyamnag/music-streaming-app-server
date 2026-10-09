@@ -281,8 +281,124 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('DROP TABLE IF EXISTS jaap_counters_table');
           await customStatement('DROP TABLE IF EXISTS jaap_daily_counts_table');
         }
+
+        // Reconcile `preferences_table` with the table definition the shipping app
+        // uses: rename the audio-source column, then rebuild so the columns' SQL
+        // DEFAULTS match a fresh install.
+        //
+        // ## Two defects this fixes, both found by the migration test
+        // Neither had ever been reported, because test/drift/app_db/migration_test.dart
+        // could not compile and therefore never ran a single hop.
+        //
+        // 1. `audio_source` was renamed to `audio_source_id` at v10 in the table
+        //    definition, but no migration performs the rename. The v9->v10 step only
+        //    drops `piped_instance`/`invidious_instance` and edits `source_match`, so
+        //    a database created before v10 simply does not have the column:
+        //
+        //        no such column: "audio_source_id"
+        //
+        //    `renameColumn` brings it across with its values intact, and is a no-op
+        //    on databases that already have the new name (guarded below).
+        //
+        // 2. Three column DEFAULTS were changed in the table definition around v11,
+        //    which is what a FRESH install gets:
+        //
+        //        accent_color_scheme   'Slate:0xff64748b'  ->  'maroon:0xff520101'
+        //        market                'US'                ->  'IN'
+        //        connect_port          -1                  ->  19876
+        //
+        //    Nothing ever changed them for databases that already existed. SQLite
+        //    cannot ALTER a DEFAULT in place, so an old install kept the old default
+        //    forever while a fresh install got the new one - two users on the same
+        //    app version with differently-defaulted databases.
+        //
+        // ## Why the order matters, and why the rename is guarded twice
+        // `m.renameColumn` throws if the source column is absent, and `TableMigration`
+        // rebuilds the table by copying EVERY column of the current definition by
+        // name - so it must run only once the table actually has them all. Both are
+        // therefore done here, after `from1To2`..`from10To11` have normalised the
+        // shape.
+        //
+        // The rename is also bounded to `to >= 10`, the version that introduced the
+        // new name. A migration run to an INTERMEDIATE version - which
+        // `testWithDataIntegrity(oldVersion: 1, newVersion: 2, ...)` legitimately
+        // does - must leave the column as that version's snapshot describes it, so
+        // an unbounded rename would make that test report a schema it is right to
+        // expect.
+        if (to >= 10) {
+          final preferencesColumns =
+              await customSelect('PRAGMA table_info(preferences_table)').get();
+          final hasLegacyAudioSource = preferencesColumns
+              .any((row) => row.read<String>('name') == 'audio_source');
+          if (hasLegacyAudioSource) {
+            await m.renameColumn(
+              preferencesTable,
+              'audio_source',
+              preferencesTable.audioSourceId,
+            );
+          }
+        }
+
+        // Only `preferences_table` is rebuilt: it is the table whose defaults
+        // drifted and it holds a single row, so the rebuild is cheap and
+        // `TableMigration` preserves that row's values.
+        //
+        // Guarded on the table already having EVERY column the current definition
+        // declares. `TableMigration` rebuilds by copying each current column BY
+        // NAME, so on a database that has not yet been through all the
+        // add/drop-column steps it would reference columns that do not exist:
+        //
+        //     no such column: "youtube_client_engine"
+        //
+        // That happens when a migration is run to an INTERMEDIATE version - which
+        // `testWithDataIntegrity(oldVersion: 1, newVersion: 2, ...)` legitimately
+        // does. The rebuild is a reconciliation to the CURRENT shape, so it is
+        // simply not applicable to a database that stopped part-way; skipping it
+        // there keeps that test meaningful and changes nothing for real upgrades,
+        // which always run to the current version.
+        if (await _hasAllColumns('preferences_table', preferencesTable)) {
+          await m.alterTable(TableMigration(preferencesTable));
+        }
+
+        // Same class of defect on `source_match_table`: its `source_type` column
+        // carried `DEFAULT 'youtube'` up to v9, and the default was REMOVED from
+        // the table definition at v10 (`text()()`), but no migration ever dropped
+        // it. A database created before v10 therefore keeps a default the current
+        // schema does not declare.
+        //
+        // The column list here is unchanged between v9 and v15, so the rebuild is
+        // safe from any starting version. `TableMigration` preserves the rows.
+        if (await _hasAllColumns('source_match_table', sourceMatchTable)) {
+          await m.alterTable(TableMigration(sourceMatchTable));
+        }
+
+        // And on the plugins table, in the opposite direction: `plugin_api_version`
+        // picked up `DEFAULT '2.0.0'` at v9, but no migration added it, so a
+        // database created earlier keeps the column with no default at all.
+        //
+        // `from8To9` only renames the TABLE (`metadata_plugins_table` ->
+        // `plugins_table`) and two of its columns; the new default was never
+        // applied. The rebuild here replaces the stored definition with the
+        // current one, and `TableMigration` preserves the plugin rows.
+        if (await _hasAllColumns('plugins_table', pluginsTable)) {
+          await m.alterTable(TableMigration(pluginsTable));
+        }
       },
     );
+  }
+
+  /// Whether [table] exists AND already carries every column [definition]
+  /// declares.
+  ///
+  /// Used to decide whether a `TableMigration` rebuild can run: the rebuild copies
+  /// the current columns BY NAME, so it is only valid once the table has all of
+  /// them. Reading `PRAGMA table_info` is the cheap, non-destructive way to ask.
+  Future<bool> _hasAllColumns(String table, TableInfo<Table, dynamic> definition) async {
+    final rows = await customSelect("PRAGMA table_info($table)").get();
+    if (rows.isEmpty) return false;
+    final present = rows.map((row) => row.read<String>('name')).toSet();
+    final expected = definition.$columns.map((column) => column.name);
+    return expected.every(present.contains);
   }
 }
 

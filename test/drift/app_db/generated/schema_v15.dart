@@ -3,452 +3,6 @@
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart';
 
-class AuthenticationTable extends Table
-    with TableInfo<AuthenticationTable, AuthenticationTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  AuthenticationTable(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  late final GeneratedColumn<String> cookie = GeneratedColumn<String>(
-      'cookie', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> accessToken = GeneratedColumn<String>(
-      'access_token', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<DateTime> expiration = GeneratedColumn<DateTime>(
-      'expiration', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, cookie, accessToken, expiration];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'authentication_table';
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  AuthenticationTableData map(Map<String, dynamic> data,
-      {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return AuthenticationTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      cookie: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}cookie'])!,
-      accessToken: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}access_token'])!,
-      expiration: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}expiration'])!,
-    );
-  }
-
-  @override
-  AuthenticationTable createAlias(String alias) {
-    return AuthenticationTable(attachedDatabase, alias);
-  }
-}
-
-class AuthenticationTableData extends DataClass
-    implements Insertable<AuthenticationTableData> {
-  final int id;
-  final String cookie;
-  final String accessToken;
-  final DateTime expiration;
-  const AuthenticationTableData(
-      {required this.id,
-      required this.cookie,
-      required this.accessToken,
-      required this.expiration});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['cookie'] = Variable<String>(cookie);
-    map['access_token'] = Variable<String>(accessToken);
-    map['expiration'] = Variable<DateTime>(expiration);
-    return map;
-  }
-
-  AuthenticationTableCompanion toCompanion(bool nullToAbsent) {
-    return AuthenticationTableCompanion(
-      id: Value(id),
-      cookie: Value(cookie),
-      accessToken: Value(accessToken),
-      expiration: Value(expiration),
-    );
-  }
-
-  factory AuthenticationTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return AuthenticationTableData(
-      id: serializer.fromJson<int>(json['id']),
-      cookie: serializer.fromJson<String>(json['cookie']),
-      accessToken: serializer.fromJson<String>(json['accessToken']),
-      expiration: serializer.fromJson<DateTime>(json['expiration']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'cookie': serializer.toJson<String>(cookie),
-      'accessToken': serializer.toJson<String>(accessToken),
-      'expiration': serializer.toJson<DateTime>(expiration),
-    };
-  }
-
-  AuthenticationTableData copyWith(
-          {int? id,
-          String? cookie,
-          String? accessToken,
-          DateTime? expiration}) =>
-      AuthenticationTableData(
-        id: id ?? this.id,
-        cookie: cookie ?? this.cookie,
-        accessToken: accessToken ?? this.accessToken,
-        expiration: expiration ?? this.expiration,
-      );
-  AuthenticationTableData copyWithCompanion(AuthenticationTableCompanion data) {
-    return AuthenticationTableData(
-      id: data.id.present ? data.id.value : this.id,
-      cookie: data.cookie.present ? data.cookie.value : this.cookie,
-      accessToken:
-          data.accessToken.present ? data.accessToken.value : this.accessToken,
-      expiration:
-          data.expiration.present ? data.expiration.value : this.expiration,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AuthenticationTableData(')
-          ..write('id: $id, ')
-          ..write('cookie: $cookie, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('expiration: $expiration')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, cookie, accessToken, expiration);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is AuthenticationTableData &&
-          other.id == this.id &&
-          other.cookie == this.cookie &&
-          other.accessToken == this.accessToken &&
-          other.expiration == this.expiration);
-}
-
-class AuthenticationTableCompanion
-    extends UpdateCompanion<AuthenticationTableData> {
-  final Value<int> id;
-  final Value<String> cookie;
-  final Value<String> accessToken;
-  final Value<DateTime> expiration;
-  const AuthenticationTableCompanion({
-    this.id = const Value.absent(),
-    this.cookie = const Value.absent(),
-    this.accessToken = const Value.absent(),
-    this.expiration = const Value.absent(),
-  });
-  AuthenticationTableCompanion.insert({
-    this.id = const Value.absent(),
-    required String cookie,
-    required String accessToken,
-    required DateTime expiration,
-  })  : cookie = Value(cookie),
-        accessToken = Value(accessToken),
-        expiration = Value(expiration);
-  static Insertable<AuthenticationTableData> custom({
-    Expression<int>? id,
-    Expression<String>? cookie,
-    Expression<String>? accessToken,
-    Expression<DateTime>? expiration,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (cookie != null) 'cookie': cookie,
-      if (accessToken != null) 'access_token': accessToken,
-      if (expiration != null) 'expiration': expiration,
-    });
-  }
-
-  AuthenticationTableCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? cookie,
-      Value<String>? accessToken,
-      Value<DateTime>? expiration}) {
-    return AuthenticationTableCompanion(
-      id: id ?? this.id,
-      cookie: cookie ?? this.cookie,
-      accessToken: accessToken ?? this.accessToken,
-      expiration: expiration ?? this.expiration,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (cookie.present) {
-      map['cookie'] = Variable<String>(cookie.value);
-    }
-    if (accessToken.present) {
-      map['access_token'] = Variable<String>(accessToken.value);
-    }
-    if (expiration.present) {
-      map['expiration'] = Variable<DateTime>(expiration.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('AuthenticationTableCompanion(')
-          ..write('id: $id, ')
-          ..write('cookie: $cookie, ')
-          ..write('accessToken: $accessToken, ')
-          ..write('expiration: $expiration')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class BlacklistTable extends Table
-    with TableInfo<BlacklistTable, BlacklistTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  BlacklistTable(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> elementType = GeneratedColumn<String>(
-      'element_type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> elementId = GeneratedColumn<String>(
-      'element_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, name, elementType, elementId];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'blacklist_table';
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  BlacklistTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return BlacklistTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      elementType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}element_type'])!,
-      elementId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}element_id'])!,
-    );
-  }
-
-  @override
-  BlacklistTable createAlias(String alias) {
-    return BlacklistTable(attachedDatabase, alias);
-  }
-}
-
-class BlacklistTableData extends DataClass
-    implements Insertable<BlacklistTableData> {
-  final int id;
-  final String name;
-  final String elementType;
-  final String elementId;
-  const BlacklistTableData(
-      {required this.id,
-      required this.name,
-      required this.elementType,
-      required this.elementId});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    map['element_type'] = Variable<String>(elementType);
-    map['element_id'] = Variable<String>(elementId);
-    return map;
-  }
-
-  BlacklistTableCompanion toCompanion(bool nullToAbsent) {
-    return BlacklistTableCompanion(
-      id: Value(id),
-      name: Value(name),
-      elementType: Value(elementType),
-      elementId: Value(elementId),
-    );
-  }
-
-  factory BlacklistTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return BlacklistTableData(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      elementType: serializer.fromJson<String>(json['elementType']),
-      elementId: serializer.fromJson<String>(json['elementId']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'elementType': serializer.toJson<String>(elementType),
-      'elementId': serializer.toJson<String>(elementId),
-    };
-  }
-
-  BlacklistTableData copyWith(
-          {int? id, String? name, String? elementType, String? elementId}) =>
-      BlacklistTableData(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        elementType: elementType ?? this.elementType,
-        elementId: elementId ?? this.elementId,
-      );
-  BlacklistTableData copyWithCompanion(BlacklistTableCompanion data) {
-    return BlacklistTableData(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      elementType:
-          data.elementType.present ? data.elementType.value : this.elementType,
-      elementId: data.elementId.present ? data.elementId.value : this.elementId,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('BlacklistTableData(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('elementType: $elementType, ')
-          ..write('elementId: $elementId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, name, elementType, elementId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is BlacklistTableData &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.elementType == this.elementType &&
-          other.elementId == this.elementId);
-}
-
-class BlacklistTableCompanion extends UpdateCompanion<BlacklistTableData> {
-  final Value<int> id;
-  final Value<String> name;
-  final Value<String> elementType;
-  final Value<String> elementId;
-  const BlacklistTableCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.elementType = const Value.absent(),
-    this.elementId = const Value.absent(),
-  });
-  BlacklistTableCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
-    required String elementType,
-    required String elementId,
-  })  : name = Value(name),
-        elementType = Value(elementType),
-        elementId = Value(elementId);
-  static Insertable<BlacklistTableData> custom({
-    Expression<int>? id,
-    Expression<String>? name,
-    Expression<String>? elementType,
-    Expression<String>? elementId,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (elementType != null) 'element_type': elementType,
-      if (elementId != null) 'element_id': elementId,
-    });
-  }
-
-  BlacklistTableCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? name,
-      Value<String>? elementType,
-      Value<String>? elementId}) {
-    return BlacklistTableCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      elementType: elementType ?? this.elementType,
-      elementId: elementId ?? this.elementId,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (elementType.present) {
-      map['element_type'] = Variable<String>(elementType.value);
-    }
-    if (elementId.present) {
-      map['element_id'] = Variable<String>(elementId.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('BlacklistTableCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('elementType: $elementType, ')
-          ..write('elementId: $elementId')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class PreferencesTable extends Table
     with TableInfo<PreferencesTable, PreferencesTableData> {
   @override
@@ -520,7 +74,7 @@ class PreferencesTable extends Table
       GeneratedColumn<String>('accent_color_scheme', aliasedName, false,
           type: DriftSqlType.string,
           requiredDuringInsert: false,
-          defaultValue: const Constant("Slate:0xff64748b"));
+          defaultValue: const Constant("maroon:0xff520101"));
   late final GeneratedColumn<String> layoutMode = GeneratedColumn<String>(
       'layout_mode', aliasedName, false,
       type: DriftSqlType.string,
@@ -536,7 +90,7 @@ class PreferencesTable extends Table
       'market', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
-      defaultValue: Constant("US"));
+      defaultValue: Constant("IN"));
   late final GeneratedColumn<String> searchMode = GeneratedColumn<String>(
       'search_mode', aliasedName, false,
       type: DriftSqlType.string,
@@ -590,7 +144,7 @@ class PreferencesTable extends Table
       'connect_port', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultValue: const Constant(-1));
+      defaultValue: const Constant(19876));
   late final GeneratedColumn<bool> cacheMusic = GeneratedColumn<bool>(
       'cache_music', aliasedName, false,
       type: DriftSqlType.bool,
@@ -1370,231 +924,6 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesTableData> {
           ..write('enableConnect: $enableConnect, ')
           ..write('connectPort: $connectPort, ')
           ..write('cacheMusic: $cacheMusic')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ScrobblerTable extends Table
-    with TableInfo<ScrobblerTable, ScrobblerTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  ScrobblerTable(this.attachedDatabase, [this._alias]);
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  late final GeneratedColumn<String> username = GeneratedColumn<String>(
-      'username', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  late final GeneratedColumn<String> passwordHash = GeneratedColumn<String>(
-      'password_hash', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, createdAt, username, passwordHash];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'scrobbler_table';
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  ScrobblerTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ScrobblerTableData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      username: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}username'])!,
-      passwordHash: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}password_hash'])!,
-    );
-  }
-
-  @override
-  ScrobblerTable createAlias(String alias) {
-    return ScrobblerTable(attachedDatabase, alias);
-  }
-}
-
-class ScrobblerTableData extends DataClass
-    implements Insertable<ScrobblerTableData> {
-  final int id;
-  final DateTime createdAt;
-  final String username;
-  final String passwordHash;
-  const ScrobblerTableData(
-      {required this.id,
-      required this.createdAt,
-      required this.username,
-      required this.passwordHash});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['username'] = Variable<String>(username);
-    map['password_hash'] = Variable<String>(passwordHash);
-    return map;
-  }
-
-  ScrobblerTableCompanion toCompanion(bool nullToAbsent) {
-    return ScrobblerTableCompanion(
-      id: Value(id),
-      createdAt: Value(createdAt),
-      username: Value(username),
-      passwordHash: Value(passwordHash),
-    );
-  }
-
-  factory ScrobblerTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ScrobblerTableData(
-      id: serializer.fromJson<int>(json['id']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      username: serializer.fromJson<String>(json['username']),
-      passwordHash: serializer.fromJson<String>(json['passwordHash']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'username': serializer.toJson<String>(username),
-      'passwordHash': serializer.toJson<String>(passwordHash),
-    };
-  }
-
-  ScrobblerTableData copyWith(
-          {int? id,
-          DateTime? createdAt,
-          String? username,
-          String? passwordHash}) =>
-      ScrobblerTableData(
-        id: id ?? this.id,
-        createdAt: createdAt ?? this.createdAt,
-        username: username ?? this.username,
-        passwordHash: passwordHash ?? this.passwordHash,
-      );
-  ScrobblerTableData copyWithCompanion(ScrobblerTableCompanion data) {
-    return ScrobblerTableData(
-      id: data.id.present ? data.id.value : this.id,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      username: data.username.present ? data.username.value : this.username,
-      passwordHash: data.passwordHash.present
-          ? data.passwordHash.value
-          : this.passwordHash,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ScrobblerTableData(')
-          ..write('id: $id, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('username: $username, ')
-          ..write('passwordHash: $passwordHash')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, createdAt, username, passwordHash);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ScrobblerTableData &&
-          other.id == this.id &&
-          other.createdAt == this.createdAt &&
-          other.username == this.username &&
-          other.passwordHash == this.passwordHash);
-}
-
-class ScrobblerTableCompanion extends UpdateCompanion<ScrobblerTableData> {
-  final Value<int> id;
-  final Value<DateTime> createdAt;
-  final Value<String> username;
-  final Value<String> passwordHash;
-  const ScrobblerTableCompanion({
-    this.id = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.username = const Value.absent(),
-    this.passwordHash = const Value.absent(),
-  });
-  ScrobblerTableCompanion.insert({
-    this.id = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    required String username,
-    required String passwordHash,
-  })  : username = Value(username),
-        passwordHash = Value(passwordHash);
-  static Insertable<ScrobblerTableData> custom({
-    Expression<int>? id,
-    Expression<DateTime>? createdAt,
-    Expression<String>? username,
-    Expression<String>? passwordHash,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (createdAt != null) 'created_at': createdAt,
-      if (username != null) 'username': username,
-      if (passwordHash != null) 'password_hash': passwordHash,
-    });
-  }
-
-  ScrobblerTableCompanion copyWith(
-      {Value<int>? id,
-      Value<DateTime>? createdAt,
-      Value<String>? username,
-      Value<String>? passwordHash}) {
-    return ScrobblerTableCompanion(
-      id: id ?? this.id,
-      createdAt: createdAt ?? this.createdAt,
-      username: username ?? this.username,
-      passwordHash: passwordHash ?? this.passwordHash,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (username.present) {
-      map['username'] = Variable<String>(username.value);
-    }
-    if (passwordHash.present) {
-      map['password_hash'] = Variable<String>(passwordHash.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ScrobblerTableCompanion(')
-          ..write('id: $id, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('username: $username, ')
-          ..write('passwordHash: $passwordHash')
           ..write(')'))
         .toString();
   }
@@ -3366,13 +2695,665 @@ class PluginsTableCompanion extends UpdateCompanion<PluginsTableData> {
   }
 }
 
-class DatabaseAtV10 extends GeneratedDatabase {
-  DatabaseAtV10(QueryExecutor e) : super(e);
-  late final AuthenticationTable authenticationTable =
-      AuthenticationTable(this);
-  late final BlacklistTable blacklistTable = BlacklistTable(this);
+class LocalPlaylistsTable extends Table
+    with TableInfo<LocalPlaylistsTable, LocalPlaylistsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  LocalPlaylistsTable(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, description, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlists_table';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalPlaylistsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  LocalPlaylistsTable createAlias(String alias) {
+    return LocalPlaylistsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistsTableData extends DataClass
+    implements Insertable<LocalPlaylistsTableData> {
+  final String id;
+  final String name;
+  final String description;
+  final DateTime createdAt;
+  const LocalPlaylistsTableData(
+      {required this.id,
+      required this.name,
+      required this.description,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['description'] = Variable<String>(description);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  LocalPlaylistsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: Value(description),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalPlaylistsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  LocalPlaylistsTableData copyWith(
+          {String? id,
+          String? name,
+          String? description,
+          DateTime? createdAt}) =>
+      LocalPlaylistsTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  LocalPlaylistsTableData copyWithCompanion(LocalPlaylistsTableCompanion data) {
+    return LocalPlaylistsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalPlaylistsTableCompanion
+    extends UpdateCompanion<LocalPlaylistsTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> description;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const LocalPlaylistsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalPlaylistsTableCompanion.insert({
+    required String id,
+    required String name,
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name);
+  static Insertable<LocalPlaylistsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalPlaylistsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? description,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return LocalPlaylistsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class LocalPlaylistSongsTable extends Table
+    with TableInfo<LocalPlaylistSongsTable, LocalPlaylistSongsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  LocalPlaylistSongsTable(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  late final GeneratedColumn<String> playlistId = GeneratedColumn<String>(
+      'playlist_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES local_playlists_table (id) ON DELETE CASCADE'));
+  late final GeneratedColumn<String> trackId = GeneratedColumn<String>(
+      'track_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [id, playlistId, trackId, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlist_songs_table';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalPlaylistSongsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistSongsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      playlistId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}playlist_id'])!,
+      trackId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}track_id'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+    );
+  }
+
+  @override
+  LocalPlaylistSongsTable createAlias(String alias) {
+    return LocalPlaylistSongsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistSongsTableData extends DataClass
+    implements Insertable<LocalPlaylistSongsTableData> {
+  final int id;
+  final String playlistId;
+  final String trackId;
+  final int position;
+  const LocalPlaylistSongsTableData(
+      {required this.id,
+      required this.playlistId,
+      required this.trackId,
+      required this.position});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['playlist_id'] = Variable<String>(playlistId);
+    map['track_id'] = Variable<String>(trackId);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  LocalPlaylistSongsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistSongsTableCompanion(
+      id: Value(id),
+      playlistId: Value(playlistId),
+      trackId: Value(trackId),
+      position: Value(position),
+    );
+  }
+
+  factory LocalPlaylistSongsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistSongsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      playlistId: serializer.fromJson<String>(json['playlistId']),
+      trackId: serializer.fromJson<String>(json['trackId']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'playlistId': serializer.toJson<String>(playlistId),
+      'trackId': serializer.toJson<String>(trackId),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  LocalPlaylistSongsTableData copyWith(
+          {int? id, String? playlistId, String? trackId, int? position}) =>
+      LocalPlaylistSongsTableData(
+        id: id ?? this.id,
+        playlistId: playlistId ?? this.playlistId,
+        trackId: trackId ?? this.trackId,
+        position: position ?? this.position,
+      );
+  LocalPlaylistSongsTableData copyWithCompanion(
+      LocalPlaylistSongsTableCompanion data) {
+    return LocalPlaylistSongsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      playlistId:
+          data.playlistId.present ? data.playlistId.value : this.playlistId,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistSongsTableData(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, playlistId, trackId, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistSongsTableData &&
+          other.id == this.id &&
+          other.playlistId == this.playlistId &&
+          other.trackId == this.trackId &&
+          other.position == this.position);
+}
+
+class LocalPlaylistSongsTableCompanion
+    extends UpdateCompanion<LocalPlaylistSongsTableData> {
+  final Value<int> id;
+  final Value<String> playlistId;
+  final Value<String> trackId;
+  final Value<int> position;
+  const LocalPlaylistSongsTableCompanion({
+    this.id = const Value.absent(),
+    this.playlistId = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  LocalPlaylistSongsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String playlistId,
+    required String trackId,
+    this.position = const Value.absent(),
+  })  : playlistId = Value(playlistId),
+        trackId = Value(trackId);
+  static Insertable<LocalPlaylistSongsTableData> custom({
+    Expression<int>? id,
+    Expression<String>? playlistId,
+    Expression<String>? trackId,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (playlistId != null) 'playlist_id': playlistId,
+      if (trackId != null) 'track_id': trackId,
+      if (position != null) 'position': position,
+    });
+  }
+
+  LocalPlaylistSongsTableCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? playlistId,
+      Value<String>? trackId,
+      Value<int>? position}) {
+    return LocalPlaylistSongsTableCompanion(
+      id: id ?? this.id,
+      playlistId: playlistId ?? this.playlistId,
+      trackId: trackId ?? this.trackId,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (playlistId.present) {
+      map['playlist_id'] = Variable<String>(playlistId.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<String>(trackId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistSongsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('trackId: $trackId, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class LocalLikedSongsTable extends Table
+    with TableInfo<LocalLikedSongsTable, LocalLikedSongsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  LocalLikedSongsTable(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  late final GeneratedColumn<String> trackId = GeneratedColumn<String>(
+      'track_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, trackId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_liked_songs_table';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalLikedSongsTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalLikedSongsTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      trackId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}track_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  LocalLikedSongsTable createAlias(String alias) {
+    return LocalLikedSongsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalLikedSongsTableData extends DataClass
+    implements Insertable<LocalLikedSongsTableData> {
+  final int id;
+  final String trackId;
+  final DateTime createdAt;
+  const LocalLikedSongsTableData(
+      {required this.id, required this.trackId, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['track_id'] = Variable<String>(trackId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  LocalLikedSongsTableCompanion toCompanion(bool nullToAbsent) {
+    return LocalLikedSongsTableCompanion(
+      id: Value(id),
+      trackId: Value(trackId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalLikedSongsTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalLikedSongsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      trackId: serializer.fromJson<String>(json['trackId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'trackId': serializer.toJson<String>(trackId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  LocalLikedSongsTableData copyWith(
+          {int? id, String? trackId, DateTime? createdAt}) =>
+      LocalLikedSongsTableData(
+        id: id ?? this.id,
+        trackId: trackId ?? this.trackId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  LocalLikedSongsTableData copyWithCompanion(
+      LocalLikedSongsTableCompanion data) {
+    return LocalLikedSongsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalLikedSongsTableData(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, trackId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalLikedSongsTableData &&
+          other.id == this.id &&
+          other.trackId == this.trackId &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalLikedSongsTableCompanion
+    extends UpdateCompanion<LocalLikedSongsTableData> {
+  final Value<int> id;
+  final Value<String> trackId;
+  final Value<DateTime> createdAt;
+  const LocalLikedSongsTableCompanion({
+    this.id = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  LocalLikedSongsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String trackId,
+    this.createdAt = const Value.absent(),
+  }) : trackId = Value(trackId);
+  static Insertable<LocalLikedSongsTableData> custom({
+    Expression<int>? id,
+    Expression<String>? trackId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (trackId != null) 'track_id': trackId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  LocalLikedSongsTableCompanion copyWith(
+      {Value<int>? id, Value<String>? trackId, Value<DateTime>? createdAt}) {
+    return LocalLikedSongsTableCompanion(
+      id: id ?? this.id,
+      trackId: trackId ?? this.trackId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<String>(trackId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalLikedSongsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class DatabaseAtV15 extends GeneratedDatabase {
+  DatabaseAtV15(QueryExecutor e) : super(e);
   late final PreferencesTable preferencesTable = PreferencesTable(this);
-  late final ScrobblerTable scrobblerTable = ScrobblerTable(this);
   late final SkipSegmentTable skipSegmentTable = SkipSegmentTable(this);
   late final SourceMatchTable sourceMatchTable = SourceMatchTable(this);
   late final AudioPlayerStateTable audioPlayerStateTable =
@@ -3380,28 +3361,28 @@ class DatabaseAtV10 extends GeneratedDatabase {
   late final HistoryTable historyTable = HistoryTable(this);
   late final LyricsTable lyricsTable = LyricsTable(this);
   late final PluginsTable pluginsTable = PluginsTable(this);
-  late final Index uniqueBlacklist = Index('unique_blacklist',
-      'CREATE UNIQUE INDEX unique_blacklist ON blacklist_table (element_type, element_id)');
-  late final Index uniqTrackMatch = Index('uniq_track_match',
-      'CREATE UNIQUE INDEX uniq_track_match ON source_match_table (track_id, source_info, source_type)');
+  late final LocalPlaylistsTable localPlaylistsTable =
+      LocalPlaylistsTable(this);
+  late final LocalPlaylistSongsTable localPlaylistSongsTable =
+      LocalPlaylistSongsTable(this);
+  late final LocalLikedSongsTable localLikedSongsTable =
+      LocalLikedSongsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        authenticationTable,
-        blacklistTable,
         preferencesTable,
-        scrobblerTable,
         skipSegmentTable,
         sourceMatchTable,
         audioPlayerStateTable,
         historyTable,
         lyricsTable,
         pluginsTable,
-        uniqueBlacklist,
-        uniqTrackMatch
+        localPlaylistsTable,
+        localPlaylistSongsTable,
+        localLikedSongsTable
       ];
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 15;
 }

@@ -206,6 +206,31 @@ jobs:
       - name: Generate code (routes, drift, envied)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      # Guard the drift schema snapshots BEFORE the build.
+      #
+      # `tool/fix_drift_schema_enums.ps1` exists because the enum defaults in
+      # these schemas reference Dart types that are not in scope in a standalone
+      # snapshot, so the migration test cannot compile. A future `drift_dev schema
+      # generate` can reintroduce that silently, and an empty `versions` registry
+      # (which `schema generate` produces on this project because it cannot map
+      # the stored schema format) would disable the whole migration suite while
+      # still looking green.
+      #
+      # The script is idempotent and self-checking: it fails if any snapshot
+      # references an undefined enum, and if `schema.dart`'s version registry is
+      # empty or missing a version.
+      #
+      # Run through `pwsh` explicitly rather than `shell: pwsh`, so the step does
+      # not depend on the worksheet's default shell being PowerShell and the
+      # failure mode is a clear "pwsh: command not found" rather than a silently
+      # skipped guard. PowerShell 7 is preinstalled on the ubuntu-22.04 runner
+      # image GitHub provides.
+      - name: Verify drift schema snapshots
+        run: pwsh -NoProfile -File ./tool/fix_drift_schema_enums.ps1
+
+      - name: Verify database migrations
+        run: flutter test test/drift/app_db/migration_test.dart
+
       # Resolve the version ONCE, from pubspec, and export it for both build
       # steps and for the verification step at the end.
       #
