@@ -489,14 +489,27 @@ class AppDatabase extends _$AppDatabase {
     try {
       await m.addColumn(table, column);
     } on SqliteException catch (e) {
-      // A CHECK constraint on the added column is rejected outright by older
-      // engines, and retrying the identical statement can only fail again.
-      // Rebuild the column without it and let the surrounding step succeed;
-      // see [_addColumnWithoutCheck] for why the constraint is safe to leave
-      // to the column's Dart type and the rest of the schema.
-      if (_isCheckConstraintRejection(e) &&
+      // The engine refused the column definition. On the older SQLite that the
+      // CI runner ships this is the inline CHECK; on any engine it can also be
+      // a duplicate column. The schema itself says which, so ask it rather than
+      // reading the message.
+      if (_isDefinitionRejection(e) &&
           !await _hasColumn(table.actualTableName, column.name)) {
+        // The column is genuinely absent, so the definition was the problem:
+        // the CHECK is what this engine will not take. Re-add it without one.
+        // If this throws too, the failure is real and propagates.
         await _addColumnWithoutCheck(m, table, column);
+
+        // Prove the recovery worked instead of assuming it. A silent success
+        // here would leave the migration chain believing a column exists that
+        // does not, and every later step would then fail on the missing column
+        // instead of at its cause.
+        if (!await _hasColumn(table.actualTableName, column.name)) {
+          throw StateError(
+            'Adding column "${column.name}" to "${table.actualTableName}" '
+            'reported success but the column is still absent.',
+          );
+        }
         return;
       }
       // The column already existed, even though the probe above could not see
@@ -515,19 +528,32 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Whether [error] is the engine refusing a column definition rather than
-  /// reporting a duplicate column.
+  /// Whether the engine rejected [column]'s DEFINITION rather than failing for
+  /// some unrelated reason.
   ///
-  /// This is deliberately NOT a match on the engine's wording. SQLite reports
-  /// a rejected `ALTER TABLE ... ADD COLUMN` with a bare "SQL logic error
-  /// (code 1)" and no column name, and that same code/message pair is what some
-  /// builds emit for a duplicate column too. The two are told apart by the one
-  /// fact that actually differs: whether the column is present afterwards, which
-  /// the caller checks with [_hasColumn] before choosing a path.
+  /// This is deliberately NOT the primary basis for choosing a path - that is
+  /// the [AppDatabase._hasColumn] probe the caller performs, which is a fact
+  /// about the schema rather than about an error message. This check only
+  /// narrows which failures are allowed to reach that probe at all, so that an
+  /// unrelated error is never silently retried as if it were a constraint
+  /// problem.
   ///
-  /// What is matched here is only the opcode, which is the stable part.
-  bool _isCheckConstraintRejection(SqliteException error) {
-    return error.resultCode == 1 || error.extendedResultCode == 1;
+  /// SQLite signals every rejected `ALTER TABLE ... ADD COLUMN` with
+  /// `SQLITE_ERROR` (1). A duplicate column is one cause; a column definition
+  /// the engine will not accept - which is what an inline `CHECK` is on the
+  /// older builds - is another. The caller distinguishes them structurally by
+  /// re-reading the schema, because the message is not stable across builds: a
+  /// recent SQLite says "duplicate column name: x" while an older one reports
+  /// only "SQL logic error (code 1)".
+  ///
+  /// Errors that are NOT `SQLITE_ERROR` - `SQLITE_BUSY` (5), `SQLITE_READONLY`
+  /// (8), `SQLITE_CORRUPT` (11), `SQLITE_FULL` (13) and the rest - are hard
+  /// failures of the environment and are deliberately excluded, so a retry
+  /// without the CHECK can never paper over them.
+  bool _isDefinitionRejection(SqliteException error) {
+    // `resultCode` is already `extendedResultCode & 0xFF`, so comparing it to 1
+    // accepts SQLITE_ERROR and its extended forms while excluding the others.
+    return error.resultCode == 1;
   }
 
   /// Adds [column] to [table] with its drift-generated `CHECK` constraint
@@ -576,7 +602,35 @@ class AppDatabase extends _$AppDatabase {
     TableInfo<Table, dynamic> table,
     GeneratedColumn<Object> column,
   ) async {
-    final context = GenerationContext.fromDb(this);
+    await m.addColumn(
+      table,
+      withoutCheck(column, GenerationContext.fromDb(this)),
+    );
+  }
+
+  /// Returns [column] with its drift-generated `CHECK` constraint dropped,
+  /// keeping its type, nullability and default.
+  ///
+  /// Split out of [_addColumnWithoutCheck] - and kept static, taking the
+  /// [GenerationContext] it needs - so the transformation can be exercised
+  /// directly by a test, rather than a copy of this logic living in the test
+  /// where the two could drift apart. The migration calls it through
+  /// [_addColumnWithoutCheck].
+  ///
+  /// `GeneratedColumn.$customConstraints` is drift's own override: when set,
+  /// drift writes it INSTEAD of the generated `NOT NULL` / `DEFAULT` / CHECK
+  /// trio (see `GeneratedColumn.writeColumnDefinition`).
+  ///
+  /// The default is rendered through the expression's own `writeInto` - NOT by
+  /// stringifying it. `defaultValue.toString()` yields the Dart object's
+  /// representation (`Constant(true)`), which is not SQL and produces
+  /// `DEFAULT Constant(true)` and a syntax error; `writeInto` yields the literal
+  /// (`1`) that the normal drift path emits.
+  @visibleForTesting
+  static GeneratedColumn<Object> withoutCheck(
+    GeneratedColumn<Object> column,
+    GenerationContext context,
+  ) {
     final constraints = StringBuffer();
 
     if (!column.$nullable) constraints.write('NOT NULL');
@@ -584,8 +638,8 @@ class AppDatabase extends _$AppDatabase {
     final defaultValue = column.defaultValue;
     if (defaultValue != null) {
       if (constraints.isNotEmpty) constraints.write(' ');
-      // Render the literal exactly as drift would: brackets are required when
-      // the expression is not a literal (see sqlite.org/syntax/column-constraint).
+      // Brackets are required when the expression is not a literal; see
+      // https://www.sqlite.org/syntax/column-constraint.html
       final needsBrackets = !defaultValue.isLiteral;
       constraints.write('DEFAULT ');
       if (needsBrackets) constraints.write('(');
@@ -595,7 +649,7 @@ class AppDatabase extends _$AppDatabase {
       context.buffer.clear();
     }
 
-    final replacement = GeneratedColumn<Object>(
+    return GeneratedColumn<Object>(
       column.name,
       column.tableName,
       column.$nullable,
@@ -604,8 +658,6 @@ class AppDatabase extends _$AppDatabase {
       defaultValue: defaultValue,
       requiredDuringInsert: column.requiredDuringInsert,
     );
-
-    await m.addColumn(table, replacement);
   }
 
   /// Whether [table] has a column called [column].
