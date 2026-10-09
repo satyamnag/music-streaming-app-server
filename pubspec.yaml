@@ -5,16 +5,15 @@ publish_to: "none"
 
 # versionName+buildNumber. The About screen renders these as
 # "<buildNumber> (<version>)" — see lib/pages/settings/about.dart — so the
-# `+80` half is what puts "80 (1.0.0)" on that screen, and it is also the
+# `+81` half is what puts "81 (1.0.0)" on that screen, and it is also the
 # Android versionCode Google Play uses to order uploads. It must increase by at
-# least one on every Play upload; 80 follows the released 1.0.0+79.
+# least one on every Play upload; 81 follows the released 1.0.0+80.
 #
-# 80 carries four UI fixes: the brand name now ships Dancing Script as STATIC
-# instances (the variable font silently fell back on device), the home carousel
-# clips to its own bounds so a banner can no longer appear to slide in from the
-# screen edge, braced lyric labels (`{...}` / `{{...}}`) render whole instead of
-# being ellipsised, and the gold rim was removed from the album/track cards.
-version: 1.0.0+80
+# 81 replaces the brand wordmark: Dancing Script is removed entirely (it never
+# rendered on device and silently fell back to the platform face) and the name
+# is now a typographic lockup - weight contrast, tracking and a gold gradient on
+# the default face - which cannot fall back because there is no font to load.
+version: 1.0.0+81
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
