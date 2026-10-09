@@ -6,9 +6,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
-import 'package:sangeet/collections/fonts.gen.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/branding/brand_wordmark.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/database/database.dart';
@@ -328,46 +328,27 @@ class _HomeHeaderRow extends StatelessWidget {
             ),
           ),
           const Gap(8),
-          // FittedBox(scaleDown) rather than an ellipsis. The script name IS the
+          // FittedBox(scaleDown) rather than an ellipsis. The wordmark IS the
           // app's identity on its own home screen, and `Expanded` + ellipsis
           // truncated it to "Soulful B..." on a 360dp phone, where the name, the
           // logo and three action icons together need slightly more width than
           // the row has. Scaling down keeps the whole name at every width, and
           // only scales when it must, so nothing changes when there is room.
           Expanded(
-            // scaleDown keeps the whole brand name visible at every width — it
+            // scaleDown keeps the whole wordmark visible at every width — it
             // only shrinks, as a last resort, on a screen so narrow that the row
             // physically cannot hold it: never cropped, never truncated, never
             // wrapped. The scale is exactly 1.0 whenever the name fits.
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Soulful Bhakti',
-                maxLines: 1,
-                style: TextStyle(
-                  // Dancing Script — the brand name's typeface.
-                  //
-                  // A script face, so its glyphs are much NARROWER per point than
-                  // the geometric Cookie it replaces while its ascenders and
-                  // descenders run far outside the em box. 26px (down from
-                  // Cookie's 30) keeps the name the same optical height and
-                  // roughly the same width in the header row; the taller
-                  // line-height below stops the flourishes on the 'S', 'f' and
-                  // 'k' from being clipped by the row's fixed toolbar height.
-                  fontFamily: FontFamily.dancingScript,
-                  fontSize: 26,
-                  height: 1.35,
-                  // Script faces are joined by design, so the word-spacing should
-                  // read as handwriting rather than as tracked-out capitals.
-                  // Cookie's 1.8 letter-spacing made Dancing Script look spaced
-                  // apart; 0.4 keeps the two words distinct without breaking the
-                  // cursive flow.
-                  letterSpacing: 0.4,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                  shadows: shadows,
-                ),
+              // The lockup carries its own weight contrast and gold gradient.
+              // See `BrandWordmark` for why the brand is styled rather than set
+              // in a custom face.
+              child: BrandWordmark(
+                fontSize: 24,
+                color: color,
+                shadows: shadows,
               ),
             ),
           ),

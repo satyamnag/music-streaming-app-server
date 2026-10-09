@@ -17,9 +17,6 @@ class FontFamily {
   /// Font family: Cookie
   static const String cookie = 'Cookie';
 
-  /// Font family: DancingScript
-  static const String dancingScript = 'DancingScript';
-
   /// Font family: RadixIcons
   static const String radixIcons = 'RadixIcons';
 }

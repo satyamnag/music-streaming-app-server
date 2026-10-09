@@ -209,14 +209,6 @@ flutter:
     - assets/branding/sangeet-logo.png
     - assets/branding/sangeet-logo-light.png
     - assets/branding/sangeet-logo.ico
-    # The Dancing Script license, bundled as an asset.
-    #
-    # `fonts:` below ships the .ttf, but it does NOT ship this license file —
-    # an entry under `fonts:` only bundles the font binaries. The OFL-1.1
-    # requires the license to accompany the font wherever it is distributed, so
-    # it is listed here as a regular asset as well. Without this the license
-    # would exist only in the source tree and not in the built app.
-    - assets/fonts/DancingScript-OFL.txt
     - assets/plugins/sangeet-supabase-audio/plugin.smplug
     - LICENSE
     - packages/flutter_undraw/assets/undraw/access_denied.svg
@@ -249,41 +241,23 @@ flutter:
         - asset: assets/fonts/Cookie-Regular.ttf
           style: normal
           weight: 500
-    # Dancing Script — the brand name's typeface ("Soulful Bhakti").
+    # Dancing Script was REMOVED here.
     #
-    # STATIC instances, one file per weight. This replaced a single VARIABLE font
-    # (`DancingScript-VariableFont_wght.ttf`, one file carrying the whole `wght`
-    # axis).
+    # It never rendered on a real device: on two phones, two Android versions and
+    # in both debug and release, the brand name silently fell back to the
+    # platform sans-serif while every unit test passed. The tests passed because
+    # `flutter_test` renders a real face only when the bytes are pushed in
+    # through `FontLoader`, so it never exercised the engine's own bundled-font
+    # lookup - which is the path that was failing.
     #
-    # WHY it was replaced: with the variable file the brand name rendered in the
-    # platform sans-serif on a real device while every test passed. The tests
-    # passed because `flutter_test` measures with fonts loaded explicitly through
-    # `FontLoader`, which succeeds where the engine's own asset font loading on
-    # Android did NOT: the variable font's outlines were never applied and the
-    # text silently fell back. A script face is unmistakable, which is how the
-    # fallback was caught - in a screenshot, not in CI.
+    # The brand is now a typographic lockup instead (`BrandWordmark`), built from
+    # weight contrast, tracking and a gold gradient on the default face. Every
+    # one of those properties is a plain `TextStyle` field, so the wordmark
+    # renders identically everywhere by construction, with no font to load and
+    # nothing that can silently fall back.
     #
-    # Static instances remove that failure mode: each file is a plain TrueType
-    # with no `fvar`/`gvar` tables, so there is no variation axis for the engine
-    # to resolve. Three weights are shipped (400/600/700) because the brand name
-    # is drawn at `w600`, which no single static file covers; declaring the
-    # nearest neighbours lets Flutter pick the real SemiBold outline instead of
-    # synthesising a fake bold over Regular.
-    #
-    # OFL-1.1 licensed (see assets/fonts/DancingScript-OFL.txt); the license file
-    # ships alongside the font because the OFL requires the license to travel
-    # with the font.
-    - family: DancingScript
-      fonts:
-        - asset: assets/fonts/DancingScript-Regular.ttf
-          style: normal
-          weight: 400
-        - asset: assets/fonts/DancingScript-SemiBold.ttf
-          style: normal
-          weight: 600
-        - asset: assets/fonts/DancingScript-Bold.ttf
-          style: normal
-          weight: 700
+    # The OFL licence below was removed with the font: the licence obligation is
+    # to ship it WITH the font, so it has no purpose once the font is gone.
 
 
 flutter_gen:

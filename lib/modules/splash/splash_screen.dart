@@ -1,7 +1,7 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/assets.gen.dart';
-import 'package:sangeet/collections/fonts.gen.dart';
+import 'package:sangeet/components/branding/brand_wordmark.dart';
 
 /// Splash screen shown while the app initializes (plugins + local server
 /// loading).
@@ -81,21 +81,12 @@ class SplashScreen extends HookWidget {
                 ),
               ),
               const Gap(20),
-              Text(
-                'Soulful Bhakti',
-                style: TextStyle(
-                  // Dancing Script — the brand name's typeface, matching the home
-                  // header. Scaled from Cookie's 34 to 30 for the same optical
-                  // height, with the line-height opened up so the script
-                  // flourishes are not clipped. See the home header for the full
-                  // reasoning on the family/size/spacing choice.
-                  fontFamily: FontFamily.dancingScript,
-                  fontSize: 30,
-                  height: 1.35,
-                  letterSpacing: 0.4,
-                  fontWeight: FontWeight.w600,
-                  color: scheme.foreground,
-                ),
+              // The same wordmark as the home header and the sidebar. Sized up
+              // from the header's 24 because the splash has the room and is the
+              // one place the brand is the entire screen.
+              BrandWordmark(
+                fontSize: 30,
+                color: scheme.foreground,
               ),
               const Gap(6),
               Text(
