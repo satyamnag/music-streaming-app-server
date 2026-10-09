@@ -26,7 +26,14 @@ void main() {
         for (final toVersion in versions.skip(i + 1)) {
           test('to $toVersion', () async {
             final schema = await verifier.schemaAt(fromVersion);
-            final db = Database(schema.newConnection());
+            // `AppDatabase.forTesting` takes the executor the verifier hands out,
+            // so the migration runs against the historical schema while the
+            // migration code under test is the app's real one.
+            //
+            // The previous `Database(...)` here referenced a name that exists
+            // nowhere in the project, so this file never compiled and none of the
+            // migration hops below had ever actually run.
+            final db = AppDatabase.forTesting(schema.newConnection());
             await verifier.migrateAndValidate(db, toVersion);
             await db.close();
           });
