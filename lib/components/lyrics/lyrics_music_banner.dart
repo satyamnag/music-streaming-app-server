@@ -54,19 +54,25 @@ class LyricsMusicBanner extends StatelessWidget {
             Gap(8 * scale),
             _note(mutedGold, scale),
             Gap(8 * scale),
-            // The label is author-written and must be shown WHOLE. It is
-            // `Flexible` so a long label wraps inside the band instead of
-            // forcing the `Row` wider than the band and overflowing it, which
-            // is what a bare Text did once the label ran past the available
-            // width. `softWrap` keeps every word; nothing is ever clipped or
-            // ellipsised, because the braces are a markup instruction and a
-            // cut label reads as a rendering fault.
+            // The label is author-written and must be shown WHOLE, on ONE LINE.
+            //
+            // `Flexible` caps it at the space the flourishes and notes leave, and
+            // `FittedBox(scaleDown)` shrinks it to fit rather than wrapping it or
+            // cutting it with an ellipsis. Wrapping (the previous behaviour) put
+            // a long label on two lines; an ellipsis would have hidden its tail.
+            // Scaling is the only treatment that keeps every word AND one line,
+            // and it leaves an ordinary `{{Music}}` at full size.
             Flexible(
-              child: Text(
-                label,
-                style: labelStyle,
-                textAlign: TextAlign.center,
-                softWrap: true,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Text(
+                  label,
+                  style: labelStyle,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
               ),
             ),
             Gap(8 * scale),

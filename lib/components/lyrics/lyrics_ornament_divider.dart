@@ -44,7 +44,23 @@ class LyricsOrnamentDivider extends StatelessWidget {
           Gap(6 * scale),
           const _Flourish(color: goldLine),
           Gap(6 * scale),
-          // Center pill
+          // Center pill.
+          //
+          // `Flexible` caps the pill at the space the rules leave, and the label
+          // inside is `FittedBox(scaleDown)`. Together they guarantee the label
+          // is shown WHOLE on ONE LINE:
+          //
+          //  * it used to be `maxLines: 1` + `TextOverflow.ellipsis`, which cut
+          //    a long heading to "{Vachan..." - the braces are a markup
+          //    instruction, so a truncated label reads as a rendering fault;
+          //  * plain wrapping then fixed the truncation but put the heading on
+          //    two lines, which is not the single line this wants.
+          //
+          // `FittedBox(scaleDown)` shrinks the text until it fits instead. It
+          // never truncates, never wraps, and never overflows: the label is
+          // always complete, always on one line, and the pill simply becomes as
+          // wide as the rules allow. Only long labels are scaled down at all, so
+          // an ordinary `{Pallavi}` is untouched.
           Flexible(
             child: Container(
               padding: EdgeInsets.symmetric(
@@ -59,19 +75,17 @@ class LyricsOrnamentDivider extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                // The label is author-written section text and must be shown
-                // WHOLE. It was `maxLines: 1` with `TextOverflow.ellipsis`,
-                // which silently cut any heading longer than the pill to
-                // "{Vachan…" - the braces are a markup instruction, so a
-                // truncated label reads as a rendering fault rather than as a
-                // long heading. Wrapping is the correct behaviour: the pill
-                // grows to a second line and the rule/flourish row stays
-                // vertically centred beside it.
-                softWrap: true,
-                style: labelStyle,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Text(
+                  label,
+                  // One line, and nothing is ever drawn outside the box.
+                  maxLines: 1,
+                  softWrap: false,
+                  textAlign: TextAlign.center,
+                  style: labelStyle,
+                ),
               ),
             ),
           ),

@@ -18,6 +18,9 @@
 // several of its sub-widgets cannot be `const`; the lint is noise here.
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
@@ -77,8 +80,24 @@ void main() {
     });
   });
 
-  group('brace labels render without truncation', () {
-    testWidgets('the ornament divider wraps a long heading instead of cutting it',
+  group('brace labels render whole on ONE line', () {
+    /// The number of lines a rendered [Text] actually occupies.
+    ///
+    /// Read from the paint-time layout rather than from the widget's
+    /// configuration: `maxLines: 1` alone would not prove the label fits on one
+    /// line, only that it is not allowed more.
+    /// The height of the rendered label, in logical pixels.
+    ///
+    /// Measured off the actual `RenderParagraph` in the tree, so it reflects the
+    /// real laid-out widget rather than a reconstruction of its style.
+    double renderedHeight(WidgetTester tester, String text) =>
+        tester.getSize(find.text(text)).height;
+
+    /// The width the label's paragraph occupies.
+    double renderedWidth(WidgetTester tester, String text) =>
+        tester.getSize(find.text(text)).width;
+
+    testWidgets('a long ornament heading stays on ONE line, untruncated',
         (tester) async {
       const long = 'Charanam 1 - Nee Pada Bhakti Yento Goppa';
 
@@ -106,15 +125,31 @@ void main() {
 
       final text = tester.widget<Text>(find.text(long));
       expect(text.data, long, reason: 'the whole label must be laid out');
-      expect(text.maxLines, isNull,
-          reason: 'a maxLines cap is what allowed the ellipsis to cut the label');
-      expect(text.overflow, isNot(TextOverflow.ellipsis),
-          reason: 'an ellipsis overflow silently hides the tail of the label');
-      expect(text.softWrap, isNot(false),
-          reason: 'wrapping must stay enabled so the label can grow a line');
+      expect(
+        text.overflow,
+        isNot(TextOverflow.ellipsis),
+        reason: 'an ellipsis silently hides the tail of the label',
+      );
+      expect(text.maxLines, 1, reason: 'the label must be capped at one line');
+      expect(text.softWrap, isFalse,
+          reason: 'soft wrap must be off, or a long label becomes two lines');
+
+      // ONE line means the rendered height stays within a single line box. A
+      // wrapped label would be roughly twice the line height, so comparing the
+      // measured height against one line's height is what actually proves the
+      // single-line requirement (a `maxLines` cap alone would not: it only
+      // forbids more lines, it does not make the text fit on one).
+      final oneLineHeight = (text.style?.fontSize ?? 12) *
+          (text.style?.height ?? 1.0);
+      expect(
+        renderedHeight(tester, long),
+        lessThanOrEqualTo(oneLineHeight * 1.6),
+        reason: 'the heading must be rendered on exactly ONE line',
+      );
     });
 
-    testWidgets('the music banner keeps a long label whole', (tester) async {
+    testWidgets('the music banner keeps a long label on ONE line',
+        (tester) async {
       const long = 'Interlude - Flute and Mridangam';
 
       await tester.pumpWidget(
@@ -142,9 +177,55 @@ void main() {
       final text = tester.widget<Text>(find.text(long));
       expect(text.data, long);
       expect(text.overflow, isNot(TextOverflow.ellipsis));
-      expect(text.softWrap, isNot(false));
+      expect(text.maxLines, 1, reason: 'the label must be capped at one line');
+      expect(text.softWrap, isFalse,
+          reason: 'soft wrap must be off, or a long label becomes two lines');
+      expect(
+        renderedHeight(tester, long),
+        lessThanOrEqualTo((text.style?.fontSize ?? 12) * 1.6),
+        reason: 'the banner label must be rendered on exactly ONE line',
+      );
     });
 
+    testWidgets('a FittedBox scales the label rather than truncating it',
+        (tester) async {
+      // The mechanism that makes one line and no ellipsis possible at once.
+      const long = 'Charanam 1 - Nee Pada Bhakti Yento Goppa';
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Theme(
+            data: ThemeData(
+              radius: .5,
+              iconTheme: const IconThemeProperties(),
+              surfaceOpacity: .8,
+              surfaceBlur: 10,
+            ),
+            child: const MediaQuery(
+              data: MediaQueryData(size: Size(320, 800)),
+              child: SizedBox(
+                width: 320,
+                child: LyricsOrnamentDivider(label: long),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(LyricsOrnamentDivider),
+          matching: find.byType(FittedBox),
+        ),
+        findsOneWidget,
+        reason: 'scaleDown is what keeps the label whole AND on one line; '
+            'without it the choice is between wrapping and an ellipsis',
+      );
+    });
+  });
+
+  group('the labels survive the worst case', () {
     testWidgets('neither widget overflows a narrow phone at a large text scale',
         (tester) async {
       // A long label at 1.5x text scale on a 320dp phone is the worst case for
