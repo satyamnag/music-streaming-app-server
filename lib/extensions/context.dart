@@ -9,16 +9,20 @@ extension PlayerFooterReserve on BuildContext {
   /// Bottom inset a scrollable page must reserve so the floating mini player
   /// and bottom navigation bar never cover the page's last items.
   ///
-  /// Mirrors the canonical home-screen pattern (a trailing
-  /// `SizedBox(height: paddingOf.bottom + 12 * scaling)`): the app-wide footer
-  /// reserve is [MediaQuery.paddingOf]'s bottom (~100px, set in
-  /// `root_app.dart`), which is a little short of the real overlay height
-  /// (mini player + navigation bar), so +12 gives the same breathing room the
-  /// home screen uses.
+  /// Derived from the inherited bottom padding, which `root_app.dart` no longer
+  /// overwrites: with `floatingFooter: true` the scaffold adds the footers'
+  /// measured `footerHeight` to it, so this value equals the real overlay height
+  /// (mini player + navigation bar). The `+12` is breathing room, matching the
+  /// trailing spacer the home screen uses.
   ///
-  /// The mini player grew when the playback timeline was added
-  /// ([PlayerOverlayCollapsedSection.collapsedHeight]), so this reserve is
-  /// derived from that constant rather than a stale hard-coded height.
+  /// This used to be documented as "`paddingOf.bottom` (~100px, set in
+  /// root_app.dart), which is a little short of the real overlay height". That
+  /// was true and was the bug: `root_app.dart` discarded the scaffold's computed
+  /// padding for a fixed 100, so the reserve was ~36px short of the ~136px
+  /// footer and the last row of every screen sat under the mini player. Because
+  /// the reserve is read from the padding, correcting that one line corrected
+  /// all of these call sites at once - and it now follows the navigation bar as
+  /// it animates, which a constant could not.
   double get bottomPlayerReserve =>
       MediaQuery.paddingOf(this).bottom + 12 * Theme.of(this).scaling;
 

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/hooks/configurators/use_check_yt_dlp_installed.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_subscription_status.dart';
@@ -58,12 +57,41 @@ class RootAppPage extends HookConsumerWidget {
             BottomPlayer(),
             SangeetNavigationBar(),
           ],
+          // The footers FLOAT over the body rather than occupying layout space,
+          // which is what keeps the mini player pinned to the bottom on every
+          // screen without each page having to reserve room for it.
+          //
+          // Overlaying is only safe because the scaffold compensates: with
+          // `floatingFooter: true` shadcn adds the measured `footerHeight` to the
+          // body's `MediaQuery.padding.bottom` (see `Scaffold.build`), so a
+          // scroll view that respects `MediaQuery.paddingOf(context).bottom`
+          // stops its last row above the player.
           floatingFooter: true,
           child: Sidebar(
+            // The scaffold's own bottom padding is used AS GIVEN, with a small
+            // breathing margin added on top.
+            //
+            // This previously read `padding.copyWith(bottom: 100 * scaling)`,
+            // which DISCARDED the framework's `footerHeight` and substituted a
+            // fixed guess. The real footer is the mini player's 86 plus the
+            // navigation bar's 50 - roughly 136 at scale 1 - so the hard-coded
+            // 100 was about 36 short, and the last row of every screen sat under
+            // the mini player. The number also ignored the nav bar animating
+            // away (it collapses to 0 while the player panel is open), so it was
+            // wrong in the other direction too.
+            //
+            // Reading the inherited padding instead means the reserve always
+            // equals the footers' real height, whatever they are: it follows the
+            // nav bar as it animates, the player as it is added or removed, and
+            // any future footer, with no constant to keep in sync.
             child: MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                padding: MediaQuery.paddingOf(context)
-                    .copyWith(bottom: 100 * context.theme.scaling),
+                padding: MediaQuery.paddingOf(context).copyWith(
+                  // The scaffold has already added `footerHeight`; this is only
+                  // a little air between the last row and the player, so the
+                  // content does not touch the bar.
+                  bottom: MediaQuery.paddingOf(context).bottom + 8,
+                ),
               ),
               child: const AutoRouter(),
             ),
