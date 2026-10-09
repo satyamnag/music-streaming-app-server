@@ -406,13 +406,25 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// Used to decide whether a `TableMigration` rebuild can run: the rebuild copies
   /// the current columns BY NAME, so it is only valid once the table has all of
-  /// them. Reading `PRAGMA table_info` is the cheap, non-destructive way to ask.
+  /// them.
+  ///
+  /// Like [_hasColumn] this reads the stored DDL from `sqlite_master` rather than
+  /// `PRAGMA table_info`, because the pragma is served from the connection's
+  /// schema cache and can be stale while a migration is in flight.
   Future<bool> _hasAllColumns(String table, TableInfo<Table, dynamic> definition) async {
-    final rows = await customSelect("PRAGMA table_info($table)").get();
+    final rows = await customSelect(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+      variables: [Variable<String>(table)],
+    ).get();
     if (rows.isEmpty) return false;
-    final present = rows.map((row) => row.read<String>('name')).toSet();
-    final expected = definition.$columns.map((column) => column.name);
-    return expected.every(present.contains);
+    final ddl = rows.first.read<String?>('sql');
+    if (ddl == null) return false;
+    return definition.$columns.every(
+      (column) => RegExp(
+        '(?:"${RegExp.escape(column.name)}"|\\b${RegExp.escape(column.name)}\\b)\\s',
+        caseSensitive: false,
+      ).hasMatch(ddl),
+    );
   }
 
   /// Adds [column] to [table] only when it is not already there.
@@ -434,41 +446,56 @@ class AppDatabase extends _$AppDatabase {
   /// on a user's device, where the bundled SQLite version is whatever the OEM
   /// shipped. Asking first removes the dependency on the engine's error message
   /// and on its tolerance, and makes re-running a step harmless.
+  ///
+  /// The "asking" is deliberately done against `sqlite_master` rather than
+  /// `PRAGMA table_info`; see [_hasColumn].
   Future<void> _addColumnIfMissing(
     Migrator m,
     TableInfo<Table, dynamic> table,
     GeneratedColumn<Object> column,
   ) async {
-    final rows = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
-    final present = rows.map((row) => row.read<String>('name')).toSet();
-    if (present.contains(column.name)) return;
+    if (await _hasColumn(table.actualTableName, column.name)) return;
     try {
       await m.addColumn(table, column);
-    } on SqliteException catch (e) {
-      // The column raced into existence between the probe above and this ALTER.
+    } on SqliteException {
+      // The column raced into existence between the probe above and this ALTER,
+      // OR the probe could not see it. This is not hypothetical: the migration
+      // test harness opens the database through a connection already built for
+      // a DIFFERENT version, so the target column can exist before the step
+      // runs. The ALTER then fails.
       //
-      // This is not hypothetical: `PRAGMA table_info` inside `onUpgrade` reports
-      // the state SQLite currently has, but drift's own plumbing (and the
-      // migration-test harness, which opens the database through a
-      // `DatabaseConnection` built for a DIFFERENT version) can have already
-      // created the column. The ALTER then fails.
-      //
-      // The engine's message for that is NOT stable across SQLite versions - a
-      // recent build says "duplicate column name", while the one on the CI
-      // runner reports a bare "SQL logic error (code 1)". Matching on the text
-      // would therefore make this migration behave differently per platform, so
-      // the failure is tolerated structurally instead: the column's presence is
-      // re-checked, and only a genuinely missing column is rethrown.
-      final after = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
-      final nowPresent = after.map((row) => row.read<String>('name')).toSet();
-      if (nowPresent.contains(column.name)) return;
-      // The column really is absent and the ALTER still failed: that is a real
-      // problem and must not be swallowed.
-      throw StateError(
-        'Failed to add ${table.actualTableName}.${column.name}, and it is still '
-        'missing afterwards: $e',
-      );
+      // The engine's message for that is NOT stable - a recent SQLite says
+      // "duplicate column name: x", while the one on an older CI build reports
+      // only "SQL logic error (code 1)". Matching on the text would make this
+      // migration behave differently per platform, so the outcome is decided
+      // structurally instead, and only a genuinely missing column is rethrown.
+      if (await _hasColumn(table.actualTableName, column.name)) return;
+      rethrow;
     }
+  }
+
+  /// Whether [table] has a column called [column].
+  ///
+  /// Reads the stored `CREATE TABLE` text from `sqlite_master`, NOT
+  /// `PRAGMA table_info`. The pragma is served from the connection's schema
+  /// cache and can disagree with the engine's own view of the table while a
+  /// migration is running - which is precisely the situation this guard has to
+  /// survive. The DDL text is the same source SQLite parses when it decides
+  /// whether `ADD COLUMN` is a duplicate, so the two can no longer disagree.
+  Future<bool> _hasColumn(String table, String column) async {
+    final rows = await customSelect(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+      variables: [Variable<String>(table)],
+    ).get();
+    if (rows.isEmpty) return false;
+    final ddl = rows.first.read<String?>('sql');
+    if (ddl == null) return false;
+    // Match the column as a quoted identifier, the form drift emits, and also
+    // the bare form, so this holds for tables created by older releases.
+    return RegExp(
+      '(?:"${RegExp.escape(column)}"|\\b${RegExp.escape(column)}\\b)\\s',
+      caseSensitive: false,
+    ).hasMatch(ddl);
   }
 }
 
