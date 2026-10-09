@@ -5,15 +5,28 @@ publish_to: "none"
 
 # versionName+buildNumber. The About screen renders these as
 # "<buildNumber> (<version>)" — see lib/pages/settings/about.dart — so the
-# `+81` half is what puts "81 (1.0.0)" on that screen, and it is also the
+# `+82` half is what puts "82 (1.0.0)" on that screen, and it is also the
 # Android versionCode Google Play uses to order uploads. It must increase by at
-# least one on every Play upload; 81 follows the released 1.0.0+80.
+# least one on every Play upload; 82 follows 1.0.0+81.
 #
-# 81 replaces the brand wordmark: Dancing Script is removed entirely (it never
-# rendered on device and silently fell back to the platform face) and the name
-# is now a typographic lockup - weight contrast, tracking and a gold gradient on
-# the default face - which cannot fall back because there is no font to load.
-version: 1.0.0+81
+# WHY NOT 79. This was requested as "79 (1.0.0)", which is not buildable as an
+# upload: versionCode 79 was already used (commit 997d91e0) and 80 and 81
+# followed it, so the code is spent twice over. Google Play rejects any upload
+# whose versionCode does not strictly exceed the highest already published, and
+# Android itself refuses to install a lower versionCode over a higher one
+# (INSTALL_FAILED_VERSION_DOWNGRADE), so a 79 build could neither be uploaded nor
+# installed on a device that has run 81. 82 is the next valid value.
+#
+# 82 carries four UI fixes:
+#   * the mini player no longer overlaps the last row of any screen — the footer
+#     reserve came from a hard-coded 100px that discarded the scaffold's measured
+#     footer height (~136px), so every page was ~36px short;
+#   * the home carousel clips with the slides' own corner radius, so banner
+#     corners stay curved while sliding instead of snapping square;
+#   * braced lyric labels (`{Pallavi}`, `{{Music}}`) render whole on ONE line,
+#     scaled to fit rather than truncated or wrapped;
+#   * a guard that every album and track surface keeps rendering the shared card.
+version: 1.0.0+82
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
