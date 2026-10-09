@@ -86,7 +86,21 @@ class TrackPresentation extends HookConsumerWidget {
                 ],
               ),
               const PresentationListSection(),
-              const SliverSafeArea(sliver: SliverGap(10)),
+              // Reserve the floating footer's height, not a fixed 10.
+              //
+              // `SliverGap(10)` left ten logical pixels against a mini player
+              // (86) plus navigation bar (50) that float OVER the list, so the
+              // last row of tracks sat behind the player on every screen built
+              // from this component - the liked playlist and every other
+              // TrackPresentation page.
+              //
+              // `bottomPlayerReserve` reads `MediaQuery.paddingOf(this).bottom`,
+              // which the scaffold has already set to the footers' measured
+              // `footerHeight` (see `root_app.dart`), so this tracks the footer
+              // as it changes instead of assuming a size.
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.bottomPlayerReserve),
+              ),
             ],
           ),
         ),

@@ -250,7 +250,21 @@ class UserPlaylistsPage extends HookConsumerWidget {
                   ),
                 ),
               ),
-              const SliverSafeArea(sliver: SliverGap(10)),
+              // Reserve the floating footer's height, not a fixed 10.
+              //
+              // This ended in `SliverSafeArea(sliver: SliverGap(10))`: ten
+              // logical pixels against a mini player (86) plus navigation bar
+              // (50) that float OVER the list, so the last row of playlists sat
+              // behind the player on every device.
+              //
+              // `bottomPlayerReserve` is `MediaQuery.paddingOf(this).bottom` plus
+              // a small margin, and that padding is the scaffold's own measured
+              // `footerHeight` (see `root_app.dart`). It therefore follows the
+              // footer as it changes - including the navigation bar animating
+              // away - instead of guessing at it.
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.bottomPlayerReserve),
+              ),
             ],
           ),
         ),
