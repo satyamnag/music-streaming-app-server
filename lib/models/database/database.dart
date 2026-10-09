@@ -458,17 +458,14 @@ class AppDatabase extends _$AppDatabase {
     try {
       await m.addColumn(table, column);
     } on SqliteException {
-      // The column raced into existence between the probe above and this ALTER,
-      // OR the probe could not see it. This is not hypothetical: the migration
-      // test harness opens the database through a connection already built for
-      // a DIFFERENT version, so the target column can exist before the step
-      // runs. The ALTER then fails.
-      //
-      // The engine's message for that is NOT stable - a recent SQLite says
-      // "duplicate column name: x", while the one on an older CI build reports
-      // only "SQL logic error (code 1)". Matching on the text would make this
-      // migration behave differently per platform, so the outcome is decided
-      // structurally instead, and only a genuinely missing column is rethrown.
+      // TEMP DIAG
+      final rows = await customSelect(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(table.actualTableName)],
+      ).get();
+      // ignore: avoid_print
+      print('DIAG add ${table.actualTableName}.${column.name} failed; '
+          'ddl=${rows.isEmpty ? "<no such table>" : rows.first.read<String?>('sql')}');
       if (await _hasColumn(table.actualTableName, column.name)) return;
       rethrow;
     }
