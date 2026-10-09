@@ -87,19 +87,22 @@ class AppDatabase extends _$AppDatabase {
           final stepUpgrade = stepByStep(
             from1To2: (m, schema) async {
               // Add invidiousInstance column to preferences table
-              await m.addColumn(
+              await _addColumnIfMissing(
+                m,
                 schema.preferencesTable,
                 schema.preferencesTable.invidiousInstance,
               );
             },
         from2To3: (m, schema) async {
-          await m.addColumn(
+          await _addColumnIfMissing(
+            m,
             schema.preferencesTable,
             schema.preferencesTable.cacheMusic,
           );
         },
         from3To4: (m, schema) async {
-          await m.addColumn(
+          await _addColumnIfMissing(
+            m,
             schema.preferencesTable,
             schema.preferencesTable.youtubeClientEngine,
           );
@@ -399,6 +402,36 @@ class AppDatabase extends _$AppDatabase {
     final present = rows.map((row) => row.read<String>('name')).toSet();
     final expected = definition.$columns.map((column) => column.name);
     return expected.every(present.contains);
+  }
+
+  /// Adds [column] to [table] only when it is not already there.
+  ///
+  /// ## Why the step chain must be idempotent
+  /// `m.addColumn` issues a bare `ALTER TABLE ... ADD COLUMN`. On SQLite that
+  /// fails when the column already exists, and the failure is not always the
+  /// explicit "duplicate column name" - an older SQLite reports a bare
+  /// "SQL logic error (code 1)" instead.
+  ///
+  /// That difference is real and was observed: every migration hop from v1..v8
+  /// passed on a local SQLite 3.50.4 and FAILED on the CI runner's older build
+  /// with
+  ///
+  ///   SqliteException(1): while executing, SQL logic error, SQL logic error (code 1)
+  ///   Causing statement: ALTER TABLE "preferences_table" ADD COLUMN "cache_music" ...
+  ///
+  /// A migration that only works on a recent SQLite is a migration that can fail
+  /// on a user's device, where the bundled SQLite version is whatever the OEM
+  /// shipped. Asking first removes the dependency on the engine's error message
+  /// and on its tolerance, and makes re-running a step harmless.
+  Future<void> _addColumnIfMissing(
+    Migrator m,
+    TableInfo<Table, dynamic> table,
+    GeneratedColumn<Object> column,
+  ) async {
+    final rows = await customSelect("PRAGMA table_info(${table.actualTableName})").get();
+    final present = rows.map((row) => row.read<String>('name')).toSet();
+    if (present.contains(column.name)) return;
+    await m.addColumn(table, column);
   }
 }
 
