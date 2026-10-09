@@ -191,22 +191,61 @@ class AppDatabase extends _$AppDatabase {
           );
         },
         from8To9: (m, schema) async {
-          await m
-              .renameTable(schema.pluginsTable, "metadata_plugins_table")
-              .catchError((e, stack) => AppLogger.reportError(e, stack));
-          await m
-              .renameColumn(
-                schema.pluginsTable,
-                "selected",
-                pluginsTable.selectedForMetadata,
-              )
-              .catchError((e, stack) => AppLogger.reportError(e, stack));
-          await _addColumnIfMissing(
-            m,
-            schema.pluginsTable,
-            pluginsTable.selectedForAudioSource,
-          );
+          // v8 -> v9 split the plugin `selected` flag into
+          // `selected_for_metadata` / `selected_for_audio_source`.
+          //
+          // The old form worked from `schema.pluginsTable`, but on the generated
+          // steps `Schema9.pluginsTable` is ALREADY the post-split shape
+          // (`Shape16` declares both new columns), and the table it describes is
+          // not the one a v8 database owns. A v8 database has
+          // `metadata_plugins_table` - created by from6To7 - still carrying the
+          // single `selected` column. The callback therefore renamed a table
+          // that did not exist, swallowed that failure, and then issued
+          // `ADD COLUMN` against it; SQLite rejects that with a bare
+          // "SQL logic error (code 1)", which is the CI-only failure this
+          // replaces.
+          //
+          // WHICH TABLE: the shipping schema names this table `plugins_table`
+          // (`PluginsTable.$name`), while the v7 step creates
+          // `metadata_plugins_table`. Normalise to the current name here so the
+          // rest of the migration and the reconciliation step agree, and so an
+          // intermediate v9 hop converges on the same shape as a fresh install.
+          final legacy = await customSelect(
+            'PRAGMA table_info(metadata_plugins_table)',
+          ).get();
+          final current = await customSelect(
+            'PRAGMA table_info(plugins_table)',
+          ).get();
+
+          if (current.isEmpty && legacy.isNotEmpty) {
+            await m.renameTable(pluginsTable, 'metadata_plugins_table');
+          }
+
+          // Re-read: the rename above (or a database already at v9) decides which
+          // name is now current.
+          final columns = await customSelect(
+            'PRAGMA table_info(${pluginsTable.actualTableName})',
+          ).get();
+          if (columns.isEmpty) return;
+          final present = columns.map((row) => row.read<String>('name')).toSet();
+
+          if (present.contains('selected') &&
+              !present.contains('selected_for_metadata')) {
+            await m.renameColumn(
+              pluginsTable,
+              'selected',
+              pluginsTable.selectedForMetadata,
+            );
+          }
+          if (!present.contains('selected_for_audio_source')) {
+            await _addColumnIfMissing(
+              m,
+              pluginsTable,
+              pluginsTable.selectedForAudioSource,
+            );
+          }
         },
+
         from9To10: (m, schema) async {
           await m
               .dropColumn(schema.preferencesTable, "piped_instance")
