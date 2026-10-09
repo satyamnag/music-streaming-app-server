@@ -26,7 +26,7 @@ publish_to: "none"
 #   * braced lyric labels (`{Pallavi}`, `{{Music}}`) render whole on ONE line,
 #     scaled to fit rather than truncated or wrapped;
 #   * a guard that every album and track surface keeps rendering the shared card.
-version: 1.0.0+82
+version: 1.0.0+83
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
