@@ -163,4 +163,72 @@ void main() {
     final heavy = tester.widget<Text>(find.text('Bhakti')).style!;
     expect(heavy.color, Colors.black);
   });
+
+  group('the styling that lifts the mark from plain text', () {
+    /// Any gradient-filled box inside the wordmark: the underline flourish.
+    Finder flourish() => find.descendant(
+          of: find.byType(BrandWordmark),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration! as BoxDecoration).gradient != null,
+          ),
+        );
+
+    testWidgets('the heavy word uses a THREE-stop gold ramp', (tester) async {
+      // The flat two-stop ramp read as dull at small sizes because the eye
+      // averages it. A bright highlight at the top-left is what makes the gold
+      // read as metal - light catching the lettering's edge - so the highlight
+      // is the styling, not decoration.
+      await pump(tester, const BrandWordmark(fontSize: 24, color: Colors.black));
+      await tester.pumpAndSettle();
+
+      final mask = tester.widget<ShaderMask>(find.byType(ShaderMask));
+      expect(mask.shaderCallback(const Rect.fromLTWH(0, 0, 100, 30)),
+          isA<Shader>(),
+          reason: 'the gradient must resolve to a real shader');
+
+      // A shader cannot be read back into its stops, so the palette is asserted
+      // directly: a highlight equal to the base gold would collapse the ramp
+      // back to two stops and lose the effect.
+      expect(BrandWordmark.goldHighlight, isNot(BrandWordmark.goldLight));
+      expect(BrandWordmark.goldHighlight, isNot(BrandWordmark.goldDeep));
+    });
+
+    testWidgets('the mark carries a fading underline flourish', (tester) async {
+      await pump(tester, const BrandWordmark(fontSize: 24, color: Colors.black));
+      await tester.pumpAndSettle();
+
+      expect(flourish(), findsWidgets,
+          reason: 'the fading gold rule is what makes it read as a designed '
+              'mark rather than as two words');
+    });
+
+    testWidgets('gradient: false omits the flourish as well', (tester) async {
+      // A caller that opted out of gold must not get a gold rule underneath.
+      await pump(
+        tester,
+        const BrandWordmark(fontSize: 24, color: Colors.black, gradient: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(flourish(), findsNothing);
+    });
+
+    testWidgets('the flourish does not overflow a narrow phone', (tester) async {
+      // The rule is laid under an `IntrinsicWidth` lockup, which is a layout
+      // shape that can overflow where a plain Text did not.
+      for (final size in [20.0, 24.0, 30.0]) {
+        await pump(
+          tester,
+          BrandWordmark(fontSize: size, color: Colors.black),
+          width: 320,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull,
+            reason: 'the mark overflowed at fontSize $size on a 320dp phone');
+      }
+    });
+  });
 }

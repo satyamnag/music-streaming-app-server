@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// The app's wordmark: "Soulful Bhakti", styled as a display lockup.
@@ -68,6 +70,15 @@ class BrandWordmark extends StatelessWidget {
   static const Color goldLight = Color(0xFFF2C14E);
   static const Color goldDeep = Color(0xFFC9822A);
 
+  /// A brighter highlight for the top of the gold ramp.
+  ///
+  /// Three stops rather than two: a highlight, the base gold, then the deep
+  /// shade. A two-stop ramp reads as flat colour at small sizes because the eye
+  /// averages it; the bright top-left corner is what makes the metal read as
+  /// METAL - it looks like light catching the edge of the lettering, which is
+  /// the effect the flat version was missing.
+  static const Color goldHighlight = Color(0xFFFFE9A8);
+
   @override
   Widget build(BuildContext context) {
     // Weight contrast is the whole idea, so the two halves are separate spans.
@@ -103,9 +114,14 @@ class BrandWordmark extends StatelessWidget {
         ? ShaderMask(
             blendMode: BlendMode.srcIn,
             shaderCallback: (bounds) => const LinearGradient(
+              // A diagonal, so the light runs across the letters rather than
+              // straight down them - the angle is what makes it read as a
+              // reflection rather than as a fill.
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: <Color>[goldLight, goldDeep],
+              // Three stops: highlight, gold, deep gold. See [goldHighlight].
+              colors: <Color>[goldHighlight, goldLight, goldDeep],
+              stops: <double>[0.0, 0.45, 1.0],
             ).createShader(bounds),
             child: Text(
               'Bhakti',
@@ -135,7 +151,7 @@ class BrandWordmark extends StatelessWidget {
     //
     // `Baseline` alignment keeps the two weights sitting on a shared baseline;
     // without it the differing metrics of w300 and w900 visibly misalign.
-    return FittedBox(
+    final lockup = FittedBox(
       fit: BoxFit.scaleDown,
       alignment: Alignment.centerLeft,
       child: Row(
@@ -156,6 +172,53 @@ class BrandWordmark extends StatelessWidget {
           heavyWidget,
         ],
       ),
+    );
+
+    // The flourish: a short gold rule under the mark, fading out at both ends.
+    //
+    // This is what lifts the lockup from "two words" to a designed mark, and it
+    // is the piece the flat version was missing. It is drawn rather than typed
+    // (no character can fade), sized from [fontSize] so it scales with the text,
+    // and inset from the edges so it reads as a deliberate underline rather than
+    // as a border.
+    //
+    // The a→b→a alpha ramp is the whole effect: a solid rule looks like a
+    // divider, while one that thins to nothing at both ends reads as a stroke
+    // that belongs to the lettering.
+    final rule = Container(
+      height: math.max(1.0, fontSize * 0.055),
+      margin: EdgeInsets.only(top: fontSize * 0.14),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: <Color>[
+            Color(0x00F2C14E),
+            goldLight,
+            goldDeep,
+            Color(0x00F2C14E),
+          ],
+          stops: <double>[0.0, 0.25, 0.75, 1.0],
+        ),
+      ),
+    );
+
+    // `IntrinsicWidth` so the rule matches the LOCKUP's width rather than the
+    // available width: a header row would otherwise stretch the underline across
+    // the whole toolbar, which is the "border" look the ramp above exists to
+    // avoid.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        IntrinsicWidth(child: lockup),
+        // Only when the gold is in play. A caller that asked for a flat mark
+        // (gradient: false) gets the words alone, so the flourish cannot
+        // introduce gold into a surface that opted out of it.
+        if (gradient)
+          Padding(
+            padding: EdgeInsets.only(right: fontSize * 0.6),
+            child: rule,
+          ),
+      ],
     );
   }
 }
