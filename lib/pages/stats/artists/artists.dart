@@ -3,14 +3,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sangeet/collections/formatters.dart';
+import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
-import 'package:sangeet/modules/stats/common/artist_item.dart';
+import 'package:sangeet/modules/stats/common/artist_grid_item.dart';
+import 'package:sangeet/modules/stats/common/stats_grid_sliver.dart';
 import 'package:sangeet/extensions/context.dart';
 
 import 'package:sangeet/provider/history/top.dart';
 import 'package:sangeet/provider/history/top/tracks.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
-import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -41,25 +42,50 @@ class StatsArtistsPage extends HookConsumerWidget {
         ],
         child: Skeletonizer(
           enabled: topTracks.isLoading && !topTracks.isLoadingNextPage,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: context.bottomPlayerReserve + 10),
-            child: InfiniteList(
-              onFetchData: () async {
-                await topTracksNotifier.fetchMore();
-              },
-              hasError: topTracks.hasError,
-              isLoading: topTracks.isLoading && !topTracks.isLoadingNextPage,
-              hasReachedMax: topTracks.asData?.value.hasMore ?? true,
-              itemCount: artistsData.length,
-              itemBuilder: (context, index) {
-                final artist = artistsData[index];
-                return StatsArtistItem(
-                  artist: artist.artist,
-                  info: Text(context.l10n.count_plays(
-                      compactNumberFormatter.format(artist.count))),
-                );
-              },
-            ),
+          // GRID view, matching the other analytics tabs and the home screen.
+          // See `StatsArtistGridItem` for why the `ButtonTile` row shape was
+          // replaced: a small fixed avatar plus a trailing stat leaves most of a
+          // grid tile empty.
+          //
+          // The reserve is the grid's own `bottomPadding`, so the last row
+          // scrolls clear of the floating player rather than the viewport being
+          // shrunk by an outer `Padding`.
+          child: CustomScrollView(
+            slivers: [
+              StatsGridSliver(
+                bottomPadding: context.bottomPlayerReserve,
+                children: [
+                  for (final artist in artistsData)
+                    StatsArtistGridItem(
+                      key: ValueKey(artist.artist.id),
+                      artist: artist.artist,
+                      info: Text(
+                        context.l10n.count_plays(
+                          compactNumberFormatter.format(artist.count),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              if (topTracks.asData?.value.hasMore ?? false)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Button.text(
+                      onPressed: () async {
+                        await topTracksNotifier.fetchMore();
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(SangeetIcons.angleDown, size: 16),
+                          const Gap(6),
+                          Text(context.l10n.see_more),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
