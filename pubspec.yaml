@@ -45,12 +45,13 @@ publish_to: "none"
 #     shared list components reserved only 10dp of a ~136dp footer;
 #   * all five analytics screens render in grid view, matching the home screen.
 #
-# 85 carries the same nine fixes after review; no source change was needed,
-# because every item from the reported list was already in the tree and covered
-# by a regression test (313 passing). This bump produces a fresh Play-compliant
-# AAB with a strictly increasing versionCode, per the Google Play requirement
-# that each upload exceed the last published one.
-version: 1.0.0+85
+# 86 rebuilds after a credential audit. The v85 build baked in a CORRECT
+# Supabase URL (https://ngemrcsdfxufxnazeqke.supabase.co) for the first time;
+# earlier builds used a dead project (ylmvnjkidmtaphqrucgk) whose DNS no longer
+# exists, which is why the home screen showed a Dio 500 (the in-app server
+# proxies /supabase/tracks and failed to reach the database). Every credential
+# was re-verified against its authoritative source before this bump.
+version: 1.0.0+86
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
