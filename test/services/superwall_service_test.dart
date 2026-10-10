@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sangeet/services/superwall_service.dart';
 
 /// Regression tests for the launch crash caused by calling into Superwall
@@ -59,13 +59,62 @@ void main() {
     await SuperwallService.instance.handleDeepLink(Uri.parse('app://x'));
   });
 
-  test('registerPlacement still runs the feature while unconfigured', () async {
+  test('registerPlacement does NOT run the feature while unconfigured',
+      () async {
+    // INVERTED. This test used to assert the opposite - that the gated feature
+    // ran when the SDK had no API key - on the reasoning that "the app must stay
+    // usable without monetisation".
+    //
+    // That assertion described a serious defect rather than a requirement. The
+    // CI release `.env` has no SUPERWALL_API_KEY, so EVERY shipped build took
+    // this path: a paid track played for anyone, with no paywall, because there
+    // was no SDK to show one. "No paywall presented" is indistinguishable from
+    // "user already entitled" from the outside, which is why it went unnoticed.
+    //
+    // A gate must fail CLOSED. The feature must NOT run, and the caller must be
+    // able to tell why.
     var ran = false;
-    await SuperwallService.instance.registerPlacement(
-      'premium_gate',
-      feature: () async => ran = true,
+
+    await expectLater(
+      SuperwallService.instance.registerPlacement(
+        'premium_gate',
+        feature: () async => ran = true,
+      ),
+      throwsA(isA<SuperwallNotConfiguredError>()),
+      reason: 'an unconfigured SDK must refuse the placement, not grant it',
     );
-    expect(ran, isTrue,
-        reason: 'without a paywall the app must stay usable, so the feature runs');
+
+    expect(
+      ran,
+      isFalse,
+      reason: 'the gated feature must NOT run: granting it would give the paid '
+          'catalogue away whenever the API key is missing',
+    );
+  });
+
+  test('the unconfigured error names the placement and the missing key',
+      () async {
+    // The message is what turns a silent give-away into a diagnosable build
+    // problem, so it must say which placement failed and what to add.
+    try {
+      await SuperwallService.instance.registerPlacement('paid_track_play');
+      fail('expected SuperwallNotConfiguredError');
+    } on SuperwallNotConfiguredError catch (e) {
+      expect(e.placement, 'paid_track_play');
+      expect(e.toString().contains('SUPERWALL_API_KEY'), isTrue,
+          reason: 'the error must name the setting to fix');
+      expect(e.toString().contains('NOT granted'), isTrue,
+          reason: 'the error must state that access was refused');
+    }
+  });
+
+  test('a placement with no feature callback still refuses while unconfigured',
+      () async {
+    // A caller that only wants the paywall (no feature) must not be silently
+    // told everything is fine either.
+    await expectLater(
+      SuperwallService.instance.registerPlacement('premium_playback'),
+      throwsA(isA<SuperwallNotConfiguredError>()),
+    );
   });
 }
