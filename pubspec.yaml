@@ -26,7 +26,25 @@ publish_to: "none"
 #   * braced lyric labels (`{Pallavi}`, `{{Music}}`) render whole on ONE line,
 #     scaled to fit rather than truncated or wrapped;
 #   * a guard that every album and track surface keeps rendering the shared card.
-version: 1.0.0+83
+#
+# 84 carries the fixes for the reported list:
+#   * the home wordmark gains a three-stop gold ramp and a fading underline
+#     flourish, so it reads as designed rather than as plain text;
+#   * the paywall can actually appear - the release .env previously carried no
+#     SUPERWALL_API_KEY, and `registerPlacement` responded to an unconfigured SDK
+#     by RUNNING the gated feature, so paid tracks played free in every build.
+#     The key is now supplied and the gate fails CLOSED without it;
+#   * the karaoke switch is visible again: both playback builders dropped
+#     `karaokeStoragePath`, so the player's availability check saw null;
+#   * the lyrics sub-tabs read Telugu, English Transliteration, English
+#     Translation - the order was reversed in three separate lists;
+#   * a share action on the main player that sends an actionable link, not just
+#     the track's name;
+#   * the floating mini player no longer hides the last row on the settings,
+#     home, album, track, deity, search, playlist and analytics screens - two
+#     shared list components reserved only 10dp of a ~136dp footer;
+#   * all five analytics screens render in grid view, matching the home screen.
+version: 1.0.0+84
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
