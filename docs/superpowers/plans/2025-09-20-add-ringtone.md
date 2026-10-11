@@ -20,7 +20,7 @@
 - **Builds go through GitHub Actions.** Never build release APKs/AABs locally. Use `.github/workflows/android-release.yml`.
 - **Do not modify `spotube-release-binary.yml`.** Leave the existing Spotube workflow untouched.
 - **Flutter pinned at 3.35.2** (`.fvmrc`). CI workflow already sets this.
-- **Supabase project for this work:** both projects must receive the SQL migration (`zxvdbaujbjkkaifkbfqg` and `ngemrcsdfxufxnazeqke`).
+- **Supabase project for this work:** `ngemrcsdfxufxnazeqke` (the only live project; the older project `zxvdbaujbjkkaifkbfqg` was retired).
 
 ---
 
@@ -162,9 +162,9 @@ select column_name from information_schema.columns
 where table_schema='public' and table_name='tracks' and column_name='ringtone_storage_path';
 ```
 
-- [ ] **Step 2: Run the migration in BOTH Supabase projects**
+- [ ] **Step 2: Run the migration in the live Supabase project**
 
-SQL Editor → paste → Run, in `zxvdbaujbjkkaifkbfqg` **and** `ngemrcsdfxufxnazeqke`.
+SQL Editor → paste → Run, in `ngemrcsdfxufxnazeqke`.
 Expected: one row returned (`ringtone_storage_path`).
 
 - [ ] **Step 3: Accept the field on create**

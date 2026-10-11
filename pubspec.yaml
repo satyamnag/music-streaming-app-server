@@ -45,12 +45,11 @@ publish_to: "none"
 #     shared list components reserved only 10dp of a ~136dp footer;
 #   * all five analytics screens render in grid view, matching the home screen.
 #
-# 86 rebuilds after a credential audit. The v85 build baked in a CORRECT
-# Supabase URL (https://ngemrcsdfxufxnazeqke.supabase.co) for the first time;
-# earlier builds used a dead project (ylmvnjkidmtaphqrucgk) whose DNS no longer
-# exists, which is why the home screen showed a Dio 500 (the in-app server
-# proxies /supabase/tracks and failed to reach the database). Every credential
-# was re-verified against its authoritative source before this bump.
+# 86 rebuilds after a credential audit. The build uses the live Supabase project
+# (https://ngemrcsdfxufxnazeqke.supabase.co); earlier builds pointed at a retired
+# project whose DNS no longer resolves, which surfaced as a Dio 500 on the home
+# screen (the in-app server proxies /supabase/tracks and could not reach the
+# database). Every credential was re-verified against its authoritative source.
 version: 1.0.0+86
 
 homepage: https://sangeet.app
