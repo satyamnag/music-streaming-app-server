@@ -293,9 +293,9 @@ class HomePage extends HookConsumerWidget {
 ///
 /// It replaces a `SliverAppBar` because the header had to become part of the
 /// wallpaper block: the artwork runs behind the header AND the carousel, so the
-/// header can no longer be a bar of its own with the wallpaper behind it. The
-/// geometry is the app bar's own — [material.kToolbarHeight] tall, contents
-/// flush to the leading edge.
+/// header can no longer be a bar of its own with the wallpaper behind it. It is
+/// 80dp tall (taller than `kToolbarHeight`'s 56) so the 72dp wordmark renders at
+/// its real size, contents flush to the leading edge.
 ///
 /// [color] and [shadows] come from the caller, which derives them from whether a
 /// wallpaper is configured: white with a shadow over artwork, the theme's
@@ -314,7 +314,11 @@ class _HomeHeaderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: material.kToolbarHeight,
+      // The row holds the logo (32dp) and the 72dp wordmark vertically; this is
+      // tall enough for both plus a small breathing margin, instead of the
+      // previous kToolbarHeight (56) which would have FittedBox-scaled the 72dp
+      // wordmark back down and silently undone the 3x enlargement.
+      height: 80,
       child: Row(
         children: [
           const SizedBox(width: 16),
@@ -341,13 +345,14 @@ class _HomeHeaderRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              // The admin-uploaded brand wordmark PNG (transparent background,
-              // rendered at 24dp optical height). It replaces the typographic
-              // lockup; `BoxFit.contain` preserves the PNG's own aspect ratio
-              // and never distorts it.
+              // The admin-uploaded brand wordmark PNG (transparent background),
+              // rendered at 72dp optical height = 3x the previous 24dp. The
+              // header row grew to 80dp so this size is genuine and is not
+              // scaled back down by the FittedBox. `BoxFit.contain` preserves
+              // the PNG's own aspect ratio and never distorts it.
               child: Image.asset(
                 'assets/branding/soulful-bhakti-wordmark.png',
-                height: 24,
+                height: 72,
                 fit: BoxFit.contain,
                 // Placeholder so the FittedBox has dimensions before decode.
                 gaplessPlayback: true,
