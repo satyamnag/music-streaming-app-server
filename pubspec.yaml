@@ -50,7 +50,13 @@ publish_to: "none"
 # project whose DNS no longer resolves, which surfaced as a Dio 500 on the home
 # screen (the in-app server proxies /supabase/tracks and could not reach the
 # database). Every credential was re-verified against its authoritative source.
-version: 1.0.0+90
+#
+# Version 87 (1.0.0) is the Google Play release: the last version PUBLISHED on
+# the Play Console is 86, so 87 is the strictly-increasing next versionCode
+# (official Play requirement). The intermediate 88/89/90 builds were installed
+# on devices only and never uploaded to Play, so they do not affect the Play
+# sequence. The About screen reads this value and shows "87 (1.0.0)".
+version: 1.0.0+87
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
