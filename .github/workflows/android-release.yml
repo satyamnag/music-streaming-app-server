@@ -133,17 +133,66 @@ jobs:
           flutter --version
           java -version
 
-      - name: Write .env (compile-time config)
+      - name: Write .env from AWS Secrets Manager (primary source)
+        # The canonical vault: the 9 compile-time keys now live in AWS Secrets
+        # Manager (ap-south-1) under <service>/<key> (supabase/url, ... /
+        # onesignal/api-key). Read them here first. This step NEVER fails the
+        # job: if AWS is unreachable or a secret is missing it leaves .env empty
+        # (exit 0), and the DOTENV_RELEASE step below fills it in instead.
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-south-1
+        run: |
+          set -eu
+          : > .env
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::warning::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not set; falling back to DOTENV_RELEASE."
+            exit 0
+          fi
+          SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/api-key onesignal/api-key"
+          for s in $SECRETS; do
+            V="$(aws secretsmanager get-secret-value --secret-id "$s" --query SecretString --output text 2>&1)" || {
+              echo "::warning::AWS fetch failed for $s; falling back to DOTENV_RELEASE."
+              : > .env
+              exit 0
+            }
+            case "$s" in
+              supabase/url)          K=SUPABASE_URL ;;
+              supabase/anon-key)     K=SUPABASE_ANON_KEY ;;
+              clerk/publishable-key) K=CLERK_PUBLISHABLE_KEY ;;
+              r2/base-url)           K=R2_BASE_URL ;;
+              release/channel)       K=RELEASE_CHANNEL ;;
+              update-check/enabled)  K=ENABLE_UPDATE_CHECK ;;
+              hide-donations)        K=HIDE_DONATIONS ;;
+              superwall/api-key)     K=SUPERWALL_API_KEY ;;
+              onesignal/api-key)     K=ONESIGNAL_APP_ID ;;
+              *) continue ;;
+            esac
+            printf '%s=%s\n' "$K" "$V" >> .env
+          done
+          echo "Wrote .env from AWS Secrets Manager with these keys:"
+          grep -oE '^[A-Z_]+' .env | sort -u
+
+      - name: Write .env from DOTENV_RELEASE (fallback)
+        # Runs after the AWS step in every case. Skips itself when the AWS step
+        # already produced a complete .env; otherwise writes the manual secret,
+        # preserving the pre-AWS behavior exactly.
+        if: ${{ !cancelled() }}
         env:
           DOTENV: ${{ secrets.DOTENV_RELEASE }}
         run: |
+          if grep -q '^SUPABASE_URL=' .env; then
+            echo ".env already written from AWS Secrets Manager; skipping fallback."
+            exit 0
+          fi
           if [ -z "$DOTENV" ]; then
-            echo "::error::Secret DOTENV_RELEASE is not set. Add it in Settings -> Secrets -> Actions."
+            echo "::error::Neither AWS Secrets Manager nor DOTENV_RELEASE produced a .env."
             exit 1
           fi
           printf '%s\n' "$DOTENV" > .env
           # Show only the KEYS, never the values, so the log stays safe.
-          echo "Wrote .env with these keys:"
+          echo "Wrote .env from DOTENV_RELEASE with these keys:"
           grep -oE '^[A-Z_]+' .env | sort -u
 
       - name: Write signing config
