@@ -50,7 +50,7 @@ publish_to: "none"
 # project whose DNS no longer resolves, which surfaced as a Dio 500 on the home
 # screen (the in-app server proxies /supabase/tracks and could not reach the
 # database). Every credential was re-verified against its authoritative source.
-version: 1.0.0+86
+version: 1.0.0+87
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
