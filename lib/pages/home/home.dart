@@ -8,7 +8,6 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/branding/brand_wordmark.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/models/database/database.dart';
@@ -342,13 +341,16 @@ class _HomeHeaderRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              // The lockup carries its own weight contrast and gold gradient.
-              // See `BrandWordmark` for why the brand is styled rather than set
-              // in a custom face.
-              child: BrandWordmark(
-                fontSize: 24,
-                color: color,
-                shadows: shadows,
+              // The admin-uploaded brand wordmark PNG (transparent background,
+              // rendered at 24dp optical height). It replaces the typographic
+              // lockup; `BoxFit.contain` preserves the PNG's own aspect ratio
+              // and never distorts it.
+              child: Image.asset(
+                'assets/branding/soulful-bhakti-wordmark.png',
+                height: 24,
+                fit: BoxFit.contain,
+                // Placeholder so the FittedBox has dimensions before decode.
+                gaplessPlayback: true,
               ),
             ),
           ),
