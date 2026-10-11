@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
@@ -132,6 +134,19 @@ class ProfileDialog extends ConsumerWidget {
                         size: 32,
                         color: theme.colorScheme.primary,
                       ),
+              ),
+              const Gap(8),
+              // Settings lives INSIDE the profile popup, not as a separate icon
+              // in the home header: account-level preferences belong with the
+              // user's identity, and keeping the header minimal leaves room for
+              // the brand wordmark.
+              Button.secondary(
+                leading: const Icon(SangeetIcons.settings, size: 18),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.navigateTo(const SettingsRoute());
+                },
+                child: const Text('Settings'),
               ),
               const Gap(8),
               if (isSignedIn) ...[

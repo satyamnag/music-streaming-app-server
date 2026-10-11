@@ -359,19 +359,10 @@ class _HomeHeaderRow extends StatelessWidget {
               ),
             ),
           ),
-          // Search: opens the app's search page. Placed first so the row reads
-          // logo | title | search | account | settings, matching the design.
-          IconButton.ghost(
-            icon: Icon(
-              SangeetIcons.search,
-              size: 20,
-              color: color,
-              shadows: shadows,
-            ),
-            onPressed: () {
-              context.navigateTo(const SearchRoute());
-            },
-          ),
+          // Account: the only action icon kept in the header. Search was removed
+          // (a dedicated Search screen exists) and Settings moved into the
+          // profile popup, so the row reads logo | wordmark | account and the
+          // wordmark keeps the room it needs.
           const Gap(10),
           // Signed-in users see their account avatar (same as the Google
           // account); signed-out users see the user icon.
@@ -404,18 +395,6 @@ class _HomeHeaderRow extends StatelessWidget {
                 context: context,
                 builder: (_) => const ProfileDialog(),
               );
-            },
-          ),
-          const Gap(10),
-          IconButton.ghost(
-            icon: Icon(
-              SangeetIcons.settings,
-              size: 20,
-              color: color,
-              shadows: shadows,
-            ),
-            onPressed: () {
-              context.navigateTo(const SettingsRoute());
             },
           ),
           const Gap(10),
