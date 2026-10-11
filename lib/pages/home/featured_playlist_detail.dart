@@ -15,6 +15,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/featured_playlist_chips.dart';
 import 'package:sangeet/modules/home/sections/featured_playlists.dart';
+import 'package:sangeet/modules/home/sections/specials.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// The full-screen "deity playlist" opened by tapping one Featured Playlist
@@ -55,6 +56,30 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
         playlist = chip;
         break;
       }
+    }
+
+    // The carousel ("Play Now" on a banner) navigates with a `specials` id
+    // (e.g. "ganesh-special"), which is a DIFFERENT id space from
+    // `featured_playlists` (e.g. "ganesha"). Looking the id up in the chips
+    // list alone therefore never matched, and the screen opened showing
+    // "nothing found" with no tracks - exactly the reported bug.
+    //
+    // Resolve against the specials provider as well: the shelf the banner
+    // belongs to already carries its ordered tracks, so the same screen can
+    // render carousel shelves and chips with one implementation.
+    final specials = ref.watch(homeSpecialsProvider);
+    for (final special in specials) {
+      if (special.id != id) continue;
+      playlist ??= FeaturedPlaylist(
+        id: special.id,
+        title: special.title,
+        keywords: const [],
+        // The banner's own artwork is not the chip's circle icon, so the
+        // circle falls back to the theme gradient and generic glyph; the
+        // screen's title and track grid - what this page is for - are correct.
+        tracks: special.tracks,
+      );
+      break;
     }
 
     final query = useState('');

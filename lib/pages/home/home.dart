@@ -345,15 +345,15 @@ class _HomeHeaderRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              // The admin-uploaded brand capsule PNG, displayed UNEDITED exactly
-              // as exported (no transparency or other processing is applied).
-              // Its on-screen size is 85% smaller than the previous 72dp
-              // wordmark: 72 * 0.15 = 10.8dp optical height, per the admin's
-              // "85% smaller" request. `BoxFit.contain` preserves the PNG's own
-              // aspect ratio and never distorts it.
+              // The admin-uploaded brand banner PNG, displayed UNEDITED exactly as
+              // exported. Its on-screen height is 5x the previous 10.8dp
+              // (72 * 0.15 * 5), per the admin's "5x bigger" request.
+              // `BoxFit.contain` preserves the PNG's own aspect ratio and never
+              // distorts it. The header row is 80dp tall, so 54dp fits with room
+              // for the logo and the FittedBox does not scale it back down.
               child: Image.asset(
                 'assets/branding/sangeet-wide-capsule-small.png',
-                height: 72 * 0.15,
+                height: 72 * 0.15 * 5,
                 fit: BoxFit.contain,
                 // Placeholder so the FittedBox has dimensions before decode.
                 gaplessPlayback: true,
