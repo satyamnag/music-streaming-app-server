@@ -84,14 +84,36 @@ void main() {
   });
 
   testWidgets('the reserve follows the padding it is given', (tester) async {
-    // The reserve must TRACK the padding. A constant could not, and that is the
-    // whole point of the fix.
-    final small = await reserveFor(tester, 40);
+    // The reserve must TRACK the padding once the padding exceeds the footer
+    // floor. A constant could not, and that is the whole point of the fix.
     final large = await reserveFor(tester, 150);
+    final larger = await reserveFor(tester, 220);
 
-    expect(small, lessThan(large),
+    expect(large, lessThan(larger),
         reason: 'the reserve must grow with the padding it is given; a fixed '
             'constant would not');
+  });
+
+  testWidgets('the reserve never drops below the real footer stack',
+      (tester) async {
+    // THE BUG THE SCREENSHOTS SHOWED: on routes whose own `Scaffold` does not
+    // receive the footer-augmented padding, `paddingOf.bottom` can be just the
+    // system inset. The reserve must still clear the mini player + nav bar, so
+    // it has a FLOOR of that stack.
+    const navBarHeight = 50.0;
+    const miniPlayerHeight = PlayerOverlayCollapsedSection.collapsedHeight;
+    const footerStack = navBarHeight + miniPlayerHeight; // 136
+
+    for (final padding in <double>[0, 8, 24, 48]) {
+      final reserve = await reserveFor(tester, padding);
+      expect(
+        reserve,
+        greaterThanOrEqualTo(footerStack),
+        reason: 'with a small/absent scaffold padding ($padding) the reserve '
+            'must still be at least the footer stack ($footerStack), or the '
+            'last row sits under the mini player',
+      );
+    }
   });
 
   testWidgets('the reserve exceeds the footer and adds only a small margin',
@@ -125,11 +147,16 @@ void main() {
     expect(reserve, greaterThan(200));
   });
 
-  testWidgets('a zero footer padding yields only the margin', (tester) async {
-    // With no player and no nav bar the reserve must collapse, so a screen is
-    // not left with a band of dead space.
+  testWidgets('with no footer at all the reserve still reserves the stack',
+      (tester) async {
+    // Deliberately NOT collapsing to zero any more. A page cannot know whether
+    // the mini player is currently showing (it appears as soon as a track is
+    // playing), so reserving the stack unconditionally is what makes "no
+    // content hidden behind the player" true on EVERY screen at EVERY moment.
+    // The cost is a little empty space when nothing is playing; the benefit is
+    // that starting playback never pushes the last row under the player.
     final reserve = await reserveFor(tester, 0);
-    expect(reserve, lessThan(30),
-        reason: 'with no footer the reserve should be just the small margin');
+    expect(reserve, greaterThanOrEqualTo(136),
+        reason: 'the reserve keeps its footer-stack floor');
   });
 }

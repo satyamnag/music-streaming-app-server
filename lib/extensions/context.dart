@@ -6,25 +6,40 @@ extension AppLocale on BuildContext {
 }
 
 extension PlayerFooterReserve on BuildContext {
+  /// Minimum height of the floating footer stack: the collapsed mini player
+  /// (`PlayerOverlayCollapsedSection.collapsedHeight` == 86) plus the bottom
+  /// navigation bar (50).
+  ///
+  /// This is the FLOOR for [bottomPlayerReserve]. It exists because the
+  /// inherited padding is not always the footer height: a page that builds its
+  /// own `Scaffold` (the stats, playlist-detail, settings and search pages all
+  /// do) receives the OUTER padding, and `floatingFooter` only adds
+  /// `footerHeight` to the subtree of the scaffold that declared it. On those
+  /// routes the padding can therefore be just the system inset (a few dp),
+  /// which under-reserved the last row into the mini player - the bug reported
+  /// with screenshots across many screens.
+  ///
+  /// Keeping the floor means the reserve is correct on every route, while the
+  /// padding term still lets it GROW when the real footer is taller (e.g. the
+  /// navigation bar is expanded) or when a system gesture bar is present.
+  static const double _minFooterStack = 86 + 50;
+
   /// Bottom inset a scrollable page must reserve so the floating mini player
   /// and bottom navigation bar never cover the page's last items.
   ///
-  /// Derived from the inherited bottom padding, which `root_app.dart` no longer
-  /// overwrites: with `floatingFooter: true` the scaffold adds the footers'
-  /// measured `footerHeight` to it, so this value equals the real overlay height
-  /// (mini player + navigation bar). The `+12` is breathing room, matching the
-  /// trailing spacer the home screen uses.
+  /// `max(padding.bottom, footer stack) + 12`, so it is never short:
+  ///  - the padding term tracks the real, animated footer height where the
+  ///    scaffold does provide it (and any system inset), and
+  ///  - the floor guarantees the last row clears the mini player even on
+  ///    routes where that padding is not propagated.
   ///
-  /// This used to be documented as "`paddingOf.bottom` (~100px, set in
-  /// root_app.dart), which is a little short of the real overlay height". That
-  /// was true and was the bug: `root_app.dart` discarded the scaffold's computed
-  /// padding for a fixed 100, so the reserve was ~36px short of the ~136px
-  /// footer and the last row of every screen sat under the mini player. Because
-  /// the reserve is read from the padding, correcting that one line corrected
-  /// all of these call sites at once - and it now follows the navigation bar as
-  /// it animates, which a constant could not.
-  double get bottomPlayerReserve =>
-      MediaQuery.paddingOf(this).bottom + 12 * Theme.of(this).scaling;
+  /// The `+12` is breathing room, matching the trailing spacer the home screen
+  /// uses.
+  double get bottomPlayerReserve {
+    final padding = MediaQuery.paddingOf(this).bottom;
+    final stack = padding > _minFooterStack ? padding : _minFooterStack;
+    return stack + 12 * Theme.of(this).scaling;
+  }
 
   /// Extra space the Lyrics screen needs below its content, on top of the
   /// app-wide footer padding, so the mini player and navigation bar never
