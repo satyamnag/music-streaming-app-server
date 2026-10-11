@@ -81,20 +81,25 @@ class PlaybuttonTile extends StatelessWidget {
             ),
             const Gap(8),
           ],
-          Tooltip(
-            tooltip: TooltipContainer(child: Text(context.l10n.play)).call,
-            child: IconButton.secondary(
-              icon: switch ((isLoading, isPlaying)) {
-                (true, _) => const CircularProgressIndicator(
-                    size: 22,
-                  ),
-                (false, false) => const Icon(SangeetIcons.play),
-                (false, true) => const Icon(SangeetIcons.pause)
-              },
-              onPressed: onPlaybuttonPressed,
-              enabled: !isLoading,
+          // The play control is optional: album cards no longer pass a callback
+          // (tapping the cover opens the album screen without starting
+          // playback), so no play icon is shown for them. Callers that DO pass
+          // one — playlists — keep the same trailing button as before.
+          if (onPlaybuttonPressed != null)
+            Tooltip(
+              tooltip: TooltipContainer(child: Text(context.l10n.play)).call,
+              child: IconButton.secondary(
+                icon: switch ((isLoading, isPlaying)) {
+                  (true, _) => const CircularProgressIndicator(
+                      size: 22,
+                    ),
+                  (false, false) => const Icon(SangeetIcons.play),
+                  (false, true) => const Icon(SangeetIcons.pause)
+                },
+                onPressed: onPlaybuttonPressed,
+                enabled: !isLoading,
+              ),
             ),
-          ),
         ],
       ),
       enabled: !isLoading,

@@ -38,6 +38,9 @@ const scrolledScreens = <String>[
   'lib/pages/library/user_playlists.dart',
   'lib/pages/settings/settings.dart',
   'lib/pages/settings/about.dart',
+  'lib/pages/settings/metadata_plugins.dart',
+  'lib/pages/profile/profile.dart',
+  'lib/pages/stats/stats.dart',
   'lib/pages/stats/streams/streams.dart',
   'lib/pages/stats/playlists/playlists.dart',
   'lib/pages/stats/minutes/minutes.dart',
@@ -93,8 +96,17 @@ void main() {
             // A page may reserve inline, e.g. home.dart's trailing spacer.
             source.contains('paddingOf(context).bottom');
 
+        // The stats container's old end-of-scroll looked like
+        // `SafeArea(child: SizedBox())` - an EMPTY box. SafeArea only insets a
+        // child that sizes to it; a zero-size SizedBox contributes zero height,
+        // so the last row slid under the footer. `bottomPlayerReserve` has to be
+        // an explicit height, not an empty SafeArea.
+        final emptySafeArea = RegExp(
+          r'SafeArea\(\s*child:\s*SizedBox\(\)\s*\)',
+        ).hasMatch(source);
+
         expect(
-          usesReserve,
+          usesReserve && !emptySafeArea,
           isTrue,
           reason: '$path scrolls but never reserves room for the floating mini '
               'player, so its last row will be hidden behind it. Use '

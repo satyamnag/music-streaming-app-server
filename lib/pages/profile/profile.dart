@@ -131,7 +131,13 @@ class ProfilePage extends HookConsumerWidget {
               //     ),
               //   ),
               // ),
-              const SliverGap(200),
+              // Reserve the floating footer. This was a fixed `SliverGap(200)`;
+              // `bottomPlayerReserve` is the footer's measured height (mini
+              // player + navigation bar) plus breathing room, so it stays right
+              // whether the nav bar animates or the player grows.
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.bottomPlayerReserve),
+              ),
             ],
           ),
         ),

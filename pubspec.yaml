@@ -245,7 +245,7 @@ flutter:
     - assets/branding/sangeet-logo.png
     - assets/branding/sangeet-logo-light.png
     - assets/branding/sangeet-logo.ico
-    - assets/branding/soulful-bhakti-wordmark.png
+    - assets/branding/sangeet-wide-capsule-small.png
     - assets/plugins/sangeet-supabase-audio/plugin.smplug
     - LICENSE
     - packages/flutter_undraw/assets/undraw/access_denied.svg

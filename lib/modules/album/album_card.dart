@@ -3,20 +3,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
-import 'package:sangeet/components/dialogs/select_device_dialog.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
 import 'package:sangeet/components/premium/locked_badge.dart';
 import 'package:sangeet/extensions/context.dart';
-import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
-import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/history/history.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/album.dart';
-import 'package:sangeet/services/audio_player/audio_player.dart';
 
 extension FormattedAlbumType on SangeetAlbumType {
   String get formatted => name.replaceFirst(name[0], name[0].toUpperCase());
@@ -38,8 +34,6 @@ class AlbumCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final playlist = ref.watch(audioPlayerProvider);
-    final playing =
-        useStream(audioPlayer.playingStream).data ?? audioPlayer.isPlaying;
     final playlistNotifier = ref.watch(audioPlayerProvider.notifier);
     final historyNotifier = ref.read(playbackHistoryActionsProvider);
     final isFetchingActiveTrack = ref.watch(queryingTrackInfoProvider);
@@ -83,51 +77,6 @@ class AlbumCard extends HookConsumerWidget {
       }
       open();
     }, [context, album, ref, locked]);
-
-    // Shared play logic (also used, gated, for locked albums).
-    Future<void> playAlbum() async {
-      updating.value = true;
-      try {
-        if (isPlaylistPlaying) {
-          return playing ? audioPlayer.pause() : audioPlayer.resume();
-        }
-
-        final fetchedTracks = await fetchAllTrack();
-
-        if (fetchedTracks.isEmpty || !context.mounted) return;
-
-        final isRemoteDevice = await showSelectDeviceDialog(context, ref);
-        if (isRemoteDevice == null) return;
-        if (isRemoteDevice) {
-          final remotePlayback = ref.read(connectProvider.notifier);
-          await remotePlayback.load(
-            WebSocketLoadEventData.album(
-              tracks: fetchedTracks,
-              collection: album,
-            ),
-          );
-        } else {
-          await playlistNotifier.load(fetchedTracks, autoPlay: true);
-          playlistNotifier.addCollection(album.id);
-          historyNotifier.addAlbums([album]);
-        }
-      } finally {
-        updating.value = false;
-      }
-    }
-
-    final onPlaybuttonPressed = useCallback(() async {
-      if (locked) {
-        await PremiumAccess.gateAlbumPlay(
-          context: context,
-          ref: ref,
-          album: album,
-          feature: () async => playAlbum(),
-        );
-        return;
-      }
-      await playAlbum();
-    }, [locked, context, ref, album, playAlbum]);
 
     final onAddToQueuePressed = useCallback(() async {
       if (isPlaylistPlaying) {
@@ -185,7 +134,11 @@ class AlbumCard extends HookConsumerWidget {
             title: album.name,
             description: description,
             onTap: onTap,
-            onPlaybuttonPressed: onPlaybuttonPressed,
+            // Albums deliberately pass NO play callback, so no play icon is
+            // rendered on the cover and tapping it only opens the album screen
+            // — it never starts the first song. Playlists keep their play
+            // button (they still pass one).
+            onPlaybuttonPressed: null,
             onAddToQueuePressed: onAddToQueuePressed,
           )
         : PlaybuttonCard(
@@ -195,7 +148,7 @@ class AlbumCard extends HookConsumerWidget {
             title: album.name,
             description: description,
             onTap: onTap,
-            onPlaybuttonPressed: onPlaybuttonPressed,
+            onPlaybuttonPressed: null,
             onAddToQueuePressed: onAddToQueuePressed,
           );
 

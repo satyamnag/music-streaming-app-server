@@ -349,6 +349,12 @@ class SettingsMetadataProviderPage extends HookConsumerWidget {
                   ),
                 ),
               ),
+              // Reserve the floating footer so the last plugin row is never
+              // hidden behind the mini player when the disclaimer card does not
+              // reach the bottom of the viewport.
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.bottomPlayerReserve),
+              ),
             ],
           ),
         ),

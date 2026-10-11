@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/stats/insights/insights_section.dart';
 import 'package:sangeet/modules/stats/summary/summary.dart';
 import 'package:sangeet/modules/stats/top/top.dart';
@@ -34,10 +35,13 @@ class StatsPage extends HookConsumerWidget {
               const StatsPageInsightsSection(),
               const StatsPageSummarySection(),
               const StatsPageTopSection(),
-              const SliverToBoxAdapter(
-                child: SafeArea(
-                  child: SizedBox(),
-                ),
+              // Reserve the floating footer's height. The old end-of-scroll here was an
+              // empty insets widget wrapping an empty box — which contributes
+              // ZERO height, so the last grid row slid under the mini player.
+              // `bottomPlayerReserve` is the footer's measured height plus
+              // breathing room.
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.bottomPlayerReserve),
               )
             ],
           ),

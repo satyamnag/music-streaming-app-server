@@ -105,37 +105,45 @@ class PlaybuttonCard extends StatelessWidget {
                         ),
                         const Gap(5),
                       ],
-                      AnimatedScale(
-                        curve: Curves.easeOutBack,
-                        duration: const Duration(milliseconds: 150),
-                        scale: states.contains(WidgetState.hovered) ||
-                                kIsMobile ||
-                                isPlaying ||
-                                isLoading
-                            ? 1
-                            : 0.7,
-                        child: AnimatedOpacity(
+                      // The play control is optional: album cards no longer pass
+                      // a callback (tapping the cover opens the album screen
+                      // without starting playback), so no play icon is shown for
+                      // them. Callers that DO pass one — playlists, tracks —
+                      // keep the exact same animated overlay as before.
+                      if (onPlaybuttonPressed != null)
+                        AnimatedScale(
+                          curve: Curves.easeOutBack,
                           duration: const Duration(milliseconds: 150),
-                          opacity: states.contains(WidgetState.hovered) ||
+                          scale: states.contains(WidgetState.hovered) ||
                                   kIsMobile ||
                                   isPlaying ||
                                   isLoading
                               ? 1
-                              : 0,
-                          child: IconButton.secondary(
-                            icon: switch ((isLoading, isPlaying)) {
-                              (true, _) => const CircularProgressIndicator(
-                                  size: 15,
-                                ),
-                              (false, false) => const Icon(SangeetIcons.play),
-                              (false, true) => const Icon(SangeetIcons.pause)
-                            },
-                            enabled: !isLoading,
-                            onPressed: onPlaybuttonPressed,
-                            size: ButtonSize.small,
+                              : 0.7,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 150),
+                            opacity: states.contains(WidgetState.hovered) ||
+                                    kIsMobile ||
+                                    isPlaying ||
+                                    isLoading
+                                ? 1
+                                : 0,
+                            child: IconButton.secondary(
+                              icon: switch ((isLoading, isPlaying)) {
+                                (true, _) => const CircularProgressIndicator(
+                                    size: 15,
+                                  ),
+                                (false, false) =>
+                                  const Icon(SangeetIcons.play),
+                                (false, true) =>
+                                  const Icon(SangeetIcons.pause)
+                              },
+                              enabled: !isLoading,
+                              onPressed: onPlaybuttonPressed,
+                              size: ButtonSize.small,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 );

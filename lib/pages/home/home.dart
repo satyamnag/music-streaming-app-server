@@ -345,14 +345,15 @@ class _HomeHeaderRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              // The admin-uploaded brand wordmark PNG (transparent background),
-              // rendered at 72dp optical height = 3x the previous 24dp. The
-              // header row grew to 80dp so this size is genuine and is not
-              // scaled back down by the FittedBox. `BoxFit.contain` preserves
-              // the PNG's own aspect ratio and never distorts it.
+              // The admin-uploaded brand capsule PNG, displayed UNEDITED exactly
+              // as exported (no transparency or other processing is applied).
+              // Its on-screen size is 85% smaller than the previous 72dp
+              // wordmark: 72 * 0.15 = 10.8dp optical height, per the admin's
+              // "85% smaller" request. `BoxFit.contain` preserves the PNG's own
+              // aspect ratio and never distorts it.
               child: Image.asset(
-                'assets/branding/soulful-bhakti-wordmark.png',
-                height: 72,
+                'assets/branding/sangeet-wide-capsule-small.png',
+                height: 72 * 0.15,
                 fit: BoxFit.contain,
                 // Placeholder so the FittedBox has dimensions before decode.
                 gaplessPlayback: true,
