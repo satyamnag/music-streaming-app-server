@@ -38,6 +38,13 @@ class FeaturedPlaylist {
   /// fallback, which means the circle is never blank.
   final String? iconUrl;
 
+  /// The admin-uploaded landscape BANNER for this playlist, when it has one
+  /// (from the `specials` row that owns the same shelf).
+  ///
+  /// The detail screen shows this in place of the round icon: opening a banner
+  /// should show that banner, not a generic glyph circle.
+  final String? bannerUrl;
+
   /// The chip's tracks, most played first. Never empty (empty chips are
   /// dropped by the provider).
   final List<SangeetTrackObject> tracks;
@@ -50,6 +57,7 @@ class FeaturedPlaylist {
     this.colorTo,
     this.icon,
     this.iconUrl,
+    this.bannerUrl,
     required this.tracks,
   });
 

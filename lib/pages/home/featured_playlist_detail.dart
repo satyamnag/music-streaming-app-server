@@ -74,9 +74,11 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
         id: special.id,
         title: special.title,
         keywords: const [],
-        // The banner's own artwork is not the chip's circle icon, so the
-        // circle falls back to the theme gradient and generic glyph; the
-        // screen's title and track grid - what this page is for - are correct.
+        // When the shelf has an admin-uploaded banner, the screen shows THAT
+        // banner where the chip screens show their round icon. `hasBanner`
+        // distinguishes a real uploaded banner from a track cover fallback, so
+        // only a genuine banner is promoted to the hero.
+        bannerUrl: special.hasBanner ? special.imageUrl : null,
         tracks: special.tracks,
       );
       break;
@@ -117,9 +119,10 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
     } else {
       body = CustomScrollView(
         slivers: [
-          // The deity's chip, blown up as the screen's hero: the same gradient
-          // circle, uploaded icon (or fallback glyph) and name the chip shows,
-          // so the screen unmistakably belongs to the chip that opened it.
+          // The screen's hero. When this shelf has an admin-uploaded BANNER the
+          // banner is shown here, so opening a banner leads to that banner
+          // rather than a generic glyph circle. Shelves without a banner (the
+          // featured-playlist chips) keep the gradient circle exactly as before.
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
@@ -130,7 +133,7 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
               ),
               child: Column(
                 children: [
-                  _HeroCircle(playlist: playlist),
+                  _HeroArtwork(playlist: playlist),
                   const Gap(12),
                   Text(
                     playlist.title,
@@ -257,6 +260,40 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
 
 /// The chip's circle at hero size: the admin gradient, the uploaded icon image
 /// (or the fallback glyph) and the same white-vs-dark glyph rule the chips use.
+/// The detail screen's hero: the shelf's uploaded BANNER when it has one,
+/// otherwise the round icon/glyph circle the chips use.
+///
+/// A banner arrives only from a `specials` shelf that the admin gave a banner
+/// upload (`HomeSpecial.hasBanner`), so chip-opened screens keep their existing
+/// circle unchanged.
+class _HeroArtwork extends StatelessWidget {
+  final FeaturedPlaylist playlist;
+
+  const _HeroArtwork({required this.playlist});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+    final banner = playlist.bannerUrl?.trim() ?? '';
+    if (banner.isEmpty) return _HeroCircle(playlist: playlist);
+
+    // 8:3 is the landscape banner ratio the admin uploads; the aspect ratio
+    // keeps the banner undistorted at any width.
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16 * scale),
+      child: AspectRatio(
+        aspectRatio: 8 / 3,
+        child: Image(
+          image: CachedNetworkImageProvider(banner, cacheKey: banner),
+          fit: BoxFit.cover,
+          width: double.infinity,
+        ),
+      ),
+    );
+  }
+}
+
 class _HeroCircle extends StatelessWidget {
   final FeaturedPlaylist playlist;
 

@@ -49,6 +49,8 @@ const scrolledScreens = <String>[
   'lib/pages/recent/recently_played.dart',
   'lib/pages/home/home_see_all.dart',
   'lib/pages/home/featured_playlist_detail.dart',
+  'lib/pages/home/home.dart',
+  'lib/pages/search/tabs/all.dart',
 ];
 
 /// Pages that render a shared scrolling component, and so must NOT be expected

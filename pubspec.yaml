@@ -56,7 +56,7 @@ publish_to: "none"
 # (official Play requirement). The intermediate 88/89/90 builds were installed
 # on devices only and never uploaded to Play, so they do not affect the Play
 # sequence. The About screen reads this value and shows "87 (1.0.0)".
-version: 1.0.0+90
+version: 1.0.0+91
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
@@ -252,6 +252,7 @@ flutter:
     - assets/branding/sangeet-logo-light.png
     - assets/branding/sangeet-logo.ico
     - assets/branding/sangeet-wide-capsule-small.png
+    - assets/branding/soulful-bhakti-ornate-white-logo.png
     - assets/plugins/sangeet-supabase-audio/plugin.smplug
     - LICENSE
     - packages/flutter_undraw/assets/undraw/access_denied.svg

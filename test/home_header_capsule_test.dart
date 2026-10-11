@@ -1,7 +1,7 @@
 // Verifies the home header's brand image is exactly what the admin asked for:
-// the wide-capsule PNG, displayed UNEDITED as exported, at 85% smaller size
-// (72dp * 0.15 = 10.8dp optical height), and that no reference to the deleted
-// soulful-bhakti-wordmark.png remains anywhere in the app tree or pubspec.
+// the "Soulful Bhakti" ornate white logo, at the SAME on-screen size as the
+// asset it replaced (72 * 0.15 * 5 = 54dp), with a genuinely transparent
+// background (so it is displayed unedited).
 
 import 'dart:io';
 
@@ -10,23 +10,26 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('home header brand image', () {
-    test('home.dart shows the capsule at 10.8dp', () {
+    test('home.dart shows the ornate logo at the unchanged 54dp height', () {
       final repo = Directory.current.path;
       final home = File('$repo/lib/pages/home/home.dart');
       expect(home.existsSync(), isTrue);
       final content = home.readAsStringSync();
 
-      // The header must load the updated capsule PNG...
+      // The header must load the new ornate logo...
       expect(
-        content.contains("'assets/branding/sangeet-wide-capsule-small.png'"),
+        content.contains(
+            "'assets/branding/soulful-bhakti-ornate-white-logo.png'"),
         isTrue,
-        reason: 'home.dart must reference the admin-updated capsule PNG',
+        reason: 'home.dart must reference the admin-uploaded ornate logo',
       );
-      // ...at 85% smaller than the previous 72dp (72 * 0.15 == 10.8dp)...
+      // ...at EXACTLY the same height as before (the admin said the current
+      // size is perfect and only the artwork was to change).
       expect(
-        content.contains('height: 72 * 0.15'),
+        content.contains('height: 72 * 0.15 * 5'),
         isTrue,
-        reason: 'the header must render at 85% smaller (15% of 72dp)',
+        reason: 'the header height must stay at 72 * 0.15 * 5 = 54dp; only the '
+            'image was to be swapped, not resized',
       );
       // ...with BoxFit.contain (aspect preserved, never distorted).
       expect(
@@ -34,42 +37,39 @@ void main() {
         isTrue,
         reason: 'the image must keep its own aspect ratio',
       );
-      // The image asset file must exist and match what the header names.
-      final asset = File('$repo/assets/branding/sangeet-wide-capsule-small.png');
+      // The asset must exist and be declared so it ships in the APK.
+      final asset = File(
+          '$repo/assets/branding/soulful-bhakti-ornate-white-logo.png');
       expect(asset.existsSync(), isTrue,
-          reason: 'the referenced capsule PNG must exist on disk');
-    });
-
-    test('no reference to the deleted wordmark asset remains', () {
-      final repo = Directory.current.path;
-      final files = <File>[
-        File('$repo/lib/pages/home/home.dart'),
-        File('$repo/pubspec.yaml'),
-      ];
-      for (final f in files) {
-        expect(f.existsSync(), isTrue, reason: '${f.path} should exist');
-        final content = f.readAsStringSync();
-        expect(content.contains('soulful-bhakti-wordmark'), isFalse,
-            reason: '${f.path} must not reference the deleted wordmark');
-      }
-      // pubspec must declare the capsule so it is bundled.
+          reason: 'the referenced logo PNG must exist on disk');
       final pubspec = File('$repo/pubspec.yaml').readAsStringSync();
       expect(
-        pubspec.contains('assets/branding/sangeet-wide-capsule-small.png'),
+        pubspec.contains(
+            'assets/branding/soulful-bhakti-ornate-white-logo.png'),
         isTrue,
-        reason: 'pubspec must declare the capsule asset so it ships in the APK',
+        reason: 'pubspec must declare the logo so it is bundled',
       );
     });
 
-    testWidgets('the capsule widget config renders an asset at 10.8dp',
-        (tester) async {
+    test('no stale reference to the previous capsule asset remains', () {
+      final repo = Directory.current.path;
+      final content =
+          File('$repo/lib/pages/home/home.dart').readAsStringSync();
+      expect(
+        content.contains('sangeet-wide-capsule-small.png'),
+        isFalse,
+        reason: 'the header must no longer point at the replaced capsule image',
+      );
+    });
+
+    testWidgets('a 54dp asset renders with contain fit', (tester) async {
       await tester.pumpWidget(
         material.MaterialApp(
           home: material.Scaffold(
             body: material.Center(
               child: material.Image.asset(
-                'assets/branding/sangeet-wide-capsule-small.png',
-                height: 72 * 0.15,
+                'assets/branding/soulful-bhakti-ornate-white-logo.png',
+                height: 72 * 0.15 * 5,
                 fit: material.BoxFit.contain,
                 gaplessPlayback: true,
               ),
@@ -77,16 +77,14 @@ void main() {
           ),
         ),
       );
-      final image = tester.widget<material.Image>(
-        find.byType(material.Image),
-      );
-      expect(image.image, isA<material.AssetImage>(),
-          reason: 'the header must load a bundled asset, not a network image');
+      final image =
+          tester.widget<material.Image>(find.byType(material.Image));
+      expect(image.image, isA<material.AssetImage>());
       expect(
         (image.image as material.AssetImage).assetName,
-        'assets/branding/sangeet-wide-capsule-small.png',
+        'assets/branding/soulful-bhakti-ornate-white-logo.png',
       );
-      expect(image.height, 72 * 0.15);
+      expect(image.height, 72 * 0.15 * 5);
       expect(image.fit, material.BoxFit.contain);
     });
   });

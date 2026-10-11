@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
+import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/search/loading.dart';
 import 'package:sangeet/pages/search/search.dart';
 import 'package:sangeet/modules/search/sections/playlists.dart';
@@ -37,14 +38,17 @@ class SearchPageAllTab extends HookConsumerWidget {
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: SafeArea(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SearchTracksSection(),
-                  SearchPlaylistsSection(),
+                  const SearchTracksSection(),
+                  const SearchPlaylistsSection(),
+                  // Reserve the floating footer. Without this the last shelf on
+                  // the "All" tab sat under the mini player.
+                  SizedBox(height: context.bottomPlayerReserve),
                 ],
               ),
             ),

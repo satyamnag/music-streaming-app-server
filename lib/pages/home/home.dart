@@ -246,10 +246,14 @@ class HomePage extends HookConsumerWidget {
                     ],
                 },
                 SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: MediaQuery.paddingOf(context).bottom +
-                        12 * theme.scaling,
-                  ),
+                  // Reserve the floating footer. This deliberately uses the
+                  // shared `context.bottomPlayerReserve` (which has a floor of
+                  // the real footer stack) instead of recomputing
+                  // `paddingOf.bottom + 12` here: that inline form had NO floor,
+                  // so on this route it could come out far short of the mini
+                  // player + navigation bar and the last shelf (Top Trending /
+                  // Albums) was hidden behind the player.
+                  child: SizedBox(height: context.bottomPlayerReserve),
                 ),
               ],
             ),
@@ -345,14 +349,17 @@ class _HomeHeaderRow extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              // The admin-uploaded brand banner PNG, displayed UNEDITED exactly as
-              // exported. Its on-screen height is 5x the previous 10.8dp
-              // (72 * 0.15 * 5), per the admin's "5x bigger" request.
+              // The admin-uploaded "Soulful Bhakti" ornate logo, displayed
+              // UNEDITED as exported. It already carries a real transparent
+              // background, so nothing is done to it here.
+              //
+              // The HEIGHT is deliberately unchanged from the previous asset
+              // (72 * 0.15 * 5 = 54dp): the admin confirmed that on-screen size
+              // is exactly right and only the artwork was to be swapped.
               // `BoxFit.contain` preserves the PNG's own aspect ratio and never
-              // distorts it. The header row is 80dp tall, so 54dp fits with room
-              // for the logo and the FittedBox does not scale it back down.
+              // distorts it.
               child: Image.asset(
-                'assets/branding/sangeet-wide-capsule-small.png',
+                'assets/branding/soulful-bhakti-ornate-white-logo.png',
                 height: 72 * 0.15 * 5,
                 fit: BoxFit.contain,
                 // Placeholder so the FittedBox has dimensions before decode.
