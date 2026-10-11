@@ -56,7 +56,7 @@ publish_to: "none"
 # (official Play requirement). The intermediate 88/89/90 builds were installed
 # on devices only and never uploaded to Play, so they do not affect the Play
 # sequence. The About screen reads this value and shows "87 (1.0.0)".
-version: 1.0.0+91
+version: 1.0.0+88
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
