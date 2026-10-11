@@ -179,9 +179,9 @@ class HomeSeeAllPage extends HookConsumerWidget {
                             AlbumRoute(id: album.id, album: album),
                           );
                         },
-                        // The card's tap opens the album; the play control
-                        // starts it, which is what the circle means here.
-                        onPlay: () => playFrom(0, albumTracks),
+                        // No `onPlay`: album covers carry NO play control, here
+                        // as everywhere else. The tap opens the album screen
+                        // only — it never starts a track.
                       );
                     }
                     final track = shownTracks[index];

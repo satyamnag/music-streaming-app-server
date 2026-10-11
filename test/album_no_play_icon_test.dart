@@ -63,6 +63,47 @@ void main() {
             'cover can never start playback',
       );
     });
+
+    test('NO album card call site anywhere passes a play callback', () {
+      // The gap this closes: the first fix only cleared `AlbumCard`, while the
+      // home "Albums" row and its See-all page render `HomeAlbumCard`, whose
+      // `onPlay` ALSO draws a play circle on the cover (TrackCard shows the
+      // control only when it is non-null). Those two surfaces kept their play
+      // button, so the album covers still showed one after the "fix".
+      //
+      // This scans every album-card call site in lib/ and fails if ANY of them
+      // hands over `onPlay` / `onPlaybuttonPressed`.
+      final libDir = Directory('lib');
+      final offenders = <String>[];
+
+      for (final file in libDir.listSync(recursive: true).whereType<File>()) {
+        if (!file.path.endsWith('.dart')) continue;
+        if (file.path.contains('.g.dart') ||
+            file.path.contains('.freezed.dart')) {
+          continue;
+        }
+        final source = file.readAsStringSync();
+        final lines = source.split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          if (!lines[i].contains('AlbumCard(')) continue;
+          // Look at the call's arguments (a generous window: the largest call
+          // site is ~15 lines) for a play callback.
+          final end = (i + 16).clamp(0, lines.length);
+          final call = lines.sublist(i, end).join('\n');
+          if (RegExp(r'onPlay\s*:').hasMatch(call) ||
+              RegExp(r'onPlaybuttonPressed\s*:\s*[^n]').hasMatch(call)) {
+            offenders.add('${file.path}:${i + 1}');
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'these album-card call sites still pass a play callback, so the '
+            'cover draws a play icon: $offenders',
+      );
+    });
   });
 
   group('playlists keep their play icon', () {
