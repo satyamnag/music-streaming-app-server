@@ -126,10 +126,47 @@ environment variables:
 | Secret | Required | Notes |
 |---|---|---|
 | `partner_kek` | **yes** | 64 hex chars. Enables document upload. |
-| `mail_from` | **yes** | A From: address on a domain you have verified with your email provider. |
-| `resend_api_key` *or* `postmark_token` *or* `mailgun_api_key` + `mailgun_domain` | **yes** | One provider is enough. |
+| `mail_from` | **yes** | The From: address. Must be on a domain you can send as. |
+| **Email transport — pick ONE:** | | |
+| `smtp_host` + `smtp_user` + `smtp_password` | option A | **Send through an existing mailbox** (Google Workspace / Microsoft 365). Adds no vendor account. |
+| `resend_api_key` | option B | Resend HTTP API. |
+| `postmark_token` | option C | Postmark HTTP API. |
+| `mailgun_api_key` + `mailgun_domain` | option D | Mailgun HTTP API. |
 | `partner_ip_salt` | recommended | Salt for hashing IPs in the audit log. Falls back to `admin_token`. |
 | `partner_admin_alert_email` | recommended | Receives a notice when a new application is submitted. |
+
+**Choosing a transport.** The server picks whichever is configured, in the
+order SMTP → Resend → Postmark → Mailgun (SMTP first, because if you have a
+mailbox on your own domain it needs no extra vendor). If more than one is set,
+change the order in `partner_email.mjs`.
+
+**Sending via your own mailbox (recommended here).** This domain already runs
+on Google Workspace (`MX: smtp.google.com`), so no new account is needed:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=partners@soulfulbhakti.com
+SMTP_PASSWORD=<a Google App Password, NOT the account password>
+MAIL_FROM=Soulful Bhakti <partners@soulfulbhakti.com>
+```
+
+- **Port 587 uses STARTTLS; port 465 uses implicit TLS.** The code derives
+  `secure` from the port, so use one of those two.
+- Google **rejects a normal account password**. Create an App Password
+  (Google Account → Security → 2-Step Verification → App passwords).
+- Google caps sending at roughly **2,000 recipients/day**. Ample for partner
+  onboarding; revisit if volume grows.
+- **Publish SPF and DMARC.** This domain currently has *neither*, so mail sent
+  as `@soulfulbhakti.com` may be rejected or spam-filed. Add:
+
+  ```
+  TXT  @            "v=spf1 include:_spf.google.com ~all"
+  TXT  _dmarc       "v=DMARC1; p=none; rua=mailto:dmarc@soulfulbhakti.com"
+  ```
+
+  Set both to **DNS only** in Cloudflare (grey cloud) — a proxied mail record
+  breaks delivery.
 
 Non-secret presentation config (Render env is fine):
 

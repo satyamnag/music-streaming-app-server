@@ -148,6 +148,17 @@ const secrets = {
   postmark_token: process.env.POSTMARK_TOKEN || '',
   mailgun_api_key: process.env.MAILGUN_API_KEY || '',
   mailgun_domain: process.env.MAILGUN_DOMAIN || '',
+  // SMTP: send through an EXISTING mailbox on your own domain (Google
+  // Workspace, Microsoft 365) instead of opening another vendor account.
+  // Preferred when the domain already has mailboxes — the message is sent by
+  // the domain that owns it, so SPF/DKIM alignment is preserved.
+  //   Google Workspace: smtp.gmail.com, port 587, an App Password as the
+  //                     password (a normal account password will be rejected).
+  //   Microsoft 365:    smtp.office365.com, port 587.
+  smtp_host: process.env.SMTP_HOST || '',
+  smtp_port: process.env.SMTP_PORT || '',
+  smtp_user: process.env.SMTP_USER || '',
+  smtp_password: process.env.SMTP_PASSWORD || '',
   // The From: address on partner emails. Must be a domain verified with the
   // provider above, with SPF/DKIM/DMARC published, or mail will be filtered.
   mail_from: process.env.MAIL_FROM || '',
@@ -187,6 +198,10 @@ const VAULT_SECRET_KEYS = [
   'mailgun_api_key',
   'mailgun_domain',
   'mail_from',
+  'smtp_host',
+  'smtp_port',
+  'smtp_user',
+  'smtp_password',
   'partner_admin_alert_email',
 ]
 

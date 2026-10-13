@@ -54,7 +54,76 @@ export function describeTransport(getSecrets) {
   if (s.mailgun_api_key && s.mailgun_domain) {
     return { provider: 'mailgun', ok: !!s.mail_from }
   }
+  // SMTP: send through an existing mailbox (Google Workspace, Microsoft 365)
+  // rather than opening another vendor account. Requires host + user + password.
+  if (s.smtp_host && s.smtp_user && s.smtp_password) {
+    return { provider: 'smtp', ok: !!s.mail_from }
+  }
   return { provider: null, ok: false }
+}
+
+/**
+ * Sends one message over SMTP.
+ *
+ * WHY THIS EXISTS ALONGSIDE THE HTTP PROVIDERS
+ * The HTTP providers each need a separate vendor account. Where the operator
+ * already pays for a mailbox on their own domain (this project uses Google
+ * Workspace — `MX: smtp.google.com`), sending through that mailbox avoids
+ * adding a vendor while keeping SPF/DKIM alignment intact, because the
+ * message is sent BY the domain that owns the mailbox.
+ *
+ * TRANSPORT DETAILS
+ *   * `nodemailer` is imported LAZILY, inside this function. If it is not
+ *     installed, the HTTP providers keep working and only this path fails —
+ *     rather than the whole server failing to boot on a missing optional
+ *     dependency.
+ *   * `secure` is derived from the port: 465 is implicit TLS, 587 is
+ *     STARTTLS. Getting this wrong hangs the connection rather than erroring.
+ *   * Timeouts are set explicitly. A hung SMTP connection would otherwise
+ *     hold the request open until the platform kills it.
+ */
+async function sendViaSmtp(s, { from, to, subject, text, html }) {
+  let nodemailer
+  try {
+    nodemailer = (await import('nodemailer')).default
+  } catch (_) {
+    console.error('[partner-email] smtp requested but nodemailer is not installed')
+    return { sent: false, provider: 'smtp', reason: 'nodemailer_not_installed' }
+  }
+
+  const port = Number(s.smtp_port || 587)
+  const secure = port === 465 // 465 = implicit TLS; 587/25 = STARTTLS
+
+  let transporter
+  try {
+    transporter = nodemailer.createTransport({
+      host: s.smtp_host,
+      port,
+      secure,
+      auth: { user: s.smtp_user, pass: s.smtp_password },
+      // Without explicit timeouts a stalled connection holds the request open.
+      connectionTimeout: TIMEOUT_MS,
+      greetingTimeout: TIMEOUT_MS,
+      socketTimeout: TIMEOUT_MS,
+    })
+
+    await transporter.sendMail({ from, to, subject, text, html })
+    console.log('[partner-email] sent via smtp')
+    return { sent: true, provider: 'smtp' }
+  } catch (err) {
+    // Never log the SMTP password or the full error object; the message can
+    // echo the recipient address.
+    const reason =
+      err && /auth|credentials|535|534/i.test(String(err.message))
+        ? 'smtp_auth_failed'
+        : err && /timeout|ETIMEDOUT|ECONNECTION/i.test(String(err.message))
+          ? 'smtp_connection_failed'
+          : 'smtp_error'
+    console.error(`[partner-email] smtp send failed: ${reason}`)
+    return { sent: false, provider: 'smtp', reason }
+  } finally {
+    try { if (transporter) transporter.close() } catch (_) { /* ignore */ }
+  }
 }
 
 /**
@@ -74,6 +143,12 @@ export async function sendEmail(getSecrets, { to, subject, text, html }) {
     // A provider without a verified From address cannot send. Treat as
     // unconfigured rather than letting the provider 4xx confusingly.
     return { sent: false, provider: transport.provider, reason: 'no_from_address' }
+  }
+
+  // SMTP is a connection-oriented transport, not an HTTP call, so it takes its
+  // own path rather than falling through to the fetch-based block below.
+  if (transport.provider === 'smtp') {
+    return sendViaSmtp(s, { from, to, subject, text, html })
   }
 
   const controller = new AbortController()
