@@ -2,6 +2,39 @@
 -- MIGRATION: Soulful Bhakti Partner Program (033)
 -- Run this in the Supabase SQL Editor (Dashboard > SQL Editor).
 --
+-- ------------------------------------------------------------------
+-- REQUIRED EXTENSION — INSTALLED BY THIS SCRIPT
+-- ------------------------------------------------------------------
+-- This migration needs `pgcrypto` for sha256 hashing (`digest`) and for
+-- cryptographically secure random tokens (`gen_random_bytes`).
+--
+-- It does NOT assume the extension is already present. An earlier revision
+-- did, on the reasoning that migration 003 installs it — but 003 plainly did
+-- not run on this project (the `affiliates` table exists, yet `digest` does
+-- not). Depending on a sibling migration having done its job is a fragile
+-- assumption, so `create extension if not exists` is issued here instead.
+--
+-- The block below is deliberately FIRST, before anything that uses it, and
+-- is a hard failure if the extension cannot be created: continuing would
+-- produce a half-built schema that fails later at runtime on the first
+-- partner registration.
+-- ------------------------------------------------------------------
+create extension if not exists pgcrypto with schema public;
+
+do $$
+begin
+  -- Fail loudly and early if pgcrypto is unavailable. A clear error here is
+  -- far better than a "function digest(text, unknown) does not exist"
+  -- 600 lines further down.
+  if not exists (select 1 from pg_extension where extname = 'pgcrypto') then
+    raise exception
+      'pgcrypto is required but could not be installed. On Supabase, enable it '
+      'in Database > Extensions (or run: create extension pgcrypto with schema public).';
+  end if;
+  raise notice 'pgcrypto present — proceeding with the partner schema.';
+end $$;
+
+-- ============================================================
 -- PURPOSE
 --   Self-service partner onboarding: a partner registers, verifies
 --   their email, submits KYC (individual or business), and APPLIES.
@@ -575,7 +608,13 @@ language sql
 immutable
 set search_path = public
 as $$
-  select encode(digest(coalesce(p_token, ''), 'sha256'), 'hex');
+  -- `digest` comes from pgcrypto, which this script installs up top.
+  -- The explicit ::text cast on the algorithm matters: without it, PostgreSQL
+  -- resolves `digest(text, unknown)` and fails with
+  -- "function digest(text, unknown) does not exist" — the exact error seen
+  -- when the extension is missing, and also possible in edge cases when the
+  -- planner cannot infer the literal's type.
+  select encode(digest(coalesce(p_token, '')::text, 'sha256'::text), 'hex');
 $$;
 
 -- 6a) Register a draft application.

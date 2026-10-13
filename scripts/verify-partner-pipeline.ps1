@@ -138,7 +138,17 @@ Write-Host 'PostgreSQL is accepting connections.' -ForegroundColor Green
 Step 'Build database from migrations (fresh)' {
   & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $DBNAME;" *> $null
   & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "CREATE DATABASE $DBNAME;" *> $null
-  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $DBNAME -q -c 'CREATE EXTENSION IF NOT EXISTS pgcrypto;' *> $null
+
+  # DELIBERATELY DO NOT pre-install pgcrypto.
+  #
+  # An earlier version of this script ran `CREATE EXTENSION pgcrypto` before
+  # applying the migrations, which HID a real deployment bug: migration 033
+  # used pgcrypto's `digest()` while assuming migration 003 had installed the
+  # extension. On the real Supabase project, 003 evidently had not — so the
+  # migration failed with "function digest(text, unknown) does not exist".
+  #
+  # Leaving the database bare makes this step prove that the migration chain
+  # installs its own dependency, rather than relying on a hand-prepared fixture.
 
   $files = @(
     'test\supabase-shim.sql',
@@ -153,6 +163,12 @@ Step 'Build database from migrations (fresh)' {
     $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $DBNAME -q -v ON_ERROR_STOP=1 -f (Join-Path $SERVER $f) 2>&1
     if ($out | Select-String 'ERROR') { throw "$f failed: $($out | Select-String 'ERROR' | Select-Object -First 1)" }
   }
+
+  # Assert the exact thing that broke in production is now working.
+  $probe = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $DBNAME -t -A -c `
+    "select public.partner_token_hash('probe') = encode(digest('probe','sha256'),'hex');" 2>&1
+  if (($probe | Out-String).Trim() -ne 't') { throw "pgcrypto/digest unusable after migrations: $probe" }
+
   # Storage emulation + vault seed (test fixtures only).
   $seed = @"
 create table if not exists public.test_only_storage_objects (
@@ -163,6 +179,24 @@ truncate table vault.secrets;
 insert into vault.secrets (name, secret) values ('admin_token','real-db-admin-token');
 "@
   $seed | & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $DBNAME -q 2>&1 | Out-Null
+}
+
+Step 'Migration installs its own extension on a BARE database' {
+  # Regression guard for the production failure. This database has NOTHING
+  # pre-installed: no pgcrypto, no extensions at all. Only the migration
+  # chain may bring it up.
+  $bare = "${DBNAME}_bare"
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $bare;" *> $null
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "CREATE DATABASE $bare;" *> $null
+
+  foreach ($f in @('test\supabase-shim.sql', 'migrations\004_coupons.sql', 'migrations\033_partner_program.sql')) {
+    $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $bare -q -v ON_ERROR_STOP=1 -f (Join-Path $SERVER $f) 2>&1
+    if ($out | Select-String 'ERROR') { throw "$f failed on a bare database: $($out | Select-String 'ERROR' | Select-Object -First 1)" }
+  }
+  $probe = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $bare -t -A -c `
+    "select public.partner_token_hash('probe') = encode(digest('probe','sha256'),'hex');" 2>&1
+  if (($probe | Out-String).Trim() -ne 't') { throw "digest unavailable on the bare database: $probe" }
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $bare;" *> $null
 }
 
 Step 'Migration 033 is idempotent (re-run)' {
