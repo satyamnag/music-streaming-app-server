@@ -11,6 +11,7 @@ import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
 import { readWebpSize, matchesAspectRatio, matchesAspectRatioRange } from './webp_size.js'
+import { registerPartnerRoutes } from './partner_routes.mjs'
 
 dotenv.config()
 
@@ -141,6 +142,31 @@ const secrets = {
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
   google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
+  // --- Partner Program ---------------------------------------------------
+  // Email transport (choose ONE provider; see partner_email.mjs):
+  resend_api_key: process.env.RESEND_API_KEY || '',
+  postmark_token: process.env.POSTMARK_TOKEN || '',
+  mailgun_api_key: process.env.MAILGUN_API_KEY || '',
+  mailgun_domain: process.env.MAILGUN_DOMAIN || '',
+  // The From: address on partner emails. Must be a domain verified with the
+  // provider above, with SPF/DKIM/DMARC published, or mail will be filtered.
+  mail_from: process.env.MAIL_FROM || '',
+  // Key Encryption Key for KYC document envelope encryption. 32 bytes as 64
+  // hex chars. REQUIRED for document upload: without it, uploads are
+  // refused rather than stored in the clear (fail-closed).
+  partner_kek: process.env.PARTNER_KEK || '',
+  // Optional: salt for hashing IPs in the audit log, so raw addresses are
+  // never persisted. Falls back to the admin token when unset.
+  partner_ip_salt: process.env.PARTNER_IP_SALT || '',
+  // Optional: where new partner applications are announced.
+  partner_admin_alert_email: process.env.PARTNER_ADMIN_ALERT_EMAIL || '',
+  // Non-secret presentation config.
+  partner_brand_name: process.env.PARTNER_BRAND_NAME || 'Soulful Bhakti',
+  partner_consent_version: process.env.PARTNER_CONSENT_VERSION || '2026-01',
+  // Public base URL used to build the emailed verification link. When unset
+  // it is derived from the request (trust proxy is set, so this is correct
+  // behind Render's load balancer).
+  partner_public_base_url: process.env.PARTNER_PUBLIC_BASE_URL || '',
 }
 
 const VAULT_SECRET_KEYS = [
@@ -152,6 +178,16 @@ const VAULT_SECRET_KEYS = [
   'r2_secret_access_key',
   'superwall_webhook_secret',
   'google_translate_api_key',
+  // Partner Program secrets. Stored in Vault rather than the deployment env
+  // wherever possible, so a leaked Render env is not a leaked KEK.
+  'partner_kek',
+  'partner_ip_salt',
+  'resend_api_key',
+  'postmark_token',
+  'mailgun_api_key',
+  'mailgun_domain',
+  'mail_from',
+  'partner_admin_alert_email',
 ]
 
 // Loads each secret from the vault (overriding the env fallback when a
@@ -1765,6 +1801,38 @@ function serveAdminHtml(req, res) {
 
 app.get('/admin', serveAdminHtml)
 
+// ------------------------------------------------------------------
+// Partner Program portal
+// ------------------------------------------------------------------
+// A separate public page from the admin panel: it is the partner-facing
+// surface (register -> verify email -> KYC -> apply -> status -> QR/coupon).
+// It is intentionally a different document from admin.html so that no admin
+// markup, route name or client-side helper is reachable from the public
+// page. All data still comes from /api/partner/* which is server-enforced.
+function servePartnerHtml(req, res) {
+  const htmlPath = path.join(__dirname, 'partner.html')
+  if (fs.existsSync(htmlPath)) {
+    res.type('html').send(fs.readFileSync(htmlPath, 'utf8'))
+  } else {
+    res.status(500).send('partner.html not found')
+  }
+}
+
+app.get('/partner', servePartnerHtml)
+app.get('/partner/verified', servePartnerHtml)
+app.get('/partner/verify', (req, res) => res.redirect(302, `/api/partner/verify?token=${encodeURIComponent(String(req.query.token || ''))}`))
+
+// Registered after the admin auth middleware is defined so requireAdmin is
+// available to it.
+registerPartnerRoutes(app, {
+  supabase,
+  secrets,
+  requireAdmin,
+  requireClerkAdmin: verifyClerkRequest,
+  publicBaseUrl: secrets.partner_public_base_url,
+  log: console,
+})
+
 // Root path: this server exists to serve the admin panel and the API, so a
 // bare visit to the domain (e.g. https://admin.soulfulbhakti.com) renders the
 // admin panel directly - no redirect, so the URL in the address bar is
@@ -2959,6 +3027,24 @@ app.post('/api/user-profile', async (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+  // Multer rejects oversized/over-count uploads by throwing before any route
+  // handler runs. Left to the generic handler these surface as a 500 with a
+  // stack trace, which is both wrong (the client's request was the problem)
+  // and unhelpful. Map them to a clear 4xx instead.
+  if (err && err.name === 'MulterError') {
+    const messages = {
+      LIMIT_FILE_SIZE: 'That file is too large. Please upload a file under 5 MB.',
+      LIMIT_FILE_COUNT: 'Please upload one file at a time.',
+      LIMIT_FIELD_COUNT: 'Too many form fields in that request.',
+      LIMIT_UNEXPECTED_FILE: 'Unexpected file field in that request.',
+    }
+    // Log the code without the request body: an upload body can contain KYC.
+    console.warn(`[upload] rejected: ${err.code} on ${req.method} ${req.path}`)
+    return res.status(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({
+      error: messages[err.code] || 'That upload could not be accepted.',
+    })
+  }
+
   console.error(err)
   res.status(500).json({ error: 'Internal Server Error' })
 })
@@ -2969,9 +3055,13 @@ async function start() {
   await loadSecretsFromVault()
   initClerkClient()
   initR2Client()
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`Sangeet Supabase server running on port ${port} - v3`)
     console.log(`[auth] clerkEnabled=${clerkEnabled()} publishableKey=${secrets.clerk_publishable_key ? 'set' : 'missing'}`)
+    // Expose the bound port (PORT=0 lets the OS choose) so integration tests
+    // can address the server without hard-coding one.
+    global.__PARTNER_TEST_PORT = server.address().port
+    global.__SERVER_PORT = server.address().port
   })
 }
 

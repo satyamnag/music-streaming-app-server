@@ -100,3 +100,8 @@ node_modules/
 # Local temp password scratch files (contain plaintext secrets - never commit)
 .tmp-newpass.txt
 *.tmp-newpass.txt
+
+# --- Local test database cluster (disposable; created by
+# scripts/verify-partner-pipeline.ps1). Contains a real PostgreSQL data
+# directory ~40MB. Never commit it.
+_pgtest/

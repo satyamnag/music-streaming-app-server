@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  Partner Portal — public, partner-facing surface.
+
+  Security posture of THIS document:
+    * No secrets, no keys, no admin markup. Everything it shows comes from
+      /api/partner/* which is server-enforced and scoped to the caller's own
+      session token.
+    * The session token is the partner's credential. It is kept in
+      localStorage and sent as an Authorization: Bearer header. It is never
+      put in a URL, so it does not leak through Referer headers or history.
+    * No third-party scripts, fonts or CDNs: the page loads nothing
+      cross-origin, so a partner's identity data cannot be exfiltrated by a
+      compromised dependency.
+    * referrer policy is no-referrer because the emailed verification link
+      lands here and carries a one-time token.
+-->
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Soulful Bhakti Partner Program</title>
+<style>
+  :root {
+    --gold: #8a6d3b;
+    --gold-light: #b9945a;
+    --ink: #23201c;
+    --muted: #6d6558;
+    --line: #e6dfd2;
+    --bg: #f7f4ee;
+    --card: #ffffff;
+    --ok: #1f7a45;
+    --ok-bg: #e8f5ec;
+    --warn: #92600a;
+    --warn-bg: #fdf3e0;
+    --err: #a32b2b;
+    --err-bg: #fdeceb;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 18px 64px; }
+
+  /* ---------- header ---------- */
+  header.site {
+    background: linear-gradient(135deg, #2a2419 0%, #4a3d27 60%, #6b5636 100%);
+    color: #f6efe2;
+    padding: 26px 0 30px;
+    margin-bottom: 26px;
+  }
+  header.site .wrap { padding-bottom: 0; }
+  .brandrow { display: flex; align-items: center; gap: 12px; }
+  .brandmark {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #e8c987, var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; color: #2a2419; flex-shrink: 0;
+  }
+  header.site h1 { font-size: 20px; margin: 0; font-weight: 600; letter-spacing: .2px; }
+  header.site p.sub { margin: 4px 0 0; font-size: 13.5px; color: #d8cbb4; }
+
+  /* ---------- progress ---------- */
+  .steps { display: flex; gap: 6px; margin: 22px 0 24px; flex-wrap: wrap; }
+  .step {
+    flex: 1 1 120px; min-width: 110px;
+    background: #fff; border: 1px solid var(--line); border-radius: 9px;
+    padding: 9px 11px; font-size: 12px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .step .n {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    background: #efe9dd; color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .step.active { border-color: var(--gold); color: var(--ink); font-weight: 600; }
+  .step.active .n { background: var(--gold); color: #fff; }
+  .step.done { border-color: #cfe6d6; color: var(--ok); }
+  .step.done .n { background: var(--ok); color: #fff; }
+
+  /* ---------- cards & forms ---------- */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 22px; margin-bottom: 18px;
+  }
+  .card h2 { font-size: 17px; margin: 0 0 4px; }
+  .card p.lead { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; }
+  h3.sect {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--muted); margin: 24px 0 12px; font-weight: 700;
+  }
+  h3.sect:first-child { margin-top: 0; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 5px; }
+  .hint { font-size: 12px; color: var(--muted); font-weight: 400; margin: 4px 0 0; }
+  input[type=text], input[type=email], input[type=tel], input[type=date],
+  input[type=url], input[type=number], select, textarea {
+    width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff;
+    color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(138,109,59,.13);
+  }
+  input:disabled, select:disabled, textarea:disabled { background: #f5f2ec; color: var(--muted); }
+  textarea { min-height: 88px; resize: vertical; }
+  .grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+  .grid.one { grid-template-columns: 1fr; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .field { margin-bottom: 14px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 20px; font-size: 14.5px; font-weight: 600; font-family: inherit;
+    border: 1px solid transparent; border-radius: 9px; cursor: pointer;
+    background: var(--gold); color: #fff; transition: filter .12s ease;
+  }
+  .btn:hover:not(:disabled) { filter: brightness(1.07); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
+  .btn.ghost { background: transparent; color: var(--gold); border-color: var(--line); }
+  .btn.danger { background: var(--err); }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
+
+  .radio-cards { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) { .radio-cards { grid-template-columns: 1fr; } }
+  .radio-card {
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 14px;
+    cursor: pointer; background: #fff; transition: border-color .12s ease;
+  }
+  .radio-card:hover { border-color: var(--gold-light); }
+  .radio-card.sel { border-color: var(--gold); background: #fdfbf7; }
+  .radio-card strong { display: block; font-size: 14px; margin-bottom: 3px; }
+  .radio-card span { font-size: 12.5px; color: var(--muted); }
+
+  /* ---------- notices ---------- */
+  .notice {
+    border-radius: 10px; padding: 13px 15px; font-size: 13.5px;
+    margin-bottom: 16px; border: 1px solid transparent;
+  }
+  .notice.info { background: #f0f4fa; border-color: #d6e2f2; color: #2c4a6e; }
+  .notice.ok { background: var(--ok-bg); border-color: #cfe6d6; color: var(--ok); }
+  .notice.warn { background: var(--warn-bg); border-color: #f0dfba; color: var(--warn); }
+  .notice.err { background: var(--err-bg); border-color: #f2cfcc; color: var(--err); }
+  .notice strong { display: block; margin-bottom: 2px; }
+
+  /* ---------- status pill ---------- */
+  .pill {
+    display: inline-block; padding: 3px 11px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: .2px;
+  }
+  .pill.draft { background: #efe9dd; color: var(--muted); }
+  .pill.pending_verification, .pill.submitted, .pill.under_review { background: var(--warn-bg); color: var(--warn); }
+  .pill.needs_info { background: #eaf0fb; color: #2c4a6e; }
+  .pill.approved { background: var(--ok-bg); color: var(--ok); }
+  .pill.rejected, .pill.withdrawn { background: var(--err-bg); color: var(--err); }
+
+  /* ---------- document list ---------- */
+  .docrow {
+    display: flex; align-items: center; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid #f0ece4; font-size: 13.5px;
+  }
+  .docrow:last-child { border-bottom: none; }
+  .docrow .meta { flex: 1; min-width: 0; }
+  .docrow .meta b { display: block; font-size: 13.5px; }
+  .docrow .meta small { color: var(--muted); font-size: 12px; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    background: #efe9dd; color: var(--muted); white-space: nowrap;
+  }
+  .badge.accepted { background: var(--ok-bg); color: var(--ok); }
+  .badge.rejected { background: var(--err-bg); color: var(--err); }
+  .badge.pending { background: var(--warn-bg); color: var(--warn); }
+
+  .drop {
+    border: 1.6px dashed var(--line); border-radius: 10px; padding: 22px;
+    text-align: center; cursor: pointer; background: #fdfcf9; transition: border-color .12s ease;
+  }
+  .drop:hover, .drop.over { border-color: var(--gold); background: #fdfaf4; }
+  .drop b { display: block; font-size: 14px; margin-bottom: 3px; }
+  .drop small { color: var(--muted); font-size: 12px; }
+
+  .checkline { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; font-size: 13.5px; }
+  .checkline input[type=checkbox] { margin-top: 3px; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--gold); }
+  .checkline label { font-weight: 400; margin: 0; }
+
+  .issued {
+    background: #fdfbf7; border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px; margin-bottom: 14px;
+  }
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 19px; font-weight: 700; letter-spacing: 1.4px; color: var(--gold);
+    word-break: break-all;
+  }
+  .qrbox { text-align: center; margin: 14px 0; }
+  .qrbox img { width: 210px; height: 210px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 8px; }
+
+  .spin {
+    display: inline-block; width: 15px; height: 15px;
+    border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: sp .7s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+
+  footer.site {
+    text-align: center; font-size: 12px; color: var(--muted);
+    padding: 26px 18px; border-top: 1px solid var(--line); margin-top: 30px;
+  }
+  footer.site a { color: var(--gold); }
+  .hidden { display: none !important; }
+  a { color: var(--gold); }
+  .kv { font-size: 13px; }
+  .kv div { display: flex; justify-content: space-between; gap: 14px; padding: 6px 0; border-bottom: 1px solid #f3efe7; }
+  .kv div:last-child { border-bottom: none; }
+  .kv span:first-child { color: var(--muted); }
+  .kv span:last-child { font-weight: 600; text-align: right; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brandrow">
+      <div class="brandmark">SB</div>
+      <div>
+        <h1>Soulful Bhakti Partner Program</h1>
+        <p class="sub">Share the music. Earn for every devotee you bring.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- global message area -->
+  <div id="globalMsg"></div>
+
+  <!-- ============================ LOADING ============================ -->
+  <div id="viewLoading" class="loading">Loading your application…</div>
+
+  <!-- ============================ REGISTER =========================== -->
+  <div id="viewRegister" class="hidden">
+    <div class="steps">
+      <div class="step active" id="stReg"><span class="n">1</span> Create account</div>
+      <div class="step" id="stVer"><span class="n">2</span> Verify email</div>
+      <div class="step" id="stForm"><span class="n">3</span> Your details</div>
+      <div class="step" id="stDocs"><span class="n">4</span> Documents</div>
+      <div class="step" id="stDone"><span class="n">5</span> Review</div>
+    </div>
+
+    <div class="card">
+      <h2>Become a Soulful Bhakti Partner</h2>
+      <p class="lead">
+        Partner with us to share devotional music with your audience. Once approved,
+        you receive a personal QR code and a discount coupon to share with your community.
+      </p>
+
+      <div class="notice info">
+        <strong>What you will need</strong>
+        Your PAN card, a proof of address, and — if you are applying as a business —
+        a registration document (GST certificate, incorporation certificate, Udyam
+        certificate, Shop &amp; Establishment licence, partnership deed or trust deed).
+        Please have clear photos or PDFs ready.
+      </div>
+
+      <div class="field">
+        <label for="regEmail">Email address</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+        <p class="hint">We will send you a verification link. Use an address you check regularly.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="regBtn" onclick="doRegister()">Continue</button>
+      </div>
+
+      <p class="hint" style="margin-top:16px;">
+        Already applied? <a href="#" onclick="showResume();return false;">Resume your application</a>
+      </p>
+    </div>
+
+    <div class="card hidden" id="resumeCard">
+      <h2>Resume your application</h2>
+      <p class="lead">Paste the partner session key you saved when you registered.</p>
+      <div class="field">
+        <label for="resumeToken">Session key</label>
+        <input type="text" id="resumeToken" placeholder="Paste your session key">
+      </div>
+      <div class="btn-row"><button class="btn" onclick="resumeSession()">Resume</button></div>
+    </div>
+  </div>
+
+  <!-- ======================= VERIFY PENDING ========================= -->
+  <div id="viewVerify" class="hidden">
+    <div class="steps">
+      <div class="step done"><span class="n">&#10003;</span> Create account</div>
+      <div class="step active"><span class="n">2</span> Verify email</div>
+      <div class="step"><span class="n">3</span> Your details</div>
+      <div class="step"><span class="n">4</span> Documents</div>
+      <div class="step"><span class="n">5</span> Review</div>
+    </div>
+
+    <div class="card">
+      <h2>Check your inbox</h2>
+      <p class="lead">
+        We sent a verification link to <b id="verifyEmail">your email address</b>.
+        Open it to confirm your address and continue your application.
+      </p>
+      <div class="notice warn" id="emailSendWarning">
+        <strong>We could not send the email yet</strong>
+        Our mail service is not available right now. You can try resending below.
+      </div>
+      <div class="notice info">
+        <strong>Save your session key</strong>
+        This key is how you return to your application. It was shown once and is
+        not emailed to you. Keep it somewhere safe.
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+          <input type="text" id="sessionKeyBox" readonly style="font-family:ui-monospace,monospace;font-size:12px;">
+          <button class="btn secondary" style="flex-shrink:0;" onclick="copySession()">Copy</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="resendBtn" onclick="resendVerification()">Resend verification email</button>
+        <button class="btn secondary" onclick="refreshMe()">I have verified — continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ FORM ============================== -->
+  <div id="viewForm" class="hidden">
+    <div class="steps">
+      <div class="step done"><span class="n">&#10003;</span> Create account</div>
+      <div class="step done"><span class="n">&#10003;</span> Verify email</div>
+      <div class="step active" id="stForm2"><span class="n">3</span> Your details</div>
+      <div class="step" id="stDocs2"><span class="n">4</span> Documents</div>
+      <div class="step" id="stDone2"><span class="n">5</span> Review</div>
+    </div>
+
+    <div id="formLockedNotice" class="notice info hidden">
+      <strong>Your application is being reviewed</strong>
+      Your details are locked while our team reviews your application. You will be
+      able to edit them again if we need more information.
+    </div>
+
+    <div id="needsInfoNotice" class="notice warn hidden">
+      <strong>We need a little more information</strong>
+      <span id="needsInfoText"></span>
+    </div>
+
+    <div class="card">
+      <h2>Tell us about yourself</h2>
+      <p class="lead">All fields are required unless marked optional.</p>
+
+      <h3 class="sect">Applying as</h3>
+      <div class="radio-cards">
+        <div class="radio-card" id="rcIndividual" onclick="setApplicantType('individual')">
+          <strong>An individual</strong>
+          <span>I am promoting the app personally — creator, artist, community leader.</span>
+        </div>
+        <div class="radio-card" id="rcBusiness" onclick="setApplicantType('business')">
+          <strong>A business</strong>
+          <span>A registered entity — proprietorship, partnership, LLP, company or trust.</span>
+        </div>
+      </div>
+
+      <h3 class="sect">Legal identity</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="fLegalName">Full legal name <span id="legalNameHint" class="hint" style="display:inline;"></span></label>
+          <input type="text" id="fLegalName" placeholder="As printed on your PAN card">
+        </div>
+        <div class="field">
+          <label for="fDisplayName">Display name <span class="hint" style="display:inline;">(optional)</span></label>
+          <input type="text" id="fDisplayName" placeholder="The name your audience knows you by">
+        </div>
+      </div>
+
+      <div class="grid" id="businessOnlyTop">
+        <div class="field">
+          <label for="fEntityType">Business type</label>
+          <select id="fEntityType">
+            <option value="">Select…</option>
+            <option value="sole_proprietor">Sole proprietorship</option>
+            <option value="partnership">Partnership firm</option>
+            <option value="llp">Limited Liability Partnership (LLP)</option>
+            <option value="private_limited">Private limited company</option>
+            <option value="public_limited">Public limited company</option>
+            <option value="one_person_company">One person company</option>
+            <option value="trust">Trust</option>
+            <option value="society">Society</option>
+            <option value="huf">Hindu Undivided Family (HUF)</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 class="sect">Personal details</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="fGender">Gender</label>
+          <select id="fGender">
+            <option value="">Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fDob">Date of birth</label>
+          <input type="date" id="fDob">
+          <p class="hint">You must be 18 or older to join the Partner Program.</p>
+        </div>
+      </div>
+
+      <h3 class="sect">Contact</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="fPhone">Phone number</label>
+          <input type="tel" id="fPhone" placeholder="+91 98765 43210" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label for="fWebsite">Website <span class="hint" style="display:inline;">(optional)</span></label>
+          <input type="url" id="fWebsite" placeholder="https://…">
+        </div>
+      </div>
+
+      <h3 class="sect">Address</h3>
+      <div class="grid one">
+        <div class="field">
+          <label for="fAddr1">Address line 1</label>
+          <input type="text" id="fAddr1" placeholder="House / building, street" autocomplete="address-line1">
+        </div>
+        <div class="field">
+          <label for="fAddr2">Address line 2 <span class="hint" style="display:inline;">(optional)</span></label>
+          <input type="text" id="fAddr2" placeholder="Area, landmark" autocomplete="address-line2">
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="fCity">City</label>
+          <input type="text" id="fCity" autocomplete="address-level2">
+        </div>
+        <div class="field">
+          <label for="fState">State</label>
+          <input type="text" id="fState" autocomplete="address-level1">
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="fPin">PIN code</label>
+          <input type="text" id="fPin" inputmode="numeric" maxlength="6" autocomplete="postal-code">
+        </div>
+        <div class="field">
+          <label for="fCountry">Country</label>
+          <input type="text" id="fCountry" value="India">
+        </div>
+      </div>
+
+      <h3 class="sect">Identity documents</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="fPan">PAN number</label>
+          <input type="text" id="fPan" maxlength="10" placeholder="ABCDE1234F" style="text-transform:uppercase;">
+          <p class="hint">Your PAN is required to verify your identity and to pay you correctly.</p>
+        </div>
+        <div class="field" id="gstinField">
+          <label for="fGstin">GSTIN <span class="hint" style="display:inline;">(if registered)</span></label>
+          <input type="text" id="fGstin" maxlength="15" placeholder="22AAAAA0000A1Z5" style="text-transform:uppercase;">
+        </div>
+      </div>
+
+      <div class="notice info">
+        <strong>We do not accept Aadhaar</strong>
+        Under the Aadhaar Act 2016, a private programme may not collect or store
+        Aadhaar numbers or copies of Aadhaar cards. Please provide a PAN card, or a
+        passport, voter ID or driving licence instead — all are equally accepted.
+      </div>
+
+      <h3 class="sect">Payout details <span class="hint" style="display:inline;text-transform:none;letter-spacing:0;">(optional for now)</span></h3>
+      <p class="hint" style="margin-bottom:12px;">
+        Commissions are recorded in your dashboard. Payouts are not yet enabled; adding
+        these now means you are ready when they are. We store only the last four digits
+        of your account number.
+      </p>
+      <div class="grid">
+        <div class="field">
+          <label for="fBankName">Account holder name</label>
+          <input type="text" id="fBankName">
+        </div>
+        <div class="field">
+          <label for="fBankLast4">Account number — last 4 digits only</label>
+          <input type="text" id="fBankLast4" maxlength="4" inputmode="numeric" placeholder="1234">
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field">
+          <label for="fIfsc">IFSC code</label>
+          <input type="text" id="fIfsc" maxlength="11" placeholder="HDFC0001234" style="text-transform:uppercase;">
+        </div>
+      </div>
+
+      <h3 class="sect">How you will promote</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="fAudience">Audience size <span class="hint" style="display:inline;">(optional)</span></label>
+          <input type="text" id="fAudience" placeholder="e.g. 5,000 followers">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fPlan">How do you plan to promote Soulful Bhakti? <span class="hint" style="display:inline;">(optional)</span></label>
+        <textarea id="fPlan" placeholder="Tell us about your channel, community or events…"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="saveBtn" onclick="saveForm(false)">Save and continue</button>
+        <span class="hint" id="saveState"></span>
+      </div>
+    </div>
+
+    <!-- ======================== DOCUMENTS ======================== -->
+    <div class="card" id="docsCard">
+      <h2>Upload your documents</h2>
+      <p class="lead" id="docsLead">
+        Upload clear photos or PDF scans. Maximum 5 MB per file.
+      </p>
+
+      <div class="notice info">
+        <strong>Your documents are encrypted</strong>
+        Files are encrypted before they are stored, and only our verification team
+        can open them. They are never made public and are deleted if your application
+        is declined.
+      </div>
+
+      <div class="field">
+        <label for="docType">Document type</label>
+        <select id="docType"></select>
+      </div>
+
+      <div class="drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <b>Choose a file or drop it here</b>
+        <small>PDF, JPEG or PNG — up to 5 MB</small>
+        <input type="file" id="fileInput" accept="application/pdf,image/jpeg,image/png" class="hidden">
+      </div>
+      <div id="uploadProgress" class="hidden" style="margin-top:12px;">
+        <div class="notice info" style="margin:0;"><span class="spin" style="border-color:rgba(44,74,110,.3);border-top-color:#2c4a6e;"></span> Encrypting and uploading…</div>
+      </div>
+
+      <div id="docList" style="margin-top:18px;"></div>
+    </div>
+
+    <!-- ======================== DECLARATIONS & SUBMIT ======================== -->
+    <div class="card">
+      <h2>Declarations</h2>
+      <p class="lead">Please read and confirm each statement.</p>
+
+      <div class="checkline">
+        <input type="checkbox" id="cbTruth">
+        <label for="cbTruth">I confirm that all the information and documents I have provided are true, complete and belong to me (or to the business I represent), and I will keep them up to date.</label>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="cbTerms">
+        <label for="cbTerms">I accept the <a href="/partner/terms" target="_blank" rel="noopener">Partner Program Terms</a>, including how commissions are calculated and paid.</label>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="cbPrivacy">
+        <label for="cbPrivacy">I have read the <a href="/partner/privacy" target="_blank" rel="noopener">Partner Privacy Notice</a> and consent to Soulful Bhakti processing my personal data and documents to assess this application and to administer the Partner Program. I understand I may withdraw my consent at any time.</label>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="cbDisclosure">
+        <label for="cbDisclosure">I understand that when I promote Soulful Bhakti I must clearly tell my audience that I am a rewarded partner, and that I must promote the app honestly and never offer anyone payment or rewards simply for installing it.</label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="applyBtn" onclick="submitApplication()">Apply to join the Partner Program</button>
+      </div>
+      <p class="hint" style="margin-top:12px;">
+        Once submitted, your application goes to our team for verification. We will
+        contact you if anything needs clarification.
+      </p>
+    </div>
+
+    <!-- ======================== WITHDRAWAL ======================== -->
+    <!--
+      DPDP Act 2023 s.6(4): withdrawing consent must be as easy as giving it.
+      So this is a single button here in the portal — deliberately NOT a
+      "contact support" instruction.
+    -->
+    <div class="card">
+      <h2 style="font-size:15px;">Withdraw your application</h2>
+      <p class="lead" style="margin-bottom:10px;">
+        You can withdraw at any time. We stop processing your application
+        immediately. We keep your information for a minimum period required by
+        Indian data protection law, after which it is deleted.
+      </p>
+      <button class="btn ghost" onclick="withdrawApplication()">Withdraw my application</button>
+    </div>
+  </div>
+
+  <!-- ============================ STATUS ============================ -->
+  <div id="viewStatus" class="hidden">
+    <div class="card">
+      <h2>Your application</h2>
+      <p class="lead">
+        Current status: <span class="pill" id="statusPill">—</span>
+      </p>
+      <div id="statusBody"></div>
+      <div class="btn-row" id="statusActions"></div>
+    </div>
+
+    <div class="card hidden" id="issuedCard">
+      <h2>Your partner kit</h2>
+      <p class="lead">Share these with your audience. Every devotee who joins through them is credited to you.</p>
+
+      <div class="issued">
+        <h3 class="sect" style="margin-top:0;">Your QR code</h3>
+        <p class="hint" style="margin-bottom:10px;">
+          Show this QR to your audience. Scanning it opens the Soulful Bhakti app on
+          Google Play. After they install and sign in, they are linked to you.
+        </p>
+        <div class="qrbox"><img id="qrImg" alt="Your partner QR code"></div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn secondary" onclick="downloadQr()">Download QR</button>
+          <button class="btn secondary" onclick="copyText(document.getElementById('installUrl').textContent.trim())">Copy link</button>
+        </div>
+        <p class="hint" style="margin-top:10px;word-break:break-all;" id="installUrl"></p>
+      </div>
+
+      <div class="issued">
+        <h3 class="sect" style="margin-top:0;">Your discount coupon</h3>
+        <p class="hint" style="margin-bottom:8px;">
+          Share this code with your audience. They enter it in the app to register
+          their support for you.
+        </p>
+        <div class="code" id="couponCode">—</div>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn secondary" onclick="copyText(document.getElementById('couponCode').textContent.trim())">Copy coupon</button>
+        </div>
+        <div class="kv" style="margin-top:14px;" id="couponMeta"></div>
+      </div>
+
+      <div class="kv" id="partnerMeta"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site">
+  <div>Soulful Bhakti Partner Program</div>
+  <div style="margin-top:6px;">
+    <a href="/partner/privacy">Partner Privacy Notice</a> ·
+    <a href="/partner/terms">Program Terms</a>
+  </div>
+  <div style="margin-top:8px;font-size:11.5px;">
+    Please do not share your session key with anyone.
+  </div>
+</footer>
+
+<script>
+// ============================================================================
+// Partner Portal client
+// ============================================================================
+// Only this page's own state lives here. Every rule that matters (what is
+// editable, what is required, who may read what) is enforced server-side.
+
+'use strict';
+
+var SESSION_KEY = 'sb_partner_session';
+var state = {
+  token: null,
+  partner: null,
+  documents: [],
+  issued: null,
+  config: null,
+  requiredDocs: [],
+  saving: false,
+};
+
+// ---------------------------------------------------------------- utilities
+function $(id) { return document.getElementById(id); }
+
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function show(view) {
+  ['viewLoading', 'viewRegister', 'viewVerify', 'viewForm', 'viewStatus'].forEach(function (v) {
+    var el = $(v);
+    if (el) el.classList.toggle('hidden', v !== view);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function msg(kind, title, body, target) {
+  var host = $(target || 'globalMsg');
+  if (!host) return;
+  if (!kind) { host.innerHTML = ''; return; }
+  host.innerHTML = '<div class="notice ' + kind + '"><strong>' + esc(title) + '</strong>' +
+    (body ? esc(body) : '') + '</div>';
+}
+
+function busy(btn, on, label) {
+  if (!btn) return;
+  btn.disabled = !!on;
+  if (on) {
+    if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spin"></span> ' + (label || 'Working…');
+  } else if (btn.dataset.orig) {
+    btn.innerHTML = btn.dataset.orig;
+    delete btn.dataset.orig;
+  }
+}
+
+function copyText(t) {
+  if (!t) return;
+  navigator.clipboard.writeText(t).then(function () {
+    msg('ok', 'Copied', null);
+    setTimeout(function () { msg(null); }, 1800);
+  }).catch(function () {
+    msg('warn', 'Could not copy automatically', 'Please select and copy the text manually.');
+  });
+}
+
+function copySession() {
+  copyText($('sessionKeyBox').value);
+}
+
+function fmtDate(v) {
+  if (!v) return '—';
+  try { return new Date(v).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); }
+  catch (e) { return '—'; }
+}
+
+function fmtBytes(n) {
+  n = Number(n) || 0;
+  if (n < 1024) return n + ' B';
+  if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB';
+  return (n / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// -------------------------------------------------------------------- API
+function api(path, opts) {
+  opts = opts || {};
+  var headers = opts.headers || {};
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+  if (opts.body && !(opts.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  return fetch(path, {
+    method: opts.method || 'GET',
+    headers: headers,
+    body: opts.body && !(opts.body instanceof FormData) ? JSON.stringify(opts.body) : opts.body,
+    credentials: 'same-origin',
+  }).then(function (res) {
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      if (!res.ok) {
+        var err = new Error(data.error || ('Request failed (' + res.status + ')'));
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    });
+  });
+}
+
+// ---------------------------------------------------------------- lifecycle
+function boot() {
+  // A token in the URL fragment would be safer than localStorage against
+  // nothing in particular here; localStorage is used because the partner
+  // returns to this page repeatedly and the token must survive that.
+  state.token = localStorage.getItem(SESSION_KEY) || null;
+
+  fetch('/api/partner/config')
+    .then(function (r) { return r.json(); })
+    .then(function (cfg) {
+      state.config = cfg;
+      populateDocTypes(cfg);
+      if (!cfg.emailEnabled) {
+        msg('warn', 'Email delivery is not configured',
+          'An administrator must configure the mail service before applications can be completed.');
+      }
+      if (!cfg.encryptionReady) {
+        msg('warn', 'Document upload is not available yet',
+          'An administrator must configure the document encryption key before documents can be uploaded.');
+      }
+    })
+    .catch(function () { /* config is non-fatal */ });
+
+  if (state.token) {
+    refreshMe();
+  } else {
+    show('viewRegister');
+  }
+}
+
+function populateDocTypes(cfg) {
+  var sel = $('docType');
+  if (!sel || !cfg.documentLabels) return;
+  var labels = cfg.documentLabels;
+  // Aadhaar can never appear: it is not offered by the server's label map and
+  // is rejected by the database constraint if forced.
+  var order = ['pan_card', 'address_proof', 'passport', 'voter_id', 'driving_licence',
+    'gst_certificate', 'incorporation_certificate', 'udyam_certificate',
+    'shop_establishment_licence', 'partnership_deed', 'trust_deed',
+    'bank_proof', 'authorised_signatory_proof', 'other'];
+  sel.innerHTML = order.filter(function (k) { return labels[k]; })
+    .map(function (k) { return '<option value="' + k + '">' + esc(labels[k]) + '</option>'; })
+    .join('');
+}
+
+// -------------------------------------------------------------- registration
+function doRegister() {
+  var email = ($('regEmail').value || '').trim();
+  if (!email) { msg('err', 'Email required', 'Please enter your email address.'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg('err', 'Check your email', 'That does not look like a valid email address.');
+    return;
+  }
+
+  var btn = $('regBtn');
+  busy(btn, true, 'Creating account…');
+  msg(null);
+
+  api('/api/partner/register', { method: 'POST', body: { email: email } })
+    .then(function (data) {
+      busy(btn, false);
+      if (data.token) {
+        state.token = data.token;
+        localStorage.setItem(SESSION_KEY, data.token);
+        $('sessionKeyBox').value = data.token;
+        $('verifyEmail').textContent = email;
+        $('emailSendWarning').classList.toggle('hidden', data.emailSent !== false);
+        show('viewVerify');
+        refreshMe();
+      } else {
+        // Deliberately identical path whether or not the address was known.
+        $('verifyEmail').textContent = email;
+        $('emailSendWarning').classList.add('hidden');
+        $('sessionKeyBox').value = '';
+        show('viewVerify');
+        msg('info', 'Check your email',
+          'If this address can be registered, a verification email is on its way. ' +
+          'If you already have an application, use "Resume your application" with your saved session key.');
+      }
+    })
+    .catch(function (e) {
+      busy(btn, false);
+      msg('err', 'Could not continue', e.message);
+    });
+}
+
+function showResume() {
+  $('resumeCard').classList.toggle('hidden');
+}
+
+function resumeSession() {
+  var t = ($('resumeToken').value || '').trim();
+  if (!t) { msg('err', 'Session key required', 'Paste the session key you saved.'); return; }
+  state.token = t;
+  localStorage.setItem(SESSION_KEY, t);
+  refreshMe();
+}
+
+function resendVerification() {
+  var btn = $('resendBtn');
+  busy(btn, true, 'Sending…');
+  msg(null);
+  api('/api/partner/resend-verification', { method: 'POST' })
+    .then(function (d) {
+      busy(btn, false);
+      msg('ok', 'Email sent', d.message || 'Check your inbox.');
+    })
+    .catch(function (e) {
+      busy(btn, false);
+      msg('err', 'Could not send', e.message);
+    });
+}
+
+// ------------------------------------------------------------------ load me
+function refreshMe() {
+  if (!state.token) { show('viewRegister'); return; }
+  api('/api/partner/me')
+    .then(function (data) {
+      state.partner = data.partner;
+      state.documents = data.documents || [];
+      state.issued = data.issued || null;
+      state.requiredDocs = data.requiredDocuments || [];
+      route();
+    })
+    .catch(function (e) {
+      if (e.status === 401) {
+        localStorage.removeItem(SESSION_KEY);
+        state.token = null;
+        msg('warn', 'Session expired', 'Please start again, or resume with your saved session key.');
+        show('viewRegister');
+      } else {
+        msg('err', 'Could not load your application', e.message);
+        show('viewRegister');
+      }
+    });
+}
+
+function route() {
+  var p = state.partner;
+  if (!p) { show('viewRegister'); return; }
+
+  if (!p.emailVerified) {
+    $('verifyEmail').textContent = p.email;
+    $('sessionKeyBox').value = state.token || '';
+    $('emailSendWarning').classList.add('hidden');
+    show('viewVerify');
+    return;
+  }
+
+  if (['submitted', 'under_review', 'approved', 'rejected', 'withdrawn'].indexOf(p.status) >= 0) {
+    renderStatus();
+    show('viewStatus');
+    return;
+  }
+
+  // draft or needs_info
+  fillForm(p);
+  renderDocuments();
+  applyLockState();
+  show('viewForm');
+}
+
+// ------------------------------------------------------------------ the form
+function setApplicantType(t) {
+  $('rcIndividual').classList.toggle('sel', t === 'individual');
+  $('rcBusiness').classList.toggle('sel', t === 'business');
+  state.applicantType = t;
+  $('businessOnlyTop').style.display = t === 'business' ? '' : 'none';
+  $('gstinField').style.display = t === 'business' ? '' : 'none';
+  $('legalNameHint').textContent = t === 'business'
+    ? '(registered entity name, exactly as on your certificate)'
+    : '(as printed on your PAN card)';
+  updateRequiredHint();
+}
+
+function updateRequiredHint() {
+  var req = state.applicantType === 'business'
+    ? ['PAN card', 'Address proof', 'A business registration document']
+    : ['PAN card', 'Address proof'];
+  $('docsLead').innerHTML = 'Required for your application: <b>' +
+    esc(req.join(', ')) + '</b>. You can also add extra supporting documents. Maximum 5 MB per file.';
+}
+
+function fillForm(p) {
+  var t = p.applicantType || 'individual';
+  setApplicantType(t);
+  $('fLegalName').value = p.legalName || '';
+  $('fDisplayName').value = p.displayName || '';
+  $('fEntityType').value = p.entityType || '';
+  $('fGender').value = p.gender || '';
+  $('fDob').value = p.dateOfBirth ? String(p.dateOfBirth).slice(0, 10) : '';
+  $('fPhone').value = p.phone || '';
+  $('fWebsite').value = p.websiteUrl || '';
+  $('fAddr1').value = p.addressLine1 || '';
+  $('fAddr2').value = p.addressLine2 || '';
+  $('fCity').value = p.city || '';
+  $('fState').value = p.state || '';
+  $('fPin').value = p.postalCode || '';
+  $('fCountry').value = p.country || 'India';
+  $('fPan').value = p.panNumber || '';
+  $('fGstin').value = p.gstin || '';
+  $('fBankName').value = p.bankAccountName || '';
+  $('fBankLast4').value = p.bankAccountLast4 || '';
+  $('fIfsc').value = p.bankIfsc || '';
+  $('fAudience').value = p.audienceSize || '';
+  $('fPlan').value = p.promotionPlan || '';
+  $('cbTruth').checked = !!p.truthfulnessDeclared;
+  $('cbTerms').checked = !!p.termsAccepted;
+  $('cbPrivacy').checked = !!p.privacyAccepted;
+}
+
+function collectForm() {
+  return {
+    applicant_type: state.applicantType || 'individual',
+    legal_name: $('fLegalName').value.trim(),
+    display_name: $('fDisplayName').value.trim(),
+    entity_type: $('fEntityType').value || null,
+    gender: $('fGender').value || null,
+    date_of_birth: $('fDob').value || null,
+    phone: $('fPhone').value.trim(),
+    address_line1: $('fAddr1').value.trim(),
+    address_line2: $('fAddr2').value.trim(),
+    city: $('fCity').value.trim(),
+    state: $('fState').value.trim(),
+    postal_code: $('fPin').value.trim(),
+    country: $('fCountry').value.trim() || 'India',
+    pan_number: $('fPan').value.trim().toUpperCase(),
+    gstin: $('fGstin').value.trim().toUpperCase(),
+    bank_account_name: $('fBankName').value.trim(),
+    bank_account_last4: $('fBankLast4').value.trim(),
+    bank_ifsc: $('fIfsc').value.trim().toUpperCase(),
+    audience_size: $('fAudience').value.trim(),
+    promotion_plan: $('fPlan').value.trim(),
+    website_url: $('fWebsite').value.trim(),
+  };
+}
+
+function validateForm() {
+  var problems = [];
+  if (!$('fLegalName').value.trim()) problems.push('your full legal name');
+  if (!$('fGender').value) problems.push('your gender');
+  if (!$('fDob').value) problems.push('your date of birth');
+  if (!$('fPhone').value.trim()) problems.push('your phone number');
+  if (!$('fAddr1').value.trim()) problems.push('your address');
+  if (!$('fCity').value.trim()) problems.push('your city');
+  if (!$('fState').value.trim()) problems.push('your state');
+  if (!$('fPin').value.trim()) problems.push('your PIN code');
+
+  var pan = $('fPan').value.trim().toUpperCase();
+  if (!pan) problems.push('your PAN number');
+  else if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) problems.push('a valid PAN (format ABCDE1234F)');
+
+  var gstin = $('fGstin').value.trim().toUpperCase();
+  if (state.applicantType === 'business' && gstin &&
+      !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) {
+    problems.push('a valid GSTIN, or leave it blank if you are not registered');
+  }
+
+  var dob = $('fDob').value;
+  if (dob) {
+    var d = new Date(dob);
+    var age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+    if (age < 18) problems.push('you must be 18 or older to join');
+  }
+
+  if (problems.length) {
+    msg('err', 'Please complete the form', 'We still need: ' + problems.join(', ') + '.');
+    return false;
+  }
+  return true;
+}
+
+function saveForm(silent) {
+  if (!validateForm()) return Promise.resolve(false);
+  if (state.saving) return Promise.resolve(false);
+
+  var btn = $('saveBtn');
+  state.saving = true;
+  busy(btn, true, 'Saving…');
+  if (!silent) msg(null);
+
+  // Consent is recorded separately with a server-side timestamp, as it is a
+  // legal assertion rather than ordinary profile data. The disclosure
+  // acknowledgement is recorded the same way, because CCPA Guidelines 2022
+  // para 14 makes affiliate disclosure legally mandatory and this is the
+  // evidence that the obligation was communicated.
+  var consentPromise = Promise.resolve();
+  if ($('cbTerms').checked && $('cbPrivacy').checked && $('cbTruth').checked) {
+    consentPromise = api('/api/partner/consent', {
+      method: 'POST',
+      body: { termsAccepted: true, privacyAccepted: true, truthfulnessDeclared: true },
+    }).catch(function () { /* surfaced at submit time */ });
+  }
+  if ($('cbDisclosure') && $('cbDisclosure').checked) {
+    consentPromise = consentPromise.then(function () {
+      return api('/api/partner/disclosure', { method: 'POST', body: {} })
+        .catch(function () { /* non-fatal; recorded best-effort */ });
+    });
+  }
+
+  return api('/api/partner/draft', { method: 'POST', body: { fields: collectForm() } })
+    .then(function () { return consentPromise; })
+    .then(function () {
+      state.saving = false;
+      busy(btn, false);
+      $('saveState').textContent = 'Saved just now.';
+      if (!silent) msg('ok', 'Saved', 'Your details have been saved.');
+      return true;
+    })
+    .catch(function (e) {
+      state.saving = false;
+      busy(btn, false);
+      msg('err', 'Could not save', e.message);
+      return false;
+    });
+}
+
+// --------------------------------------------------------------- documents
+function renderDocuments() {
+  var host = $('docList');
+  if (!state.documents.length) {
+    host.innerHTML = '<p class="hint">No documents uploaded yet.</p>';
+    return;
+  }
+  host.innerHTML = state.documents.map(function (d) {
+    var badge = d.reviewStatus === 'accepted' ? 'accepted'
+      : d.reviewStatus === 'rejected' ? 'rejected' : 'pending';
+    var badgeLabel = d.reviewStatus === 'accepted' ? 'Accepted'
+      : d.reviewStatus === 'rejected' ? 'Needs replacing' : 'Awaiting review';
+    var note = d.reviewNote
+      ? '<small style="color:#a32b2b;display:block;">' + esc(d.reviewNote) + '</small>' : '';
+    return '<div class="docrow">' +
+      '<div class="meta"><b>' + esc(d.label || d.docType) + '</b>' +
+      '<small>' + esc(d.originalFilename || 'document') + ' · ' + fmtBytes(d.sizeBytes) +
+      ' · ' + fmtDate(d.uploadedAt) + '</small>' + note + '</div>' +
+      '<span class="badge ' + badge + '">' + badgeLabel + '</span>' +
+      '<button class="btn ghost" style="padding:6px 12px;font-size:12.5px;" ' +
+      'onclick="deleteDoc(\'' + d.id + '\')">Remove</button>' +
+      '</div>';
+  }).join('');
+}
+
+function deleteDoc(id) {
+  if (!confirm('Remove this document? You can upload a replacement afterwards.')) return;
+  api('/api/partner/documents/' + id, { method: 'DELETE' })
+    .then(function () { return refreshMe(); })
+    .catch(function (e) { msg('err', 'Could not remove', e.message); });
+}
+
+function uploadFile(file) {
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    msg('err', 'File too large', 'Please upload a file under 5 MB.');
+    return;
+  }
+  var okTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  if (okTypes.indexOf(file.type) < 0) {
+    msg('err', 'Unsupported file', 'Please upload a PDF, JPEG or PNG.');
+    return;
+  }
+
+  var docType = $('docType').value;
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('docType', docType);
+
+  $('uploadProgress').classList.remove('hidden');
+  msg(null);
+
+  api('/api/partner/documents', { method: 'POST', body: fd })
+    .then(function () {
+      $('uploadProgress').classList.add('hidden');
+      $('fileInput').value = '';
+      msg('ok', 'Uploaded', 'Your document has been encrypted and saved.');
+      return refreshMe();
+    })
+    .catch(function (e) {
+      $('uploadProgress').classList.add('hidden');
+      $('fileInput').value = '';
+      msg('err', 'Upload failed', e.message);
+    });
+}
+
+function applyLockState() {
+  var locked = state.partner && state.partner.status === 'needs_info' ? false
+    : (state.partner && state.partner.status !== 'draft' && state.partner.status !== 'needs_info');
+
+  $('formLockedNotice').classList.toggle('hidden', !locked);
+
+  var needsInfo = state.partner && state.partner.status === 'needs_info';
+  $('needsInfoNotice').classList.toggle('hidden', !needsInfo);
+  if (needsInfo && state.partner.decisionNote) {
+    $('needsInfoText').textContent = state.partner.decisionNote;
+  }
+}
+
+// ------------------------------------------------------------------- submit
+function submitApplication() {
+  if (!$('cbTruth').checked || !$('cbTerms').checked || !$('cbPrivacy').checked) {
+    msg('err', 'Please confirm the declarations',
+      'All three statements must be accepted before you can apply.');
+    return;
+  }
+  if (!validateForm()) return;
+
+  var btn = $('applyBtn');
+  busy(btn, true, 'Submitting…');
+  msg(null);
+
+  saveForm(true).then(function (saved) {
+    if (!saved) { busy(btn, false); return; }
+    return api('/api/partner/submit', { method: 'POST' })
+      .then(function (d) {
+        busy(btn, false);
+        if (d.ok) {
+          msg('ok', 'Application submitted', d.message);
+          refreshMe();
+        }
+      })
+      .catch(function (e) {
+        busy(btn, false);
+        var extra = '';
+        if (e.data && e.data.missingLabels && e.data.missingLabels.length) {
+          extra = ' Still needed: ' + e.data.missingLabels.join(', ') + '.';
+        }
+        msg('err', 'Could not submit', e.message + extra);
+      });
+  });
+}
+
+// ------------------------------------------------------------------- status
+function renderStatus() {
+  var p = state.partner;
+  var pill = $('statusPill');
+  var labels = {
+    draft: 'Draft',
+    pending_verification: 'Awaiting email verification',
+    submitted: 'Submitted — awaiting review',
+    under_review: 'Under review',
+    needs_info: 'More information needed',
+    approved: 'Approved',
+    rejected: 'Not approved',
+    withdrawn: 'Withdrawn',
+  };
+  pill.textContent = labels[p.status] || p.status;
+  pill.className = 'pill ' + p.status;
+
+  var body = '';
+  var actions = '';
+
+  if (p.status === 'submitted') {
+    body = '<p>Thank you — your application is in our verification queue. ' +
+      'We usually respond within a few working days. We will email you at <b>' +
+      esc(p.email) + '</b> once it has been reviewed.</p>';
+  } else if (p.status === 'under_review') {
+    body = '<p>Our team is currently reviewing your application and documents. ' +
+      'No action is needed from you right now.</p>';
+  } else if (p.status === 'needs_info') {
+    body = '<p>We need a little more information before we can approve your application.</p>' +
+      (p.decisionNote ? '<div class="notice warn"><strong>What we need</strong>' + esc(p.decisionNote) + '</div>' : '');
+    actions = '<button class="btn" onclick="editAgain()">Update my application</button>';
+  } else if (p.status === 'approved') {
+    body = '<p>Congratulations — you are an approved Soulful Bhakti Partner. ' +
+      'Your QR code and discount coupon are below.</p>';
+    $('issuedCard').classList.remove('hidden');
+    renderIssued();
+  } else if (p.status === 'rejected') {
+    body = '<p>Unfortunately we are not able to approve this application.</p>' +
+      (p.decisionNote ? '<div class="notice err"><strong>Reason</strong>' + esc(p.decisionNote) + '</div>' : '') +
+      '<p class="hint">If you believe this was a mistake, please contact us.</p>';
+  } else if (p.status === 'withdrawn') {
+    body = '<p>This application was withdrawn. We have stopped processing it, and your ' +
+      'information will be deleted after the minimum retention period required by law.</p>';
+  }
+
+  // Withdrawal must remain reachable while the application is still "live"
+  // (s.6(4): withdrawing consent must be as easy as giving it).
+  if (['submitted', 'under_review', 'needs_info'].indexOf(p.status) >= 0) {
+    actions += '<button class="btn ghost" onclick="withdrawApplication()">Withdraw my application</button>';
+  }
+
+  $('statusBody').innerHTML = body;
+  $('statusActions').innerHTML = actions;
+
+  if (p.status !== 'approved') {
+    $('issuedCard').classList.add('hidden');
+  }
+}
+
+function renderIssued() {
+  var i = state.issued;
+  if (!i) return;
+
+  // An <img> cannot send an Authorization header, so this one endpoint also
+  // accepts the session token as a query parameter. The response is a QR
+  // image the partner already owns and shows publicly, and the route reveals
+  // nothing about any other partner.
+  $('qrImg').src = '/api/partner/qr/' + encodeURIComponent(state.partner.id) +
+    '.png?token=' + encodeURIComponent(state.token || '');
+  $('installUrl').textContent = i.installUrl || '';
+  $('couponCode').textContent = i.coupon ? i.coupon.code : 'Not issued yet';
+
+  var rows = [];
+  if (i.coupon) {
+    rows.push('<div><span>Coupon status</span><span>' + esc(i.coupon.status) + '</span></div>');
+    if (i.coupon.maxRedemptions) {
+      rows.push('<div><span>Redemptions</span><span>' +
+        esc(i.coupon.redemptionCount) + ' of ' + esc(i.coupon.maxRedemptions) + '</span></div>');
+    } else {
+      rows.push('<div><span>Redemptions</span><span>' + esc(i.coupon.redemptionCount) + '</span></div>');
+    }
+    if (i.coupon.expiresAt) {
+      rows.push('<div><span>Coupon expires</span><span>' + fmtDate(i.coupon.expiresAt) + '</span></div>');
+    }
+  }
+  $('couponMeta').innerHTML = rows.join('');
+  $('partnerMeta').innerHTML =
+    '<div><span>Partner</span><span>' + esc(i.affiliateName || '') + '</span></div>' +
+    '<div><span>Your referrer code</span><span>' + esc(i.referrerCode || '') + '</span></div>' +
+    '<div><span>Approved on</span><span>' + fmtDate(p_approvedAt()) + '</span></div>';
+}
+
+function p_approvedAt() {
+  return state.partner ? state.partner.approvedAt : null;
+}
+
+function editAgain() {
+  fillForm(state.partner);
+  renderDocuments();
+  applyLockState();
+  show('viewForm');
+}
+
+// Withdrawal. DPDP Act 2023 s.6(4) requires this to be as easy as consenting,
+// so it lives here as one button rather than a support request. The confirm
+// spells out the retention consequence rather than implying instant deletion.
+function withdrawApplication() {
+  var confirmed = confirm(
+    'Withdraw your application?\n\n' +
+    'We will stop processing it immediately. We are required by Indian data ' +
+    'protection law to keep your information for a minimum period, after which ' +
+    'it is deleted. You can apply again later.',
+  );
+  if (!confirmed) return;
+
+  api('/api/partner/withdraw', { method: 'POST', body: {} })
+    .then(function (d) {
+      localStorage.removeItem(SESSION_KEY);
+      state.token = null;
+      msg('ok', 'Application withdrawn', d.message || 'We have stopped processing your application.');
+      show('viewRegister');
+    })
+    .catch(function (e) {
+      msg('err', 'Could not withdraw', e.message);
+    });
+}
+
+function downloadQr() {
+  var img = $('qrImg');
+  if (!img || !img.src) return;
+  var a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'soulful-bhakti-partner-qr.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ---------------------------------------------------------------- upload UI
+document.addEventListener('DOMContentLoaded', function () {
+  var fi = $('fileInput');
+  if (fi) {
+    fi.addEventListener('change', function () {
+      if (fi.files && fi.files[0]) uploadFile(fi.files[0]);
+    });
+  }
+
+  var dz = $('dropZone');
+  if (dz) {
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.add('over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      dz.addEventListener(ev, function (e) {
+        e.preventDefault(); e.stopPropagation();
+        dz.classList.remove('over');
+      });
+    });
+    dz.addEventListener('drop', function (e) {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        uploadFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  boot();
+});
+</script>
+</body>
+</html>

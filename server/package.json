@@ -9,17 +9,24 @@
     "test": "node test/admin-filters.test.cjs",
     "test:e2e": "node test/admin-filters.e2e.cjs",
     "test:all": "node test/admin-filters.test.cjs && node test/admin-filters.e2e.cjs",
-    "verify": "node test/admin-static-verify.cjs"
+    "verify": "node test/admin-static-verify.cjs",
+    "test:partner-crypto": "node test/partner_crypto.test.mjs",
+    "test:partner-verify": "node test/partner-verify.cjs",
+    "test:partner-flow": "node test/partner-stub-register.mjs test/partner-flow.test.mjs",
+    "test:partner": "node test/partner_crypto.test.mjs && node test/partner-verify.cjs && node test/partner-stub-register.mjs test/partner-flow.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",
+    "@clerk/backend": "^1.27.0",
     "@supabase/supabase-js": "2.49.1",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "express-rate-limit": "^8.6.2",
     "multer": "^2.2.0",
-    "qrcode": "^1.5.4",
-    "@clerk/backend": "^1.27.0"
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "pg": "^8.23.1"
   }
 }
