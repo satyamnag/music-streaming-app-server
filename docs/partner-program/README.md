@@ -62,6 +62,30 @@ Tests: `npm run test:partner` (see §8).
 
 ## 3. Deployment steps
 
+### 3.0 URLs: where the portal lives
+
+There are **two hosts** involved, and the split is deliberate:
+
+| URL | Served by | Purpose |
+|---|---|---|
+| `https://soulfulbhakti.com/partner` | The marketing website (Next.js on Cloudflare) | The **public front door** partners are given. It forwards to the portal. |
+| `https://admin.soulfulbhakti.com/partner` | This Express server on Render | The **portal itself** — the application, its API, and the encrypted document store. |
+
+The root domain is served by the website, which is a different deployment and
+never reaches Render — so the portal cannot be *served* from the root domain.
+The website therefore owns the `/partner` route and forwards to the portal.
+That keeps the recognisable branded URL in partners' hands while the portal
+keeps running on the infrastructure that owns the partner database and the
+admin review queue.
+
+**`PARTNER_PUBLIC_BASE_URL`** (see §3.3) controls the branded origin used in
+partner-facing copy. Verification emails deliberately link to the **serving**
+host so a one-time security token never depends on the forward staying in
+place; the code detects whether the two hosts differ and picks accordingly.
+
+Both `/partner/terms` and `/partner/privacy` are exposed on **both** hosts for
+consistency.
+
 ### 3.1 Apply the migration
 
 Open the Supabase dashboard → SQL Editor → run
@@ -114,6 +138,10 @@ Non-secret presentation config (Render env is fine):
 | `PARTNER_BRAND_NAME` | `Soulful Bhakti` |
 | `PARTNER_CONSENT_VERSION` | `2026-01` |
 | `PARTNER_PUBLIC_BASE_URL` | derived from the request |
+| `PARTNER_DISCLOSURE_VERSION` | `2026-01` |
+
+Set `PARTNER_PUBLIC_BASE_URL=https://soulfulbhakti.com` in production so the
+branded origin appears in partner-facing copy.
 
 ### 3.4 Publish email DNS records
 

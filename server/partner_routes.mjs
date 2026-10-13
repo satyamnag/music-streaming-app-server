@@ -226,12 +226,48 @@ export function registerPartnerRoutes(app, deps) {
       .slice(0, 300)
   }
 
-  /** The base URL used to build the emailed verification link. */
+  /**
+   * The base URL used to build the emailed verification link.
+   *
+   * `PARTNER_PUBLIC_BASE_URL` is the single source of truth when set. It is the
+   * branded public origin (https://soulfulbhakti.com), so the link a partner
+   * receives shows the domain they recognise rather than the infrastructure
+   * host. That origin serves /partner via the marketing website, which forwards
+   * to this portal — so the link works whichever end the partner starts from.
+   *
+   * Falling back to the request host keeps local development and any
+   * un-configured deployment working without special-casing.
+   */
   function resolveBaseUrl(req) {
     if (publicBaseUrl) return publicBaseUrl.replace(/\/+$/, '')
     // Derive from the request. `trust proxy` is set, so protocol/host reflect
     // the external origin rather than the internal Render address.
     return `${req.protocol}://${req.get('host')}`
+  }
+
+  /**
+   * The origin that actually SERVES the portal API, which is where the
+   * verification link must ultimately land.
+   *
+   * When the branded origin is a different host (soulfulbhakti.com forwards to
+   * the portal), pointing the emailed link straight at the serving host avoids
+   * depending on that forward staying in place for a one-time security token.
+   * The branded path is still used when it IS the serving host, so local dev
+   * and single-host deployments are unaffected.
+   */
+  function resolveVerifyBaseUrl(req) {
+    const serving = `${req.protocol}://${req.get('host')}`
+    if (!publicBaseUrl) return serving
+    try {
+      const branded = new URL(publicBaseUrl)
+      const s = new URL(serving)
+      // Same host (the common case): use the branded base verbatim.
+      if (branded.host === s.host) return publicBaseUrl.replace(/\/+$/, '')
+      // Different host: the token must reach the server that can consume it.
+      return serving
+    } catch (_) {
+      return serving
+    }
   }
 
   /**
@@ -420,7 +456,7 @@ export function registerPartnerRoutes(app, deps) {
       const sent = await sendVerificationEmail({
         email,
         token: verifyToken,
-        baseUrl: resolveBaseUrl(req),
+        baseUrl: resolveVerifyBaseUrl(req),
       })
 
       // The portal token IS returned here — it is the credential the partner
@@ -566,7 +602,7 @@ export function registerPartnerRoutes(app, deps) {
       const sent = await sendVerificationEmail({
         email: row.email,
         token: verifyToken,
-        baseUrl: resolveBaseUrl(req),
+        baseUrl: resolveVerifyBaseUrl(req),
       })
 
       await auditPartner(row.partner_id, 'verification_resent', {
