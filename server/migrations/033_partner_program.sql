@@ -21,6 +21,122 @@
 -- ------------------------------------------------------------------
 create extension if not exists pgcrypto with schema public;
 
+-- ------------------------------------------------------------------
+-- SCHEMA-QUALIFIED CRYPTO HELPERS
+-- ------------------------------------------------------------------
+-- WHY THIS WRAPPER EXISTS (this caused two failed deployments):
+--
+-- Supabase does not always install pgcrypto into `public`. A very common
+-- layout puts extensions in a separate `extensions` schema. The functions in
+-- this migration deliberately pin `set search_path = public` (to prevent
+-- search-path hijacking), which means an unqualified call to `digest(...)`
+-- resolves ONLY against `public` — and fails with:
+--
+--     ERROR: 42883: function digest(text, text) does not exist
+--
+-- even though pgcrypto is installed and working.
+--
+-- The robust fix is to resolve the function ONCE at migration time via the
+-- catalog (`pg_proc`), whatever schema it lives in, and wrap it in our own
+-- SECURITY INVOKER function inside `public`. Everything downstream then calls
+-- `public.sb_digest(...)`, which is always visible regardless of search_path
+-- or where the extension was installed.
+--
+-- Note this also survives the extension being installed into `extensions`,
+-- `public`, or any other schema — the failure mode is removed rather than
+-- special-cased.
+-- ------------------------------------------------------------------
+
+do $$
+declare
+  v_schema text;
+  v_args text;
+begin
+  -- Find whichever digest() overload the installed pgcrypto provides.
+  select n.nspname, pg_get_function_identity_arguments(p.oid)
+    into v_schema, v_args
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where p.proname = 'digest'
+    and pg_get_function_identity_arguments(p.oid) in ('bytea, text', 'text, text')
+  order by (pg_get_function_identity_arguments(p.oid) = 'bytea, text') desc
+  limit 1;
+
+  if v_schema is null then
+    raise exception
+      'pgcrypto is installed but no digest() function was found. '
+      'Enable pgcrypto in Database > Extensions, then re-run this migration.';
+  end if;
+
+  -- Build the wrapper with the function name SCHEMA-QUALIFIED to wherever
+  -- pgcrypto actually lives. This is the crux of the fix: an unqualified
+  -- `digest(...)` inside a function that pins `search_path = public` fails
+  -- when pgcrypto lives elsewhere, which is exactly how this migration broke
+  -- twice in production.
+  if v_args = 'bytea, text' then
+    execute format($f$
+      create or replace function public.sb_digest(p_input text, p_alg text default 'sha256')
+      returns text
+      language sql
+      immutable
+      as $body$
+        select encode(%I.digest(convert_to(coalesce(p_input, ''), 'UTF8'), p_alg), 'hex');
+      $body$;
+    $f$, v_schema);
+  else
+    -- Older pgcrypto exposing digest(text, text).
+    execute format($f$
+      create or replace function public.sb_digest(p_input text, p_alg text default 'sha256')
+      returns text
+      language sql
+      immutable
+      as $body$
+        select encode(%I.digest(coalesce(p_input, ''), p_alg), 'hex');
+      $body$;
+    $f$, v_schema);
+  end if;
+
+  raise notice 'pgcrypto digest() found in schema "%" — public.sb_digest() created.', v_schema;
+end $$;
+
+comment on function public.sb_digest(text, text) is
+  'SHA-256 (or other pgcrypto digest) of a UTF-8 string, returned as hex. Exists because pgcrypto''s schema varies between Supabase projects, and an unqualified digest() call inside a search_path-pinned function fails when the extension lives outside public.';
+
+-- `gen_random_bytes` has exactly the same schema-visibility problem as
+-- `digest`, and it is used to mint the portal tokens. Wrap it the same way so
+-- the CSPRNG is reachable wherever pgcrypto was installed.
+do $$
+declare
+  v_schema text;
+begin
+  select n.nspname into v_schema
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where p.proname = 'gen_random_bytes'
+  limit 1;
+
+  if v_schema is null then
+    raise exception
+      'pgcrypto is installed but gen_random_bytes() was not found. '
+      'The partner portal tokens depend on it. Enable pgcrypto, then re-run.';
+  end if;
+
+  execute format($f$
+    create or replace function public.sb_random_bytes(p_len integer)
+    returns bytea
+    language sql
+    volatile
+    as $body$
+      select %I.gen_random_bytes(p_len);
+    $body$;
+  $f$, v_schema);
+
+  raise notice 'pgcrypto gen_random_bytes() found in schema "%" — public.sb_random_bytes() created.', v_schema;
+end $$;
+
+comment on function public.sb_random_bytes(integer) is
+  'Cryptographically secure random bytes from pgcrypto, resolved independently of the extension schema.';
+
 do $$
 begin
   -- Fail loudly and early if pgcrypto is unavailable. A clear error here is
@@ -32,6 +148,220 @@ begin
       'in Database > Extensions (or run: create extension pgcrypto with schema public).';
   end if;
   raise notice 'pgcrypto present — proceeding with the partner schema.';
+end $$;
+
+-- ------------------------------------------------------------------
+-- PREREQUISITE REPAIR: affiliates.referrer_code
+-- ------------------------------------------------------------------
+-- This migration ISSUES a QR referrer code on approval, which is stored on
+-- the affiliate row. That column is introduced by migration 009.
+--
+-- On this project, migration 009 evidently did not run: 003 never installed
+-- pgcrypto, and `affiliates` lacks `referrer_code`. Rather than fail 1,200
+-- lines in with "column a.referrer_code does not exist", the column is
+-- created here if it is missing, backfilled, and made unique — i.e. exactly
+-- what migration 009 would have done.
+--
+-- This is idempotent: on a project where 009 DID run, every statement below
+-- is a no-op.
+-- ------------------------------------------------------------------
+do $$
+declare
+  v_has_table boolean;
+  v_has_column boolean;
+  v_dup_count integer;
+begin
+  select exists (
+    select 1 from information_schema.tables
+    where table_schema = 'public' and table_name = 'affiliates'
+  ) into v_has_table;
+
+  if not v_has_table then
+    raise exception
+      'public.affiliates does not exist. The Partner Program attaches approved '
+      'partners to the affiliate pipeline, so migrations 004 (and ideally 008/009) '
+      'must be applied first.';
+  end if;
+
+  select exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'affiliates'
+      and column_name = 'referrer_code'
+  ) into v_has_column;
+
+  if v_has_column then
+    raise notice 'affiliates.referrer_code already present — no repair needed.';
+    return;
+  end if;
+
+  raise notice 'affiliates.referrer_code is MISSING (migration 009 did not run) — adding it now.';
+
+  alter table public.affiliates add column referrer_code text;
+
+  -- Backfill from the id, matching migration 009's scheme.
+  update public.affiliates
+     set referrer_code = upper(replace(substr(id::text, 1, 8), '-', ''))
+   where referrer_code is null or referrer_code = '';
+
+  -- Guard against a collision before enforcing uniqueness.
+  select count(*) into v_dup_count
+  from (
+    select referrer_code from public.affiliates
+    group by referrer_code having count(*) > 1
+  ) d;
+
+  if v_dup_count > 0 then
+    raise exception
+      'referrer_code collision after backfill — resolve manually before re-running.';
+  end if;
+
+  alter table public.affiliates alter column referrer_code set not null;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'affiliates_referrer_code_key'
+      and conrelid = 'public.affiliates'::regclass
+  ) then
+    alter table public.affiliates
+      add constraint affiliates_referrer_code_key unique (referrer_code);
+  end if;
+
+  raise notice 'affiliates.referrer_code repaired (added, backfilled, made unique).';
+end $$;
+
+-- ------------------------------------------------------------------
+-- PREREQUISITE REPAIR: affiliates.commission_amount
+-- ------------------------------------------------------------------
+-- Introduced by migration 008. It is the per-affiliate flat commission the
+-- admin sets, and `partner_approve` writes it when creating the affiliate.
+-- Added here if missing, for the same reason as referrer_code above.
+-- ------------------------------------------------------------------
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'affiliates'
+      and column_name = 'commission_amount'
+  ) then
+    raise notice 'affiliates.commission_amount is MISSING (migration 008 did not run) — adding it now.';
+    alter table public.affiliates
+      add column commission_amount numeric not null default 0
+      check (commission_amount >= 0);
+    raise notice 'affiliates.commission_amount repaired.';
+  else
+    raise notice 'affiliates.commission_amount already present — no repair needed.';
+  end if;
+end $$;
+
+-- The QR install-referrer pipeline also writes to `affiliate_referrals`
+-- (migration 009). The partner program does not write to it directly, but the
+-- shipped app does when a user scans a partner QR — so make sure it exists.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.tables
+    where table_schema = 'public' and table_name = 'affiliate_referrals'
+  ) then
+    raise notice 'affiliate_referrals is MISSING (migration 009 did not run) — creating it now.';
+
+    create table public.affiliate_referrals (
+      id uuid primary key default gen_random_uuid(),
+      referrer_code text not null,
+      affiliate_id uuid not null references public.affiliates(id) on delete cascade,
+      purchaser_user_id text not null unique,
+      created_at timestamptz not null default now()
+    );
+
+    alter table public.affiliate_referrals enable row level security;
+
+    create index if not exists affiliate_referrals_affiliate_idx
+      on public.affiliate_referrals (affiliate_id);
+
+    raise notice 'affiliate_referrals created.';
+  else
+    raise notice 'affiliate_referrals already present — no repair needed.';
+  end if;
+end $$;
+
+-- ------------------------------------------------------------------
+-- PREREQUISITE REPAIR: bind_affiliate_referral(text, text)
+-- ------------------------------------------------------------------
+-- The SHIPPED Android app calls this RPC on first sign-in to bind a user to
+-- the affiliate whose QR they scanned. It is created by migration 009.
+--
+-- The partner program's whole "zero app changes" claim rests on this function
+-- existing: a partner QR is only useful if the app can act on it. So it is
+-- created here if absent, with the same semantics as migration 009
+-- (idempotent, rejects unknown/inactive codes, one binding per user).
+-- ------------------------------------------------------------------
+do $$
+begin
+  if not exists (
+    select 1 from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'bind_affiliate_referral'
+  ) then
+    raise notice 'bind_affiliate_referral is MISSING (migration 009 did not run) — creating it now.';
+
+    execute $fn$
+      create or replace function public.bind_affiliate_referral(
+        p_referrer_code text, p_user_id text
+      )
+      returns text
+      language plpgsql
+      security definer
+      set search_path = public
+      as $body$
+      declare
+        v_affiliate_id uuid;
+        v_bound boolean;
+      begin
+        if p_referrer_code is null or p_referrer_code = ''
+           or p_user_id is null or p_user_id = '' then
+          return 'invalid';
+        end if;
+
+        if exists (
+          select 1 from public.affiliate_referrals where purchaser_user_id = p_user_id
+        ) then
+          return 'already_bound';
+        end if;
+
+        select a.id into v_affiliate_id
+        from public.affiliates a
+        where upper(a.referrer_code) = upper(p_referrer_code)
+          and a.status = 'active'
+        limit 1;
+
+        if v_affiliate_id is null then
+          return 'invalid';
+        end if;
+
+        insert into public.affiliate_referrals (referrer_code, affiliate_id, purchaser_user_id)
+        values (upper(p_referrer_code), v_affiliate_id, p_user_id)
+        on conflict (purchaser_user_id) do nothing;
+
+        select exists (
+          select 1 from public.affiliate_referrals
+          where purchaser_user_id = p_user_id and affiliate_id = v_affiliate_id
+        ) into v_bound;
+
+        if v_bound then
+          return 'bound';
+        else
+          return 'already_bound';
+        end if;
+      end;
+      $body$;
+    $fn$;
+
+    grant execute on function public.bind_affiliate_referral(text, text)
+      to anon, authenticated;
+
+    raise notice 'bind_affiliate_referral created.';
+  else
+    raise notice 'bind_affiliate_referral already present — no repair needed.';
+  end if;
 end $$;
 
 -- ============================================================
@@ -608,13 +938,12 @@ language sql
 immutable
 set search_path = public
 as $$
-  -- `digest` comes from pgcrypto, which this script installs up top.
-  -- The explicit ::text cast on the algorithm matters: without it, PostgreSQL
-  -- resolves `digest(text, unknown)` and fails with
-  -- "function digest(text, unknown) does not exist" — the exact error seen
-  -- when the extension is missing, and also possible in edge cases when the
-  -- planner cannot infer the literal's type.
-  select encode(digest(coalesce(p_token, '')::text, 'sha256'::text), 'hex');
+  -- public.sb_digest() is created at the top of this migration and resolves
+  -- pgcrypto's digest() wherever the extension happens to live. Calling
+  -- pgcrypto's `digest` directly here would fail on any project where
+  -- pgcrypto is installed outside `public` (e.g. in an `extensions` schema),
+  -- because this function pins `search_path = public`.
+  select public.sb_digest(coalesce(p_token, '')::text, 'sha256');
 $$;
 
 -- 6a) Register a draft application.
@@ -660,7 +989,8 @@ begin
   end if;
 
   -- 32 random bytes => 256 bits of entropy (ASVS 6.5.3 CSPRNG).
-  v_token := encode(gen_random_bytes(32), 'hex');
+  -- public.sb_random_bytes resolves pgcrypto regardless of its schema.
+  v_token := encode(public.sb_random_bytes(32), 'hex');
 
   insert into public.partners (email, portal_token_hash, status)
   values (v_email, public.partner_token_hash(v_token), 'draft')

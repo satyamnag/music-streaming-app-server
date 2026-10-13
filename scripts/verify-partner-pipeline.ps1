@@ -199,6 +199,58 @@ Step 'Migration installs its own extension on a BARE database' {
   & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $bare;" *> $null
 }
 
+Step 'Works when pgcrypto lives in a NON-public schema (production layout)' {
+  # This is the exact production failure. Supabase commonly installs
+  # extensions into an `extensions` schema. The partner functions pin
+  # `set search_path = public`, so an unqualified digest() call fails with
+  # "function digest(text, text) does not exist" even though pgcrypto is
+  # installed and working.
+  $ext = "${DBNAME}_ext"
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $ext;" *> $null
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "CREATE DATABASE $ext;" *> $null
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $ext -q -c 'create schema extensions; create extension pgcrypto with schema extensions;' *> $null
+
+  foreach ($f in @('test\supabase-shim.sql', 'migrations\004_coupons.sql', 'migrations\033_partner_program.sql')) {
+    $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $ext -q -v ON_ERROR_STOP=1 -f (Join-Path $SERVER $f) 2>&1
+    if ($out | Select-String 'ERROR') { throw "$f failed with pgcrypto in 'extensions': $($out | Select-String 'ERROR' | Select-Object -First 1)" }
+  }
+  $probe = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $ext -t -A -c `
+    "select public.partner_token_hash('probe') = encode(extensions.digest('probe','sha256'),'hex');" 2>&1
+  if (($probe | Out-String).Trim() -ne 't') { throw "sb_digest wrong with pgcrypto in 'extensions': $probe" }
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $ext;" *> $null
+}
+
+Step 'Repairs missing earlier migrations and runs the full lifecycle' {
+  # Simulates a project where 003/008/009 never ran: pgcrypto sits in
+  # `extensions`, and `affiliates` lacks referrer_code and commission_amount.
+  # Migration 033 must repair those prerequisites itself, then drive a
+  # complete partner lifecycle including the SHIPPED app's RPCs.
+  $fix = "${DBNAME}_repair"
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $fix;" *> $null
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "CREATE DATABASE $fix;" *> $null
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $fix -q -c 'create schema extensions; create extension pgcrypto with schema extensions;' *> $null
+
+  foreach ($f in @('test\supabase-shim.sql', 'migrations\004_coupons.sql', 'migrations\033_partner_program.sql')) {
+    $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $fix -q -v ON_ERROR_STOP=1 -f (Join-Path $SERVER $f) 2>&1
+    if ($out | Select-String 'ERROR') { throw "$f failed during repair: $($out | Select-String 'ERROR' | Select-Object -First 1)" }
+  }
+
+  # Assert the repairs actually happened.
+  foreach ($col in @('referrer_code', 'commission_amount')) {
+    $present = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $fix -t -A -c `
+      "select count(*) from information_schema.columns where table_name='affiliates' and column_name='$col';" 2>&1
+    if (($present | Out-String).Trim() -ne '1') { throw "repair failed: affiliates.$col still missing" }
+  }
+
+  # Full lifecycle, including bind_affiliate_referral / validate_coupon /
+  # redeem_coupon — the RPCs the shipped Android app calls.
+  $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $fix -q -v ON_ERROR_STOP=1 `
+    -f (Join-Path $SERVER 'test\partner_lifecycle_on_repaired_db.sql') 2>&1
+  if ($out | Select-String 'ERROR') { throw "lifecycle failed: $($out | Select-String 'ERROR' | Select-Object -First 1)" }
+  if (-not ($out | Select-String 'LIFECYCLE COMPLETE AND CORRECT')) { throw 'lifecycle did not report success' }
+  & $PSQL -h 127.0.0.1 -p $PORT -U postgres -q -c "DROP DATABASE IF EXISTS $fix;" *> $null
+}
+
 Step 'Migration 033 is idempotent (re-run)' {
   $out = & $PSQL -h 127.0.0.1 -p $PORT -U postgres -d $DBNAME -q -v ON_ERROR_STOP=1 `
     -f (Join-Path $MIG '033_partner_program.sql') 2>&1
