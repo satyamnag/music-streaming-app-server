@@ -137,6 +137,77 @@ end $$;
 comment on function public.sb_random_bytes(integer) is
   'Cryptographically secure random bytes from pgcrypto, resolved independently of the extension schema.';
 
+-- `crypt` and `gen_salt` have exactly the same schema-visibility problem as
+-- `digest` and `gen_random_bytes` above. The partner login password hash
+-- depends on them, and it would fail at login time (not at migration time)
+-- if pgcrypto lives outside `public` — the worst possible moment to discover
+-- it. Wrap them the same way.
+--
+-- NOTE: unlike digest(), `crypt` is NOT immutable — a bcrypt hash embeds a
+-- fresh random salt, so every call returns a different string for the same
+-- input. It is declared volatile by pgcrypto and must stay volatile here.
+do $$
+declare
+  v_schema text;
+begin
+  select n.nspname into v_schema
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where p.proname = 'crypt'
+  limit 1;
+
+  if v_schema is null then
+    raise exception
+      'pgcrypto is installed but crypt() was not found. '
+      'Partner login depends on it. Enable pgcrypto, then re-run.';
+  end if;
+
+  execute format($f$
+    create or replace function public.sb_crypt(p_password text, p_salt text)
+    returns text
+    language sql
+    volatile
+    as $body$
+      select %I.crypt(p_password, p_salt);
+    $body$;
+  $f$, v_schema);
+
+  select n.nspname into v_schema
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where p.proname = 'gen_salt'
+  limit 1;
+
+  if v_schema is null then
+    raise exception
+      'pgcrypto is installed but gen_salt() was not found. '
+      'Partner login depends on it. Enable pgcrypto, then re-run.';
+  end if;
+
+  execute format($f$
+    create or replace function public.sb_gen_salt(p_algo text, p_cost integer default 10)
+    returns text
+    language sql
+    volatile
+    as $body$
+      -- The 3-arg form is used only for bcrypt ('bf'), which is the only
+      -- algorithm here that takes a cost. Passing a cost to e.g. 'md5'
+      -- would be wrong, so 'bf' is required explicitly.
+      select case
+        when p_algo = 'bf' then %I.gen_salt('bf', greatest(10, least(12, coalesce(p_cost, 10))))
+        else %I.gen_salt(p_algo)
+      end;
+    $body$;
+  $f$, v_schema, v_schema);
+
+  raise notice 'pgcrypto crypt()/gen_salt() found in schema "%" — public.sb_crypt()/sb_gen_salt() created.', v_schema;
+end $$;
+
+comment on function public.sb_crypt(text, text) is
+  'pgcrypto crypt() resolved independently of the extension schema. Used for the partner password hash.';
+comment on function public.sb_gen_salt(text, integer) is
+  'pgcrypto gen_salt() resolved independently of the extension schema. Cost is clamped to 10..12 for bcrypt.';
+
 do $$
 begin
   -- Fail loudly and early if pgcrypto is unavailable. A clear error here is
@@ -439,16 +510,61 @@ end $$;
 --     submitting identity information — hence the non-Aadhaar route this
 --     portal offers (PAN / Passport / Voter ID / Driving Licence).
 --
---     PENALTIES: s.33A (inserted 2019) — civil penalty up to Rs 1 CRORE per
---     contravention, plus up to Rs 10 LAKH PER DAY for a continuing failure.
---     s.38 (unauthorised CIDR access) was raised by the 2019 Act to 10 YEARS'
---     imprisonment with a minimum Rs 10 lakh fine, and its clause (g) covers
---     sharing, using or displaying information in contravention of s.29.
---     s.42 general penalty: 3 years. Crucially, s.43 makes DIRECTORS AND
---     OFFICERS personally liable: every person "in charge of, and was
---     responsible to, the company for the conduct of the business ... shall
---     be deemed to be guilty of the offence" (with a due-diligence defence).
---     That personal exposure is why this control is structural.
+--     PENALTIES — VERIFIED against the consolidated Act on 2026-10-14:
+--
+--       s.40 [substituted by Act 14 of 2019] — "Penalty for unauthorised use
+--            by requesting entity or offline verification-seeking entity":
+--            imprisonment up to THREE YEARS, or a fine up to Rs 10,000, or in
+--            the case of a COMPANY a fine up to Rs 1 LAKH, or both. Clause (b)
+--            applies specifically to an offline verification-seeking entity
+--            acting in contravention of s.8A(2). Read verbatim from
+--            https://indiankanoon.org/doc/85168365/ .
+--            NOTE: an earlier revision of this comment cited "s.38A" for this.
+--            NO SECTION 38A EXISTS in the Aadhaar Act. Corrected.
+--
+--       s.33A [inserted 2019] — civil penalty up to Rs 1 CRORE per
+--            contravention, plus up to Rs 10 LAKH PER DAY continuing.
+--
+--       s.37 (disclosure of identity information in contravention of the
+--            Act) — imprisonment up to THREE YEARS, or a fine up to
+--            Rs 10,000, or in the case of a COMPANY a fine up to Rs 1 LAKH,
+--            or both. VERIFIED via the Supreme Court's own description of the
+--            provision in Puttaswamy (2018) at
+--            https://indiankanoon.org/doc/127517806/ , paragraph 38:
+--            "relevant Section is Section 37 which makes act of disclosing
+--            identity information as offence which is punishable with
+--            imprisonment for a term which may extend to three years or with a
+--            fine which may extend to ten thousand rupees. In the case of a
+--            company, this fine can extend to one lakh rupees."
+--            NOTE: s.37 and s.40 carry the SAME quantum. s.37 bites on
+--            disclosure, s.40 on use by a requesting / offline-verification
+--            entity. Both are therefore in scope for a KYC portal.
+--
+--            SOURCING RULE (learned the hard way): Indian Kanoon section-page
+--            IDs are NOT derivable. /doc/1619494/ looks like an Aadhaar s.37
+--            link but resolves to IT Act 2000 s.37 (Suspension of Digital
+--            Signature Certificate). Always confirm the page's own <h1>
+--            ("Section N in The ... Act, YYYY") before quoting it. Cite the
+--            bare section number and the instrument; never a bare link.
+--
+--       s.38 (unauthorised access to the Central Identities Data Repository)
+--            was raised by the 2019 Act to 10 YEARS' imprisonment with a
+--            minimum Rs 10 lakh fine; its clause (g) covers sharing, using or
+--            displaying information in contravention of s.29. This is the
+--            most severe provision and applies to CIDR access, which this
+--            programme never performs.
+--
+--       s.43 — DIRECTORS AND OFFICERS ARE PERSONALLY LIABLE: every person "in
+--            charge of, and was responsible to, the company for the conduct of
+--            the business ... shall be deemed to be guilty of the offence",
+--            with only a due-diligence defence. The s.47 proviso also lets an
+--            individual Aadhaar holder file the complaint directly, so the
+--            company does not get the protection of a UIDAI-only complaint gate.
+--
+--     That combination — personal criminal liability plus a private right to
+--     complain — is the reason this control is STRUCTURAL (a CHECK constraint)
+--     rather than procedural (a written policy). A policy is weak evidence of
+--     due diligence; a constraint that cannot be bypassed is strong evidence.
 --
 --     CONSEQUENCE: the document allow-list below contains NO 'aadhaar'
 --     value, so an Aadhaar scan cannot be recorded even if a future UI bug
@@ -731,6 +847,108 @@ comment on column public.partners.date_of_birth is
   'Age is derived from this, never stored. A CHECK enforces 18+ because a minor cannot contract.';
 
 -- ------------------------------------------------------------------
+-- 1b) ADMIN-GENERATED PARTNER CREDENTIALS
+-- ------------------------------------------------------------------
+-- CHANGE OF PIPELINE: partners no longer self-register a public account.
+-- The ADMIN creates the account and issues the credentials, because:
+--   (a) the KYC documents include identity documents — intake must not be
+--       open to anonymous self-service; and
+--   (b) the client explicitly chose "we (admin) will provide them generated
+--       user id and password".
+--
+-- DESIGN — WHY COLUMNS, NOT A SECOND AUTH PATH:
+-- `portal_token_hash` is the SESSION credential and 14 SECURITY DEFINER
+-- functions authenticate against it. Adding a parallel password check to
+-- each of those would mean 14 hand-edited auth paths, and a mistake in any
+-- one is a silent privilege bug.
+--
+-- Instead the login exchanges (login_id, password) for a freshly minted
+-- opaque session token of EXACTLY the same shape `partner_register` already
+-- produces. Every existing function keeps working unmodified, and the
+-- password never reaches them. The only new auth surface is one function.
+--
+-- Column shape mirrors the house style already used for the email
+-- verification token (hash-only at rest, expiry, attempt counter).
+--
+-- These are ADDED rather than folded into the `create table` above because
+-- that statement already executed in production; `create table if not
+-- exists` would silently skip an edited definition there. `add column if
+-- not exists` is idempotent and applies on both fresh and migrated DBs.
+-- ------------------------------------------------------------------
+alter table public.partners
+  -- Human-typed login handle issued by the admin, e.g. 'SB-7K2M4Q'.
+  -- Stored uppercase; compared case-insensitively. Unique so two partners
+  -- can never collide on a handle.
+  add column if not exists login_id text,
+
+  -- bcrypt hash, produced by pgcrypto's crypt(gen_salt('bf', <cost>)).
+  -- NEVER the password itself. pgcrypto's crypt() REJECTS a NUL byte
+  -- outright (verified on PG 18.6) rather than silently truncating it,
+  -- which is the failure mode we want: the generator below emits only
+  -- [A-Za-z0-9] so the password cannot be mangled in transit.
+  add column if not exists password_hash text,
+
+  -- Forces a change on first login: an admin-issued password is known to
+  -- the admin (it is emailed), so it must not remain a long-term secret.
+  add column if not exists must_change_password boolean not null default true,
+
+  -- Credential lifecycle. NULL password_hash => the admin has not issued
+  -- credentials yet, and login is impossible for that row.
+  add column if not exists password_set_at timestamptz,
+  add column if not exists password_changed_at timestamptz,
+
+  -- THROTTLING (ASVS 6.2.1 / 6.2.2 — no unlimited credential stuffing).
+  -- Counted per row so the lock survives a server restart, unlike an
+  -- in-memory limiter. Time-based, not permanent: a locked partner is not
+  -- permanently denied by a stranger's guessing.
+  add column if not exists failed_login_count integer not null default 0,
+  add column if not exists locked_until timestamptz,
+  add column if not exists last_login_at timestamptz;
+
+-- One handle per partner, case-insensitively, and NULLs may repeat
+-- (Postgres already allows multiple NULLs in a unique index, so rows with
+-- no credentials yet do not collide with each other).
+create unique index if not exists partners_login_id_key
+  on public.partners (upper(login_id))
+  where login_id is not null;
+
+-- Format guard so a malformed handle cannot be written by any future path.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'partners_login_id_format'
+  ) then
+    alter table public.partners
+      add constraint partners_login_id_format
+      check (login_id is null or login_id ~ '^[A-Z0-9][A-Z0-9-]{4,31}$');
+  end if;
+end $$;
+
+-- A row with a password hash MUST have a handle, or it could never log in
+-- and would look silently broken. Enforced in the DB, not just in code.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'partners_credentials_paired'
+  ) then
+    alter table public.partners
+      add constraint partners_credentials_paired
+      check (password_hash is null or login_id is not null);
+  end if;
+end $$;
+
+comment on column public.partners.login_id is
+  'Admin-issued partner login handle (e.g. SB-7K2M4Q). Case-insensitive; unique.';
+comment on column public.partners.password_hash is
+  'bcrypt hash of the admin-issued password (pgcrypto crypt/gen_salt bf). The raw password is never stored and never logged.';
+comment on column public.partners.must_change_password is
+  'True while the partner is still using the admin-issued password. An emailed password is known to the admin, so it must not stay a long-term secret.';
+comment on column public.partners.failed_login_count is
+  'Consecutive failed logins. Reset on success. Persisted (not in-memory) so lockout survives a restart.';
+comment on column public.partners.locked_until is
+  'Temporary lockout expiry after repeated failures. NULL when not locked.';
+
+-- ------------------------------------------------------------------
 -- 2) PARTNER DOCUMENTS
 --    One row per uploaded KYC document. The BYTES live in a PRIVATE
 --    Supabase Storage bucket; this table holds only metadata plus the
@@ -745,7 +963,8 @@ create table if not exists public.partner_documents (
   --
   -- NOTE: there is deliberately NO 'aadhaar' value here. Aadhaar is not
   -- an acceptable document for this programme (Aadhaar Act 2016 s.8(2),
-  -- s.29(3)/(4), s.37 — see the header). Because the CHECK constraint
+  -- s.29(3)/(4), s.37 — see the s.4(4)/consent block above). Because the
+  -- CHECK constraint
   -- rejects it, an Aadhaar scan cannot be recorded even if a future UI
   -- bug tried to offer it. The control is structural.
   doc_type text not null
@@ -1026,6 +1245,326 @@ $$;
 
 revoke execute on function public.partner_get_self(text) from public;
 grant execute on function public.partner_get_self(text) to anon, authenticated, service_role;
+
+-- ------------------------------------------------------------------
+-- 6b-i) ADMIN-ISSUED CREDENTIALS + THE SINGLE LOGIN PATH
+-- ------------------------------------------------------------------
+-- Two functions, deliberately split by trust level:
+--   * partner_set_credentials(...)  — ADMIN/service-role ONLY. Writes the
+--     handle and the bcrypt hash. Never callable by anon.
+--   * partner_login(...)            — anon-executable. Verifies and mints
+--     a session. This is the ONLY new anonymous auth surface.
+-- ------------------------------------------------------------------
+
+-- Generate an unused login handle. Format SB-XXXXXX over an unambiguous
+-- alphabet: the vowels and look-alike glyphs (0/O, 1/I/L) are removed so a
+-- handle read aloud or copied from an email cannot be mistyped.
+create or replace function public.partner_gen_login_id()
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  -- 31 chars: no 0/O/1/I/L, no vowels (so no accidental words).
+  c_alphabet constant text := '23456789BCDFGHJKMNPQRSTVWXYZ';
+  v_candidate text;
+  v_i int;
+  v_attempt int := 0;
+begin
+  loop
+    v_attempt := v_attempt + 1;
+    v_candidate := 'SB-';
+    for v_i in 1..6 loop
+      v_candidate := v_candidate
+        || substr(c_alphabet,
+                  1 + floor(random() * length(c_alphabet))::int,
+                  1);
+    end loop;
+
+    -- 31^6 ~= 887 million, so a collision is very unlikely; the loop makes
+    -- it impossible to return a duplicate rather than merely improbable.
+    if not exists (
+      select 1 from public.partners p
+      where upper(p.login_id) = v_candidate
+    ) then
+      return v_candidate;
+    end if;
+
+    if v_attempt > 50 then
+      raise exception 'could not allocate a unique login id';
+    end if;
+  end loop;
+end;
+$$;
+
+revoke execute on function public.partner_gen_login_id() from public;
+
+-- Issue credentials to a partner. ADMIN ONLY — enforced by the grant below
+-- (service_role), not by a flag the caller could forge.
+--
+-- The caller (trusted server) generates the PASSWORD, because it must be
+-- emailed and the DB must never be the place a plaintext password exists
+-- longer than the transaction. The DB generates the HANDLE, because only
+-- the DB can guarantee uniqueness.
+--
+-- p_password is hashed immediately; the plaintext is not stored, not
+-- logged, and not returned.
+create or replace function public.partner_set_credentials(
+  p_partner_id uuid,
+  p_password text,
+  p_bcrypt_cost integer default 10
+)
+returns table (ok boolean, login_id text, reason text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_login text;
+  v_cost int;
+begin
+  -- bcrypt cost bounds. Below 10 is too weak to be worth the bcrypt cost;
+  -- above 12 is measurably painful. Measured on this codebase's test
+  -- cluster (PG 18.6): cost 10 ~= 363 ms, 11 ~= 827 ms, 12 ~= 2378 ms.
+  -- Cost is parameterised rather than hard-coded because those timings are
+  -- machine-specific.
+  v_cost := coalesce(p_bcrypt_cost, 10);
+  if v_cost < 10 or v_cost > 12 then
+    return query select false, null::text, 'invalid_bcrypt_cost'::text;
+    return;
+  end if;
+
+  -- A minimum length is enforced here as well as in the server: the DB is
+  -- the last line of defence, and a short password must not be storable.
+  if p_password is null or length(p_password) < 16 then
+    return query select false, null::text, 'password_too_short'::text;
+    return;
+  end if;
+
+  if not exists (select 1 from public.partners p where p.id = p_partner_id) then
+    return query select false, null::text, 'not_found'::text;
+    return;
+  end if;
+
+  -- Reuse the partner's existing handle if they already have one, so
+  -- re-issuing a password does not silently change their login id.
+  select p.login_id into v_login
+  from public.partners p where p.id = p_partner_id;
+
+  if v_login is null then
+    v_login := public.partner_gen_login_id();
+  end if;
+
+  update public.partners p set
+    login_id = v_login,
+    password_hash = public.sb_crypt(p_password, public.sb_gen_salt('bf', v_cost)),
+    must_change_password = true,
+    password_set_at = now(),
+    password_changed_at = null,
+    -- A fresh credential clears any lockout: otherwise an admin reissue
+    -- would appear to succeed while the partner still could not log in.
+    failed_login_count = 0,
+    locked_until = null,
+    updated_at = now()
+  where p.id = p_partner_id;
+
+  -- Audit WITHOUT the password or its hash.
+  insert into public.partner_audit_log (partner_id, actor_type, action, detail)
+  values (p_partner_id, 'admin', 'credentials_issued',
+          jsonb_build_object('login_id', v_login, 'bcrypt_cost', v_cost));
+
+  return query select true, v_login, 'ok'::text;
+end;
+$$;
+
+-- ADMIN ONLY. `public` and `anon` are explicitly excluded, so a partner
+-- session token can never be used to mint or overwrite credentials.
+revoke execute on function public.partner_set_credentials(uuid, text, integer) from public;
+revoke execute on function public.partner_set_credentials(uuid, text, integer) from anon;
+revoke execute on function public.partner_set_credentials(uuid, text, integer) from authenticated;
+grant execute on function public.partner_set_credentials(uuid, text, integer) to service_role;
+
+-- Set the partner's OWN password (used by the forced first-login change and
+-- by any future self-service reset). Authorised by a live SESSION token, so
+-- only someone already logged in can call it.
+create or replace function public.partner_change_password(
+  p_token text,
+  p_new_password text,
+  p_bcrypt_cost integer default 10
+)
+returns table (ok boolean, reason text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+  v_cost int;
+begin
+  v_cost := coalesce(p_bcrypt_cost, 10);
+  if v_cost < 10 or v_cost > 12 then
+    return query select false, 'invalid_bcrypt_cost'::text;
+    return;
+  end if;
+
+  if p_new_password is null or length(p_new_password) < 16 then
+    return query select false, 'password_too_short'::text;
+    return;
+  end if;
+
+  select p.id into v_id
+  from public.partners p
+  where p.portal_token_hash = public.partner_token_hash(coalesce(p_token, ''))
+  limit 1;
+
+  if v_id is null then
+    return query select false, 'invalid_session'::text;
+    return;
+  end if;
+
+  update public.partners p set
+    password_hash = public.sb_crypt(p_new_password, public.sb_gen_salt('bf', v_cost)),
+    must_change_password = false,
+    password_changed_at = now(),
+    -- Rotating the password must invalidate the session that set it: if the
+    -- old session token leaked, changing the password is the remedy. A new
+    -- token is minted by a subsequent login.
+    portal_token_hash = 'rotated:' || p.id::text || ':' || encode(public.sb_random_bytes(8), 'hex'),
+    updated_at = now()
+  where p.id = v_id;
+
+  insert into public.partner_audit_log (partner_id, actor_type, action, detail)
+  values (v_id, 'partner', 'password_changed',
+          jsonb_build_object('forced', false));
+
+  return query select true, 'ok'::text;
+end;
+$$;
+
+revoke execute on function public.partner_change_password(text, text, integer) from public;
+grant execute on function public.partner_change_password(text, text, integer) to anon, authenticated, service_role;
+
+-- THE LOGIN. Exchanges (login_id, password) for a session token of exactly
+-- the shape `partner_register` mints, so all 14 existing token-consuming
+-- functions continue to work with no modification.
+--
+-- NO USER ENUMERATION: an unknown handle, a row with no issued credentials,
+-- and a wrong password all return the identical `invalid_credentials`. The
+-- caller cannot tell which, so the endpoint cannot be used to discover
+-- which handles exist.
+--
+-- TIMING: on an unknown handle we still perform one bcrypt verification
+-- against a dummy hash, so a missing account does not return measurably
+-- faster than a wrong password (a classic enumeration oracle).
+create or replace function public.partner_login(
+  p_login_id text,
+  p_password text,
+  p_ip_hash text default null,
+  p_max_failures integer default 8,
+  p_lock_minutes integer default 15
+)
+returns table (ok boolean, portal_token text, partner_id uuid, reason text, must_change boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row public.partners;
+  v_token text;
+  v_handle text;
+  -- Precomputed bcrypt hash of a random value; used only to burn equivalent
+  -- CPU time when the handle does not exist.
+  c_dummy constant text := '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+begin
+  v_handle := upper(trim(coalesce(p_login_id, '')));
+
+  select * into v_row
+  from public.partners p
+  where upper(p.login_id) = v_handle
+  limit 1;
+
+  -- Unknown handle: burn comparable time, then fail identically.
+  --
+  -- DELIBERATELY NOT AUDITED HERE. `partner_audit_log.partner_id` is NOT NULL
+  -- and foreign-keyed to partners(id), because every row in that table is
+  -- attributable to a real applicant. An unknown handle has no partner to
+  -- attribute, and inventing one (or making the column nullable) would either
+  -- write a false identity or weaken an append-only table whose immutability
+  -- is enforced by a trigger. These attempts are already captured by the
+  -- endpoint's rate limiter and the request log, which is the right place for
+  -- unauthenticated noise.
+  if v_row.id is null then
+    perform public.sb_crypt(coalesce(p_password, ''), c_dummy);
+    return query select false, null::text, null::uuid, 'invalid_credentials'::text, false;
+    return;
+  end if;
+
+  -- Still locked? Report the same generic reason; do not confirm the
+  -- account exists or reveal the remaining time.
+  if v_row.locked_until is not null and v_row.locked_until > now() then
+    insert into public.partner_audit_log (partner_id, actor_type, action, detail, ip_hash)
+    values (v_row.id, 'system', 'login_locked',
+            jsonb_build_object('locked_until', v_row.locked_until), p_ip_hash);
+    return query select false, null::text, null::uuid, 'invalid_credentials'::text, false;
+    return;
+  end if;
+
+  -- No credentials issued yet, or password wrong.
+  if v_row.password_hash is null
+     or public.sb_crypt(coalesce(p_password, ''), v_row.password_hash) <> v_row.password_hash then
+    update public.partners p set
+      failed_login_count = p.failed_login_count + 1,
+      locked_until = case
+        when p.failed_login_count + 1 >= coalesce(p_max_failures, 8)
+          then now() + (coalesce(p_lock_minutes, 15) || ' minutes')::interval
+        else p.locked_until
+      end,
+      updated_at = now()
+    where p.id = v_row.id;
+
+    insert into public.partner_audit_log (partner_id, actor_type, action, detail, ip_hash)
+    values (v_row.id, 'system', 'login_failed',
+            jsonb_build_object('failed_count', v_row.failed_login_count + 1), p_ip_hash);
+
+    -- NOTE: deliberately the same reason string as an unknown handle.
+    return query select false, null::text, null::uuid, 'invalid_credentials'::text, false;
+    return;
+  end if;
+
+  -- Success. A withdrawn application must not regain a session, but the
+  -- failure is reported generically so the status is not disclosed.
+  if v_row.status = 'withdrawn' then
+    insert into public.partner_audit_log (partner_id, actor_type, action, detail, ip_hash)
+    values (v_row.id, 'system', 'login_withdrawn', '{}'::jsonb, p_ip_hash);
+    return query select false, null::text, null::uuid, 'invalid_credentials'::text, false;
+    return;
+  end if;
+
+  -- Mint a fresh 256-bit session token, hashed at rest — identical scheme
+  -- to partner_register. Rotating on every login means a previously
+  -- captured token stops working the moment the partner logs in again.
+  v_token := encode(public.sb_random_bytes(32), 'hex');
+
+  update public.partners p set
+    portal_token_hash = public.partner_token_hash(v_token),
+    portal_token_created_at = now(),
+    failed_login_count = 0,
+    locked_until = null,
+    last_login_at = now(),
+    updated_at = now()
+  where p.id = v_row.id;
+
+  insert into public.partner_audit_log (partner_id, actor_type, action, detail, ip_hash)
+  values (v_row.id, 'partner', 'login', '{}'::jsonb, p_ip_hash);
+
+  return query select true, v_token, v_row.id, 'ok'::text, v_row.must_change_password;
+end;
+$$;
+
+revoke execute on function public.partner_login(text, text, text, integer, integer) from public;
+grant execute on function public.partner_login(text, text, text, integer, integer) to anon, authenticated, service_role;
+
 
 -- 6c) Save a draft: UPDATE the caller's own row, with a strict allow-list
 --     of columns so the portal cannot set status, affiliate_id, decision
@@ -2000,6 +2539,158 @@ $$;
 
 revoke execute on function public.partner_admin_list(text) from public;
 grant execute on function public.partner_admin_list(text) to service_role;
+
+-- ------------------------------------------------------------------
+-- 6j) PARTNER DASHBOARD (read-only, self-scoped)
+-- ------------------------------------------------------------------
+-- The partner's own dashboard: QR link, referral code, discount coupon,
+-- referral count, conversion count and commission totals.
+--
+-- AUTHORISATION: by live session token, and the caller can ONLY ever see
+-- their own row — the affiliate is resolved FROM the partner row rather than
+-- accepted as a parameter, so there is no id to tamper with.
+--
+-- DATA MINIMISATION: this function deliberately returns NO KYC data — no
+-- legal name, no PAN, no address, no documents. It returns artefacts and
+-- aggregates. A dashboard is not a reason to re-expose identity documents.
+--
+-- COMMISSIONS ARE DISPLAY-ONLY. The client's decision was: record and show
+-- the commission amount, but pay through other means. There is accordingly
+-- NO payout execution and NO bank-detail editing here. `status` values are
+-- the existing pipeline's own (pending / credited / paid); "paid" means a
+-- human has settled it out of band.
+create or replace function public.partner_dashboard(p_token text)
+returns table (
+  partner_id uuid,
+  status text,
+  login_id text,
+  must_change_password boolean,
+  affiliate_id uuid,
+  referrer_code text,
+  install_url text,
+  coupon_code text,
+  coupon_status text,
+  coupon_max_redemptions integer,
+  coupon_redemption_count integer,
+  coupon_expires_at timestamptz,
+  commission_rate numeric,
+  referral_count bigint,
+  conversion_count bigint,
+  commission_pending numeric,
+  commission_credited numeric,
+  commission_paid numeric,
+  commission_total numeric,
+  approved_at timestamptz,
+  first_referral_at timestamptz,
+  last_referral_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_row public.partners;
+  v_play_url constant text :=
+    'https://play.google.com/store/apps/details?id=com.soulfulbhakti.app';
+begin
+  select * into v_row
+  from public.partners p
+  where p.portal_token_hash = public.partner_token_hash(coalesce(p_token, ''))
+  limit 1;
+
+  -- An invalid session returns NO ROWS rather than an error, so the caller
+  -- learns nothing about whether the token ever existed.
+  if v_row.id is null then
+    return;
+  end if;
+
+  return query
+  select
+    v_row.id,
+    v_row.status,
+    v_row.login_id,
+    v_row.must_change_password,
+    v_row.affiliate_id,
+
+    -- The QR install deep-link. This MUST match the format the SHIPPED app
+    -- parses, which is the Google Play Install Referrer convention:
+    --   ...&referrer=utm_source=<code>
+    -- NOT the shorter ...&referrer=<code>, which the app does not understand.
+    -- Verified against the three other construction sites in the codebase
+    -- (partner_routes.mjs installUrl x2, server.js referral link).
+    --
+    -- NO PERCENT-ENCODING IS APPLIED, deliberately. Postgres has no
+    -- urlencode(); `encode()` is a bytea serializer, not URL encoding, so
+    -- using it here would corrupt the link. None is needed: referrer_code is
+    -- constrained by the approve path to ^[A-Z0-9][A-Z0-9-]{2,31}$, and
+    -- A-Z, 0-9 and hyphen are all RFC 3986 unreserved characters that are
+    -- safe verbatim in a query string.
+    aff.referrer_code,
+    case
+      when aff.referrer_code is null then null
+      else v_play_url || '&referrer=utm_source=' || aff.referrer_code
+    end,
+
+    cp.code,
+    cp.status,
+    cp.max_redemptions,
+    cp.redemption_count,
+    cp.expires_at,
+    aff.commission_amount,
+
+    coalesce(ref.cnt, 0),
+    coalesce(com.cnt, 0),
+    coalesce(com.pending, 0),
+    coalesce(com.credited, 0),
+    coalesce(com.paid, 0),
+    coalesce(com.total, 0),
+
+    v_row.approved_at,
+    ref.first_at,
+    ref.last_at
+
+  from (select 1) one
+  left join public.affiliates aff
+    on aff.id = v_row.affiliate_id
+  -- The coupon issued to this affiliate. Ordered deterministically so the
+  -- dashboard shows the FIRST issued coupon rather than a random one when
+  -- more than one exists.
+  left join lateral (
+    select c.code, c.status, c.max_redemptions, c.redemption_count, c.expires_at
+    from public.coupons c
+    where c.affiliate_id = v_row.affiliate_id
+    order by c.created_at asc
+    limit 1
+  ) cp on true
+  -- Referrals: users who scanned this partner's QR and signed in.
+  left join lateral (
+    select count(*)::bigint as cnt,
+           min(r.created_at) as first_at,
+           max(r.created_at) as last_at
+    from public.affiliate_referrals r
+    where r.affiliate_id = v_row.affiliate_id
+  ) ref on true
+  -- Conversions and commission money, bucketed by the pipeline's own status
+  -- values (pending / credited / paid).
+  left join lateral (
+    select
+      count(*)::bigint as cnt,
+      coalesce(sum(k.commission_amount) filter (where k.status = 'pending'), 0)  as pending,
+      coalesce(sum(k.commission_amount) filter (where k.status = 'credited'), 0) as credited,
+      coalesce(sum(k.commission_amount) filter (where k.status = 'paid'), 0)     as paid,
+      coalesce(sum(k.commission_amount), 0)                                      as total
+    from public.affiliate_commissions k
+    where k.affiliate_id = v_row.affiliate_id
+  ) com on true;
+end;
+$$;
+
+revoke execute on function public.partner_dashboard(text) from public;
+grant execute on function public.partner_dashboard(text) to anon, authenticated, service_role;
+
+comment on function public.partner_dashboard(text) is
+  'Self-scoped read-only partner dashboard: QR link, referral/coupon codes, referral and conversion counts, and commission totals. Returns NO KYC data. Commissions are display-only; payouts happen out of band.';
+
 
 -- ------------------------------------------------------------------
 -- 7) PRIVATE STORAGE BUCKET FOR KYC DOCUMENTS

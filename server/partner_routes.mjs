@@ -63,6 +63,7 @@ import {
   decryptDocument,
   validateDocumentUpload,
   generateToken,
+  generatePartnerPassword,
   sha256Hex,
   sha256HexOfString,
   hashIp,
@@ -173,6 +174,20 @@ export function registerPartnerRoutes(app, deps) {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     message: { error: 'Too many attempts. Please try again later.' },
+  })
+
+  // Sign-in is the credential-stuffing target, so it is limited harder than
+  // the general verify bucket. This is a COARSE IP-level floor only: the
+  // authoritative throttle is the per-account lockout in partner_login(),
+  // which follows the account rather than the source address and therefore
+  // also defeats a distributed attempt against one handle.
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    ipv6Subnet: 56,
+    message: { error: 'Too many sign-in attempts. Please try again later.' },
   })
 
   const resendLimiter = rateLimit({
@@ -677,6 +692,208 @@ export function registerPartnerRoutes(app, deps) {
   // -------------------------------------------------------------------------
   // Partner self-service (session-token authenticated)
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Public: partner login (admin-issued credentials)
+  // -------------------------------------------------------------------------
+  //
+  // PIPELINE CHANGE: partners no longer self-register a public account. The
+  // admin creates the account and issues a login id + password. This endpoint
+  // exchanges those for a session token of exactly the shape the rest of the
+  // portal already uses, so no downstream route changed.
+  //
+  // The DB function deliberately returns the SAME generic reason for an
+  // unknown handle, a wrong password and a locked account, and burns
+  // comparable CPU on each, so this endpoint is not a user-enumeration
+  // oracle. The response below preserves that: one message for every failure.
+  app.post('/api/partner/login', loginLimiter, async (req, res, next) => {
+    try {
+      const body = req.body || {}
+      const loginId = String(body.loginId || '').trim()
+      const password = String(body.password || '')
+
+      // Shape checks only. Deliberately NOT a policy check: telling the
+      // caller "your password is too short" would reveal that the handle was
+      // otherwise valid.
+      if (!loginId || loginId.length > 64 || !password || password.length > 512) {
+        return res.status(400).json({ error: 'Enter your partner ID and password.' })
+      }
+
+      const { data, error } = await supabase.rpc('partner_login', {
+        p_login_id: loginId,
+        p_password: password,
+        p_ip_hash: clientIpHash(req),
+      })
+      if (error) {
+        log.error('[partner] login rpc failed:', error.message)
+        return res.status(503).json({ error: 'Sign-in is temporarily unavailable.' })
+      }
+
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row || !row.ok) {
+        // ONE message for every failure mode. Do not add detail here: any
+        // distinction reintroduces the enumeration oracle the DB avoids.
+        return res.status(401).json({ error: 'Incorrect partner ID or password.' })
+      }
+
+      res.json({
+        ok: true,
+        token: row.portal_token,
+        partnerId: row.partner_id,
+        mustChangePassword: !!row.must_change,
+      })
+    } catch (err) {
+      next(err)
+    }
+  })
+
+  // The partner's own read-only dashboard. Authorised by session token and
+  // scoped to the caller's own row inside the DB (the affiliate is resolved
+  // FROM the partner row, never accepted as a parameter).
+  app.get('/api/partner/dashboard', verifyLimiter, async (req, res, next) => {
+    try {
+      const token = portalToken(req)
+      if (!token) return res.status(401).json({ error: 'Missing session.' })
+
+      const { data, error } = await supabase.rpc('partner_dashboard', { p_token: token })
+      if (error) {
+        log.error('[partner] dashboard rpc failed:', error.message)
+        return res.status(503).json({ error: 'Temporarily unavailable.' })
+      }
+      const row = Array.isArray(data) ? data[0] : data
+      // No row => the session is not valid. Same response as an expired
+      // session so the two are indistinguishable.
+      if (!row) return res.status(401).json({ error: 'Invalid or expired session.' })
+
+      res.json({
+        // NOTE: no KYC data crosses this boundary by design. The dashboard
+        // shows artefacts and aggregates only.
+        //
+        // partnerId is included because the partner's own QR image is
+        // addressed by id (/api/partner/qr/:id), and that route verifies the
+        // id matches the CALLER'S OWN session before returning anything — so
+        // exposing it here grants no additional reach.
+        partnerId: row.partner_id,
+        status: row.status,
+        loginId: row.login_id,
+        mustChangePassword: !!row.must_change_password,
+        approvedAt: row.approved_at,
+        partner: {
+          referrerCode: row.referrer_code || null,
+          installUrl: row.install_url || null,
+          couponCode: row.coupon_code || null,
+          couponStatus: row.coupon_status || null,
+          couponMaxRedemptions: row.coupon_max_redemptions,
+          couponRedemptionCount: row.coupon_redemption_count,
+          couponExpiresAt: row.coupon_expires_at,
+        },
+        performance: {
+          commissionRate: row.commission_rate,
+          referrals: Number(row.referral_count || 0),
+          conversions: Number(row.conversion_count || 0),
+          firstReferralAt: row.first_referral_at,
+          lastReferralAt: row.last_referral_at,
+        },
+        // COMMISSIONS ARE DISPLAY-ONLY (client decision): the amount is
+        // recorded and shown, and payment is settled outside this system.
+        // There is no payout endpoint, by design.
+        commissions: {
+          pending: Number(row.commission_pending || 0),
+          credited: Number(row.commission_credited || 0),
+          paid: Number(row.commission_paid || 0),
+          total: Number(row.commission_total || 0),
+          currency: 'INR',
+        },
+      })
+    } catch (err) {
+      next(err)
+    }
+  })
+
+  // The partner sets their OWN password. Used for the forced first-login
+  // change (an admin-issued password is known to the admin, so it must not
+  // remain a long-term secret).
+  app.post('/api/partner/change-password', verifyLimiter, async (req, res, next) => {
+    try {
+      const token = portalToken(req)
+      if (!token) return res.status(401).json({ error: 'Missing session.' })
+
+      const body = req.body || {}
+      const current = String(body.currentPassword || '')
+      const next = String(body.newPassword || '')
+
+      if (next.length < 16) {
+        return res.status(400).json({
+          error: 'Choose a password of at least 16 characters.',
+        })
+      }
+      if (next.length > 512) {
+        return res.status(400).json({ error: 'That password is too long.' })
+      }
+      if (next === current) {
+        return res.status(400).json({
+          error: 'Choose a password different from the one you were given.',
+        })
+      }
+
+      // Re-authenticate with the CURRENT password before rotating. A stolen
+      // session token alone must not be enough to lock the real partner out
+      // of their own account.
+      const { data: self } = await supabase.rpc('partner_get_self', { p_token: token })
+      const selfRow = Array.isArray(self) ? self[0] : self
+      if (!selfRow) return res.status(401).json({ error: 'Invalid or expired session.' })
+
+      if (!current) {
+        return res.status(400).json({ error: 'Enter your current password.' })
+      }
+      const { data: check, error: checkErr } = await supabase.rpc('partner_login', {
+        p_login_id: selfRow.login_id || '',
+        p_password: current,
+        p_ip_hash: clientIpHash(req),
+      })
+      const checkRow = Array.isArray(check) ? check[0] : check
+      if (checkErr || !checkRow || !checkRow.ok) {
+        return res.status(401).json({ error: 'Your current password is incorrect.' })
+      }
+
+      const { data, error } = await supabase.rpc('partner_change_password', {
+        p_token: checkRow.portal_token,
+        p_new_password: next,
+      })
+      if (error) {
+        log.error('[partner] change_password rpc failed:', error.message)
+        return res.status(503).json({ error: 'Temporarily unavailable.' })
+      }
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row || !row.ok) {
+        const messages = {
+          password_too_short: 'Choose a password of at least 16 characters.',
+          invalid_session: 'Invalid or expired session.',
+          invalid_bcrypt_cost: 'Temporarily unavailable.',
+        }
+        return res.status(row && row.reason === 'invalid_session' ? 401 : 400).json({
+          error: messages[row && row.reason] || 'Could not update your password.',
+        })
+      }
+
+      // The change ROTATES and invalidates the session used to perform it
+      // (deliberate: if that token leaked, rotating is the remedy). Hand the
+      // caller a fresh token so the UI can continue without a re-login.
+      const { data: relogin } = await supabase.rpc('partner_login', {
+        p_login_id: selfRow.login_id || '',
+        p_password: next,
+        p_ip_hash: clientIpHash(req),
+      })
+      const reloginRow = Array.isArray(relogin) ? relogin[0] : relogin
+
+      res.json({
+        ok: true,
+        token: reloginRow && reloginRow.portal_token ? reloginRow.portal_token : null,
+      })
+    } catch (err) {
+      next(err)
+    }
+  })
 
   app.get('/api/partner/me', verifyLimiter, async (req, res, next) => {
     try {
@@ -1925,9 +2142,72 @@ export function registerPartnerRoutes(app, deps) {
     }
   })
 
-  // The partner's own QR image, addressed by the PARTNER's own id and
-  // authorised by the partner's session token. The client uses this so the
-  // admin-only route never has to be exposed to the public portal.
+  /**
+   * Sends the partner their admin-issued login credentials.
+   *
+   * SECURITY: this is the ONLY place the plaintext password exists outside the
+   * admin request that generated it. It is placed in the email body and
+   * nowhere else — not logged, not stored, and not returned by the API.
+   *
+   * The email tells the partner plainly that the password was issued by an
+   * administrator and must be changed at first sign-in, because an
+   * admin-issued password is known to the admin and must not remain a
+   * long-term secret.
+   */
+  async function sendCredentialsEmail(partner, loginId, password, req) {
+    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
+    const name = partner.display_name || partner.legal_name || 'Partner'
+
+    // The portal URL the partner should actually visit. resolveBaseUrl()
+    // already handles the branded-vs-serving-host distinction.
+    const portalUrl = `${resolveBaseUrl(req)}/partner`
+
+    const text = [
+      `Namaste ${name},`,
+      ``,
+      `Your ${brand} Partner Program account has been created.`,
+      ``,
+      `Partner ID: ${loginId}`,
+      `Password:   ${password}`,
+      ``,
+      `Sign in here: ${portalUrl}`,
+      ``,
+      `IMPORTANT: This password was issued by our team, so please change it`,
+      `immediately after your first sign-in. You will be asked to do this.`,
+      ``,
+      `Keep this email confidential. Anyone with these details can access your`,
+      `partner dashboard. If you did not expect this email, please contact us`,
+      `and we will reissue your credentials.`,
+      ``,
+      `— ${brand}`,
+    ].join('\n')
+
+    const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;padding:24px;background:#f6f4ef;">
+<div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e8e2d6;border-radius:12px;padding:32px;">
+<h1 style="font-size:20px;margin:0 0 16px;">Your ${escapeHtml(brand)} Partner account</h1>
+<p style="font-size:15px;line-height:1.6;">Namaste ${escapeHtml(name)}, your partner account has been created.</p>
+<table style="font-size:15px;margin:20px 0;border-collapse:collapse;">
+<tr><td style="padding:6px 16px 6px 0;color:#6b6b6b;">Partner ID</td><td style="padding:6px 0;font-weight:700;letter-spacing:1px;">${escapeHtml(loginId)}</td></tr>
+<tr><td style="padding:6px 16px 6px 0;color:#6b6b6b;">Password</td><td style="padding:6px 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;">${escapeHtml(password)}</td></tr>
+</table>
+<p style="font-size:15px;"><a href="${escapeHtml(portalUrl)}" style="background:#8a6d3b;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block;">Sign in to your dashboard</a></p>
+<p style="font-size:13px;color:#8a5a00;background:#fdf6e3;border:1px solid #f0e0b0;border-radius:8px;padding:12px;margin-top:20px;"><strong>Please change this password immediately after your first sign-in.</strong> It was issued by our team, so it should not be kept as your long-term password.</p>
+<p style="font-size:13px;color:#6b6b6b;margin-top:20px;">Keep this email confidential — anyone with these details can access your partner dashboard.</p>
+</div></body></html>`
+
+    return sendEmail(getSecrets, {
+      to: partner.email,
+      subject: `Your ${brand} Partner account — sign-in details`,
+      text,
+      html,
+    })
+  }
+
+  // The ADMIN's view of a partner's QR image, for the review UI. Requires
+  // requireAdmin — unlike /api/partner/qr/:id, which the partner calls for
+  // their own dashboard and which authorises by partner session token
+  // instead. Kept as two routes on purpose: the admin must be able to render
+  // a QR before the partner has ever logged in.
   app.get('/api/admin/partners/:id/qr.png', requireAdmin, async (req, res, next) => {
     try {
       const id = req.params.id
@@ -1964,9 +2244,78 @@ export function registerPartnerRoutes(app, deps) {
     }
   })
 
-  // Small dashboard summary for the admin landing area.
-  app.get('/api/admin/partners/stats/summary', requireAdmin, async (req, res, next) => {
+  // Issue (or re-issue) a partner's login credentials.
+  //
+  // ADMIN ONLY. The admin does not choose the password: the SERVER generates
+  // it from a CSPRNG and emails it. That means a weak or reused password
+  // cannot be introduced by hand, and the password exists in plaintext only
+  // inside this request — it is never stored, never logged, and never
+  // returned in the response.
+  //
+  // Re-issuing is also the recovery path when a partner is locked out: the
+  // DB function clears the failure counter and the lockout.
+  app.post('/api/admin/partners/:id/credentials', requireAdmin, async (req, res, next) => {
     try {
+      const id = req.params.id
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: 'Invalid id' })
+
+      const { data: partner } = await supabase
+        .from('partners')
+        .select('id, email, legal_name, display_name, status')
+        .eq('id', id)
+        .maybeSingle()
+      if (!partner) return res.status(404).json({ error: 'Application not found.' })
+
+      // 24 chars over a 62-char alphabet ~= 143 bits. Far beyond bcrypt's
+      // 72-byte input limit, so the whole password is always significant and
+      // no entropy is silently discarded.
+      const password = generatePartnerPassword(24)
+
+      const { data, error } = await supabase.rpc('partner_set_credentials', {
+        p_partner_id: id,
+        p_password: password,
+        p_bcrypt_cost: Number(secrets.partner_bcrypt_cost || 10),
+      })
+      if (error) {
+        log.error('[admin] set_credentials failed:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row || !row.ok) {
+        const messages = {
+          password_too_short: 'Generated password was rejected.',
+          invalid_bcrypt_cost: 'Configured bcrypt cost is out of range.',
+          not_found: 'Application not found.',
+        }
+        return res.status(400).json({ error: messages[row && row.reason] || 'Could not issue credentials.' })
+      }
+
+      // Email is best-effort: the credentials ARE issued in the database at
+      // this point, so a mail failure must not report the whole action as
+      // failed. The admin is told plainly that delivery did not happen, and
+      // can re-issue (which rotates the password and retries the email).
+      const mail = await sendCredentialsEmail(partner, row.login_id, password, req)
+        .catch((e) => ({ sent: false, reason: e && e.message ? e.message : 'send_failed' }))
+
+      res.json({
+        ok: true,
+        loginId: row.login_id,
+        emailSent: !!mail.sent,
+        // Deliberately NOT returning the password in the API response. It is
+        // delivered to the partner's mailbox, not to whoever holds the admin
+        // session. If the email fails, re-issue rather than reading it here.
+        emailTo: partner.email,
+        note: mail.sent
+          ? 'Credentials emailed to the partner. They must change the password at first sign-in.'
+          : 'Credentials were issued but the email could NOT be sent. Re-issue to retry delivery.',
+      })
+    } catch (err) {
+      next(err)
+    }
+  })
+
+  // Small dashboard summary for the admin landing area.
+  app.get('/api/admin/partners/stats/summary', requireAdmin, async (req, res, next) => {    try {
       const { data, error } = await supabase.from('partners').select('status')
       if (error) return res.status(500).json({ error: error.message })
       const counts = {}

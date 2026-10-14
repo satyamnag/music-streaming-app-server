@@ -11,12 +11,25 @@ Android app**.
 The partner journey is:
 
 ```
-register  ->  verify email  ->  KYC form  ->  upload documents  ->  APPLY
-                                                                      |
-                                              admin due diligence  <--+
-                                                      |
-                              approve  ->  affiliate + QR referrer code + discount coupon
+admin creates the account  ->  admin issues credentials (ID + password, emailed)
+                                        |
+                                        v
+                     partner signs in  ->  KYC form  ->  upload documents  ->  APPLY
+                                                                                  |
+                                                        admin due diligence  <----+
+                                                                |
+                                        approve  ->  affiliate + QR referrer code + discount coupon
+                                                                |
+                                        partner dashboard (QR, codes, referrals, commissions)
 ```
+
+> **Pipeline change (see `docs/PIPELINE-CHANGE-ANALYSIS.md` for the full
+> record).** Partners no longer self-register a public account. The admin
+> creates it and issues the credentials, because (a) the intake includes
+> government identity documents, which must not be open to anonymous
+> self-service, and (b) the client chose admin-issued credentials explicitly.
+> An admin-issued password is force-changed at first sign-in, since it is known
+> to the admin and must not remain a long-term secret.
 
 The important design decision is in that last line.
 
@@ -372,7 +385,9 @@ independent primary sources**:
 | Provision | Exposure |
 |---|---|
 | **s.33A** (inserted 2019) | Civil penalty up to **₹1 crore per contravention**, plus up to **₹10 lakh per day** for a continuing failure |
+| **s.37** — disclosure of identity information in contravention of the Act | **3 years'** imprisonment, or fine up to **₹10,000**, or for a company up to **₹1 lakh**, or both |
 | **s.38** (unauthorised CIDR access), raised by the 2019 Act | **10 years'** imprisonment, minimum **₹10 lakh** fine; clause (g) covers sharing, using or displaying information in contravention of s.29 |
+| **s.40** — unauthorised use by a requesting entity or offline-verification-seeking entity | **3 years**, or fine up to **₹10,000**, or for a company up to **₹1 lakh**, or both (same quantum as s.37; s.37 bites on disclosure, s.40 on use) |
 | **s.42** (general penalty), raised | 3 years |
 | **s.43 — offences by companies** | **Directors and officers are personally liable**: every person *"in charge of, and was responsible to, the company for the conduct of the business … shall be deemed to be guilty of the offence"* (with a due-diligence defence) |
 
@@ -630,11 +645,14 @@ inflated reference prices, and a dark-pattern self-audit.
 
 | Boundary | Enforcement |
 |---|---|
-| Public portal | 256-bit bearer token; only its **SHA-256 hash** is stored. Every RPC resolves the row **from the hash**, and the portal never sends a partner id, so it **cannot address another partner's row**. |
+| Public portal | 256-bit bearer **session** token; only its **SHA-256 hash** is stored. Every RPC resolves the row **from the hash**, and the portal never sends a partner id, so it **cannot address another partner's row**. |
+| Partner sign-in | The session token is obtained by exchanging an **admin-issued** `login_id` + password. The password is bcrypt-hashed (pgcrypto `crypt`/`gen_salt`), never stored raw and never returned by the API — it is emailed to the partner. `partner_set_credentials` is **service_role only**, so a partner session cannot mint or overwrite credentials. |
+| Sign-in abuse | Per-account lockout after repeated failures, counted **in the database** (so it survives a restart, unlike an in-memory limiter), plus a coarser per-IP limiter on the route. Unknown handle, wrong password and locked account all return an **identical** generic failure, and an unknown handle still performs one bcrypt verification so the timing does not reveal whether the account exists. |
 | Database | **No anon/authenticated RLS policy exists** on any partner table. Even a leaked anon key reads nothing. |
 | Storage | Bucket is **private with no storage policy**; all bytes are brokered by the service-role server. |
 | Admin | Reuses the existing `requireAdmin` (Clerk `@soulfulbhakti.com` domain or ADMIN_TOKEN session). |
 | Documents | Encrypted at the application layer **before** upload; admins get proxied bytes, never a public or signed URL. |
+| Partner dashboard | Returns **artefacts and aggregates only — no KYC data at all**, asserted against the function's declared return type. Commissions are display-only; there is no payout endpoint. |
 
 ### 6.2 Why documents are proxied rather than served via signed URLs
 
@@ -768,11 +786,18 @@ npm run test:partner-flow      # 37 HTTP integration tests
 | Layer | Count | Proves |
 |---|---|---|
 | Real SQL behaviour (`partner_db.test.sql`) | **131 assertions** | The SQL functions, CHECK constraints, SECURITY DEFINER posture and grants behave as authored — **against a genuine PostgreSQL server** |
+| Credentials + login + dashboard, real SQL (`partner_auth.test.sql`) | **103 assertions** | bcrypt round-trip, admin issuance, no-enumeration login, session rotation, lockout + recovery, forced password change, dashboard aggregates, and that the return type exposes **no KYC column** |
 | HTTP end-to-end vs **real** PostgreSQL (`partner-real-db.test.mjs`) | **29 tests** | The whole pipeline works through the real Express server and real database, including encryption round-trips |
+| Credentials + login over **real** HTTP (`partner-auth-http.test.mjs`) | **16 tests** | The admin route is admin-only, the API never returns a password, a wrong password and an unknown ID are indistinguishable, the new session drives the **unmodified** `/api/partner/me`, and the dashboard payload carries no KYC key |
 | HTTP integration vs stub (`partner-flow.test.mjs`) | **37 tests** | Route logic, validation and trust boundaries in isolation |
-| Crypto + file validation (`partner_crypto.test.mjs`) | **31 tests** | Encryption round-trip, tamper detection, fail-closed KEK, upload attack rejection |
+| Crypto + file validation (`partner_crypto.test.mjs`) | **42 tests** | Encryption round-trip, tamper detection, fail-closed KEK, upload attack rejection, and that the generated password is CSPRNG, unbiased and clear of bcrypt's 72-byte truncation limit |
 | Structural (`partner-verify.cjs`) | — | Page wiring, ID uniqueness, no token leakage, no external resources |
 | Pre-existing admin tests | **25 tests** | No regression in the existing admin panel |
+
+> Run the partner suites with their documented wrappers (`package.json` has
+> `test:partner-flow`, `test:partner-real-db`, `test:partner-auth-http`).
+> Invoking `node --test` directly bypasses the module loader that swaps in the
+> stub/adapter, and fails with `fetch failed` for reasons unrelated to the code.
 
 ### 8.4 The assertions that matter most
 

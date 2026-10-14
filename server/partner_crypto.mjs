@@ -207,6 +207,48 @@ export function generateToken() {
   return randomBytes(32).toString('base64url')
 }
 
+/**
+ * Generates an admin-issued partner password.
+ *
+ * Constraints this satisfies deliberately:
+ *   * CSPRNG only (ASVS 6.5.3), never Math.random.
+ *   * Alphabet is [A-Za-z0-9] and the length stays well under 72 bytes, so
+ *     the password survives bcrypt intact (bcrypt ignores input past 72
+ *     bytes, which would silently discard entropy).
+ *   * No NUL byte and no non-ASCII: pgcrypto's crypt() REJECTS a NUL outright
+ *     (verified on PG 18.6), so keeping the alphabet ASCII-safe means the
+ *     value cannot be mangled between generation and hashing.
+ *   * UNBIASED. A naive `randomBytes(n) % 62` skews the first 8 characters of
+ *     the alphabet because 256 is not a multiple of 62. Rejection sampling
+ *     (below) discards the biased tail instead, so every character is uniform.
+ *
+ * @param {number} length number of characters; 16-128
+ * @returns {string}
+ */
+export function generatePartnerPassword(length = 24) {
+  const ALPHABET =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const n = Math.floor(Number(length))
+  if (!Number.isFinite(n) || n < 16 || n > 128) {
+    throw new Error('password length must be between 16 and 128')
+  }
+
+  // Largest multiple of the alphabet size that fits in a byte. Bytes >= this
+  // are rejected, which removes the modulo bias entirely.
+  const limit = 256 - (256 % ALPHABET.length) // 248 for a 62-char alphabet
+  const out = []
+  while (out.length < n) {
+    // Small over-read so the common case is one draw, while still allowing
+    // for rejections.
+    const buf = randomBytes(n - out.length + 8)
+    for (let i = 0; i < buf.length && out.length < n; i++) {
+      const b = buf[i]
+      if (b < limit) out.push(ALPHABET[b % ALPHABET.length])
+    }
+  }
+  return out.join('')
+}
+
 // ---------------------------------------------------------------------------
 // File-type validation
 // ---------------------------------------------------------------------------

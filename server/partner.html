@@ -205,6 +205,31 @@
   .qrbox { text-align: center; margin: 14px 0; }
   .qrbox img { width: 210px; height: 210px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 8px; }
 
+  /* Dashboard kit rows: a readonly field with a Copy button beside it.
+     NOTE: .copyrow / .statgrid / .statnum / .statlbl were referenced by the
+     existing markup but never defined, so they rendered unstyled. Defined here
+     so the shared classes actually work wherever they are used. */
+  .copyrow { display: flex; gap: 8px; align-items: stretch; }
+  .copyrow input { flex: 1 1 auto; min-width: 0; }
+  .copyrow .btn { flex: 0 0 auto; white-space: nowrap; }
+
+  .statgrid {
+    display: grid; gap: 12px; margin: 6px 0 4px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .stat {
+    background: #fdfbf7; border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; text-align: center;
+  }
+  .statnum {
+    display: block; font-size: 22px; font-weight: 700; color: var(--gold);
+    letter-spacing: .3px; word-break: break-word;
+  }
+  .statlbl {
+    display: block; margin-top: 4px; font-size: 12px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .6px;
+  }
+
   .spin {
     display: inline-block; width: 15px; height: 15px;
     border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff;
@@ -248,6 +273,160 @@
 
   <!-- ============================ LOADING ============================ -->
   <div id="viewLoading" class="loading">Loading your application…</div>
+
+  <!-- ============================= LOGIN ============================= -->
+  <!-- The admin creates the partner account and issues the credentials, so
+       SIGN-IN is the entry point, not self-registration. -->
+  <div id="viewLogin" class="hidden">
+    <div class="card">
+      <h2>Partner sign-in</h2>
+      <p class="lead">
+        Enter the partner ID and password we emailed you when your account was created.
+      </p>
+
+      <div class="field">
+        <label for="loginId">Partner ID</label>
+        <input type="text" id="loginId" placeholder="SB-XXXXXX" autocomplete="username"
+               autocapitalize="characters" spellcheck="false">
+      </div>
+
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
+      </div>
+
+      <div id="loginMsg"></div>
+
+      <p class="hint" style="margin-top:16px;">
+        Lost your sign-in details? Contact us and we will reissue them — for your
+        security we cannot show you the existing password.
+      </p>
+      <p class="hint">
+        Not a partner yet? Applications are reviewed by our team before an account
+        is created.
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================= FORCED PW CHANGE ======================== -->
+  <!-- Shown when the partner is still using the admin-issued password. An
+       emailed password is known to the admin, so it must not remain a
+       long-term secret. -->
+  <div id="viewChangePw" class="hidden">
+    <div class="card">
+      <h2>Choose your own password</h2>
+      <p class="lead">
+        Your current password was issued by our team. Please replace it with one
+        only you know.
+      </p>
+
+      <div class="field">
+        <label for="curPassword">Current password</label>
+        <input type="password" id="curPassword" autocomplete="current-password">
+      </div>
+
+      <div class="field">
+        <label for="newPassword">New password</label>
+        <input type="password" id="newPassword" autocomplete="new-password">
+        <p class="hint">At least 16 characters. Longer is better than complicated.</p>
+      </div>
+
+      <div class="field">
+        <label for="newPassword2">Confirm new password</label>
+        <input type="password" id="newPassword2" autocomplete="new-password">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn" id="changePwBtn" onclick="doChangePassword()">Save password</button>
+      </div>
+
+      <div id="changePwMsg"></div>
+    </div>
+  </div>
+
+  <!-- =========================== DASHBOARD =========================== -->
+  <!-- Read-only. Shows the partner's QR, codes, referrals, conversions and
+       commission totals. It deliberately shows NO KYC data and has no payout
+       controls: commissions are recorded here and settled outside this app. -->
+  <div id="viewDashboard" class="hidden">
+    <div class="card">
+      <h2>Your partner dashboard</h2>
+      <p class="lead" id="dashWelcome">Welcome back.</p>
+      <div id="dashStatus"></div>
+    </div>
+
+    <div class="card" id="dashKitCard">
+      <h2>Your partner kit</h2>
+
+      <div class="field">
+        <label>Your referral code</label>
+        <div class="copyrow">
+          <input type="text" id="dashReferrer" readonly>
+          <button class="btn ghost" onclick="copyText($('dashReferrer').value)">Copy</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Your discount coupon</label>
+        <div class="copyrow">
+          <input type="text" id="dashCoupon" readonly>
+          <button class="btn ghost" onclick="copyText($('dashCoupon').value)">Copy</button>
+        </div>
+        <p class="hint" id="dashCouponHint"></p>
+      </div>
+
+      <div class="field">
+        <label>Your install link</label>
+        <div class="copyrow">
+          <input type="text" id="dashInstall" readonly>
+          <button class="btn ghost" onclick="copyText($('dashInstall').value)">Copy</button>
+        </div>
+        <p class="hint">
+          Everyone who installs through this link and signs in is attributed to you.
+        </p>
+      </div>
+
+      <div class="qrbox" id="dashQrBox">
+        <img id="dashQr" alt="Your partner QR code">
+        <div class="btn-row">
+          <button class="btn ghost" onclick="downloadDashQr()">Download QR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Your performance</h2>
+      <div class="statgrid">
+        <div class="stat"><span class="statnum" id="statReferrals">0</span><span class="statlbl">Referrals</span></div>
+        <div class="stat"><span class="statnum" id="statConversions">0</span><span class="statlbl">Conversions</span></div>
+        <div class="stat"><span class="statnum" id="statRate">—</span><span class="statlbl">Your rate</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Your commissions</h2>
+      <div class="statgrid">
+        <div class="stat"><span class="statnum" id="comPending">₹0</span><span class="statlbl">Pending</span></div>
+        <div class="stat"><span class="statnum" id="comCredited">₹0</span><span class="statlbl">Credited</span></div>
+        <div class="stat"><span class="statnum" id="comPaid">₹0</span><span class="statlbl">Paid</span></div>
+        <div class="stat"><span class="statnum" id="comTotal">₹0</span><span class="statlbl">Total earned</span></div>
+      </div>
+      <p class="hint">
+        Commission amounts are recorded here for your reference. Payments are
+        settled separately by our team — this page does not process payouts.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn ghost" onclick="doLogout()">Sign out</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================ REGISTER =========================== -->
   <div id="viewRegister" class="hidden">
@@ -696,7 +875,8 @@ function esc(v) {
 }
 
 function show(view) {
-  ['viewLoading', 'viewRegister', 'viewVerify', 'viewForm', 'viewStatus'].forEach(function (v) {
+  ['viewLoading', 'viewLogin', 'viewChangePw', 'viewDashboard',
+   'viewRegister', 'viewVerify', 'viewForm', 'viewStatus'].forEach(function (v) {
     var el = $(v);
     if (el) el.classList.toggle('hidden', v !== view);
   });
@@ -800,10 +980,286 @@ function boot() {
     .catch(function () { /* config is non-fatal */ });
 
   if (state.token) {
-    refreshMe();
+    // Which view a stored session opens depends on what kind of session it is:
+    //   * an admin-issued LOGIN  -> the read-only partner dashboard, and
+    //   * a KYC application token -> the application/status flow.
+    // The dashboard endpoint is the discriminator: it returns 200 for a valid
+    // logged-in partner and 401 for anything else. Asking it first means an
+    // admin-issued partner lands on their dashboard, while an applicant token
+    // falls through to the application flow unchanged.
+    probeDashboardOrApplication();
   } else {
-    show('viewRegister');
+    show('viewLogin');
   }
+}
+
+function probeDashboardOrApplication() {
+  fetch('/api/partner/dashboard', {
+    headers: { Authorization: 'Bearer ' + state.token },
+  })
+    .then(function (r) {
+      if (!r.ok) return null;
+      return r.json();
+    })
+    .then(function (d) {
+      if (d && d.loginId) {
+        state.dashboard = d;
+        if (d.mustChangePassword) show('viewChangePw');
+        else renderDashboard(d);
+        return;
+      }
+      // Not an admin-issued partner session — fall back to the application
+      // flow, which is what every pre-existing session token is.
+      refreshMe();
+    })
+    .catch(function () { refreshMe(); });
+}
+
+// ------------------------------------------------------------ partner login
+function doLogin() {
+  var idEl = $('loginId');
+  var pwEl = $('loginPassword');
+  var btn = $('loginBtn');
+  var loginId = (idEl.value || '').trim();
+  var password = pwEl.value || '';
+
+  if (!loginId || !password) {
+    msg('warn', 'Enter your details', 'Please enter both your partner ID and password.', 'loginMsg');
+    return;
+  }
+
+  busy(btn, true, 'Signing in…');
+  msg(null, null, null, 'loginMsg');
+
+  fetch('/api/partner/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ loginId: loginId, password: password }),
+  })
+    .then(function (r) {
+      return r.json().then(function (d) { return { status: r.status, data: d }; });
+    })
+    .then(function (res) {
+      if (res.status !== 200 || !res.data.token) {
+        // The server returns one generic message for a wrong password, an
+        // unknown partner ID and a locked account alike — deliberately, so the
+        // page cannot be used to discover which IDs exist. Surface it as-is.
+        msg('err', 'Could not sign in',
+          res.data.error || 'Incorrect partner ID or password.', 'loginMsg');
+        return;
+      }
+
+      state.token = res.data.token;
+      localStorage.setItem(SESSION_KEY, state.token);
+      pwEl.value = '';
+
+      if (res.data.mustChangePassword) {
+        show('viewChangePw');
+      } else {
+        loadDashboard();
+      }
+    })
+    .catch(function () {
+      msg('err', 'Could not sign in', 'Please check your connection and try again.', 'loginMsg');
+    })
+    .then(function () { busy(btn, false); });
+}
+
+function doLogout() {
+  // Best-effort: the server-side session is invalidated by rotation on the
+  // next login, so clearing locally is sufficient and must never fail loudly.
+  localStorage.removeItem(SESSION_KEY);
+  state.token = null;
+  state.dashboard = null;
+  msg(null);
+  show('viewLogin');
+}
+
+// -------------------------------------------------------- password change
+function doChangePassword() {
+  var cur = $('curPassword').value || '';
+  var n1 = $('newPassword').value || '';
+  var n2 = $('newPassword2').value || '';
+  var btn = $('changePwBtn');
+
+  msg(null, null, null, 'changePwMsg');
+
+  if (!cur) {
+    msg('warn', 'Enter your current password', null, 'changePwMsg');
+    return;
+  }
+  if (n1.length < 16) {
+    msg('warn', 'Password too short', 'Please choose at least 16 characters.', 'changePwMsg');
+    return;
+  }
+  if (n1 !== n2) {
+    msg('warn', 'Passwords do not match', 'Please re-enter the same new password.', 'changePwMsg');
+    return;
+  }
+
+  busy(btn, true, 'Saving…');
+
+  fetch('/api/partner/change-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + state.token,
+    },
+    body: JSON.stringify({ currentPassword: cur, newPassword: n1 }),
+  })
+    .then(function (r) {
+      return r.json().then(function (d) { return { status: r.status, data: d }; });
+    })
+    .then(function (res) {
+      if (res.status !== 200 || !res.data.ok) {
+        msg('err', 'Could not change your password',
+          res.data.error || 'Please try again.', 'changePwMsg');
+        return;
+      }
+
+      // The server rotates the session when the password changes, so the old
+      // token is now dead. Store the fresh one or the next call would 401.
+      if (res.data.token) {
+        state.token = res.data.token;
+        localStorage.setItem(SESSION_KEY, state.token);
+      }
+
+      $('curPassword').value = '';
+      $('newPassword').value = '';
+      $('newPassword2').value = '';
+
+      msg('ok', 'Password updated', 'Use your new password from now on.');
+      loadDashboard();
+    })
+    .catch(function () {
+      msg('err', 'Could not change your password',
+        'Please check your connection and try again.', 'changePwMsg');
+    })
+    .then(function () { busy(btn, false); });
+}
+
+// ------------------------------------------------------------- dashboard
+function money(n) {
+  var v = Number(n) || 0;
+  try {
+    return '₹' + v.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  } catch (e) {
+    return '₹' + v;
+  }
+}
+
+function loadDashboard() {
+  show('viewLoading');
+
+  fetch('/api/partner/dashboard', {
+    headers: { Authorization: 'Bearer ' + state.token },
+  })
+    .then(function (r) {
+      return r.json().then(function (d) { return { status: r.status, data: d }; });
+    })
+    .then(function (res) {
+      if (res.status === 401) {
+        // Expired or revoked session.
+        localStorage.removeItem(SESSION_KEY);
+        state.token = null;
+        msg('warn', 'Please sign in again', 'Your session has ended.');
+        show('viewLogin');
+        return;
+      }
+      if (res.status !== 200) {
+        msg('err', 'Could not load your dashboard',
+          (res.data && res.data.error) || 'Please try again later.');
+        show('viewLogin');
+        return;
+      }
+
+      state.dashboard = res.data;
+
+      // An admin-issued password must be replaced before the dashboard is used.
+      if (res.data.mustChangePassword) {
+        msg('warn', 'Please choose your own password', null);
+        show('viewChangePw');
+        return;
+      }
+
+      renderDashboard(res.data);
+    })
+    .catch(function () {
+      msg('err', 'Could not load your dashboard', 'Please check your connection.');
+      show('viewLogin');
+    });
+}
+
+function renderDashboard(d) {
+  var p = d.partner || {};
+  var perf = d.performance || {};
+  var com = d.commissions || {};
+
+  $('dashWelcome').textContent = d.loginId
+    ? 'Signed in as ' + d.loginId + '.'
+    : 'Welcome back.';
+
+  // Status banner. Approval is what issues the QR and coupon, so an
+  // unapproved partner is told plainly rather than shown empty boxes.
+  var host = $('dashStatus');
+  if (d.status === 'approved') {
+    host.innerHTML = '<div class="notice ok"><strong>You are approved</strong>' +
+      'Your partner kit is active and ready to share.</div>';
+  } else {
+    host.innerHTML = '<div class="notice info"><strong>Application status: ' +
+      esc(d.status || 'in progress') + '</strong>' +
+      'Your QR code and discount coupon are issued once our team approves your ' +
+      'application.</div>';
+  }
+
+  var approved = d.status === 'approved';
+
+  // Kit card is only meaningful once artefacts exist.
+  $('dashKitCard').classList.toggle('hidden', !approved);
+
+  if (approved) {
+    $('dashReferrer').value = p.referrerCode || '';
+    $('dashCoupon').value = p.couponCode || '';
+    $('dashInstall').value = p.installUrl || '';
+
+    var hint = 'Share this code with your audience — they enter it in the app.';
+    if (p.couponMaxRedemptions) {
+      hint += ' Used ' + (p.couponRedemptionCount || 0) +
+        ' of ' + p.couponMaxRedemptions + ' times.';
+    }
+    if (p.couponExpiresAt) hint += ' Valid until ' + fmtDate(p.couponExpiresAt) + '.';
+    $('dashCouponHint').textContent = hint;
+
+    // The QR is fetched from the partner-authorised route, which returns it
+    // only when the id matches the caller's OWN session — the admin-only route
+    // is never exposed to the portal. Token-in-URL handling lives in qrUrl().
+    if (d.partnerId) {
+      $('dashQr').src = qrUrl(d.partnerId);
+    }
+  }
+
+  $('statReferrals').textContent = perf.referrals || 0;
+  $('statConversions').textContent = perf.conversions || 0;
+  $('statRate').textContent = (perf.commissionRate === null || perf.commissionRate === undefined)
+    ? '—' : money(perf.commissionRate);
+
+  $('comPending').textContent = money(com.pending);
+  $('comCredited').textContent = money(com.credited);
+  $('comPaid').textContent = money(com.paid);
+  $('comTotal').textContent = money(com.total);
+
+  show('viewDashboard');
+}
+
+function downloadDashQr() {
+  var img = $('dashQr');
+  if (!img || !img.src) return;
+  var a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'soulful-bhakti-partner-qr.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function populateDocTypes(cfg) {
@@ -890,6 +1346,21 @@ function resendVerification() {
 }
 
 // ------------------------------------------------------------------ load me
+// The ONE place a session token is ever placed in a URL.
+//
+// An <img> cannot send an Authorization header, so the QR endpoint alone
+// accepts the token as a query parameter. Keeping this in a single helper means
+// the token-in-URL surface cannot quietly grow: every QR <img> in the page goes
+// through here, and the static verifier asserts the pattern still appears
+// exactly once.
+function qrUrl(partnerId) {
+  // NOTE the '.png?' form: the route strips the '.png' suffix itself (Express
+  // does not treat ':id.png' as a parameter with a suffix), and the suffix also
+  // makes the browser treat the response as an image.
+  return '/api/partner/qr/' + encodeURIComponent(partnerId) +
+    '.png?token=' + encodeURIComponent(state.token || '');
+}
+
 function refreshMe() {
   if (!state.token) { show('viewRegister'); return; }
   api('/api/partner/me')
@@ -1274,8 +1745,7 @@ function renderIssued() {
   // accepts the session token as a query parameter. The response is a QR
   // image the partner already owns and shows publicly, and the route reveals
   // nothing about any other partner.
-  $('qrImg').src = '/api/partner/qr/' + encodeURIComponent(state.partner.id) +
-    '.png?token=' + encodeURIComponent(state.token || '');
+  $('qrImg').src = qrUrl(state.partner.id);
   $('installUrl').textContent = i.installUrl || '';
   $('couponCode').textContent = i.coupon ? i.coupon.code : 'Not issued yet';
 

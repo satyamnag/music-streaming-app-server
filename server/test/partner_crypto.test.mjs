@@ -1,4 +1,4 @@
-import { encryptDocument, decryptDocument, validateDocumentUpload, sniffDocumentType, generateToken, safeEqual, maskEmail, maskGovernmentId, hashIp } from "../partner_crypto.mjs";
+import { encryptDocument, decryptDocument, validateDocumentUpload, sniffDocumentType, generateToken, generatePartnerPassword, safeEqual, maskEmail, maskGovernmentId, hashIp } from "../partner_crypto.mjs";
 
 const secrets = { partner_kek: "0".repeat(63) + "1" };
 const getSecrets = () => secrets;
@@ -66,6 +66,42 @@ check("token is 256-bit base64url", t1.length === 43 && t1 !== t2);
 check("safeEqual true", safeEqual("abc", "abc"));
 check("safeEqual false", !safeEqual("abc", "abd"));
 check("safeEqual length mismatch", !safeEqual("abc", "abcd"));
+
+// --- admin-issued partner passwords ---
+// These guard the properties that make the generated password usable as a
+// bcrypt credential. Each one corresponds to a real way this could break.
+const pw1 = generatePartnerPassword(24), pw2 = generatePartnerPassword(24);
+check("password is 24 chars", pw1.length === 24);
+check("password is alphanumeric only", /^[A-Za-z0-9]{24}$/.test(pw1));
+check("two passwords differ", pw1 !== pw2);
+// bcrypt silently ignores input past 72 bytes. A longer password would throw
+// entropy away without any error, so the length must stay clear of the limit.
+check("password stays under bcrypt's 72-byte limit", Buffer.byteLength(pw1, "utf8") <= 72);
+// pgcrypto's crypt() REJECTS a NUL byte outright (verified on PG 18.6), and
+// non-ASCII could be mangled between generation and hashing.
+check("password contains no NUL", !pw1.includes("\u0000"));
+check("password is pure ASCII", /^[\x20-\x7E]+$/.test(pw1));
+
+// Uniqueness across a realistic batch: 500 credentials with no collision.
+const batch = new Set();
+for (let i = 0; i < 500; i++) batch.add(generatePartnerPassword(24));
+check("500 generated passwords are all unique", batch.size === 500);
+
+// The alphabet must be FULLY used, not a biased subset. A naive
+// `byte % 62` skews the first 8 characters of the alphabet, which this
+// catches: over 62k draws each of the 62 characters should appear.
+const seen = new Set();
+for (let i = 0; i < 62000; i++) seen.add(generatePartnerPassword(16)[0]);
+check("all 62 alphabet characters are reachable (no modulo bias)", seen.size === 62);
+
+// Bounds are enforced.
+let threwPw = false;
+try { generatePartnerPassword(10); } catch (e) { threwPw = true; }
+check("length below 16 is rejected", threwPw);
+let threwPw2 = false;
+try { generatePartnerPassword(129); } catch (e) { threwPw2 = true; }
+check("length above 128 is rejected", threwPw2);
+check("the minimum length 16 is accepted", generatePartnerPassword(16).length === 16);
 
 // --- masking ---
 check("email masked", maskEmail("satyam@example.com") === "sa****@example.com");
