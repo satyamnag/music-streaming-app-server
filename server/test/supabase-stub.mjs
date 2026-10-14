@@ -403,6 +403,37 @@ function makeSupabaseStub() {
           return { data: [{ ok: true, status: row.status, reason: 'ok' }], error: null }
         }
 
+        case 'partner_attest_email': {
+          // Mirrors the SQL: an attestation REQUIRES an admin identity and a
+          // known method, is idempotent, and records who/when/how.
+          const row = db.partners.get(p.p_partner_id)
+          if (!row) return { data: [{ ok: false, reason: 'not_found', already_verified: false }], error: null }
+
+          const method = p.p_method || 'admin_attested'
+          const allowed = ['admin_attested', 'kyc_document', 'partner_contact', 'legacy_link']
+          if (!allowed.includes(method)) {
+            return { data: [{ ok: false, reason: 'invalid_method', already_verified: false }], error: null }
+          }
+          if (!p.p_admin || !String(p.p_admin).trim()) {
+            return { data: [{ ok: false, reason: 'admin_required', already_verified: false }], error: null }
+          }
+
+          if (row.email_verified) {
+            return { data: [{ ok: true, reason: 'ok', already_verified: true }], error: null }
+          }
+
+          row.email_verified = true
+          row.email_verified_at = new Date().toISOString()
+          row.email_verified_by = String(p.p_admin)
+          row.email_verified_method = method
+          row.email_verified_note = p.p_note || null
+          // Clear any leftover link token, exactly like the SQL.
+          row.email_verify_token_hash = null
+          row.email_verify_expires_at = null
+
+          return { data: [{ ok: true, reason: 'ok', already_verified: false }], error: null }
+        }
+
         case 'partner_approve': {
           const row = db.partners.get(p.p_partner_id)
           if (!row) return { data: [{ ok: false, reason: 'not_found' }], error: null }

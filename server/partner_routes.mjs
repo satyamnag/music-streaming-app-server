@@ -1,5 +1,5 @@
 // ============================================================================
-// Partner Program — public portal API + admin review API
+// Partner Program Ã¢â‚¬â€ public portal API + admin review API
 // ============================================================================
 //
 // Mounted from server.js via `registerPartnerRoutes(app, deps)`. Kept in its
@@ -17,7 +17,7 @@
 //   1. A partner authenticates with a 256-bit bearer token issued at
 //      registration. Only its SHA-256 hash is stored. Every partner-facing
 //      call passes that token, and the database resolves the row FROM THE
-//      HASH — the portal never sends a partner id, so it can never address
+//      HASH Ã¢â‚¬â€ the portal never sends a partner id, so it can never address
 //      another partner's row. There is no IDOR surface by construction.
 //
 //   2. NO anon/authenticated RLS policy exists on any partner table, and the
@@ -81,12 +81,14 @@ const KYC_BUCKET = 'partner-kyc'
 const MAX_DOC_BYTES = 5 * 1024 * 1024 // 5 MB per document
 const MAX_DOCS_PER_PARTNER = 15
 const PORTAL_TOKEN_BYTES = 32 // 256 bits
-const VERIFY_TOKEN_TTL_MINUTES = 24 * 60 // 24 hours
-const VERIFY_RESEND_COOLDOWN_SECONDS = 60
+
+// NOTE: VERIFY_TOKEN_TTL_MINUTES and VERIFY_RESEND_COOLDOWN_SECONDS were
+// removed with the emailed-link flow. Verification is now an admin attestation
+// (partner_attest_email), which has no token and therefore no TTL.
 
 // The Play listing the partner QR points at. Kept identical to the existing
 // affiliate QR route so the SHIPPED Android install-referrer pipeline keeps
-// working unchanged (zero app changes — a hard requirement).
+// working unchanged (zero app changes Ã¢â‚¬â€ a hard requirement).
 const PLAY_PACKAGE = 'com.soulfulbhakti.app'
 const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}`
 
@@ -190,14 +192,6 @@ export function registerPartnerRoutes(app, deps) {
     message: { error: 'Too many sign-in attempts. Please try again later.' },
   })
 
-  const resendLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 5,
-    standardHeaders: 'draft-8',
-    legacyHeaders: false,
-    message: { error: 'Too many resend requests. Please wait.' },
-  })
-
   const uploadLimiterSubnet = rateLimit({
     windowMs: 60 * 60 * 1000,
     limit: 60,
@@ -248,7 +242,7 @@ export function registerPartnerRoutes(app, deps) {
    * branded public origin (https://soulfulbhakti.com), so the link a partner
    * receives shows the domain they recognise rather than the infrastructure
    * host. That origin serves /partner via the marketing website, which forwards
-   * to this portal — so the link works whichever end the partner starts from.
+   * to this portal Ã¢â‚¬â€ so the link works whichever end the partner starts from.
    *
    * Falling back to the request host keeps local development and any
    * un-configured deployment working without special-casing.
@@ -258,31 +252,6 @@ export function registerPartnerRoutes(app, deps) {
     // Derive from the request. `trust proxy` is set, so protocol/host reflect
     // the external origin rather than the internal Render address.
     return `${req.protocol}://${req.get('host')}`
-  }
-
-  /**
-   * The origin that actually SERVES the portal API, which is where the
-   * verification link must ultimately land.
-   *
-   * When the branded origin is a different host (soulfulbhakti.com forwards to
-   * the portal), pointing the emailed link straight at the serving host avoids
-   * depending on that forward staying in place for a one-time security token.
-   * The branded path is still used when it IS the serving host, so local dev
-   * and single-host deployments are unaffected.
-   */
-  function resolveVerifyBaseUrl(req) {
-    const serving = `${req.protocol}://${req.get('host')}`
-    if (!publicBaseUrl) return serving
-    try {
-      const branded = new URL(publicBaseUrl)
-      const s = new URL(serving)
-      // Same host (the common case): use the branded base verbatim.
-      if (branded.host === s.host) return publicBaseUrl.replace(/\/+$/, '')
-      // Different host: the token must reach the server that can consume it.
-      return serving
-    } catch (_) {
-      return serving
-    }
   }
 
   /**
@@ -403,7 +372,21 @@ export function registerPartnerRoutes(app, deps) {
   // -------------------------------------------------------------------------
   // Public: register
   // -------------------------------------------------------------------------
-
+  //
+  // PIPELINE CHANGE â€” READ THIS BEFORE EDITING.
+  //
+  // This route used to create an account and email a verification link, which
+  // was the ONLY proof that the person controlled the address. The emailed
+  // link is gone (no SMTP dependency), so that proof now comes from the ADMIN
+  // (partner_attest_email). Left as-is, this endpoint would be an unauthenticated
+  // way to create partner rows with nobody vouching for them â€” so it now
+  // REFUSES to create an account unless an admin-attested row already exists
+  // for that address.
+  //
+  // In the normal flow the admin creates the partner with
+  // POST /api/admin/partners/:id/attest-email (or the account is created in the
+  // admin panel), so this route is a no-op for strangers and only ever
+  // "resumes" an account an admin has already vouched for.
   app.post('/api/partner/register', registerLimiter, async (req, res, next) => {
     try {
       const email = String((req.body && req.body.email) || '').trim().toLowerCase()
@@ -431,10 +414,10 @@ export function registerPartnerRoutes(app, deps) {
 
       // ---- USER-ENUMERATION RESISTANCE (ASVS 6.3.8) ----------------------
       // The response is identical whether or not this email was already
-      // registered. For a duplicate we do NOT return a token and we do NOT
-      // send a verification link; instead the real owner is emailed a notice
-      // that someone attempted registration. An attacker therefore cannot
-      // use this endpoint to discover which addresses are enrolled.
+      // registered, and whether or not an admin has vouched for it. For a
+      // duplicate we do NOT return a token; instead the real owner is emailed
+      // a notice that someone attempted registration. An attacker therefore
+      // cannot use this endpoint to discover which addresses are enrolled.
       if (existing || !rawToken) {
         if (existing && partnerId) {
           // Best-effort courtesy notice to the address owner. Sent
@@ -443,47 +426,31 @@ export function registerPartnerRoutes(app, deps) {
         }
         return res.status(202).json({
           ok: true,
-          message: 'If this address can be registered, a verification email is on its way.',
+          message:
+            'If this address has an approved partner account, you can sign in with the ' +
+            'details we emailed you.',
         })
       }
 
-      // ---- Issue and send the verification email ------------------------
-      const verifyToken = generateToken()
-      const { data: setOk, error: setErr } = await supabase.rpc(
-        'partner_set_verification_token',
-        {
-          p_partner_id: partnerId,
-          p_raw_token: verifyToken,
-          p_ttl_minutes: VERIFY_TOKEN_TTL_MINUTES,
-        },
-      )
-      if (setErr || setOk === false) {
-        log.error('[partner] set verification token failed:', setErr && setErr.message)
-        // The account exists; the partner can retry the resend endpoint.
-        return res.status(202).json({
-          ok: true,
-          token: rawToken,
-          emailSent: false,
-          message: 'Account created, but we could not send the verification email yet.',
-        })
-      }
-
-      const sent = await sendVerificationEmail({
-        email,
-        token: verifyToken,
-        baseUrl: resolveVerifyBaseUrl(req),
-      })
-
-      // The portal token IS returned here — it is the credential the partner
-      // now holds. It is never emailed and never logged.
+      // ---- NEW ACCOUNT CREATED: require an admin attestation --------------
+      //
+      // partner_register just made a fresh draft row. Without an emailed link
+      // there is nothing to verify it with, so the account stays UNVERIFIED
+      // and cannot submit, upload documents or be approved. The partner is
+      // told plainly to wait for the admin rather than being shown a
+      // verification step that no longer exists.
+      //
+      // The token IS returned: it is the credential for their own draft row,
+      // it is never emailed, and it grants nothing until an admin attests.
       res.status(201).json({
         ok: true,
         token: rawToken,
-        emailSent: sent.sent,
-        emailReason: sent.sent ? null : sent.reason,
-        message: sent.sent
-          ? 'Check your inbox for a verification link.'
-          : 'Account created, but we could not send the verification email yet.',
+        emailSent: false,
+        awaitingAttestation: true,
+        message:
+          'Your details were received. A member of our team will confirm your ' +
+          'email address and send you sign-in details. You can also sign in ' +
+          'once you receive them.',
       })
     } catch (err) {
       next(err)
@@ -491,52 +458,22 @@ export function registerPartnerRoutes(app, deps) {
   })
 
   // -------------------------------------------------------------------------
-  // Email verification
+  // Email verification â€” REMOVED
   // -------------------------------------------------------------------------
+  //
+  // The emailed-link flow (and its resend endpoint) is deliberately gone:
+  // there is no SMTP dependency any more. Verification is now an ADMIN
+  // ATTESTATION recorded by POST /api/admin/partners/:id/attest-email, which
+  // sets the same `email_verified` flag these routes used to set.
+  //
+  // The token-based DB functions were DROPPED by migration 033, not merely
+  // left unused, so there is no longer any code path that can set
+  // `email_verified` from a bearer token.
 
-  /**
-   * Sends the verification email. Returns the transport result; never throws.
-   */
-  async function sendVerificationEmail({ email, token, baseUrl }) {
-    const link = `${baseUrl}/partner/verify?token=${encodeURIComponent(token)}`
-    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
-    const subject = `Verify your email to continue your ${brand} Partner application`
-
-    const text = [
-      `Namaste,`,
-      ``,
-      `Thank you for your interest in the ${brand} Partner Program.`,
-      ``,
-      `Please confirm your email address by opening this link:`,
-      link,
-      ``,
-      `This link can be used once and expires in 24 hours.`,
-      ``,
-      `If you did not request this, you can safely ignore this email — no`,
-      `account will be activated and no further messages will be sent.`,
-      ``,
-      `— ${brand}`,
-    ].join('\n')
-
-    const html = `<!doctype html>
-<html><body style="margin:0;padding:24px;background:#f6f4ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2b2b2b;">
-  <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;border:1px solid #e8e2d6;">
-    <h1 style="margin:0 0 8px;font-size:20px;">${escapeHtml(brand)} Partner Program</h1>
-    <p style="margin:0 0 20px;color:#6b6b6b;font-size:14px;">Confirm your email address</p>
-    <p style="margin:0 0 20px;font-size:15px;line-height:1.6;">Namaste,<br>Thank you for your interest in the ${escapeHtml(brand)} Partner Program. Please confirm your email address to continue your application.</p>
-    <p style="margin:0 0 24px;"><a href="${escapeHtml(link)}" style="display:inline-block;background:#8a6d3b;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;font-size:15px;">Verify my email</a></p>
-    <p style="margin:0 0 8px;font-size:13px;color:#6b6b6b;">Or paste this link into your browser:</p>
-    <p style="margin:0 0 24px;font-size:12px;word-break:break-all;color:#8a6d3b;">${escapeHtml(link)}</p>
-    <p style="margin:0;font-size:13px;color:#6b6b6b;line-height:1.6;">This link can be used once and expires in 24 hours. If you did not request it, you can safely ignore this email.</p>
-  </div>
-</body></html>`
-
-    return sendEmail(getSecrets, { to: email, subject, text, html })
-  }
 
   /**
    * Courtesy notice for a duplicate registration attempt. Deliberately
-   * contains no token and no account details — it only tells the real owner
+   * contains no token and no account details Ã¢â‚¬â€ it only tells the real owner
    * that someone tried, which is the safe direction to leak.
    */
   async function notifyDuplicateRegistration(partnerId, email) {
@@ -549,19 +486,19 @@ export function registerPartnerRoutes(app, deps) {
       `Program application. Because this address is already registered, we`,
       `did not create a second account and we sent no verification link.`,
       ``,
-      `If this was you, simply continue with your existing application —`,
+      `If this was you, simply continue with your existing application Ã¢â‚¬â€`,
       `your original verification email is still valid.`,
       ``,
       `If this was not you, no action is needed.`,
       ``,
-      `— ${brand}`,
+      `Ã¢â‚¬â€ ${brand}`,
     ].join('\n')
 
     const result = await sendEmail(getSecrets, {
       to: email,
       subject,
       text,
-      html: `<p>Namaste,</p><p>Someone entered this email address while starting a ${escapeHtml(brand)} Partner Program application. Because this address is already registered, we did not create a second account and sent no verification link.</p><p>If this was you, continue with your existing application.</p><p>If this was not you, no action is needed.</p><p>— ${escapeHtml(brand)}</p>`,
+      html: `<p>Namaste,</p><p>Someone entered this email address while starting a ${escapeHtml(brand)} Partner Program application. Because this address is already registered, we did not create a second account and sent no verification link.</p><p>If this was you, continue with your existing application.</p><p>If this was not you, no action is needed.</p><p>Ã¢â‚¬â€ ${escapeHtml(brand)}</p>`,
     })
     await auditPartner(partnerId, 'duplicate_registration_notice', {
       sent: result.sent,
@@ -570,124 +507,6 @@ export function registerPartnerRoutes(app, deps) {
     return result
   }
 
-  // Resend the verification email. Rate-limited per IP and additionally
-  // windowed per account (a resend also invalidates the previous link).
-  app.post('/api/partner/resend-verification', resendLimiter, async (req, res, next) => {
-    try {
-      const token = portalToken(req)
-      if (!token) return res.status(401).json({ error: 'Missing session.' })
-
-      const { data, error } = await supabase.rpc('partner_prepare_verification', {
-        p_token: token,
-        p_ip_hash: clientIpHash(req),
-      })
-      if (error) {
-        log.error('[partner] prepare verification failed:', error.message)
-        return res.status(503).json({ error: 'Temporarily unavailable.' })
-      }
-
-      const row = Array.isArray(data) ? data[0] : data
-      if (!row || !row.can_send) {
-        const reason = (row && row.reason) || 'invalid_session'
-        if (reason === 'already_verified') {
-          return res.json({ ok: true, message: 'This email is already verified.' })
-        }
-        if (reason === 'rate_limited') {
-          // Per-account window (5/hour) rather than the coarser IP limiter.
-          return res.status(429).json({
-            error: 'We have already sent several emails. Please check your inbox and spam folder.',
-          })
-        }
-        return res.status(401).json({ error: 'Invalid or expired session.' })
-      }
-
-      const verifyToken = generateToken()
-      const { data: setOk, error: setErr } = await supabase.rpc(
-        'partner_set_verification_token',
-        {
-          p_partner_id: row.partner_id,
-          p_raw_token: verifyToken,
-          p_ttl_minutes: VERIFY_TOKEN_TTL_MINUTES,
-        },
-      )
-      if (setErr || setOk === false) {
-        return res.status(503).json({ error: 'Temporarily unavailable.' })
-      }
-
-      const sent = await sendVerificationEmail({
-        email: row.email,
-        token: verifyToken,
-        baseUrl: resolveVerifyBaseUrl(req),
-      })
-
-      await auditPartner(row.partner_id, 'verification_resent', {
-        sent: sent.sent,
-        reason: sent.reason || null,
-      }, req)
-
-      if (!sent.sent) {
-        return res.status(503).json({
-          error: 'We could not send the email right now. Please try again shortly.',
-        })
-      }
-      res.json({ ok: true, message: 'Verification email sent.' })
-    } catch (err) {
-      next(err)
-    }
-  })
-
-  // Consume the verification link. This endpoint is what the emailed URL
-  // hits, so it must be safe to open from a mail client and must never leak
-  // whether a token merely expired versus never existed.
-  app.get('/api/partner/verify', verifyLimiter, async (req, res, next) => {
-    try {
-      const raw = String(req.query.token || '')
-      if (!raw) return renderVerifyPage(res, false, 'This verification link is not valid.')
-      if (raw.length > 200) return renderVerifyPage(res, false, 'This verification link is not valid.')
-
-      const { data, error } = await supabase.rpc('partner_consume_verification', {
-        p_raw_token: raw,
-      })
-      if (error) {
-        log.error('[partner] consume verification failed:', error.message)
-        return renderVerifyPage(res, false, 'We could not verify this link right now. Please try again.')
-      }
-
-      const row = Array.isArray(data) ? data[0] : data
-      if (!row || !row.ok) {
-        const reason = (row && row.reason) || 'invalid'
-        const message =
-          reason === 'expired'
-            ? 'This verification link has expired. Open your application and request a new one.'
-            : reason === 'already_used'
-              ? 'This link has already been used. You can continue with your application.'
-              : 'This verification link is not valid or has already been used.'
-        return renderVerifyPage(res, false, message)
-      }
-
-      // Success. The portal reads its session from localStorage/cookie, so
-      // send the partner to the portal rather than to a dead-end page.
-      return res.redirect(302, '/partner/verified')
-    } catch (err) {
-      next(err)
-    }
-  })
-
-  function renderVerifyPage(res, ok, message) {
-    res
-      .status(ok ? 200 : 400)
-      .type('html')
-      .send(`<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Partner email verification</title></head>
-<body style="margin:0;padding:40px 20px;background:#f6f4ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;">
-<div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e8e2d6;border-radius:12px;padding:32px;text-align:center;">
-<h1 style="font-size:19px;margin:0 0 12px;">${ok ? 'Email verified' : 'Verification problem'}</h1>
-<p style="font-size:15px;line-height:1.6;color:#555;margin:0 0 20px;">${escapeHtml(message)}</p>
-<p><a href="/partner" style="display:inline-block;background:#8a6d3b;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:600;">Go to the Partner Portal</a></p>
-</div></body></html>`)
-  }
 
   // -------------------------------------------------------------------------
   // Partner self-service (session-token authenticated)
@@ -771,7 +590,7 @@ export function registerPartnerRoutes(app, deps) {
         //
         // partnerId is included because the partner's own QR image is
         // addressed by id (/api/partner/qr/:id), and that route verifies the
-        // id matches the CALLER'S OWN session before returning anything — so
+        // id matches the CALLER'S OWN session before returning anything Ã¢â‚¬â€ so
         // exposing it here grants no additional reach.
         partnerId: row.partner_id,
         status: row.status,
@@ -1144,7 +963,7 @@ export function registerPartnerRoutes(app, deps) {
 
   // Partner-initiated withdrawal. DPDP Act 2023 s.6(4) requires that
   // withdrawing consent be as easy as giving it, so this is a single call
-  // from the portal — never a "contact support" instruction.
+  // from the portal Ã¢â‚¬â€ never a "contact support" instruction.
   //
   // It is deliberately honest about timing: processing stops immediately, but
   // deletion is bounded by the DPDP Rules 2025 r.8(3) one-year retention
@@ -1384,7 +1203,7 @@ export function registerPartnerRoutes(app, deps) {
   /**
    * A server-generated 32-hex-character object name. The partner's own
    * filename never reaches storage, which structurally eliminates path
-   * traversal, the NTFS short-name alias attack and the ADS colon trick —
+   * traversal, the NTFS short-name alias attack and the ADS colon trick Ã¢â‚¬â€
    * there is simply nothing attacker-controlled left to traverse with.
    */
   function cryptoRandomHex() {
@@ -1559,7 +1378,7 @@ export function registerPartnerRoutes(app, deps) {
   })
 
   // Full application detail, including the masked identifiers the reviewer
-  // needs for a first pass and the document list (metadata only — bytes are
+  // needs for a first pass and the document list (metadata only Ã¢â‚¬â€ bytes are
   // fetched separately and individually audited).
   app.get('/api/admin/partners/:id', requireAdmin, async (req, res, next) => {
     try {
@@ -1672,7 +1491,7 @@ export function registerPartnerRoutes(app, deps) {
   //      OWASP-prescribed download headers cannot be enforced on that path.
   //   3. Proxying gives a single chokepoint where every access is audited.
   // Because the object is application-encrypted ciphertext, a signed URL
-  // would not have disclosed readable data anyway — but proxying makes the
+  // would not have disclosed readable data anyway Ã¢â‚¬â€ but proxying makes the
   // access log authoritative and the headers real.
   app.get('/api/admin/partners/:id/documents/:docId/content', requireAdmin, async (req, res, next) => {
     const { id: partnerId, docId } = req.params
@@ -1772,7 +1591,7 @@ export function registerPartnerRoutes(app, deps) {
    *   * an audit-write failure must not turn a successful, authorised read into
    *     an error for the reviewer; and
    *   * a DENIED access for a partner id that does not exist cannot be logged
-   *     against that partner (the FK would reject it) — the denial is still
+   *     against that partner (the FK would reject it) Ã¢â‚¬â€ the denial is still
    *     logged to the server console so probing is visible, but it is not
    *     attributed to a row that is not there.
    */
@@ -1895,7 +1714,7 @@ export function registerPartnerRoutes(app, deps) {
         return res.status(400).json({ error: 'invalid decision' })
       }
       if (decision === 'reject' && !String(note || '').trim()) {
-        // A rejection must be explainable — both for the applicant and for
+        // A rejection must be explainable Ã¢â‚¬â€ both for the applicant and for
         // our own due-diligence record.
         return res.status(400).json({ error: 'A reason is required when rejecting an application.' })
       }
@@ -2056,7 +1875,7 @@ export function registerPartnerRoutes(app, deps) {
       ``,
       `You can see both any time in your partner dashboard.`,
       ``,
-      `— ${brand}`,
+      `Ã¢â‚¬â€ ${brand}`,
     ].join('\n')
 
     const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;padding:24px;background:#f6f4ef;">
@@ -2074,7 +1893,7 @@ export function registerPartnerRoutes(app, deps) {
 
     return sendEmail(getSecrets, {
       to: p.email,
-      subject: `Welcome to the ${brand} Partner Program — your QR and coupon are ready`,
+      subject: `Welcome to the ${brand} Partner Program Ã¢â‚¬â€ your QR and coupon are ready`,
       text,
       html,
     })
@@ -2094,7 +1913,7 @@ export function registerPartnerRoutes(app, deps) {
       // the partner already owns and displays publicly, the route reveals
       // nothing about any other partner, and the request is rate-limited.
       // The token is NOT accepted in the query for any endpoint that returns
-      // personal data or documents — those require the bearer header.
+      // personal data or documents Ã¢â‚¬â€ those require the bearer header.
       const token = portalToken(req)
       if (!token) return res.status(401).json({ error: 'Missing session.' })
 
@@ -2147,7 +1966,7 @@ export function registerPartnerRoutes(app, deps) {
    *
    * SECURITY: this is the ONLY place the plaintext password exists outside the
    * admin request that generated it. It is placed in the email body and
-   * nowhere else — not logged, not stored, and not returned by the API.
+   * nowhere else Ã¢â‚¬â€ not logged, not stored, and not returned by the API.
    *
    * The email tells the partner plainly that the password was issued by an
    * administrator and must be changed at first sign-in, because an
@@ -2179,7 +1998,7 @@ export function registerPartnerRoutes(app, deps) {
       `partner dashboard. If you did not expect this email, please contact us`,
       `and we will reissue your credentials.`,
       ``,
-      `— ${brand}`,
+      `Ã¢â‚¬â€ ${brand}`,
     ].join('\n')
 
     const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;padding:24px;background:#f6f4ef;">
@@ -2192,19 +2011,19 @@ export function registerPartnerRoutes(app, deps) {
 </table>
 <p style="font-size:15px;"><a href="${escapeHtml(portalUrl)}" style="background:#8a6d3b;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block;">Sign in to your dashboard</a></p>
 <p style="font-size:13px;color:#8a5a00;background:#fdf6e3;border:1px solid #f0e0b0;border-radius:8px;padding:12px;margin-top:20px;"><strong>Please change this password immediately after your first sign-in.</strong> It was issued by our team, so it should not be kept as your long-term password.</p>
-<p style="font-size:13px;color:#6b6b6b;margin-top:20px;">Keep this email confidential — anyone with these details can access your partner dashboard.</p>
+<p style="font-size:13px;color:#6b6b6b;margin-top:20px;">Keep this email confidential Ã¢â‚¬â€ anyone with these details can access your partner dashboard.</p>
 </div></body></html>`
 
     return sendEmail(getSecrets, {
       to: partner.email,
-      subject: `Your ${brand} Partner account — sign-in details`,
+      subject: `Your ${brand} Partner account Ã¢â‚¬â€ sign-in details`,
       text,
       html,
     })
   }
 
   // The ADMIN's view of a partner's QR image, for the review UI. Requires
-  // requireAdmin — unlike /api/partner/qr/:id, which the partner calls for
+  // requireAdmin Ã¢â‚¬â€ unlike /api/partner/qr/:id, which the partner calls for
   // their own dashboard and which authorises by partner session token
   // instead. Kept as two routes on purpose: the admin must be able to render
   // a QR before the partner has ever logged in.
@@ -2244,12 +2063,69 @@ export function registerPartnerRoutes(app, deps) {
     }
   })
 
+  // Admin attests a partner's email address.
+  //
+  // THIS REPLACES EMAIL VERIFICATION. The emailed one-time link is gone, so
+  // this is now the ONLY way `email_verified` becomes true — and with it, the
+  // only way a partner can submit an application, upload documents or be
+  // approved.
+  //
+  // The admin is asserting "I have confirmed this address belongs to this
+  // partner." That is a stronger claim than an unverified click on a link,
+  // provided it is recorded: the DB stores WHO attested, WHEN, and HOW, and
+  // writes an append-only audit row. An attestation with no admin identity is
+  // rejected by the function and by a CHECK constraint.
+  app.post('/api/admin/partners/:id/attest-email', requireAdmin, async (req, res, next) => {
+    try {
+      const id = req.params.id
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(400).json({ error: 'Invalid id' })
+
+      const body = req.body || {}
+      const method = body.method ? String(body.method).trim() : 'admin_attested'
+      const note = body.note ? String(body.note).trim().slice(0, 500) : null
+
+      const { data, error } = await supabase.rpc('partner_attest_email', {
+        p_partner_id: id,
+        // The authenticated admin identity, resolved from the Clerk session or
+        // the ADMIN_TOKEN session — never taken from the request body, which a
+        // caller could forge to attribute their own action to someone else.
+        p_admin: await adminIdentity(req),
+        p_method: method,
+        p_note: note,
+      })
+      if (error) {
+        log.error('[admin] attest_email failed:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row || !row.ok) {
+        const messages = {
+          not_found: 'Application not found.',
+          invalid_method: 'Unknown verification method.',
+          admin_required: 'An admin identity is required to attest an address.',
+        }
+        return res.status(400).json({ error: messages[row && row.reason] || 'Could not record attestation.' })
+      }
+
+      res.json({
+        ok: true,
+        alreadyVerified: !!row.already_verified,
+        method,
+        message: row.already_verified
+          ? 'This email address had already been verified.'
+          : 'Email address verified. The partner can now complete their application.',
+      })
+    } catch (err) {
+      next(err)
+    }
+  })
+
   // Issue (or re-issue) a partner's login credentials.
   //
   // ADMIN ONLY. The admin does not choose the password: the SERVER generates
   // it from a CSPRNG and emails it. That means a weak or reused password
   // cannot be introduced by hand, and the password exists in plaintext only
-  // inside this request — it is never stored, never logged, and never
+  // inside this request Ã¢â‚¬â€ it is never stored, never logged, and never
   // returned in the response.
   //
   // Re-issuing is also the recovery path when a partner is locked out: the

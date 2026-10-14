@@ -3,13 +3,13 @@
 -- Run this in the Supabase SQL Editor (Dashboard > SQL Editor).
 --
 -- ------------------------------------------------------------------
--- REQUIRED EXTENSION — INSTALLED BY THIS SCRIPT
+-- REQUIRED EXTENSION â€” INSTALLED BY THIS SCRIPT
 -- ------------------------------------------------------------------
 -- This migration needs `pgcrypto` for sha256 hashing (`digest`) and for
 -- cryptographically secure random tokens (`gen_random_bytes`).
 --
 -- It does NOT assume the extension is already present. An earlier revision
--- did, on the reasoning that migration 003 installs it — but 003 plainly did
+-- did, on the reasoning that migration 003 installs it â€” but 003 plainly did
 -- not run on this project (the `affiliates` table exists, yet `digest` does
 -- not). Depending on a sibling migration having done its job is a fragile
 -- assumption, so `create extension if not exists` is issued here instead.
@@ -30,7 +30,7 @@ create extension if not exists pgcrypto with schema public;
 -- layout puts extensions in a separate `extensions` schema. The functions in
 -- this migration deliberately pin `set search_path = public` (to prevent
 -- search-path hijacking), which means an unqualified call to `digest(...)`
--- resolves ONLY against `public` — and fails with:
+-- resolves ONLY against `public` â€” and fails with:
 --
 --     ERROR: 42883: function digest(text, text) does not exist
 --
@@ -43,7 +43,7 @@ create extension if not exists pgcrypto with schema public;
 -- or where the extension was installed.
 --
 -- Note this also survives the extension being installed into `extensions`,
--- `public`, or any other schema — the failure mode is removed rather than
+-- `public`, or any other schema â€” the failure mode is removed rather than
 -- special-cased.
 -- ------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ begin
     $f$, v_schema);
   end if;
 
-  raise notice 'pgcrypto digest() found in schema "%" — public.sb_digest() created.', v_schema;
+  raise notice 'pgcrypto digest() found in schema "%" â€” public.sb_digest() created.', v_schema;
 end $$;
 
 comment on function public.sb_digest(text, text) is
@@ -131,7 +131,7 @@ begin
     $body$;
   $f$, v_schema);
 
-  raise notice 'pgcrypto gen_random_bytes() found in schema "%" — public.sb_random_bytes() created.', v_schema;
+  raise notice 'pgcrypto gen_random_bytes() found in schema "%" â€” public.sb_random_bytes() created.', v_schema;
 end $$;
 
 comment on function public.sb_random_bytes(integer) is
@@ -140,10 +140,10 @@ comment on function public.sb_random_bytes(integer) is
 -- `crypt` and `gen_salt` have exactly the same schema-visibility problem as
 -- `digest` and `gen_random_bytes` above. The partner login password hash
 -- depends on them, and it would fail at login time (not at migration time)
--- if pgcrypto lives outside `public` — the worst possible moment to discover
+-- if pgcrypto lives outside `public` â€” the worst possible moment to discover
 -- it. Wrap them the same way.
 --
--- NOTE: unlike digest(), `crypt` is NOT immutable — a bcrypt hash embeds a
+-- NOTE: unlike digest(), `crypt` is NOT immutable â€” a bcrypt hash embeds a
 -- fresh random salt, so every call returns a different string for the same
 -- input. It is declared volatile by pgcrypto and must stay volatile here.
 do $$
@@ -200,7 +200,7 @@ begin
     $body$;
   $f$, v_schema, v_schema);
 
-  raise notice 'pgcrypto crypt()/gen_salt() found in schema "%" — public.sb_crypt()/sb_gen_salt() created.', v_schema;
+  raise notice 'pgcrypto crypt()/gen_salt() found in schema "%" â€” public.sb_crypt()/sb_gen_salt() created.', v_schema;
 end $$;
 
 comment on function public.sb_crypt(text, text) is
@@ -218,7 +218,7 @@ begin
       'pgcrypto is required but could not be installed. On Supabase, enable it '
       'in Database > Extensions (or run: create extension pgcrypto with schema public).';
   end if;
-  raise notice 'pgcrypto present — proceeding with the partner schema.';
+  raise notice 'pgcrypto present â€” proceeding with the partner schema.';
 end $$;
 
 -- ------------------------------------------------------------------
@@ -230,7 +230,7 @@ end $$;
 -- On this project, migration 009 evidently did not run: 003 never installed
 -- pgcrypto, and `affiliates` lacks `referrer_code`. Rather than fail 1,200
 -- lines in with "column a.referrer_code does not exist", the column is
--- created here if it is missing, backfilled, and made unique — i.e. exactly
+-- created here if it is missing, backfilled, and made unique â€” i.e. exactly
 -- what migration 009 would have done.
 --
 -- This is idempotent: on a project where 009 DID run, every statement below
@@ -261,11 +261,11 @@ begin
   ) into v_has_column;
 
   if v_has_column then
-    raise notice 'affiliates.referrer_code already present — no repair needed.';
+    raise notice 'affiliates.referrer_code already present â€” no repair needed.';
     return;
   end if;
 
-  raise notice 'affiliates.referrer_code is MISSING (migration 009 did not run) — adding it now.';
+  raise notice 'affiliates.referrer_code is MISSING (migration 009 did not run) â€” adding it now.';
 
   alter table public.affiliates add column referrer_code text;
 
@@ -283,7 +283,7 @@ begin
 
   if v_dup_count > 0 then
     raise exception
-      'referrer_code collision after backfill — resolve manually before re-running.';
+      'referrer_code collision after backfill â€” resolve manually before re-running.';
   end if;
 
   alter table public.affiliates alter column referrer_code set not null;
@@ -314,26 +314,26 @@ begin
     where table_schema = 'public' and table_name = 'affiliates'
       and column_name = 'commission_amount'
   ) then
-    raise notice 'affiliates.commission_amount is MISSING (migration 008 did not run) — adding it now.';
+    raise notice 'affiliates.commission_amount is MISSING (migration 008 did not run) â€” adding it now.';
     alter table public.affiliates
       add column commission_amount numeric not null default 0
       check (commission_amount >= 0);
     raise notice 'affiliates.commission_amount repaired.';
   else
-    raise notice 'affiliates.commission_amount already present — no repair needed.';
+    raise notice 'affiliates.commission_amount already present â€” no repair needed.';
   end if;
 end $$;
 
 -- The QR install-referrer pipeline also writes to `affiliate_referrals`
 -- (migration 009). The partner program does not write to it directly, but the
--- shipped app does when a user scans a partner QR — so make sure it exists.
+-- shipped app does when a user scans a partner QR â€” so make sure it exists.
 do $$
 begin
   if not exists (
     select 1 from information_schema.tables
     where table_schema = 'public' and table_name = 'affiliate_referrals'
   ) then
-    raise notice 'affiliate_referrals is MISSING (migration 009 did not run) — creating it now.';
+    raise notice 'affiliate_referrals is MISSING (migration 009 did not run) â€” creating it now.';
 
     create table public.affiliate_referrals (
       id uuid primary key default gen_random_uuid(),
@@ -350,7 +350,7 @@ begin
 
     raise notice 'affiliate_referrals created.';
   else
-    raise notice 'affiliate_referrals already present — no repair needed.';
+    raise notice 'affiliate_referrals already present â€” no repair needed.';
   end if;
 end $$;
 
@@ -372,7 +372,7 @@ begin
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.proname = 'bind_affiliate_referral'
   ) then
-    raise notice 'bind_affiliate_referral is MISSING (migration 009 did not run) — creating it now.';
+    raise notice 'bind_affiliate_referral is MISSING (migration 009 did not run) â€” creating it now.';
 
     execute $fn$
       create or replace function public.bind_affiliate_referral(
@@ -431,7 +431,7 @@ begin
 
     raise notice 'bind_affiliate_referral created.';
   else
-    raise notice 'bind_affiliate_referral already present — no repair needed.';
+    raise notice 'bind_affiliate_referral already present â€” no repair needed.';
   end if;
 end $$;
 
@@ -479,7 +479,7 @@ end $$;
 --     UIDAI itself (Aadhaar Act 2016 as amended by Act 14 of 2019):
 --
 --       1. s.8A(4)(b) [INSERTED 2019], verbatim: "No offline
---          verification-seeking entity shall— ... (b) collect, use, or store
+--          verification-seeking entity shallâ€” ... (b) collect, use, or store
 --          an Aadhaar number or biometric information of any individual for
 --          any purpose". A PROHIBITION, not a guideline. A private marketing
 --          programme verifying a partner by looking at their Aadhaar card is
@@ -507,12 +507,12 @@ end $$;
 --          to be "sensitive personal data" under the IT Act 2000.
 --
 --     s.8(3) also requires the individual to be told the ALTERNATIVES to
---     submitting identity information — hence the non-Aadhaar route this
+--     submitting identity information â€” hence the non-Aadhaar route this
 --     portal offers (PAN / Passport / Voter ID / Driving Licence).
 --
---     PENALTIES — VERIFIED against the consolidated Act on 2026-10-14:
+--     PENALTIES â€” VERIFIED against the consolidated Act on 2026-10-14:
 --
---       s.40 [substituted by Act 14 of 2019] — "Penalty for unauthorised use
+--       s.40 [substituted by Act 14 of 2019] â€” "Penalty for unauthorised use
 --            by requesting entity or offline verification-seeking entity":
 --            imprisonment up to THREE YEARS, or a fine up to Rs 10,000, or in
 --            the case of a COMPANY a fine up to Rs 1 LAKH, or both. Clause (b)
@@ -522,11 +522,11 @@ end $$;
 --            NOTE: an earlier revision of this comment cited "s.38A" for this.
 --            NO SECTION 38A EXISTS in the Aadhaar Act. Corrected.
 --
---       s.33A [inserted 2019] — civil penalty up to Rs 1 CRORE per
+--       s.33A [inserted 2019] â€” civil penalty up to Rs 1 CRORE per
 --            contravention, plus up to Rs 10 LAKH PER DAY continuing.
 --
 --       s.37 (disclosure of identity information in contravention of the
---            Act) — imprisonment up to THREE YEARS, or a fine up to
+--            Act) â€” imprisonment up to THREE YEARS, or a fine up to
 --            Rs 10,000, or in the case of a COMPANY a fine up to Rs 1 LAKH,
 --            or both. VERIFIED via the Supreme Court's own description of the
 --            provision in Puttaswamy (2018) at
@@ -554,21 +554,21 @@ end $$;
 --            most severe provision and applies to CIDR access, which this
 --            programme never performs.
 --
---       s.43 — DIRECTORS AND OFFICERS ARE PERSONALLY LIABLE: every person "in
+--       s.43 â€” DIRECTORS AND OFFICERS ARE PERSONALLY LIABLE: every person "in
 --            charge of, and was responsible to, the company for the conduct of
 --            the business ... shall be deemed to be guilty of the offence",
 --            with only a due-diligence defence. The s.47 proviso also lets an
 --            individual Aadhaar holder file the complaint directly, so the
 --            company does not get the protection of a UIDAI-only complaint gate.
 --
---     That combination — personal criminal liability plus a private right to
---     complain — is the reason this control is STRUCTURAL (a CHECK constraint)
+--     That combination â€” personal criminal liability plus a private right to
+--     complain â€” is the reason this control is STRUCTURAL (a CHECK constraint)
 --     rather than procedural (a written policy). A policy is weak evidence of
 --     due diligence; a constraint that cannot be bypassed is strong evidence.
 --
 --     CONSEQUENCE: the document allow-list below contains NO 'aadhaar'
 --     value, so an Aadhaar scan cannot be recorded even if a future UI bug
---     offered it. There is also no `aadhaar_number` column — only an
+--     offered it. There is also no `aadhaar_number` column â€” only an
 --     optional 4-digit mask the partner may volunteer, and storing even that
 --     requires the consent flag. The control is structural rather than
 --     procedural, because a procedural rule is what a future change is most
@@ -798,7 +798,7 @@ create table if not exists public.partners (
   --               DPDP Act 2023 s.6(4) requires withdrawing consent to be as
   --               easy as giving it, so a partner who never consented (or who
   --               wishes to revoke) must be able to withdraw. Requiring
-  --               consent to withdraw would invert the provision — you would
+  --               consent to withdraw would invert the provision â€” you would
   --               have to AGREE in order to DISAGREE.
   --
   -- Anything that represents an active application (submitted, under_review,
@@ -851,12 +851,12 @@ comment on column public.partners.date_of_birth is
 -- ------------------------------------------------------------------
 -- CHANGE OF PIPELINE: partners no longer self-register a public account.
 -- The ADMIN creates the account and issues the credentials, because:
---   (a) the KYC documents include identity documents — intake must not be
+--   (a) the KYC documents include identity documents â€” intake must not be
 --       open to anonymous self-service; and
 --   (b) the client explicitly chose "we (admin) will provide them generated
 --       user id and password".
 --
--- DESIGN — WHY COLUMNS, NOT A SECOND AUTH PATH:
+-- DESIGN â€” WHY COLUMNS, NOT A SECOND AUTH PATH:
 -- `portal_token_hash` is the SESSION credential and 14 SECURITY DEFINER
 -- functions authenticate against it. Adding a parallel password check to
 -- each of those would mean 14 hand-edited auth paths, and a mistake in any
@@ -897,7 +897,7 @@ alter table public.partners
   add column if not exists password_set_at timestamptz,
   add column if not exists password_changed_at timestamptz,
 
-  -- THROTTLING (ASVS 6.2.1 / 6.2.2 — no unlimited credential stuffing).
+  -- THROTTLING (ASVS 6.2.1 / 6.2.2 â€” no unlimited credential stuffing).
   -- Counted per row so the lock survives a server restart, unlike an
   -- in-memory limiter. Time-based, not permanent: a locked partner is not
   -- permanently denied by a stranger's guessing.
@@ -949,6 +949,102 @@ comment on column public.partners.locked_until is
   'Temporary lockout expiry after repeated failures. NULL when not locked.';
 
 -- ------------------------------------------------------------------
+-- 1c) ADMIN-ATTESTED EMAIL VERIFICATION (replaces the emailed link)
+-- ------------------------------------------------------------------
+-- WHY THIS CHANGED
+-- The original flow emailed a single-use verification link, which required a
+-- working SMTP/provider configuration. The client removed that requirement.
+--
+-- WHAT "VERIFIED" NOW MEANS â€” stated honestly, because the distinction matters:
+-- Email ownership cannot be proven without the person receiving SOMETHING at
+-- that address. That is not a configuration limit; it is what verification
+-- means. So rather than pretend a non-existent check exists, the check moved
+-- to a channel that already exists and is already trusted: THE ADMIN.
+--
+-- The admin confirms the address (during onboarding, or on a call, or against
+-- the KYC documents they are already reviewing) and records that attestation.
+-- This is NOT weaker than a self-service link â€” it is stronger, because a human
+-- reviewed it â€” and it is auditable, which an unlogged click never was.
+--
+-- `email_verified` remains THE single authoritative flag, so the four places
+-- that already gate on it keep working unchanged. What changes is HOW it comes
+-- to be true: only partner_attest_email() may set it now.
+-- ------------------------------------------------------------------
+alter table public.partners
+  -- Which admin vouched for the address (the ADMIN_TOKEN/Clerk identity).
+  add column if not exists email_verified_by text,
+  -- HOW it was established. Constrained so the method is a known value and
+  -- cannot drift into free text that means nothing later.
+  add column if not exists email_verified_method text,
+  -- Free-text note: where the address came from, what was checked.
+  add column if not exists email_verified_note text;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'partners_email_verify_method_check'
+  ) then
+    alter table public.partners
+      add constraint partners_email_verify_method_check
+      check (
+        email_verified_method is null
+        or email_verified_method in (
+          'admin_attested',   -- admin confirmed it directly (the normal path)
+          'kyc_document',     -- taken from a reviewed KYC document
+          'partner_contact',  -- confirmed with the partner out of band
+          'legacy_link'       -- verified by the old emailed link, pre-change
+        )
+      );
+  end if;
+end $$;
+
+-- An attested verification must record WHO and HOW. Otherwise the flag is an
+-- unauditable boolean and the whole point of the change is lost. `legacy_link`
+-- is exempt because those rows were verified before this column existed.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'partners_email_verify_audited'
+  ) then
+    alter table public.partners
+      add constraint partners_email_verify_audited
+      check (
+        email_verified = false
+        or email_verified_method = 'legacy_link'
+        or (email_verified_by is not null and email_verified_method is not null)
+      );
+  end if;
+end $$;
+
+comment on column public.partners.email_verified is
+  'THE authoritative "this address has been checked" flag. Set ONLY by partner_attest_email() (admin-attested) or by the retired emailed-link flow for rows verified before that change. Four DB functions gate on this column.';
+comment on column public.partners.email_verified_by is
+  'Which admin confirmed the partner email address. Required for any attested verification (CHECK-enforced).';
+comment on column public.partners.email_verified_method is
+  'How the address was confirmed: admin_attested | kyc_document | partner_contact | legacy_link.';
+
+-- One-time backfill for rows already in the database.
+--
+-- A row that was already verified keeps its own history. A row that was NOT
+-- verified is left untouched and still blocked: silently marking unverified
+-- applicants as verified would fabricate a check that never happened, and this
+-- migration must not do that. The admin attests them explicitly instead.
+do $$
+declare
+  v_legacy int;
+begin
+  update public.partners p
+     set email_verified_method = 'legacy_link'
+   where p.email_verified = true
+     and p.email_verified_method is null;
+
+  get diagnostics v_legacy = row_count;
+  if v_legacy > 0 then
+    raise notice 'backfilled % previously-verified partner row(s) as legacy_link', v_legacy;
+  end if;
+end $$;
+
+-- ------------------------------------------------------------------
 -- 2) PARTNER DOCUMENTS
 --    One row per uploaded KYC document. The BYTES live in a PRIVATE
 --    Supabase Storage bucket; this table holds only metadata plus the
@@ -963,7 +1059,7 @@ create table if not exists public.partner_documents (
   --
   -- NOTE: there is deliberately NO 'aadhaar' value here. Aadhaar is not
   -- an acceptable document for this programme (Aadhaar Act 2016 s.8(2),
-  -- s.29(3)/(4), s.37 — see the s.4(4)/consent block above). Because the
+  -- s.29(3)/(4), s.37 â€” see the s.4(4)/consent block above). Because the
   -- CHECK constraint
   -- rejects it, an Aadhaar scan cannot be recorded even if a future UI
   -- bug tried to offer it. The control is structural.
@@ -999,7 +1095,7 @@ create table if not exists public.partner_documents (
   -- --- Application-level envelope encryption ------------------------
   -- The object in storage is AES-256-GCM ciphertext, not the document.
   -- The DEK is stored WRAPPED (encrypted) by the KEK, and the KEK lives
-  -- in the server environment / secrets manager — never in this database.
+  -- in the server environment / secrets manager â€” never in this database.
   -- Destroying the KEK (crypto-shredding) renders every document of this
   -- partner permanently unrecoverable, which is a stronger guarantee than
   -- relying on object deletion alone.
@@ -1112,7 +1208,7 @@ alter table public.partner_email_events enable row level security;
 --
 -- partners_consent_check: an earlier revision required consent for every
 -- status except 'draft'. That made withdrawal impossible for a partner who
--- had not yet consented — which inverts DPDP Act 2023 s.6(4), where
+-- had not yet consented â€” which inverts DPDP Act 2023 s.6(4), where
 -- withdrawing must be as easy as giving. 'withdrawn' is now exempt.
 -- ------------------------------------------------------------------
 alter table public.partners drop constraint if exists partners_consent_check;
@@ -1250,9 +1346,9 @@ grant execute on function public.partner_get_self(text) to anon, authenticated, 
 -- 6b-i) ADMIN-ISSUED CREDENTIALS + THE SINGLE LOGIN PATH
 -- ------------------------------------------------------------------
 -- Two functions, deliberately split by trust level:
---   * partner_set_credentials(...)  — ADMIN/service-role ONLY. Writes the
+--   * partner_set_credentials(...)  â€” ADMIN/service-role ONLY. Writes the
 --     handle and the bcrypt hash. Never callable by anon.
---   * partner_login(...)            — anon-executable. Verifies and mints
+--   * partner_login(...)            â€” anon-executable. Verifies and mints
 --     a session. This is the ONLY new anonymous auth surface.
 -- ------------------------------------------------------------------
 
@@ -1300,7 +1396,7 @@ $$;
 
 revoke execute on function public.partner_gen_login_id() from public;
 
--- Issue credentials to a partner. ADMIN ONLY — enforced by the grant below
+-- Issue credentials to a partner. ADMIN ONLY â€” enforced by the grant below
 -- (service_role), not by a flag the caller could forge.
 --
 -- The caller (trusted server) generates the PASSWORD, because it must be
@@ -1541,7 +1637,7 @@ begin
     return;
   end if;
 
-  -- Mint a fresh 256-bit session token, hashed at rest — identical scheme
+  -- Mint a fresh 256-bit session token, hashed at rest â€” identical scheme
   -- to partner_register. Rotating on every login means a previously
   -- captured token stops working the moment the partner logs in again.
   v_token := encode(public.sb_random_bytes(32), 'hex');
@@ -1681,196 +1777,120 @@ $$;
 revoke execute on function public.partner_prepare_verification(text, text) from public;
 grant execute on function public.partner_prepare_verification(text, text) to service_role;
 
--- 6d-ii) Store the hash of a freshly-issued verification token. The RAW
---        token is minted by the server (crypto.randomBytes(32)) and is
---        sent to the partner in the email; the database only ever holds
---        its SHA-256. Service-role only, so no client can plant a token.
---        Setting a new token also INVALIDATES any previous one, so only
---        the newest emailed link can ever be used (a resend therefore
---        revokes the prior link, as OWASP's Forgot Password guidance
---        requires).
-create or replace function public.partner_set_verification_token(
-  p_partner_id uuid,
-  p_raw_token text,
-  p_ttl_minutes integer default 1440
-)
-returns boolean
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_updated integer;
-begin
-  if p_partner_id is null or coalesce(p_raw_token, '') = '' then
-    return false;
-  end if;
-  -- Guard the TTL so a bad caller cannot mint a forever-valid link.
-  if p_ttl_minutes is null or p_ttl_minutes < 1 or p_ttl_minutes > 10080 then
-    p_ttl_minutes := 1440;
-  end if;
-
-  update public.partners p
-     set email_verify_token_hash = public.partner_token_hash(p_raw_token),
-         email_verify_expires_at = now() + make_interval(mins => p_ttl_minutes),
-         email_verify_attempts = 0
-   where p.id = p_partner_id
-     and p.email_verified = false;
-
-  get diagnostics v_updated = row_count;
-  return v_updated > 0;
-end;
-$$;
-
-revoke execute on function public.partner_set_verification_token(uuid, text, integer) from public;
-grant execute on function public.partner_set_verification_token(uuid, text, integer) to service_role;
-
--- 6d-iii) Record a document access event. Called by the trusted server
---         every time an admin opens a KYC document, so access to
---         identity data is auditable (OWASP Logging: log access to
---         sensitive data, with who/when/what/result). Only identifiers
---         and outcomes are stored — never the document bytes, the
---         extracted PAN/GSTIN, or a signed URL.
-create or replace function public.partner_log_document_access(
-  p_partner_id uuid,
-  p_document_id uuid,
-  p_admin text,
-  p_action text,
-  p_result text,
-  p_reason text default null,
-  p_ip_hash text default null,
-  p_user_agent text default null
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.partner_audit_log
-    (partner_id, actor_type, actor, action, detail, ip_hash, user_agent)
-  values (
-    p_partner_id, 'admin', p_admin, coalesce(p_action, 'document.access'),
-    jsonb_build_object(
-      'document_id', p_document_id,
-      'result', coalesce(p_result, 'unknown'),
-      'reason', p_reason
-    ),
-    p_ip_hash,
-    -- Bound and strip control characters: OWASP warns that logged data
-    -- must be sanitised to prevent log injection.
-    left(regexp_replace(coalesce(p_user_agent, ''), '[[:cntrl:]]', '', 'g'), 300)
-  );
-end;
-$$;
-
-revoke execute on function public.partner_log_document_access(uuid, uuid, text, text, text, text, text, text) from public;
-grant execute on function public.partner_log_document_access(uuid, uuid, text, text, text, text, text, text) to service_role;
-
--- 6e) Consume a verification token (called by the server with the raw
---     token from the emailed link). Single-use, expiring, attempt-capped.
+-- 6d-ii) ADMIN-ATTESTED EMAIL VERIFICATION.
 --
---     ATOMICITY: the burn is a single `UPDATE ... WHERE ... RETURNING`.
---     A naive SELECT-then-UPDATE would let two concurrent requests both
---     observe an unconsumed token and both succeed (TOCTOU). Because the
---     guard conditions live in the UPDATE's WHERE clause, exactly one
---     caller can ever win the row; the loser gets zero rows back and is
---     reported as 'already_used'. This satisfies ASVS 6.5.1 ("only
---     successfully usable once").
-create or replace function public.partner_consume_verification(p_raw_token text)
-returns table (partner_id uuid, email text, ok boolean, reason text)
+--         Replaces the emailed-link pair (partner_set_verification_token +
+--         partner_consume_verification). Neither of those exists any more, so
+--         no token can be minted and no link can be consumed: the surface is
+--         REMOVED, not merely left unused. The columns they wrote to
+--         (email_verify_token_hash / _expires_at / _attempts) are deliberately
+--         NOT dropped â€” see below.
+--
+--         WHO may call this: service_role only, and the route above it sits
+--         behind requireAdmin. A partner session cannot self-verify.
+--
+--         WHY THE OLD COLUMNS ARE KEPT: dropping columns on a production table
+--         is irreversible and buys nothing here. Leaving them nullable and
+--         unwritten is the safe choice; a stale hash is inert because no
+--         function reads it any more.
+--
+--         IDEMPOTENT: attesting an already-verified row is a no-op success
+--         rather than an error, so a double-click in the admin UI cannot fail.
+create or replace function public.partner_attest_email(
+  p_partner_id uuid,
+  p_admin text,
+  p_method text default 'admin_attested',
+  p_note text default null
+)
+returns table (ok boolean, reason text, already_verified boolean)
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_hash text;
-  v_id uuid;
-  v_email text;
-  v_expires timestamptz;
-  v_verified boolean;
-  v_attempts integer;
+  v_row public.partners;
+  v_method text;
 begin
-  if coalesce(p_raw_token, '') = '' then
-    return query select null::uuid, null::text, false, 'invalid';
+  v_method := coalesce(nullif(trim(coalesce(p_method, '')), ''), 'admin_attested');
+
+  -- The method is constrained in the schema too, but validating here returns a
+  -- clean reason instead of surfacing a raw constraint violation.
+  if v_method not in ('admin_attested', 'kyc_document', 'partner_contact', 'legacy_link') then
+    return query select false, 'invalid_method'::text, false;
     return;
   end if;
 
-  v_hash := public.partner_token_hash(p_raw_token);
-
-  -- Read the row for diagnosis only; the AUTHORITATIVE check is the
-  -- conditional UPDATE below.
-  select p.id, p.email, p.email_verify_expires_at, p.email_verified,
-         p.email_verify_attempts
-    into v_id, v_email, v_expires, v_verified, v_attempts
-  from public.partners p
-  where p.email_verify_token_hash = v_hash
-  limit 1;
-
-  if v_id is null then
-    -- Unknown token. Deliberately indistinguishable from an expired or
-    -- consumed one to the caller; the server maps all of these to the
-    -- same user-facing message.
-    return query select null::uuid, null::text, false, 'invalid';
+  -- An attestation MUST identify the admin. Without this the flag becomes an
+  -- unauditable boolean, which is exactly what this change exists to avoid.
+  if coalesce(trim(coalesce(p_admin, '')), '') = '' then
+    return query select false, 'admin_required'::text, false;
     return;
   end if;
 
-  -- Count the attempt regardless of outcome, so brute-force guessing is
-  -- bounded even across many invalid attempts on a live token.
-  update public.partners p
-     set email_verify_attempts = p.email_verify_attempts + 1
-   where p.id = v_id;
-
-  if v_verified then
-    return query select v_id, v_email, true, 'already_verified';
-    return;
-  end if;
-  if v_attempts >= 20 then
-    return query select v_id, v_email, false, 'too_many_attempts';
-    return;
-  end if;
-  if v_expires is null or v_expires < now() then
-    return query select v_id, v_email, false, 'expired';
+  select * into v_row from public.partners p where p.id = p_partner_id;
+  if v_row.id is null then
+    return query select false, 'not_found'::text, false;
     return;
   end if;
 
-  -- Atomic single-use burn. Only ONE concurrent caller gets a row.
+  if v_row.email_verified then
+    return query select true, 'ok'::text, true;
+    return;
+  end if;
+
   update public.partners p
      set email_verified = true,
          email_verified_at = now(),
+         email_verified_by = left(p_admin, 200),
+         email_verified_method = v_method,
+         email_verified_note = nullif(left(coalesce(p_note, ''), 500), ''),
+         -- Clear any pre-existing link token so a leftover credential cannot
+         -- outlive the flow that issued it.
          email_verify_token_hash = null,
-         email_verify_expires_at = null
-   where p.id = v_id
-     and p.email_verified = false
-     and p.email_verify_token_hash = v_hash
-     and p.email_verify_expires_at is not null
-     and p.email_verify_expires_at >= now()
-  returning p.id into v_id;
+         email_verify_expires_at = null,
+         updated_at = now()
+   where p.id = p_partner_id
+     and p.email_verified = false;
 
-  if v_id is null then
-    -- Lost the race (or the conditions no longer hold).
-    return query select null::uuid, null::text, false, 'already_used';
-    return;
-  end if;
+  -- Audit with actor_type 'admin' and the real identity, so "who vouched for
+  -- this address" is answerable from the append-only log.
+  insert into public.partner_audit_log
+    (partner_id, actor_type, actor, action, detail)
+  values (
+    p_partner_id, 'admin', left(p_admin, 200), 'email_attested',
+    jsonb_build_object('method', v_method,
+                       'note', nullif(left(coalesce(p_note, ''), 500), ''))
+  );
 
-  insert into public.partner_email_events (partner_id, email, kind)
-  select p.id, p.email, 'verified' from public.partners p where p.id = v_id;
-
-  insert into public.partner_audit_log (partner_id, actor_type, action, detail)
-  select p.id, 'partner', 'email_verified', jsonb_build_object('email', p.email)
-  from public.partners p where p.id = v_id;
-
-  return query select v_id, v_email, true, 'verified';
+  return query select true, 'ok'::text, false;
 end;
 $$;
 
-revoke execute on function public.partner_consume_verification(text) from public;
-grant execute on function public.partner_consume_verification(text) to service_role;
+-- ADMIN ONLY: `public`, `anon` and `authenticated` are explicitly excluded, so
+-- no partner session can mark itself verified.
+revoke execute on function public.partner_attest_email(uuid, text, text, text) from public;
+revoke execute on function public.partner_attest_email(uuid, text, text, text) from anon;
+revoke execute on function public.partner_attest_email(uuid, text, text, text) from authenticated;
+grant execute on function public.partner_attest_email(uuid, text, text, text) to service_role;
+
+-- Retire the token-based verification functions explicitly.
+--
+-- Dropped rather than left in place: an orphaned function that can still set
+-- `email_verified = true` from a bearer token is a live authentication bypass,
+-- whether or not any current caller uses it. If either was never created (a
+-- fresh database where this section was already replaced), `if exists` keeps
+-- this idempotent.
+drop function if exists public.partner_consume_verification(text);
+drop function if exists public.partner_set_verification_token(uuid, text, integer);
 
 -- 6f) Submit the application: validates completeness and flips to
---     `submitted`. Requires a verified email and the mandatory consent
---     flags. Runs server-side validation so a crafted request cannot
---     bypass the form rules.
+--     `submitted`. Requires an ATTESTED (email_verified) address and the
+--     mandatory consent flags. Runs server-side validation so a crafted
+--     request cannot bypass the form rules.
+--
+--     NOTE: `email_verified` is now set by partner_attest_email() (admin
+--     attestation), not by an emailed link. The gate below is unchanged and
+--     still reads the same column, so this function needed no edit.
 create or replace function public.partner_submit(p_token text, p_ip_hash text default null)
 returns table (ok boolean, status text, missing text[])
 language plpgsql
@@ -2077,7 +2097,7 @@ revoke execute on function public.partner_add_document(text, text, text, text, t
 grant execute on function public.partner_add_document(text, text, text, text, text, text, bigint, text, text, text, text, text, text) to service_role;
 
 -- 6f-iii) List the caller's own live documents (metadata only, never the
---         bytes, never the object key — the partner has no way to fetch
+--         bytes, never the object key â€” the partner has no way to fetch
 --         the ciphertext directly).
 create or replace function public.partner_list_documents(p_token text)
 returns table (
@@ -2389,7 +2409,7 @@ grant execute on function public.partner_decide(uuid, text, text, text, integer)
 -- 6h-ii) Partner-initiated withdrawal (DPDP Act 2023 s.6(4): withdrawing
 --        consent must be as easy as giving it, so the partner can do this
 --        from the portal with the same single bearer token they registered
---        with — no support email required).
+--        with â€” no support email required).
 --
 --        IMPORTANT: this marks the application withdrawn and schedules
 --        purging, but it does NOT delete immediately. DPDP Rules 2025 r.8(3)
@@ -2547,10 +2567,10 @@ grant execute on function public.partner_admin_list(text) to service_role;
 -- referral count, conversion count and commission totals.
 --
 -- AUTHORISATION: by live session token, and the caller can ONLY ever see
--- their own row — the affiliate is resolved FROM the partner row rather than
+-- their own row â€” the affiliate is resolved FROM the partner row rather than
 -- accepted as a parameter, so there is no id to tamper with.
 --
--- DATA MINIMISATION: this function deliberately returns NO KYC data — no
+-- DATA MINIMISATION: this function deliberately returns NO KYC data â€” no
 -- legal name, no PAN, no address, no documents. It returns artefacts and
 -- aggregates. A dashboard is not a reason to re-expose identity documents.
 --

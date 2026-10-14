@@ -101,9 +101,13 @@ console.log('\n=== partner.html: structure and safety ===');
   ok(/do not accept Aadhaar/i.test(p), 'portal states Aadhaar is not accepted');
 
   // Key flows present.
+  //
+  // NOTE: /api/partner/resend-verification is deliberately ABSENT. Email
+  // verification is now an admin attestation, so the portal must NOT contain
+  // any verification-email call. That absence is asserted below, so the flow
+  // cannot creep back in unnoticed.
   const flows = [
     [/\/api\/partner\/register/, 'register call'],
-    [/\/api\/partner\/resend-verification/, 'resend verification call'],
     [/\/api\/partner\/draft/, 'draft save call'],
     [/\/api\/partner\/documents/, 'document upload call'],
     [/\/api\/partner\/submit/, 'submit call'],
@@ -111,6 +115,30 @@ console.log('\n=== partner.html: structure and safety ===');
     [/\/api\/partner\/consent/, 'consent call'],
   ];
   for (const [re, label] of flows) ok(re.test(p), label);
+
+  // --- Email verification removed (admin attestation instead) ---------------
+  //
+  // The portal must not reference a verification link, a resend endpoint, or
+  // an OTP/code entry. If any of these reappear, verification has quietly been
+  // reintroduced and the "no SMTP needed to apply" property is broken.
+  ok(!/resend-verification/.test(p), 'portal has no verify-resend call');
+  ok(!/\/partner\/verify\?token=/.test(p), 'portal has no verification link');
+  ok(!/verifyEmail/.test(p), 'portal has no verify-email element');
+  ok(!/emailSendWarning/.test(p), 'portal has no mail-failure warning (mail is no longer required to apply)');
+  ok(
+    /there is no link to click|no link to click/i.test(p),
+    'portal tells the partner there is no link to click',
+  );
+  // The admin panel must expose the attestation control instead.
+  const adminSrc = fs.readFileSync(path.join(dir, 'admin.html'), 'utf8');
+  ok(
+    /attest-email/.test(adminSrc),
+    'admin panel has an email-attestation call',
+  );
+  ok(
+    /function attestPartnerEmail/.test(adminSrc),
+    'admin panel defines the attestation handler',
+  );
 
   // Every onclick handler referenced must be declared.
   const declared = new Set(

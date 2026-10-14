@@ -431,8 +431,8 @@
   <!-- ============================ REGISTER =========================== -->
   <div id="viewRegister" class="hidden">
     <div class="steps">
-      <div class="step active" id="stReg"><span class="n">1</span> Create account</div>
-      <div class="step" id="stVer"><span class="n">2</span> Verify email</div>
+      <div class="step active" id="stReg"><span class="n">1</span> Your details</div>
+      <div class="step" id="stVer"><span class="n">2</span> We confirm your email</div>
       <div class="step" id="stForm"><span class="n">3</span> Your details</div>
       <div class="step" id="stDocs"><span class="n">4</span> Documents</div>
       <div class="step" id="stDone"><span class="n">5</span> Review</div>
@@ -456,7 +456,10 @@
       <div class="field">
         <label for="regEmail">Email address</label>
         <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
-        <p class="hint">We will send you a verification link. Use an address you check regularly.</p>
+        <p class="hint">
+          Our team confirms this address for you — there is no link to click.
+          Use an address you check regularly.
+        </p>
       </div>
 
       <div class="btn-row">
@@ -482,22 +485,25 @@
   <!-- ======================= VERIFY PENDING ========================= -->
   <div id="viewVerify" class="hidden">
     <div class="steps">
-      <div class="step done"><span class="n">&#10003;</span> Create account</div>
-      <div class="step active"><span class="n">2</span> Verify email</div>
+      <div class="step done"><span class="n">&#10003;</span> Details received</div>
+      <div class="step active"><span class="n">2</span> We confirm your email</div>
       <div class="step"><span class="n">3</span> Your details</div>
       <div class="step"><span class="n">4</span> Documents</div>
       <div class="step"><span class="n">5</span> Review</div>
     </div>
 
     <div class="card">
-      <h2>Check your inbox</h2>
+      <h2>We are confirming your email address</h2>
       <p class="lead">
-        We sent a verification link to <b id="verifyEmail">your email address</b>.
-        Open it to confirm your address and continue your application.
+        Thank you. A member of our team will confirm your email address and send
+        you your sign-in details. There is no link to click — we verify it for
+        you.
       </p>
-      <div class="notice warn" id="emailSendWarning">
-        <strong>We could not send the email yet</strong>
-        Our mail service is not available right now. You can try resending below.
+      <div class="notice info">
+        <strong>What happens next</strong>
+        Once we have confirmed your address, we will email you a partner ID and
+        password. Sign in with those to complete your details and upload your
+        documents.
       </div>
       <div class="notice info">
         <strong>Save your session key</strong>
@@ -509,8 +515,7 @@
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn" id="resendBtn" onclick="resendVerification()">Resend verification email</button>
-        <button class="btn secondary" onclick="refreshMe()">I have verified — continue</button>
+        <button class="btn secondary" onclick="refreshMe()">Check again — I have been confirmed</button>
       </div>
     </div>
   </div>
@@ -968,10 +973,15 @@ function boot() {
     .then(function (cfg) {
       state.config = cfg;
       populateDocTypes(cfg);
-      if (!cfg.emailEnabled) {
-        msg('warn', 'Email delivery is not configured',
-          'An administrator must configure the mail service before applications can be completed.');
-      }
+      // NOTE: email is NO LONGER required to complete an application. Email
+      // verification is now an admin attestation, so a partner can register,
+      // be confirmed, complete KYC and submit with no mail service at all.
+      //
+      // The warning that used to sit here ("applications cannot be completed")
+      // was therefore wrong and has been removed. What email is still used for
+      // is sending the partner their admin-issued sign-in details — which is
+      // an ADMIN action, so the partner does not need to be warned about it
+      // here. The admin panel reports delivery failure at the point it happens.
       if (!cfg.encryptionReady) {
         msg('warn', 'Document upload is not available yet',
           'An administrator must configure the document encryption key before documents can be uploaded.');
@@ -1287,7 +1297,7 @@ function doRegister() {
   }
 
   var btn = $('regBtn');
-  busy(btn, true, 'Creating account…');
+  busy(btn, true, 'Submitting…');
   msg(null);
 
   api('/api/partner/register', { method: 'POST', body: { email: email } })
@@ -1297,19 +1307,20 @@ function doRegister() {
         state.token = data.token;
         localStorage.setItem(SESSION_KEY, data.token);
         $('sessionKeyBox').value = data.token;
-        $('verifyEmail').textContent = email;
-        $('emailSendWarning').classList.toggle('hidden', data.emailSent !== false);
         show('viewVerify');
-        refreshMe();
+        // show('viewVerify') is correct here: the account exists but is NOT
+        // verified. Verification is now an admin attestation, so the page
+        // must say "we will confirm you" rather than "open your inbox".
+        msg('ok', 'Details received',
+          data.message || 'Our team will confirm your email address and send your sign-in details.');
       } else {
         // Deliberately identical path whether or not the address was known.
-        $('verifyEmail').textContent = email;
-        $('emailSendWarning').classList.add('hidden');
         $('sessionKeyBox').value = '';
         show('viewVerify');
-        msg('info', 'Check your email',
-          'If this address can be registered, a verification email is on its way. ' +
-          'If you already have an application, use "Resume your application" with your saved session key.');
+        msg('info', 'Thank you',
+          'If this address has an approved partner account, you can sign in with the ' +
+          'details we emailed you. If you already started an application, use ' +
+          '"Resume your application" with your saved session key.');
       }
     })
     .catch(function (e) {
@@ -1330,20 +1341,9 @@ function resumeSession() {
   refreshMe();
 }
 
-function resendVerification() {
-  var btn = $('resendBtn');
-  busy(btn, true, 'Sending…');
-  msg(null);
-  api('/api/partner/resend-verification', { method: 'POST' })
-    .then(function (d) {
-      busy(btn, false);
-      msg('ok', 'Email sent', d.message || 'Check your inbox.');
-    })
-    .catch(function (e) {
-      busy(btn, false);
-      msg('err', 'Could not send', e.message);
-    });
-}
+// NOTE: resendVerification() was removed with the emailed-link flow. There is
+// no longer any email to resend — the admin attestation endpoint is the only
+// way to become verified.
 
 // ------------------------------------------------------------------ load me
 // The ONE place a session token is ever placed in a URL.
@@ -1388,10 +1388,11 @@ function route() {
   var p = state.partner;
   if (!p) { show('viewRegister'); return; }
 
+  // Still awaiting the admin's email attestation. There is no link for the
+  // partner to click, so the page explains who is doing what rather than
+  // showing an inbox instruction.
   if (!p.emailVerified) {
-    $('verifyEmail').textContent = p.email;
     $('sessionKeyBox').value = state.token || '';
-    $('emailSendWarning').classList.add('hidden');
     show('viewVerify');
     return;
   }

@@ -4,7 +4,7 @@
  * Boots the real Express app from server.js against a STUB Supabase client and
  * a stub email transport, then drives the complete partner lifecycle over
  * HTTP. The point is to exercise the actual route handlers, validation and
- * trust boundaries — not a re-implementation of them.
+ * trust boundaries â€” not a re-implementation of them.
  *
  * What this covers:
  *   - registration, including the user-enumeration-resistant response
@@ -129,32 +129,41 @@ console.log('\n=== Partner Program integration tests ===\n')
 
 let partnerToken = null
 let partnerId = null
-let verifyToken = null
 
-// Capture the verification token by observing the RPC call.
-function lastVerificationToken() {
-  const call = [...state.rpcLog].reverse().find((r) => r.name === 'partner_set_verification_token')
-  return call ? call.params.p_raw_token : null
-}
+// NOTE: there is no verification token any more. The emailed-link flow was
+// replaced by an ADMIN ATTESTATION that sets the same `email_verified` flag.
+// lastVerificationToken() is gone with it.
 
-await test('registration creates an account and sends a verification email', async () => {
+await test('registration creates an account and does NOT send a verification email', async () => {
   const res = await request('POST', '/api/partner/register', { body: { email: 'Partner@Example.com' } })
   assert.equal(res.status, 201)
   assert.equal(res.body.ok, true)
   assert.ok(res.body.token, 'a portal token is returned to the new partner')
-  assert.equal(res.body.emailSent, true, 'the email transport reported success')
+
+  // The whole point of removing the link: registration must not depend on a
+  // mail service. emailSent is false and the response says so.
+  assert.equal(res.body.emailSent, false, 'no verification email is sent')
+  assert.equal(res.body.awaitingAttestation, true, 'the response says an admin must confirm the address')
+
+  // And no verification token was minted in the database.
+  const minted = [...state.rpcLog].some((r) => r.name === 'partner_set_verification_token')
+  assert.equal(minted, false, 'no verification token RPC was called')
+
   partnerToken = res.body.token
   partnerId = [...db.partners.values()][0].id
-  verifyToken = lastVerificationToken()
-  assert.ok(verifyToken, 'a verification token was issued')
   assert.equal([...db.partners.values()][0].email, 'partner@example.com', 'email is normalised to lower case')
+  assert.equal([...db.partners.values()][0].email_verified, false, 'a new account is NOT verified')
 })
 
 await test('registration of an existing email does not reveal that it exists', async () => {
   const res = await request('POST', '/api/partner/register', { body: { email: 'partner@example.com' } })
   assert.equal(res.status, 202)
   assert.equal(res.body.token, undefined, 'no token is handed out for a duplicate')
-  assert.ok(/verification email is on its way/i.test(res.body.message))
+  // The wording may not confirm or deny that the address is registered.
+  assert.ok(
+    /approved partner account|sign in/i.test(res.body.message),
+    'the message is non-committal: ' + res.body.message,
+  )
   assert.equal(db.partners.size, 1, 'no second account was created')
 })
 
@@ -164,19 +173,44 @@ await test('an unverified partner cannot upload documents', async () => {
   assert.ok([400, 403].includes(res.status), 'blocked, got ' + res.status)
 })
 
-await test('verification link verifies the email once and expires the token', async () => {
-  const first = await request('GET', '/api/partner/verify?token=' + encodeURIComponent(verifyToken))
-  assert.equal(first.status, 302, 'success redirects to the portal')
-  assert.equal([...db.partners.values()][0].email_verified, true)
+await test('the email-verification endpoints NO LONGER EXIST', async () => {
+  // The link flow was removed outright. Asserting the absence stops it being
+  // reintroduced by accident, which would silently restore the SMTP dependency.
+  const verify = await request('GET', '/api/partner/verify?token=anything')
+  assert.equal(verify.status, 404, 'the verification-link endpoint is gone')
 
-  // Replaying the same link must not re-verify or leak which state it was in.
-  const second = await request('GET', '/api/partner/verify?token=' + encodeURIComponent(verifyToken))
-  assert.equal(second.status, 400, 'a consumed token is rejected')
+  const resend = await request('POST', '/api/partner/resend-verification', { body: {} })
+  assert.equal(resend.status, 404, 'the resend endpoint is gone')
 })
 
-await test('an unknown verification token is rejected', async () => {
-  const res = await request('GET', '/api/partner/verify?token=not-a-real-token')
-  assert.equal(res.status, 400)
+await test('an admin attestation verifies the address', async () => {
+  // The route requires admin auth, so an unauthenticated call must fail first.
+  const unauth = await request('POST', `/api/admin/partners/${partnerId}/attest-email`, {
+    body: { method: 'admin_attested' },
+  })
+  assert.ok([401, 403].includes(unauth.status), `expected 401/403, got ${unauth.status}`)
+  assert.equal(db.partners.get(partnerId).email_verified, false, 'an unauthorised call verified nothing')
+
+  // Now the real thing, exactly as the admin panel calls it.
+  const res = await request('POST', `/api/admin/partners/${partnerId}/attest-email`, {
+    headers: { Cookie: adminCookie() },
+    body: { method: 'admin_attested', note: 'stub test' },
+  })
+  assert.equal(res.status, 200, JSON.stringify(res.body))
+  assert.equal(res.body.ok, true)
+
+  const row = db.partners.get(partnerId)
+  assert.equal(row.email_verified, true, 'the address is now verified')
+  assert.equal(row.email_verified_by, 'admin-token', 'the attesting admin is recorded')
+  assert.equal(row.email_verified_method, 'admin_attested', 'the method is recorded')
+
+  // Idempotent: a second attestation is not an error.
+  const again = await request('POST', `/api/admin/partners/${partnerId}/attest-email`, {
+    headers: { Cookie: adminCookie() },
+    body: { method: 'admin_attested' },
+  })
+  assert.equal(again.status, 200, 're-attesting is not an error')
+  assert.equal(again.body.alreadyVerified, true, 'it reports already-verified')
 })
 
 await test('GET /api/partner/me returns the authenticated partner only', async () => {
@@ -520,12 +554,16 @@ await test('an admin rejection schedules a purge no earlier than the legal reten
   // must never be scheduled before the floor elapses.
   const p2 = await request('POST', '/api/partner/register', { body: { email: 'reject-me@example.com' } })
   assert.equal(p2.status, 201)
-  const token2 = p2.body.token
-  const vt2 = lastVerificationToken()
-  await request('GET', '/api/partner/verify?token=' + encodeURIComponent(vt2))
 
   const row2 = [...db.partners.values()].find((r) => r.email === 'reject-me@example.com')
   assert.equal(row2.status, 'draft')
+
+  // Verification is now an admin attestation rather than an emailed link.
+  const attested = await request('POST', `/api/admin/partners/${row2.id}/attest-email`, {
+    headers: { Cookie: adminCookie() },
+    body: { method: 'admin_attested' },
+  })
+  assert.equal(attested.status, 200, JSON.stringify(attested.body))
 
   const decided = await request('POST', `/api/admin/partners/${row2.id}/decision`, {
     headers: { Cookie: adminCookie() },

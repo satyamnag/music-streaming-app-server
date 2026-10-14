@@ -92,9 +92,9 @@ keeps running on the infrastructure that owns the partner database and the
 admin review queue.
 
 **`PARTNER_PUBLIC_BASE_URL`** (see §3.3) controls the branded origin used in
-partner-facing copy. Verification emails deliberately link to the **serving**
-host so a one-time security token never depends on the forward staying in
-place; the code detects whether the two hosts differ and picks accordingly.
+partner-facing copy, such as the sign-in link in the credentials email.
+(Historically it also governed the verification-email link; that email no longer
+exists — verification is now an admin attestation, see § 5.4a.)
 
 Both `/partner/terms` and `/partner/privacy` are exposed on **both** hosts for
 consistency.
@@ -202,9 +202,13 @@ is rejected outright. With your provider, verify the sending domain and publish:
 - **DKIM** — cryptographically signs your messages
 - **DMARC** — tells receivers what to do when SPF/DKIM fail
 
-Until this is done, partners will not reliably receive verification links.
-The portal detects an unconfigured mail service and says so plainly rather
-than silently failing.
+> **SMTP is no longer required to run the partner program.** Email verification
+> is now an admin attestation (see § 5.1a), so a partner can register, be
+> confirmed, complete KYC, upload documents and submit with **no mail service
+> configured at all**. Mail is used for two convenience messages only: the
+> admin-issued sign-in credentials, and the approval kit. If mail is
+> unconfigured, the admin panel reports the delivery failure at the point it
+> happens and the admin passes the details on directly.
 
 ### 3.5 Deploy and verify
 
@@ -437,6 +441,54 @@ The Third Schedule's three-year retention for large platforms applies to
 e-commerce entities with ≥2 crore registered users in India. **Unless Soulful
 Bhakti crosses that threshold it does not apply** — do not build to those
 periods as if they were yours.
+
+### 5.4a Email verification — ADMIN ATTESTATION, not an emailed link
+
+**Changed deliberately.** The original flow emailed a single-use verification
+link, which made the whole program dependent on a working SMTP/provider
+configuration. It has been **removed**, and the token-based DB functions were
+**dropped**, not merely left unused.
+
+**Be precise about what this does and does not claim.** Email ownership cannot
+be proven without the person receiving *something* at that address. That is not
+a configuration limit; it is what verification means. So rather than pretend a
+check exists, the check moved to a channel that already exists and is already
+trusted: **the admin**, who is already reviewing the partner's identity
+documents.
+
+| | |
+|---|---|
+| **Who verifies** | The admin, via `POST /api/admin/partners/:id/attest-email` |
+| **What is recorded** | `email_verified` (the same authoritative flag), plus `email_verified_by`, `email_verified_method`, `email_verified_note`, `email_verified_at` |
+| **Audit** | An append-only `email_attested` row with `actor_type = 'admin'` and the admin identity |
+| **Enforcement** | `partner_attest_email` is **service_role only** — `anon` and `authenticated` have no EXECUTE — and a **CHECK constraint** requires an attesting admin for any attested verification |
+| **Methods** | `admin_attested` (normal), `kyc_document`, `partner_contact`, `legacy_link` (pre-change rows) |
+| **Idempotent** | Yes, so a double-click in the admin panel is not an error. A second attestation does **not** overwrite the first attestor |
+
+**Why this is not a security downgrade.** An unattributed click on a link and a
+named human asserting "I confirmed this address" are not equivalent — the
+second is a stronger claim, *provided it is recorded*. It is: the schema
+refuses an attestation with no admin identity, and the audit log is append-only.
+The old flag was a bare boolean with no record of who caused it.
+
+**What was removed, and why the columns remain:**
+
+- `GET /api/partner/verify` and `POST /api/partner/resend-verification` —
+  **gone** (404). Asserted absent by the test suites so the flow cannot creep
+  back and silently restore the SMTP dependency.
+- `partner_set_verification_token` and `partner_consume_verification` —
+  **dropped**. Leaving a function that can set `email_verified` from a bearer
+  token would be a live authentication bypass, used or not.
+- The columns `email_verify_token_hash` / `_expires_at` / `_attempts` are
+  **kept but unwritten**. Dropping columns is irreversible and buys nothing;
+  a stale hash is inert because no function reads it.
+
+**Consequence for registration.** Because there is no emailed link, an
+unauthenticated `POST /api/partner/register` can no longer produce a *usable*
+account: the row is created unverified and cannot submit, upload or be approved
+until an admin attests it. The endpoint therefore tells the caller plainly that
+the team will confirm the address, rather than showing a verification step that
+no longer exists.
 
 ### 5.5 Data minimisation
 
@@ -711,14 +763,13 @@ and individually, that is the right trade.
 - **Registration is not a user-enumeration oracle** (ASVS 6.3.8). The response
   is identical whether or not the address is already registered; for a duplicate
   the *existing* partner is emailed a notice instead of issuing a token.
-- Rate limits on registration, verification, resend, upload and submit. Note
-  `ipv6Subnet` is left at the library default of `/56`: Indian mobile ISPs
-  commonly delegate large IPv6 prefixes, so a per-address limit alone is
-  trivially bypassed.
+- Rate limits on registration, sign-in, upload and submit. Note `ipv6Subnet` is
+  left at the library default of `/56`: Indian mobile ISPs commonly delegate
+  large IPv6 prefixes, so a per-address limit alone is trivially bypassed.
 - **`MemoryStore` caveat**: these limits reset on restart and multiply across
   instances. They are a coarse abuse floor; the authoritative limits are the
-  per-partner document cap (15) and the per-account resend window (5/hour),
-  both enforced in Postgres.
+  per-partner document cap (15) and the per-account sign-in lockout, both
+  enforced in Postgres.
 - The audit log is **append-only** — a trigger makes UPDATE and DELETE fail.
 
 ---
@@ -726,10 +777,12 @@ and individually, that is the right trade.
 ## 7. Schema reference
 
 ### `partners`
-One row per application. Key points: `portal_token_hash` (unique),
-`email_verify_token_hash`, `status`, `affiliate_id` (set on approval),
-`purge_after`, and **`earliest_purge_at`** — the DPDP Rules r.8(3) one-year
-minimum retention floor, defaulted at creation.
+One row per application. Key points: `portal_token_hash` (unique, the SESSION
+credential), `login_id` + `password_hash` (admin-issued sign-in),
+`email_verified` + `email_verified_by` / `_method` / `_at` (**admin-attested**;
+`email_verify_token_hash` is a retained-but-unwritten legacy column), `status`,
+`affiliate_id` (set on approval), `purge_after`, and **`earliest_purge_at`** —
+the DPDP Rules r.8(3) one-year minimum retention floor, defaulted at creation.
 
 Statuses: `draft` → `pending_verification` → `submitted` → `under_review` →
 (`needs_info` ⇄) → `approved` | `rejected` | `withdrawn`
@@ -753,7 +806,9 @@ Append-only. `actor_type` (`partner` | `admin` | `system`), `action`,
 here.**
 
 ### `partner_email_events`
-Verification / resend / verified events; backs the per-account resend window.
+Per-account email delivery records. It historically backed the verification
+resend window (5/hour); with the emailed-link flow removed, the remaining
+writers are the credential and approval emails.
 
 ---
 
@@ -785,9 +840,9 @@ npm run test:partner-flow      # 37 HTTP integration tests
 
 | Layer | Count | Proves |
 |---|---|---|
-| Real SQL behaviour (`partner_db.test.sql`) | **131 assertions** | The SQL functions, CHECK constraints, SECURITY DEFINER posture and grants behave as authored — **against a genuine PostgreSQL server** |
+| Real SQL behaviour (`partner_db.test.sql`) | **142 assertions** | The SQL functions, CHECK constraints, SECURITY DEFINER posture and grants behave as authored — **against a genuine PostgreSQL server** — including that the retired token-verification functions no longer exist and that email attestation requires an admin identity |
 | Credentials + login + dashboard, real SQL (`partner_auth.test.sql`) | **103 assertions** | bcrypt round-trip, admin issuance, no-enumeration login, session rotation, lockout + recovery, forced password change, dashboard aggregates, and that the return type exposes **no KYC column** |
-| HTTP end-to-end vs **real** PostgreSQL (`partner-real-db.test.mjs`) | **29 tests** | The whole pipeline works through the real Express server and real database, including encryption round-trips |
+| HTTP end-to-end vs **real** PostgreSQL (`partner-real-db.test.mjs`) | **31 tests** | The whole pipeline works through the real Express server and real database, including encryption round-trips, admin attestation, and that the removed verification endpoints return 404 |
 | Credentials + login over **real** HTTP (`partner-auth-http.test.mjs`) | **16 tests** | The admin route is admin-only, the API never returns a password, a wrong password and an unknown ID are indistinguishable, the new session drives the **unmodified** `/api/partner/me`, and the dashboard payload carries no KYC key |
 | HTTP integration vs stub (`partner-flow.test.mjs`) | **37 tests** | Route logic, validation and trust boundaries in isolation |
 | Crypto + file validation (`partner_crypto.test.mjs`) | **42 tests** | Encryption round-trip, tamper detection, fail-closed KEK, upload attack rejection, and that the generated password is CSPRNG, unbiased and clear of bcrypt's 72-byte truncation limit |
@@ -881,8 +936,8 @@ production deploy.**
 - [ ] Migration 033 applied; verification queries at the end all pass
 - [ ] `partner-kyc` bucket exists and is **private**
 - [ ] `partner_kek` generated and **backed up outside Supabase**
-- [ ] Email provider configured and `mail_from` set
-- [ ] SPF, DKIM and DMARC published; a test verification email arrives in the inbox
+- [ ] Email provider configured and `mail_from` set — **optional**: the program runs without it, and only the credential and approval emails need it
+- [ ] SPF, DKIM and DMARC published; a test **credentials** email arrives in the inbox
 - [ ] Startup log shows `email=…, encryption=ready`
 
 **Legal / policy**

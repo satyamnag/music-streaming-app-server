@@ -165,20 +165,21 @@ console.log('Database truncated; starting lifecycle.\n')
 
 let partnerToken = null
 let partnerId = null
-let verifyToken = null
+// NOTE: `verifyToken` was removed with the emailed-link flow. Verification is
+// an admin attestation and has no token.
 
 // The server mints the verification token internally, so read its hash target
 // from the database and instead drive verification through the resend path,
 // which returns success and lets us confirm via the DB.
-async function fetchVerificationToken() {
-  // We cannot recover the raw token (only its hash is stored) — that is the
-  // design. To complete the flow we mint a token directly in SQL, exactly as
-  // the server would, then use the HTTP verify endpoint on it.
-  const rows = await q('select id from public.partners where email = $1', ['real.partner@example.com'])
-  const id = rows[0].id
-  const raw = crypto.randomBytes(32).toString('hex')
-  await q('select public.partner_set_verification_token($1, $2, 1440)', [id, raw])
-  return raw
+// Email verification is now an ADMIN ATTESTATION, not an emailed link. The
+// old fetchVerificationToken() helper is gone with the token flow; this calls
+// the real RPC the admin route calls.
+async function attestPartnerEmail(partnerRowId) {
+  await q(
+    `select public.partner_attest_email($1, 'test-admin@soulfulbhakti.com',
+       'admin_attested', 'integration test')`,
+    [partnerRowId],
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -229,21 +230,52 @@ await test('an unverified partner is blocked from uploading (real DB gate)', asy
 })
 
 // ---------------------------------------------------------------------------
-// 2. Email verification through the real HTTP endpoint
+// 2. Email verification via ADMIN ATTESTATION (replaces the emailed link)
 // ---------------------------------------------------------------------------
-await test('GET /api/partner/verify consumes the token in the real DB', async () => {
-  verifyToken = await fetchVerificationToken()
-  const res = await request('GET', '/api/partner/verify?token=' + encodeURIComponent(verifyToken))
-  assert.equal(res.status, 302, 'success redirects')
-
-  const rows = await q('select email_verified, email_verify_token_hash from public.partners where id=$1', [partnerId])
-  assert.equal(rows[0].email_verified, true, 'the REAL row is marked verified')
-  assert.equal(rows[0].email_verify_token_hash, null, 'the token hash is burned')
+await test('the partner is blocked until an admin attests the address', async () => {
+  // Still unverified at this point, so submission must be refused. This proves
+  // the gate is real before we open it. The route answers 403 (forbidden),
+  // not 400 — the request is well-formed but not permitted yet.
+  const res = await request('POST', '/api/partner/submit', { token: partnerToken, body: {} })
+  assert.equal(res.status, 403, JSON.stringify(res.body))
+  assert.ok(/verify your email/i.test(res.body.error), 'the gate names email verification')
 })
 
-await test('replaying the verification link is refused', async () => {
-  const res = await request('GET', '/api/partner/verify?token=' + encodeURIComponent(verifyToken))
-  assert.equal(res.status, 400, 'a consumed token is rejected by the DB function')
+await test('POST /api/admin/partners/:id/attest-email verifies the REAL row', async () => {
+  // The admin route, exactly as the admin panel calls it.
+  const res = await request('POST', `/api/admin/partners/${partnerId}/attest-email`, {
+    headers: { Cookie: adminCookie() },
+    body: { method: 'admin_attested', note: 'integration test' },
+  })
+  assert.equal(res.status, 200, JSON.stringify(res.body))
+  assert.equal(res.body.ok, true)
+
+  const rows = await q(
+    `select email_verified, email_verified_by, email_verified_method, email_verified_at
+     from public.partners where id=$1`,
+    [partnerId],
+  )
+  assert.equal(rows[0].email_verified, true, 'the REAL row is marked verified')
+  assert.equal(rows[0].email_verified_by, 'admin-token', 'the attesting admin is recorded')
+  assert.equal(rows[0].email_verified_method, 'admin_attested', 'the method is recorded')
+  assert.ok(rows[0].email_verified_at, 'the timestamp is recorded')
+})
+
+await test('attestation requires admin auth', async () => {
+  const res = await request('POST', `/api/admin/partners/${partnerId}/attest-email`, {
+    body: { method: 'admin_attested' },
+  })
+  assert.ok(res.status === 401 || res.status === 403, `expected 401/403, got ${res.status}`)
+})
+
+await test('the email-verification endpoints NO LONGER EXIST', async () => {
+  // The emailed-link flow was removed. Asserting the absence keeps it from
+  // being reintroduced by accident.
+  const verify = await request('GET', '/api/partner/verify?token=anything')
+  assert.equal(verify.status, 404, 'the verification-link endpoint is gone')
+
+  const resend = await request('POST', '/api/partner/resend-verification', { body: {} })
+  assert.equal(resend.status, 404, 'the resend endpoint is gone')
 })
 
 await test('GET /api/partner/me returns the real row', async () => {
@@ -619,7 +651,9 @@ await test('the full lifecycle left a complete audit trail', async () => {
     'select action, count(*)::int as n from public.partner_audit_log group by action order by action',
   )
   const actions = rows.map((r) => r.action)
-  for (const expected of ['register', 'email_verified', 'submit', 'approve', 'document_uploaded']) {
+  // NOTE: 'email_verified' became 'email_attested' when the emailed-link flow
+  // was replaced by admin attestation.
+  for (const expected of ['register', 'email_attested', 'submit', 'approve', 'document_uploaded']) {
     assert.ok(actions.includes(expected), `audit contains "${expected}" (got: ${actions.join(', ')})`)
   }
 })

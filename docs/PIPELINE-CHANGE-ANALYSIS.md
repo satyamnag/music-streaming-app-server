@@ -261,12 +261,68 @@ suite proves the same session works on `/api/partner/me`.
 
 | Suite | Result |
 |---|---|
-| `partner_db.test.sql` | 131 assertions, all passed |
+| `partner_db.test.sql` | 142 assertions, all passed |
 | `partner_auth.test.sql` (new) | 103 assertions, all passed |
 | `partner_crypto.test.mjs` | 42 passed, 0 failed |
 | `partner_email.test.mjs` | 10 passed, 0 failed |
 | `partner-flow.test.mjs` (stub HTTP) | 37 passed, 0 failed |
-| `partner-real-db.test.mjs` (real PG over HTTP) | 29 passed, 0 failed |
+| `partner-real-db.test.mjs` (real PG over HTTP) | 31 passed, 0 failed |
 | `partner-auth-http.test.mjs` (new) | 16 passed, 0 failed |
 | `partner-verify.cjs` (static/security) | all checks passed |
+
+---
+
+# FOLLOW-UP CHANGE — email verification replaced by admin attestation
+
+**Requirement:** remove the verification link/OTP so the program does not need
+SMTP configuration.
+
+**The honest framing, which shaped the design.** Email ownership cannot be
+proven without the person receiving *something* at that address. That is not a
+configuration limitation; it is what verification means. Any "verification
+without sending" would be theatre. So the check did not disappear — it moved to
+a channel that already exists and is already trusted: **the admin**, who is
+already reviewing the partner's identity documents.
+
+This is **not a downgrade**. An unattributed click on a link and a named human
+asserting "I confirmed this address" are different claims, and the second is
+stronger *provided it is recorded*. It is:
+
+| Property | Enforcement |
+|---|---|
+| Who verified is recorded | `email_verified_by` (the resolved admin identity, never a request-body field) |
+| How is recorded | `email_verified_method` ∈ {`admin_attested`, `kyc_document`, `partner_contact`, `legacy_link`} |
+| When is recorded | `email_verified_at` |
+| It is auditable | Append-only `email_attested` row with `actor_type = 'admin'` |
+| It cannot be anonymous | A **CHECK constraint** rejects an attested verification with no admin identity, and the function returns `admin_required` |
+| A partner cannot self-verify | `partner_attest_email` is **service_role only**; asserted: `anon` and `authenticated` have no EXECUTE |
+
+**Removed, and asserted absent** so the flow cannot creep back and silently
+restore the SMTP dependency:
+
+- `GET /api/partner/verify` and `POST /api/partner/resend-verification` → 404.
+  Asserted by both HTTP suites and by the static verifier.
+- `partner_set_verification_token` and `partner_consume_verification` →
+  **dropped**. An orphaned function that can set `email_verified` from a bearer
+  token is a live authentication bypass whether or not anything calls it.
+  Asserted absent in the DB suite.
+- `sendVerificationEmail`, `resolveVerifyBaseUrl`, `resendLimiter`,
+  `VERIFY_TOKEN_TTL_MINUTES` — all removed as dead code.
+
+**Kept deliberately:** the columns `email_verify_token_hash`,
+`email_verify_expires_at`, `email_verify_attempts`. Dropping columns on a
+production table is irreversible and buys nothing here; a stale hash is inert
+because no function reads it any more.
+
+**Consequence that had to be handled, not ignored.** With no emailed link, an
+unauthenticated `POST /api/partner/register` can no longer produce a *usable*
+account. Left alone it would have been an open way to create partner rows with
+nobody vouching for them. The route now tells the caller plainly that the team
+will confirm the address, and the row stays unverified — so it cannot submit,
+upload documents or be approved — until an admin attests it.
+
+**One-time backfill.** Rows already verified are marked `legacy_link` so their
+history stays truthful. Rows that were NOT verified are **left blocked**: the
+migration must not fabricate a check that never happened. An admin attests them
+explicitly.
 

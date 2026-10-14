@@ -4537,6 +4537,16 @@ function renderPartnerActions(data) {
   var host = document.getElementById('pmActions');
   var parts = [];
 
+  // EMAIL ATTESTATION — the replacement for the emailed verification link.
+  //
+  // Shown FIRST and for any status, because it is the gate on everything else:
+  // an unattested partner cannot complete their details, upload documents or
+  // be approved. The button label says "unverified" rather than describing a
+  // link, since no link is sent any more.
+  if (!p.emailVerified) {
+    parts.push('<button class="btn btn-success" onclick="attestPartnerEmail(\'' + p.id + '\')">Confirm email address (unverified)</button>');
+  }
+
   if (p.status === 'submitted') {
     parts.push('<button class="btn btn-secondary" onclick="partnerDecision(\'' + p.id + '\',\'under_review\')">Start review</button>');
   }
@@ -4651,6 +4661,44 @@ async function approvePartner(id) {
     if (!res.ok) { var e = await res.json(); throw new Error(e.error || 'Approval failed'); }
     var d = await res.json();
     toast('Partner approved — referrer ' + d.referrerCode + ', coupon ' + d.couponCode);
+    await openPartner(id);
+    loadPartners();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+// Records the ADMIN'S ATTESTATION that a partner's email address is correct.
+//
+// This replaces the emailed verification link. There is no SMTP dependency:
+// the admin confirms the address (from a call, from the KYC documents, or
+// however they actually established it) and the system records who vouched for
+// it and when.
+//
+// The admin identity is taken from the SESSION by the server, never from this
+// page, so an action cannot be attributed to someone else.
+async function attestPartnerEmail(id) {
+  var ok = confirm(
+    'Confirm this partner\'s email address?\n\n' +
+    'Only do this if you have actually verified the address belongs to this ' +
+    'partner. This unlocks their application: they will be able to complete ' +
+    'their details, upload documents and be approved.\n\n' +
+    'Your name is recorded against this confirmation.'
+  );
+  if (!ok) return;
+  if (!lock()) return;
+
+  try {
+    showLoading(true);
+    var res = await authedFetch('/api/admin/partners/' + id + '/attest-email', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method: 'admin_attested' })
+    });
+    if (!res.ok) { var e = await res.json(); throw new Error(e.error || 'Could not confirm the address'); }
+    var d = await res.json();
+    toast(d.message || 'Email address confirmed');
     await openPartner(id);
     loadPartners();
   } catch (e) {

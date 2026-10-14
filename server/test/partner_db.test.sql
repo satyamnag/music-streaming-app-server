@@ -189,7 +189,8 @@ declare
   v_id uuid;
   v_tok text;
   v_res record;
-  v_verify text;
+  -- NOTE: `v_verify` was removed with the emailed-link flow. Attestation has
+  -- no token, so there is nothing to hold.
 begin
   raise notice '';
   raise notice '--- 3. Email verification ---';
@@ -214,68 +215,107 @@ begin
   perform pg_temp.assert_eq(v_res.ok, false, 'an unverified partner cannot upload documents');
   perform pg_temp.assert_eq(v_res.reason, 'email_not_verified', 'upload gate reports email_not_verified');
 
-  -- Mint a verification token and confirm only its hash is stored.
-  v_verify := encode(gen_random_bytes(32), 'hex');
-  perform public.partner_set_verification_token(v_id, v_verify, 1440);
+  -- ---------------------------------------------------------------------
+  -- EMAIL VERIFICATION IS NOW AN ADMIN ATTESTATION.
+  --
+  -- The emailed-link flow (partner_set_verification_token /
+  -- partner_consume_verification) was REMOVED and those functions were
+  -- DROPPED, so there is no token to mint or consume any more. What is tested
+  -- here is the replacement, plus the fact that the old surface is really gone.
+  -- ---------------------------------------------------------------------
 
+  -- The old token-based functions must NOT exist. If either came back, a
+  -- bearer token could set email_verified again — an authentication bypass.
   perform pg_temp.assert(
-    (select email_verify_token_hash from public.partners where id = v_id)
-      = encode(digest(v_verify, 'sha256'), 'hex'),
-    'verification token is stored only as a SHA-256 hash');
+    not exists (
+      select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public'
+        and p.proname in ('partner_consume_verification', 'partner_set_verification_token')
+    ),
+    'the retired token-verification functions do NOT exist');
 
+  -- An attestation with NO admin identity must be refused: that is what keeps
+  -- email_verified auditable rather than an anonymous boolean.
+  select * into v_res from public.partner_attest_email(v_id, '', 'admin_attested', null);
+  perform pg_temp.assert_eq(v_res.ok, false, 'attestation without an admin identity is refused');
+  perform pg_temp.assert_eq(v_res.reason, 'admin_required', 'reason is admin_required');
   perform pg_temp.assert(
-    (select email_verify_expires_at from public.partners where id = v_id) > now(),
-    'verification token gets a future expiry');
+    (select email_verified from public.partners where id = v_id) = false,
+    'a refused attestation did not verify the row');
 
-  -- Consume it.
-  select * into v_res from public.partner_consume_verification(v_verify);
-  perform pg_temp.assert_eq(v_res.ok, true, 'valid verification token is accepted');
-  perform pg_temp.assert_eq(v_res.reason, 'verified', 'first use reports "verified"');
+  -- An unknown method must be refused.
+  select * into v_res from public.partner_attest_email(v_id, 'admin@x.test', 'telepathy', null);
+  perform pg_temp.assert_eq(v_res.ok, false, 'an unknown verification method is refused');
+  perform pg_temp.assert_eq(v_res.reason, 'invalid_method', 'reason is invalid_method');
+
+  -- An unknown partner must be refused rather than silently succeeding.
+  select * into v_res from public.partner_attest_email(
+    '00000000-0000-4000-8000-000000000000', 'admin@x.test', 'admin_attested', null);
+  perform pg_temp.assert_eq(v_res.ok, false, 'attesting an unknown partner is refused');
+  perform pg_temp.assert_eq(v_res.reason, 'not_found', 'reason is not_found');
+
+  -- The REAL attestation.
+  select * into v_res from public.partner_attest_email(
+    v_id, 'reviewer@soulfulbhakti.com', 'admin_attested', 'confirmed on call');
+  perform pg_temp.assert_eq(v_res.ok, true, 'an admin can attest the address');
+  perform pg_temp.assert_eq(v_res.already_verified, false, 'first attestation reports not-already-verified');
+
   perform pg_temp.assert(
     (select email_verified from public.partners where id = v_id) = true,
     'email_verified is now true');
 
+  -- WHO and HOW must be recorded, or the attestation is unauditable.
   perform pg_temp.assert(
-    (select email_verify_token_hash from public.partners where id = v_id) is null,
-    'token hash is burned after use (single-use)');
+    (select email_verified_by from public.partners where id = v_id) = 'reviewer@soulfulbhakti.com',
+    'the attesting admin is recorded');
+  perform pg_temp.assert(
+    (select email_verified_method from public.partners where id = v_id) = 'admin_attested',
+    'the verification method is recorded');
+  perform pg_temp.assert(
+    (select email_verified_note from public.partners where id = v_id) = 'confirmed on call',
+    'the attestation note is recorded');
+  perform pg_temp.assert(
+    (select email_verified_at from public.partners where id = v_id) is not null,
+    'the attestation timestamp is recorded');
 
-  -- Replay must be refused.
-  select * into v_res from public.partner_consume_verification(v_verify);
-  perform pg_temp.assert_eq(v_res.ok, false, 'a consumed token cannot be replayed');
+  -- It must be AUDITED, with the admin as the actor.
+  perform pg_temp.assert(
+    exists (
+      select 1 from public.partner_audit_log l
+      where l.partner_id = v_id
+        and l.action = 'email_attested'
+        and l.actor_type = 'admin'
+        and l.actor = 'reviewer@soulfulbhakti.com'
+    ),
+    'the attestation is audited with the admin identity');
 
-  -- Unknown token must be refused.
-  select * into v_res from public.partner_consume_verification('not-a-real-token');
-  perform pg_temp.assert_eq(v_res.reason, 'invalid', 'unknown token is rejected');
-
-  -- Empty token must not crash.
-  select * into v_res from public.partner_consume_verification('');
-  perform pg_temp.assert_eq(v_res.ok, false, 'empty token is rejected safely');
+  -- Idempotent: a second attestation succeeds and reports it was already done.
+  -- A double-click in the admin UI must not be an error.
+  select * into v_res from public.partner_attest_email(v_id, 'other@soulfulbhakti.com', 'admin_attested', null);
+  perform pg_temp.assert_eq(v_res.ok, true, 're-attesting an already verified row succeeds');
+  perform pg_temp.assert_eq(v_res.already_verified, true, 'it reports already_verified');
+  perform pg_temp.assert(
+    (select email_verified_by from public.partners where id = v_id) = 'reviewer@soulfulbhakti.com',
+    're-attesting does NOT overwrite the original attestation (the first attestor stands)');
 end $$;
 
--- An EXPIRED token must be refused.
+-- The attestation audit row must be append-only like every other audit row.
 do $$
 declare
   v_id uuid;
-  v_verify text;
-  v_res record;
 begin
   raise notice '';
-  raise notice '--- 3b. Expired verification token ---';
+  raise notice '--- 3b. Attestation audit is immutable ---';
 
-  insert into public.partners (email, portal_token_hash, status)
-  values ('expired@example.com', encode(digest('tok-expired', 'sha256'), 'hex'), 'draft')
-  returning id into v_id;
+  select id into v_id from public.partners where email = 'test.partner@example.com';
 
-  v_verify := encode(gen_random_bytes(32), 'hex');
-  perform public.partner_set_verification_token(v_id, v_verify, 1440);
-
-  -- Force expiry into the past.
-  update public.partners set email_verify_expires_at = now() - interval '1 minute'
-  where id = v_id;
-
-  select * into v_res from public.partner_consume_verification(v_verify);
-  perform pg_temp.assert_eq(v_res.ok, false, 'expired token is refused');
-  perform pg_temp.assert_eq(v_res.reason, 'expired', 'expiry is reported as "expired"');
+  begin
+    update public.partner_audit_log set actor = 'tampered'
+    where partner_id = v_id and action = 'email_attested';
+    perform pg_temp.assert(false, 'the audit log must be append-only');
+  exception when others then
+    perform pg_temp.assert(true, 'the attestation audit row cannot be altered');
+  end;
 end $$;
 
 -- ===========================================================================
@@ -944,10 +984,20 @@ begin
   into v_ok;
   perform pg_temp.assert(v_ok = true, 'service_role CAN execute partner_approve');
 
-  -- Verification-token minting is server-only.
+  -- EMAIL ATTESTATION IS ADMIN-ONLY. This replaces the old verification-token
+  -- grant check: `anon` must not be able to verify an address for itself,
+  -- because that would make the whole attestation meaningless.
   select has_function_privilege('anon',
-    'public.partner_set_verification_token(uuid,text,integer)', 'EXECUTE') into v_ok;
-  perform pg_temp.assert(v_ok = false, 'anon CANNOT mint verification tokens');
+    'public.partner_attest_email(uuid,text,text,text)', 'EXECUTE') into v_ok;
+  perform pg_temp.assert(v_ok = false, 'anon CANNOT attest an email address');
+
+  select has_function_privilege('authenticated',
+    'public.partner_attest_email(uuid,text,text,text)', 'EXECUTE') into v_ok;
+  perform pg_temp.assert(v_ok = false, 'authenticated CANNOT attest an email address');
+
+  select has_function_privilege('service_role',
+    'public.partner_attest_email(uuid,text,text,text)', 'EXECUTE') into v_ok;
+  perform pg_temp.assert(v_ok = true, 'service_role CAN attest an email address (admin path)');
 
   -- The public portal CAN register and read itself.
   select has_function_privilege('anon', 'public.partner_register(text,text)', 'EXECUTE') into v_ok;
