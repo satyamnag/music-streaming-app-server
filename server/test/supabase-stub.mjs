@@ -403,6 +403,45 @@ function makeSupabaseStub() {
           return { data: [{ ok: true, status: row.status, reason: 'ok' }], error: null }
         }
 
+        case 'partner_set_credentials': {
+          // Mirrors the SQL: validates input, generates a handle when the row
+          // has none, reuses an existing handle on reissue, hashes nothing
+          // real (the stub never verifies), and clears any lockout.
+          const row = db.partners.get(p.p_partner_id)
+          if (!row) return { data: [{ ok: false, login_id: null, reason: 'not_found' }], error: null }
+
+          const cost = Number(p.p_bcrypt_cost || 10)
+          if (!Number.isInteger(cost) || cost < 10 || cost > 12) {
+            return { data: [{ ok: false, login_id: null, reason: 'invalid_bcrypt_cost' }], error: null }
+          }
+          if (!p.p_password || String(p.p_password).length < 16) {
+            return { data: [{ ok: false, login_id: null, reason: 'password_too_short' }], error: null }
+          }
+
+          if (!row.login_id) {
+            // The real function allocates a unique SB-XXXXXX handle.
+            const alphabet = '23456789BCDFGHJKMNPQRSTVWXYZ'
+            let handle
+            do {
+              handle = 'SB-'
+              for (let i = 0; i < 6; i++) {
+                handle += alphabet[Math.floor(Math.random() * alphabet.length)]
+              }
+            } while ([...db.partners.values()].some((r) => r.login_id === handle))
+            row.login_id = handle
+          }
+
+          // NEVER store the plaintext, exactly like the SQL. A fake marker is
+          // enough: the stub does not verify passwords.
+          row.password_hash = '$2b$10$stubstubstubstubstubst'
+          row.must_change_password = true
+          row.password_set_at = new Date().toISOString()
+          row.failed_login_count = 0
+          row.locked_until = null
+
+          return { data: [{ ok: true, login_id: row.login_id, reason: 'ok' }], error: null }
+        }
+
         case 'partner_attest_email': {
           // Mirrors the SQL: an attestation REQUIRES an admin identity and a
           // known method, is idempotent, and records who/when/how.

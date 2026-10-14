@@ -236,22 +236,41 @@ export function registerPartnerRoutes(app, deps) {
   }
 
   /**
-   * The base URL used to build the emailed verification link.
+   * The base URL used to build partner-facing links (the sign-in URL in the
+   * credentials email, and the approval email's dashboard link).
    *
-   * `PARTNER_PUBLIC_BASE_URL` is the single source of truth when set. It is the
-   * branded public origin (https://soulfulbhakti.com), so the link a partner
-   * receives shows the domain they recognise rather than the infrastructure
-   * host. That origin serves /partner via the marketing website, which forwards
-   * to this portal Ã¢â‚¬â€ so the link works whichever end the partner starts from.
+   * THE PROBLEM THIS SOLVES
+   * This service runs on admin.soulfulbhakti.com, so `req.get('host')` is the
+   * ADMIN host. Falling back to it produced partner-facing links pointing at
+   * https://admin.soulfulbhakti.com/partner — a host that exposes the admin
+   * panel's own subdomain to every partner, and which is not the domain the
+   * brand uses publicly.
    *
-   * Falling back to the request host keeps local development and any
-   * un-configured deployment working without special-casing.
+   * THE FIX
+   * Prefer, in order:
+   *   1. PARTNER_PUBLIC_BASE_URL — an explicit override, for staging or if the
+   *      public origin ever changes.
+   *   2. PARTNER_BRANDED_BASE_URL  — a built-in default of the public site, so
+   *      links are correct WITHOUT depending on an env var being set. An
+   *      unset variable must not silently leak the admin host into emails.
+   *   3. The request host — last resort, so local development and self-hosted
+   *      deployments still work with no configuration.
+   *
+   * WHY THIS IS SAFE: the branded origin serves /partner and forwards to this
+   * portal, so the link resolves correctly whether the partner opens it from
+   * the public site or lands here directly. Nothing about the portal's own
+   * routing changes — only the URL we PRINT in an email.
    */
+  const BRANDED_BASE_URL = 'https://soulfulbhakti.com'
+
   function resolveBaseUrl(req) {
     if (publicBaseUrl) return publicBaseUrl.replace(/\/+$/, '')
-    // Derive from the request. `trust proxy` is set, so protocol/host reflect
-    // the external origin rather than the internal Render address.
-    return `${req.protocol}://${req.get('host')}`
+    // Guard against a deployment that explicitly sets the admin host here.
+    const reqHost = req.get('host') || ''
+    if (/^admin\./i.test(reqHost)) return BRANDED_BASE_URL
+    // A non-admin request host means a custom/staging deployment; honour it.
+    if (reqHost) return `${req.protocol}://${reqHost}`
+    return BRANDED_BASE_URL
   }
 
   /**

@@ -43,9 +43,18 @@ resetStub()
 // test/partner-stub-loader.mjs, which is registered via --import.
 
 // Stub the email provider so the transport code runs without a network call.
+//
+// The request BODY is captured, not just short-circuited, so tests can assert
+// on what we actually emailed a partner. That matters for the portal URL: a
+// wrong host in the credentials email is invisible to every other test, which
+// is exactly how `admin.soulfulbhakti.com` ended up in partner-facing links.
+const sentEmails = []
 const realFetch = globalThis.fetch
 globalThis.fetch = async (url, opts) => {
   if (typeof url === 'string' && url.includes('api.resend.com')) {
+    if (opts && typeof opts.body === 'string') {
+      try { sentEmails.push(JSON.parse(opts.body)) } catch (_) { sentEmails.push({ raw: opts.body }) }
+    }
     return new Response(JSON.stringify({ id: 'stub-email-id' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -499,6 +508,75 @@ await test('approval is idempotent and returns the same artefacts', async () => 
   assert.equal(res.body.couponCode, couponBefore, 'no second coupon was created')
   assert.equal(db.coupons.size, 1, 'exactly one coupon exists')
   assert.equal(db.affiliates.size, 1, 'exactly one affiliate exists')
+})
+
+await test('partner-facing emails NEVER link to the admin host', async () => {
+  // REGRESSION GUARD.
+  //
+  // This service runs on admin.soulfulbhakti.com, and resolveBaseUrl() used to
+  // fall back to the request host — which is the ADMIN host on Render. That put
+  // https://admin.soulfulbhakti.com/partner into emails sent to partners,
+  // exposing the admin panel's subdomain and printing a host that is not the
+  // brand's public domain.
+  //
+  // NOTE ON HOW THIS IS TESTED: the suite talks to 127.0.0.1, and for a
+  // non-admin host resolveBaseUrl() intentionally honours the request host (so
+  // local/staging deployments keep working). The production bug only appears
+  // when the request host IS the admin host — so that is what this drives, by
+  // sending a Host header exactly as the real deployment receives.
+  const before = sentEmails.length
+
+  const issued = await request('POST', `/api/admin/partners/${partnerId}/credentials`, {
+    headers: { Cookie: adminCookie(), Host: 'admin.soulfulbhakti.com' },
+    body: {},
+  })
+  assert.equal(issued.status, 200, JSON.stringify(issued.body))
+  assert.ok(issued.body.loginId, 'credentials were issued')
+
+  const newEmails = sentEmails.slice(before)
+  assert.ok(newEmails.length > 0, 'issuing credentials sent an email')
+
+  let branded = 0
+  for (const mail of newEmails) {
+    const body = JSON.stringify(mail)
+    assert.ok(
+      !/admin\.soulfulbhakti\.com/i.test(body),
+      'a partner-facing email must NOT contain the admin host: ' + body.slice(0, 300),
+    )
+    if (/soulfulbhakti\.com/.test(body)) {
+      branded++
+      assert.ok(
+        /https:\/\/soulfulbhakti\.com\/partner/.test(body),
+        'the link must point at /partner on the public domain, got: ' + body.slice(0, 300),
+      )
+    }
+  }
+  assert.ok(branded > 0, 'the email contained a branded portal link')
+})
+
+await test('a non-admin host is still honoured (local/staging must keep working)', async () => {
+  // The branded default must not break local development or a self-hosted
+  // deployment: only the ADMIN host is rewritten.
+  const before = sentEmails.length
+  const res = await request('POST', `/api/admin/partners/${partnerId}/credentials`, {
+    headers: { Cookie: adminCookie(), Host: 'partners.staging.example' },
+    body: {},
+  })
+  assert.equal(res.status, 200, JSON.stringify(res.body))
+
+  const newEmails = sentEmails.slice(before)
+  assert.ok(newEmails.length > 0, 'an email was sent')
+  const body = JSON.stringify(newEmails[0])
+  // The protocol follows the request (http here, since the suite has no TLS).
+  // What matters is that the HOST is honoured rather than rewritten.
+  assert.ok(
+    /\/\/partners\.staging\.example\/partner/.test(body),
+    'a custom host must be honoured, got: ' + body.slice(0, 300),
+  )
+  assert.ok(
+    !/soulfulbhakti\.com/.test(body),
+    'a custom host must NOT be replaced by the branded default',
+  )
 })
 
 await test('the approved partner sees their QR link and coupon', async () => {
