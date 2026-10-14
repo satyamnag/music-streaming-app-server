@@ -1,9 +1,37 @@
 name: Keep Render Warm
 
+# Keeps a Render web service from idling on the free tier.
+#
+# ENVIRONMENT-AWARE. This workflow previously hard-coded the PRODUCTION Render
+# URL, which meant that on the `dev` branch it kept PRODUCTION warm while the
+# development service fell asleep — the exact opposite of the intent, and a
+# silent failure because the job still reported success.
+#
+# The target now comes from a repository variable, so each environment can
+# point at its own service:
+#
+#   Settings -> Secrets and variables -> Actions -> Variables
+#     RENDER_HEALTH_URL = https://<service>.onrender.com/health
+#
+# Set a different value per environment. On a GitHub Environment, scope the
+# variable to that environment; otherwise set it per repository.
+#
+# Behaviour when unset: the job SKIPS rather than guessing. Pointing keep-alive
+# at the wrong service is worse than not running it, because it wastes the free
+# tier's hours on a service nobody is using.
+
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # Every 14 minutes. Render's free tier idles after ~15 minutes of
+    # inactivity, so a 5-minute interval (the previous value) burned roughly
+    # 3x the required requests for no benefit.
+    - cron: '*/14 * * * *'
   workflow_dispatch:
+    inputs:
+      url:
+        description: 'Override the health URL for a single run'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -12,8 +40,38 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Wake Render free web service
+      - name: Resolve the health URL
+        id: resolve
+        env:
+          VAR_URL: ${{ vars.RENDER_HEALTH_URL }}
+          INPUT_URL: ${{ inputs.url }}
         run: |
-          curl --fail --silent --show-error --max-time 90 \
+          set -eu
+          URL="${INPUT_URL:-$VAR_URL}"
+          if [ -z "$URL" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Keep-alive skipped::RENDER_HEALTH_URL is not set for this repository/environment, so there is no service to keep warm."
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "url=$URL" >> "$GITHUB_OUTPUT"
+            # Never echo the full URL into the log unnecessarily, but the
+            # hostname is useful for confirming the right environment ran.
+            echo "Target host: $(echo "$URL" | sed -E 's#https?://([^/]+).*#\1#')"
+          fi
+
+      - name: Wake Render free web service
+        if: steps.resolve.outputs.enabled == 'true'
+        env:
+          URL: ${{ steps.resolve.outputs.url }}
+        run: |
+          set -eu
+          # --retry handles a service that is mid-cold-start: the first request
+          # may time out while the container boots, and the retry succeeds once
+          # it is up. Without this the job fails on an otherwise healthy
+          # service, producing noise that trains people to ignore failures.
+          curl --fail --silent --show-error \
+            --max-time 90 \
+            --retry 3 --retry-delay 20 --retry-all-errors \
             -o /dev/null \
-            https://music-streaming-app-server.onrender.com/health
+            "$URL"
+          echo "Service is awake."
