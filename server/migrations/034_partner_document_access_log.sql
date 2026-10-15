@@ -1,225 +1,180 @@
 -- ============================================================================
 -- 034_partner_document_access_log.sql
 -- ============================================================================
--- Adds the RPC that records WHO READ WHICH KYC DOCUMENT, and WHEN.
+-- Brings the REPOSITORY in line with PRODUCTION for
+-- public.partner_log_document_access.
 --
--- WHY THIS MIGRATION EXISTS
--- server/partner_routes.mjs calls `partner_log_document_access` on every
--- document view — success and denial alike — and discards the error:
+-- ---------------------------------------------------------------------------
+-- READ THIS FIRST: THE HISTORY OF THIS FILE, BECAUSE IT EXPLAINS ITS SHAPE
+-- ---------------------------------------------------------------------------
+-- An earlier version of this migration was WRONG and would have broken a
+-- working production function. It was written on the belief that the function
+-- did not exist anywhere, because it is absent from every migration in this
+-- repository. That belief was mistaken. The function DOES exist in production;
+-- it was applied out-of-band and never committed, so the repository and the
+-- live database had silently drifted.
 --
---     const { error } = await supabase.rpc('partner_log_document_access', {...})
---     if (error) log.error('[admin] document access log failed:', error.message)
+-- Applying the earlier version produced, in production:
 --
--- That function was never created. Migration 033 defines 27 functions and none
--- of them log document access; `document_access` appears nowhere in it. So the
--- call has been failing silently in production, and document reads have been
--- unaudited.
+--     ERROR: 42P13: cannot change return type of existing function
+--     HINT:  Use DROP FUNCTION partner_log_document_access(...) first.
 --
--- This is not cosmetic. The stated reason for proxying document bytes through
--- the server instead of issuing a Supabase signed URL is auditability:
+-- That error was the drift surfacing. The live function is a REAL, WORKING
+-- implementation: it returns void, inserts into partner_audit_log with
+-- actor_type='admin', and strips control characters from the user agent against
+-- log injection. It was never broken, and document-access auditing was never a
+-- no-op. The earlier file's claim to the contrary was false.
 --
---     "Proxying gives a single chokepoint where every access is audited."
---     "a leaked URL is a bearer credential for its whole lifetime"
+-- So this file no longer INVENTS a function. It REPRODUCES the live one, so a
+-- database built from this repository ends up with the function production
+-- already has. That is a sync, not a redesign.
 --
--- Reason 1 traded away revocability in exchange for an audit trail. Without
--- this function that trade bought nothing: there was no record of a read.
+-- ---------------------------------------------------------------------------
+-- THE CONTRACT, TAKEN FROM PRODUCTION
+-- ---------------------------------------------------------------------------
+--   returns void                 NOT a table. The caller reads only `error`,
+--                                never `data`, so a fire-and-forget write is
+--                                the correct shape — the original Express code
+--                                was right and needed no change.
+--   p_action  text               NO DEFAULT
+--   p_result  text               NO DEFAULT
+--   p_reason  text DEFAULT NULL
+--   p_ip_hash text DEFAULT NULL
+--   p_user_agent text DEFAULT NULL
 --
--- WHY THE ARGUMENTS ARE NAMED p_result / p_reason
--- The calling code passes exactly eight named arguments. The names and order
--- here must match, or PostgREST resolves no function and the call fails again —
--- silently, which is the failure mode being fixed. The TypeScript port
--- (libs/adminPartnerShared.ts) uses the same eight names.
+-- The action value written is 'document.access'.
 --
--- DESIGN NOTES, all deliberate:
+-- The TypeScript port passes all eight arguments by name, so it satisfies both
+-- this signature and the no-default parameters. The bug was never in a caller.
 --
---  1. record_type is 'document_access', NOT one of 033's existing action
---     values. The existing partner_audit_log rows describe lifecycle changes
---     (submitted, approved, email_attested). A document read is a different
---     kind of event — a security audit of privileged access — and conflating
---     them would make "who changed this application" and "who looked at this
---     PAN card" impossible to query apart.
+-- ---------------------------------------------------------------------------
+-- DEPLOYING THIS AGAINST PRODUCTION IS A NO-OP, AND THAT IS THE POINT
+-- ---------------------------------------------------------------------------
+-- The CREATE OR REPLACE below is equivalent to the live definition: same return
+-- type, same parameter list, same defaults, same body. It therefore does not
+-- raise 42P13 and does not change behaviour. Against a database built from this
+-- repository it CREATES the function; against production it replaces it with an
+-- identical one. Either way the two converge.
 --
---  2. NO DOCUMENT CONTENT AND NO PII in `detail`. The table's own comment
---     requires this: "Free-form, non-sensitive detail (NEVER raw PII or
---     document content)." Only the document id, the outcome and a coarse
---     reason code are stored — enough to answer "who saw this", nothing more.
---     The document id is a uuid reference, not content.
+-- ---------------------------------------------------------------------------
+-- WHY THERE IS NO DROP
+-- ---------------------------------------------------------------------------
+-- The obvious "fix" for 42P13 is to DROP first — that is what the HINT suggests.
+-- It is the wrong move here:
 --
---  3. The reason is normalised to a CLOSED SET. A free-text reason could carry
---     incidental detail (a filename, a storage key, a decryption error string)
---     into an append-only table that can never be edited to remove it.
---     Unknown reasons collapse to 'other' so the column stays queryable.
+--   * A DROP would discard a working, OWASP-conscious implementation in favour
+--     of one written from a description, because the DROP only exists to clear
+--     the way for MY design. There is no reason to prefer my design; the live
+--     one is already in service.
+--   * DROP + CREATE is not atomic with respect to concurrent callers. Between
+--     the two statements the function does not exist, and an audit write landing
+--     in that window would fail. For an audit path that is the wrong risk to
+--     take in order to change a return type nobody needs changed.
+--   * pg_depend showed no dependents, so a DROP would succeed — which is
+--     precisely why the decision must be about intent rather than feasibility.
 --
---  4. It NEVER RAISES for an unknown partner. The caller treats a denied
---     access for a non-existent partner as un-loggable (the FK would reject it)
---     and logs to the console instead. Returning ok=false mirrors that, rather
---     than throwing an error the caller would discard anyway.
+-- Because this file reproduces the live shape, no DROP is needed.
 --
---  5. It is APPEND-ONLY by construction: the function only ever INSERTs. The
---     partner_audit_log_no_update trigger from 033 raises on UPDATE or DELETE,
---     so even a later bug cannot rewrite history through this path.
---
---  6. service_role ONLY. Document-access records name the admin who looked, so
---     they must not be writable by the anon or authenticated roles, which would
---     let a client forge an access record or flood the log. The partner-facing
---     surface never calls this.
---
--- IDEMPOTENT: safe to re-run. `create or replace` plus `drop ... if exists`
--- for the trigger-free parts, and no data changes.
+-- ---------------------------------------------------------------------------
+-- SCOPE
+-- ---------------------------------------------------------------------------
+-- Additive and idempotent. Creates the function if absent, replaces it with an
+-- equivalent definition if present. No table, column, policy or existing row is
+-- altered. No application code changes.
 -- ============================================================================
 
 create or replace function public.partner_log_document_access(
-  p_partner_id  uuid,
+  p_partner_id uuid,
   p_document_id uuid,
-  p_admin       text,
-  p_action      text default 'document.view',
-  p_result      text default 'success',
-  p_reason      text default null,
-  p_ip_hash     text default null,
-  p_user_agent  text default null
+  p_admin text,
+  p_action text,
+  p_result text,
+  p_reason text default null,
+  p_ip_hash text default null,
+  p_user_agent text default null
 )
-returns table (ok boolean, reason text)
+returns void
 language plpgsql
 security definer
 set search_path = public
-as $$
-declare
-  v_action text;
-  v_result text;
-  v_reason text;
-  v_admin  text;
+as $function$
 begin
-  -- ---- action: closed set ------------------------------------------------
-  v_action := coalesce(nullif(trim(coalesce(p_action, '')), ''), 'document.view');
-  if v_action not in (
-    'document.view',
-    'document.review',
-    'document.delete',
-    'document.upload'
-  ) then
-    return query select false, 'invalid_action'::text;
-    return;
-  end if;
-
-  -- ---- result: closed set ------------------------------------------------
-  v_result := coalesce(nullif(trim(coalesce(p_result, '')), ''), 'success');
-  if v_result not in ('success', 'denied') then
-    return query select false, 'invalid_result'::text;
-    return;
-  end if;
-
-  -- ---- reason: closed set, defaulted per result --------------------------
-  -- 'other' rather than the raw string, so an unexpected reason cannot smuggle
-  -- free text (a key, a filename, a driver error) into an immutable row.
-  v_reason := nullif(trim(coalesce(p_reason, '')), '');
-  if v_reason is not null and v_reason not in (
-    'not_found',
-    'storage_error',
-    'decrypt_failed',
-    'checksum_mismatch',
-    'error',
-    'superseded',
-    'forbidden'
-  ) then
-    v_reason := 'other';
-  end if;
-  if v_result = 'success' then
-    -- A success has no failure reason; keeping one would misreport the outcome.
-    v_reason := null;
-  end if;
-
-  -- ---- actor: an admin identity is REQUIRED ------------------------------
-  -- Matches partner_attest_email's rule: a record with no actor is an
-  -- unattributable entry in a security log, which is the thing this table
-  -- exists to prevent. The caller always has an identity (it falls back to
-  -- 'admin-token'), so an empty value here means a caller bug, not a normal
-  -- path — refuse rather than write an anonymous row.
-  v_admin := nullif(trim(coalesce(p_admin, '')), '');
-  if v_admin is null then
-    return query select false, 'admin_required'::text;
-    return;
-  end if;
-
-  -- ---- ids must be present ----------------------------------------------
-  if p_partner_id is null or p_document_id is null then
-    return query select false, 'invalid_id'::text;
-    return;
-  end if;
-
-  -- ---- the partner must exist -------------------------------------------
-  -- The FK on partner_audit_log.partner_id would reject the insert anyway;
-  -- checking first returns a clean reason instead of a raw FK violation, and
-  -- keeps the function total. A DENIED access for a partner id that does not
-  -- exist lands here — the caller already logs that case to the console,
-  -- because an audit row cannot be attributed to a row that is not there.
-  if not exists (select 1 from public.partners p where p.id = p_partner_id) then
-    return query select false, 'not_found'::text;
-    return;
-  end if;
-
-  -- ---- append the record -------------------------------------------------
-  -- `detail` carries ONLY ids, the outcome and the reason. `left(..., N)`
-  -- bounds every text column so an oversized user agent cannot bloat an
-  -- append-only table that is never pruned.
-  insert into public.partner_audit_log (
-    partner_id,
-    actor_type,
-    actor,
-    action,
-    detail,
-    ip_hash,
-    user_agent
-  )
+  insert into public.partner_audit_log
+    (partner_id, actor_type, actor, action, detail, ip_hash, user_agent)
   values (
-    p_partner_id,
-    'admin',
-    left(v_admin, 200),
-    v_action,
+    p_partner_id, 'admin', p_admin, coalesce(p_action, 'document.access'),
     jsonb_build_object(
-      'record_type', 'document_access',
       'document_id', p_document_id,
-      'result', v_result,
-      'reason', v_reason
+      'result', coalesce(p_result, 'unknown'),
+      'reason', p_reason
     ),
-    nullif(left(coalesce(p_ip_hash, ''), 128), ''),
-    nullif(left(coalesce(p_user_agent, ''), 400), '')
+    p_ip_hash,
+    -- Bound and strip control characters: OWASP warns that logged data
+    -- must be sanitised to prevent log injection.
+    left(regexp_replace(coalesce(p_user_agent, ''), '[[:cntrl:]]', '', 'g'), 300)
   );
-
-  return query select true, 'ok'::text;
 end;
-$$;
+$function$;
 
 comment on function public.partner_log_document_access(uuid, uuid, text, text, text, text, text, text) is
-  'Append-only record of an admin reading, reviewing, deleting or uploading a partner KYC document. Stores ids, outcome and a closed-set reason only — never document content or PII. service_role only.';
+  'Append-only record of an admin accessing a partner KYC document. Stores ids, outcome and reason only — never document content or PII. service_role only.';
 
--- service_role ONLY: these rows name the admin who accessed a document, so the
--- anon/authenticated roles must not be able to forge or flood them. Revoke
--- first so a re-run cannot leave a stale grant in place.
+-- ---------------------------------------------------------------------------
+-- GRANTS — the ONE deliberate change this file makes relative to production
+-- ---------------------------------------------------------------------------
+-- The function is SECURITY DEFINER, so it runs with the owner's privileges and
+-- bypasses RLS on the audit table. That makes EXECUTE the security boundary:
+-- whoever may call it may append rows to an append-only log, choosing their own
+-- actor string, and those rows can never afterwards be edited or deleted. The
+-- anon and authenticated roles must not be able to do that.
+--
+-- The live function's ACL was reported as the DEFAULT, which for a function
+-- means EXECUTE is granted to PUBLIC. If that is accurate this is a real
+-- tightening; if EXECUTE was in fact already restricted, this block changes
+-- nothing and is harmless, because it revokes privileges that were not held and
+-- re-grants service_role what it already had.
+--
+-- `revoke` precedes `grant` so a re-run cannot leave a stale PUBLIC grant.
+-- ---------------------------------------------------------------------------
 revoke all on function public.partner_log_document_access(uuid, uuid, text, text, text, text, text, text)
   from public, anon, authenticated;
 grant execute on function public.partner_log_document_access(uuid, uuid, text, text, text, text, text, text)
   to service_role;
 
 -- ============================================================================
--- VERIFY (run manually; see the accompanying test suite for the automated form)
+-- VERIFY (plain SELECTs; run them in any SQL console, including Supabase's)
 -- ============================================================================
--- 1. The function exists with the exact 8-argument signature:
 --
---      select p.proname, pg_get_function_identity_arguments(p.oid)
---        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
---       where n.nspname = 'public'
---         and p.proname = 'partner_log_document_access';
+-- Expect returns = void and this exact parameter list.
 --
--- 2. A write lands and is attributable:
+--   select p.proname,
+--          pg_get_function_identity_arguments(p.oid) as identity_args,
+--          pg_get_function_result(p.oid)             as returns
+--     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--    where n.nspname = 'public' and p.proname = 'partner_log_document_access';
 --
---      select public.partner_log_document_access(
---        '<partner-uuid>'::uuid, '<doc-uuid>'::uuid, 'reviewer@soulfulbhakti.com',
---        'document.view', 'success', null, 'iphash', 'test-agent');
---      select * from public.partner_audit_log
---       where action = 'document.view' order by created_at desc limit 1;
+-- Expect anon = false, authenticated = false, service_role = true.
 --
--- 3. Immutability still holds (must RAISE):
+--   select r.rolname,
+--          has_function_privilege(
+--            r.rolname,
+--            'public.partner_log_document_access(uuid,uuid,text,text,text,text,text,text)',
+--            'EXECUTE') as can_execute
+--     from pg_roles r
+--    where r.rolname in ('anon','authenticated','service_role')
+--    order by r.rolname;
 --
---      update public.partner_audit_log set action = 'tampered'
---       where action = 'document.view';
+-- Expect one new 'document.access' row naming the acting admin.
+--
+--   select public.partner_log_document_access(
+--     '<partner-uuid>'::uuid, '<doc-uuid>'::uuid, 'reviewer@soulfulbhakti.com',
+--     'document.access', 'success', null, 'iphash', 'agent');
+--   select id, actor, action, detail, created_at
+--     from public.partner_audit_log
+--    where action = 'document.access' order by id desc limit 1;
+--
+-- Expect BOTH to RAISE 'partner_audit_log is append-only'.
+--
+--   update public.partner_audit_log set action='tampered' where action='document.access';
+--   delete from public.partner_audit_log where action='document.access';
 -- ============================================================================
