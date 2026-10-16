@@ -665,7 +665,10 @@ await test('the config endpoint is accurate against the real deployment', async 
   const res = await request('GET', '/api/partner/config')
   assert.equal(res.status, 200)
   assert.equal(res.body.encryptionReady, true)
-  assert.equal(res.body.emailEnabled, true)
+  // emailEnabled is a hardcoded false, not a capability probe: this portal sends
+  // no automatic email at all. Asserting false is deliberate — if a transport is
+  // ever reintroduced, this fails and forces that to be a conscious decision.
+  assert.equal(res.body.emailEnabled, false, 'emailEnabled must be false: no automatic email exists')
   assert.ok(!JSON.stringify(res.body).includes(process.env.PARTNER_KEK), 'the KEK is never exposed')
   assert.ok(!/aadhaar/i.test(JSON.stringify(res.body.documentLabels)), 'Aadhaar is not offered')
 })

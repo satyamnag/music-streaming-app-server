@@ -15,8 +15,7 @@
                     "test:partner-flow":  "node test/partner-stub-register.mjs test/partner-flow.test.mjs",
                     "test:partner-real-db":  "node test/real-db-register.mjs test/partner-real-db.test.mjs",
                     "test:partner-auth-http":  "node test/real-db-register.mjs test/partner-auth-http.test.mjs",
-                    "test:partner":  "node test/partner_crypto.test.mjs \u0026\u0026 node test/partner_email.test.mjs \u0026\u0026 node test/partner-verify.cjs \u0026\u0026 node test/partner-stub-register.mjs test/partner-flow.test.mjs",
-                    "test:partner-email":  "node test/partner_email.test.mjs"
+                    "test:partner":  "node test/partner_crypto.test.mjs \u0026\u0026 node test/partner-verify.cjs \u0026\u0026 node test/partner-stub-register.mjs test/partner-flow.test.mjs"
                 },
     "dependencies":  {
                          "@aws-sdk/client-s3":  "^3.1111.0",
@@ -27,7 +26,6 @@
                          "express":  "^4.21.0",
                          "express-rate-limit":  "^8.6.2",
                          "multer":  "^2.2.0",
-                         "nodemailer":  "^10.1.0",
                          "qrcode":  "^1.5.4"
                      },
     "devDependencies":  {

@@ -165,6 +165,10 @@ const PARTNER_ID = seeded[0].id
 let loginId = null
 let sessionToken = null
 let issuedPassword = null
+// The password the credentials ROUTE handed back. Kept separately from
+// `issuedPassword` (which later tests rotate through change-password) so the
+// login test can prove the route's own value works.
+let issuedPasswordFromRoute = null
 
 console.log('\n=== Partner credentials + login (HTTP, real DB) ===\n')
 
@@ -180,7 +184,24 @@ await test('an unauthenticated caller cannot issue credentials', async () => {
   assert.equal(rows[0].password_hash, null, 'no password hash was written')
 })
 
-await test('admin issues credentials and the password is NOT in the response', async () => {
+await test('admin issues credentials and the password IS returned once, bounded', async () => {
+  // THE CONTRACT CHANGED DELIBERATELY. READ BEFORE "FIXING" THIS TEST.
+  //
+  // This test was named "the password is NOT in the response" and asserted
+  // `!("password" in res.body)`. That was correct while the credential was
+  // emailed to the partner. Automatic email has since been removed from the
+  // portal, which makes the admin the ONLY party who can relay a credential —
+  // so withholding it would leave every newly issued password undeliverable,
+  // which is strictly worse than emailing it.
+  //
+  // The property worth protecting is no longer "it never appears" (that is now
+  // false by design). It is that the exposure is BOUNDED:
+  //   * returned by THIS route only, and flagged as shown-once;
+  //   * never logged, and never recoverable afterwards (only a bcrypt hash is
+  //     stored, so there is no second read);
+  //   * the stored credential is STILL a hash, never the plaintext.
+  // Asserting the bounds is stronger than the old absence check, which would now
+  // simply be wrong.
   const res = await request('POST', `/api/admin/partners/${PARTNER_ID}/credentials`, {
     headers: asAdmin(),
     body: {},
@@ -192,10 +213,24 @@ await test('admin issues credentials and the password is NOT in the response', a
 
   loginId = res.body.loginId
 
-  // The raw password is delivered by email, never by this API. Assert the
-  // response has no password-shaped field at all.
-  assert.ok(!("password" in res.body), 'the response has no password field')
+  // BOUND 1: the password is returned, and is usable.
+  assert.equal(typeof res.body.password, 'string', 'the credential must be returned for the admin to relay')
+  assert.ok(res.body.password.length >= 16, 'the returned password meets the enforced minimum length')
+  issuedPasswordFromRoute = res.body.password
 
+  // BOUND 2: the response says plainly that this is a one-shot reveal.
+  assert.equal(res.body.passwordShownOnce, true, 'the response flags the password as shown once')
+
+  // BOUND 3: it does not claim an email was sent — no email exists.
+  assert.equal(res.body.emailSent, false, 'emailSent must be false: no automatic email exists')
+  assert.ok(
+    !/emailed/i.test(String(res.body.note || '')),
+    'the note must not claim the credential was emailed',
+  )
+
+  // BOUND 4: NOTHING is stored in plaintext. This is the assertion that would
+  // catch the genuinely dangerous regression — a change that persisted the
+  // password, or returned a value that was not the one hashed.
   const rows = await q(
     `select login_id, password_hash, must_change_password, failed_login_count
      from public.partners where id = $1`,
@@ -203,8 +238,21 @@ await test('admin issues credentials and the password is NOT in the response', a
   )
   assert.equal(rows[0].login_id, loginId)
   assert.match(rows[0].password_hash, /^\$2[aby]\$/, 'a bcrypt hash is stored')
+  assert.notEqual(rows[0].password_hash, res.body.password, 'the plaintext is never stored')
+  assert.ok(
+    !rows[0].password_hash.includes(res.body.password),
+    'the stored value must not contain the plaintext password',
+  )
   assert.equal(rows[0].must_change_password, true, 'the forced change is set')
   assert.equal(Number(rows[0].failed_login_count), 0)
+
+  // BOUND 5: it is not written to the audit trail either.
+  const audit = await q(
+    `select count(*)::int as n from public.partner_audit_log
+      where partner_id = $1 and detail::text ilike '%' || $2 || '%'`,
+    [PARTNER_ID, res.body.password],
+  )
+  assert.equal(audit[0].n, 0, 'the password must never appear in the audit log')
 })
 
 // ---------------------------------------------------------------------------
@@ -236,14 +284,17 @@ await test('a malformed login request is rejected without revealing validity', a
 })
 
 await test('a valid login yields a session token stored only as a hash', async () => {
-  // The suite cannot read the generated password back (only its hash is
-  // stored — by design), so it sets a known one through the same DB function
-  // the admin route calls. The ROUTE itself was exercised above.
-  issuedPassword = 'KnownHttpPassword1234'
-  await q('select public.partner_set_credentials($1, $2, 10)', [PARTNER_ID, issuedPassword])
+  // STRONGER THAN BEFORE, now that the credential route returns its password.
+  //
+  // This used to have to invent a password and set it through the DB function,
+  // because the issued one could not be read back — which meant the admin route
+  // and this login were never verified against the SAME value. It now uses the
+  // password the route actually returned, so this is a true end-to-end check:
+  // the value handed to the admin is the value that logs in.
+  assert.ok(issuedPasswordFromRoute, 'the credentials route returned a password to log in with')
 
   const res = await request('POST', '/api/partner/login', {
-    body: { loginId, password: issuedPassword },
+    body: { loginId, password: issuedPasswordFromRoute },
   })
   assert.equal(res.status, 200, JSON.stringify(res.body))
   assert.equal(res.body.ok, true)
@@ -251,6 +302,7 @@ await test('a valid login yields a session token stored only as a hash', async (
   assert.equal(res.body.mustChangePassword, true, 'the forced change is reported')
 
   sessionToken = res.body.token
+  issuedPassword = issuedPasswordFromRoute
 
   const rows = await q('select portal_token_hash from public.partners where id = $1', [PARTNER_ID])
   assert.notEqual(rows[0].portal_token_hash, sessionToken, 'the raw token is not stored')

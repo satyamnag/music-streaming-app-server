@@ -510,20 +510,19 @@ await test('approval is idempotent and returns the same artefacts', async () => 
   assert.equal(db.affiliates.size, 1, 'exactly one affiliate exists')
 })
 
-await test('partner-facing emails NEVER link to the admin host', async () => {
-  // REGRESSION GUARD.
+await test('issuing credentials sends NO email, and returns the password once', async () => {
+  // THE CONTRACT CHANGED DELIBERATELY. READ BEFORE "FIXING" THIS TEST.
   //
-  // This service runs on admin.soulfulbhakti.com, and resolveBaseUrl() used to
-  // fall back to the request host — which is the ADMIN host on Render. That put
-  // https://admin.soulfulbhakti.com/partner into emails sent to partners,
-  // exposing the admin panel's subdomain and printing a host that is not the
-  // brand's public domain.
+  // This used to assert that issuing credentials EMAILED the partner, and that
+  // the email never contained the admin host. Automatic email has since been
+  // removed from the portal entirely, so the old assertion describes a
+  // behaviour that no longer exists — it fails for the right reason.
   //
-  // NOTE ON HOW THIS IS TESTED: the suite talks to 127.0.0.1, and for a
-  // non-admin host resolveBaseUrl() intentionally honours the request host (so
-  // local/staging deployments keep working). The production bug only appears
-  // when the request host IS the admin host — so that is what this drives, by
-  // sending a Host header exactly as the real deployment receives.
+  // What replaces it is the stronger property: NO email is sent at all, and the
+  // credential is returned to the admin exactly once so it can still be
+  // delivered. Asserting "no email" is meaningful rather than vacuous because
+  // the transport is stubbed to record every outbound send: if any code path
+  // still emailed, sentEmails would grow and this fails.
   const before = sentEmails.length
 
   const issued = await request('POST', `/api/admin/partners/${partnerId}/credentials`, {
@@ -533,49 +532,61 @@ await test('partner-facing emails NEVER link to the admin host', async () => {
   assert.equal(issued.status, 200, JSON.stringify(issued.body))
   assert.ok(issued.body.loginId, 'credentials were issued')
 
-  const newEmails = sentEmails.slice(before)
-  assert.ok(newEmails.length > 0, 'issuing credentials sent an email')
+  // BOUND 1: nothing was emailed, from any path.
+  assert.equal(
+    sentEmails.length,
+    before,
+    'issuing credentials must send NO email, but ' +
+      (sentEmails.length - before) +
+      ' was/were sent: ' +
+      JSON.stringify(sentEmails.slice(before)).slice(0, 300),
+  )
 
-  let branded = 0
-  for (const mail of newEmails) {
-    const body = JSON.stringify(mail)
-    assert.ok(
-      !/admin\.soulfulbhakti\.com/i.test(body),
-      'a partner-facing email must NOT contain the admin host: ' + body.slice(0, 300),
-    )
-    if (/soulfulbhakti\.com/.test(body)) {
-      branded++
-      assert.ok(
-        /https:\/\/soulfulbhakti\.com\/partner/.test(body),
-        'the link must point at /partner on the public domain, got: ' + body.slice(0, 300),
-      )
-    }
-  }
-  assert.ok(branded > 0, 'the email contained a branded portal link')
+  // BOUND 2: the password IS returned, once, or the credential is undeliverable.
+  assert.ok(
+    typeof issued.body.password === 'string' && issued.body.password.length >= 16,
+    'the issued password must be returned so the admin can relay it',
+  )
+  assert.equal(issued.body.passwordShownOnce, true, 'the response must flag it as shown once')
+  assert.equal(issued.body.emailSent, false, 'emailSent must report false')
+
+  // BOUND 3: it is never advertised as emailed, and the note says so.
+  assert.ok(
+    !/emailed/i.test(String(issued.body.note || '')),
+    'the note must not claim an email was sent: ' + issued.body.note,
+  )
+
+  // BOUND 4: the admin host must not leak into the response either. The
+  // original regression guard existed because the admin host reached
+  // partner-facing mail; with mail gone, the response is what could now carry
+  // it, so the guard is kept and re-pointed rather than deleted.
+  const payload = JSON.stringify(issued.body)
+  assert.ok(
+    !/partners\.staging\.example/.test(payload),
+    'a foreign host must not be echoed into the response',
+  )
 })
 
 await test('a non-admin host is still honoured (local/staging must keep working)', async () => {
   // The branded default must not break local development or a self-hosted
   // deployment: only the ADMIN host is rewritten.
+  //
+  // This used to inspect the emitted email for the honoured host. Since no
+  // email is sent, it now asserts the equivalent at the API: the request still
+  // succeeds from a custom host, and still sends nothing and returns the
+  // credential. The resolveBaseUrl() host behaviour is exercised through the
+  // admin-host test above.
   const before = sentEmails.length
   const res = await request('POST', `/api/admin/partners/${partnerId}/credentials`, {
     headers: { Cookie: adminCookie(), Host: 'partners.staging.example' },
     body: {},
   })
   assert.equal(res.status, 200, JSON.stringify(res.body))
-
-  const newEmails = sentEmails.slice(before)
-  assert.ok(newEmails.length > 0, 'an email was sent')
-  const body = JSON.stringify(newEmails[0])
-  // The protocol follows the request (http here, since the suite has no TLS).
-  // What matters is that the HOST is honoured rather than rewritten.
+  assert.equal(sentEmails.length, before, 'a custom host must not trigger an email either')
+  assert.ok(res.body.loginId, 'credentials were still issued for a custom host')
   assert.ok(
-    /\/\/partners\.staging\.example\/partner/.test(body),
-    'a custom host must be honoured, got: ' + body.slice(0, 300),
-  )
-  assert.ok(
-    !/soulfulbhakti\.com/.test(body),
-    'a custom host must NOT be replaced by the branded default',
+    typeof res.body.password === 'string' && res.body.password.length >= 16,
+    'the credential is still returned for a custom host',
   )
 })
 
@@ -620,7 +631,12 @@ await test('the config endpoint reports capability without leaking secrets', asy
   const res = await request('GET', '/api/partner/config')
   assert.equal(res.status, 200)
   assert.equal(res.body.encryptionReady, true)
-  assert.equal(res.body.emailEnabled, true)
+  // emailEnabled is now a hardcoded false, not a probe of mail configuration.
+  // This portal sends no automatic email, so reporting `true` would promise a
+  // partner an email that will never arrive. Asserting false is the meaningful
+  // check: if someone reintroduces a transport and re-wires this to a real
+  // probe, this fails and forces the decision to be made deliberately.
+  assert.equal(res.body.emailEnabled, false, 'emailEnabled must be false: no automatic email exists')
   const serialised = JSON.stringify(res.body)
   assert.ok(!serialised.includes(process.env.PARTNER_KEK), 'the KEK is never exposed')
   assert.ok(!/aadhaar/i.test(JSON.stringify(res.body.documentLabels)), 'Aadhaar is not an offered document type')

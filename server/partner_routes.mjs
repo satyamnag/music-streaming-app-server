@@ -71,7 +71,11 @@ import {
   ALLOWED_DOC_MIME,
 } from './partner_crypto.mjs'
 
-import { sendEmail, escapeHtml, describeTransport } from './partner_email.mjs'
+// NO EMAIL IMPORT. This portal sends no automatic email at all: every send path
+// was removed deliberately, so there is no sendEmail, escapeHtml or
+// describeTransport to import. See the "NO AUTOMATIC EMAIL" note above
+// notifyDuplicateRegistration for why the credential is now returned to the
+// admin instead of emailed.
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -365,12 +369,19 @@ export function registerPartnerRoutes(app, deps) {
   // -------------------------------------------------------------------------
 
   // What the portal needs to render its initial state: whether email can be
-  // sent at all, and whether document upload is available. Both are
-  // non-secret booleans, and surfacing them lets the UI disable a flow that
-  // cannot succeed rather than failing confusingly later.
+  // sent at all, and whether document upload is available. `emailEnabled` is
+  // now a hardcoded false rather than a capability probe — this portal sends no
+  // automatic email, so the honest answer is always no. `encryptionReady` IS
+  // still a real probe, and surfacing it lets the UI disable a flow that cannot
+  // succeed rather than failing confusingly later.
   app.get('/api/partner/config', (req, res) => {
     res.json({
-      emailEnabled: !!describeTransport(getSecrets).provider,
+      // ALWAYS FALSE, BY DESIGN — this portal sends no automatic email at all.
+      // It is not a probe of mail configuration: reporting `true` would tell a
+      // caller the portal will email a partner when it will not. Every send
+      // path was removed, so this is a statement of fact, not a capability
+      // check. The client uses it to decide whether to promise an email.
+      emailEnabled: false,
       encryptionReady: encryptionReady(getSecrets),
       maxDocumentBytes: MAX_DOC_BYTES,
       allowedDocumentMime: ALLOWED_DOC_MIME,
@@ -434,15 +445,16 @@ export function registerPartnerRoutes(app, deps) {
       // ---- USER-ENUMERATION RESISTANCE (ASVS 6.3.8) ----------------------
       // The response is identical whether or not this email was already
       // registered, and whether or not an admin has vouched for it. For a
-      // duplicate we do NOT return a token; instead the real owner is emailed
-      // a notice that someone attempted registration. An attacker therefore
-      // cannot use this endpoint to discover which addresses are enrolled.
+      // duplicate we do NOT return a token. An attacker therefore cannot use
+      // this endpoint to discover which addresses are enrolled.
+      //
+      // The courtesy notice that used to be emailed to the address owner on a
+      // duplicate attempt is GONE, because this portal sends no automatic
+      // email. That removes a signal, not a control: the enumeration defence
+      // is the IDENTICAL RESPONSE below, and it is unchanged. Note what the
+      // notice also did — it told a real owner someone had tried. Nothing
+      // replaces it, so a duplicate attempt is now silent.
       if (existing || !rawToken) {
-        if (existing && partnerId) {
-          // Best-effort courtesy notice to the address owner. Sent
-          // asynchronously and never surfaced to the caller.
-          notifyDuplicateRegistration(partnerId, email).catch(() => {})
-        }
         return res.status(202).json({
           ok: true,
           message:
@@ -490,41 +502,38 @@ export function registerPartnerRoutes(app, deps) {
   // `email_verified` from a bearer token.
 
 
-  /**
-   * Courtesy notice for a duplicate registration attempt. Deliberately
-   * contains no token and no account details Ã¢â‚¬â€ it only tells the real owner
-   * that someone tried, which is the safe direction to leak.
-   */
-  async function notifyDuplicateRegistration(partnerId, email) {
-    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
-    const subject = `Someone tried to register with your email on ${brand}`
-    const text = [
-      `Namaste,`,
-      ``,
-      `Someone entered this email address while starting a ${brand} Partner`,
-      `Program application. Because this address is already registered, we`,
-      `did not create a second account and we sent no verification link.`,
-      ``,
-      `If this was you, simply continue with your existing application Ã¢â‚¬â€`,
-      `your original verification email is still valid.`,
-      ``,
-      `If this was not you, no action is needed.`,
-      ``,
-      `Ã¢â‚¬â€ ${brand}`,
-    ].join('\n')
-
-    const result = await sendEmail(getSecrets, {
-      to: email,
-      subject,
-      text,
-      html: `<p>Namaste,</p><p>Someone entered this email address while starting a ${escapeHtml(brand)} Partner Program application. Because this address is already registered, we did not create a second account and sent no verification link.</p><p>If this was you, continue with your existing application.</p><p>If this was not you, no action is needed.</p><p>Ã¢â‚¬â€ ${escapeHtml(brand)}</p>`,
-    })
-    await auditPartner(partnerId, 'duplicate_registration_notice', {
-      sent: result.sent,
-      reason: result.reason || null,
-    })
-    return result
-  }
+  // -------------------------------------------------------------------------
+  // NO AUTOMATIC EMAIL — the whole portal
+  // -------------------------------------------------------------------------
+  //
+  // Every send path is removed, deliberately. Nothing here contacts a partner,
+  // an applicant or an admin by email:
+  //
+  //   * the duplicate-registration notice  -- REMOVED (was notifyDuplicateRegistration)
+  //   * the admin submission alert         -- REMOVED (was notifyAdminsOfSubmission)
+  //   * the approval / QR / coupon email   -- REMOVED (was sendApprovalEmail)
+  //   * the credential email               -- REMOVED (was sendCredentialsEmail)
+  //
+  // TWO CONSEQUENCES THAT ARE NOT OBVIOUS, AND ARE THE POINT OF THIS NOTE:
+  //
+  // 1. ISSUING CREDENTIALS NOW RETURNS THE PASSWORD TO THE ADMIN, ONCE. The
+  //    credential email was the only delivery path, so removing it without
+  //    returning the password would leave a newly issued credential with no way
+  //    to reach anybody — strictly worse than emailing it. The route therefore
+  //    hands it back to the authenticated admin, who relays it by whatever
+  //    channel they choose. This REVERSES the previous design, which
+  //    deliberately withheld it; see the note in that route.
+  //
+  // 2. A DUPLICATE REGISTRATION ATTEMPT IS NOW SILENT. The notice previously
+  //    told a real address owner that someone had tried to register with their
+  //    address. Nothing replaces it. This WEAKENS a real signal, so it is
+  //    recorded rather than glossed: the enumeration DEFENCE is the identical
+  //    HTTP response, which is unchanged, but the courtesy warning to the
+  //    owner is gone.
+  //
+  // The mail transport module (partner_email.mjs) is deleted with this change,
+  // so there is no code path — not merely no caller — that can send mail.
+  // -------------------------------------------------------------------------
 
 
   // -------------------------------------------------------------------------
@@ -1304,8 +1313,13 @@ export function registerPartnerRoutes(app, deps) {
         return res.status(400).json({ error: 'Your application could not be submitted.' })
       }
 
-      // Notify the admin team that a new application is waiting.
-      await notifyAdminsOfSubmission(row.status).catch(() => {})
+      // NO ADMIN EMAIL. The submission is recorded in the database and appears
+      // in the admin review queue (/admin -> "Partner Applications"); the alert
+      // that used to be emailed to the operating team is removed with every
+      // other send path. The admin now DISCOVERS submissions by opening the
+      // queue rather than being told. That is a real loss of promptness, not
+      // just a change of transport, so it is stated rather than glossed: if a
+      // submission must not sit unseen, someone has to check the queue.
 
       res.json({
         ok: true,
@@ -1344,18 +1358,10 @@ export function registerPartnerRoutes(app, deps) {
     return map[key] || key
   }
 
-  /** Emails the operating team that a new application needs review. */
-  async function notifyAdminsOfSubmission(status) {
-    const to = secrets.partner_admin_alert_email
-    if (!to) return { sent: false, reason: 'not_configured' }
-    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
-    return sendEmail(getSecrets, {
-      to,
-      subject: `${brand}: a new Partner application is ready for review`,
-      text: `A partner application has been submitted and is waiting in the admin review queue.\n\nOpen ${publicBaseUrl || ''}/admin and go to "Partner Applications".`,
-      html: `<p>A partner application has been submitted and is waiting in the admin review queue.</p><p>Open the <b>Partner Applications</b> section of the admin panel to review it.</p>`,
-    })
-  }
+  // REMOVED: notifyAdminsOfSubmission(). It emailed the operating team that a
+  // submission was waiting. Submissions still surface in the admin review queue
+  // and the audit trail; only the emailed alert is gone. See the "NO AUTOMATIC
+  // EMAIL" note above partner self-service for the full list of removals.
 
   // -------------------------------------------------------------------------
   // Admin: review queue
@@ -1840,8 +1846,11 @@ export function registerPartnerRoutes(app, deps) {
         return res.status(400).json({ error: messages[reason] || 'Approval failed.' })
       }
 
-      // Congratulate the partner with their issued QR + coupon.
-      await sendApprovalEmail(id).catch(() => {})
+      // NO PARTNER EMAIL. The QR link and coupon are in the response below, so
+      // the admin sees them immediately and can pass them on directly. The
+      // courtesy email that used to carry them is removed with every other send
+      // path. Nothing is lost from the API: affiliateId, referrerCode and
+      // couponCode were already being returned.
 
       res.json({
         ok: true,
@@ -1855,68 +1864,11 @@ export function registerPartnerRoutes(app, deps) {
     }
   })
 
-  /**
-   * Tells the partner they were approved and gives them their QR link and
-   * coupon code. Best-effort: a mail failure must not undo an approval that
-   * is already committed.
-   */
-  async function sendApprovalEmail(partnerId) {
-    const { data: p } = await supabase
-      .from('partners')
-      .select('email, legal_name, display_name, affiliate_id')
-      .eq('id', partnerId)
-      .maybeSingle()
-    if (!p || !p.affiliate_id) return { sent: false, reason: 'not_found' }
-
-    const issued = await loadIssuedArtefacts(p.affiliate_id)
-    if (!issued) return { sent: false, reason: 'no_artefacts' }
-
-    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
-    const name = p.display_name || p.legal_name || 'Partner'
-    const couponLine = issued.coupon ? issued.coupon.code : '(issued in your dashboard)'
-
-    const text = [
-      `Namaste ${name},`,
-      ``,
-      `Welcome to the ${brand} Partner Program. Your application has been approved.`,
-      ``,
-      `Your partner QR code link:`,
-      issued.installUrl,
-      ``,
-      `Share this QR with your audience. When someone scans it, they are taken`,
-      `to the Google Play listing and, after installing and signing in, they`,
-      `are attributed to you.`,
-      ``,
-      `Your discount coupon code: ${couponLine}`,
-      ``,
-      `Share the coupon with your audience. They enter it in the app to`,
-      `register their support for you.`,
-      ``,
-      `You can see both any time in your partner dashboard.`,
-      ``,
-      `Ã¢â‚¬â€ ${brand}`,
-    ].join('\n')
-
-    const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;padding:24px;background:#f6f4ef;">
-<div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e8e2d6;border-radius:12px;padding:32px;">
-<h1 style="font-size:20px;margin:0 0 16px;">Welcome to the ${escapeHtml(brand)} Partner Program</h1>
-<p style="font-size:15px;line-height:1.6;">Namaste ${escapeHtml(name)}, your application has been approved.</p>
-<h2 style="font-size:15px;margin:24px 0 8px;">Your partner link</h2>
-<p style="font-size:13px;word-break:break-all;"><a href="${escapeHtml(issued.installUrl)}">${escapeHtml(issued.installUrl)}</a></p>
-<p style="font-size:13px;color:#6b6b6b;">Share your QR code with your audience. After installing and signing in, they are attributed to you.</p>
-<h2 style="font-size:15px;margin:24px 0 8px;">Your discount coupon</h2>
-<p style="font-size:22px;font-weight:700;letter-spacing:1px;color:#8a6d3b;">${escapeHtml(couponLine)}</p>
-<p style="font-size:13px;color:#6b6b6b;">Share this code with your audience. They enter it in the app to register their support for you.</p>
-<p style="font-size:13px;color:#6b6b6b;margin-top:24px;">You can see both any time in your partner dashboard.</p>
-</div></body></html>`
-
-    return sendEmail(getSecrets, {
-      to: p.email,
-      subject: `Welcome to the ${brand} Partner Program Ã¢â‚¬â€ your QR and coupon are ready`,
-      text,
-      html,
-    })
-  }
+  // REMOVED: sendApprovalEmail(). It emailed the partner their QR link and
+  // coupon on approval. The approval route already returns affiliateId,
+  // referrerCode and couponCode, so the admin has everything needed to pass
+  // them on; only the automatic email is gone. loadIssuedArtefacts() is
+  // retained because the partner dashboard uses it independently.
 
   // The partner's own QR image, addressed by the PARTNER's own id and
   // authorised by the partner's session token. The client uses this so the
@@ -1980,66 +1932,22 @@ export function registerPartnerRoutes(app, deps) {
     }
   })
 
-  /**
-   * Sends the partner their admin-issued login credentials.
-   *
-   * SECURITY: this is the ONLY place the plaintext password exists outside the
-   * admin request that generated it. It is placed in the email body and
-   * nowhere else Ã¢â‚¬â€ not logged, not stored, and not returned by the API.
-   *
-   * The email tells the partner plainly that the password was issued by an
-   * administrator and must be changed at first sign-in, because an
-   * admin-issued password is known to the admin and must not remain a
-   * long-term secret.
-   */
-  async function sendCredentialsEmail(partner, loginId, password, req) {
-    const brand = secrets.partner_brand_name || 'Soulful Bhakti'
-    const name = partner.display_name || partner.legal_name || 'Partner'
-
-    // The portal URL the partner should actually visit. resolveBaseUrl()
-    // already handles the branded-vs-serving-host distinction.
-    const portalUrl = `${resolveBaseUrl(req)}/partner`
-
-    const text = [
-      `Namaste ${name},`,
-      ``,
-      `Your ${brand} Partner Program account has been created.`,
-      ``,
-      `Partner ID: ${loginId}`,
-      `Password:   ${password}`,
-      ``,
-      `Sign in here: ${portalUrl}`,
-      ``,
-      `IMPORTANT: This password was issued by our team, so please change it`,
-      `immediately after your first sign-in. You will be asked to do this.`,
-      ``,
-      `Keep this email confidential. Anyone with these details can access your`,
-      `partner dashboard. If you did not expect this email, please contact us`,
-      `and we will reissue your credentials.`,
-      ``,
-      `Ã¢â‚¬â€ ${brand}`,
-    ].join('\n')
-
-    const html = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#2b2b2b;padding:24px;background:#f6f4ef;">
-<div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e8e2d6;border-radius:12px;padding:32px;">
-<h1 style="font-size:20px;margin:0 0 16px;">Your ${escapeHtml(brand)} Partner account</h1>
-<p style="font-size:15px;line-height:1.6;">Namaste ${escapeHtml(name)}, your partner account has been created.</p>
-<table style="font-size:15px;margin:20px 0;border-collapse:collapse;">
-<tr><td style="padding:6px 16px 6px 0;color:#6b6b6b;">Partner ID</td><td style="padding:6px 0;font-weight:700;letter-spacing:1px;">${escapeHtml(loginId)}</td></tr>
-<tr><td style="padding:6px 16px 6px 0;color:#6b6b6b;">Password</td><td style="padding:6px 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;">${escapeHtml(password)}</td></tr>
-</table>
-<p style="font-size:15px;"><a href="${escapeHtml(portalUrl)}" style="background:#8a6d3b;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block;">Sign in to your dashboard</a></p>
-<p style="font-size:13px;color:#8a5a00;background:#fdf6e3;border:1px solid #f0e0b0;border-radius:8px;padding:12px;margin-top:20px;"><strong>Please change this password immediately after your first sign-in.</strong> It was issued by our team, so it should not be kept as your long-term password.</p>
-<p style="font-size:13px;color:#6b6b6b;margin-top:20px;">Keep this email confidential Ã¢â‚¬â€ anyone with these details can access your partner dashboard.</p>
-</div></body></html>`
-
-    return sendEmail(getSecrets, {
-      to: partner.email,
-      subject: `Your ${brand} Partner account Ã¢â‚¬â€ sign-in details`,
-      text,
-      html,
-    })
-  }
+  // REMOVED: sendCredentialsEmail(). It posted the partner their Partner ID and
+  // password, and was the ONLY delivery path for a newly issued credential —
+  // which is exactly why the credential route can no longer simply withhold the
+  // password. Removing this without returning it would have made every future
+  // credential undeliverable. The route now hands the password back to the
+  // authenticated admin ONCE, who relays it by whatever channel they choose.
+  //
+  // This REVERSES a deliberate earlier decision, so the reasoning is recorded
+  // rather than left implicit. The old comment here read: "this is the ONLY
+  // place the plaintext password exists outside the admin request... not
+  // logged, not stored, and not returned by the API." It is still true that the
+  // password is never logged and never stored in plaintext — the database holds
+  // only a bcrypt hash. It is no longer true that the API never returns it, and
+  // the exposure that replaces it is BOUNDED instead of absent: one response,
+  // one route, once, to an authenticated admin. See the note in the credentials
+  // route, which states the bounds and why they are asserted as bounded.
 
   // The ADMIN's view of a partner's QR image, for the review UI. Requires
   // requireAdmin Ã¢â‚¬â€ unlike /api/partner/qr/:id, which the partner calls for
@@ -2185,24 +2093,39 @@ export function registerPartnerRoutes(app, deps) {
         return res.status(400).json({ error: messages[row && row.reason] || 'Could not issue credentials.' })
       }
 
-      // Email is best-effort: the credentials ARE issued in the database at
-      // this point, so a mail failure must not report the whole action as
-      // failed. The admin is told plainly that delivery did not happen, and
-      // can re-issue (which rotates the password and retries the email).
-      const mail = await sendCredentialsEmail(partner, row.login_id, password, req)
-        .catch((e) => ({ sent: false, reason: e && e.message ? e.message : 'send_failed' }))
-
+      // NO EMAIL IS SENT. This portal contacts no one automatically, so the
+      // credential email path is gone.
+      //
+      // THE PASSWORD IS THEREFORE RETURNED, ONCE. READ THIS BEFORE "FIXING" IT
+      // BACK, because it reverses a deliberate earlier decision. The previous
+      // design emailed the password and never returned it, on the reasoning
+      // that the mailbox is the partner's and the API caller is whoever holds
+      // the admin session. That reasoning still holds — but with email removed
+      // the admin IS the delivery channel, so withholding the value would leave
+      // a freshly issued credential with no way to reach anybody. That is
+      // strictly worse than emailing it.
+      //
+      // So the exposure is BOUNDED rather than absent, and the bounds are:
+      //   * this route only — it is the sole response anywhere that carries it;
+      //   * once — the caller is told to show it to the admin and not store it;
+      //   * never logged — no console/log call touches `password`;
+      //   * never re-fetched — it is not recoverable from the API later, only
+      //     the bcrypt hash is stored, so this is a one-shot read.
+      // The admin relays it and the partner is forced to change it at first
+      // sign-in (must_change_password is set by partner_set_credentials), so it
+      // does not become a long-term shared secret.
       res.json({
         ok: true,
         loginId: row.login_id,
-        emailSent: !!mail.sent,
-        // Deliberately NOT returning the password in the API response. It is
-        // delivered to the partner's mailbox, not to whoever holds the admin
-        // session. If the email fails, re-issue rather than reading it here.
+        // Shown once. The admin sends it to the partner themselves.
+        password,
+        passwordShownOnce: true,
+        emailSent: false,
         emailTo: partner.email,
-        note: mail.sent
-          ? 'Credentials emailed to the partner. They must change the password at first sign-in.'
-          : 'Credentials were issued but the email could NOT be sent. Re-issue to retry delivery.',
+        note:
+          'Password issued. It is shown here once and cannot be retrieved ' +
+          'again. Send it to the partner yourself; they must change it at ' +
+          'first sign-in.',
       })
     } catch (err) {
       next(err)
@@ -2230,7 +2153,7 @@ export function registerPartnerRoutes(app, deps) {
   })
 
   log.log(
-    `[partner] routes registered (email=${describeTransport(getSecrets).provider || 'NOT CONFIGURED'}, ` +
+    `[partner] routes registered (email=DISABLED by design, ` +
       `encryption=${encryptionReady(getSecrets) ? 'ready' : 'NOT CONFIGURED'})`,
   )
 }
