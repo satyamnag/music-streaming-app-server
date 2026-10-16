@@ -4352,14 +4352,25 @@ async function openPartner(id) {
     var data = await res.json();
     currentPartner = data;
     renderPartnerModal(data);
-    document.getElementById('partnerModal').classList.add('open');
+    // style.display, NOT classList.add('open').
+    //
+    // This used to be classList.add('open'), and THERE IS NO `.open` CSS RULE
+    // ANYWHERE in this file — not for .modal, not for #partnerModal. Adding a
+    // class with no rule changes nothing, so `.modal { display: none }` won and
+    // the modal NEVER APPEARED for anyone. The symptom was exactly what an
+    // operator reported: clicking Review showed the loading spinner, the request
+    // succeeded, and then nothing at all.
+    //
+    // Every other modal in this panel sets display directly (qrModal,
+    // confirmModal, credModal). This now matches them.
+    document.getElementById('partnerModal').style.display = 'flex';
   } catch (e) {
     if (e.message !== 'Session expired — sign in again.') toast('Failed to load application: ' + e.message);
   } finally { showLoading(false); }
 }
 
 function closePartnerModal() {
-  document.getElementById('partnerModal').classList.remove('open');
+  document.getElementById('partnerModal').style.display = 'none';
   currentPartner = null;
 }
 
