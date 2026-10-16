@@ -281,7 +281,7 @@
     <div class="card">
       <h2>Partner sign-in</h2>
       <p class="lead">
-        Enter the partner ID and password we emailed you when your account was created.
+        Enter the partner ID and password our team sent you when your account was created.
       </p>
 
       <div class="field">
@@ -314,8 +314,9 @@
 
   <!-- ======================= FORCED PW CHANGE ======================== -->
   <!-- Shown when the partner is still using the admin-issued password. An
-       emailed password is known to the admin, so it must not remain a
-       long-term secret. -->
+       admin-issued password is known to whoever issued it, so it must not
+       remain a long-term secret. ("Emailed" until automatic email was removed —
+       the reason was never the transport, it is that someone else knows it.) -->
   <div id="viewChangePw" class="hidden">
     <div class="card">
       <h2>Choose your own password</h2>
@@ -501,8 +502,8 @@
       </p>
       <div class="notice info">
         <strong>What happens next</strong>
-        Once we have confirmed your address, we will email you a partner ID and
-        password. Sign in with those to complete your details and upload your
+        Once we have confirmed your address, our team will send you a partner ID
+        and password. Sign in with those to complete your details and upload your
         documents.
       </div>
       <div class="notice info">
@@ -1319,7 +1320,7 @@ function doRegister() {
         show('viewVerify');
         msg('info', 'Thank you',
           'If this address has an approved partner account, you can sign in with the ' +
-          'details we emailed you. If you already started an application, use ' +
+          'details our team sent you. If you already started an application, use ' +
           '"Resume your application" with your saved session key.');
       }
     })

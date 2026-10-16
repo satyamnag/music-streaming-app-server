@@ -143,33 +143,24 @@ const secrets = {
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
   google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
   // --- Partner Program ---------------------------------------------------
-  // Email transport (choose ONE provider; see partner_email.mjs):
-  resend_api_key: process.env.RESEND_API_KEY || '',
-  postmark_token: process.env.POSTMARK_TOKEN || '',
-  mailgun_api_key: process.env.MAILGUN_API_KEY || '',
-  mailgun_domain: process.env.MAILGUN_DOMAIN || '',
-  // SMTP: send through an EXISTING mailbox on your own domain (Google
-  // Workspace, Microsoft 365) instead of opening another vendor account.
-  // Preferred when the domain already has mailboxes — the message is sent by
-  // the domain that owns it, so SPF/DKIM alignment is preserved.
-  //   Google Workspace: smtp.gmail.com, port 587, an App Password as the
-  //                     password (a normal account password will be rejected).
-  //   Microsoft 365:    smtp.office365.com, port 587.
-  smtp_host: process.env.SMTP_HOST || '',
-  smtp_port: process.env.SMTP_PORT || '',
-  smtp_user: process.env.SMTP_USER || '',
-  smtp_password: process.env.SMTP_PASSWORD || '',
-  // The From: address on partner emails. Must be a domain verified with the
-  // provider above, with SPF/DKIM/DMARC published, or mail will be filtered.
-  mail_from: process.env.MAIL_FROM || '',
+  // NO EMAIL CONFIGURATION. The portal sends no automatic email: every send
+  // path was removed (see the "NO AUTOMATIC EMAIL" note in partner_routes.mjs).
+  // The provider keys that used to live here — resend_api_key, postmark_token,
+  // mailgun_*, smtp_*, mail_from — are deliberately GONE rather than left as
+  // unused fields, because a half-configured transport is exactly what invites
+  // someone to re-wire a send path without noticing it was removed on purpose.
+  // If email is ever wanted again, it is a deliberate rebuild.
+  //
   // Key Encryption Key for KYC document envelope encryption. 32 bytes as 64
   // hex chars. REQUIRED for document upload: without it, uploads are
   // refused rather than stored in the clear (fail-closed).
+  // NOTE: this is NOT email-related and is still very much required.
   partner_kek: process.env.PARTNER_KEK || '',
   // Optional: salt for hashing IPs in the audit log, so raw addresses are
   // never persisted. Falls back to the admin token when unset.
   partner_ip_salt: process.env.PARTNER_IP_SALT || '',
-  // Optional: where new partner applications are announced.
+  // No longer used to announce applications (that email is removed), but
+  // retained as a stored value because the admin UI may display it.
   partner_admin_alert_email: process.env.PARTNER_ADMIN_ALERT_EMAIL || '',
   // Non-secret presentation config.
   partner_brand_name: process.env.PARTNER_BRAND_NAME || 'Soulful Bhakti',
@@ -191,17 +182,13 @@ const VAULT_SECRET_KEYS = [
   'google_translate_api_key',
   // Partner Program secrets. Stored in Vault rather than the deployment env
   // wherever possible, so a leaked Render env is not a leaked KEK.
+  //
+  // The email keys that used to be listed here are removed with the transport.
+  // Keeping them would make /api/partner/config's story harder to trust and
+  // would suggest a send path still exists. partner_kek is NOT email-related
+  // and remains essential for document upload.
   'partner_kek',
   'partner_ip_salt',
-  'resend_api_key',
-  'postmark_token',
-  'mailgun_api_key',
-  'mailgun_domain',
-  'mail_from',
-  'smtp_host',
-  'smtp_port',
-  'smtp_user',
-  'smtp_password',
   'partner_admin_alert_email',
 ]
 

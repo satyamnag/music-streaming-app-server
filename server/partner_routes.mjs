@@ -459,7 +459,7 @@ export function registerPartnerRoutes(app, deps) {
           ok: true,
           message:
             'If this address has an approved partner account, you can sign in with the ' +
-            'details we emailed you.',
+            'details our team sent you.',
         })
       }
 
@@ -2074,10 +2074,17 @@ export function registerPartnerRoutes(app, deps) {
       // no entropy is silently discarded.
       const password = generatePartnerPassword(24)
 
+      // p_admin records WHO issued this. It is the point of migration 035: the
+      // audit row for a credentials_issued event used to name nobody, for the
+      // one privileged action that creates a working login to an account
+      // holding someone's government ID documents. adminIdentity() never
+      // throws, so failing to resolve the Clerk session degrades to
+      // 'admin-token' rather than blocking the issuance.
       const { data, error } = await supabase.rpc('partner_set_credentials', {
         p_partner_id: id,
         p_password: password,
         p_bcrypt_cost: Number(secrets.partner_bcrypt_cost || 10),
+        p_admin: await adminIdentity(req),
       })
       if (error) {
         log.error('[admin] set_credentials failed:', error.message)
