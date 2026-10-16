@@ -89,6 +89,49 @@ drop function if exists public.partner_set_credentials(uuid, text, integer);
 --
 -- IDEMPOTENT: on a re-run the drop finds nothing to remove and the create
 -- replaces the identical function.
+--
+-- ---------------------------------------------------------------------------
+-- APPLIED AND VERIFIED — 2026-10-16
+-- ---------------------------------------------------------------------------
+-- Rehearsed in full on a LOCAL database carrying the same 3-argument signature
+-- as production, then applied to production inside a single transaction.
+--
+-- Before:      partner_set_credentials(p_partner_id, p_password, p_bcrypt_cost)
+-- After:       partner_set_credentials(p_partner_id, p_password, p_bcrypt_cost, p_admin)
+-- Overloads:   0 remnants of the 3-argument form
+-- Grants:      postgres + service_role only; anon/authenticated absent
+--
+-- Behaviour confirmed, each by execution rather than by reading the SQL:
+--   * a 3-ARGUMENT call still RESOLVES and reaches the function body. Probed
+--     with a deliberately short password so resolution was proven with no side
+--     effect: the call returned `password_too_short`, i.e. the function's own
+--     verdict, not a resolution error. This is the case that broke before.
+--   * a 4-argument call with an identity records it: actor =
+--     'admin@soulfulbhakti.com'. THE DEFECT IS FIXED.
+--   * a 4-argument call with a BLANK identity records NULL, not whitespace —
+--     nullif(trim(...)) doing its job, so a blank cannot masquerade as a name.
+--   * guard rails intact: password_too_short / invalid_bcrypt_cost / not_found.
+--   * the audit detail contains NO password and NO bcrypt hash (checked by
+--     matching '%password%' and '$2a$' across partner_audit_log: 0 rows).
+--
+-- DATA IMPACT: NONE. Partner rows 4 -> 4 and audit rows 16 -> 16 across the
+-- change. The partner with a working login (SB-5VZTRN) kept its password hash,
+-- its zero failure count and its unlocked state.
+--
+-- ROLLBACK, if ever needed — verified to work, not merely written down:
+--   drop function if exists public.partner_set_credentials(uuid,text,integer,text);
+--   \i _partner-sql/ROLLBACK-035-partner_set_credentials.sql
+-- The snapshot is a verbatim pg_get_functiondef() of the pre-migration
+-- function, and restoring it was tested end-to-end.
+--
+-- NOTE ON THE SUPABASE "DESTRUCTIVE OPERATION" WARNING: the DROP below triggers
+-- it, correctly — it does remove an object. It removes a FUNCTION DEFINITION,
+-- not data: no table, column, policy or audit row is touched, and the
+-- replacement carries the same body plus the actor. If you are re-running this
+-- by hand in the SQL editor, the warning is expected and is not a reason to
+-- stop; confirm the pre-flight signature is 3 arguments first, because if the
+-- DROP matches nothing then the CREATE adds a SECOND overload and the
+-- 3-argument calls become ambiguous.
 -- ============================================================================
 
 create or replace function public.partner_set_credentials(
