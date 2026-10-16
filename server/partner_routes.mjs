@@ -1144,9 +1144,24 @@ export function registerPartnerRoutes(app, deps) {
         const { error: upErr } = await supabase.storage
           .from(KYC_BUCKET)
           .upload(key, ciphertext, {
-            // Always opaque: the stored object is ciphertext, so declaring
-            // the real type would be both wrong and a needless hint.
-            contentType: 'application/octet-stream',
+            // THE REAL MIME TYPE, NOT application/octet-stream.
+            //
+            // This used to declare the object opaque, reasoning that it IS
+            // ciphertext so the real type would be "both wrong and a needless
+            // hint". Sound reasoning, but the platform disagreed: partner-kyc
+            // has an allowedMimeTypes allow-list of
+            // [application/pdf, image/jpeg, image/png] and Supabase Storage
+            // rejects anything else with
+            //
+            //     415 mime type application/octet-stream is not supported
+            //
+            // so EVERY upload failed with the generic 503 above. Verified by
+            // calling the same storage API directly: octet-stream rejected, the
+            // three allowed types accepted.
+            //
+            // check.mime is the SNIFFED type (magic bytes), validated just
+            // above, so it is always one the bucket permits.
+            contentType: check.mime,
             upsert: false,
           })
         if (upErr) {
