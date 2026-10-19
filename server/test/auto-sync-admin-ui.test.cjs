@@ -56,21 +56,38 @@ check('every element id the script reads exists in the panel markup', () => {
 })
 
 check('the button handler matches the function name exactly', () => {
-  assert.match(panel, /onclick="runAutoSync\(false\)"/, 'button does not call runAutoSync(false)')
+  assert.match(panel, /onclick="runAutoSync\(false\)"/, 'propose button must call runAutoSync(false)')
+  assert.match(panel, /onclick="runAutoSync\(true\)"/, 'save button must call runAutoSync(true)')
 })
 
-check('the panel states that nothing is saved', () => {
-  assert.match(panel, /Nothing is saved/i, 'the panel must tell the admin nothing is persisted')
+check('both modes are labelled distinctly', () => {
+  assert.match(panel, /Propose timings from audio/, 'propose button label missing')
+  assert.match(panel, /Propose &amp; Save/, 'save button label missing')
 })
 
-check('the script never PUTs or POSTs to the track endpoint', () => {
-  // The ONLY permitted request is the propose-only auto-sync endpoint. The URL
-  // is assembled from a concatenation, so capture the whole expression up to
-  // the options object rather than stopping at the first parenthesis.
-  const calls = [...js.matchAll(/authedFetch\(([\s\S]*?),\s*\{\s*\n?\s*method:/g)].map((m) => m[1].trim())
-  assert.strictEqual(calls.length, 1, `expected exactly one request, found ${calls.length}: ${calls.join(' | ')}`)
-  assert.ok(/auto-sync/.test(calls[0]), `the single request must target /auto-sync, found: ${calls[0]}`)
+check('the write mode requires explicit confirmation', () => {
+  assert.match(js, /window\.confirm\(/, 'the destructive mode must ask before writing')
+})
+
+check('the panel explains that the write is gated and reversible', () => {
+  assert.match(panel, /when every single line clears the confidence bar/i,
+    'the panel must state the write is conditional')
+  assert.match(panel, /rolled back/i, 'the panel must mention rollback')
+})
+
+check('the script never PUTs to the track endpoint', () => {
+  // Auto-Sync writes only through its own endpoint, never the generic PUT,
+  // so the SRT guard and audited path in the editor stay authoritative.
   assert.ok(!/method:\s*'PUT'/.test(js), 'the Auto-Sync UI must not issue a PUT')
+})
+
+check('rollback is wired to its own authenticated endpoint', () => {
+  const rollbackStart = html.indexOf('async function rollbackAutoSync(')
+  assert.ok(rollbackStart > -1, 'rollbackAutoSync() not found')
+  const rollbackJs = html.slice(rollbackStart, rollbackStart + 2000)
+  assert.match(rollbackJs, /auto-sync\/rollback\//, 'rollback must call the rollback endpoint')
+  assert.match(rollbackJs, /window\.confirm\(/, 'rollback must be confirmed')
+  assert.match(rollbackJs, /authedFetch\(/, 'rollback must go through authedFetch (admin auth)')
 })
 
 check('the proposal is written into the shared Sync Telugu textarea', () => {
@@ -79,12 +96,21 @@ check('the proposal is written into the shared Sync Telugu textarea', () => {
   assert.match(js, /lyricsText/, 'must write into #lyricsText')
 })
 
-check('the response body is read only once', () => {
+check('no response body is read more than once', () => {
   // A Response body is single-use: calling res.json() after res.text() throws
   // "Body is unusable", which would make the feature fail exactly when it needs
-  // to report an error.
-  const bodyReads = [...js.matchAll(/await res\.(json|text)\(\)/g)].map((m) => m[1])
-  assert.strictEqual(bodyReads.length, 1, `response body read ${bodyReads.length} times: ${bodyReads.join(', ')}`)
+  // to report an error. There are now two functions (runAutoSync and
+  // rollbackAutoSync), each with its own request, so this checks PER FUNCTION.
+  const fns = [
+    ['runAutoSync', html.indexOf('async function runAutoSync('), html.indexOf('async function rollbackAutoSync(')],
+    ['rollbackAutoSync', html.indexOf('async function rollbackAutoSync('), html.indexOf('// Switches between the "Track" and "Lyrics" panes')],
+  ]
+  for (const [name, from, to] of fns) {
+    assert.ok(from > -1 && to > from, `${name} not found or has no body`)
+    const body = html.slice(from, to)
+    const reads = [...body.matchAll(/await res\.(json|text)\(\)/g)].map((m) => m[1])
+    assert.strictEqual(reads.length, 1, `${name} reads its response body ${reads.length} times: ${reads.join(', ')}`)
+  }
 })
 
 check('the panel is cleared when a different track is loaded', () => {

@@ -751,6 +751,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <strong style="font-size:13px;">Auto-Sync Lyrics</strong>
             <button class="btn btn-primary btn-sm" type="button" id="autoSyncBtn" onclick="runAutoSync(false)">Propose timings from audio</button>
+            <button class="btn btn-success btn-sm" type="button" id="autoSyncSaveBtn" onclick="runAutoSync(true)">Propose &amp; Save</button>
             <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;">
               <input type="checkbox" id="autoSyncForce"> Re-run tracks that already have sync lyrics
             </label>
@@ -760,12 +761,17 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
             returned word timings against the <strong>Plain Telugu</strong> lyrics.
             Every language column shares one timeline, so one run covers all five.
             <br>
-            <strong>Nothing is saved.</strong> The result is filled into the Sync editor below for you
-            to review and correct; press <em>Save</em> there to persist it.
-            This is a suggestion, not a guarantee — singing makes speech models less reliable than
-            they are on speech, so check the flagged lines before saving.
+            <strong>Propose</strong> only fills the editor below for review.
+            <strong>Propose &amp; Save</strong> writes directly to the database, but
+            <em>only</em> when every single line clears the confidence bar and the track has no
+            existing sync lyrics &mdash; otherwise it saves nothing and tells you why. Every write
+            is verified by re-reading the row and can be rolled back.
+            <br>
+            This is a suggestion, not a guarantee &mdash; singing makes speech models less reliable
+            than they are on speech.
           </p>
           <div id="autoSyncReport" style="font-size:12px;margin-top:10px;"></div>
+          <div id="autoSyncRollbackBar" style="margin-top:8px;"></div>
         </div>
 
         <div class="lyrics-nested">
@@ -1283,24 +1289,45 @@ async function saveLyricsPane() {
 // existing SRT validator and Save button already live — deliberately reusing
 // that surface instead of inventing a second, unguarded write path.
 // ---------------------------------------------------------------------------
-async function runAutoSync(force) {
+async function runAutoSync(doWrite) {
   const id = syncTrackId || document.getElementById('editId').value;
   if (!id) { toast('Save the track first — auto-sync needs a stored track id'); return; }
 
   const btn = document.getElementById('autoSyncBtn');
+  const saveBtn = document.getElementById('autoSyncSaveBtn');
   const report = document.getElementById('autoSyncReport');
+  const rollbackBar = document.getElementById('autoSyncRollbackBar');
   const forceBox = document.getElementById('autoSyncForce');
-  const useForce = force === true || (forceBox && forceBox.checked);
+  const useForce = forceBox && forceBox.checked;
 
-  if (btn) { btn.disabled = true; btn.textContent = 'Transcribing…'; }
+  // Writing is destructive enough to deserve an explicit confirmation. The
+  // server refuses anyway on any doubt, but the admin should knowingly ask.
+  if (doWrite) {
+    const t = currentEditTrack();
+    const name = t ? (t.title || id) : id;
+    const ok = window.confirm(
+      'Propose & Save for "' + name + '"?\n\n' +
+      'This writes sync lyrics directly to the database.\n' +
+      'It only saves when EVERY line clears the confidence bar, and it will ' +
+      'never overwrite a track that already has sync lyrics.\n\n' +
+      'A rollback link is offered afterwards.'
+    );
+    if (!ok) return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (saveBtn) saveBtn.disabled = true;
+  if (btn) btn.textContent = doWrite ? 'Propose timings from audio' : 'Transcribing…';
+  if (saveBtn && doWrite) saveBtn.textContent = 'Transcribing…';
   if (report) report.innerHTML = '<span style="color:#666;">Sending audio to Deepgram — this can take a while for a full track…</span>';
+  if (rollbackBar) rollbackBar.innerHTML = '';
 
   try {
     const res = await authedFetch('/api/admin/tracks/' + encodeURIComponent(id) + '/auto-sync', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ force: useForce }),
+      body: JSON.stringify({ force: useForce, write: doWrite === true }),
     });
 
     // Read the body exactly once — a Response body cannot be consumed twice.
@@ -1316,9 +1343,8 @@ async function runAutoSync(force) {
       return;
     }
 
-    // Fill the Sync Telugu editor with the proposal so it can be reviewed and
-    // saved with the normal button. Other languages are offered as a summary
-    // because each has its own textarea behind the language selector.
+    // Show the proposal in the editor. After a successful write the editor now
+    // holds exactly what the database holds, so this stays consistent.
     const te = body.proposed && body.proposed.synced_lyrics;
     if (te) {
       lyricsLevel = 'sync'; lyricsLang = 'te';
@@ -1359,13 +1385,40 @@ async function runAutoSync(force) {
     if (otherLangs.length) {
       html += `<div style="margin-top:8px;color:#666;">Also proposed timings for: `
            + otherLangs.map((k) => esc(k.replace('synced_lyrics_', ''))).join(', ')
-           + `. Switch language above after saving Telugu — each column keeps the same timeline.</div>`;
+           + `. Switch language above to review each column.</div>`;
     }
 
-    html += `<div style="margin-top:8px;color:#137333;"><strong>Nothing was saved.</strong> Review the Sync Telugu text above, then press Save.</div>`;
-    if (report) report.innerHTML = html;
+    // Outcome of the write attempt, stated plainly.
+    if (body.wrote_to_database) {
+      html += `<div style="margin-top:8px;color:#137333;"><strong>Saved to the database.</strong> `
+           + `Columns: ${(body.written_columns || []).map((c) => esc(c.replace('synced_lyrics', 'te'))).join(', ')}.</div>`;
+      toast('Saved to the database');
+      // Offer the one-click way back.
+      if (rollbackBar && body.rollback_available && body.audit_id) {
+        rollbackBar.innerHTML = '<button class="btn btn-secondary btn-sm" type="button" '
+          + `onclick="rollbackAutoSync(${JSON.stringify(String(body.audit_id))})">Roll back this save</button>`;
+      }
+      await loadTracks();
+    } else if (body.write_requested) {
+      const why = {
+        alignment_not_ok: 'not every line cleared the confidence bar',
+        existing_verified_timings: 'this track already has sync lyrics, which are never overwritten',
+        line_text_mismatch: 'a generated line did not match the plain lyrics',
+        invalid_srt: 'the generated SRT failed validation',
+        db_error: 'the database rejected the write',
+        readback_mismatch: 'the write did not round-trip, so it was rolled back',
+        exception: 'the write failed unexpectedly',
+        nothing_to_write: 'there was nothing to write',
+      }[body.write_blocked_reason] || body.write_blocked_reason;
+      html += `<div style="margin-top:8px;color:#b06000;"><strong>Nothing was saved</strong> — ${esc(why)}.</div>`;
+      if (body.write_detail) html += `<div style="color:#888;">${esc(body.write_detail)}</div>`;
+      toast('Not saved — ' + why);
+    } else {
+      html += `<div style="margin-top:8px;color:#137333;"><strong>Nothing was saved.</strong> Review the Sync Telugu text above, then press Save.</div>`;
+      toast(te ? 'Proposal ready — review and press Save' : 'No proposal returned');
+    }
 
-    toast(te ? 'Proposal ready — review and press Save' : 'No proposal returned');
+    if (report) report.innerHTML = html;
   } catch (e) {
     if (e.message !== 'Session expired — sign in again.') {
       if (report) report.innerHTML = `<span style="color:#b00;">${esc(e.message)}</span>`;
@@ -1373,6 +1426,36 @@ async function runAutoSync(force) {
     }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Propose timings from audio'; }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Propose & Save'; }
+  }
+}
+
+// Undoes a specific Auto-Sync write using the snapshot stored on its audit row.
+async function rollbackAutoSync(runId) {
+  const id = syncTrackId || document.getElementById('editId').value;
+  if (!id || !runId) { toast('Nothing to roll back'); return; }
+  if (!window.confirm('Roll back this save and restore the previous sync lyrics?')) return;
+
+  const rollbackBar = document.getElementById('autoSyncRollbackBar');
+  const report = document.getElementById('autoSyncReport');
+  try {
+    const res = await authedFetch(
+      '/api/admin/tracks/' + encodeURIComponent(id) + '/auto-sync/rollback/' + encodeURIComponent(runId),
+      { method: 'POST', credentials: 'same-origin' }
+    );
+    let body = {};
+    try { body = await res.json(); } catch (_) { body = {}; }
+    if (!res.ok) {
+      if (report) report.innerHTML = `<span style="color:#b00;">${esc(body.error || 'Rollback failed')}</span>`;
+      toast(body.error || 'Rollback failed');
+      return;
+    }
+    if (rollbackBar) rollbackBar.innerHTML = '<span style="color:#137333;">Rolled back — the previous sync lyrics were restored.</span>';
+    toast('Rolled back');
+    await loadTracks();
+    loadLyricsText();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
   }
 }
 

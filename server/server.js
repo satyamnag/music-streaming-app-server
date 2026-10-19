@@ -2112,28 +2112,53 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// Server-side mirror of isValidSrt() in admin.html.
+//
+// The client check protects the manual editor, but the Auto-Sync write path
+// runs server-side and must not depend on the client having validated anything.
+// Both share the same contract, which admin.html's SRT guard and the Flutter
+// client's parser both rely on: each block is an optional index line, then a
+// cue timing line, then at least one text line.
+function isValidSrtText(text) {
+  const blocks = String(text || '').replace(/\r/g, '').trim().split(/\n\s*\n/).filter((b) => b.trim())
+  if (!blocks.length) return true
+  const cue = /^\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}\s*-->\s*\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}/
+  return blocks.every((block) => {
+    const lines = block.split('\n').filter((l) => l.trim())
+    if (lines.length < 2) return false
+    if (/^\d+$/.test(lines[0].trim())) lines.shift()
+    return cue.test(lines[0]) && lines.length >= 2
+  })
+}
+
 // ============================================================================
-// POST /api/admin/tracks/:id/auto-sync  —  PROPOSE ONLY, NEVER AUTO-WRITES
+// POST /api/admin/tracks/:id/auto-sync
 // ============================================================================
 //
 // Sends a track's audio to Deepgram, aligns the returned word timings against
 // the track's `plain_lyrics`, and returns REVIEW SUGGESTIONS.
 //
-// This endpoint deliberately does NOT write to `tracks`. Not even when every
-// line clears the confidence bar. The reasons are concrete:
+// By default this endpoint writes NOTHING. Without `write: true` it is purely
+// a proposal, and the admin reviews and saves through the normal editor.
 //
+// With an explicit `write: true` it may store the timings, but only when ALL
+// of these hold (see the write block for the enforcement):
+//   - every single line cleared the confidence bar (alignment.ok)
+//   - the track has no existing timed lyrics (checked against the DB row)
+//   - every output line is byte-identical to the author's `plain_lyrics`
+//   - every rendered SRT passes the same validator the client uses
+// and the write is verified by re-reading the row and comparing, then
+// reversed automatically if the read-back does not match. The previous values
+// are stored on the audit row so it can be rolled back afterwards.
+//
+// Why it is not "align and write, always":
 //   1. STT is not forced alignment. Deepgram's /v1/listen re-transcribes; it
 //      does not align a known script to audio, and there is no forced-alignment
 //      parameter. Singing makes word timings materially less reliable than
 //      speech (sustained vowels, elided consonants, percussive masking).
 //   2. A plausible-but-wrong timestamp is far worse than a missing one: it
 //      ships silently to listeners and looks authoritative.
-//   3. The existing hand-timed LRCs are ground truth. Overwriting them with
-//      machine output would destroy verified work with no way back.
-//
-// So the contract is: propose, verify hard, and let the human click Save. The
-// admin UI pre-fills the existing sync editor from this response, which already
-// has its own "must be valid SRT" guard and a normal audited PUT path.
+//   3. Existing hand-timed LRCs are ground truth and are never overwritten.
 //
 // Cost note: each call is a billable Deepgram request. `force` re-runs a track
 // that already has synced lyrics; without it those tracks are refused early so
@@ -2234,7 +2259,11 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       diarize: 'false',
     })
 
-    const dgRes = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {
+    // The base URL is overridable ONLY so the test suite can point it at a
+    // local stub. It defaults to the real API, so production behaviour is
+    // unchanged and the endpoint cannot be redirected by a request.
+    const deepgramBase = process.env.DEEPGRAM_API_URL || 'https://api.deepgram.com'
+    const dgRes = await fetch(`${deepgramBase}/v1/listen?${params.toString()}`, {
       method: 'POST',
       headers: {
         Authorization: `Token ${secrets.deepgram_api_key}`,
@@ -2297,6 +2326,94 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       proposed[column] = buildSrtForVariant(plainVariant, filledTimings, totalLines)
     }
 
+    // Snapshot the CURRENT values of every column the write path may touch,
+    // taken from the DB row read at the top of this handler. Stored on the
+    // audit row so a write can always be reversed.
+    const previousSrt = {
+      synced_lyrics: track.synced_lyrics ?? null,
+      synced_lyrics_en: track.synced_lyrics_en ?? null,
+      synced_lyrics_hi: track.synced_lyrics_hi ?? null,
+      synced_lyrics_en_tr: track.synced_lyrics_en_tr ?? null,
+      synced_lyrics_hi_tr: track.synced_lyrics_hi_tr ?? null,
+    }
+
+    // --- Optional WRITE path (opt-in, gated, verified, reversible) ----------
+    //
+    // Reached only with an explicit ?write=true. Four independent conditions
+    // must ALL hold before a single byte is written:
+    //
+    //   1. alignment.ok is true — every line cleared the confidence bar. A
+    //      partial alignment is never written; that is the whole point of the
+    //      gate, and it is why the response can still say "Needs review".
+    //   2. The track has no existing timed lyrics. Verified against the DB row
+    //      re-read here, not the request body, so a stale client cannot cause
+    //      an overwrite of verified hand-timed work.
+    //   3. Every proposed line is byte-identical to its `plain_lyrics`
+    //      counterpart. Auto-Sync must never rewrite the author's words.
+    //   4. Every rendered SRT passes the same validity check admin.html
+    //      enforces, so an invalid SRT can never reach the app.
+    //
+    // The previous values are captured first and stored on the audit row, so
+    // the write is reversible via the rollback endpoint.
+    const wantWrite = req.body && (req.body.write === true || req.body.write === 'true')
+
+    let writeResult = { wrote: false, reason: 'not_requested', columns: [] }
+
+    if (wantWrite) {
+      if (!alignment.ok) {
+        writeResult = { wrote: false, reason: 'alignment_not_ok' }
+      } else if (existingTimed.length) {
+        writeResult = { wrote: false, reason: 'existing_verified_timings' }
+      } else if (!Object.keys(proposed).length) {
+        writeResult = { wrote: false, reason: 'nothing_to_write' }
+      } else {
+        // (3) The rendered text must contain the author's exact lines.
+        const baseLinesForCheck = splitLyricLines(plain)
+        const linesMatchPlain = alignment.lines.every(
+          (l) => classifyLine(l.text) !== 'lyric' || baseLinesForCheck[l.lineIndex] === l.text
+        )
+        // (4) Every rendered SRT must be structurally valid.
+        const allValidSrt = Object.values(proposed).every((srt) => isValidSrtText(srt))
+
+        if (!linesMatchPlain) {
+          writeResult = { wrote: false, reason: 'line_text_mismatch' }
+        } else if (!allValidSrt) {
+          writeResult = { wrote: false, reason: 'invalid_srt' }
+        } else {
+          try {
+            const { data: written, error: writeErr } = await supabase
+              .from('tracks')
+              .update(proposed)
+              .eq('id', track.id)
+              .select('id, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr')
+              .single()
+
+            if (writeErr) {
+              writeResult = { wrote: false, reason: 'db_error', detail: writeErr.message }
+            } else {
+              // Read-back verification: the row we just wrote must round-trip
+              // to exactly the text we sent. This catches a silent
+              // partial-update or an encoding mangling between us and Postgres.
+              const mismatched = Object.keys(proposed).filter(
+                (col) => String(written?.[col] ?? '') !== String(proposed[col] ?? '')
+              )
+              if (mismatched.length) {
+                // Put the originals back: a partially-correct write is worse
+                // than no write at all.
+                await supabase.from('tracks').update(previousSrt).eq('id', track.id)
+                writeResult = { wrote: false, reason: 'readback_mismatch', detail: mismatched.join(', ') }
+              } else {
+                writeResult = { wrote: true, reason: null, columns: Object.keys(proposed) }
+              }
+            }
+          } catch (writeExcept) {
+            await supabase.from('tracks').update(previousSrt).eq('id', track.id).then(() => {}, () => {})
+            writeResult = { wrote: false, reason: 'exception', detail: writeExcept.message }
+          }
+        }
+      }
+    }
+
     // --- Audit the attempt --------------------------------------------------
     // Best-effort: the audit table ships in migration 036. If it has not been
     // applied yet, the feature still works and simply logs instead.
@@ -2336,6 +2453,11 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
           transcript_words: words.slice(0, 5000),
           audio_duration: audioDuration,
           api_cost_note: `deepgram nova-3 te, ${audio.length} bytes`,
+          // Write-path bookkeeping (migration 037). `previous_srt` holds what
+          // was there BEFORE the write, which is what makes rollback possible.
+          wrote_to_tracks: writeResult.wrote,
+          previous_srt: writeResult.wrote ? previousSrt : null,
+          written_columns: writeResult.wrote ? writeResult.columns : null,
         })
         .select('id')
         .single()
@@ -2382,12 +2504,98 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       // Proposed SRT text per column — pre-filled into the editor, NOT saved.
       proposed,
       words: words.length,
-      wrote_to_database: false,
+      // The write path is opt-in; this reports exactly what happened.
+      wrote_to_database: writeResult.wrote,
+      write_requested: wantWrite,
+      write_blocked_reason: writeResult.wrote ? null : (wantWrite ? writeResult.reason : null),
+      write_detail: writeResult.detail || null,
+      written_columns: writeResult.columns,
+      rollback_available: writeResult.wrote && auditId !== null,
     })
   } catch (err) { next(err) }
 })
 
 // Delete track
+// ============================================================================
+// POST /api/admin/tracks/:id/auto-sync/rollback/:runId
+// ============================================================================
+//
+// Restores the lyric columns a specific Auto-Sync run overwrote, using the
+// `previous_srt` snapshot stored on that run's audit row (migration 037).
+//
+// This exists because the write path replaces existing data, and a write
+// without a tested way back is not a safe write. A run can only be rolled
+// back once, and only by the exact run id that performed the write.
+app.post('/api/admin/tracks/:id/auto-sync/rollback/:runId', requireAdmin, async (req, res, next) => {
+  try {
+    const { data: run, error } = await supabase
+      .from('lyric_auto_sync_runs')
+      .select('id, track_id, wrote_to_tracks, previous_srt, written_columns, rolled_back_at, created_at')
+      .eq('id', req.params.runId)
+      .maybeSingle()
+
+    if (error) return res.status(500).json({ error: error.message })
+    if (!run) return res.status(404).json({ error: 'Auto-Sync run not found' })
+
+    // The run id must belong to the track in the URL, so a mistyped id cannot
+    // restore one track's lyrics onto another.
+    if (String(run.track_id) !== String(req.params.id)) {
+      return res.status(409).json({ error: 'That run belongs to a different track.' })
+    }
+    if (!run.wrote_to_tracks) {
+      return res.status(409).json({ error: 'That run did not write anything, so there is nothing to roll back.' })
+    }
+    if (run.rolled_back_at) {
+      return res.status(409).json({
+        error: 'That run has already been rolled back.',
+        rolled_back_at: run.rolled_back_at,
+      })
+    }
+    const previous = run.previous_srt
+    if (!previous || typeof previous !== 'object') {
+      return res.status(409).json({ error: 'No backup was recorded for that run.' })
+    }
+
+    // Only restore the columns this run actually wrote.
+    const restore = {}
+    for (const col of (run.written_columns || Object.keys(previous))) {
+      if (col in previous) restore[col] = previous[col]
+    }
+    if (!Object.keys(restore).length) {
+      return res.status(409).json({ error: 'No restorable columns recorded for that run.' })
+    }
+
+    const { data: restored, error: restoreErr } = await supabase
+      .from('tracks')
+      .update(restore)
+      .eq('id', req.params.id)
+      .select('id, ' + Object.keys(restore).join(', '))
+      .single()
+
+    if (restoreErr) return res.status(500).json({ error: restoreErr.message })
+
+    // Verify the restore round-tripped, then mark the run consumed.
+    const mismatched = Object.keys(restore).filter(
+      (col) => String(restored?.[col] ?? '') !== String(restore[col] ?? '')
+    )
+    if (mismatched.length) {
+      return res.status(500).json({
+        error: 'Rollback did not round-trip; the track may be in a mixed state.',
+        detail: mismatched.join(', '),
+      })
+    }
+
+    // Stamp the run so it can never be rolled back twice (which would restore
+    // stale content over newer edits).
+    await supabase
+      .from('lyric_auto_sync_runs')
+      .update({ rolled_back_at: new Date().toISOString() })
+      .eq('id', run.id)
+
+    res.json({ ok: true, restored_columns: Object.keys(restore), run_id: run.id })
+  } catch (err) { next(err) }
+})
+
 app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
     // Read the audio paths first so the R2 objects can be cleaned up after

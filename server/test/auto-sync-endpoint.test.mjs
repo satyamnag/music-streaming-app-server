@@ -108,14 +108,34 @@ function makeQuery(state, table) {
     async _run() {
       if (table === 'tracks') {
         if (q._op === 'select') return { data: state.track, error: null }
-        // Any write to tracks violates the endpoint contract. Record it and
-        // fail the call so a regression surfaces loudly rather than silently.
+        // A write to tracks: record it, then behave like a real UPDATE ...
         state.trackWrites.push({ op: q._op, payload: q._payload })
-        return { data: null, error: { message: 'tracks must not be written by auto-sync' } }
+        if (state.failTracksWrite) {
+          return { data: null, error: { message: 'simulated write failure' } }
+        }
+        // ... unless the test asks for a read-back mismatch, which simulates
+        // Postgres storing something other than what was sent.
+        const stored = {}
+        for (const [k, v] of Object.entries(q._payload || {})) {
+          stored[k] = state.corruptOnWrite ? String(v ?? '') + ' CORRUPTED' : v
+        }
+        Object.assign(state.track, stored)
+        return { data: { id: state.track.id, ...stored }, error: null }
       }
       if (table === 'lyric_auto_sync_runs') {
-        state.auditRows.push(q._payload)
-        return { data: { id: state.auditRows.length }, error: null }
+        if (q._op === 'insert') {
+          state.auditRows.push(q._payload)
+          return { data: { id: state.auditRows.length }, error: null }
+        }
+        if (q._op === 'update') {
+          state.auditUpdates.push(q._payload)
+          return { data: null, error: null }
+        }
+        // A select on the runs table is the rollback path looking up a run.
+        const id = q._filters.find(([c]) => c === 'id')
+        const wanted = id ? id[1] : null
+        const found = state.auditRuns.find((r) => String(r.id) === String(wanted)) || null
+        return { data: found, error: null }
       }
       return { data: null, error: null }
     },
@@ -160,33 +180,78 @@ register(new URL(process.env.__AUTOSYNC_HOOKS))
 `
 
 const HOOKS = `
+// The write path can only be reached once the audio fetch succeeds, and that
+// needs a working R2/S3 client. Stubbing @aws-sdk/client-s3 keeps the test
+// offline while exercising the REAL server code path end to end.
+const S3_STUB = process.env.__AUTOSYNC_S3_STUB
 export async function resolve(specifier, context, next) {
   const stub = process.env.__AUTOSYNC_SUPABASE_STUB
   if (stub && specifier === '@supabase/supabase-js') {
     return { url: stub, shortCircuit: true, format: 'module' }
   }
+  if (S3_STUB && specifier === '@aws-sdk/client-s3') {
+    return { url: S3_STUB, shortCircuit: true, format: 'module' }
+  }
   return next(specifier, context)
 }
 `
 
-async function launch({ track, deepgramPort }) {
+// Minimal S3 client stub. Only the commands server.js actually issues for the
+// auto-sync path are implemented; GetObjectCommand returns fixed audio bytes.
+const S3_STUB = `
+export class S3Client {
+  async send(cmd) {
+    const name = cmd && cmd.constructor && cmd.constructor.name
+    // Lets the 503 path be exercised without disabling R2 entirely (which
+    // would make the write path unreachable and hide the logic under test).
+    if (globalThis.__AUTOSYNC_TEST_STATE && globalThis.__AUTOSYNC_TEST_STATE.failAudioFetch) {
+      throw new Error('simulated R2 outage')
+    }
+    if (name === 'HeadObjectCommand') return { ContentLength: 2048 }
+    if (name === 'GetObjectCommand') {
+      return { Body: { transformToByteArray: async () => new Uint8Array(2048).fill(7) } }
+    }
+    return {}
+  }
+}
+export class PutObjectCommand { constructor(i) { Object.assign(this, i) } }
+export class GetObjectCommand { constructor(i) { Object.assign(this, i) } }
+export class DeleteObjectCommand { constructor(i) { Object.assign(this, i) } }
+export class HeadObjectCommand { constructor(i) { Object.assign(this, i) } }
+`
+
+async function launch({ track, deepgramPort, corruptOnWrite = false, failTracksWrite = false, failAudioFetch = false }) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'autosync-'))
 
   fs.writeFileSync(path.join(tmp, 'supabase-stub.mjs'), STUB_SUPABASE, 'utf8')
+  fs.writeFileSync(path.join(tmp, 's3-stub.mjs'), S3_STUB, 'utf8')
   fs.writeFileSync(path.join(tmp, 'hooks.mjs'), HOOKS, 'utf8')
   fs.writeFileSync(path.join(tmp, 'preload.mjs'), PRELOAD, 'utf8')
 
   const entry = `
-globalThis.__AUTOSYNC_TEST_STATE = ${JSON.stringify({ track, trackWrites: [], auditRows: [] })}
+globalThis.__AUTOSYNC_TEST_STATE = ${JSON.stringify({
+    track: { ...track },
+    trackWrites: [],
+    auditRows: [],
+    auditUpdates: [],
+    auditRuns: [],
+    corruptOnWrite,
+    failTracksWrite,
+    failAudioFetch,
+  })}
 process.env.SUPABASE_URL = 'http://127.0.0.1:1'
 process.env.SUPABASE_SERVICE_KEY = 'stub'
 process.env.ADMIN_TOKEN = 'test-admin-token'
 process.env.PORT = '0'
 process.env.R2_BASE_URL = 'https://music.example.invalid'
-process.env.R2_ACCOUNT_ID = ''
-process.env.R2_ACCESS_KEY_ID = ''
-process.env.R2_SECRET_ACCESS_KEY = ''
-process.env.__AUTOSYNC_DEEPGRAM_BASE = 'http://127.0.0.1:${deepgramPort}'
+// initR2Client() only constructs the S3 client when all three credentials are
+// present. They are deliberately fake: the S3 module itself is stubbed, so
+// nothing leaves the machine, but r2Enabled must become true for the audio
+// fetch to run and the write path to be reachable.
+process.env.R2_ACCOUNT_ID = 'test-account'
+process.env.R2_ACCESS_KEY_ID = 'test-access-key'
+process.env.R2_SECRET_ACCESS_KEY = 'test-secret-key'
+process.env.DEEPGRAM_API_URL = 'http://127.0.0.1:${deepgramPort}'
 await import(${JSON.stringify(pathToFileURL(path.join(SERVER_DIR, 'server.js')).href)})
 // server.js binds PORT=0 (OS-assigned) and exposes the REAL bound port on
 // globalThis only after listen() succeeds. Its log line prints the requested
@@ -213,6 +278,7 @@ const waitBound = setInterval(() => {
       DEEPGRAM_API_KEY: 'dg-test-key',
       __AUTOSYNC_HOOKS: pathToFileURL(path.join(tmp, 'hooks.mjs')).href,
       __AUTOSYNC_SUPABASE_STUB: pathToFileURL(path.join(tmp, 'supabase-stub.mjs')).href,
+      __AUTOSYNC_S3_STUB: pathToFileURL(path.join(tmp, 's3-stub.mjs')).href,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   })
@@ -364,34 +430,144 @@ try {
     }
   })
 
-  await test('an R2/CDN failure is reported as 503, not a partial write', async () => {
-    // The stub R2 client is not configured in tests, so the audio fetch fails.
-    const res = await fetch(`http://127.0.0.1:${srv.port}/api/admin/tracks/${baseTrack.id}/auto-sync`, {
-      method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json' }, body: '{}',
-    })
-    assert.equal(res.status, 503, `expected 503, got ${res.status}`)
-    const body = await res.json()
-    assert.match(body.error, /R2 fetch failed|CDN unavailable/i)
+  // ---- Write path -------------------------------------------------------
+  // The stub Deepgram returns words that DO match these lyrics, so alignment
+  // succeeds and the write gate is actually reached.
+  const WRITABLE = { ...baseTrack, synced_lyrics: null }
+
+  const post = (port, cookie, body) => fetch(
+    `http://127.0.0.1:${port}/api/admin/tracks/${WRITABLE.id}/auto-sync`,
+    { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+  )
+
+  await test('without write:true nothing is written even on a passing alignment', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, {})
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      assert.equal(body.wrote_to_database, false, 'a default call must never write')
+      assert.equal(body.write_requested, false)
+      assert.ok(body.proposed?.synced_lyrics, 'a proposal should still be returned')
+    } finally { s.child.kill() }
+  })
+
+  await test('write:true writes only when every line cleared the bar', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { write: true })
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      if (body.ok) {
+        assert.equal(body.wrote_to_database, true, `expected a write, blocked: ${body.write_blocked_reason}`)
+        assert.ok(body.written_columns.includes('synced_lyrics'))
+        assert.equal(body.rollback_available, true, 'a write must be rollback-able')
+      } else {
+        // A refused alignment must NOT write — that is the gate working.
+        assert.equal(body.wrote_to_database, false)
+        assert.equal(body.write_blocked_reason, 'alignment_not_ok')
+      }
+    } finally { s.child.kill() }
+  })
+
+  await test('write:true NEVER overwrites a track with existing sync lyrics', async () => {
+    const timed = { ...baseTrack, synced_lyrics: '[00:05.80]HAND TIMED\n' }
+    const s = await launch({ track: timed, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      // force bypasses the 409 so the request reaches the write gate; the gate
+      // itself must still refuse, because verified timings are never replaced.
+      const res = await post(s.port, c, { write: true, force: true })
+      const body = await res.json()
+      assert.equal(body.wrote_to_database, false, 'existing verified timings must never be overwritten')
+      assert.equal(body.write_blocked_reason, 'existing_verified_timings')
+    } finally { s.child.kill() }
+  })
+
+  await test('a read-back mismatch rolls the write back instead of leaving it', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port, corruptOnWrite: true })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { write: true })
+      const body = await res.json()
+      // The stub appends " CORRUPTED" to whatever is stored, simulating a
+      // silent partial/encoding fault between us and Postgres.
+      assert.equal(body.wrote_to_database, false, 'a non-round-tripping write must be reported as failed')
+      assert.equal(body.write_blocked_reason, 'readback_mismatch')
+    } finally { s.child.kill() }
+  })
+
+  await test('a database write failure is reported, not swallowed', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port, failTracksWrite: true })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { write: true })
+      const body = await res.json()
+      assert.equal(body.wrote_to_database, false)
+      assert.equal(body.write_blocked_reason, 'db_error')
+    } finally { s.child.kill() }
+  })
+
+  await test('an audio fetch failure is reported as 503, not a partial write', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port, failAudioFetch: true })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { write: true })
+      assert.equal(res.status, 503, `expected 503, got ${res.status}`)
+      const body = await res.json()
+      assert.match(body.error, /R2 fetch failed|CDN unavailable/i)
+    } finally { s.child.kill() }
+  })
+
+  await test('the rollback endpoint refuses a run that wrote nothing', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await fetch(
+        `http://127.0.0.1:${s.port}/api/admin/tracks/${WRITABLE.id}/auto-sync/rollback/999`,
+        { method: 'POST', headers: { Cookie: c } }
+      )
+      const body = await res.json()
+      assert.ok(res.status === 409 || res.status === 404, `expected 404/409, got ${res.status}`)
+      assert.ok(/not found|did not write/i.test(body.error), `unexpected error: ${body.error}`)
+    } finally { s.child.kill() }
+  })
+
+  await test('rollback requires authentication', async () => {
+    const res = await fetch(
+      `http://127.0.0.1:${srv.port}/api/admin/tracks/${WRITABLE.id}/auto-sync/rollback/1`,
+      { method: 'POST' }
+    )
+    assert.ok(res.status === 401 || res.status === 403, `expected 401/403, got ${res.status}`)
   })
 
   // ---- The central contract, asserted directly against the source ---------
-  await test('the endpoint never writes to `tracks`', async () => {
+  await test('the handler writes to `tracks` ONLY inside the gated write block', async () => {
     const src = fs.readFileSync(path.join(SERVER_DIR, 'server.js'), 'utf8')
     const start = src.indexOf("app.post('/api/admin/tracks/:id/auto-sync'")
     assert.ok(start > 0, 'auto-sync endpoint not found in server.js')
-    const end = src.indexOf('app.delete(', start)
+    const end = src.indexOf('app.post(\'/api/admin/tracks/:id/auto-sync/rollback', start)
     const handler = src.slice(start, end)
 
-    assert.ok(!/from\('tracks'\)\s*\.\s*(update|insert|upsert|delete)/.test(handler),
-      'the auto-sync handler must never write to tracks')
-    assert.match(handler, /wrote_to_database:\s*false/,
-      'the response must state explicitly that nothing was written')
+    // Every write to tracks must be preceded by the `if (wantWrite)` gate.
+    const gateIdx = handler.indexOf('if (wantWrite)')
+    assert.ok(gateIdx > 0, 'the write gate is missing')
+    const writes = [...handler.matchAll(/from\('tracks'\)\s*\.\s*(update|insert|upsert|delete)/g)]
+    assert.ok(writes.length > 0, 'expected the gated write to exist')
+    for (const w of writes) {
+      assert.ok(w.index > gateIdx, 'a write to tracks occurs OUTSIDE the write gate')
+    }
+    // And the default response must still advertise that nothing was written
+    // unless the gate actually ran.
+    assert.match(handler, /wrote_to_database:\s*writeResult\.wrote/)
   })
 
   await test('the handler does not echo the Deepgram key back to the client', async () => {
     const src = fs.readFileSync(path.join(SERVER_DIR, 'server.js'), 'utf8')
     const start = src.indexOf("app.post('/api/admin/tracks/:id/auto-sync'")
-    const end = src.indexOf('app.delete(', start)
+    const end = src.indexOf("app.post('/api/admin/tracks/:id/auto-sync/rollback", start)
     const handler = src.slice(start, end)
     const responseSection = handler.slice(handler.indexOf('res.json({'))
     assert.ok(!/deepgram_api_key/.test(responseSection),
