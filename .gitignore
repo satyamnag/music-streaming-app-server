@@ -105,3 +105,6 @@ node_modules/
 # scripts/verify-partner-pipeline.ps1). Contains a real PostgreSQL data
 # directory ~40MB. Never commit it.
 _pgtest/
+# Local temp secret scratch files (OneSignal key etc.) - never commit
+_onesignal_key.tmp
+*.onesignal.tmp
