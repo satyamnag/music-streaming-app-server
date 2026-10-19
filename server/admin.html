@@ -743,6 +743,31 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
       <div id="lyricsPane" class="edit-pane">
         <div class="sync-header"><h2>Lyrics — <span id="syncTrackTitle"></span></h2></div>
         <p id="syncMsg" style="color:#555;font-size:13px;"></p>
+
+        <!-- Auto-Sync: proposes timings from the audio, writes NOTHING.
+             It fills the Sync editor below so the admin can review, correct
+             and Save through the normal audited path. -->
+        <div id="autoSyncPanel" style="border:1px solid #e2e2e2;border-radius:8px;padding:12px;margin:0 0 14px;background:#fafafa;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <strong style="font-size:13px;">Auto-Sync Lyrics</strong>
+            <button class="btn btn-primary btn-sm" type="button" id="autoSyncBtn" onclick="runAutoSync(false)">Propose timings from audio</button>
+            <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;">
+              <input type="checkbox" id="autoSyncForce"> Re-run tracks that already have sync lyrics
+            </label>
+          </div>
+          <p style="font-size:12px;color:#666;margin:8px 0 0;line-height:1.6;">
+            Sends this track's audio to Deepgram (<code>nova-3</code>, Telugu) and matches the
+            returned word timings against the <strong>Plain Telugu</strong> lyrics.
+            Every language column shares one timeline, so one run covers all five.
+            <br>
+            <strong>Nothing is saved.</strong> The result is filled into the Sync editor below for you
+            to review and correct; press <em>Save</em> there to persist it.
+            This is a suggestion, not a guarantee — singing makes speech models less reliable than
+            they are on speech, so check the flagged lines before saving.
+          </p>
+          <div id="autoSyncReport" style="font-size:12px;margin-top:10px;"></div>
+        </div>
+
         <div class="lyrics-nested">
           <div class="lyrics-sidebar">
             <button type="button" class="lyrics-l1 active" id="lvl-plain" onclick="lyricsSetLevel('plain')">Plain</button>
@@ -1149,6 +1174,10 @@ function loadSyncLyricsInto(id) {
   const titleEl = document.getElementById('syncTrackTitle');
   if (titleEl) titleEl.textContent = t ? (t.title || '') : '';
   const msg = document.getElementById('syncMsg'); if (msg) msg.textContent = '';
+  // Clear any previous track's auto-sync proposal. Leaving it on screen would
+  // let a stale report (and its confidence numbers) be read as this track's.
+  const report = document.getElementById('autoSyncReport'); if (report) report.innerHTML = '';
+  const forceBox = document.getElementById('autoSyncForce'); if (forceBox) forceBox.checked = false;
   lyricsLevel = 'plain'; lyricsLang = 'te';
   document.querySelectorAll('.lyrics-l1').forEach((b) => b.classList.remove('active'));
   document.querySelectorAll('.lyrics-l2').forEach((b) => b.classList.remove('active'));
@@ -1160,6 +1189,7 @@ function loadSyncLyricsInto(id) {
 function closeSyncLyrics() {
   syncTrackId = null;
   syncEntries = [];
+  const report = document.getElementById('autoSyncReport'); if (report) report.innerHTML = '';
 }
 
 // ----- Nested Plain/Sync lyrics editor -----
@@ -1238,6 +1268,111 @@ async function saveLyricsPane() {
   } finally {
     showLoading(false);
     unlock();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auto-Sync Lyrics
+//
+// Calls the propose-only endpoint and renders the result for REVIEW. It never
+// saves: the server writes nothing to `tracks` either, so the only way a
+// proposed timing reaches the database is an admin pressing Save in the Sync
+// editor, which goes through the normal audited PUT path.
+//
+// The proposal is written into the Sync Telugu textarea, which is where the
+// existing SRT validator and Save button already live — deliberately reusing
+// that surface instead of inventing a second, unguarded write path.
+// ---------------------------------------------------------------------------
+async function runAutoSync(force) {
+  const id = syncTrackId || document.getElementById('editId').value;
+  if (!id) { toast('Save the track first — auto-sync needs a stored track id'); return; }
+
+  const btn = document.getElementById('autoSyncBtn');
+  const report = document.getElementById('autoSyncReport');
+  const forceBox = document.getElementById('autoSyncForce');
+  const useForce = force === true || (forceBox && forceBox.checked);
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Transcribing…'; }
+  if (report) report.innerHTML = '<span style="color:#666;">Sending audio to Deepgram — this can take a while for a full track…</span>';
+
+  try {
+    const res = await authedFetch('/api/admin/tracks/' + encodeURIComponent(id) + '/auto-sync', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force: useForce }),
+    });
+
+    // Read the body exactly once — a Response body cannot be consumed twice.
+    let body = {};
+    try { body = await res.json(); } catch (_) { body = {}; }
+
+    if (!res.ok) {
+      const extra = body.existing_cue_count
+        ? ` (${body.existing_cue_count} existing cues — enable the re-run checkbox to override)`
+        : '';
+      if (report) report.innerHTML = `<span style="color:#b00;">${esc(body.error || 'Auto-Sync failed')}${esc(extra)}</span>`;
+      toast(body.error || 'Auto-Sync failed');
+      return;
+    }
+
+    // Fill the Sync Telugu editor with the proposal so it can be reviewed and
+    // saved with the normal button. Other languages are offered as a summary
+    // because each has its own textarea behind the language selector.
+    const te = body.proposed && body.proposed.synced_lyrics;
+    if (te) {
+      lyricsLevel = 'sync'; lyricsLang = 'te';
+      document.querySelectorAll('.lyrics-l1').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.lyrics-l2').forEach((b) => b.classList.remove('active'));
+      const l1 = document.getElementById('lvl-sync'); if (l1) l1.classList.add('active');
+      const l2 = document.getElementById('lang-te'); if (l2) l2.classList.add('active');
+      const ta = document.getElementById('lyricsText');
+      if (ta) ta.value = te;
+    }
+
+    const flagged = (body.lines || []).filter((l) => l.start_seconds === null || l.confidence < 0.55);
+    const pct = (n) => (Math.round((Number(n) || 0) * 1000) / 10) + '%';
+    const otherLangs = Object.keys(body.proposed || {}).filter((k) => k !== 'synced_lyrics');
+
+    let html = '';
+    html += `<div style="margin-bottom:6px;">`;
+    html += `<strong style="color:${body.ok ? '#137333' : '#b06000'};">${body.ok ? 'All lines cleared the confidence bar' : 'Needs review'}</strong>`;
+    if (body.reason) html += ` — <code>${esc(body.reason)}</code>`;
+    html += `</div>`;
+    html += `<div>Lines placed: <strong>${body.line_placed}/${body.line_total}</strong>`;
+    html += ` &middot; matched: <strong>${pct(body.match_rate)}</strong>`;
+    html += ` &middot; lowest confidence: <strong>${pct(body.overall_confidence)}</strong>`;
+    html += ` &middot; words heard: <strong>${body.words}</strong>`;
+    html += ` &middot; ${(body.elapsed_ms / 1000).toFixed(1)}s</div>`;
+
+    if (flagged.length) {
+      html += `<div style="margin-top:8px;color:#b06000;"><strong>${flagged.length} line(s) need checking:</strong></div>`;
+      html += '<ul style="margin:4px 0 0;padding-left:18px;max-height:180px;overflow:auto;">';
+      for (const l of flagged.slice(0, 40)) {
+        const time = l.start_seconds === null ? 'not placed' : formatLrcTime(l.start_seconds);
+        html += `<li><code>${esc(time)}</code> ${esc((l.text || '').slice(0, 60))}`
+             + ` <span style="color:#888;">(conf ${pct(l.confidence)}${l.words ? '' : ', no words heard'})</span></li>`;
+      }
+      html += '</ul>';
+    }
+
+    if (otherLangs.length) {
+      html += `<div style="margin-top:8px;color:#666;">Also proposed timings for: `
+           + otherLangs.map((k) => esc(k.replace('synced_lyrics_', ''))).join(', ')
+           + `. Switch language above after saving Telugu — each column keeps the same timeline.</div>`;
+    }
+
+    html += `<div style="margin-top:8px;color:#137333;"><strong>Nothing was saved.</strong> Review the Sync Telugu text above, then press Save.</div>`;
+    if (report) report.innerHTML = html;
+
+    toast(te ? 'Proposal ready — review and press Save' : 'No proposal returned');
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') {
+      if (report) report.innerHTML = `<span style="color:#b00;">${esc(e.message)}</span>`;
+      toast('Error: ' + e.message);
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Propose timings from audio'; }
   }
 }
 

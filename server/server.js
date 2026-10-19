@@ -12,6 +12,15 @@ import { rateLimit } from 'express-rate-limit'
 import { createClerkClient } from '@clerk/backend'
 import { readWebpSize, matchesAspectRatio, matchesAspectRatioRange } from './webp_size.js'
 import { registerPartnerRoutes } from './partner_routes.mjs'
+import {
+  alignLyrics,
+  buildSrtForVariant,
+  fillUnsungTimings,
+  parseTimedLyrics,
+  splitLyricLines,
+  classifyLine,
+  DEFAULT_CONFIDENCE_FLOOR,
+} from './libs/autoSyncLyrics.mjs'
 
 dotenv.config()
 
@@ -142,6 +151,11 @@ const secrets = {
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
   google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
+  // Deepgram API key for the admin "Auto-Sync Lyrics" feature. Stored in Vault
+  // like every other secret; the env value is only a fallback. When unset the
+  // auto-sync endpoint fails closed with a clear message rather than doing
+  // anything partial.
+  deepgram_api_key: process.env.DEEPGRAM_API_KEY || '',
   // --- Partner Program ---------------------------------------------------
   // NO EMAIL CONFIGURATION. The portal sends no automatic email: every send
   // path was removed (see the "NO AUTOMATIC EMAIL" note in partner_routes.mjs).
@@ -180,6 +194,9 @@ const VAULT_SECRET_KEYS = [
   'r2_secret_access_key',
   'superwall_webhook_secret',
   'google_translate_api_key',
+  // Auto-Sync Lyrics (Deepgram). Vault-preferred so a leaked Render env does
+  // not hand over a billable third-party credential.
+  'deepgram_api_key',
   // Partner Program secrets. Stored in Vault rather than the deployment env
   // wherever possible, so a leaked Render env is not a leaked KEK.
   //
@@ -2092,6 +2109,281 @@ app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
     if (albumIds !== null) { try { await setTrackAlbums(supabase, req.params.id, albumIds) } catch (_) {} }
     await cleanupReplacedR2Files(existing, updates)
     res.json(data)
+  } catch (err) { next(err) }
+})
+
+// ============================================================================
+// POST /api/admin/tracks/:id/auto-sync  —  PROPOSE ONLY, NEVER AUTO-WRITES
+// ============================================================================
+//
+// Sends a track's audio to Deepgram, aligns the returned word timings against
+// the track's `plain_lyrics`, and returns REVIEW SUGGESTIONS.
+//
+// This endpoint deliberately does NOT write to `tracks`. Not even when every
+// line clears the confidence bar. The reasons are concrete:
+//
+//   1. STT is not forced alignment. Deepgram's /v1/listen re-transcribes; it
+//      does not align a known script to audio, and there is no forced-alignment
+//      parameter. Singing makes word timings materially less reliable than
+//      speech (sustained vowels, elided consonants, percussive masking).
+//   2. A plausible-but-wrong timestamp is far worse than a missing one: it
+//      ships silently to listeners and looks authoritative.
+//   3. The existing hand-timed LRCs are ground truth. Overwriting them with
+//      machine output would destroy verified work with no way back.
+//
+// So the contract is: propose, verify hard, and let the human click Save. The
+// admin UI pre-fills the existing sync editor from this response, which already
+// has its own "must be valid SRT" guard and a normal audited PUT path.
+//
+// Cost note: each call is a billable Deepgram request. `force` re-runs a track
+// that already has synced lyrics; without it those tracks are refused early so
+// verified work is never even re-transcribed.
+app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next) => {
+  const startedAt = Date.now()
+  try {
+    if (!secrets.deepgram_api_key) {
+      return res.status(503).json({
+        error: 'Auto-Sync is not configured: the Deepgram API key is missing. ' +
+               'Store it in Supabase Vault as `deepgram_api_key`.',
+      })
+    }
+
+    const { data: track, error } = await supabase
+      .from('tracks')
+      .select(
+        'id, title, storage_path, duration, language, ' +
+        'synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, ' +
+        'plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr'
+      )
+      .eq('id', req.params.id)
+      .maybeSingle()
+
+    if (error) return res.status(500).json({ error: error.message })
+    if (!track) return res.status(404).json({ error: 'Track not found' })
+
+    const force = req.body && (req.body.force === true || req.body.force === 'true')
+
+    // Never re-transcribe (or overwrite) verified hand-timed work by default.
+    const existingTimed = parseTimedLyrics(track.synced_lyrics)
+    if (existingTimed.length && !force) {
+      return res.status(409).json({
+        error: 'This track already has sync lyrics. Auto-Sync refuses to touch verified timings.',
+        existing_cue_count: existingTimed.length,
+        hint: 'Send { "force": true } to re-run it as a suggestion only. Nothing is written either way.',
+      })
+    }
+
+    const plain = (track.plain_lyrics || '').trim()
+    if (!plain) {
+      return res.status(400).json({
+        error: 'This track has no plain lyrics to align against. Fill in the Plain Telugu lyrics first — ' +
+               'they are the script the timings are matched to.',
+      })
+    }
+
+    // Telugu is the only language aligned: all five lyric columns share one
+    // line-by-line timeline, so one alignment covers every language.
+    if (!track.storage_path) {
+      return res.status(400).json({ error: 'This track has no audio file to transcribe.' })
+    }
+
+    // --- Fetch the audio from R2 (the only configured backend) --------------
+    //
+    // The whole object is buffered because the Deepgram pre-recorded API is a
+    // single POST. That makes the byte size a memory commitment on this process,
+    // so it is bounded explicitly: nova-3 accepts up to 2 GB / 10 hours, which
+    // is far beyond any track here, and an unbounded read would let one request
+    // exhaust the container. A generous ceiling well above a normal song keeps
+    // real tracks working while refusing the pathological case.
+    const AUTO_SYNC_MAX_AUDIO_BYTES = 40 * 1024 * 1024
+
+    let audio = null
+    if (r2) {
+      try {
+        const head = await r2.send(new HeadObjectCommand({ Bucket: R2_BUCKET, Key: track.storage_path }))
+        const size = Number(head.ContentLength) || 0
+        if (size > AUTO_SYNC_MAX_AUDIO_BYTES) {
+          return res.status(413).json({
+            error: `That audio file is ${(size / 1048576).toFixed(1)} MB, above the ` +
+                   `${AUTO_SYNC_MAX_AUDIO_BYTES / 1048576} MB Auto-Sync limit.`,
+          })
+        }
+        const obj = await r2.send(new GetObjectCommand({ Bucket: R2_BUCKET, Key: track.storage_path }))
+        if (obj.Body) audio = Buffer.from(await obj.Body.transformToByteArray())
+      } catch (_) { /* reported below */ }
+    }
+    if (!audio) {
+      return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed).' })
+    }
+
+    // The SHA is recorded in the audit row. If a wrong-audio alignment is ever
+    // suspected, this is the only way to prove which bytes produced it.
+    const storageSha256 = crypto.createHash('sha256').update(audio).digest('hex')
+
+    // --- Transcribe with Deepgram ------------------------------------------
+    // nova-3 + Telugu, per Deepgram's published model/language table.
+    // smart_format and punctuate are OFF on purpose: formatting rewrites the
+    // words ("twenty five" -> "25"), which only adds noise when the goal is to
+    // match the author's own text.
+    const params = new URLSearchParams({
+      model: 'nova-3',
+      language: 'te',
+      smart_format: 'false',
+      punctuate: 'false',
+      utterances: 'false',
+      diarize: 'false',
+    })
+
+    const dgRes = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Token ${secrets.deepgram_api_key}`,
+        'Content-Type': 'application/octet-stream',
+      },
+      body: audio,
+    })
+
+    if (!dgRes.ok) {
+      const detail = await dgRes.text().catch(() => '')
+      console.error(`[auto-sync] Deepgram ${dgRes.status} for track ${track.id}`)
+      return res.status(502).json({
+        error: `Transcription failed (Deepgram ${dgRes.status}).`,
+        detail: detail.slice(0, 400),
+      })
+    }
+
+    const dgJson = await dgRes.json()
+    const alt = dgJson?.results?.channels?.[0]?.alternatives?.[0]
+    const words = Array.isArray(alt?.words)
+      ? alt.words.map((w) => ({
+          word: w.punctuated_word || w.word || '',
+          start: Number(w.start) || 0,
+          end: Number(w.end) || 0,
+          confidence: typeof w.confidence === 'number' ? w.confidence : 0,
+        }))
+      : []
+
+    const audioDuration = Number(dgJson?.metadata?.duration) || Number(track.duration) || null
+
+    // --- Align --------------------------------------------------------------
+    const floor = Number(req.body?.confidence_floor)
+    const alignment = alignLyrics({
+      plainLyrics: plain,
+      words,
+      audioDuration,
+      confidenceFloor: Number.isFinite(floor) && floor > 0 && floor <= 1 ? floor : DEFAULT_CONFIDENCE_FLOOR,
+    })
+
+    // --- Render the proposed SRT for every language column ------------------
+    // Line timings are keyed by the plain-lyrics line index, so all five
+    // columns share one timeline. Unsung lines ({Section}, blank separators)
+    // get an interpolated time so no row loses its position.
+    const baseLines = splitLyricLines(plain)
+    const totalLines = baseLines.length
+    const lineTimings = new Array(totalLines).fill(null)
+    for (const l of alignment.lines) lineTimings[l.lineIndex] = l.startSeconds
+    const filledTimings = fillUnsungTimings(lineTimings)
+
+    const variants = {
+      synced_lyrics: track.plain_lyrics,
+      synced_lyrics_en: track.plain_lyrics_en,
+      synced_lyrics_hi: track.plain_lyrics_hi,
+      synced_lyrics_en_tr: track.plain_lyrics_en_tr,
+      synced_lyrics_hi_tr: track.plain_lyrics_hi_tr,
+    }
+    const proposed = {}
+    for (const [column, plainVariant] of Object.entries(variants)) {
+      if (!plainVariant || !String(plainVariant).trim()) continue
+      proposed[column] = buildSrtForVariant(plainVariant, filledTimings, totalLines)
+    }
+
+    // --- Audit the attempt --------------------------------------------------
+    // Best-effort: the audit table ships in migration 036. If it has not been
+    // applied yet, the feature still works and simply logs instead.
+    //
+    // The actor is resolved here rather than read off `req`: requireAdmin is a
+    // shared guard for the whole admin surface and deliberately does not mutate
+    // the request, so changing it to attach an identity would alter behaviour
+    // for every admin route. Resolving it locally keeps this change contained.
+    let actor = 'admin-token'
+    try {
+      if (clerkEnabled()) {
+        const claims = await verifyClerkRequest(req)
+        const email = (claims && (claims.emailAddress || claims.email)) || ''
+        if (email) actor = String(email).toLowerCase()
+      }
+    } catch (_) { /* fall back to the token identity */ }
+
+    let auditId = null
+    try {
+      const { data: auditRow } = await supabase
+        .from('lyric_auto_sync_runs')
+        .insert({
+          track_id: track.id,
+          track_title: track.title || null,
+          storage_path: track.storage_path,
+          storage_sha256: storageSha256,
+          requested_by: actor,
+          model: 'nova-3',
+          language: 'te',
+          accepted: alignment.ok,
+          reason: alignment.reason,
+          match_rate: alignment.matchRate,
+          overall_confidence: alignment.overallConfidence,
+          line_total: alignment.lines.length,
+          line_placed: alignment.buildableLineCount,
+          lines: alignment.lines,
+          transcript_words: words.slice(0, 5000),
+          audio_duration: audioDuration,
+          api_cost_note: `deepgram nova-3 te, ${audio.length} bytes`,
+        })
+        .select('id')
+        .single()
+      auditId = auditRow?.id ?? null
+    } catch (auditErr) {
+      console.warn(`[auto-sync] audit insert skipped: ${auditErr.message}`)
+    }
+
+    // --- Respond. NOTE: nothing above wrote to `tracks`. --------------------
+    const unacceptable = alignment.lines.filter(
+      (l) => l.startSeconds === null || l.confidence < (Number.isFinite(floor) ? floor : DEFAULT_CONFIDENCE_FLOOR)
+    )
+
+    res.json({
+      ok: alignment.ok,
+      reason: alignment.reason,
+      track_id: track.id,
+      title: track.title,
+      model: 'nova-3',
+      language: 'te',
+      audio_duration: audioDuration,
+      storage_sha256: storageSha256,
+      audit_id: auditId,
+      elapsed_ms: Date.now() - startedAt,
+      match_rate: alignment.matchRate,
+      overall_confidence: alignment.overallConfidence,
+      line_total: alignment.lines.length,
+      line_placed: alignment.buildableLineCount,
+      line_flagged: unacceptable.length,
+      // Per-line detail for the review UI, including lines that could not be
+      // placed so the admin can see exactly which ones need attention.
+      lines: alignment.lines.map((l) => ({
+        line_index: l.lineIndex,
+        text: l.text,
+        kind: classifyLine(l.text),
+        start_seconds: l.startSeconds,
+        end_seconds: l.endSeconds,
+        confidence: l.confidence,
+        matched_keys: l.matchedKeys,
+        total_keys: l.totalKeys,
+        word_count: l.wordCount,
+        asr_confidence: l.asrConfidence,
+      })),
+      // Proposed SRT text per column — pre-filled into the editor, NOT saved.
+      proposed,
+      words: words.length,
+      wrote_to_database: false,
+    })
   } catch (err) { next(err) }
 })
 

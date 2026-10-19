@@ -15,7 +15,11 @@
                     "test:partner-flow":  "node test/partner-stub-register.mjs test/partner-flow.test.mjs",
                     "test:partner-real-db":  "node test/real-db-register.mjs test/partner-real-db.test.mjs",
                     "test:partner-auth-http":  "node test/real-db-register.mjs test/partner-auth-http.test.mjs",
-                    "test:partner":  "node test/partner_crypto.test.mjs \u0026\u0026 node test/partner-verify.cjs \u0026\u0026 node test/partner-stub-register.mjs test/partner-flow.test.mjs"
+                    "test:partner":  "node test/partner_crypto.test.mjs \u0026\u0026 node test/partner-verify.cjs \u0026\u0026 node test/partner-stub-register.mjs test/partner-flow.test.mjs",
+                    "test:auto-sync":  "node test/auto-sync-lyrics.test.mjs \u0026\u0026 node test/auto-sync-endpoint.test.mjs \u0026\u0026 node test/auto-sync-admin-ui.test.cjs",
+                    "test:auto-sync-lyrics":  "node test/auto-sync-lyrics.test.mjs",
+                    "test:auto-sync-endpoint":  "node test/auto-sync-endpoint.test.mjs",
+                    "test:auto-sync-ui":  "node test/auto-sync-admin-ui.test.cjs"
                 },
     "dependencies":  {
                          "@aws-sdk/client-s3":  "^3.1111.0",
