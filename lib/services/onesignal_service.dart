@@ -73,4 +73,64 @@ class OneSignalService {
   /// Adds a trigger that can control in-app message display.
   Future<void> addInAppMessageTrigger(String key, String value) =>
       OneSignal.InAppMessages.addTrigger(key, value);
+
+  /// Removes a trigger, so a message keyed on it stops being eligible.
+  Future<void> removeInAppMessageTrigger(String key) =>
+      OneSignal.InAppMessages.removeTrigger(key);
+
+  /// Pauses or resumes in-app message display for the whole app. Used to keep
+  /// a message from covering the player while audio is running.
+  Future<void> setInAppMessagesPaused(bool paused) =>
+      OneSignal.InAppMessages.paused(paused);
+
+  /// Fires when the user taps a push notification or one of its action
+  /// buttons. The notification's custom payload is on
+  /// [OSNotificationClickEvent.notification]`additionalData`; an explicit
+  /// link is on `event.result.url`.
+  ///
+  /// Registered once at startup. The SDK keeps this listener for the process
+  /// lifetime, so there is no matching remove call here.
+  void addNotificationClickListener(OnNotificationClickListener listener) {
+    OneSignal.Notifications.addClickListener(listener);
+  }
+
+  /// Fires when a notification arrives while the app is in the foreground,
+  /// before it is shown. The handler may call `event.preventDefault()` to keep
+  /// it out of the shade, or `event.notification.display()` to show it later.
+  void addForegroundWillDisplayListener(
+    OnNotificationWillDisplayListener listener,
+  ) {
+    OneSignal.Notifications.addForegroundWillDisplayListener(listener);
+  }
+
+  /// Fires when a user taps a button or image inside an in-app message. The
+  /// action's identifier and link are on `event.result` (`actionId`, `url`).
+  void addInAppMessageClickListener(OnClickInAppMessageListener listener) {
+    OneSignal.InAppMessages.addClickListener(listener);
+  }
+
+  /// Registers the four in-app message lifecycle listeners. Each is optional;
+  /// pass only the ones the caller needs.
+  ///
+  /// The SDK stores these separately (not as one listener object), which is why
+  /// this wrapper exists rather than exposing four methods.
+  void addInAppMessageLifecycleListeners({
+    OnWillDisplayInAppMessageListener? onWillDisplay,
+    OnDidDisplayInAppMessageListener? onDidDisplay,
+    OnWillDismissInAppMessageListener? onWillDismiss,
+    OnDidDismissInAppMessageListener? onDidDismiss,
+  }) {
+    if (onWillDisplay != null) {
+      OneSignal.InAppMessages.addWillDisplayListener(onWillDisplay);
+    }
+    if (onDidDisplay != null) {
+      OneSignal.InAppMessages.addDidDisplayListener(onDidDisplay);
+    }
+    if (onWillDismiss != null) {
+      OneSignal.InAppMessages.addWillDismissListener(onWillDismiss);
+    }
+    if (onDidDismiss != null) {
+      OneSignal.InAppMessages.addDidDismissListener(onDidDismiss);
+    }
+  }
 }

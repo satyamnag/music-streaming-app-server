@@ -56,7 +56,19 @@ publish_to: "none"
 # (official Play requirement). The intermediate 88/89/90 builds were installed
 # on devices only and never uploaded to Play, so they do not affect the Play
 # sequence. The About screen reads this value and shows "87 (1.0.0)".
-version: 1.0.0+88
+#
+# 92 carries the OneSignal push + in-app messaging work:
+#   * google-services.json now covers all three flavours (stable, dev, nightly)
+#     and points at the live Firebase project `soulful-bhakti-project`;
+#   * the notification small icon (`ic_stat_onesignal_default`) is shipped in
+#     all five densities, so pushes show the app's own glyph rather than the
+#     Android default bell;
+#   * notification taps and in-app message buttons now route through
+#     AppDeepLinkRouter, so `sangeet://track/<id>` opens the track instead of
+#     dropping the user on Home.
+# 92 sits above every previously built artifact (86-91) so an install always
+# moves forward and Play never rejects it as a downgrade.
+version: 1.0.0+92
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet

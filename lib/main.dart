@@ -17,6 +17,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:metadata_god/metadata_god.dart';
+import 'package:sangeet/services/app_deep_link_router.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
@@ -229,6 +230,10 @@ Future<void> main(List<String> rawArgs) async {
             await OneSignalService.instance
                 .initialize(appId)
                 .timeout(const Duration(seconds: 10));
+            // Listeners are attached ONLY after a successful initialize: the
+            // SDK discards listeners registered before init, so attaching
+            // earlier would compile, run, and silently never fire.
+            _registerOneSignalListeners();
           } catch (_) {
             // OneSignal init stalled/hung — continue without push messaging.
           }
@@ -458,4 +463,41 @@ class Sangeet extends HookConsumerWidget {
       },
     );
   }
+}
+
+/// Attaches the OneSignal listeners that turn a tapped notification or an
+/// in-app message button into navigation.
+///
+/// Called once, immediately after a successful SDK initialize — the SDK
+/// discards listeners registered before init, so attaching earlier would
+/// compile, run, and silently never fire.
+///
+/// A tap that *launches* the app arrives before the navigator exists, so the
+/// link is queued by [AppDeepLinkRouter] and replayed by `useOneSignalDeepLinks`
+/// after the first frame.
+///
+/// Both listeners are deliberately narrow: they do nothing unless the message
+/// actually carries a link, so a plain "we miss you" push still just opens the
+/// app instead of pushing a blank route.
+void _registerOneSignalListeners() {
+  final links = AppDeepLinkRouter.instance;
+
+  OneSignalService.instance.addNotificationClickListener((event) {
+    // An explicit link on the notification wins; otherwise fall back to the
+    // `deeplink` key set under Additional Data in the OneSignal dashboard.
+    final target =
+        event.result.url ?? event.notification.additionalData?['deeplink'];
+    if (target is! String || target.isEmpty) return;
+    final uri = Uri.tryParse(target);
+    if (uri == null) return;
+    links.handle(uri);
+  });
+
+  OneSignalService.instance.addInAppMessageClickListener((event) {
+    final target = event.result.url;
+    if (target == null || target.isEmpty) return;
+    final uri = Uri.tryParse(target);
+    if (uri == null) return;
+    links.handle(uri);
+  });
 }

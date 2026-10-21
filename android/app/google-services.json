@@ -1,13 +1,13 @@
-{
+﻿{
   "project_info": {
-    "project_number": "206480724575",
-    "project_id": "soulful-bhakti-d06f0",
-    "storage_bucket": "soulful-bhakti-d06f0.firebasestorage.app"
+    "project_number": "362087058491",
+    "project_id": "soulful-bhakti-project",
+    "storage_bucket": "soulful-bhakti-project.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:206480724575:android:8f201153fb474746b081ea",
+        "mobilesdk_app_id": "1:362087058491:android:559a5d09026becedb9201e",
         "android_client_info": {
           "package_name": "com.soulfulbhakti.app"
         }
@@ -15,7 +15,45 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDbVdlKiQUHpLhRjWKPuz-TwhtqOybcG8Y"
+          "current_key": "AIzaSyB4BNFLhjZbr39B6EGlEfEAnlrO0AEBWtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362087058491:android:a2b68fdc7c91828fb9201e",
+        "android_client_info": {
+          "package_name": "com.soulfulbhakti.app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4BNFLhjZbr39B6EGlEfEAnlrO0AEBWtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362087058491:android:7cd04a6218c7f69bb9201e",
+        "android_client_info": {
+          "package_name": "com.soulfulbhakti.app.nightly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4BNFLhjZbr39B6EGlEfEAnlrO0AEBWtU"
         }
       ],
       "services": {

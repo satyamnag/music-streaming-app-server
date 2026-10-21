@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/hooks/configurators/use_check_yt_dlp_installed.dart';
+import 'package:sangeet/hooks/configurators/use_onesignal_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_deep_links.dart';
 import 'package:sangeet/hooks/configurators/use_superwall_subscription_status.dart';
 import 'package:sangeet/modules/root/bottom_player.dart';
@@ -34,6 +35,10 @@ class RootAppPage extends HookConsumerWidget {
     // Forward incoming deep links to Superwall (paywall previews, web
     // checkout redemption).
     useSuperwallDeepLinks();
+    // Replay a OneSignal link that arrived before the navigator existed — the
+    // cold-start notification tap. Listeners themselves are registered in
+    // main.dart, right after the SDK initializes.
+    useOneSignalDeepLinks();
 
     useEffect(() {
       SystemChrome.setSystemUIOverlayStyle(
