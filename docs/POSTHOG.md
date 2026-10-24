@@ -152,6 +152,13 @@ every APK — so passing it as a dispatch input reveals nothing that is not alre
 in the artifact. It is never committed, and the workflow prints `.env` key names
 only, never values.
 
+**Prefer not to pass the token on a command line?** Set the repository secret
+`POSTHOG_VERIFY_KEY` (and optionally `POSTHOG_VERIFY_HOST`) instead, then
+dispatch without `posthog_api_key` — the workflow appends the secret's value to
+`.env`. That keeps the token out of shell history and out of any transcript, and
+it does not touch `DOTENV_RELEASE`, whose current value cannot be read back, so
+editing that one risks dropping Supabase/Clerk/OneSignal keys from every build.
+
 > A release build (`--release`) is not a valid way to run this: the debug gate
 > refuses, by design. To see events from a release build, add the token to the
 > build environment and opt in on the device.

@@ -112,15 +112,30 @@ jobs:
       - name: Add PostHog verification config (verification runs only)
         # Appends after the .env step above. Prints no values: this token is
         # public by design, but the habit has to hold for any key handled here.
-        if: ${{ inputs.posthog_api_key != '' }}
+        #
+        # The token comes from the dispatch input when one is given, otherwise
+        # from the POSTHOG_VERIFY_KEY repository secret. The secret path exists
+        # so a verification run can be triggered without the token being pasted
+        # into a chat, a shell history, or a log, and without touching
+        # DOTENV_RELEASE (whose current value cannot be read back, so editing it
+        # risks dropping Supabase/Clerk/OneSignal keys from every build).
+        #
+        # No `if:` on this step on purpose: the `secrets` context is not
+        # available to step-level conditionals, so the check happens in shell.
         env:
-          POSTHOG_KEY: ${{ inputs.posthog_api_key }}
-          POSTHOG_HOST_IN: ${{ inputs.posthog_host }}
+          POSTHOG_KEY: ${{ inputs.posthog_api_key || secrets.POSTHOG_VERIFY_KEY }}
+          POSTHOG_HOST_IN: ${{ inputs.posthog_host || secrets.POSTHOG_VERIFY_HOST }}
+          VERIFY_OPTIN: ${{ inputs.verify_analytics_optin }}
         run: |
+          set -eu
+          if [ -z "${POSTHOG_KEY:-}" ]; then
+            echo "No PostHog token supplied (dispatch input or POSTHOG_VERIFY_KEY secret); nothing appended."
+            exit 0
+          fi
           printf 'POSTHOG_API_KEY=%s\n' "$POSTHOG_KEY" >> .env
           printf 'POSTHOG_HOST=%s\n' "${POSTHOG_HOST_IN:-https://us.i.posthog.com}" >> .env
           echo "Appended POSTHOG_API_KEY and POSTHOG_HOST to .env (values not shown)."
-          if [ "${{ inputs.verify_analytics_optin }}" != "true" ]; then
+          if [ "$VERIFY_OPTIN" != "true" ]; then
             echo "::warning::A PostHog token was supplied without verify_analytics_optin=true. Analytics will be available but opted OUT, so no events will arrive until a user opts in."
           fi
 
