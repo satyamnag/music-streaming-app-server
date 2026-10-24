@@ -311,6 +311,46 @@ jobs:
           fi
           echo "Signing files written and verified (alias: ${ALIAS})."
 
+      - name: Verify the keystore is the Play upload key
+        # Pin the signing key, the same way the .env guard pins the keys the app
+        # needs. KEYSTORE is a repo secret and cannot be read back, so a wrong or
+        # subtly-corrupted value has no other symptom: the build goes green, and
+        # either Play rejects the bundle or - worse - you ship something signed
+        # with a key nothing else in the world uses.
+        #
+        # EXPECTED_KEYSTORE_SHA256 is the byte-exact SHA-256 of
+        #   C:\Users\SATYAM NAG\Documents\keystores\soulfulbhakti-upload.jks
+        # the upload key the LIVE Play listing is signed with. That file is the
+        # only source of truth for signing; this step makes the build refuse to
+        # proceed with anything else.
+        #
+        # If this fails, the KEYSTORE secret is not that file. Do NOT "fix" it by
+        # editing the hash. A genuinely rotated upload key must be re-registered
+        # in Play Console first, and only then may this constant change.
+        env:
+          EXPECTED_KEYSTORE_SHA256: "435dafda878703c73137b17102000e271d1bcf76da53dc2e414f814b471d117b"
+        run: |
+          ACTUAL_SHA="$(sha256sum android/app/upload-keystore.jks | awk '{print $1}')"
+          echo "keystore SHA-256 : ${ACTUAL_SHA}"
+          echo "expected SHA-256 : ${EXPECTED_KEYSTORE_SHA256}"
+          if [ "${ACTUAL_SHA}" != "${EXPECTED_KEYSTORE_SHA256}" ]; then
+            echo "::error::The KEYSTORE secret is not soulfulbhakti-upload.jks - refusing to sign with the wrong key."
+            echo "::error::expected ${EXPECTED_KEYSTORE_SHA256}, got ${ACTUAL_SHA}"
+            exit 1
+          fi
+          echo "Keystore matches the Play upload key."
+
+          # Also record WHICH certificate signs the artifact, every run. Expected
+          # SHA256 fingerprint, matching upload_certificate.pem in the same
+          # folder:
+          #   96:2A:0B:93:2F:48:98:24:C3:58:88:61:F1:01:E3:4E:
+          #   67:E9:26:49:5F:8F:95:F8:18:B5:F9:0C:4C:14:29:21
+          ALIAS="$(grep -E '^keyAlias=' android/key.properties | cut -d= -f2-)"
+          STOREPASS="$(grep -E '^storePassword=' android/key.properties | cut -d= -f2-)"
+          keytool -list -v -keystore android/app/upload-keystore.jks \
+            -storepass "$STOREPASS" -alias "$ALIAS" 2>/dev/null |
+            grep -E 'Alias name|Owner:|Valid from|SHA256:' || true
+
       - name: Install dependencies
         run: flutter pub get
 
