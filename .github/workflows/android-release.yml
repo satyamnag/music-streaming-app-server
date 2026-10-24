@@ -134,11 +134,21 @@ jobs:
           java -version
 
       - name: Write .env from AWS Secrets Manager (primary source)
-        # The canonical vault: the 9 compile-time keys now live in AWS Secrets
+        # The canonical vault: the 9 compile-time keys live in AWS Secrets
         # Manager (ap-south-1) under <service>/<key> (supabase/url, ... /
         # onesignal/api-key). Read them here first. This step NEVER fails the
-        # job: if AWS is unreachable or a secret is missing it leaves .env empty
-        # (exit 0), and the DOTENV_RELEASE step below fills it in instead.
+        # job; whatever it cannot supply is left to the DOTENV_RELEASE step.
+        #
+        # It must NOT abort on the first failure. It used to: the loop ran
+        # `: > .env; exit 0` the moment a single secret failed, and because
+        # supabase/url is FIRST in the list and is the one secret that could not
+        # be fetched, this step never supplied a single value. Every release run
+        # from 2026-10-11 to 2026-10-21 fell straight through to the fallback,
+        # silently. So collect the failures, keep whatever did work, report both.
+        #
+        # The failure text IS printed. On failure the CLI holds no secret value
+        # to leak - stderr is an AWS error naming the secret and the API call -
+        # and discarding it is precisely why this stayed invisible for ten days.
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -151,12 +161,13 @@ jobs:
             exit 0
           fi
           SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/api-key onesignal/api-key"
+          FAILED=""
           for s in $SECRETS; do
-            V="$(aws secretsmanager get-secret-value --secret-id "$s" --query SecretString --output text 2>&1)" || {
-              echo "::warning::AWS fetch failed for $s; falling back to DOTENV_RELEASE."
-              : > .env
-              exit 0
-            }
+            if ! V="$(aws secretsmanager get-secret-value --secret-id "$s" --query SecretString --output text 2>&1)"; then
+              echo "::warning::AWS fetch failed for $s: $(printf '%s' "$V" | tr '\n' ' ')"
+              FAILED="$FAILED $s"
+              continue
+            fi
             case "$s" in
               supabase/url)          K=SUPABASE_URL ;;
               supabase/anon-key)     K=SUPABASE_ANON_KEY ;;
@@ -171,37 +182,70 @@ jobs:
             esac
             printf '%s=%s\n' "$K" "$V" >> .env
           done
-          echo "Wrote .env from AWS Secrets Manager with these keys:"
-          grep -oE '^[A-Z_]+' .env | sort -u
+          # The old listing was `grep -oE '^[A-Z_]+'`, which truncates a key at
+          # its first digit and so printed R2_BASE_URL as "R" - a lossy list is
+          # how a missing key went unremarked. Match digits too.
+          echo "AWS Secrets Manager supplied these keys:"
+          sed -n 's/^\([A-Za-z0-9_]*\)=.*/\1/p' .env | sort -u || true
+          if [ -n "$FAILED" ]; then
+            echo "::warning::AWS Secrets Manager did not supply:$FAILED"
+          fi
+          exit 0
 
-      - name: Write .env from DOTENV_RELEASE (fallback)
-        # Runs after the AWS step in every case. Skips itself when the AWS step
-        # already produced a complete .env; otherwise writes the manual secret,
-        # preserving the pre-AWS behavior exactly.
+      - name: Fill remaining .env gaps from DOTENV_RELEASE (fallback)
+        # Runs after the AWS step in every case, and MERGES - it must never
+        # overwrite. It used to probe only `^SUPABASE_URL=` and then `> .env` the
+        # entire file, which was wrong twice over: that single probe is the one
+        # key DOTENV_RELEASE does not carry, and a wholesale overwrite throws
+        # away every key AWS did supply. Add only the keys still missing.
         if: ${{ !cancelled() }}
         env:
           DOTENV: ${{ secrets.DOTENV_RELEASE }}
         run: |
-          if grep -q '^SUPABASE_URL=' .env; then
-            echo ".env already written from AWS Secrets Manager; skipping fallback."
+          if [ -z "$DOTENV" ]; then
+            echo "::warning::DOTENV_RELEASE is not set; nothing to merge in."
             exit 0
           fi
-          if [ -z "$DOTENV" ]; then
-            echo "::error::Neither AWS Secrets Manager nor DOTENV_RELEASE produced a .env."
-            exit 1
+          printf '%s\n' "$DOTENV" > .env.fallback
+          ADDED=""
+          while IFS= read -r line || [ -n "$line" ]; do
+            case "$line" in ''|'#'*) continue ;; esac
+            case "$line" in *=*) ;; *) continue ;; esac
+            key="${line%%=*}"
+            case "$key" in ''|*[!A-Za-z0-9_]*) continue ;; esac
+            if grep -q "^${key}=" .env; then
+              continue
+            fi
+            printf '%s\n' "$line" >> .env
+            ADDED="$ADDED $key"
+          done < .env.fallback
+          rm -f .env.fallback
+          if [ -n "$ADDED" ]; then
+            echo "::warning::Filled from DOTENV_RELEASE:$ADDED"
+          else
+            echo ".env needed nothing from DOTENV_RELEASE."
           fi
-          printf '%s\n' "$DOTENV" > .env
           # Show only the KEYS, never the values, so the log stays safe.
-          echo "Wrote .env from DOTENV_RELEASE with these keys:"
-          grep -oE '^[A-Z_]+' .env | sort -u
+          echo "Final .env keys:"
+          sed -n 's/^\([A-Za-z0-9_]*\)=.*/\1/p' .env | sort -u || true
 
       - name: Verify required .env keys
-        # main.dart initialises OneSignal ONLY when ONESIGNAL_APP_ID is
-        # non-empty, and envied gives it an empty default. So a release built
-        # without that key ships with push silently disabled: no error at
-        # runtime, no notification, and nothing in the app to debug from. The
-        # other three have no default at all and fail code generation later
-        # with a much less obvious message. Fail loudly, here, instead.
+        # Two distinct failure modes are covered here.
+        #
+        # ONESIGNAL_APP_ID carries an explicit `defaultValue: ""` in
+        # lib/collections/env.dart, and main.dart initialises OneSignal only
+        # when it is non-empty - so a build without it ships with push silently
+        # disabled: no runtime error, no notification, nothing to debug from.
+        #
+        # SUPABASE_URL, SUPABASE_ANON_KEY and CLERK_PUBLISHABLE_KEY have no
+        # default at all, and Env.supabaseUrl is passed straight into
+        # SupabaseClient() in lib/provider/server/routes/supabase_data.dart.
+        #
+        # Do NOT assume a missing one breaks code generation and is therefore
+        # caught anyway. On the 2026-10-11 and 2026-10-21 runs .env had no
+        # SUPABASE_URL whatsoever, envied still reported "1 output", and both
+        # jobs went GREEN. A green build proves nothing about these keys. Only
+        # this check does. Fail loudly, here.
         run: |
           missing=""
           for key in SUPABASE_URL SUPABASE_ANON_KEY CLERK_PUBLISHABLE_KEY ONESIGNAL_APP_ID; do
