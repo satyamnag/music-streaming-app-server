@@ -114,6 +114,37 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Free disk space
+        # The ubuntu-22.04 image arrives with ~30 GB of preinstalled toolchains
+        # this build never touches, and the Flutter SDK (~4 GB), the Android SDK,
+        # Gradle's caches and Cargokit compiling Rust for THREE ABIs push what is
+        # left to zero. Observed on this repository as
+        #     ##[error]No space left on device
+        # mid-compile, reproducibly, in two consecutive runs - while the same
+        # commit builds fine on the public repository, whose runners have warm
+        # caches. So the space has to be reclaimed rather than hoped for.
+        #
+        # Only toolchains this build does not use are removed. The Android NDK is
+        # deliberately KEPT: android/app/build.gradle pins
+        # ndkVersion = "29.0.14206865" and the native plugin builds require it.
+        # Emulator system images are also removed - they are only needed by
+        # android-emulator-debug.yml, which gets its own fresh runner.
+        run: |
+          echo "--- disk before ---"
+          df -h /
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /opt/ghc \
+            /usr/local/share/boost \
+            /opt/hostedtoolcache/CodeQL \
+            /usr/local/lib/android/sdk/system-images \
+            /usr/local/lib/android/sdk/emulator \
+            /opt/microsoft 2>/dev/null || true
+          sudo docker image prune -af 2>/dev/null || true
+          sudo apt-get clean 2>/dev/null || true
+          echo "--- disk after ---"
+          df -h /
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
