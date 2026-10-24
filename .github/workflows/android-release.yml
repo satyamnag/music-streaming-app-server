@@ -195,6 +195,24 @@ jobs:
           echo "Wrote .env from DOTENV_RELEASE with these keys:"
           grep -oE '^[A-Z_]+' .env | sort -u
 
+      - name: Verify required .env keys
+        # main.dart initialises OneSignal ONLY when ONESIGNAL_APP_ID is
+        # non-empty, and envied gives it an empty default. So a release built
+        # without that key ships with push silently disabled: no error at
+        # runtime, no notification, and nothing in the app to debug from. The
+        # other three have no default at all and fail code generation later
+        # with a much less obvious message. Fail loudly, here, instead.
+        run: |
+          missing=""
+          for key in SUPABASE_URL SUPABASE_ANON_KEY CLERK_PUBLISHABLE_KEY ONESIGNAL_APP_ID; do
+            grep -q "^${key}=." .env || missing="$missing $key"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::.env is missing required release keys:$missing"
+            exit 1
+          fi
+          echo "All required release keys are present (values not shown)."
+
       - name: Write signing config
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE }}
