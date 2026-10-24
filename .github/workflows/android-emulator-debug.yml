@@ -109,15 +109,21 @@ jobs:
             grep -oE '^[A-Z_]+' .env | sort -u
           fi
 
-      - name: Add PostHog verification config from AWS Secrets Manager
-        # PostHog credentials live in AWS Secrets Manager (ap-south-1) as
-        # `posthog/api-key` and `posthog/host` - the SAME two names the release
-        # workflow reads - so there is one home for them, not a GitHub secret
-        # copy that can drift out of sync.
+      - name: Add PostHog verification config
+        # Resolution order, first match wins:
         #
-        # Never fails the job: no secret or no AWS credential simply leaves
-        # PostHog unconfigured, which is the safe default (the SDK is not set up
-        # at all). A dispatch input can still override, for a one-off run.
+        #   1. the `posthog_api_key` dispatch input  - one-off runs only
+        #   2. the POSTHOG_VERIFY_KEY repository secret
+        #   3. AWS Secrets Manager `posthog/api-key` (ap-south-1) - the same
+        #      name android-release.yml reads
+        #
+        # Only the third is the release path; the first two exist so the
+        # verification run needs no AWS access at all. Whichever was used is
+        # named in the log, so a stale duplicate in the other location is
+        # visible rather than silent.
+        #
+        # Never fails the job: no token simply leaves PostHog unconfigured,
+        # which is the safe default - the SDK is not set up at all.
         #
         # No `if:` on this step on purpose: step-level conditionals cannot see
         # the `secrets` context, so the checks happen in shell.
@@ -127,25 +133,50 @@ jobs:
           AWS_DEFAULT_REGION: ap-south-1
           POSTHOG_KEY_IN: ${{ inputs.posthog_api_key }}
           POSTHOG_HOST_IN: ${{ inputs.posthog_host }}
+          POSTHOG_KEY_SECRET: ${{ secrets.POSTHOG_VERIFY_KEY }}
+          POSTHOG_HOST_SECRET: ${{ secrets.POSTHOG_VERIFY_HOST }}
           VERIFY_OPTIN: ${{ inputs.verify_analytics_optin }}
         run: |
           set -u
           KEY="${POSTHOG_KEY_IN:-}"
           HOST="${POSTHOG_HOST_IN:-}"
           SOURCE="dispatch input"
+
+          if [ -z "$KEY" ] && [ -n "${POSTHOG_KEY_SECRET:-}" ]; then
+            KEY="$POSTHOG_KEY_SECRET"
+            HOST="${HOST:-${POSTHOG_HOST_SECRET:-}}"
+            SOURCE="repository secret POSTHOG_VERIFY_KEY"
+          fi
+
           if [ -z "$KEY" ] && [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
             KEY="$(aws secretsmanager get-secret-value --secret-id posthog/api-key --query SecretString --output text 2>/dev/null || true)"
-            HOST="$(aws secretsmanager get-secret-value --secret-id posthog/host --query SecretString --output text 2>/dev/null || true)"
-            SOURCE="AWS Secrets Manager"
+            HOST="${HOST:-$(aws secretsmanager get-secret-value --secret-id posthog/host --query SecretString --output text 2>/dev/null || true)}"
+            [ -n "$KEY" ] && SOURCE="AWS Secrets Manager"
           fi
+
           if [ -z "$KEY" ]; then
             if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
-              echo "::warning::No PostHog token: no dispatch input, and no AWS credentials are configured to read posthog/api-key from ap-south-1. The verification build will run with analytics unconfigured, so no events will be sent."
+              echo "::warning::No PostHog token: no dispatch input, no POSTHOG_VERIFY_KEY secret, and no AWS credentials to read posthog/api-key. The verification build will run with analytics unconfigured, so no events will be sent."
             else
-              echo "::warning::No PostHog token: no dispatch input, and posthog/api-key could not be read from ap-south-1 - the secret does not exist yet, or the IAM policy does not allow secretsmanager:GetSecretValue on it. The verification build will run with analytics unconfigured, so no events will be sent."
+              echo "::warning::No PostHog token: no dispatch input and no POSTHOG_VERIFY_KEY secret, and posthog/api-key could not be read from ap-south-1 - it does not exist yet, or the IAM policy does not allow secretsmanager:GetSecretValue on it. The verification build will run with analytics unconfigured, so no events will be sent."
             fi
             exit 0
           fi
+
+          # A secret is usually pasted wrong in one of two ways. Both would
+          # otherwise surface only as "no events arrived", 20 minutes later.
+          KEY="$(printf '%s' "$KEY" | tr -d '\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+          case "$KEY" in
+            POSTHOG_API_KEY=*)
+              echo "::warning::The stored token starts with 'POSTHOG_API_KEY='; stripping that prefix. Store only the phc_... value."
+              KEY="${KEY#POSTHOG_API_KEY=}"
+              ;;
+          esac
+          case "$KEY" in
+            phc_*) ;;
+            *) echo "::warning::The stored token does not start with 'phc_'. It may be a personal API key (phx_), a project id, or a placeholder. PostHog will reject it and no events will arrive." ;;
+          esac
+
           printf 'POSTHOG_API_KEY=%s\n' "$KEY" >> .env
           printf 'POSTHOG_HOST=%s\n' "${HOST:-https://us.i.posthog.com}" >> .env
           echo "Appended POSTHOG_API_KEY and POSTHOG_HOST to .env from $SOURCE (values not shown)."

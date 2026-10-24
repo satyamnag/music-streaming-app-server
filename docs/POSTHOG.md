@@ -147,10 +147,29 @@ natively the moment the SDK is set up) plus `analytics_verification_optin`, whic
 `lib/main.dart` emits purely so the verification run is identifiable in the event
 list.
 
-### Where the credentials live: AWS Secrets Manager, not GitHub secrets
+### Where the verification credential comes from
 
-Both the release workflow and the verification workflow read the same two names
-from AWS Secrets Manager in `ap-south-1`. One home, so the two cannot drift:
+Resolution order, first match wins — and whichever was used is named in the run
+log, so a stale duplicate left in another location is visible rather than silent:
+
+1. the `posthog_api_key` dispatch input — a one-off override;
+2. the **`POSTHOG_VERIFY_KEY` repository secret** (optional
+   `POSTHOG_VERIFY_HOST` alongside it);
+3. **AWS Secrets Manager** `posthog/api-key` / `posthog/host` in `ap-south-1` —
+   the same two names `android-release.yml` reads, so a release-only setup still
+   verifies without adding a GitHub secret.
+
+Nothing here can fail a build: with no token at all, PostHog is simply left
+unconfigured, which is the safe default.
+
+The stored value must be **the token alone** — `phc_…`, no `POSTHOG_API_KEY=`
+prefix, no quotes, no JSON. A pasted prefix is stripped with a warning, and a
+value that does not start with `phc_` (a `phx_` personal key, a project id, a
+placeholder) is reported immediately, because otherwise both mistakes surface
+only as "no events arrived" twenty minutes later.
+
+The release path is AWS: create the same secret there when you are ready for
+production analytics.
 
 ```bash
 aws secretsmanager create-secret --name posthog/api-key \
@@ -160,15 +179,6 @@ aws secretsmanager create-secret --name posthog/api-key \
 aws secretsmanager create-secret --name posthog/host \
   --secret-string 'https://us.i.posthog.com' --region ap-south-1
 ```
-
-The value is the raw string — the same `<service>/<key>` convention as
-`supabase/url`, `clerk/publishable-key` and `onesignal/api-key`. Neither workflow
-can fail on these: an unreadable or absent secret leaves PostHog unconfigured,
-which is the safe default, and the step says so in the log.
-
-A dispatch input (`-f posthog_api_key=...`) still overrides both, for a one-off
-run where changing the vault would be inappropriate. It is a convenience, not the
-supported path: prefer the vault.
 
 > A release build (`--release`) is not a valid way to run this: the debug gate
 > refuses, by design. To see events from a release build, add the token to the
