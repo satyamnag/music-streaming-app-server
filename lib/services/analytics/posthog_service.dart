@@ -90,6 +90,56 @@ class PostHogService {
     _host = '';
   }
 
+  /// Whether this binary was compiled with the verification define set.
+  ///
+  /// Overridable in tests only: in a real build this is the compile-time
+  /// constant `POSTHOG_VERIFY_OPTIN`, which no shipping workflow passes.
+  @visibleForTesting
+  bool Function() isVerificationDefineSet =
+      () => const bool.fromEnvironment('POSTHOG_VERIFY_OPTIN');
+
+  /// Whether this binary is a debug build.
+  @visibleForTesting
+  bool Function() isDebugBuild = () => kDebugMode;
+
+  /// Whether this build should grant analytics consent by itself, for
+  /// installation verification.
+  ///
+  /// TWO independent gates, and a shipping build fails both:
+  ///
+  /// 1. `POSTHOG_VERIFY_OPTIN` must be set at **compile time**
+  ///    (`--dart-define=POSTHOG_VERIFY_OPTIN=true`). Because it is a compile-time
+  ///    constant it cannot be switched on at runtime by remote config, by a
+  ///    stored preference, or by a tampered device.
+  /// 2. The binary must be a **debug** build. Even if the define were added to a
+  ///    release pipeline by mistake, a release binary refuses.
+  ///
+  /// Not a product feature: it exists so the analytics pipeline can be verified
+  /// end to end against a real PostHog project. See docs/POSTHOG.md.
+  @visibleForTesting
+  bool isVerificationOptInRequested() =>
+      isVerificationDefineSet() && isDebugBuild();
+
+  /// Grants consent programmatically for an installation-verification build.
+  ///
+  /// Goes through the same [setConsent] the Settings toggle uses, so the stored
+  /// value and every downstream effect are identical to a user tapping the
+  /// switch - the only difference is who initiates it. Returns whether this call
+  /// is what granted consent.
+  ///
+  /// A no-op unless [isVerificationOptInRequested], so in every shipping build
+  /// this returns `false` and changes nothing.
+  Future<bool> verifyOptInIfRequested() async {
+    if (!isVerificationOptInRequested()) return false;
+
+    _warn(
+      'POSTHOG_VERIFY_OPTIN is set in a debug build: granting analytics consent '
+      'for installation verification. This must never appear in a release.',
+    );
+    await setConsent(true);
+    return true;
+  }
+
   /// Reads the stored consent decision and sets the SDK up **only** if the user
   /// has already opted in. Safe to call once at startup; never throws.
   ///

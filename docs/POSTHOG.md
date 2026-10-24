@@ -115,6 +115,47 @@ On a device, with a token configured: open *Settings → Privacy*, turn the togg
 on, and watch for `Application Opened` in PostHog's activity view. Turn it off
 and confirm events stop.
 
+### Verifying the live pipeline in CI (no device needed)
+
+Collection is opt-in, so a fresh install sends nothing and PostHog's "Verify
+installation" stays waiting until somebody opts in on a real device.
+`PostHogService.verifyOptInIfRequested()` closes that gap for CI by granting
+consent itself. It is reachable only when **both** of these hold:
+
+1. the binary was compiled with `--dart-define=POSTHOG_VERIFY_OPTIN=true`, and
+2. the binary is a **debug** build.
+
+A compile-time constant cannot be switched on at runtime by remote config, by a
+stored preference, or by a tampered device; the debug gate means a release binary
+refuses even if the define were added to a release pipeline by mistake. In every
+shipping build the call returns `false` and changes nothing. It grants consent
+through the same `setConsent()` the Settings toggle uses, so what it persists and
+what it applies are identical to a user tapping the switch.
+
+Dispatch the emulator workflow with the project token and the flag:
+
+```bash
+gh workflow run "Android Emulator Debug (logcat)" \
+  -R satyamnag/music-streaming-app-server \
+  -f posthog_api_key=phc_REPLACE_ME \
+  -f posthog_host=https://us.i.posthog.com \
+  -f verify_analytics_optin=true
+```
+
+Expected in PostHog within a couple of minutes: `Application Opened` (captured
+natively the moment the SDK is set up) plus `analytics_verification_optin`, which
+`lib/main.dart` emits purely so the verification run is identifiable in the event
+list.
+
+The token is a public client-side ingest token — the same string ships inside
+every APK — so passing it as a dispatch input reveals nothing that is not already
+in the artifact. It is never committed, and the workflow prints `.env` key names
+only, never values.
+
+> A release build (`--release`) is not a valid way to run this: the debug gate
+> refuses, by design. To see events from a release build, add the token to the
+> build environment and opt in on the device.
+
 ## Compliance follow-ups (outside this repo)
 
 Adding any analytics vendor changes what the app collects, so these must match:

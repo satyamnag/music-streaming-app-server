@@ -188,6 +188,20 @@ Future<void> main(List<String> rawArgs) async {
       host: Env.posthogHost,
     );
 
+    // Installation-verification harness. A no-op in every shipping build: it
+    // needs BOTH the compile-time define POSTHOG_VERIFY_OPTIN (passed only by
+    // the verification dispatch) AND a debug build. It grants consent through
+    // the same API the Settings toggle uses - see
+    // PostHogService.verifyOptInIfRequested for why both gates exist.
+    if (await PostHogService.instance.verifyOptInIfRequested()) {
+      // One labelled event so a verification run is identifiable in PostHog
+      // next to the lifecycle events the SDK captures when it is set up.
+      await PostHogService.instance.capture(
+        'analytics_verification_optin',
+        properties: {'release_channel': Env.releaseChannel.name},
+      );
+    }
+
     // Install the catalogue-sized image cache before the first frame, so every
     // CachedNetworkImageProvider in the app (UniversalImage and the surfaces
     // that build a provider directly) serves from it instead of

@@ -488,4 +488,79 @@ void main() {
       await expectLater(service.capture('x'), completes);
     });
   });
+
+  group('installation-verification harness', () {
+    // The harness exists so CI can prove the pipeline against a real PostHog
+    // project. These tests pin its two gates: it must be impossible to reach
+    // from any normal build.
+    setUp(() {
+      service.isVerificationDefineSet = () => false;
+      service.isDebugBuild = () => true;
+    });
+
+    tearDown(() {
+      service.isVerificationDefineSet =
+          () => const bool.fromEnvironment('POSTHOG_VERIFY_OPTIN');
+      service.isDebugBuild = () => true;
+    });
+
+    test('a normal build never requests it', () {
+      expect(service.isVerificationOptInRequested(), isFalse);
+      expect(service.hasConsent, isFalse);
+    });
+
+    test('a release build refuses it even if the define were set', () {
+      service.isVerificationDefineSet = () => true;
+      service.isDebugBuild = () => false;
+
+      expect(
+        service.isVerificationOptInRequested(),
+        isFalse,
+        reason: 'a mistaken define in a release pipeline must not be enough to '
+            'grant consent on every user device',
+      );
+    });
+
+    test('without the define, verifyOptInIfRequested changes nothing', () async {
+      final granted = await service.verifyOptInIfRequested();
+
+      expect(granted, isFalse);
+      expect(service.hasConsent, isFalse);
+      expect(platform.calls, isEmpty);
+      expect(KVStoreService.analyticsConsent, isFalse);
+    });
+
+    test('with both gates open it grants consent through the normal path',
+        () async {
+      service.isVerificationDefineSet = () => true;
+      await service.initialize(projectToken: token, host: '');
+
+      final granted = await service.verifyOptInIfRequested();
+
+      expect(granted, isTrue);
+      expect(service.hasConsent, isTrue);
+      expect(service.isCapturing, isTrue);
+      expect(KVStoreService.analyticsConsent, isTrue,
+          reason: 'it must persist exactly what the Settings toggle persists');
+      expect(
+        platform.calls,
+        containsAllInOrder(['setup', 'enable']),
+        reason: 'and apply it exactly the same way',
+      );
+    });
+
+    test('release build with the define still refuses to grant', () async {
+      service.isVerificationDefineSet = () => true;
+      service.isDebugBuild = () => false;
+      await service.initialize(projectToken: token, host: '');
+
+      final granted = await service.verifyOptInIfRequested();
+
+      expect(granted, isFalse);
+      expect(service.hasConsent, isFalse);
+      expect(service.isCapturing, isFalse);
+      expect(KVStoreService.analyticsConsent, isFalse);
+      expect(platform.calls, isEmpty);
+    });
+  });
 }
