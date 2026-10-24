@@ -139,7 +139,11 @@ jobs:
             SOURCE="AWS Secrets Manager"
           fi
           if [ -z "$KEY" ]; then
-            echo "::warning::No PostHog token available (no dispatch input, and posthog/api-key was not readable in ap-south-1). The verification build will run with analytics unconfigured, so no events will be sent."
+            if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+              echo "::warning::No PostHog token: no dispatch input, and no AWS credentials are configured to read posthog/api-key from ap-south-1. The verification build will run with analytics unconfigured, so no events will be sent."
+            else
+              echo "::warning::No PostHog token: no dispatch input, and posthog/api-key could not be read from ap-south-1 - the secret does not exist yet, or the IAM policy does not allow secretsmanager:GetSecretValue on it. The verification build will run with analytics unconfigured, so no events will be sent."
+            fi
             exit 0
           fi
           printf 'POSTHOG_API_KEY=%s\n' "$KEY" >> .env
