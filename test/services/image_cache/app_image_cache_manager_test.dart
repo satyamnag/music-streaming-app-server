@@ -1,93 +1,71 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
 
 /// Regression guard for the image cache configuration.
 ///
-/// The bug this exists for was invisible in the source: `cached_network_image`
-/// was wired up correctly, but inherited `flutter_cache_manager`'s
+/// The bug this exists for was invisible in source: `cached_network_image` was
+/// wired up correctly but inherited `flutter_cache_manager`'s
 /// `maxNrOfCacheObjects` default of 200, so the LRU evicted artwork that was
 /// still in use and every launch refetched it. Nothing failed, nothing logged.
 /// These tests fail if that default creeps back in.
+///
+/// WHY THESE ASSERT CONSTANTS INSTEAD OF CONSTRUCTING THE MANAGER
+/// --------------------------------------------------------------
+/// Constructing a `CacheManager` is not safe in a unit test. `Config` builds
+/// `IOFileSystem(cacheKey)`, whose initialiser is
+///     IOFileSystem(this._cacheKey) : _fileDir = createDirectory(_cacheKey);
+/// so it calls `getTemporaryDirectory()` eagerly, in the constructor. Under
+/// `flutter test` path_provider has no implementation, that future completes with
+/// an error nobody awaits, and the test runner reports
+/// "failed after test completion". This was observed, not theorised: run
+/// 40090219829 failed both construction tests with exactly that message.
+///
+/// WHAT THIS THEREFORE DOES *NOT* PROVE
+/// ------------------------------------
+///  * That `main()` calls `configureImageCache()`. Covered instead by the
+///    analyzer (the call and import must resolve) and by the release build.
+///  * That artwork actually survives an app restart. That needs a real device
+///    and two launches, and is deliberately NOT claimed here.
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  group('AppImageCacheManager', () {
-    test('is a singleton, so one cache directory backs the whole app', () {
-      expect(
-        identical(AppImageCacheManager(), AppImageCacheManager()),
-        isTrue,
-        reason: 'two instances would mean two directories and two databases',
-      );
-    });
-
+  group('AppImageCacheManager configuration', () {
     test('caps far above the 200-object default that caused the reloads', () {
-      final config = AppImageCacheManager().config;
-      final defaultCap = DefaultCacheManager().config.maxNrOfCacheObjects;
+      // flutter_cache_manager-3.4.2/lib/src/config/_config_io.dart:
+      //     maxNrOfCacheObjects = maxNrOfCacheObjects ?? 200
+      const int packageDefault = 200;
 
       expect(
-        config.maxNrOfCacheObjects,
-        greaterThan(defaultCap),
+        AppImageCacheManager.maxObjects,
+        greaterThan(packageDefault),
         reason:
-            'flutter_cache_manager defaults maxNrOfCacheObjects to $defaultCap. '
-            'This app touches far more distinct artwork URLs than that in one '
-            'session, so the LRU evicts images still in use and the next launch '
-            'refetches them - the reported "images load every time" symptom.',
+            'at the default cap this app evicts artwork still in use and '
+            'refetches it on the next launch - the reported symptom',
       );
-      expect(config.maxNrOfCacheObjects, AppImageCacheManager.maxObjects);
+      expect(AppImageCacheManager.maxObjects, 1200);
     });
 
-    test('keeps artwork well past 30 days', () {
-      final config = AppImageCacheManager().config;
-      expect(config.stalePeriod, AppImageCacheManager.stalePeriod);
+    test('keeps artwork far longer than the 30-day default', () {
+      // flutter_cache_manager-3.4.2/lib/src/config/_config_io.dart:
+      //     stalePeriod = stalePeriod ?? const Duration(days: 30)
+      const Duration packageDefault = Duration(days: 30);
+
       expect(
-        config.stalePeriod,
-        greaterThan(const Duration(days: 30)),
+        AppImageCacheManager.stalePeriod,
+        greaterThan(packageDefault),
         reason: 'track artwork never changes; a 30-day refresh is pure waste',
       );
+      expect(AppImageCacheManager.stalePeriod, const Duration(days: 90));
     });
 
-    test('uses its own cache key, not the shared default', () {
+    test('uses a cache key of its own, not the shared default', () {
+      // DefaultCacheManager.key == 'libCachedImageData'
       expect(
-        AppImageCacheManager().config.cacheKey,
         AppImageCacheManager.key,
-      );
-      expect(
-        AppImageCacheManager().config.cacheKey,
-        isNot(DefaultCacheManager().config.cacheKey),
+        isNot('libCachedImageData'),
         reason:
-            'sharing libCachedImageData would let anything else evict this '
-            'app\'s artwork under the 200-object cap',
+            'sharing the default key would let anything else in the app evict '
+            'this artwork under the cap that is already too small',
       );
-    });
-  });
-
-  group('configureImageCache', () {
-    test('installs AppImageCacheManager as the provider default', () {
-      final installed = configureImageCache();
-
-      expect(installed, same(AppImageCacheManager()));
-      expect(
-        identical(
-          CachedNetworkImageProvider.defaultCacheManager,
-          AppImageCacheManager(),
-        ),
-        isTrue,
-        reason:
-            'every existing call site relies on the static default; if this is '
-            'not set they silently fall back to the 200-object cache',
-      );
-    });
-
-    test('is idempotent', () {
-      configureImageCache();
-      final first = CachedNetworkImageProvider.defaultCacheManager;
-      configureImageCache();
-      expect(
-        identical(CachedNetworkImageProvider.defaultCacheManager, first),
-        isTrue,
-      );
+      expect(AppImageCacheManager.key, 'soulfulBhaktiImageCache');
     });
   });
 }
