@@ -37,6 +37,30 @@ on:
           - warning
           - error
           - assert
+      # --- PostHog installation verification (optional) ---------------------
+      # Collection is opt-in, so a normal install sends nothing and PostHog's
+      # "Verify installation" step waits forever. Supplying a project token here
+      # plus verify_analytics_optin=true builds a DEBUG APK that grants consent
+      # itself and sends a labelled event, which is how the pipeline is proven
+      # end to end. See docs/POSTHOG.md.
+      #
+      # The token is a public client-side ingest token - the same string ships
+      # inside every APK - so it is not a secret in the API-key sense. It is
+      # never committed; this workflow prints .env KEY NAMES only, never values.
+      posthog_api_key:
+        description: "PostHog project token (phc_...) for verification runs only. Empty = normal run."
+        type: string
+        default: ""
+      posthog_host:
+        description: PostHog ingest host (https://us.i.posthog.com or https://eu.i.posthog.com)
+        type: string
+        default: "https://us.i.posthog.com"
+      verify_analytics_optin:
+        description: >-
+          Build with POSTHOG_VERIFY_OPTIN so this debug APK opts itself in to
+          analytics. Refused by release builds by design.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -85,6 +109,21 @@ jobs:
             grep -oE '^[A-Z_]+' .env | sort -u
           fi
 
+      - name: Add PostHog verification config (verification runs only)
+        # Appends after the .env step above. Prints no values: this token is
+        # public by design, but the habit has to hold for any key handled here.
+        if: ${{ inputs.posthog_api_key != '' }}
+        env:
+          POSTHOG_KEY: ${{ inputs.posthog_api_key }}
+          POSTHOG_HOST_IN: ${{ inputs.posthog_host }}
+        run: |
+          printf 'POSTHOG_API_KEY=%s\n' "$POSTHOG_KEY" >> .env
+          printf 'POSTHOG_HOST=%s\n' "${POSTHOG_HOST_IN:-https://us.i.posthog.com}" >> .env
+          echo "Appended POSTHOG_API_KEY and POSTHOG_HOST to .env (values not shown)."
+          if [ "${{ inputs.verify_analytics_optin }}" != "true" ]; then
+            echo "::warning::A PostHog token was supplied without verify_analytics_optin=true. Analytics will be available but opted OUT, so no events will arrive until a user opts in."
+          fi
+
       - name: Write signing config
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE }}
@@ -116,7 +155,17 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build debug APK
-        run: flutter build apk --debug --flavor stable
+        # POSTHOG_VERIFY_OPTIN is passed ONLY on a verification dispatch, and it
+        # is compiled in - a compile-time constant cannot be switched on at
+        # runtime. PostHogService additionally requires kDebugMode, so a release
+        # build refuses it even if this flag were ever wired into one.
+        run: |
+          ARGS=""
+          if [ "${{ inputs.verify_analytics_optin }}" = "true" ]; then
+            ARGS="--dart-define=POSTHOG_VERIFY_OPTIN=true"
+            echo "::warning::POSTHOG_VERIFY_OPTIN is set: this debug APK grants analytics consent on launch so the pipeline can be verified."
+          fi
+          flutter build apk --debug --flavor stable $ARGS
 
       - name: Enable KVM group perms
         run: |
