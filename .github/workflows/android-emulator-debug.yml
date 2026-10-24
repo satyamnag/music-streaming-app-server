@@ -109,32 +109,42 @@ jobs:
             grep -oE '^[A-Z_]+' .env | sort -u
           fi
 
-      - name: Add PostHog verification config (verification runs only)
-        # Appends after the .env step above. Prints no values: this token is
-        # public by design, but the habit has to hold for any key handled here.
+      - name: Add PostHog verification config from AWS Secrets Manager
+        # PostHog credentials live in AWS Secrets Manager (ap-south-1) as
+        # `posthog/api-key` and `posthog/host` - the SAME two names the release
+        # workflow reads - so there is one home for them, not a GitHub secret
+        # copy that can drift out of sync.
         #
-        # The token comes from the dispatch input when one is given, otherwise
-        # from the POSTHOG_VERIFY_KEY repository secret. The secret path exists
-        # so a verification run can be triggered without the token being pasted
-        # into a chat, a shell history, or a log, and without touching
-        # DOTENV_RELEASE (whose current value cannot be read back, so editing it
-        # risks dropping Supabase/Clerk/OneSignal keys from every build).
+        # Never fails the job: no secret or no AWS credential simply leaves
+        # PostHog unconfigured, which is the safe default (the SDK is not set up
+        # at all). A dispatch input can still override, for a one-off run.
         #
-        # No `if:` on this step on purpose: the `secrets` context is not
-        # available to step-level conditionals, so the check happens in shell.
+        # No `if:` on this step on purpose: step-level conditionals cannot see
+        # the `secrets` context, so the checks happen in shell.
         env:
-          POSTHOG_KEY: ${{ inputs.posthog_api_key || secrets.POSTHOG_VERIFY_KEY }}
-          POSTHOG_HOST_IN: ${{ inputs.posthog_host || secrets.POSTHOG_VERIFY_HOST }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-south-1
+          POSTHOG_KEY_IN: ${{ inputs.posthog_api_key }}
+          POSTHOG_HOST_IN: ${{ inputs.posthog_host }}
           VERIFY_OPTIN: ${{ inputs.verify_analytics_optin }}
         run: |
-          set -eu
-          if [ -z "${POSTHOG_KEY:-}" ]; then
-            echo "No PostHog token supplied (dispatch input or POSTHOG_VERIFY_KEY secret); nothing appended."
+          set -u
+          KEY="${POSTHOG_KEY_IN:-}"
+          HOST="${POSTHOG_HOST_IN:-}"
+          SOURCE="dispatch input"
+          if [ -z "$KEY" ] && [ -n "${AWS_ACCESS_KEY_ID:-}" ] && [ -n "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            KEY="$(aws secretsmanager get-secret-value --secret-id posthog/api-key --query SecretString --output text 2>/dev/null || true)"
+            HOST="$(aws secretsmanager get-secret-value --secret-id posthog/host --query SecretString --output text 2>/dev/null || true)"
+            SOURCE="AWS Secrets Manager"
+          fi
+          if [ -z "$KEY" ]; then
+            echo "::warning::No PostHog token available (no dispatch input, and posthog/api-key was not readable in ap-south-1). The verification build will run with analytics unconfigured, so no events will be sent."
             exit 0
           fi
-          printf 'POSTHOG_API_KEY=%s\n' "$POSTHOG_KEY" >> .env
-          printf 'POSTHOG_HOST=%s\n' "${POSTHOG_HOST_IN:-https://us.i.posthog.com}" >> .env
-          echo "Appended POSTHOG_API_KEY and POSTHOG_HOST to .env (values not shown)."
+          printf 'POSTHOG_API_KEY=%s\n' "$KEY" >> .env
+          printf 'POSTHOG_HOST=%s\n' "${HOST:-https://us.i.posthog.com}" >> .env
+          echo "Appended POSTHOG_API_KEY and POSTHOG_HOST to .env from $SOURCE (values not shown)."
           if [ "$VERIFY_OPTIN" != "true" ]; then
             echo "::warning::A PostHog token was supplied without verify_analytics_optin=true. Analytics will be available but opted OUT, so no events will arrive until a user opts in."
           fi

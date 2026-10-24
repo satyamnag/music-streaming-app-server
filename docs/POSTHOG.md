@@ -42,10 +42,11 @@ than "installed but idle".
 
    `POSTHOG_HOST` may be omitted; it defaults to the US host. Use
    `https://eu.i.posthog.com` for a project in the EU region.
-3. **Release builds:** the release workflow builds `.env` from AWS Secrets
-   Manager (`ap-south-1`), so create the secrets `posthog/api-key` and — for an
-   EU project — `posthog/host`. Until they exist the release job prints a
-   warning and ships with analytics inert; it does not fail.
+3. **CI builds (release and verification):** both workflows build `.env` from AWS
+   Secrets Manager (`ap-south-1`), so create the secrets `posthog/api-key` and —
+   for an EU project — `posthog/host`. Same vault, same two names, one home for
+   the credential. Until they exist each job prints a warning and ships with
+   analytics inert; neither fails.
 4. Once the secrets are provisioned, add `POSTHOG_API_KEY` to the required-keys
    check in `.github/workflows/android-release.yml` so a missing token fails the
    build instead of shipping silently.
@@ -132,13 +133,12 @@ shipping build the call returns `false` and changes nothing. It grants consent
 through the same `setConsent()` the Settings toggle uses, so what it persists and
 what it applies are identical to a user tapping the switch.
 
-Dispatch the emulator workflow with the project token and the flag:
+Dispatch the emulator workflow with the verification flag — the token is not
+passed on the command line:
 
 ```bash
 gh workflow run "Android Emulator Debug (logcat)" \
   -R satyamnag/music-streaming-app-server \
-  -f posthog_api_key=phc_REPLACE_ME \
-  -f posthog_host=https://us.i.posthog.com \
   -f verify_analytics_optin=true
 ```
 
@@ -147,17 +147,28 @@ natively the moment the SDK is set up) plus `analytics_verification_optin`, whic
 `lib/main.dart` emits purely so the verification run is identifiable in the event
 list.
 
-The token is a public client-side ingest token — the same string ships inside
-every APK — so passing it as a dispatch input reveals nothing that is not already
-in the artifact. It is never committed, and the workflow prints `.env` key names
-only, never values.
+### Where the credentials live: AWS Secrets Manager, not GitHub secrets
 
-**Prefer not to pass the token on a command line?** Set the repository secret
-`POSTHOG_VERIFY_KEY` (and optionally `POSTHOG_VERIFY_HOST`) instead, then
-dispatch without `posthog_api_key` — the workflow appends the secret's value to
-`.env`. That keeps the token out of shell history and out of any transcript, and
-it does not touch `DOTENV_RELEASE`, whose current value cannot be read back, so
-editing that one risks dropping Supabase/Clerk/OneSignal keys from every build.
+Both the release workflow and the verification workflow read the same two names
+from AWS Secrets Manager in `ap-south-1`. One home, so the two cannot drift:
+
+```bash
+aws secretsmanager create-secret --name posthog/api-key \
+  --secret-string 'phc_REPLACE_ME' --region ap-south-1
+
+# Optional: only needed for an EU project. US is the default everywhere.
+aws secretsmanager create-secret --name posthog/host \
+  --secret-string 'https://us.i.posthog.com' --region ap-south-1
+```
+
+The value is the raw string — the same `<service>/<key>` convention as
+`supabase/url`, `clerk/publishable-key` and `onesignal/api-key`. Neither workflow
+can fail on these: an unreadable or absent secret leaves PostHog unconfigured,
+which is the safe default, and the step says so in the log.
+
+A dispatch input (`-f posthog_api_key=...`) still overrides both, for a one-off
+run where changing the vault would be inappropriate. It is a convenience, not the
+supported path: prefer the vault.
 
 > A release build (`--release`) is not a valid way to run this: the debug gate
 > refuses, by design. To see events from a release build, add the token to the
