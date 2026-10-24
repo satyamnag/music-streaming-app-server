@@ -78,5 +78,18 @@
 		<true/>
 		<key>UISupportsDocumentBrowser</key>
 		<true/>
+		<!-- PostHog: manual initialisation only, mirroring
+		     android/app/src/main/AndroidManifest.xml. AUTO_INIT=false stops the
+		     native SDK from starting itself; setup() is called from Dart
+		     (lib/services/analytics/posthog_service.dart) only after the user has
+		     opted in to analytics. The project token is deliberately NOT here. -->
+		<key>com.posthog.posthog.AUTO_INIT</key>
+		<false/>
+		<!-- Push-opened attribution stays with OneSignal. Unlike the Kotlin
+		     setting, this key also disables the iOS cold-start prewarm, which
+		     runs before Dart does and so cannot be gated by the Dart-side
+		     consent flag. -->
+		<key>com.posthog.posthog.CAPTURE_PUSH_NOTIFICATION_OPENED</key>
+		<false/>
 	</dict>
 </plist>

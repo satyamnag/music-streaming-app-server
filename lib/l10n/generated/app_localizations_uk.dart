@@ -1748,4 +1748,14 @@ class AppLocalizationsUk extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get share_analytics => 'Share analytics';
+
+  @override
+  String get share_analytics_description =>
+      'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.';
 }

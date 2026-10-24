@@ -1,4 +1,4 @@
-﻿{
+{
   "guest": "Guest",
   "browse": "Browse",
   "search": "Search",
@@ -506,5 +506,17 @@
     "placeholders": {
       "count": { "type": "int" }
     }
+  },
+  "privacy": "Privacy",
+  "@privacy": {
+    "description": "Heading of the privacy settings section"
+  },
+  "share_analytics": "Share analytics",
+  "@share_analytics": {
+    "description": "Label of the opt-in toggle for product analytics (PostHog)"
+  },
+  "share_analytics_description": "Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.",
+  "@share_analytics_description": {
+    "description": "Subtitle explaining exactly what the analytics opt-in sends"
   }
 }

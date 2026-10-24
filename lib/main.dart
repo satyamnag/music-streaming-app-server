@@ -13,10 +13,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifier/local_notifier.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:metadata_god/metadata_god.dart';
+import 'package:sangeet/services/analytics/posthog_service.dart';
 import 'package:sangeet/services/app_deep_link_router.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
@@ -85,19 +85,23 @@ Future<void> main(List<String> rawArgs) async {
 
     tz.initializeTimeZones();
 
-    // Firebase (Crashlytics + Analytics). Initialize once at startup and wire
-    // the Crashlytics error handlers so all uncaught Flutter fatal errors and
-    // uncaught async errors are recorded.
+    // Firebase Crashlytics. Initialize once at startup and wire the Crashlytics
+    // error handlers so all uncaught Flutter fatal errors and uncaught async
+    // errors are recorded.
+    //
+    // Crashlytics only: Firebase Analytics was initialised here and collected
+    // unconditionally, with no consent decision and no way for the user to say
+    // no. Product analytics now lives in PostHog and starts only after an
+    // explicit opt-in (see the PostHogService.initialize call below).
     //
     // Bounded + guarded: Firebase init is a platform-channel call that can hang
     // or throw on some devices/firmware. A failure here must NEVER block app
-    // startup — the worst case is that Crashlytics/Analytics stay unconfigured
+    // startup — the worst case is that Crashlytics stays unconfigured
     // for that session. (Per the Dart SDK docs, Future.timeout stops waiting
     // without cancelling the underlying operation.)
     if (kIsAndroid || kIsIOS) {
       try {
         await Firebase.initializeApp().timeout(const Duration(seconds: 10));
-        FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
         FlutterError.onError = (errorDetails) {
           // CHAIN, never replace: AppLogger's handler (installed in
           // AppLogger.runZoned) writes framework errors to the local log file.
@@ -171,6 +175,18 @@ Future<void> main(List<String> rawArgs) async {
     }
 
     await KVStoreService.initialize();
+
+    // Product analytics. Two independent gates, both closed by default:
+    // POSTHOG_API_KEY must be present in .env, and the user must have opted in
+    // via Settings > Privacy. With no consent the SDK is never set up, so no
+    // distinct id is created and nothing is queued or sent.
+    //
+    // Must run after KVStoreService.initialize() - the stored consent decision
+    // is read from SharedPreferences.
+    await PostHogService.instance.initialize(
+      projectToken: Env.posthogApiKey,
+      host: Env.posthogHost,
+    );
 
     // Install the catalogue-sized image cache before the first frame, so every
     // CachedNetworkImageProvider in the app (UniversalImage and the surfaces

@@ -10,6 +10,7 @@ import 'package:sangeet/pages/settings/sections/appearance.dart';
 import 'package:sangeet/pages/settings/sections/desktop.dart';
 import 'package:sangeet/pages/settings/sections/language_region.dart';
 import 'package:sangeet/pages/settings/sections/playback.dart';
+import 'package:sangeet/pages/settings/sections/privacy.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/utils/platform.dart';
 import 'package:auto_route/auto_route.dart';
@@ -95,6 +96,8 @@ class SettingsPage extends HookConsumerWidget {
                       const SettingsAppearanceSection(),
                       const Gap(12),
                       const SettingsPlaybackSection(),
+                      const Gap(12),
+                      const SettingsPrivacySection(),
                       if (kIsDesktop) ...[
                         const Gap(12),
                         const SettingsDesktopSection(),

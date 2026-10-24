@@ -135,5 +135,16 @@
     <meta-data
       android:name="flutterEmbedding"
       android:value="2" />
+
+    <!-- PostHog: manual initialisation only.
+         AUTO_INIT=false stops the native SDK from starting itself from manifest
+         values, which is what lets the app decide at runtime whether to start it
+         at all. The project token is NOT in this file: it is injected through
+         .env (POSTHOG_API_KEY) and applied in
+         lib/services/analytics/posthog_service.dart, which calls setup() only
+         after the user has opted in to analytics. -->
+    <meta-data
+      android:name="com.posthog.posthog.AUTO_INIT"
+      android:value="false" />
   </application>
 </manifest>

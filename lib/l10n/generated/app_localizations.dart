@@ -3152,6 +3152,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 song} other{{count} songs}}'**
   String songs_count(int count);
+
+  /// Heading of the privacy settings section
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// Label of the opt-in toggle for product analytics (PostHog)
+  ///
+  /// In en, this message translates to:
+  /// **'Share analytics'**
+  String get share_analytics;
+
+  /// Subtitle explaining exactly what the analytics opt-in sends
+  ///
+  /// In en, this message translates to:
+  /// **'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.'**
+  String get share_analytics_description;
 }
 
 class _AppLocalizationsDelegate

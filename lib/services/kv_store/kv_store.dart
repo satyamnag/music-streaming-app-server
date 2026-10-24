@@ -19,6 +19,22 @@ abstract class KVStoreService {
   static Future<void> setAskedForBatteryOptimization(bool value) async =>
       await sharedPreferences.setBool('askedForBatteryOptimization', value);
 
+  /// Whether the user has opted in to product analytics (PostHog).
+  ///
+  /// Defaults to **false**: consent is opt-in, so a fresh install - and every
+  /// install that has never seen the Settings toggle - collects nothing. Read
+  /// once at startup by PostHogService.initialize, before the SDK is set up,
+  /// so there is no window in which events are captured without consent.
+  ///
+  /// Stored in SharedPreferences rather than the Drift preferences table on
+  /// purpose: it must be readable before the database is opened, and adding a
+  /// column to preferences_table would need a schema migration for a single
+  /// boolean.
+  static bool get analyticsConsent =>
+      sharedPreferences.getBool('analyticsConsent') ?? false;
+  static Future<void> setAnalyticsConsent(bool value) async =>
+      await sharedPreferences.setBool('analyticsConsent', value);
+
   static List<String> get recentSearches =>
       sharedPreferences.getStringList('recentSearches') ?? [];
 

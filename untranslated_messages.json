@@ -8,7 +8,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "bn": [
@@ -20,7 +23,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ca": [
@@ -32,7 +38,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "cs": [
@@ -44,7 +53,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "de": [
@@ -56,7 +68,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "es": [
@@ -68,7 +83,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "eu": [
@@ -80,7 +98,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "fa": [
@@ -92,7 +113,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "fi": [
@@ -104,7 +128,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "fr": [
@@ -116,7 +143,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "hi": [
@@ -128,7 +158,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "id": [
@@ -140,7 +173,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "it": [
@@ -152,7 +188,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ja": [
@@ -164,7 +203,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ka": [
@@ -176,7 +218,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ko": [
@@ -188,7 +233,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ne": [
@@ -200,7 +248,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "nl": [
@@ -212,7 +263,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "pl": [
@@ -224,7 +278,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "pt": [
@@ -236,7 +293,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ru": [
@@ -248,7 +308,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "ta": [
@@ -260,7 +323,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "th": [
@@ -272,7 +338,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "tl": [
@@ -284,7 +353,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "tr": [
@@ -296,7 +368,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "uk": [
@@ -308,7 +383,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "vi": [
@@ -320,7 +398,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "zh": [
@@ -332,7 +413,10 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ],
 
   "zh_TW": [
@@ -344,6 +428,9 @@
     "insights_vs_last_week",
     "set_as_ringtone",
     "ringtone_set",
-    "ringtone_failed"
+    "ringtone_failed",
+    "privacy",
+    "share_analytics",
+    "share_analytics_description"
   ]
 }

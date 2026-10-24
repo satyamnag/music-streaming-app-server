@@ -748,30 +748,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.9.3+5"
-  firebase_analytics:
-    dependency: "direct main"
-    description:
-      name: firebase_analytics
-      sha256: a139dd0ada1c6e0ffd77bfdb877ac9061ffdec7c415e3e06113bdf8844db771f
-      url: "https://pub.dev"
-    source: hosted
-    version: "12.4.6"
-  firebase_analytics_platform_interface:
-    dependency: transitive
-    description:
-      name: firebase_analytics_platform_interface
-      sha256: "448c319ea895da002e43892c7d3f15dccbc3c4c3b81d3e307e37da885ea52bdf"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.6"
-  firebase_analytics_web:
-    dependency: transitive
-    description:
-      name: firebase_analytics_web
-      sha256: "67f287a0df75f27eafdd4a66a41e44f232c3aba713ea4794a1159893665a8bf5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.1+12"
   firebase_core:
     dependency: "direct main"
     description:
@@ -1935,6 +1911,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.8.0"
+  posthog_flutter:
+    dependency: "direct main"
+    description:
+      name: posthog_flutter
+      sha256: affc775fc3ad01a2daad24391a79a2cd563efe2d3c06c84d2ede0b76fa191190
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.56.2"
   process_run:
     dependency: "direct dev"
     description:

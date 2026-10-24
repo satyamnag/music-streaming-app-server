@@ -48,6 +48,27 @@ abstract class Env {
   @EnviedField(varName: 'ONESIGNAL_APP_ID', defaultValue: "")
   static final String oneSignalAppId = _Env.oneSignalAppId;
 
+  /// PostHog project token (`phc_...`). Public by design: it is a client-side
+  /// ingest token, the same one that ships inside every copy of the app.
+  ///
+  /// Empty by default, mirroring [oneSignalAppId]: with no token the SDK is
+  /// never set up, so analytics is silently OFF rather than misconfigured.
+  /// The service also refuses to collect until the user has opted in - see
+  /// lib/services/analytics/posthog_service.dart.
+  @EnviedField(varName: 'POSTHOG_API_KEY', defaultValue: "")
+  static final String posthogApiKey = _Env.posthogApiKey;
+
+  /// PostHog ingest host for the project's region: `https://us.i.posthog.com`
+  /// or `https://eu.i.posthog.com`. Public by design (same as the token).
+  ///
+  /// Defaults to the US host, which is also the SDK's own default. A blank
+  /// value falls back to that default host inside [PostHogConfig.host].
+  @EnviedField(
+    varName: 'POSTHOG_HOST',
+    defaultValue: "https://us.i.posthog.com",
+  )
+  static final String posthogHost = _Env.posthogHost;
+
   static bool get enableUpdateChecker =>
       kIsFlatpak || _enableUpdateChecker == "1";
 

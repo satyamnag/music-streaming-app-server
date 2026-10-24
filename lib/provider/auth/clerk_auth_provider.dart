@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
 import 'package:sangeet/provider/database/database.dart';
+import 'package:sangeet/services/analytics/posthog_service.dart';
 import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -120,6 +121,10 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   ///    email is attached to the identified user via `addEmail` **after**
   ///    `login`, so it lands on the identified user (per the guide, operations
   ///    done under the device-scoped user are lost on login).
+  ///  - **PostHog**: `identify` on sign-in (Clerk user id only - never the
+  ///    email or name, which a native `$set` event would send unredactable),
+  ///    `reset` on sign-out. Both are no-ops unless the user opted in to
+  ///    analytics.
   void _syncThirdPartyIdentity(ClerkAuthState authState) {
     unawaited(_syncThirdPartyIdentityAsync(authState));
   }
@@ -130,8 +135,14 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   Future<void> _syncThirdPartyIdentityAsync(ClerkAuthState authState) async {
     final sw = SuperwallService.instance;
     final os = OneSignalService.instance;
+    final ph = PostHogService.instance;
     try {
       if (authState.signedIn && authState.userId != null) {
+        // First in the block on purpose: every call below is awaited in
+        // sequence, so a throw from an earlier service would skip the rest.
+        // Analytics identity is the cheapest call here and the one that must
+        // not be lost to a monetisation or push failure.
+        await ph.identify(authState.userId!);
         await sw.identify(authState.userId!);
         await sw.setUserAttributes({
           'email': authState.email ?? '',
@@ -154,6 +165,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
       } else if (!authState.signedIn) {
         await sw.reset();
         await os.logout();
+        await ph.reset();
       }
     } catch (e, stack) {
       AppLogger.reportError(e, stack);
@@ -242,6 +254,10 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     // Reset third-party identity and reflect the signed-out state.
     SuperwallService.instance.reset();
     OneSignalService.instance.logout();
+    // Account deletion must also drop the analytics identity: leaving it behind
+    // would keep attributing a deleted user's device to them, which is exactly
+    // what the deletion request asked us to stop doing.
+    PostHogService.instance.reset();
     ref.invalidateSelf();
 
     return null;
