@@ -52,11 +52,21 @@ jobs:
         # defaultValue, so codegen fails without them. The values are deliberate
         # placeholders: this workflow compiles and tests, it never contacts
         # Supabase and never produces a shippable artifact.
+        #
+        # R2_BASE_URL is here for the same class of reason, but it is not
+        # required for codegen: it has a defaultValue of "". Without it,
+        # Env.r2BaseUrl is empty, RingtoneService refuses before touching the
+        # native channel, and two tests in
+        # test/services/ringtone/ringtone_service_test.dart fail - they assert
+        # the configured path, and they are the only reason a full-suite run of
+        # this workflow has ever been red. A placeholder keeps them honest
+        # without pretending the URL is real.
         run: |
           printf '%s\n' \
             'SUPABASE_URL=https://placeholder.supabase.co' \
             'SUPABASE_ANON_KEY=placeholder-anon-key' \
             'CLERK_PUBLISHABLE_KEY=pk_test_placeholder' \
+            'R2_BASE_URL=https://placeholder-r2.invalid' \
             'RELEASE_CHANNEL=nightly' \
             'ENABLE_UPDATE_CHECK=1' \
             'HIDE_DONATIONS=0' \
