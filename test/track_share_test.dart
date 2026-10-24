@@ -134,6 +134,46 @@ void main() {
           reason: 'an em dash with nothing after it reads as a broken message');
     });
 
+    test('the "Unknown Artist" placeholder becomes the app name', () {
+      // lib/models/metadata/track.dart synthesises SangeetSimpleArtistObject(
+      // id: "unknown", name: "Unknown Artist") for a file with no artist tag.
+      // That label used to reach the recipient verbatim, so a share read
+      // "Vandyadu — Unknown Artist" instead of crediting the app.
+      final message = TrackShare.messageFor(
+        track(artists: const ['Unknown Artist']),
+      );
+
+      expect(
+        message.contains('Unknown Artist'),
+        isFalse,
+        reason: 'a synthetic placeholder must never be shared as an artist name',
+      );
+      expect(
+        message.contains('— ${TrackShare.brandName}'),
+        isTrue,
+        reason: 'with no known artist the message should still credit the app',
+      );
+    });
+
+    test('a real artist is never replaced by the app name', () {
+      final message = TrackShare.messageFor(
+        track(artists: const ['S. P. Balasubrahmanyam']),
+      );
+
+      expect(message.contains('S. P. Balasubrahmanyam'), isTrue);
+      expect(message.contains('— ${TrackShare.brandName}'), isFalse,
+          reason: 'a known artist must not be overwritten by the brand');
+    });
+
+    test('a placeholder mixed with a real artist keeps only the real one', () {
+      final message = TrackShare.messageFor(
+        track(artists: const ['Unknown Artist', 'Annamacharya']),
+      );
+
+      expect(message.contains('Unknown Artist'), isFalse);
+      expect(message.contains('Annamacharya'), isTrue);
+    });
+
     test('the first line identifies the song, since previews show only that',
         () {
       final message = TrackShare.messageFor(track());

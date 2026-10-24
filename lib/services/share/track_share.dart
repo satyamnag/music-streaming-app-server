@@ -45,6 +45,16 @@ class TrackShare {
   static String deepLinkFor(SangeetTrackObject track) =>
       'sangeet://track/${Uri.encodeComponent(track.id)}';
 
+  /// Shown in place of an artist we do not actually know, so a shared track
+  /// reads as a recommendation from the app instead of "— Unknown Artist".
+  static const String brandName = 'Soulful Bhakti';
+
+  /// The placeholder `lib/models/metadata/track.dart` synthesises for a local
+  /// file with no artist tag: `SangeetSimpleArtistObject(id: "unknown", name:
+  /// "Unknown Artist", ...)`. It is a UI label, not a real artist, and it must
+  /// not travel into a share message.
+  static const String _unknownArtistPlaceholder = 'unknown artist';
+
   /// The message body shared for [track].
   ///
   /// Kept free of any trailing punctuation that a messaging app might mangle,
@@ -52,10 +62,23 @@ class TrackShare {
   /// preview in WhatsApp and similar shows only the first line.
   static String messageFor(SangeetTrackObject track) {
     final title = track.name.trim().isEmpty ? 'this track' : track.name.trim();
-    final artist = track.artists
+
+    final names = track.artists
         .map((a) => a.name.trim())
         .where((n) => n.isNotEmpty)
-        .join(', ');
+        .toList();
+    final known = names
+        .where((n) => n.toLowerCase() != _unknownArtistPlaceholder)
+        .toList();
+
+    // Two distinct degenerate cases, deliberately not merged:
+    //  * no artist information at all  -> omit the dash entirely, because an em
+    //    dash with nothing after it reads as a broken message;
+    //  * only the "Unknown Artist" placeholder -> show the app's name, so the
+    //    message still reads as a recommendation.
+    final artist = known.isNotEmpty
+        ? known.join(', ')
+        : (names.isEmpty ? '' : brandName);
 
     final buffer = StringBuffer()
       ..writeln('🎵 $title${artist.isEmpty ? '' : ' — $artist'}')
