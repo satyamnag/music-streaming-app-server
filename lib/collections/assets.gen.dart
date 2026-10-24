@@ -25,9 +25,22 @@ class $AssetsBrandingGen {
   AssetGenImage get sangeetLogoPng =>
       const AssetGenImage('assets/branding/sangeet-logo.png');
 
+  /// File path: assets/branding/sangeet-wide-capsule-small.png
+  AssetGenImage get sangeetWideCapsuleSmall =>
+      const AssetGenImage('assets/branding/sangeet-wide-capsule-small.png');
+
+  /// File path: assets/branding/soulful-bhakti-ornate-white-logo.png
+  AssetGenImage get soulfulBhaktiOrnateWhiteLogo => const AssetGenImage(
+      'assets/branding/soulful-bhakti-ornate-white-logo.png');
+
   /// List of all assets
-  List<dynamic> get values =>
-      [sangeetLogoLight, sangeetLogoIco, sangeetLogoPng];
+  List<dynamic> get values => [
+        sangeetLogoLight,
+        sangeetLogoIco,
+        sangeetLogoPng,
+        sangeetWideCapsuleSmall,
+        soulfulBhaktiOrnateWhiteLogo
+      ];
 }
 
 class $AssetsImagesGen {
