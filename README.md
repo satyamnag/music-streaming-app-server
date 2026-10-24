@@ -39,7 +39,9 @@ A Flutter application for devotional music listening.
 - ❤️ **Likes and playlists** — save what you love, organised your way
 - 🔔 **Ringtones** — set a track as your ringtone
 - 📊 **Listening insights** — your own listening stats
-- ✋ **No telemetry** — no diagnostics or user data collection
+- ✋ **Analytics is opt-in** — product analytics (PostHog) is **off until you turn
+  it on** in *Settings → Privacy*. Crash reports go to Firebase Crashlytics.
+  See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) and [docs/POSTHOG.md](docs/POSTHOG.md)
 
 ### Installing the app
 
