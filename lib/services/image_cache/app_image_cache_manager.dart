@@ -1,6 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
 /// The image cache every network image in the app is served from.
 ///
 /// WHY THIS EXISTS
@@ -36,6 +33,9 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 /// `package:file` as a direct dependency purely to satisfy the `FileSystem`
 /// interface, which is not a trade worth making for this fix.
 library;
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AppImageCacheManager extends CacheManager with ImageCacheManager {
   /// A distinct key, so this cache has its own directory and its own metadata
