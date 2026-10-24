@@ -199,7 +199,7 @@ jobs:
             echo "::warning::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not set; falling back to DOTENV_RELEASE."
             exit 0
           fi
-          SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/api-key onesignal/api-key"
+          SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/api-key onesignal/api-key posthog/api-key posthog/host"
           FAILED=""
           for s in $SECRETS; do
             if ! V="$(aws secretsmanager get-secret-value --secret-id "$s" --query SecretString --output text 2>&1)"; then
@@ -217,6 +217,8 @@ jobs:
               hide-donations)        K=HIDE_DONATIONS ;;
               superwall/api-key)     K=SUPERWALL_API_KEY ;;
               onesignal/api-key)     K=ONESIGNAL_APP_ID ;;
+              posthog/api-key)       K=POSTHOG_API_KEY ;;
+              posthog/host)          K=POSTHOG_HOST ;;
               *) continue ;;
             esac
             printf '%s=%s\n' "$K" "$V" >> .env
@@ -295,6 +297,33 @@ jobs:
             exit 1
           fi
           echo "All required release keys are present (values not shown)."
+
+      - name: Check PostHog configuration (warning only, never fatal)
+        # POSTHOG_API_KEY carries `defaultValue: ""` in lib/collections/env.dart
+        # and the SDK is set up only when it is non-empty, so a release without
+        # it ships with analytics silently disabled - no error, no events,
+        # nothing to notice. That is the same failure shape as the missing
+        # ONESIGNAL_APP_ID / SUPERWALL_API_KEY cases above, so it is reported.
+        #
+        # It is deliberately NOT in the required-keys list yet: the token has to
+        # exist in AWS Secrets Manager (posthog/api-key) first, and a hard failure
+        # here would block every release until it does. Promote it to the
+        # required list above once the secret is provisioned.
+        #
+        # This check never fails the job: analytics being off is a product
+        # decision, not a broken build.
+        run: |
+          if grep -q "^POSTHOG_API_KEY=." .env; then
+            echo "PostHog token present; analytics is available to users who opt in."
+          else
+            echo "::warning::POSTHOG_API_KEY is not set. This release ships with product analytics disabled (the opt-in toggle will be present but inert). Add the AWS Secrets Manager secret posthog/api-key, and posthog/host if the project is in the EU region."
+          fi
+
+          if grep -q "^POSTHOG_HOST=." .env; then
+            echo "PostHog host is set."
+          else
+            echo "POSTHOG_HOST not set; defaulting to https://us.i.posthog.com."
+          fi
 
       - name: Write signing config
         env:
