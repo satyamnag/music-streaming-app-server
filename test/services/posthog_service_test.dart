@@ -547,6 +547,23 @@ void main() {
         containsAllInOrder(['setup', 'enable']),
         reason: 'and apply it exactly the same way',
       );
+      expect(
+        platform.setupConfig?.debug,
+        isTrue,
+        reason: 'a verification build turns on the SDK logs, so a missing event '
+            'is diagnosable from logcat instead of guesswork',
+      );
+    });
+
+    test('a normal build never turns on the SDK debug logs', () async {
+      await service.initialize(projectToken: token, host: '');
+      await service.setConsent(true);
+
+      expect(
+        platform.setupConfig?.debug,
+        isFalse,
+        reason: 'verbose SDK logging must not reach users',
+      );
     });
 
     test('release build with the define still refuses to grant', () async {

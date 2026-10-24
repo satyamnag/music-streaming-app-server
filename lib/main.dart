@@ -200,6 +200,11 @@ Future<void> main(List<String> rawArgs) async {
         'analytics_verification_optin',
         properties: {'release_channel': Env.releaseChannel.name},
       );
+      // Send it now. The SDK otherwise batches (every 30s or 20 events), and a
+      // verification build may be stopped before the next automatic flush -
+      // which would make a working pipeline look broken. The first verification
+      // run proved it: only the natively-sent "Application Installed" arrived.
+      await PostHogService.instance.flush();
     }
 
     // Install the catalogue-sized image cache before the first frame, so every

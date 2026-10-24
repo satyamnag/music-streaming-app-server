@@ -347,6 +347,13 @@ class PostHogService {
       config.rageClickConfig.enabled = false;
       config.beforeSend = [redact];
 
+      // Verbose SDK logs, but ONLY in a build that exists to be verified. This
+      // is what turns "no events arrived" into a readable logcat: the SDK prints
+      // what it queued, what it flushed, and what the server answered. Gated by
+      // the same two conditions as the verification harness itself, so no
+      // shipping build can enable it.
+      config.debug = isVerificationOptInRequested();
+
       await Posthog().setup(config);
       _configured = true;
     } catch (e, stack) {
