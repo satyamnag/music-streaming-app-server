@@ -24,6 +24,9 @@ class _RecordingPlatform extends PosthogFlutterPlatformInterface {
   Map<String, Object>? identifiedUserPropertiesSetOnce;
   String? screenName;
   Object? capturedError;
+  String? loggedBody;
+  PostHogLogSeverity? loggedLevel;
+  Map<String, Object>? loggedAttributes;
   bool throwOnEveryCall = false;
 
   void clear() {
@@ -36,6 +39,9 @@ class _RecordingPlatform extends PosthogFlutterPlatformInterface {
     identifiedUserPropertiesSetOnce = null;
     screenName = null;
     capturedError = null;
+    loggedBody = null;
+    loggedLevel = null;
+    loggedAttributes = null;
   }
 
   @override
@@ -114,6 +120,22 @@ class _RecordingPlatform extends PosthogFlutterPlatformInterface {
     calls.add('captureException');
     if (throwOnEveryCall) throw StateError('native captureException failed');
     capturedError = error;
+  }
+
+  @override
+  Future<void> captureLog({
+    required String body,
+    PostHogLogSeverity level = PostHogLogSeverity.info,
+    Map<String, Object>? attributes,
+    String? traceId,
+    String? spanId,
+    int? traceFlags,
+  }) async {
+    calls.add('captureLog');
+    if (throwOnEveryCall) throw StateError('native captureLog failed');
+    loggedBody = body;
+    loggedLevel = level;
+    loggedAttributes = attributes;
   }
 }
 
@@ -470,6 +492,7 @@ void main() {
       await expectLater(service.screen('Home'), completes);
       await expectLater(service.identify('user_1'), completes);
       await expectLater(service.captureException(StateError('x')), completes);
+      await expectLater(service.log('x'), completes);
       await expectLater(service.flush(), completes);
       await expectLater(service.reset(), completes);
       await expectLater(service.setConsent(false), completes);
@@ -578,6 +601,129 @@ void main() {
       expect(service.isCapturing, isFalse);
       expect(KVStoreService.analyticsConsent, isFalse);
       expect(platform.calls, isEmpty);
+    });
+  });
+
+  group('PostHog Logs', () {
+    test('no log record is sent before consent', () async {
+      await service.initialize(projectToken: token, host: '');
+
+      await service.log('playback failed', attributes: {'error_code': 'E401'});
+
+      expect(platform.calls, isEmpty);
+      expect(platform.loggedBody, isNull);
+    });
+
+    test('log forwards the body, severity and attributes', () async {
+      await service.initialize(projectToken: token, host: '');
+      await service.setConsent(true);
+      platform.clear();
+
+      await service.log(
+        'offline download failed',
+        level: PostHogLogLevel.error,
+        attributes: {'error_code': 'E500', 'attempt': 3},
+      );
+
+      expect(platform.calls, ['captureLog']);
+      expect(platform.loggedBody, 'offline download failed');
+      expect(
+        platform.loggedLevel,
+        PostHogLogSeverity.error,
+        reason: 'the local level enum must map onto the SDK severity',
+      );
+      expect(platform.loggedAttributes, {'error_code': 'E500', 'attempt': 3});
+    });
+
+    test('info is the default level', () async {
+      await service.initialize(projectToken: token, host: '');
+      await service.setConsent(true);
+
+      await service.log('app started');
+
+      expect(platform.loggedLevel, PostHogLogSeverity.info);
+    });
+
+    test('a blank message is not sent', () async {
+      await service.initialize(projectToken: token, host: '');
+      await service.setConsent(true);
+      platform.clear();
+
+      await service.log('   ');
+
+      expect(platform.calls, isEmpty);
+    });
+
+    test('the logs config carries the service name and environment', () async {
+      await service.initialize(
+        projectToken: token,
+        host: '',
+        environment: 'nightly',
+      );
+      await service.setConsent(true);
+
+      final config = platform.setupConfig!;
+      expect(config.logsConfig.serviceName, 'soulful-bhakti-android');
+      expect(config.logsConfig.environment, 'nightly');
+      expect(
+        config.logsConfig.beforeSend,
+        isNotEmpty,
+        reason: 'the redaction callback must be installed on the logs config',
+      );
+    });
+
+    test('redactLog strips identifying attributes', () {
+      final record = PostHogLogRecord(
+        body: 'playback failed',
+        attributes: {'email': 'listener@example.com', 'error_code': 'E401'},
+      );
+
+      PostHogService.redactLog(record);
+
+      expect(record.attributes, {'error_code': 'E401'});
+    });
+
+    test('redactLog scrubs emails out of the message body', () {
+      final record = PostHogLogRecord(
+        body: 'pairing failed for arjun.sharma+test@example.co.in after 3 tries',
+      );
+
+      PostHogService.redactLog(record);
+
+      expect(record.body.contains('example.co.in'), isFalse);
+      expect(record.body, contains('[redacted-email]'));
+      expect(record.body, contains('after 3 tries'),
+          reason: 'only the identifying part is removed');
+    });
+
+    test('redactLog scrubs credentials out of the message body', () {
+      expect(
+        PostHogService.scrubText('using phc_abcdefghijklmnop for ingest'),
+        'using [redacted-token] for ingest',
+      );
+      expect(
+        PostHogService.scrubText('header Authorization: Bearer abc.def.ghi'),
+        contains('[redacted-token]'),
+      );
+    });
+
+    test('redactLog keeps a record rather than dropping it', () {
+      final record = PostHogLogRecord(body: 'app started');
+
+      expect(PostHogService.redactLog(record), isNotNull);
+      expect(record.body, 'app started');
+    });
+
+    test('the redaction callback is what gets installed on the logs config', () {
+      final record = PostHogLogRecord(
+        body: 'token phc_abcdefghijklmnop leaked',
+        attributes: {'phone': '+91 90000 00000', 'error_code': 'E1'},
+      );
+
+      final result = PostHogService.redactLog(record);
+
+      expect(result!.body, contains('[redacted-token]'));
+      expect(result.attributes, {'error_code': 'E1'});
     });
   });
 }

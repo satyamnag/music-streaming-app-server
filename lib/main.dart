@@ -186,6 +186,9 @@ Future<void> main(List<String> rawArgs) async {
     await PostHogService.instance.initialize(
       projectToken: Env.posthogApiKey,
       host: Env.posthogHost,
+      // Labels PostHog Logs records so a nightly build's logs can be told apart
+      // from a stable one's. The version is left to the native default.
+      environment: Env.releaseChannel.name,
     );
 
     // Installation-verification harness. A no-op in every shipping build: it
@@ -199,6 +202,12 @@ Future<void> main(List<String> rawArgs) async {
       await PostHogService.instance.capture(
         'analytics_verification_optin',
         properties: {'release_channel': Env.releaseChannel.name},
+      );
+      // And one log record, so the Logs pipeline is verified by the same run
+      // rather than being taken on trust. Constant text, no user data.
+      await PostHogService.instance.log(
+        'analytics verification run',
+        attributes: {'release_channel': Env.releaseChannel.name},
       );
       // Send it now. The SDK otherwise batches (every 30s or 20 events), and a
       // verification build may be stopped before the next automatic flush -

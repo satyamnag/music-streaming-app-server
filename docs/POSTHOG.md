@@ -67,8 +67,9 @@ recorded next to it in `_ensureSetup`:
 | `rageClickConfig.enabled` | `true` | `false` | Autocaptured rage clicks are not wanted. |
 | error tracking | all `false` | all `false` | Crashlytics owns crash reporting. Enabling both would double-report every crash to two vendors. |
 
-Session replay, surveys, logs and error tracking are therefore available for a
-future change but are not part of this one.
+Session replay, surveys and error tracking are therefore available for a future
+change but are not part of this one. Logs **are** wired (see below), in
+allow-list form.
 
 ## What is captured, and what is not
 
@@ -81,9 +82,46 @@ Captured, once the user opts in:
   `.screen` / `.captureException`. **No feature-level events are instrumented
   yet** — that is product work, and each event should be reviewed for PII before
   it is added.
+- Structured log records sent through `PostHogService.log()`, on the same
+  terms — allow-listed call sites only, nothing forwarded from the app's logger.
 
 Not captured: email, name, username, phone, address, search text, playback
 history, the audio itself.
+
+### PostHog Logs: allow-list only, never a firehose
+
+`PostHogService.log()` sends one structured record, gated by the same consent
+check as everything else. It is deliberately **not** wired to `AppLogger`:
+app logs stay in the file on the device, and nothing reaches PostHog Logs unless
+a call site asks for it by name.
+
+That property is worth stating precisely, because it is what makes Logs safe to
+have enabled: this SDK has **no "capture everything" switch** for logs — no
+console interception, no logger forwarding. The allow-list is enforced by
+`.log()` being the only way in, rather than by a filter that someone can widen
+later without noticing.
+
+Rules for a call site:
+
+- a **constant** message, never text assembled from a track, a search, an email
+  or a request body;
+- attributes limited to codes, counts and durations (`error_code`, `attempt`,
+  `duration_ms`) — the same key rules as events apply;
+- it is not a debugging console. Records batch (native default: 20 records or
+  30 seconds); use logcat or the on-device log file for that.
+
+`redactLog` runs as the logs `beforeSend` and is the only inspection point a
+record gets: it strips identifying attribute keys with the same rules as events,
+and scrubs emails (`[redacted-email]`) and credentials/tokens
+(`[redacted-token]`) out of the message body. The text pass is deliberately
+narrow — a broader net would mangle legitimate values like build numbers and
+track ids, and a redaction rule that corrupts real data gets removed by the next
+person who hits it. The guarantee is "these shapes never leave", not "no PII can
+possibly be in a log line".
+
+`logsConfig.serviceName` is `soulful-bhakti-android` and `environment` is the
+release channel, so records are filterable; the service version is left to the
+native SDK's own default.
 
 ### PII redaction and its limit
 

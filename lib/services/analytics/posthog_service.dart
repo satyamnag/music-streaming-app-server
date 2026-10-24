@@ -4,6 +4,16 @@ import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/utils/platform.dart';
 
+/// Severity for a structured log record, limited to the three levels this app
+/// uses.
+///
+/// A local enum rather than the SDK's [PostHogLogSeverity] so call sites never
+/// import the SDK, and so `trace`, `debug` and `fatal` are not available to be
+/// reached for by accident: this app forwards a small allow-list, not a
+/// firehose, and a level nobody uses is a level somebody would eventually use
+/// for something noisy.
+enum PostHogLogLevel { info, warning, error }
+
 /// Centralized wrapper around the PostHog Flutter SDK.
 ///
 /// Every PostHog call goes through this class so the SDK surface, the consent
@@ -59,6 +69,7 @@ class PostHogService {
   bool _consented = false;
   String _projectToken = '';
   String _host = '';
+  String? _environment;
 
   /// Whether `Posthog().setup()` has completed successfully.
   bool get isConfigured => _configured;
@@ -149,9 +160,11 @@ class PostHogService {
   Future<void> initialize({
     required String projectToken,
     required String host,
+    String? environment,
   }) async {
     _projectToken = projectToken.trim();
     _host = host.trim();
+    _environment = environment;
     _consented = KVStoreService.analyticsConsent;
     if (!_consented) return;
     await _ensureSetup();
@@ -311,6 +324,45 @@ class PostHogService {
     }
   }
 
+  /// Sends one structured log record to PostHog Logs, if the user has opted in.
+  ///
+  /// **Allow-list, not a firehose.** This app does not forward its logger
+  /// output: [AppLogger] writes to a file on the device, and nothing that
+  /// reaches this method arrives here by accident. Call sites must pass a
+  /// constant message and deliberately-chosen attributes - never user content,
+  /// never free text assembled from a track, a search, an email or a request
+  /// body. Logs are a third-party data flow and the cheapest way to leak
+  /// something you did not mean to send.
+  ///
+  /// The SDK batches records (native default: 20 records or 30 seconds), so it
+  /// is not a debugging console - use logcat or the on-device log file for that.
+  Future<void> log(
+    String message, {
+    PostHogLogLevel level = PostHogLogLevel.info,
+    Map<String, Object>? attributes,
+  }) async {
+    if (!isCapturing) return;
+    final body = message.trim();
+    if (body.isEmpty) return;
+
+    try {
+      await Posthog().captureLog(
+        body: body,
+        level: _severityFor(level),
+        attributes: attributes,
+      );
+    } catch (e, stack) {
+      _report(e, stack, 'posthog: log');
+    }
+  }
+
+  static PostHogLogSeverity _severityFor(PostHogLogLevel level) =>
+      switch (level) {
+        PostHogLogLevel.info => PostHogLogSeverity.info,
+        PostHogLogLevel.warning => PostHogLogSeverity.warn,
+        PostHogLogLevel.error => PostHogLogSeverity.error,
+      };
+
   /// Sets the SDK up if it is not set up yet. Never throws: a failure here
   /// leaves [isConfigured] false, which turns every other method into a no-op.
   Future<void> _ensureSetup() async {
@@ -353,6 +405,15 @@ class PostHogService {
       // the same two conditions as the verification harness itself, so no
       // shipping build can enable it.
       config.debug = isVerificationOptInRequested();
+
+      // PostHog Logs: identity for filtering, and the same redaction net the
+      // events path has. Nothing is emitted unless a call site asks for it -
+      // this SDK has no "capture everything" switch for logs, which is exactly
+      // the property wanted here: the allow-list is enforced by [log] being the
+      // only way in.
+      config.logsConfig.serviceName = 'soulful-bhakti-android';
+      config.logsConfig.environment = _environment;
+      config.logsConfig.beforeSend = [redactLog];
 
       await Posthog().setup(config);
       _configured = true;
@@ -451,6 +512,44 @@ class PostHogService {
     if (redactedKeys.contains(normalised)) return true;
     return redactedKeyFragments.any(normalised.contains);
   }
+
+  /// Email addresses, wherever they appear in free text.
+  static final RegExp _emailLike = RegExp(r'[\w.+-]+@[\w-]+\.[\w.-]+');
+
+  /// PostHog tokens and bearer credentials.
+  ///
+  /// Both are the kind of thing that gets into a log line by accident - a config
+  /// dump, an exception message quoting a request - and both are worth catching
+  /// even though the project token is public by design: a log is the last place
+  /// it should turn up.
+  static final RegExp _tokenLike =
+      RegExp(r'\bph[ctx]_[A-Za-z0-9]{8,}|\bBearer\s+\S+');
+
+  /// `PostHogLogsConfig.beforeSend`: redacts a log record, then keeps it.
+  ///
+  /// The attribute map goes through exactly the same key rules as events, and
+  /// the body gets a text pass on top. Unlike events, this callback is the ONLY
+  /// place a log record can be inspected before it leaves the device, so it is
+  /// the only net there is - which is why [log] also documents that call sites
+  /// must not pass user content in the first place.
+  @visibleForTesting
+  static PostHogLogRecord? redactLog(PostHogLogRecord record) {
+    record.body = scrubText(record.body);
+    _redactMap(record.attributes);
+    return record;
+  }
+
+  /// Removes emails and credentials from free text.
+  ///
+  /// Deliberately narrow. A broader net (phone numbers, long digit runs) would
+  /// mangle legitimate values - build numbers, durations, track ids - and a
+  /// redaction rule that corrupts real data gets switched off by the next person
+  /// who hits it. The guarantee here is "these two shapes never leave", not
+  /// "no PII can possibly be in a log line".
+  @visibleForTesting
+  static String scrubText(String text) => text
+      .replaceAll(_emailLike, '[redacted-email]')
+      .replaceAll(_tokenLike, '[redacted-token]');
 
   /// Reports a contained failure without ever throwing itself.
   ///
