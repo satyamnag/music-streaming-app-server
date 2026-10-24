@@ -1,0 +1,82 @@
+name: Flutter Verify (analyze + tests)
+
+# On-demand static verification. No APK, no AAB, nothing published: this only
+# compiles the Dart source, runs the analyzer, and runs unit tests. It exists so
+# analyze/test can be executed in the cloud instead of on a developer machine,
+# and specifically so the image-cache regression guard in
+# test/services/image_cache/ actually executes rather than being taken on trust.
+on:
+  workflow_dispatch:
+    inputs:
+      test_path:
+        description: >-
+          Test path to run. Defaults to the image-cache guard. Set to "test" to
+          run the whole suite, which currently carries pre-existing failures
+          documented in TEST-MATRIX.md.
+        type: string
+        default: test/services/image_cache/
+
+env:
+  FLUTTER_VERSION: 3.35.2
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Verify toolchain
+        run: |
+          flutter --version
+          java -version
+
+      - name: Write a placeholder .env
+        # envied generates from .env at build time and these three have no
+        # defaultValue, so codegen fails without them. The values are deliberate
+        # placeholders: this workflow compiles and tests, it never contacts
+        # Supabase and never produces a shippable artifact.
+        run: |
+          printf '%s\n' \
+            'SUPABASE_URL=https://placeholder.supabase.co' \
+            'SUPABASE_ANON_KEY=placeholder-anon-key' \
+            'CLERK_PUBLISHABLE_KEY=pk_test_placeholder' \
+            'RELEASE_CHANNEL=nightly' \
+            'ENABLE_UPDATE_CHECK=1' \
+            'HIDE_DONATIONS=0' \
+            > .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code (routes, drift, envied)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze
+        # Warnings are allowed to be fatal-free here: the fork carries a known
+        # backdrop of pre-existing info/warning diagnostics (TEST-MATRIX.md).
+        # Errors still fail the job, which is the signal that matters.
+        run: dart analyze --no-fatal-warnings
+
+      - name: Test
+        run: flutter test ${{ inputs.test_path }}
+
+      - name: Clean up compile-time config
+        if: always()
+        run: rm -f .env

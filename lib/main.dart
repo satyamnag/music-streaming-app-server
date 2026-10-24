@@ -52,6 +52,7 @@ import 'package:sangeet/provider/connect/clients.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/cli/cli.dart';
+import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
 import 'package:sangeet/services/kv_store/encrypted_kv_store.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -170,6 +171,14 @@ Future<void> main(List<String> rawArgs) async {
     }
 
     await KVStoreService.initialize();
+
+    // Install the catalogue-sized image cache before the first frame, so every
+    // CachedNetworkImageProvider in the app (UniversalImage and the surfaces
+    // that build a provider directly) serves from it instead of
+    // flutter_cache_manager's 200-object default. That default evicted artwork
+    // still in use and made images refetch on every launch - see
+    // lib/services/image_cache/app_image_cache_manager.dart.
+    configureImageCache();
 
     if (kIsDesktop) {
       await windowManager.setPreventClose(true);
