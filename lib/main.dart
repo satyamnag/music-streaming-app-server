@@ -335,17 +335,22 @@ Future<void> main(List<String> rawArgs) async {
       ),
     );
 
-    // Same compile-time flag: one bounded report 30 s in, which is long enough
-    // for the home screen and the artwork warm-up to settle. A normal build sets
-    // no timer at all, and this must never delay the first frame - hence the
-    // unawaited delay rather than anything on the startup path.
+    // Same compile-time flag: two bounded reports, because a debug build on an
+    // emulator spends its first ~60 s on startup (local playback server, plugin
+    // scripts) before the home screen does any network work - a single early
+    // report measured a cache nothing had asked for yet, which read as "the
+    // cache is empty". The later line is the settled one. A normal build sets no
+    // timer at all, and this must never delay the first frame - hence the
+    // unawaited delays rather than anything on the startup path.
     if (imageCacheDiagnosticsEnabled) {
-      unawaited(
-        Future<void>.delayed(
-          const Duration(seconds: 30),
-          () => logImageCacheDiagnostics('after-home-load'),
-        ),
-      );
+      for (final seconds in const [30, 90]) {
+        unawaited(
+          Future<void>.delayed(
+            Duration(seconds: seconds),
+            () => logImageCacheDiagnostics('after-home-load-${seconds}s'),
+          ),
+        );
+      }
     }
   });
 }
