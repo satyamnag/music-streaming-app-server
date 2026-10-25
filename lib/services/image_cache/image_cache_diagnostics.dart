@@ -36,6 +36,7 @@ library;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
@@ -86,5 +87,68 @@ Future<void> logImageCacheDiagnostics(String label) async {
   } catch (e) {
     // Diagnostics must never be the reason a screen fails.
     debugPrint('[IMGDIAG] $label failed: $e');
+  }
+}
+
+/// Reports, per artwork category, how many of the URLs the app actually uses are
+/// on disk.
+///
+/// This is the answer to "is caching working for covers, banners, wallpapers and
+/// icons" - a total file count cannot distinguish "the covers are cached" from
+/// "42 unrelated files are cached". One line per category:
+///
+///     [IMGDIAG] home-45s category=covers cached=12 total=12
+///     [IMGDIAG] home-45s category=wallpaper cached=1 total=1
+///
+/// `cached` counts entries the manager answers for WITHOUT touching the network
+/// (`getFileFromCache` is a lookup), so a category reading `cached=total` means a
+/// reader on a dead connection would still see all of it.
+Future<void> logImageCacheAudit(
+  String label,
+  Map<String, List<String>> urlsByCategory,
+) async {
+  if (!imageCacheDiagnosticsEnabled) return;
+  final manager = AppImageCacheManager();
+  for (final entry in urlsByCategory.entries) {
+    final urls = <String>{
+      for (final url in entry.value)
+        if (url.startsWith('http')) url,
+    };
+    var cached = 0;
+    for (final url in urls) {
+      try {
+        if (await manager.getFileFromCache(url) != null) cached++;
+      } catch (_) {
+        // A single unreadable entry must not abort the audit.
+      }
+    }
+    debugPrint(
+      '[IMGDIAG] $label category=${entry.key} cached=$cached total=${urls.length}',
+    );
+  }
+}
+
+/// Reports how many bundled artwork assets this build ships.
+///
+/// Logos and placeholders are NOT network images: they live in the APK
+/// (`assets/images/app_logo.png`, `assets/images/logos/*`), so they are on the
+/// device before the first request and cannot fail on a weak connection. Reading
+/// the real asset manifest is what makes that a measurement rather than a claim
+/// - it fails loudly if a logo were ever dropped from the bundle.
+Future<void> logBundledAssetAudit(String label) async {
+  if (!imageCacheDiagnosticsEnabled) return;
+  try {
+    final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final assets = manifest.listAssets();
+    final logos = assets.where((a) => a.contains('assets/images/logos/')).length;
+    final marks = assets
+        .where((a) => a.startsWith('assets/images/') && !a.contains('/logos/'))
+        .length;
+    debugPrint(
+      '[IMGDIAG] $label category=logos bundled=$logos '
+      '(in the APK, never fetched) bundled_images=$marks',
+    );
+  } catch (e) {
+    debugPrint('[IMGDIAG] $label bundled asset audit failed: $e');
   }
 }

@@ -73,4 +73,67 @@ void main() {
       );
     });
   });
+
+  group('homeArtworkUrlsByCategory', () {
+    test('splits artwork into the categories a reader would name', () {
+      final byCategory = homeArtworkUrlsByCategory(
+        wallpaperUrl: 'https://cdn.example/wall.webp',
+        bannerUrls: const ['https://cdn.example/banner.webp'],
+        iconUrls: const ['https://cdn.example/icon.webp'],
+        coverUrls: const ['https://cdn.example/cover.webp'],
+      );
+
+      expect(byCategory.keys.toSet(), {
+        'wallpaper',
+        'banners',
+        'icons',
+        'covers',
+      });
+      expect(byCategory['wallpaper'], const ['https://cdn.example/wall.webp']);
+      expect(byCategory['banners'], const ['https://cdn.example/banner.webp']);
+      expect(byCategory['icons'], const ['https://cdn.example/icon.webp']);
+      expect(byCategory['covers'], const ['https://cdn.example/cover.webp']);
+    });
+
+    test('caps each category independently', () {
+      final many = [
+        for (var i = 0; i < 40; i++) 'https://cdn.example/i$i.webp',
+      ];
+      final byCategory = homeArtworkUrlsByCategory(
+        bannerUrls: many,
+        iconUrls: many,
+        coverUrls: many,
+      );
+
+      expect(byCategory['banners']!.length, 12);
+      expect(byCategory['icons']!.length, 12);
+      expect(byCategory['covers']!.length, 12);
+    });
+
+    test('flatten keeps warm-up order and collapses cross-category repeats', () {
+      final flat = flattenArtworkCategories({
+        'wallpaper': ['https://cdn.example/wall.webp'],
+        'banners': ['https://cdn.example/shared.webp'],
+        'icons': [
+          'https://cdn.example/shared.webp',
+          'https://cdn.example/icon.webp',
+        ],
+        'covers': ['https://cdn.example/cover.webp'],
+      });
+
+      expect(flat, const [
+        'https://cdn.example/wall.webp',
+        'https://cdn.example/shared.webp',
+        'https://cdn.example/icon.webp',
+        'https://cdn.example/cover.webp',
+      ]);
+    });
+
+    test('has no logo category, because logos ship inside the APK', () {
+      // Logos are bundled assets; including them would send an APK path to the
+      // network cache. The on-device audit reports them separately, from the
+      // real asset manifest.
+      expect(homeArtworkUrlsByCategory().containsKey('logos'), isFalse);
+    });
+  });
 }
