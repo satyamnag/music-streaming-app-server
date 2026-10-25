@@ -243,6 +243,11 @@ jobs:
         # android/app/src/debug/AndroidManifest.xml adds only INTERNET, so no
         # debug-only source can add or hide a permission. permissions.txt is
         # picked up by the artifact upload below.
+        #
+        # The finding is not hypothetical: run 40189466351 shows AD_ID IS merged
+        # into the shipped APK, from an AAR rather than from this repo.
+        # docs/PLAY_DATA_SAFETY.md records what that obliges, and the blame
+        # report printed at the end of this step names the SDK responsible.
         run: |
           set -u
           APK="$(find build/app/outputs -name '*.apk' 2>/dev/null | head -n1)"
@@ -269,6 +274,25 @@ jobs:
           else
             echo "AD_ID is absent: no Advertising ID declaration is required for this build."
           fi
+          echo "--- which dependency contributes it ---"
+          # Knowing THAT AD_ID is merged is not enough to act on: the developer
+          # has to know which SDK wants the advertising ID before deciding
+          # between declaring it and removing it with tools:node="remove". The
+          # merger's blame report names the contributing artifact, and the
+          # Gradle cache confirms which modules were resolved at all - neither is
+          # visible from the pubspec, because the permission arrives with an AAR
+          # rather than with a plugin's own manifest.
+          BLAME="$(find build -name 'manifest-merger-blame*report.txt' 2>/dev/null | head -n1)"
+          if [ -n "$BLAME" ]; then
+            echo "blame report: $BLAME"
+            grep -n -B2 -A6 -E 'AD_ID|ACCESS_ADSERVICES' "$BLAME" | head -n 80 || true
+          else
+            echo "::warning::No manifest-merger blame report found; the artifact contributing AD_ID cannot be named from this build."
+          fi
+          echo "--- resolved gradle modules matching ads/analytics/measurement ---"
+          find "${GRADLE_USER_HOME:-$HOME/.gradle}/caches/modules-2/files-2.1" -maxdepth 3 -type d \
+            \( -iname '*ads*' -o -iname '*analytics*' -o -iname '*measurement*' -o -iname '*installreferrer*' \) 2>/dev/null \
+            | sed 's#.*/files-2.1/##' | sort -u | head -n 40 || true
 
       - name: Enable KVM group perms
         run: |
