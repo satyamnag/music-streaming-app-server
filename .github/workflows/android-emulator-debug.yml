@@ -277,22 +277,44 @@ jobs:
           echo "--- which dependency contributes it ---"
           # Knowing THAT AD_ID is merged is not enough to act on: the developer
           # has to know which SDK wants the advertising ID before deciding
-          # between declaring it and removing it with tools:node="remove". The
-          # merger's blame report names the contributing artifact, and the
-          # Gradle cache confirms which modules were resolved at all - neither is
-          # visible from the pubspec, because the permission arrives with an AAR
-          # rather than with a plugin's own manifest.
-          BLAME="$(find build -name 'manifest-merger-blame*report.txt' 2>/dev/null | head -n1)"
-          if [ -n "$BLAME" ]; then
-            echo "blame report: $BLAME"
-            grep -n -B2 -A6 -E 'AD_ID|ACCESS_ADSERVICES' "$BLAME" | head -n 80 || true
+          # between declaring it and removing it with tools:node="remove". None
+          # of this is visible from the pubspec, because the permission arrives
+          # with an AAR rather than with a plugin's own manifest.
+          #
+          # Three lookups, deliberately overlapping, because the first attempt
+          # guessed `find build -name 'manifest-merger-blame*report.txt' | head
+          # -n1` and got a PLUGIN subproject's report, which named nothing:
+          #   1. the app module's own blame report (exact path, if it holds)
+          #   2. any blame report that actually mentions the permission, so a
+          #      moved path cannot silently produce no answer
+          #   3. the transformed AAR manifests, whose directory names ARE the
+          #      artifact coordinates - the only lookup that names the SDK
+          #      directly rather than by filename convention
+          APPB="$(find build -path '*app/intermediates/manifest_merge_blame_file*' -name '*report.txt' 2>/dev/null | head -n1)"
+          if [ -n "$APPB" ]; then
+            echo "app blame report: $APPB"
+            grep -n -B2 -A6 -E 'AD_ID|ACCESS_ADSERVICES' "$APPB" | head -n 80 || true
           else
-            echo "::warning::No manifest-merger blame report found; the artifact contributing AD_ID cannot be named from this build."
+            echo "::warning::No app-module blame report found."
           fi
-          echo "--- resolved gradle modules matching ads/analytics/measurement ---"
-          find "${GRADLE_USER_HOME:-$HOME/.gradle}/caches/modules-2/files-2.1" -maxdepth 3 -type d \
-            \( -iname '*ads*' -o -iname '*analytics*' -o -iname '*measurement*' -o -iname '*installreferrer*' \) 2>/dev/null \
-            | sed 's#.*/files-2.1/##' | sort -u | head -n 40 || true
+          echo "--- blame reports that mention the permission ---"
+          timeout 150 grep -rl 'permission\.AD_ID' build --include='*report.txt' 2>/dev/null | head -n 5 || true
+          echo "--- transformed AAR manifests that mention the permission ---"
+          timeout 240 grep -rl 'permission\.AD_ID' "$HOME/.gradle/caches" --include='AndroidManifest.xml' 2>/dev/null | head -n 10 || true
+          echo "--- gradle cache layout ---"
+          ls -d "$HOME"/.gradle/caches/* 2>/dev/null | head -n 10 || true
+          echo "--- dependency chains that pull an ads or installreferrer artifact ---"
+          # The artifact name says whats contributes the permission; the chain
+          # says which SDK asked for it, which is the part that decides whether
+          # removing it would break that SDK. Warm cache, so this resolves from
+          # disk; a failure here is not allowed to fail the audit.
+          if [ -x android/gradlew ]; then
+            (
+              cd android
+              timeout 420 ./gradlew -q :app:dependencies --configuration stableDebugRuntimeClasspath 2>/dev/null \
+                | grep -iE '^[+\\|].*(ads|installreferrer)' | sort -u | head -n 40
+            ) || echo "(dependency report unavailable; see the transformed AAR manifests above)"
+          fi
 
       - name: Enable KVM group perms
         run: |
