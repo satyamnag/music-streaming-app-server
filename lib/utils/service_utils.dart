@@ -1,8 +1,6 @@
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'package:html/dom.dart' hide Text;
 import 'package:shadcn_flutter/shadcn_flutter.dart' hide Element;
@@ -12,7 +10,6 @@ import 'package:sangeet/modules/root/update_dialog.dart';
 
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/services/dio/dio.dart';
-import 'package:sangeet/services/logger/logger.dart';
 
 import 'package:sangeet/utils/primitive_utils.dart';
 import 'package:collection/collection.dart';
@@ -307,28 +304,6 @@ abstract class ServiceUtils {
           },
         );
       } catch (_) {}
-    }
-  }
-
-  static Future<Uint8List?> downloadImage(
-    String imageUrl,
-  ) async {
-    try {
-      final fileStream = DefaultCacheManager().getImageFile(imageUrl);
-
-      final bytes = List<int>.empty(growable: true);
-
-      await for (final data in fileStream) {
-        if (data is FileInfo) {
-          bytes.addAll(data.file.readAsBytesSync());
-          break;
-        }
-      }
-
-      return Uint8List.fromList(bytes);
-    } catch (e, stackTrace) {
-      AppLogger.reportError(e, stackTrace);
-      return null;
     }
   }
 

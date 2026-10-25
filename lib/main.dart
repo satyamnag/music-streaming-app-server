@@ -53,6 +53,7 @@ import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/cli/cli.dart';
 import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
+import 'package:sangeet/services/image_cache/image_cache_diagnostics.dart';
 import 'package:sangeet/services/kv_store/encrypted_kv_store.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -223,6 +224,10 @@ Future<void> main(List<String> rawArgs) async {
     // still in use and made images refetch on every launch - see
     // lib/services/image_cache/app_image_cache_manager.dart.
     configureImageCache();
+    // Marks the start of this launch for the cache diagnostic. A no-op unless
+    // the build was compiled with --dart-define=IMAGE_CACHE_DIAGNOSTICS=true;
+    // see lib/services/image_cache/image_cache_diagnostics.dart.
+    imageCacheDiagnosticsStart();
 
     if (kIsDesktop) {
       await windowManager.setPreventClose(true);
@@ -329,6 +334,19 @@ Future<void> main(List<String> rawArgs) async {
         child: const Sangeet(),
       ),
     );
+
+    // Same compile-time flag: one bounded report 30 s in, which is long enough
+    // for the home screen and the artwork warm-up to settle. A normal build sets
+    // no timer at all, and this must never delay the first frame - hence the
+    // unawaited delay rather than anything on the startup path.
+    if (imageCacheDiagnosticsEnabled) {
+      unawaited(
+        Future<void>.delayed(
+          const Duration(seconds: 30),
+          () => logImageCacheDiagnostics('after-home-load'),
+        ),
+      );
+    }
   });
 }
 

@@ -7,6 +7,7 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_services/mobile_audio_service.dart';
 import 'package:sangeet/services/audio_services/windows_audio_service.dart';
+import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
 import 'package:sangeet/utils/platform.dart';
 
 class AudioServices with WidgetsBindingObserver {
@@ -47,18 +48,44 @@ class AudioServices with WidgetsBindingObserver {
 
   Future<void> addTrack(SangeetTrackObject track) async {
     await smtc?.addTrack(track);
-    final images = track.album.images;
     mobile?.addItem(MediaItem(
       id: track.id,
       album: track.album.name,
       title: track.name,
       artist: track.artists.asString(),
       duration: Duration(milliseconds: track.durationMs),
-      artUri: (images != null && images.isNotEmpty)
-          ? images.asUri(placeholder: ImagePlaceholder.albumArt)
-          : null,
+      artUri: await _notificationArtUri(track),
       playable: true,
     ));
+  }
+
+  /// The notification's artwork URI, preferring the copy already on disk.
+  ///
+  /// audio_service officially supports `file://`, `http(s)://` and
+  /// `content://` for [MediaItem.artUri]. The URL chosen is exactly the one the
+  /// UI uses ([SangeetImageExtensions.asUri]), so both surfaces share one cache
+  /// entry - but when that entry is already cached the FILE is handed over
+  /// instead of the URL. That is the difference, on a weak connection, between
+  /// a cover in the notification and an empty box: the media notification then
+  /// draws from disk without opening a socket.
+  ///
+  /// Deliberately a lookup, not a fetch: `getFileFromCache` never downloads, so
+  /// a track whose art is not cached yet keeps the network URL it always had and
+  /// nothing is prefetched behind the reader's back here.
+  Future<Uri?> _notificationArtUri(SangeetTrackObject track) async {
+    final images = track.album.images;
+    if (images.isEmpty) return null;
+    final uri = images.asUri(placeholder: ImagePlaceholder.albumArt);
+    if (uri == null) return null;
+    try {
+      final cached = await AppImageCacheManager().getFileFromCache(
+        uri.toString(),
+      );
+      if (cached != null) return cached.file.uri;
+    } catch (_) {
+      // Any cache problem: fall back to the network URL, as before.
+    }
+    return uri;
   }
 
   void activateSession() {
