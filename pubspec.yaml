@@ -68,7 +68,24 @@ publish_to: "none"
 #     dropping the user on Home.
 # 92 sits above every previously built artifact (86-91) so an install always
 # moves forward and Play never rejects it as a downgrade.
-version: 1.0.0+92
+#
+# Version 93 (1.0.1) is the next Play upload. The Console's testing track holds
+# 88 (1.0.0); a versionCode cannot be reused once uploaded, so "88 (1.0.1)" is
+# not uploadable - 93 is the strictly-increasing next code, above BOTH the 88 on
+# Play and the 92 this repo has been building locally. versionName 1.0.1 marks
+# the content change even though the versionCode jump looks large.
+#
+# What 93 carries:
+#   * the leftover `firebase-analytics` Gradle dependency is gone, so the app no
+#     longer runs Google Analytics for Firebase and no longer carries
+#     com.google.android.gms.permission.AD_ID - the Data safety form therefore
+#     needs NO Advertising ID declaration;
+#   * every artwork surface (home wallpaper, carousel banners, shelf icons,
+#     covers) goes through AppImageCacheManager and the first screenful is
+#     warmed on launch, verified on-device as "warm start writes 0 files";
+#   * OneSignal in-app messages are wired: an `app_open` dashboard trigger,
+#     observable lifecycle listeners, and messages paused while audio plays.
+version: 1.0.1+93
 
 homepage: https://sangeet.app
 repository: https://github.com/user/sangeet
