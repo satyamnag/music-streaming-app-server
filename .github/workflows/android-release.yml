@@ -619,6 +619,61 @@ jobs:
           # build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab
           path: build/app/outputs/bundle/*/*.aab
 
+      - name: Audit shipped permissions (Data safety evidence)
+        # The debug verification workflow audits its own APK. This audits the
+        # artifact a RELEASE hands to Play, because that is the one Play Console's
+        # Data safety answers describe, and the debug build is only a proxy for it.
+        #
+        # The permission that matters is com.google.android.gms.permission.AD_ID:
+        # when it is merged, Play requires the "Device or other IDs -> Advertising
+        # ID" declaration. It can arrive from a transitive AAR that nothing in this
+        # repo declares, which is exactly how it got in once - a leftover
+        # firebase-analytics Gradle dependency kept Google Analytics for Firebase
+        # alive and pulled play-services-measurement in with it. See
+        # docs/PLAY_DATA_SAFETY.md; the warning below is the tripwire for a repeat.
+        run: |
+          set -u
+          APK="$(find build/app/outputs/flutter-apk -name '*.apk' 2>/dev/null | head -n1)"
+          AAB="$(find build/app/outputs/bundle -maxdepth 2 -name '*.aab' 2>/dev/null | head -n1)"
+          OUT="release-permissions.txt"
+          {
+            echo "apk: ${APK:-none}"
+            echo "aab: ${AAB:-none}"
+            echo "--- declared permissions ---"
+            if [ -n "$APK" ]; then
+              AAPT2="$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name 'aapt2' 2>/dev/null | sort | tail -n1)"
+              if [ -z "$AAPT2" ]; then
+                echo "::error::aapt2 not found in the Android SDK; cannot read the release APK manifest."
+                exit 1
+              fi
+              "$AAPT2" dump permissions "$APK" | sort -u
+            elif [ -n "$AAB" ]; then
+              # An AAB carries a protobuf manifest, so it is read with bundletool
+              # rather than unzipped - the same tool the Verify AAB step uses.
+              BT="$(find "$ANDROID_HOME" -name 'bundletool*.jar' 2>/dev/null | head -n1)"
+              if [ -z "$BT" ]; then
+                echo "::error::bundletool not found; cannot read the release AAB manifest."
+                exit 1
+              fi
+              java -jar "$BT" dump manifest --bundle "$AAB" | grep -E 'uses-permission' | sort -u
+            else
+              echo "::error::Neither an APK nor an AAB was produced, so there is nothing to audit."
+              exit 1
+            fi
+          } | tee "$OUT"
+          echo "--- verdict ---"
+          if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' "$OUT"; then
+            echo "::warning::AD_ID is present in the release artifact: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
+          else
+            echo "AD_ID is absent from the release artifact: no Advertising ID declaration is required."
+          fi
+          {
+            echo "### Release artifact permissions"
+            echo '```'
+            cat "$OUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # Signing material and the compile-time .env are written into the workspace
       # above. Remove them whatever happened, so an artifact or a subsequent step
       # can never pick them up.
@@ -626,5 +681,6 @@ jobs:
         if: always()
         run: |
           rm -f android/key.properties android/app/upload-keystore.jks .env manifest.xml js.txt
+          rm -f release-permissions.txt
           rm -rf aab_extract
           echo "Signing files and .env removed from the workspace."
