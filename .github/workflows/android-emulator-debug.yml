@@ -229,34 +229,43 @@ jobs:
 
       - name: Audit merged manifest permissions (Data safety evidence)
         # Play requires the "Device or other IDs -> Advertising ID" declaration
-        # whenever the MERGED manifest carries
+        # whenever the SHIPPED manifest carries
         # com.google.android.gms.permission.AD_ID - including when it arrives
-        # transitively from a library rather than from this repo. That answer
-        # feeds the Play Console Data safety form, so it is checked mechanically
-        # here instead of being assumed from the dependency list.
+        # transitively from a library rather than from this repo, which is how
+        # firebase_analytics used to contribute it. That answer feeds the Play
+        # Console Data safety form, so it is read off the APK this build just
+        # produced instead of being inferred from the pubspec dependency list.
         #
-        # This is the debug build because it is the cheap one, and it is
-        # equivalent for this question: the debug source set adds only INTERNET
-        # (android/app/src/debug/AndroidManifest.xml), so nothing debug-specific
-        # can introduce or hide a permission. permissions.txt is picked up by
-        # the existing artifact upload.
+        # aapt2 reads the APK's own binary manifest, so this keeps working when
+        # the Gradle intermediate paths move - they did: Flutter puts them under
+        # build/, not android/app/build/. The debug APK is the cheap build and
+        # answers the same question, because
+        # android/app/src/debug/AndroidManifest.xml adds only INTERNET, so no
+        # debug-only source can add or hide a permission. permissions.txt is
+        # picked up by the artifact upload below.
         run: |
           set -u
-          MANIFEST="$(find android/app/build/intermediates -name AndroidManifest.xml -path '*merged_manifest*' | head -n1)"
-          if [ -z "$MANIFEST" ]; then
-            echo "::error::No merged manifest found; cannot confirm whether an Advertising ID declaration is required."
+          APK="$(find build/app/outputs -name '*.apk' 2>/dev/null | head -n1)"
+          if [ -z "$APK" ]; then
+            echo "::error::No APK found; cannot confirm whether an Advertising ID declaration is required."
+            find build -maxdepth 4 -type d 2>/dev/null | head -n 20 || true
             exit 1
           fi
-          echo "Merged manifest: $MANIFEST"
+          echo "APK: $APK"
+          AAPT2="$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name 'aapt2' 2>/dev/null | sort | tail -n1)"
+          if [ -z "$AAPT2" ]; then
+            echo "::error::aapt2 not found in the Android SDK; cannot read the APK manifest."
+            exit 1
+          fi
+          echo "aapt2: $AAPT2"
           {
-            echo "merged manifest: $MANIFEST"
+            echo "apk: $APK"
             echo "--- declared permissions ---"
-            grep -o '<uses-permission[^>]*android:name="[^"]*"' "$MANIFEST" \
-              | sed -E 's/.*android:name="([^"]*)"/\1/' | sort -u
+            "$AAPT2" dump permissions "$APK" | sort -u
           } | tee permissions.txt
           echo "--- verdict ---"
-          if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' "$MANIFEST"; then
-            echo "::warning::AD_ID is present in the merged manifest: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
+          if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' permissions.txt; then
+            echo "::warning::AD_ID is present in the shipped manifest: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
           else
             echo "AD_ID is absent: no Advertising ID declaration is required for this build."
           fi
