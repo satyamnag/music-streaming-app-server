@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart';
@@ -9,6 +8,7 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/server/server.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
 import 'package:sangeet/services/logger/logger.dart';
 import 'package:sangeet/utils/platform.dart';
 
@@ -84,7 +84,11 @@ Future<void> _sendActiveTrack(SangeetTrackObject? track) async {
   final cachedImage = image == null
       ? null
       : image.url.startsWith("http")
-          ? (await DefaultCacheManager().getSingleFile(image.url)).path
+          // The app's own cache, not DefaultCacheManager: the widget then reuses
+          // the artwork the UI already downloaded (and its 1200-object budget)
+          // instead of pulling the same cover a second time into the 200-object
+          // default cache, which is what evicts artwork under normal use.
+          ? (await AppImageCacheManager().getSingleFile(image.url)).path
           : image.url;
   final data = {
     ...jsonTrack,

@@ -53,6 +53,7 @@ import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/services/cli/cli.dart';
 import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
+import 'package:sangeet/services/image_cache/image_cache_diagnostics.dart';
 import 'package:sangeet/services/kv_store/encrypted_kv_store.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -223,6 +224,10 @@ Future<void> main(List<String> rawArgs) async {
     // still in use and made images refetch on every launch - see
     // lib/services/image_cache/app_image_cache_manager.dart.
     configureImageCache();
+    // Marks the start of this launch for the cache diagnostic. A no-op unless
+    // the build was compiled with --dart-define=IMAGE_CACHE_DIAGNOSTICS=true;
+    // see lib/services/image_cache/image_cache_diagnostics.dart.
+    imageCacheDiagnosticsStart();
 
     if (kIsDesktop) {
       await windowManager.setPreventClose(true);
@@ -329,6 +334,24 @@ Future<void> main(List<String> rawArgs) async {
         child: const Sangeet(),
       ),
     );
+
+    // Same compile-time flag: two bounded reports, because a debug build on an
+    // emulator spends its first ~60 s on startup (local playback server, plugin
+    // scripts) before the home screen does any network work - a single early
+    // report measured a cache nothing had asked for yet, which read as "the
+    // cache is empty". The later line is the settled one. A normal build sets no
+    // timer at all, and this must never delay the first frame - hence the
+    // unawaited delays rather than anything on the startup path.
+    if (imageCacheDiagnosticsEnabled) {
+      for (final seconds in const [30, 90]) {
+        unawaited(
+          Future<void>.delayed(
+            Duration(seconds: seconds),
+            () => logImageCacheDiagnostics('after-home-load-${seconds}s'),
+          ),
+        );
+      }
+    }
   });
 }
 

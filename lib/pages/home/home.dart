@@ -30,6 +30,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/history/recent_tracks.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/image_cache/artwork_precache.dart';
 import 'package:sangeet/utils/platform.dart';
 
 @RoutePage()
@@ -47,6 +48,12 @@ class HomePage extends HookConsumerWidget {
     final sectionsAsync = ref.watch(homeSectionsProvider);
     // Fire-and-forget: pre-warm stream URLs so tapping a song starts instantly.
     ref.watch(prewarmHomeStreamsProvider);
+    // Fire-and-forget, same pattern for artwork: pull the wallpaper, the
+    // carousel banners and the first screenful of covers into the disk cache
+    // once the home data resolves, so a reader on a weak connection is not
+    // looking at placeholders on every visit. Bounded and best-effort - see
+    // lib/services/image_cache/artwork_precache.dart.
+    ref.watch(precacheHomeArtworkProvider);
     final clerkAuth = ref.watch(clerkAuthProvider);
     final clerkState = clerkAuth.valueOrNull ?? const ClerkAuthState();
     // Admin-managed home wallpaper. Null (unset, table absent, or a failed
