@@ -1,0 +1,148 @@
+name: Image Cache Verification (two launches)
+
+# Answers one question that nothing else in the repo can: does artwork survive an
+# app restart?
+#
+# The cache is written into the app's private cache directory, so it cannot be
+# read from a device without root or a debuggable build, and Android's own cache
+# gauges are unusable (`dumpsys diskstats` is stale, `cmd storagestats` is absent
+# on Android 11, `du` on /data/data/<pkg> is denied). A build compiled with
+# --dart-define=IMAGE_CACHE_DIAGNOSTICS=true therefore reports the cache's own
+# numbers, and .github/scripts/image-cache-verify.sh compares a cold launch with
+# a warm one. See lib/services/image_cache/image_cache_diagnostics.dart.
+#
+# This is the test the repo's own unit test declines to claim:
+#   test/services/image_cache/app_image_cache_manager_test.dart
+#     "That artwork actually survives an app restart. That needs a real device
+#      and two launches, and is deliberately NOT claimed here."
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.35.2
+
+jobs:
+  two_launch_cache_check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Write .env (compile-time config)
+        # Real credentials matter here: with placeholder ones the home screen has
+        # no artwork to fetch, and the script fails with "too few cache files"
+        # rather than pretending the cache works.
+        env:
+          DOTENV: ${{ secrets.DOTENV_RELEASE }}
+        run: |
+          if [ -z "$DOTENV" ]; then
+            echo "::warning::Secret DOTENV_RELEASE not set. The home screen will have no catalogue, so this run cannot prove anything about artwork caching."
+            printf '%s\n' \
+              'SUPABASE_URL=https://placeholder.supabase.co' \
+              'SUPABASE_ANON_KEY=placeholder-anon-key' \
+              'CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuc291bGZ1bGJoYWt0aS5jb20k' \
+              'RELEASE_CHANNEL=nightly' \
+              'ENABLE_UPDATE_CHECK=1' \
+              'HIDE_DONATIONS=0' \
+              'R2_BASE_URL=https://placeholder-r2.invalid' \
+              > .env
+          else
+            printf '%s\n' "$DOTENV" > .env
+            grep -oE '^[A-Z_]+' .env | sort -u
+          fi
+
+      - name: Write signing config
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE }}
+          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEY_PROPERTIES" ]; then
+            echo "::warning::Signing secrets missing; generating an ephemeral debug keystore."
+            keytool -genkeypair -v \
+              -keystore android/app/upload-keystore.jks \
+              -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android999 -keypass android999 \
+              -dname "CN=Android Debug, OU=CI, O=Soulful Bhakti, L=Temp, ST=Temp, C=IN" 2>/dev/null
+            printf '%s\n' \
+              'storeFile=upload-keystore.jks' \
+              'storePassword=android999' \
+              'keyAlias=debug' \
+              'keyPassword=android999' \
+              > android/key.properties
+          else
+            echo "$KEYSTORE_B64" | base64 --decode > android/app/upload-keystore.jks
+            printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
+            test -s android/app/upload-keystore.jks || { echo "::error::empty keystore"; exit 1; }
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code (routes, drift, envied)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build debug APK with cache diagnostics
+        # The define is compiled in: a normal build has no timer, no directory
+        # walk and no logging (imageCacheDiagnosticsEnabled is a const).
+        run: |
+          flutter build apk --debug --flavor stable \
+            --dart-define=IMAGE_CACHE_DIAGNOSTICS=true
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Cold launch vs warm launch
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 900
+          # One command, not a multi-line script: the emulator action executes the
+          # script line-by-line in fresh shells, so all logic lives in the file.
+          script: bash .github/scripts/image-cache-verify.sh
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### Artwork cache across two launches"
+            echo '```'
+            cat imgdiag-cold.txt 2>/dev/null || echo "(no cold diagnostic)"
+            cat imgdiag-warm.txt 2>/dev/null || echo "(no warm diagnostic)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-cache-diagnostics
+          path: |
+            imgdiag-*.txt
+            logcat-*.txt
+          if-no-files-found: warn
