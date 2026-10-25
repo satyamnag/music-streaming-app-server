@@ -227,6 +227,40 @@ jobs:
           fi
           flutter build apk --debug --flavor stable $ARGS
 
+      - name: Audit merged manifest permissions (Data safety evidence)
+        # Play requires the "Device or other IDs -> Advertising ID" declaration
+        # whenever the MERGED manifest carries
+        # com.google.android.gms.permission.AD_ID - including when it arrives
+        # transitively from a library rather than from this repo. That answer
+        # feeds the Play Console Data safety form, so it is checked mechanically
+        # here instead of being assumed from the dependency list.
+        #
+        # This is the debug build because it is the cheap one, and it is
+        # equivalent for this question: the debug source set adds only INTERNET
+        # (android/app/src/debug/AndroidManifest.xml), so nothing debug-specific
+        # can introduce or hide a permission. permissions.txt is picked up by
+        # the existing artifact upload.
+        run: |
+          set -u
+          MANIFEST="$(find android/app/build/intermediates -name AndroidManifest.xml -path '*merged_manifest*' | head -n1)"
+          if [ -z "$MANIFEST" ]; then
+            echo "::error::No merged manifest found; cannot confirm whether an Advertising ID declaration is required."
+            exit 1
+          fi
+          echo "Merged manifest: $MANIFEST"
+          {
+            echo "merged manifest: $MANIFEST"
+            echo "--- declared permissions ---"
+            grep -o '<uses-permission[^>]*android:name="[^"]*"' "$MANIFEST" \
+              | sed -E 's/.*android:name="([^"]*)"/\1/' | sort -u
+          } | tee permissions.txt
+          echo "--- verdict ---"
+          if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' "$MANIFEST"; then
+            echo "::warning::AD_ID is present in the merged manifest: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
+          else
+            echo "AD_ID is absent: no Advertising ID declaration is required for this build."
+          fi
+
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
