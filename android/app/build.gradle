@@ -3,7 +3,7 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "org.jetbrains.kotlin.plugin.compose"
-    // Firebase (Crashlytics + Analytics)
+    // Firebase (Crashlytics only)
     id "com.google.gms.google-services"
     id "com.google.firebase.crashlytics"
 }
@@ -183,8 +183,24 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
     implementation 'com.google.code.gson:gson:2.11.0'
 
-    // Firebase BoM + Analytics (explicit per official setup; matches the
-    // FlutterFire-managed BOM version 34.17.0, so Gradle deduplicates).
+    // Firebase BoM only (matches the FlutterFire-managed BOM version 34.17.0, so
+    // Gradle deduplicates).
+    //
+    // There is deliberately no `com.google.firebase:firebase-analytics` artifact
+    // here. It used to be declared explicitly, and it was the ONLY thing pulling
+    // play-services-measurement into the APK - which is what merged
+    // com.google.android.gms.permission.AD_ID and the two Privacy Sandbox
+    // ACCESS_ADSERVICES permissions into the shipped manifest, obliging an
+    // Advertising ID declaration in Play Console (and an advertising-identifier
+    // disclosure in the privacy policy) for an app that serves no ads. The Dart
+    // side was already migrated to PostHog; the raw Gradle artifact was left
+    // behind and kept Google Analytics for Firebase collecting.
+    //
+    // Crashlytics does not need it: firebase-crashlytics' own POM depends on
+    // firebase-sessions, firebase-installations and firebase-measurement-
+    // connector, none of which pull play-services-measurement. Verified by
+    // reading the resolved artifact POMs, and re-verified on every build by the
+    // "Audit merged manifest permissions" step in
+    // .github/workflows/android-emulator-debug.yml. See docs/PLAY_DATA_SAFETY.md.
     implementation platform('com.google.firebase:firebase-bom:34.17.0')
-    implementation 'com.google.firebase:firebase-analytics'
 }
