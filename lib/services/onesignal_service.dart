@@ -1,4 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+
+/// Whether this build reports in-app message activity to logcat.
+///
+/// A compile-time constant, so a normal build costs nothing: the `[OSDIAG]`
+/// lines collapse to a `false` check. Only a build compiled with
+/// `--dart-define=ONESIGNAL_VERIFY=true` (a verification build - the release
+/// workflow refuses nothing here, so such an artifact must not be uploaded to
+/// Play) turns on the SDK's verbose log and the lifecycle reporting.
+const bool oneSignalVerifyEnabled = bool.fromEnvironment('ONESIGNAL_VERIFY');
 
 /// Centralized wrapper around the OneSignal Flutter SDK.
 ///
@@ -14,6 +24,11 @@ class OneSignalService {
 
   bool _isInitialized = false;
 
+  /// Whether [initialize] has completed. The in-app-message and trigger
+  /// methods below are no-ops until then: the SDK has no app context before
+  /// init, and calling into it would throw inside a widget build path.
+  bool get isInitialized => _isInitialized;
+
   /// A real, server-assigned push subscription ID is non-empty and does not
   /// start with the SDK's `local-` placeholder (which is assigned before the
   /// device registers with OneSignal's servers).
@@ -24,9 +39,16 @@ class OneSignalService {
   /// first call performs initialization.
   Future<void> initialize(String appId) async {
     if (_isInitialized || appId.isEmpty) return;
-    OneSignal.Debug.setLogLevel(OSLogLevel.warn);
+    OneSignal.Debug.setLogLevel(
+      oneSignalVerifyEnabled ? OSLogLevel.verbose : OSLogLevel.warn,
+    );
     await OneSignal.initialize(appId);
     _isInitialized = true;
+    if (oneSignalVerifyEnabled) {
+      // Proof from the device that the SDK came up: a verification run greps
+      // logcat for this line.
+      debugPrint('[OSDIAG] sdk_initialized app_id_suffix=${appId.substring(appId.length - 4)}');
+    }
   }
 
   /// Opts the user into push notifications. Does not necessarily prompt for
@@ -71,17 +93,39 @@ class OneSignalService {
       OneSignal.User.addTagWithKey(key, value);
 
   /// Adds a trigger that can control in-app message display.
-  Future<void> addInAppMessageTrigger(String key, String value) =>
-      OneSignal.InAppMessages.addTrigger(key, value);
+  ///
+  /// A no-op before [initialize]: the SDK has no app context yet, and a trigger
+  /// set early would be discarded.
+  Future<void> addInAppMessageTrigger(String key, String value) async {
+    if (!_isInitialized) return;
+    await OneSignal.InAppMessages.addTrigger(key, value);
+    if (oneSignalVerifyEnabled) {
+      debugPrint('[OSDIAG] iam_trigger_set $key=$value');
+    }
+  }
 
   /// Removes a trigger, so a message keyed on it stops being eligible.
-  Future<void> removeInAppMessageTrigger(String key) =>
-      OneSignal.InAppMessages.removeTrigger(key);
+  Future<void> removeInAppMessageTrigger(String key) async {
+    if (!_isInitialized) return;
+    await OneSignal.InAppMessages.removeTrigger(key);
+    if (oneSignalVerifyEnabled) {
+      debugPrint('[OSDIAG] iam_trigger_removed $key');
+    }
+  }
 
   /// Pauses or resumes in-app message display for the whole app. Used to keep
   /// a message from covering the player while audio is running.
-  Future<void> setInAppMessagesPaused(bool paused) =>
-      OneSignal.InAppMessages.paused(paused);
+  ///
+  /// The SDK persists this flag itself, so it survives navigation; it does NOT
+  /// survive a process restart, which is why `main()` re-applies it from the
+  /// player's own state at startup.
+  Future<void> setInAppMessagesPaused(bool paused) async {
+    if (!_isInitialized) return;
+    await OneSignal.InAppMessages.paused(paused);
+    if (oneSignalVerifyEnabled) {
+      debugPrint('[OSDIAG] iam_paused=${paused ? 'true' : 'false'}');
+    }
+  }
 
   /// Fires when the user taps a push notification or one of its action
   /// buttons. The notification's custom payload is on
@@ -106,6 +150,7 @@ class OneSignalService {
   /// Fires when a user taps a button or image inside an in-app message. The
   /// action's identifier and link are on `event.result` (`actionId`, `url`).
   void addInAppMessageClickListener(OnClickInAppMessageListener listener) {
+    if (!_isInitialized) return;
     OneSignal.InAppMessages.addClickListener(listener);
   }
 
@@ -120,6 +165,7 @@ class OneSignalService {
     OnWillDismissInAppMessageListener? onWillDismiss,
     OnDidDismissInAppMessageListener? onDidDismiss,
   }) {
+    if (!_isInitialized) return;
     if (onWillDisplay != null) {
       OneSignal.InAppMessages.addWillDisplayListener(onWillDisplay);
     }
