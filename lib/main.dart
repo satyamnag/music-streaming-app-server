@@ -292,6 +292,8 @@ Future<void> main(List<String> rawArgs) async {
             // SDK discards listeners registered before init, so attaching
             // earlier would compile, run, and silently never fire.
             _registerOneSignalListeners();
+            // Keeps in-app messages off the player while audio is running.
+            _followPlaybackForInAppMessages();
           } catch (_) {
             // OneSignal init stalled/hung — continue without push messaging.
           }
@@ -575,5 +577,50 @@ void _registerOneSignalListeners() {
     final uri = Uri.tryParse(target);
     if (uri == null) return;
     links.handle(uri);
+  });
+
+  // A trigger the dashboard can target, so a message can be scheduled for
+  // "app opened" with no in-app state involved. It is the only trigger the app
+  // sets itself; `addInAppMessageTrigger` is the seam for future event triggers
+  // (paywall seen, first playlist, ...).
+  unawaited(OneSignalService.instance.addInAppMessageTrigger('app_open', 'true'));
+
+  // The four lifecycle listeners exist to make a display OBSERVABLE. Without
+  // them, a message that silently never appears is indistinguishable from one
+  // that was never configured - which is the difference between a tested
+  // integration and a hopeful one. They report only in a verification build.
+  OneSignalService.instance.addInAppMessageLifecycleListeners(
+    onWillDisplay: (_) => _logInAppMessage('will_display'),
+    onDidDisplay: (_) => _logInAppMessage('did_display'),
+    onWillDismiss: (_) => _logInAppMessage('will_dismiss'),
+    onDidDismiss: (_) => _logInAppMessage('did_dismiss'),
+  );
+}
+
+/// Reports an in-app message lifecycle event, in a verification build only.
+///
+/// `[OSDIAG]` is what a verification run greps for: a message that displays
+/// logs `iam_did_display`, a message suppressed by the player logs nothing, and
+/// a broken integration logs nothing at all - so the presence of these lines,
+/// not the absence of errors, is the proof.
+void _logInAppMessage(String event) {
+  if (!oneSignalVerifyEnabled) return;
+  debugPrint('[OSDIAG] iam_$event');
+}
+
+/// Keeps in-app messages off the player while audio is actually running.
+///
+/// `setInAppMessagesPaused` has been in the wrapper since the SDK was added,
+/// with exactly this intent in its doc comment, but nothing ever called it - so
+/// a dashboard message could cover the transport controls mid-song. Following
+/// the player's own stream means the flag tracks reality (a paused track does
+/// NOT suppress messages) and needs no route observer, which this app has not
+/// got.
+///
+/// The subscription lives for the process lifetime, like the notification
+/// listeners above, so it is deliberately never cancelled.
+void _followPlaybackForInAppMessages() {
+  audioPlayer.playingStream.listen((playing) {
+    unawaited(OneSignalService.instance.setInAppMessagesPaused(playing));
   });
 }
