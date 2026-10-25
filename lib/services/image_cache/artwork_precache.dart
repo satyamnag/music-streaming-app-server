@@ -18,14 +18,16 @@
 ///
 /// BOUNDED ON PURPOSE
 /// ------------------
-///  * a hard cap of [maxUrls] files, so this can never turn into a bulk
-///    downloader that eats a reader's data allowance;
+///  * a hard cap of [ArtworkPrecache.maxUrls] files, so this can never turn into
+///    a bulk downloader that eats a reader's data allowance;
 ///  * served through the SAME cache manager as the UI, and a URL that is already
 ///    on disk costs no network at all (`getFileFromCache` is a lookup, not a
 ///    fetch);
 ///  * strictly best-effort: every failure is swallowed, because a warm-up must
 ///    never be the reason a screen fails to load.
 library;
+
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -35,41 +37,96 @@ import 'package:sangeet/modules/home/sections/featured_playlists.dart';
 import 'package:sangeet/modules/home/sections/specials.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/services/image_cache/app_image_cache_manager.dart';
+import 'package:sangeet/services/image_cache/image_cache_diagnostics.dart';
 
-/// The ordered, de-duplicated, capped list of home artwork worth warming.
+/// The home artwork split by the category a reader would name it by.
 ///
-/// Ordered by what the reader sees first: the wallpaper band behind the header,
-/// then the carousel banners, then the first screenful of covers. Pure, so the
-/// ordering, the de-duplication and the cap can be asserted without a platform
-/// cache - see `test/services/image_cache/artwork_precache_test.dart`.
+/// This is the shape the on-device audit reports in, so "is caching working?"
+/// can be answered per category - covers, banners, wallpapers, icons - instead
+/// of as one opaque total. Pure, so the split, the ordering, the de-duplication
+/// and the per-category caps are asserted without a platform cache; see
+/// `test/services/image_cache/artwork_precache_test.dart`.
 ///
 /// Non-http entries are dropped: placeholder paths point at bundled assets and
 /// must never be sent to the network cache.
+///
+/// Logos are deliberately absent: they are bundled in the APK
+/// (`assets/images/app_logo.png`, `assets/images/logos/*`) and are therefore
+/// already available offline - there is nothing to cache and nothing to fetch.
+@visibleForTesting
+Map<String, List<String>> homeArtworkUrlsByCategory({
+  String? wallpaperUrl,
+  List<String?> bannerUrls = const [],
+  List<String?> iconUrls = const [],
+  List<String> coverUrls = const [],
+  int maxBanners = 12,
+  int maxIcons = 12,
+  int maxCovers = 12,
+}) {
+  List<String> clean(Iterable<String?> raw, int cap) {
+    final out = <String>[];
+    for (final value in raw.take(cap)) {
+      final url = value?.trim() ?? '';
+      if (url.isEmpty || !url.startsWith('http')) continue;
+      if (out.contains(url)) continue;
+      out.add(url);
+    }
+    return out;
+  }
+
+  return {
+    'wallpaper': clean([wallpaperUrl], 1),
+    'banners': clean(bannerUrls, maxBanners),
+    'icons': clean(iconUrls, maxIcons),
+    'covers': clean(coverUrls, maxCovers),
+  };
+}
+
+/// Flattens [byCategory] into warm-up order: wallpaper, banners, icons, covers.
+///
+/// Cross-category duplicates collapse (a shelf cover can also be a track cover)
+/// and the result is capped at [maxUrls], so the warm-up is bounded no matter
+/// how the categories are sized.
+@visibleForTesting
+List<String> flattenArtworkCategories(
+  Map<String, List<String>> byCategory, {
+  int maxUrls = ArtworkPrecache.maxUrls,
+}) {
+  final urls = <String>[];
+  for (final category in const ['wallpaper', 'banners', 'icons', 'covers']) {
+    for (final url in byCategory[category] ?? const <String>[]) {
+      if (urls.length >= maxUrls) return urls;
+      if (urls.contains(url)) continue;
+      urls.add(url);
+    }
+  }
+  return urls;
+}
+
+/// The ordered, de-duplicated, capped list of home artwork worth warming.
+///
+/// Derived from [homeArtworkUrlsByCategory] through
+/// [flattenArtworkCategories], so the audit and the warm-up can never disagree
+/// about what a category contains.
 @visibleForTesting
 List<String> homeArtworkUrlsForCache({
   String? wallpaperUrl,
   List<String?> bannerUrls = const [],
+  List<String?> iconUrls = const [],
   List<String> coverUrls = const [],
   int maxCovers = 12,
   int maxUrls = ArtworkPrecache.maxUrls,
 }) {
-  final urls = <String>[];
-
-  void add(String? raw) {
-    final url = raw?.trim() ?? '';
-    if (url.isEmpty || !url.startsWith('http')) return;
-    if (urls.length >= maxUrls || urls.contains(url)) return;
-    urls.add(url);
-  }
-
-  add(wallpaperUrl);
-  for (final banner in bannerUrls) {
-    add(banner);
-  }
-  for (final cover in coverUrls.take(maxCovers)) {
-    add(cover);
-  }
-  return urls;
+  return flattenArtworkCategories(
+    homeArtworkUrlsByCategory(
+      wallpaperUrl: wallpaperUrl,
+      bannerUrls: bannerUrls,
+      iconUrls: iconUrls,
+      coverUrls: coverUrls,
+      maxCovers: maxCovers,
+    ),
+    maxUrls: maxUrls,
+  );
 }
 
 /// Fetches first-paint artwork into the shared cache, once, in the background.
@@ -81,8 +138,9 @@ class ArtworkPrecache {
   /// Hard cap on how many files a single warm-up may fetch.
   ///
   /// Chosen against what the home screen actually draws before the first
-  /// scroll: one wallpaper, a handful of banners, and the first covers. It is a
-  /// ceiling, not a target - a screen with three banners warms four files.
+  /// scroll: one wallpaper, a handful of banners and icons, and the first
+  /// covers. It is a ceiling, not a target - a screen with three banners warms
+  /// four files.
   static const int maxUrls = 24;
 
   /// URLs already handled this session, so a rebuild of the home screen cannot
@@ -118,14 +176,26 @@ class ArtworkPrecache {
 /// Watched (not awaited) by the home page, mirroring
 /// [prewarmHomeStreamsProvider]'s pattern for stream URLs: the screen paints
 /// from whatever is already cached, and this fills the disk behind it.
+///
+/// In a build compiled with `--dart-define=IMAGE_CACHE_DIAGNOSTICS=true` it also
+/// reports, per category, how much of that artwork ended up on disk - twice, so
+/// a verification run can see the state once the warm-up has finished rather
+/// than racing it. Both reports are no-ops otherwise.
 final precacheHomeArtworkProvider = FutureProvider<int>((ref) async {
   final wallpaper = await ref.watch(homeWallpaperProvider.future);
   final rows = await ref.watch(homeSpecialRowsProvider.future);
+  final playlists = await ref.watch(featuredPlaylistsProvider.future);
   final tracks = await ref.watch(homeTracksProvider.future);
 
-  final urls = homeArtworkUrlsForCache(
+  final byCategory = homeArtworkUrlsByCategory(
     wallpaperUrl: wallpaper,
+    // The carousel's admin-uploaded landscape banners.
     bannerUrls: [for (final row in rows) row.bannerUrl],
+    // The featured-playlist chips' admin-uploaded icons, plus the banner each
+    // chip's detail screen promotes.
+    iconUrls: [
+      for (final playlist in playlists) ...[playlist.iconUrl, playlist.bannerUrl],
+    ],
     coverUrls: [
       for (final track in tracks)
         if (track is SangeetFullTrackObject)
@@ -133,5 +203,23 @@ final precacheHomeArtworkProvider = FutureProvider<int>((ref) async {
     ],
   );
 
-  return ArtworkPrecache.instance.warm(urls);
+  final fetched = await ArtworkPrecache.instance.warm(
+    flattenArtworkCategories(byCategory),
+  );
+
+  if (imageCacheDiagnosticsEnabled) {
+    // Twice: the first pass catches a cold start mid-flight, the second is the
+    // settled number a verification run should judge.
+    for (final seconds in const [20, 45]) {
+      unawaited(
+        Future<void>.delayed(
+          Duration(seconds: seconds),
+          () => logImageCacheAudit('home-${seconds}s', byCategory),
+        ),
+      );
+    }
+    unawaited(logBundledAssetAudit('home-0s'));
+  }
+
+  return fetched;
 });

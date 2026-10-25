@@ -56,6 +56,14 @@ on:
           universal APK already ships arm64-v8a + armeabi-v7a.
         type: boolean
         default: false
+      dart_defines:
+        description: >-
+          VERIFICATION ONLY. Extra --dart-define flags, comma separated, e.g.
+          "IMAGE_CACHE_DIAGNOSTICS=true". Leave blank for a real release: the
+          artifact is then byte-identical to one built before this input existed.
+          An artifact built with defines set must not be uploaded to Play.
+        type: string
+        default: ""
       flavor:
         description: >-
           Product flavor. Keep `stable` for the Play build (com.soulfulbhakti.app).
@@ -509,6 +517,13 @@ jobs:
           # Rust toolchain through Cargokit purely to discard it. That waste is
           # what pushed the runner's disk to zero mid-compile.
           ARGS="--build-number ${{ steps.version.outputs.version_code }} --build-name ${{ steps.version.outputs.version_name }} --target-platform android-arm,android-arm64"
+          # Verification builds only: the empty default leaves a real release
+          # byte-identical to before this input existed.
+          if [ -n "${{ inputs.dart_defines }}" ]; then
+            echo "::warning::VERIFICATION BUILD - extra dart-defines: ${{ inputs.dart_defines }}. Do not upload this artifact to Play."
+            IFS=',' read -ra EXTRA <<< "${{ inputs.dart_defines }}"
+            for d in "${EXTRA[@]}"; do ARGS="$ARGS --dart-define=$(printf '%s' "$d" | xargs)"; done
+          fi
           if [ "${{ inputs.split_per_abi }}" = "true" ]; then
             flutter build apk --release --flavor ${{ inputs.flavor }} $ARGS --split-per-abi
           else
@@ -523,10 +538,16 @@ jobs:
           # Same ABI reasoning as the APK step: the release buildType only ships
           # armeabi-v7a and arm64-v8a, so compiling x86_64 is wasted disk and
           # time for an artifact Play would never serve.
+          BUNDLE_ARGS=""
+          if [ -n "${{ inputs.dart_defines }}" ]; then
+            echo "::warning::VERIFICATION BUILD - extra dart-defines: ${{ inputs.dart_defines }}. Do not upload this artifact to Play."
+            IFS=',' read -ra EXTRA <<< "${{ inputs.dart_defines }}"
+            for d in "${EXTRA[@]}"; do BUNDLE_ARGS="$BUNDLE_ARGS --dart-define=$(printf '%s' "$d" | xargs)"; done
+          fi
           flutter build appbundle --release --flavor ${{ inputs.flavor }} \
             --build-number ${{ steps.version.outputs.version_code }} \
             --build-name ${{ steps.version.outputs.version_name }} \
-            --target-platform android-arm,android-arm64
+            --target-platform android-arm,android-arm64 $BUNDLE_ARGS
 
       - name: List build outputs
         run: |
