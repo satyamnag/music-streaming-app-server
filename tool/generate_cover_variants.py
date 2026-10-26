@@ -148,11 +148,19 @@ def main() -> int:
     names: dict[str, str] = {}
     rows: list[dict] = []
     problems: list[str] = []
+    skipped: list[str] = []
     for index, source in enumerate(sources, 1):
         url = normalise_url(source["url"])
         name = unquote(urlsplit(url).path.split("/")[-1]).strip()
         if not name:
             problems.append(f"{source['role']}: cannot derive a file name from {source['url']}")
+            continue
+        # A legacy album cover carries a double-encoded name with a C1 control
+        # byte (the stored key itself is invalid for Storage). Supabase rejects
+        # such a key with InvalidKey, so skip it explicitly: the app keeps
+        # drawing that cover from its 1024 original (UniversalImage falls back).
+        if any(ord(character) < 32 or 0x7F <= ord(character) <= 0x9F for character in name):
+            skipped.append(f"{source['role']} {name!r} (control character in the stored name)")
             continue
         if name in names and names[name] != url:
             problems.append(f"two different originals map to one variant name {name!r}: "
