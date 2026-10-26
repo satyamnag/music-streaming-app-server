@@ -43,6 +43,29 @@ void main() {
     });
   });
 
+  group('object keys with control characters', () {
+    // One legacy album cover is stored as "MÄ\u0081dhuryam" (double-encoded
+    // "Mādhuryam"). Supabase Storage rejects such keys, so the rendition is
+    // stored - and requested - with the C1 byte replaced by "_".
+    final legacy =
+        'https://music.soulfulbhakti.com/images/1791407744819-Krishna%20M%C3%84%C2%81dhuryam%20Album%20Cover.webp';
+    const expected =
+        '1791407744819-Krishna%20M%C3%84_dhuryam%20Album%20Cover.webp';
+
+    test('replaces the control byte, keeps everything else', () {
+      expect(
+        CoverRendition.urlFor(legacy),
+        '$base/storage/v1/object/public/thumbnails/variants/512/$expected',
+      );
+    });
+
+    test('is idempotent on the rendition itself', () {
+      final rendition =
+          '$base/storage/v1/object/public/thumbnails/variants/512/$expected';
+      expect(CoverRendition.urlFor(rendition), rendition);
+    });
+  });
+
   group('everything else is left alone', () {
     test('avatars and third-party images', () {
       for (final url in const [

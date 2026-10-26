@@ -73,6 +73,22 @@ def normalise_url(url: str) -> str:
     parts = urlsplit(url)
     return urlunsplit((parts.scheme, parts.netloc, encode_path(parts.path), parts.query, parts.fragment))
 
+def variant_name(name: str) -> str:
+    """Object key used for the rendition of `name`.
+
+    One legacy cover carries a C1 control byte in its stored name (double-encoded
+    "Mādhuryam"), and Supabase Storage rejects such keys with InvalidKey. Control
+    characters are therefore replaced with `_` - the only transformation applied;
+    every other character, including spaces and non-ASCII letters, is kept so the
+    rendition is still recognisable. lib/services/images/cover_renditions.dart
+    applies exactly the same rule before building the URL the app requests, and
+    the manifest keeps the original name for traceability.
+    """
+    return "".join(
+        "_" if (ord(character) < 32 or 0x7F <= ord(character) <= 0x9F) else character
+        for character in name
+    )
+
 
 def http(method: str, url: str, headers: dict[str, str] | None = None, body: bytes | None = None,
          timeout: int = 120) -> tuple[int, bytes, dict[str, str]]:
@@ -155,18 +171,15 @@ def main() -> int:
         if not name:
             problems.append(f"{source['role']}: cannot derive a file name from {source['url']}")
             continue
-        # A legacy album cover carries a double-encoded name with a C1 control
-        # byte (the stored key itself is invalid for Storage). Supabase rejects
-        # such a key with InvalidKey, so skip it explicitly: the app keeps
-        # drawing that cover from its 1024 original (UniversalImage falls back).
-        if any(ord(character) < 32 or 0x7F <= ord(character) <= 0x9F for character in name):
-            skipped.append(f"{source['role']} {name!r} (control character in the stored name)")
+        key_name = variant_name(name)
+        if not key_name.strip():
+            problems.append(f"{source['role']}: stored name has no addressable characters: {name!r}")
             continue
-        if name in names and names[name] != url:
+        if key_name in names and names[key_name] != url:
             problems.append(f"two different originals map to one variant name {name!r}: "
                             f"{names[name]} and {url}")
             continue
-        names[name] = url
+        names[key_name] = url
 
         try:
             original_bytes = download(url)
@@ -183,7 +196,7 @@ def main() -> int:
             problems.append(f"{source['role']} {name!r}: {error}")
             continue
 
-        object_path = f"{VARIANT_PREFIX}/{name}"
+        object_path = f"{VARIANT_PREFIX}/{key_name}"
         if not object_path.startswith(f"{VARIANT_PREFIX}/"):
             print(f"::error::refusing to write outside {VARIANT_PREFIX}/: {object_path}")
             return 1
@@ -221,6 +234,7 @@ def main() -> int:
             "role": source["role"],
             "title": source["title"],
             "originalName": name,
+            "variantKey": key_name,
             "originalBytes": len(original_bytes),
             "originalSize": f"{source_size[0]}x{source_size[1]}",
             "variantBytes": len(served),

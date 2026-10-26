@@ -38,6 +38,9 @@ class CoverRendition {
   /// R2 CDN host that serves album covers today.
   static const String r2HostSuffix = 'soulfulbhakti.com';
 
+  /// C0/C1 control characters, which a storage object key may not contain.
+  static final RegExp _controlCharacters = RegExp(r'[\x00-\x1f\x7f-\x9f]');
+
   /// Returns the URL for [url] at the requested rendition size.
   ///
   /// Returns [url] unchanged when:
@@ -76,9 +79,14 @@ class CoverRendition {
     }
 
     final base = Env.supabaseUrl.replaceAll(RegExp(r'/+$'), '');
+    // Object keys may not contain control characters (Supabase Storage answers
+    // InvalidKey), and one legacy cover is stored with a C1 byte in its name.
+    // tool/generate_cover_variants.py replaces exactly those characters with
+    // `_` when it writes the rendition, so the same rule is applied here.
+    final keyName = name.replaceAll(_controlCharacters, '_');
     // `pathSegments` is percent-decoded, so re-encode: object keys contain spaces
     // and non-ASCII bytes that must reach the server escaped.
-    final encodedName = Uri.encodeComponent(name);
+    final encodedName = Uri.encodeComponent(keyName);
     return '$base/storage/v1/object/public/$bucket/variants/$pixels/$encodedName';
   }
 }
