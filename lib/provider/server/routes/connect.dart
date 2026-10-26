@@ -57,10 +57,31 @@ class ServerConnectRoutes {
         final context =
             (req.context["shelf.io.connection_info"] as HttpConnectionInfo?);
         final origin = "${context?.remoteAddress.host}:${context?.remotePort}";
-        _connectClientStreamController.add(origin);
 
-        // Confirm whether user allows to connect
-        if (rootNavigatorKey.currentContext?.mounted == true &&
+        // A loopback peer is a process on THIS phone (the app's own Connect
+        // controller when it resolves a local service, a browser tab, any local
+        // client), never another device. Two user-facing behaviours treated such
+        // a peer as a stranger, and both read as security warnings while
+        // protecting nothing:
+        //
+        //  * the approval dialog "Allow 127.0.0.1:PORT to connect?" asked the
+        //    reader to authorise the phone to itself;
+        //  * the "You're being controlled by 127.0.0.1:PORT" toast announced
+        //    self-control as an intrusion.
+        //
+        // Neither is a network prompt: nothing leaves the device, and the app
+        // already controls its own playback. The approval dialog exists for
+        // REMOTE peers, because with Connect enabled the server listens on every
+        // interface and an unapproved device could drive playback. A local peer
+        // gains nothing a hostile local app could not equally get from the rest
+        // of the loopback server.
+        final isLoopback = context?.remoteAddress.isLoopback ?? false;
+        if (!isLoopback) {
+          _connectClientStreamController.add(origin);
+        }
+
+        if (!isLoopback &&
+            rootNavigatorKey.currentContext?.mounted == true &&
             _allowedConnections.contains(origin) == false) {
           final confirmed = await showDialog<bool>(
                 context: rootNavigatorKey.currentContext!,
