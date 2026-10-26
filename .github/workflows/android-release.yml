@@ -669,14 +669,28 @@ jobs:
               fi
               "$AAPT2" dump permissions "$APK" | sort -u
             elif [ -n "$AAB" ]; then
-              # An AAB carries a protobuf manifest, so it is read with bundletool
-              # rather than unzipped - the same tool the Verify AAB step uses.
-              BT="$(find "$ANDROID_HOME" -name 'bundletool*.jar' 2>/dev/null | head -n1)"
-              if [ -z "$BT" ]; then
-                echo "::error::bundletool not found; cannot read the release AAB manifest."
+              # An AAB carries a protobuf manifest. The permission NAMES are plain
+              # UTF-8 strings inside it, so they are read directly instead of via
+              # `bundletool dump manifest`.
+              #
+              # That is not a shortcut, it is a bug fix: the first version of this
+              # step did `java -jar bundletool ... | grep -E 'uses-permission' |
+              # sort -u`. A pipeline reports the LAST command's status, so
+              # bundletool could fail (or pretty-print the attributes onto their
+              # own lines) and the step still exited 0 with an EMPTY permission
+              # list - and then declared "AD_ID is absent" from no evidence at all.
+              # A vacuous pass is worse than no check, so the extraction below is
+              # asserted against a permission this app cannot legitimately lack.
+              unzip -p "$AAB" base/manifest/AndroidManifest.xml > aab_manifest.bin
+              if [ ! -s aab_manifest.bin ]; then
+                echo "::error::Could not extract base/manifest/AndroidManifest.xml from the bundle."
                 exit 1
               fi
-              java -jar "$BT" dump manifest --bundle "$AAB" | grep -E 'uses-permission' | sort -u
+              if ! grep -aq 'android\.permission\.INTERNET' aab_manifest.bin; then
+                echo "::error::CONTROL FAILED: the app always declares android.permission.INTERNET, but it is not in the extracted manifest - the extraction is broken, so no AD_ID verdict can be trusted."
+                exit 1
+              fi
+              grep -aoE '([A-Za-z0-9_]+\.)+[A-Za-z0-9_]*permission[A-Za-z0-9_.]*' aab_manifest.bin | sort -u
             else
               echo "::error::Neither an APK nor an AAB was produced, so there is nothing to audit."
               exit 1
@@ -702,6 +716,6 @@ jobs:
         if: always()
         run: |
           rm -f android/key.properties android/app/upload-keystore.jks .env manifest.xml js.txt
-          rm -f release-permissions.txt
+          rm -f release-permissions.txt aab_manifest.bin
           rm -rf aab_extract
           echo "Signing files and .env removed from the workspace."
