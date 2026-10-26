@@ -11,6 +11,7 @@ import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 class SiblingTracksSheet extends HookConsumerWidget {
   final bool floating;
@@ -107,6 +108,7 @@ class SiblingTracksSheet extends HookConsumerWidget {
                         leading: sourceInfo.thumbnail != null
                             ? UniversalImage(
                                 path: sourceInfo.thumbnail!,
+coverPixels: CoverRendition.card,
                                 height: 60,
                                 width: 60,
                               )

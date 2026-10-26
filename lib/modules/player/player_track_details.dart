@@ -8,6 +8,7 @@ import 'package:sangeet/components/links/link_text.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 class PlayerTrackDetails extends HookConsumerWidget {
   final Color? color;
@@ -51,6 +52,7 @@ class PlayerTrackDetails extends HookConsumerWidget {
                 path: (track?.album.images)
                     .asUrlString(placeholder: ImagePlaceholder.albumArt),
                 placeholder: Assets.images.albumPlaceholder.path,
+                coverPixels: CoverRendition.card,
               ),
             ),
           ),

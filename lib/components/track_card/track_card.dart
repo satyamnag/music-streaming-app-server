@@ -8,6 +8,7 @@ import 'package:sangeet/components/track_card/card_border.dart';
 import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 /// Responsive count of grid columns for the track/album cards: each column is
 /// at least a card ([minCardWidth] * scaling) plus one [cardGap] gutter wide.
@@ -551,7 +552,11 @@ class TrackCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  UniversalImage(path: imageUrl, fit: BoxFit.cover),
+                  UniversalImage(
+                          path: imageUrl,
+                          fit: BoxFit.cover,
+                          coverPixels: CoverRendition.card,
+                        ),
                   LockedBadge(locked: locked, borderRadius: 0),
                 ],
               ),

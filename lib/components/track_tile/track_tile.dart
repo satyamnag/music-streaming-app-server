@@ -24,6 +24,7 @@ import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/audio_player/state.dart';
 import 'package:sangeet/services/audio_preload/track_byte_prefetcher.dart';
 import 'package:sangeet/utils/platform.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 final _overlay = ValueNotifier<OverlayCompleter<dynamic>?>(null);
 
@@ -105,6 +106,7 @@ class TrackTile extends HookConsumerWidget {
     final imageProvider = useMemoized(
       () => UniversalImage.imageProvider(
         (track.album.images).smallest(ImagePlaceholder.albumArt),
+coverPixels: CoverRendition.card,
       ),
       [track.album.images],
     );

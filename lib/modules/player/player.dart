@@ -24,6 +24,7 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
 import 'package:sangeet/provider/server/active_track_sources.dart';
 import 'package:sangeet/provider/volume_provider.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 class PlayerView extends HookConsumerWidget {
   final PanelController panelController;
@@ -161,6 +162,7 @@ class PlayerView extends HookConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       child: UniversalImage(
                         path: albumArt,
+coverPixels: CoverRendition.hero,
                         placeholder: Assets.images.albumPlaceholder.path,
                         fit: BoxFit.cover,
                       ),
