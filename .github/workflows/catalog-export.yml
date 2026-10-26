@@ -30,6 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Checkout (only the export script)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: tool
+          sparse-checkout-cone-mode: false
+
       - name: Trigger context
         run: echo "event=${{ github.event_name }} ref=${{ github.ref_name }} sha=${{ github.sha }}"
 
