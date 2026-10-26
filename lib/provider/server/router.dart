@@ -4,6 +4,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:sangeet/provider/server/routes/connect.dart';
 import 'package:sangeet/provider/server/routes/playback.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
+import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
 final serverRouterProvider = Provider((ref) {
   final playbackRoutes = ref.watch(serverPlaybackRoutesProvider);
@@ -77,7 +78,23 @@ final serverRouterProvider = Provider((ref) {
   router.post("/supabase/coupons/redeem", supabaseRoutes.redeemCoupon);
   router.post("/supabase/referrers/bind", supabaseRoutes.bindReferrer);
 
-  router.all("/ws", connectRoutes.websocket);
+  // Remote control (what the "Connect" feature drives). Mounted ONLY when the
+  // user has enabled Connect:
+  //
+  //  * with Connect off the socket is bound to loopback, so no other device can
+  //    reach this route anyway - leaving it mounted is attack surface with no
+  //    purpose;
+  //  * and mounting it unconditionally is what produced the alarming
+  //    "Allow 127.0.0.1:PORT to connect?" dialog, because ANY loopback client
+  //    (the app's own web surface among them) could knock on it and trigger the
+  //    approval prompt.
+  //
+  // The preference is read once, exactly like server.dart reads it to choose the
+  // bind address, so the route and the bind cannot disagree.
+  final enableConnect = ref.read(userPreferencesProvider).enableConnect;
+  if (enableConnect) {
+    router.all("/ws", connectRoutes.websocket);
+  }
 
   return router;
 });
