@@ -1,16 +1,27 @@
 name: Cover Variants (512x512 WebP)
 
-# Dispatch-only, additive. Generates the 512x512 WebP cover variants the Android
-# app uses for grid cards, list rows and the media notification, and stores them
-# in Supabase Storage next to the untouched 1024 originals.
+# Generates the 512x512 WebP cover variants the Android app uses for grid cards,
+# list rows and the media notification, and stores them in Supabase Storage next
+# to the untouched 1024 originals.
 #
 #   writes : thumbnails/variants/512/<name>   (nothing else, ever)
 #   reads  : the catalog rows + the original cover bytes
 #
-# No push / pull_request / schedule trigger, so builds, tests and releases are
-# unaffected. Run it again after covers are added or replaced - it is idempotent.
+# Two triggers:
+#   * schedule - runs automatically every 6 hours so that a cover added or
+#     replaced in the admin portal produces (or refreshes) its 512 variant
+#     without any manual dispatch. The script is idempotent: each run upservers
+#     the rendition it derives from the CURRENT 1024 original, so both a new
+#     cover and an updated one are handled.
+#   * workflow_dispatch - manual on-demand run (immediate, no waiting).
+#
+# Scheduled workflows run only from the default branch and can be delayed at
+# times of high load (https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule).
+# This workflow never touches builds, tests or releases.
 
 on:
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 permissions:
