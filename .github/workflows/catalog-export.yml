@@ -53,6 +53,10 @@ jobs:
       - name: Export catalog
         env:
           INCLUDE_KARAOKE: ${{ inputs.include_karaoke }}
+          # Public project URL: it ships inside the APK and inside every stored
+          # asset link, so it is configuration rather than a secret. Override it
+          # with a repository variable if the project ever moves.
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://ngemrcsdfxufxnazeqke.supabase.co' }}
         run: python3 tool/catalog_export.py
 
       - name: Upload catalog artifact

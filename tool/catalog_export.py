@@ -170,9 +170,13 @@ def main() -> int:
     include_karaoke = os.environ.get("INCLUDE_KARAOKE", "true").lower() in ("1", "true", "yes")
 
     env = load_env()
+    # The project URL is public (it ships inside the APK and inside every stored
+    # asset link); CI supplies it directly, a local run picks it up from .env.
+    if os.environ.get("SUPABASE_URL"):
+        env["SUPABASE_URL"] = os.environ["SUPABASE_URL"]
     missing = [key for key in REQUIRED_ENV if not env.get(key)]
     if missing:
-        print(f"::error::missing from .env: {', '.join(missing)}")
+        print(f"::error::missing configuration: {', '.join(missing)}")
         return 1
     base = env["SUPABASE_URL"].rstrip("/")
     key = env["SUPABASE_ANON_KEY"]
