@@ -76,7 +76,13 @@ def normalise_url(url: str) -> str:
 
 def http(method: str, url: str, headers: dict[str, str] | None = None, body: bytes | None = None,
          timeout: int = 120) -> tuple[int, bytes, dict[str, str]]:
-    request = urllib.request.Request(url, data=body, method=method, headers=headers or {})
+    # The R2 host sits behind Cloudflare, which answers 403 to the default
+    # Python-urllib User-Agent but 200 to this one (verified by header probe;
+    # the catalog export job uses the same value). Always send it.
+    merged = {"User-Agent": "sb-catalog-export"}
+    if headers:
+        merged.update(headers)
+    request = urllib.request.Request(url, data=body, method=method, headers=merged)
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return response.status, response.read(), dict(response.headers)
