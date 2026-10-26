@@ -1,0 +1,63 @@
+name: Catalog Export (tracks + covers)
+
+# Dispatch-only, READ-ONLY export. No push / pull_request / schedule trigger, so
+# it cannot affect builds, tests or releases. All heavy work runs here.
+#
+# Index  : the Supabase database rows (tracks, albums) - exactly what the app reads.
+# Bytes  : wherever each row points - Supabase Storage for track covers
+#          (public bucket "thumbnails"), the project's R2 CDN for audio and album art.
+#          Every file records its source. See tool/catalog_export.py for the detail.
+#
+# Requests are GET only: nothing is uploaded, deleted or modified in Supabase or R2.
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_karaoke:
+        description: Include karaoke audio variants
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Trigger context
+        run: echo "event=${{ github.event_name }} ref=${{ github.ref_name }} sha=${{ github.sha }}"
+
+      - name: Materialise .env (only key names are printed)
+        env:
+          DOTENV: ${{ secrets.DOTENV_RELEASE }}
+        run: |
+          if [ -z "$DOTENV" ]; then
+            echo "::error::DOTENV_RELEASE secret is empty; catalog credentials are unavailable."
+            exit 1
+          fi
+          printf '%s\n' "$DOTENV" > .env
+          sed -n 's/^\([A-Za-z0-9_]*\)=.*/\1/p' .env | sort -u
+
+      - name: Export catalog
+        env:
+          INCLUDE_KARAOKE: ${{ inputs.include_karaoke }}
+        run: python3 tool/catalog_export.py
+
+      - name: Upload catalog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: soulful-bhakti-catalog
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+          path: |
+            out/SoulfulBhakti-Tracks-and-Covers.zip
+            out/SoulfulBhakti-Tracks-and-Covers.sha256.txt
+            out/SoulfulBhakti-Catalog/manifest.csv
+            out/SoulfulBhakti-Catalog/README.txt
