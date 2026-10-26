@@ -50,9 +50,9 @@ void main() {
     final legacy =
         'https://music.soulfulbhakti.com/images/1791407744819-Krishna%20M%C3%84%C2%81dhuryam%20Album%20Cover.webp';
     const expected =
-        '1791407744819-Krishna%20M%C3%84_dhuryam%20Album%20Cover.webp';
+        '1791407744819-Krishna%20M__dhuryam%20Album%20Cover.webp';
 
-    test('replaces the control byte, keeps everything else', () {
+    test('replaces non-ASCII and control bytes, keeps ASCII', () {
       expect(
         CoverRendition.urlFor(legacy),
         '$base/storage/v1/object/public/thumbnails/variants/512/$expected',

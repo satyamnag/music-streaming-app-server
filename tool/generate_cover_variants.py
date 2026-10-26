@@ -76,16 +76,20 @@ def normalise_url(url: str) -> str:
 def variant_name(name: str) -> str:
     """Object key used for the rendition of `name`.
 
-    One legacy cover carries a C1 control byte in its stored name (double-encoded
-    "Mādhuryam"), and Supabase Storage rejects such keys with InvalidKey. Control
-    characters are therefore replaced with `_` - the only transformation applied;
-    every other character, including spaces and non-ASCII letters, is kept so the
+    One legacy cover carries a non-ASCII byte in its stored name (double-encoded
+    "Mādhuryam"), and Supabase Storage rejects such keys with InvalidKey. Non-ASCII
+    and control characters are therefore replaced with `_` - the only transformation
+    applied; spaces, letters and digits are kept so the
     rendition is still recognisable. lib/services/images/cover_renditions.dart
     applies exactly the same rule before building the URL the app requests, and
     the manifest keeps the original name for traceability.
     """
+    # Keys must be printable ASCII only: every other cover works because its
+    # name is ASCII, and this one fails because it carries a non-ASCII "Ä" (and
+    # originally a C1 byte). Anything outside 0x20-0x7E, plus the path
+    # separators, is replaced with "_". The app applies the identical rule.
     return "".join(
-        "_" if (ord(character) < 32 or 0x7F <= ord(character) <= 0x9F) else character
+        "_" if (ord(character) < 0x20 or ord(character) > 0x7E or character in "/\\") else character
         for character in name
     )
 
