@@ -553,10 +553,10 @@ class TrackCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   UniversalImage(
-                          path: imageUrl,
-                          fit: BoxFit.cover,
-                          coverPixels: CoverRendition.card,
-                        ),
+                        path: imageUrl,
+                        fit: BoxFit.cover,
+                        coverPixels: CoverRendition.card,
+                      ),
                   LockedBadge(locked: locked, borderRadius: 0),
                 ],
               ),
