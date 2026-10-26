@@ -1,0 +1,65 @@
+name: Cover Variants (512x512 WebP)
+
+# Dispatch-only, additive. Generates the 512x512 WebP cover variants the Android
+# app uses for grid cards, list rows and the media notification, and stores them
+# in Supabase Storage next to the untouched 1024 originals.
+#
+#   writes : thumbnails/variants/512/<name>   (nothing else, ever)
+#   reads  : the catalog rows + the original cover bytes
+#
+# No push / pull_request / schedule trigger, so builds, tests and releases are
+# unaffected. Run it again after covers are added or replaced - it is idempotent.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cover-variants
+  cancel-in-progress: false
+
+jobs:
+  variants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (only the script)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: tool
+          sparse-checkout-cone-mode: false
+
+      - name: Trigger context
+        run: echo "event=${{ github.event_name }} ref=${{ github.ref_name }} sha=${{ github.sha }}"
+
+      - name: Materialise .env (only key names are printed)
+        env:
+          DOTENV: ${{ secrets.DOTENV_RELEASE }}
+        run: |
+          if [ -z "$DOTENV" ]; then
+            echo "::error::DOTENV_RELEASE secret is empty; catalog credentials are unavailable."
+            exit 1
+          fi
+          printf '%s\n' "$DOTENV" > .env
+          sed -n 's/^\([A-Za-z0-9_]*\)=.*/\1/p' .env | sort -u
+
+      - name: Install Pillow
+        run: python3 -m pip install --quiet --disable-pip-version-check "pillow==10.4.0"
+
+      - name: Generate and verify variants
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://ngemrcsdfxufxnazeqke.supabase.co' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python3 tool/generate_cover_variants.py
+
+      - name: Upload manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: cover-variants-manifest
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            out/cover-variants.csv
+            out/cover-variants.json
