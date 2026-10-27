@@ -160,6 +160,33 @@ void main() {
       expect(body, contains('signedIn: isSignedIn(ref)'));
     });
 
+    test('the gate reads the synchronous auth mirror, not the provider', () {
+      // Reading `clerkAuthProvider` from a provider's Ref answered
+      // "signed out" for a signed-in user (measured on a device: playback was
+      // refused and the stream endpoint 401'd), so the gate must read the
+      // mirror ClerkAuthNotifier keeps.
+      final body = _member(premium, 'static bool isSignedIn(');
+      expect(body, isNotEmpty);
+      expect(body, contains('ClerkAuthSignal.current.signedIn'));
+      expect(
+        body.contains('ref.read('),
+        isFalse,
+        reason: 'the gate must not read the async provider synchronously',
+      );
+    });
+
+    test('the notifier keeps the mirror up to date', () {
+      final source =
+          File('lib/provider/auth/clerk_auth_provider.dart').readAsStringSync();
+      expect(source, contains('class ClerkAuthSignal'));
+      // Both places the notifier resolves a state: the event stream and the
+      // initial getState.
+      expect(
+        RegExp(r'ClerkAuthSignal\.update\(').allMatches(source).length,
+        greaterThanOrEqualTo(2),
+      );
+    });
+
     test('the album gate asks for sign-in first', () {
       final body = _member(premium, 'static Future<bool> _gate({');
       expect(body, isNotEmpty);
@@ -246,7 +273,7 @@ void main() {
       'lib/provider/track_options/track_options_provider.dart':
           'PremiumAccess.requireSignInToPlay(',
       'lib/services/audio_preload/track_byte_prefetcher.dart':
-          'PremiumAccess.isPlaybackAllowedWith(',
+          'PremiumAccess.isPlaybackAllowedNow',
     };
 
     for (final entry in callSites.entries) {

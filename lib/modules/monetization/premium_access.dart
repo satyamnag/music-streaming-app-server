@@ -46,21 +46,10 @@ class PremiumAccess {
   /// Whether the current user is considered "premium" (signed in AND has an
   /// active subscription). If status is unknown we default to false (safe).
   ///
-  /// [ref] may be a `WidgetRef` (widgets) or a `Ref` (providers/server) — both
-  /// expose `read`. It is passed as [dynamic] to accept both without coupling
-  /// this module to a specific Riverpod type.
-  static bool isPremiumUser(dynamic ref) {
-    final bool signedIn;
-    try {
-      signedIn = ref.read(clerkAuthProvider).valueOrNull?.signedIn == true;
-    } catch (_) {
-      // Provider not ready yet (e.g. read during first build): treat as not
-      // signed in — safest default for gating.
-      return false;
-    }
-    if (!signedIn) return false;
-    return _subscriptionStatus.isActive;
-  }
+  /// [ref] is accepted so the call sites of a widget and of a provider look
+  /// identical, but it is deliberately NOT used — see [isSignedIn].
+  static bool isPremiumUser(dynamic ref) =>
+      isSignedIn(ref) && _subscriptionStatus.isActive;
 
   /// Whether this build requires a signed-in user before ANY track can be
   /// listened to, free or paid.
@@ -74,18 +63,21 @@ class PremiumAccess {
 
   /// Whether the current user is signed in.
   ///
-  /// Same defensive shape as [isPremiumUser]: a provider that has not resolved
-  /// yet — or that threw — counts as signed OUT, which is the safe default for
-  /// a gate that must never let audio through on an unknown session.
+  /// Reads [ClerkAuthSignal], the synchronous mirror `ClerkAuthNotifier` keeps,
+  /// NOT the provider.
   ///
-  /// [ref] may be a `WidgetRef` or a `Ref`; see [isPremiumUser].
-  static bool isSignedIn(dynamic ref) {
-    try {
-      return ref.read(clerkAuthProvider).valueOrNull?.signedIn == true;
-    } catch (_) {
-      return false;
-    }
-  }
+  /// Reading `clerkAuthProvider` here was the bug behind "signed in but playback
+  /// refused": from a provider's `Ref` the read returns `AsyncLoading` (no
+  /// value) even for a signed-in user, so this answered `false` while the same
+  /// account's profile dialog showed it signed in — measured on a device, where
+  /// a signed-in account was blocked from playing and the stream endpoint
+  /// answered 401. The mirror is written on every resolved auth state, so it is
+  /// the reliable synchronous view; it starts signed OUT, which is the safe
+  /// default for a gate that must never let audio through on an unknown session.
+  ///
+  /// [ref] is accepted for call-site compatibility (`WidgetRef` or `Ref`) and is
+  /// intentionally unused.
+  static bool isSignedIn(dynamic ref) => ClerkAuthSignal.current.signedIn;
 
   /// Whether playback may start at all: every track — free or paid — requires a
   /// signed-in user where [loginRequiredForPlayback] is true.
@@ -98,21 +90,12 @@ class PremiumAccess {
         signedIn: isSignedIn(ref),
       );
 
-  /// [isPlaybackAllowed] for callers that hold only a read function.
+  /// [isPlaybackAllowed] for callers that hold no ref at all.
   ///
   /// `TrackBytePrefetcher` is handed `ref.read` as a tear-off — its
   /// `ProviderReader` typedef — which is a plain function with no `read` method
-  /// of its own, so [isPlaybackAllowed] cannot be used there.
-  static bool isPlaybackAllowedWith(
-    T Function<T>(ProviderListenable<T> provider) read,
-  ) {
-    if (!loginRequiredForPlayback) return true;
-    try {
-      return read(clerkAuthProvider).valueOrNull?.signedIn == true;
-    } catch (_) {
-      return false;
-    }
-  }
+  /// of its own, so it can pass neither a `WidgetRef` nor a `Ref`.
+  static bool get isPlaybackAllowedNow => isPlaybackAllowed(null);
 
   /// Enforces "sign in before listening" for EVERY track, free or paid.
   ///

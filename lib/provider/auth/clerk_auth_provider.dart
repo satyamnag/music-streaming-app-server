@@ -78,6 +78,41 @@ class ClerkAuthState {
   }
 }
 
+/// The latest RESOLVED auth state, mirrored for synchronous gates.
+///
+/// [clerkAuthProvider] is an `AsyncNotifier`, so the only reliable way to read
+/// it is to await it. Two hot paths cannot: the local stream server (an HTTP
+/// handler) and the audio player notifier's `load()`/`jumpToTrack()` getters.
+/// Reading the provider there produced `AsyncLoading` (no value) even for a
+/// signed-in user, which the gate then read as "signed out" — measured on a
+/// device: a signed-in account was refused playback and the stream endpoint
+/// answered 401.
+///
+/// So the state is mirrored here, exactly as `PremiumAccess._subscriptionStatus`
+/// mirrors the Superwall entitlement for the same reason, and the gate reads this.
+/// It is written on every state the notifier resolves, so it can never lag
+/// further than the last auth event — and it starts signed OUT, which is the
+/// safe default for a gate.
+class ClerkAuthSignal {
+  ClerkAuthSignal._();
+
+  static ClerkAuthState _current = const ClerkAuthState();
+
+  /// The most recent resolved auth state. Never null; signed out until the
+  /// notifier reports otherwise.
+  static ClerkAuthState get current => _current;
+
+  /// Records a resolved state. Called by [ClerkAuthNotifier] only.
+  static void update(ClerkAuthState state) {
+    if (_current.signedIn != state.signedIn) {
+      AppLogger.log.i(
+        'auth: signedIn ${_current.signedIn} -> ${state.signedIn}',
+      );
+    }
+    _current = state;
+  }
+}
+
 class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
   static const _methodChannel = MethodChannel('com.soulfulbhakti.app/clerk');
   static const _eventChannel =
@@ -92,6 +127,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
         .map((event) => ClerkAuthState.fromMap(event as Map))
         .listen((newState) {
       state = AsyncData(newState);
+      ClerkAuthSignal.update(newState);
       _syncThirdPartyIdentity(newState);
     });
 
@@ -107,6 +143,7 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
     final current =
         await _methodChannel.invokeMethod<Map<Object?, Object?>>('getState');
     final initialState = ClerkAuthState.fromMap(current ?? const {});
+    ClerkAuthSignal.update(initialState);
     _syncThirdPartyIdentity(initialState);
     return initialState;
   }
