@@ -6,14 +6,36 @@ import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/monetization/superwall_gate.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/services/superwall_service.dart';
+import 'package:sangeet/utils/platform.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
-/// Access helpers for paid (premium) tracks.
+/// Pure playback-gate rule: whether playback may start.
 ///
-/// A track with `status == 'paid'` is locked for free users and unlocked for
-/// signed-in users with an active Superwall subscription. Free users (whether
-/// signed in or signed out) must sign in first, then purchase a plan, to play
-/// a paid track.
+/// Split out of [PremiumAccess.isPlaybackAllowed] so the rule can be unit-tested
+/// without a Riverpod container or a platform channel (see
+/// `test/modules/monetization/playback_login_gate_test.dart`).
+///
+///  - Where a sign-in bridge exists, listening to ANY track — free or paid —
+///    requires a signed-in user, so `signedIn == false` locks playback.
+///  - Where no sign-in bridge exists, requiring one would make the app able to
+///    play nothing at all, so playback is not gated on sign-in there.
+bool isPlaybackUnlocked({
+  required bool signInRequiredOnPlatform,
+  required bool signedIn,
+}) =>
+    !signInRequiredOnPlatform || signedIn;
+
+/// Access helpers for playback: the sign-in requirement that applies to every
+/// track, plus the paid (premium) rules on top of it.
+///
+/// **Every** track requires a signed-in user before it can be listened to,
+/// whether its `status` is `free` or `paid` — see [isPlaybackAllowed].
+///
+/// On top of that, a track with `status == 'paid'` is locked for users without
+/// an active Superwall subscription and unlocked for those with one. Signing in
+/// therefore comes first in every gate, and only then is the paywall considered:
+/// a signed-out user cannot complete a purchase anyway, and asking them to pay
+/// before they have an account would be the wrong order.
 class PremiumAccess {
   PremiumAccess._();
 
@@ -38,6 +60,75 @@ class PremiumAccess {
     }
     if (!signedIn) return false;
     return _subscriptionStatus.isActive;
+  }
+
+  /// Whether this build requires a signed-in user before ANY track can be
+  /// listened to, free or paid.
+  ///
+  /// Sign-in in this app is the native Clerk bridge at
+  /// `android/app/src/main/kotlin/com/sangeet/app/ClerkBridge.kt`, registered by
+  /// `MainActivity`, so the requirement is scoped to Android. Desktop, macOS,
+  /// Linux and iOS have no sign-in bridge at all, and gating playback on a login
+  /// that cannot happen would silence the app instead of gating it.
+  static bool get loginRequiredForPlayback => kIsAndroid;
+
+  /// Whether the current user is signed in.
+  ///
+  /// Same defensive shape as [isPremiumUser]: a provider that has not resolved
+  /// yet — or that threw — counts as signed OUT, which is the safe default for
+  /// a gate that must never let audio through on an unknown session.
+  ///
+  /// [ref] may be a `WidgetRef` or a `Ref`; see [isPremiumUser].
+  static bool isSignedIn(dynamic ref) {
+    try {
+      return ref.read(clerkAuthProvider).valueOrNull?.signedIn == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Whether playback may start at all: every track — free or paid — requires a
+  /// signed-in user where [loginRequiredForPlayback] is true.
+  ///
+  /// Used by the local stream server (the authoritative byte-level check) and by
+  /// the audio player notifier (so no code path can start audio around the UI
+  /// gates).
+  static bool isPlaybackAllowed(dynamic ref) => isPlaybackUnlocked(
+        signInRequiredOnPlatform: loginRequiredForPlayback,
+        signedIn: isSignedIn(ref),
+      );
+
+  /// [isPlaybackAllowed] for callers that hold only a read function.
+  ///
+  /// `TrackBytePrefetcher` is handed `ref.read` as a tear-off — its
+  /// `ProviderReader` typedef — which is a plain function with no `read` method
+  /// of its own, so [isPlaybackAllowed] cannot be used there.
+  static bool isPlaybackAllowedWith(
+    T Function<T>(ProviderListenable<T> provider) read,
+  ) {
+    if (!loginRequiredForPlayback) return true;
+    try {
+      return read(clerkAuthProvider).valueOrNull?.signedIn == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Enforces "sign in before listening" for EVERY track, free or paid.
+  ///
+  /// Returns true when playback may proceed: no sign-in is required on this
+  /// platform, the user is already signed in, or they just signed in. Shows the
+  /// Google sign-in dialog when one is needed.
+  ///
+  /// [ref] may be a `WidgetRef` (widgets) or a `Ref` (providers), matching
+  /// [isPremiumUser] — provider code such as `TrackOptionsActions` has a `Ref`.
+  static Future<bool> requireSignInToPlay(
+    BuildContext context,
+    dynamic ref,
+  ) async {
+    if (!loginRequiredForPlayback) return true;
+    if (isSignedIn(ref)) return true;
+    return promptSignIn(context, ref);
   }
 
   /// Whether a track is a paid (premium) track.
@@ -85,9 +176,10 @@ class PremiumAccess {
     });
   }
 
-  /// Gating logic shared by tracks and albums: if the object is paid and the
-  /// user is not premium, prompts sign-in then the paywall, and only runs
-  /// [feature] after purchase. Returns true if [feature] ran.
+  /// Gating logic shared by tracks and albums: sign-in is required for EVERY
+  /// playback (free or paid); on top of that, if the object is paid and the user
+  /// is not premium, the paywall is presented and only then does [feature] run.
+  /// Returns true if [feature] ran.
   static Future<bool> _gate({
     required BuildContext context,
     required WidgetRef ref,
@@ -95,15 +187,14 @@ class PremiumAccess {
     required Map<String, String> params,
     required Future<void> Function() feature,
   }) async {
+    // Sign-in comes FIRST, before the paid check: playback of a FREE track now
+    // needs a signed-in user too, and a signed-out user must be asked to sign in
+    // rather than shown a paywall they cannot complete a purchase through.
+    if (!await requireSignInToPlay(context, ref)) return false;
+
     if (!isPaid || isPremiumUser(ref)) {
       await feature();
       return true;
-    }
-
-    final auth = ref.read(clerkAuthProvider).valueOrNull;
-    if (auth?.signedIn != true) {
-      final signedIn = await promptSignIn(context, ref);
-      if (!signedIn) return false;
     }
 
     // See gateTrackPlay: ensure Superwall knows the identity before evaluating
@@ -159,10 +250,10 @@ class PremiumAccess {
 
   /// Gates playback of a (possibly paid) track.
   ///
-  ///  - Free track: [feature] runs immediately.
+  ///  - Signed-out user: prompts sign-in first. Nothing is played until the user
+  ///    is signed in — this holds for FREE tracks as well as paid ones.
+  ///  - Free track + signed-in user: [feature] runs immediately.
   ///  - Paid track + premium user: [feature] runs immediately.
-  ///  - Paid track + signed-out user: prompts sign-in first, then presents the
-  ///    paywall, then runs [feature] only after a successful purchase.
   ///  - Paid track + signed-in free user: presents the paywall; [feature] runs
   ///    only after a successful purchase (Gated mode).
   ///
@@ -180,23 +271,20 @@ class PremiumAccess {
   }) async {
     final isPaid =
         isPaidTrack(track) || (albumLock != null && isPaidAlbum(albumLock));
+
+    // Sign-in for EVERY track, free or paid (see _gate).
+    if (!await requireSignInToPlay(context, ref)) return false;
+
     if (!isPaid || isPremiumUser(ref)) {
       await feature();
       return true;
     }
 
-    // Paid track (or a track inside a paid album) and the user is not premium.
-    final auth = ref.read(clerkAuthProvider).valueOrNull;
-    if (auth?.signedIn != true) {
-      // User must sign in first in all conditions before paying.
-      final signedIn = await promptSignIn(context, ref);
-      if (!signedIn) return false;
-    }
-
-    // Make sure Superwall knows the (possibly just signed-in) identity BEFORE
-    // the placement is evaluated: identify() is normally fire-and-forget from
-    // the auth sync, so without this a returning subscriber could hit a
-    // spurious paywall while identify() is still in flight.
+    // Paid track (or a track inside a paid album) and the user is not premium:
+    // present the paywall. Make sure Superwall knows the (possibly just signed-in)
+    // identity BEFORE the placement is evaluated: identify() is normally
+    // fire-and-forget from the auth sync, so without this a returning subscriber
+    // could hit a spurious paywall while identify() is still in flight.
     final user = ref.read(clerkAuthProvider).valueOrNull;
     if (user?.signedIn == true && user?.userId != null) {
       await SuperwallService.instance.identify(user!.userId!);
@@ -282,9 +370,12 @@ class PremiumAccess {
 
   /// Shows the Clerk Google-only sign-in dialog and waits until the user is
   /// signed in (or the dialog is dismissed). Returns true if signed in.
+  ///
+  /// [ref] may be a `WidgetRef` or a `Ref` (see [isPremiumUser]): the gate is
+  /// reached from provider code as well as from widgets.
   static Future<bool> promptSignIn(
     BuildContext context,
-    WidgetRef ref,
+    dynamic ref,
   ) async {
     // Present the sign-in dialog and wait for it to be dismissed. After the
     // flow completes the auth state is refreshed by the dialog itself.

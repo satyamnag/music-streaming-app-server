@@ -601,6 +601,21 @@ class ServerPlaybackRoutes {
         return Response.notFound("Karaoke track not found");
       }
 
+      // THE authoritative gate: listening requires a signed-in user for EVERY
+      // track, free or paid. All audio for the in-app player is served through
+      // this endpoint (see `SangeetMedia.uri`), so refusing here covers every
+      // path that could otherwise start audio without a session — queue restore,
+      // next/previous, auto-advance, the endless-playback append and remote
+      // control — whatever the UI did. 401 (not 403) because the requester is
+      // unauthenticated, not merely unauthorised.
+      if (!PremiumAccess.isPlaybackAllowed(ref)) {
+        return Response(
+          401,
+          body: 'Sign in required to listen',
+          headers: {'content-type': 'text/plain; charset=utf-8'},
+        );
+      }
+
       // Paid tracks are locked for free users — refuse to stream even if a
       // client bypasses the UI and hits the local stream endpoint directly.
       final status = stream.query.status;
@@ -636,6 +651,15 @@ class ServerPlaybackRoutes {
           await _sourcedTrackForVariant(request, trackId, sourcedTrack);
       if (stream == null) {
         return Response.notFound("Karaoke track not found");
+      }
+
+      // See headStreamTrackId: sign-in is required to listen to ANY track.
+      if (!PremiumAccess.isPlaybackAllowed(ref)) {
+        return Response(
+          401,
+          body: 'Sign in required to listen',
+          headers: {'content-type': 'text/plain; charset=utf-8'},
+        );
       }
 
       // Paid tracks are locked for free users — refuse to stream even if a

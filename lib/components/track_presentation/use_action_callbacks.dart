@@ -36,17 +36,17 @@ UseActionCallbacks useActionCallbacks(WidgetRef ref) {
     [playlist.collections, options.collectionId],
   );
 
-  // One gate for the whole collection: when the presented album is paid and
-  // the user is not premium, present the Superwall paywall first (a no-op
-  // feature — access is granted by the purchase itself, not by playing). Free
-  // albums and premium users pass through immediately.
+  // One gate for the whole collection. Every track — free or paid — now needs a
+  // signed-in user before it can be listened to, so the gate runs for EVERY
+  // collection and not only for a locked (paid) one; PremiumAccess presents the
+  // sign-in dialog and, when the collection is paid, the paywall on top.
+  // [feature] is a no-op here: access is granted by the sign-in/purchase itself,
+  // not by playing something.
   Future<bool> ensureCollectionUnlocked() async {
-    final collection = options.collection;
-    if (!PremiumAccess.isAlbumLocked(collection, ref)) return true;
     return PremiumAccess.gateAlbumPlay(
       context: context,
       ref: ref,
-      album: collection,
+      album: options.collection,
       feature: () async {},
     );
   }

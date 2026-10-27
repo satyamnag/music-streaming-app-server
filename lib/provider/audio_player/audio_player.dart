@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:drift/drift.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/services/audio_player/playlist_mode.dart';
 import 'package:sangeet/extensions/list.dart';
 import 'package:sangeet/models/database/database.dart';
@@ -18,6 +21,17 @@ void _log(String msg) {
 }
 
 class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
+  /// Whether playback may start at all.
+  ///
+  /// Listening to ANY track — free or paid — requires a signed-in user, so every
+  /// path that could start audio is guarded by this. It is read synchronously
+  /// because the notifier has no `BuildContext`; the UI surfaces ask the user to
+  /// sign in themselves (`PremiumAccess.gateTrackPlay` / `gateAlbumPlay` /
+  /// `requireSignInToPlay`), and this is the last line of defence for any path
+  /// that does not — including queue restore, auto-advance and the endless-
+  /// playback radio append.
+  bool get _playbackAllowed => PremiumAccess.isPlaybackAllowed(ref);
+
   void _assertAllowedTracks(Iterable<SangeetTrackObject> tracks) {
     assert(
       tracks.every(
@@ -64,6 +78,18 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     final tracks = playerState.tracks;
     final currentIndex = playerState.currentIndex;
 
+    // A queue saved by a previous session must not be handed to a signed-out
+    // user: playback needs a signed-in user, so restoring it would only surface
+    // a queue that can never play (the local stream server refuses every request
+    // from a signed-out client). The saved rows are left untouched, so a user who
+    // signs in gets their queue back on the next launch.
+    if (tracks.isNotEmpty && !await _playbackAllowedWhenKnown()) {
+      AppLogger.log.i(
+        'Saved playback queue not restored: sign-in is required to listen.',
+      );
+      return;
+    }
+
     if (tracks.isEmpty && state.tracks.isNotEmpty) {
       await _updatePlayerState(
         AudioPlayerStateTableCompanion(
@@ -102,6 +128,25 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     await (database.update(database.audioPlayerStateTable)
           ..where((tb) => tb.id.equals(0)))
         .write(companion);
+  }
+
+  /// [_playbackAllowed], awaiting the auth state while it is still loading.
+  ///
+  /// Returns `true` when the answer is unknown (provider error or timeout), so an
+  /// auth hiccup can never discard a user's saved queue. The stream server and
+  /// [_playbackAllowed] still enforce the rule at playback time, so returning
+  /// `true` here only decides whether the queue is *restored*, never whether
+  /// audio may play.
+  Future<bool> _playbackAllowedWhenKnown() async {
+    if (!PremiumAccess.loginRequiredForPlayback) return true;
+    try {
+      final auth = await ref
+          .read(clerkAuthProvider.future)
+          .timeout(const Duration(seconds: 10));
+      return auth.signedIn;
+    } catch (_) {
+      return true;
+    }
   }
 
   @override
@@ -181,6 +226,20 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     ];
 
     _syncSavedState();
+
+    // Signing out must stop listening. Playback requires a signed-in user, so a
+    // queue left playing (or left in the mini player) after sign-out could only
+    // fail on the next track — the stream server refuses signed-out requests.
+    // Stopping here keeps the player truthful instead of showing a queue that
+    // can never produce sound. Only a real signed-in -> signed-out transition
+    // triggers it, so the first auth read at launch is never mistaken for one.
+    ref.listen(clerkAuthProvider, (previous, next) {
+      final wasSignedIn = previous?.valueOrNull?.signedIn == true;
+      final isSignedIn = next.valueOrNull?.signedIn == true;
+      if (wasSignedIn && !isSignedIn) {
+        unawaited(stop());
+      }
+    });
 
     ref.onDispose(() {
       for (final subscription in subscriptions) {
@@ -382,6 +441,14 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     _log('load() called: ${tracks.length} tracks, port=${SangeetMedia.serverPort}');
     _assertAllowedTracks(tracks);
 
+    // Listening requires a signed-in user for EVERY track, free or paid. This
+    // covers every caller that starts a queue without going through a UI gate
+    // (home shelves, the specials carousel, "play all", start-radio, ...).
+    if (!_playbackAllowed) {
+      _log('load(): blocked - sign-in is required to listen');
+      return;
+    }
+
     // The resolved-stream cache is deliberately NOT cleared here any more.
     //
     // It used to be, to stop a stale signed URL from a previous playlist being
@@ -458,6 +525,8 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       return;
     }
 
+    if (!_playbackAllowed) return;
+
     final oldState = state;
     await audioPlayer.stop();
 
@@ -486,6 +555,11 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
   }
 
   Future<void> jumpToTrack(SangeetTrackObject track) async {
+    // Jumping to a queued track starts it playing, so it is gated like load().
+    if (!_playbackAllowed) {
+      _log('jumpToTrack(): blocked - sign-in is required to listen');
+      return;
+    }
     final index =
         state.tracks.toList().indexWhere((element) => element.id == track.id);
     if (index == -1) return;

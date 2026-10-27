@@ -12,6 +12,7 @@ import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/extensions/list.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/modules/player/track_lyrics.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/track.dart';
@@ -48,6 +49,8 @@ class TrackPage extends HookConsumerWidget {
       if (isActive) {
         audioPlayer.pause();
       } else {
+        // Listening requires a signed-in user for EVERY track, free or paid.
+        if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
         await playlistNotifier.load([track], autoPlay: true);
       }
     }

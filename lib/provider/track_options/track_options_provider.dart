@@ -8,6 +8,7 @@ import 'package:sangeet/components/dialogs/prompt_dialog.dart';
 import 'package:sangeet/components/dialogs/track_details_dialog.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/local_tracks/local_tracks_provider.dart';
 import 'package:sangeet/provider/metadata_plugin/core/auth.dart';
@@ -69,6 +70,10 @@ class TrackOptionsActions {
   }
 
   Future<void> actionStartRadio(BuildContext context) async {
+    // Starting a radio plays the tapped track, so listening requires a signed-in
+    // user for EVERY track, free or paid.
+    if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
+
     final playback = ref.read(audioPlayerProvider.notifier);
     final playlist = ref.read(audioPlayerProvider);
     final metadataPlugin = await ref.read(metadataPluginProvider.future);

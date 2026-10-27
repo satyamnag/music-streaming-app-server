@@ -10,6 +10,7 @@ import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/specials.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 
 /// Full-width "Featured Playlist" carousel shown above the Albums shelf on the
@@ -193,6 +194,17 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
                   special: special,
                   dots: dots,
                   onPlay: () async {
+                    // Listening requires a signed-in user for EVERY track, free
+                    // or paid, so ask before either starting a queue or opening
+                    // the shelf screen — otherwise the screen opens onto a queue
+                    // that cannot play.
+                    if (!await PremiumAccess.requireSignInToPlay(
+                      context,
+                      ref,
+                    )) {
+                      return;
+                    }
+
                     // Start the shelf's queue FIRST, then open its screen.
                     //
                     // The order matters. Playback is started here rather than

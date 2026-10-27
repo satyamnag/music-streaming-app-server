@@ -10,6 +10,7 @@ import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:sangeet/provider/metadata_plugin/artist/top_tracks.dart';
@@ -47,6 +48,11 @@ class ArtistPageTopTracks extends HookConsumerWidget {
       List<SangeetFullTrackObject> tracks, {
       SangeetTrackObject? currentTrack,
     }) async {
+      // Listening requires a signed-in user for EVERY track, free or paid. The
+      // per-row taps already go through TrackTile's gate; this covers the
+      // section's own play control.
+      if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
+
       isLoading.value = true;
 
       currentTrack ??= tracks.first;

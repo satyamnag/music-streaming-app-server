@@ -406,6 +406,17 @@ class ServerSupabaseDataRoutes {
           .select('storage_path,status')
           .eq('id', id)
           .single();
+      // Listening requires a signed-in user for EVERY track, free or paid, so no
+      // stream URL is handed out without a session — same rule the /stream/<id>
+      // proxy enforces (see playback.dart). Refusing here closes the second way
+      // to obtain playable audio from the local server.
+      if (!PremiumAccess.isPlaybackAllowed(ref)) {
+        return Response(
+          401,
+          body: '{"error":"Sign in required to listen"}',
+          headers: {'content-type': 'application/json'},
+        );
+      }
       // Paid tracks are locked for free users — refuse to hand out a stream
       // URL even if a client bypasses the UI.
       if (raw['status'] == 'paid' && !PremiumAccess.isPremiumUser(ref)) {

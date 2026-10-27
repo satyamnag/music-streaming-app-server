@@ -8,6 +8,7 @@ import 'package:sangeet/components/playbutton_view/playbutton_card.dart';
 import 'package:sangeet/components/playbutton_view/playbutton_tile.dart';
 import 'package:sangeet/models/connect/connect.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/audio_player/querying_track_info.dart';
 import 'package:sangeet/provider/connect/connect.dart';
 import 'package:sangeet/provider/history/history.dart';
@@ -78,6 +79,10 @@ class PlaylistCard extends HookConsumerWidget {
     }, [context, playlist]);
 
     final onPlaybuttonPressed = useCallback(() async {
+      // Listening requires a signed-in user for EVERY track, free or paid, so
+      // the sign-in dialog comes before anything touches the engine — the same
+      // rule the track rows and home cards apply.
+      if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
       try {
         updating.value = true;
         if (isPlaylistPlaying && playing) {

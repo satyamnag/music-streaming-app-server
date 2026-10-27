@@ -75,6 +75,11 @@ class TrackBytePrefetcher {
   /// Requests a warm-up prefetch for [track] if it is eligible.
   void prefetch(SangeetTrackObject track, ProviderReader reader) {
     if (track is! SangeetFullTrackObject) return;
+    // Listening requires a signed-in user for EVERY track, free or paid, so a
+    // signed-out session warms no audio bytes: it can never play them, and
+    // fetching ~20% of every visible track would be pure wasted traffic.
+    // `reader` is a read *function*, not a Ref — see isPlaybackAllowedWith.
+    if (!PremiumAccess.isPlaybackAllowedWith(reader)) return;
     final id = track.id;
     // Do not prefetch paid tracks for free users (they are locked).
     if (track.status == 'paid' && !PremiumAccess.isPremiumUser(reader)) return;
@@ -109,6 +114,8 @@ class TrackBytePrefetcher {
   /// load and the CDN edge should be warm right before the switch.
   void prefetchNext(SangeetTrackObject track, ProviderReader reader) {
     if (track is! SangeetFullTrackObject) return;
+    // See prefetch(): no audio warm-up without a signed-in user.
+    if (!PremiumAccess.isPlaybackAllowedWith(reader)) return;
     if (track.status == 'paid' && !PremiumAccess.isPremiumUser(reader)) return;
     if (_inFlight.contains(track.id)) return;
     _durationMsById[track.id] = track.durationMs;

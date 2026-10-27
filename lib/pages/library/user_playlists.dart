@@ -16,6 +16,7 @@ import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/string.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/home_section_layout.dart';
+import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/modules/playlist/playlist_create_dialog.dart';
 import 'package:sangeet/components/inter_scrollbar/inter_scrollbar.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -196,10 +197,22 @@ class UserPlaylistsPage extends HookConsumerWidget {
                       // play control too. Guarded on emptiness because there is
                       // nothing to play (and nothing to gate) with no songs.
                       onPlay: (likedSongsQuery.asData?.value.isNotEmpty ?? false)
-                          ? () => ref.read(audioPlayerProvider.notifier).load(
-                                likedSongsQuery.asData!.value,
-                                autoPlay: true,
-                              )
+                          ? () async {
+                              // Listening requires a signed-in user for EVERY
+                              // track, free or paid.
+                              if (!await PremiumAccess.requireSignInToPlay(
+                                context,
+                                ref,
+                              )) {
+                                return;
+                              }
+                              await ref
+                                  .read(audioPlayerProvider.notifier)
+                                  .load(
+                                    likedSongsQuery.asData!.value,
+                                    autoPlay: true,
+                                  );
+                            }
                           : null,
                     ),
                   ),
