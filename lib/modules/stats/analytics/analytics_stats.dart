@@ -229,7 +229,6 @@ class _StatCard extends StatelessWidget {
             _TrendRow(
               percent: trendPercent!,
               label: trendLabel!,
-              accent: foreground,
             )
           else if (footnote != null)
             Text(
@@ -255,12 +254,10 @@ class _StatCard extends StatelessWidget {
 class _TrendRow extends StatelessWidget {
   final double percent;
   final String label;
-  final Color accent;
 
   const _TrendRow({
     required this.percent,
     required this.label,
-    required this.accent,
   });
 
   @override

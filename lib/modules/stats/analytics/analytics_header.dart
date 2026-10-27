@@ -22,10 +22,18 @@ import 'package:sangeet/provider/history/top.dart';
 class AnalyticsHeader extends HookConsumerWidget {
   const AnalyticsHeader({super.key});
 
-  /// Height of the band. Fixed rather than ratio-based because the title block
-  /// has a fixed content height: a ratio would make the band taller on a tablet
-  /// while the text stayed the same size, leaving a dead strip of artwork.
+  /// Height of the band when an admin wallpaper is configured. Fixed rather
+  /// than ratio-based because the title block has a fixed content height: a
+  /// ratio would make the band taller on a tablet while the text stayed the same
+  /// size, leaving a dead strip of artwork.
   static const double height = 148;
+
+  /// Height when NO wallpaper is configured.
+  ///
+  /// The band exists to show artwork. With none, keeping the full 148dp would
+  /// spend 148dp of the screen on empty page surface above the title, so the
+  /// header collapses to a page title of a sensible size instead.
+  static const double plainHeight = 92;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -49,7 +57,7 @@ class AnalyticsHeader extends HookConsumerWidget {
 
     return SliverToBoxAdapter(
       child: SizedBox(
-        height: height,
+        height: hasWallpaper ? height : plainHeight,
         child: Stack(
           fit: StackFit.expand,
           children: [
