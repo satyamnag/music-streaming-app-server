@@ -1,0 +1,62 @@
+# TEMPORARY workflow — deleted again in the next commit.
+#
+# `l10n.yaml` writes the generated localization classes into `lib/l10n/generated`,
+# which is checked in. Adding new keys to `app_en.arb` therefore needs one
+# `flutter gen-l10n` run to refresh 34 locale files. This exists so that run
+# happens in CI and comes back as an artifact, instead of being hand-written.
+name: TEMP gen-l10n
+
+on:
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: 3.35.2
+
+permissions:
+  contents: read
+
+jobs:
+  gen:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.18.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Write a placeholder .env
+        # envied has no default for these, so codegen elsewhere in the repo
+        # cannot run without them. Placeholders: nothing here contacts a service.
+        run: |
+          printf '%s\n' \
+            'SUPABASE_URL=https://placeholder.supabase.co' \
+            'SUPABASE_ANON_KEY=placeholder-anon-key' \
+            'CLERK_PUBLISHABLE_KEY=pk_test_placeholder' \
+            'R2_BASE_URL=https://placeholder-r2.invalid' \
+            'RELEASE_CHANNEL=nightly' \
+            'ENABLE_UPDATE_CHECK=1' \
+            'HIDE_DONATIONS=0' \
+            > .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Show what changed
+        run: |
+          ls -la lib/l10n/generated
+          grep -c 'String get analytics_' lib/l10n/generated/app_localizations.dart || true
+
+      - name: Upload generated localizations
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: generated-l10n
+          path: lib/l10n/generated

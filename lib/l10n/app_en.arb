@@ -518,5 +518,129 @@
   "share_analytics_description": "Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.",
   "@share_analytics_description": {
     "description": "Subtitle explaining exactly what the analytics opt-in sends"
+  },
+  "analytics_journey_title": "My Bhakti Journey",
+  "@analytics_journey_title": {
+    "description": "Title at the top of the Analytics screen"
+  },
+  "analytics_journey_subtitle": "Your music, your moments of devotion",
+  "@analytics_journey_subtitle": {
+    "description": "Subtitle under the Analytics screen title"
+  },
+  "analytics_range_7_days": "7 Days",
+  "@analytics_range_7_days": {
+    "description": "Analytics range selector: the current week"
+  },
+  "analytics_range_30_days": "30 Days",
+  "@analytics_range_30_days": {
+    "description": "Analytics range selector: the current month"
+  },
+  "analytics_listening_time": "Listening Time",
+  "@analytics_listening_time": {
+    "description": "Analytics stat card label for total minutes listened"
+  },
+  "analytics_songs_played": "Songs Played",
+  "@analytics_songs_played": {
+    "description": "Analytics stat card label for the number of track plays"
+  },
+  "analytics_bhakti_streak": "Bhakti Streak",
+  "@analytics_bhakti_streak": {
+    "description": "Analytics stat card label for the current consecutive-day listening streak"
+  },
+  "analytics_devotional_days": "Devotional Days",
+  "@analytics_devotional_days": {
+    "description": "Analytics stat card label for the number of days listened in the period"
+  },
+  "analytics_day_unit": "{count, plural, =1{day} other{days}}",
+  "@analytics_day_unit": {
+    "description": "Unit shown next to a day count, e.g. '7 days'",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "analytics_min_unit": "min",
+  "@analytics_min_unit": {
+    "description": "Unit shown next to a minutes count, e.g. '125 min'"
+  },
+  "analytics_best_days": "Best: {count, plural, =1{1 day} other{{count} days}}",
+  "@analytics_best_days": {
+    "description": "The user's longest consecutive-day listening streak",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "analytics_listened_days_of": "You listened on {days} out of {total} days",
+  "@analytics_listened_days_of": {
+    "description": "How many days of the selected period had at least one play",
+    "placeholders": {
+      "days": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "analytics_vs_previous_days": "vs previous {count, plural, =1{day} other{{count} days}}",
+  "@analytics_vs_previous_days": {
+    "description": "Comparison window of an analytics trend, e.g. 'vs previous 7 days'",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "analytics_listening_activity": "Listening Activity",
+  "@analytics_listening_activity": {
+    "description": "Title of the per-day minutes chart card"
+  },
+  "analytics_minutes_each_day": "Minutes listened each day",
+  "@analytics_minutes_each_day": {
+    "description": "Subtitle of the per-day minutes chart card"
+  },
+  "analytics_total_this_week": "Total this week",
+  "@analytics_total_this_week": {
+    "description": "Label above the week's total in the chart card"
+  },
+  "analytics_current_streak": "Your Current Streak",
+  "@analytics_current_streak": {
+    "description": "Title of the current streak card"
+  },
+  "analytics_current_streak_desc": "Keep listening daily to continue your bhakti journey",
+  "@analytics_current_streak_desc": {
+    "description": "Subtitle of the current streak card"
+  },
+  "analytics_favourite_deity": "Favourite Deity",
+  "@analytics_favourite_deity": {
+    "description": "Title of the favourite deity card"
+  },
+  "analytics_favourite_deity_desc": "The deity you listened to most",
+  "@analytics_favourite_deity_desc": {
+    "description": "Subtitle of the favourite deity card"
+  },
+  "analytics_deity_share_caption": "of your listening time",
+  "@analytics_deity_share_caption": {
+    "description": "Caption under the favourite deity's share percentage"
+  },
+  "analytics_deity_blessing": "May {deity} always guide you with peace and positivity.",
+  "@analytics_deity_blessing": {
+    "description": "Blessing line under the favourite deity share",
+    "placeholders": {
+      "deity": { "type": "String" }
+    }
+  },
+  "analytics_your_top_tracks": "Your Top Tracks",
+  "@analytics_your_top_tracks": {
+    "description": "Title of the top tracks card on the Analytics screen"
+  },
+  "analytics_top_tracks_desc": "The songs you loved the most this period",
+  "@analytics_top_tracks_desc": {
+    "description": "Subtitle of the top tracks card on the Analytics screen"
+  },
+  "analytics_played_times_mins": "Played {count, plural, =1{1 time} other{{count} times}} · {mins} min",
+  "@analytics_played_times_mins": {
+    "description": "A top track row's play count and nominal minutes",
+    "placeholders": {
+      "count": { "type": "int" },
+      "mins": { "type": "int" }
+    }
+  },
+  "analytics_see_all": "See all",
+  "@analytics_see_all": {
+    "description": "Link that opens the full list from an Analytics card"
   }
 }
