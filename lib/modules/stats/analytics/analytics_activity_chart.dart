@@ -29,11 +29,33 @@ class AnalyticsActivityChart extends StatelessWidget {
     'Sun',
   ];
 
+  /// Fixed height reserved under the plot for the weekday row.
+  ///
+  /// Fixed, and shared with the y-axis column, so the axis labels and the grid
+  /// lines end at the same pixel. Letting the row size itself made the "0" tick
+  /// sit one text-line below the bottom grid line (seen on a device).
+  static const double weekdayRowHeight = 14;
+
+  /// Gap between the plot and the weekday row.
+  static const double _plotToLabelsGap = 6;
+
   /// A round ceiling for the y axis, so the tallest bar sits below the top grid
   /// line instead of touching it and the axis reads in familiar numbers.
   static double axisMaxFor(int highestMinutes) {
     if (highestMinutes <= 0) return 60;
-    for (final step in const [15, 30, 45, 60, 90, 120, 180, 240, 300, 480, 600]) {
+    for (final step in const [
+      15,
+      30,
+      45,
+      60,
+      90,
+      120,
+      180,
+      240,
+      300,
+      480,
+      600,
+    ]) {
       if (highestMinutes <= step) return step.toDouble();
     }
     return (highestMinutes / 600).ceil() * 600.0;
@@ -154,21 +176,33 @@ class AnalyticsActivityChart extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // The y axis ends where the PLOT ends, not where the card
+                  // does: the weekday row's height is reserved out of it.
                   SizedBox(
                     width: 24,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        for (final tick in ticks)
-                          Text(
-                            '$tick',
-                            maxLines: 1,
-                            style: theme.typography.xSmall.copyWith(
-                              color: muted,
-                              fontSize: 10,
-                            ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              for (final tick in ticks)
+                                Text(
+                                  '$tick',
+                                  maxLines: 1,
+                                  style: theme.typography.xSmall.copyWith(
+                                    color: muted,
+                                    fontSize: 10,
+                                    height: 1,
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
+                        const SizedBox(
+                          height: _plotToLabelsGap + weekdayRowHeight,
+                        ),
                       ],
                     ),
                   ),
@@ -212,24 +246,27 @@ class AnalyticsActivityChart extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Gap(6),
-                        Row(
-                          children: [
-                            for (final day in days)
-                              Expanded(
-                                child: Text(
-                                  _weekdayLabels[(day.day.weekday - 1) %
-                                      _weekdayLabels.length],
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.clip,
-                                  style: theme.typography.xSmall.copyWith(
-                                    color: muted,
-                                    fontSize: 10,
+                        const SizedBox(height: _plotToLabelsGap),
+                        SizedBox(
+                          height: weekdayRowHeight,
+                          child: Row(
+                            children: [
+                              for (final day in days)
+                                Expanded(
+                                  child: Text(
+                                    _weekdayLabels[(day.day.weekday - 1) %
+                                        _weekdayLabels.length],
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    style: theme.typography.xSmall.copyWith(
+                                      color: muted,
+                                      fontSize: 10,
+                                      height: 1,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -244,70 +281,85 @@ class AnalyticsActivityChart extends StatelessWidget {
   }
 }
 
-/// One day's bar: its minute count above, the bar itself grown from the axis.
+/// One day's bar: its minute count directly above the bar, and the bar grown
+/// from the plot's baseline.
+///
+/// The label shares a bottom-aligned column with its bar instead of sitting
+/// above an `Expanded` plot slot: an `Expanded` child claims the whole column,
+/// which pinned every label to the top of the chart whatever its bar did — all
+/// seven numbers sat level with the axis maximum on a device.
 class _ChartBar extends StatelessWidget {
   final int minutes;
   final double axisMax;
+
+  /// Height reserved for the value label, so a full-height bar can never push
+  /// it out of the plot (label + gap + bar is exactly the plot height).
+  static const double _labelHeight = 14;
+  static const double _labelGap = 2;
 
   const _ChartBar({required this.minutes, required this.axisMax});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          '$minutes',
-          maxLines: 1,
-          style: theme.typography.xSmall.copyWith(
-            color: theme.colorScheme.foreground,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const Gap(2),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // A bar is a fraction of the plot height. Guarded because a
-              // degenerate box (zero or unbounded height) would otherwise
-              // divide by zero or ask a Column for infinite space.
-              if (!constraints.hasBoundedHeight || constraints.maxHeight <= 0) {
-                return const SizedBox.shrink();
-              }
-              final available = constraints.maxHeight;
-              final ratio = axisMax <= 0
-                  ? 0.0
-                  : (minutes / axisMax).clamp(0.0, 1.0).toDouble();
-              final height = minutes <= 0
-                  ? 0.0
-                  : (available * ratio).clamp(3.0, available).toDouble();
-              return Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: Container(
-                    width: double.infinity,
-                    height: height,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFFF7B733), Color(0xFFEF8A17)],
-                      ),
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(5),
-                        bottom: Radius.circular(2),
-                      ),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available =
+            constraints.hasBoundedHeight ? constraints.maxHeight : 0.0;
+        final barSpace =
+            (available - _labelHeight - _labelGap).clamp(0.0, double.infinity);
+
+        final ratio =
+            axisMax <= 0 ? 0.0 : (minutes / axisMax).clamp(0.0, 1.0).toDouble();
+
+        var barHeight = 0.0;
+        if (minutes > 0 && barSpace > 0) {
+          // A non-zero day always draws at least a sliver, so "listened a
+          // little" never looks like "did not listen".
+          final minimum = barSpace < 3 ? barSpace : 3.0;
+          barHeight = (barSpace * ratio).clamp(minimum, barSpace).toDouble();
+        }
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              height: _labelHeight,
+              child: Center(
+                child: Text(
+                  '$minutes',
+                  maxLines: 1,
+                  style: theme.typography.xSmall.copyWith(
+                    color: theme.colorScheme.foreground,
+                    fontSize: 10,
+                    height: 1,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+            ),
+            const SizedBox(height: _labelGap),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: Container(
+                width: double.infinity,
+                height: barHeight,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFFF7B733), Color(0xFFEF8A17)],
+                  ),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(5),
+                    bottom: Radius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

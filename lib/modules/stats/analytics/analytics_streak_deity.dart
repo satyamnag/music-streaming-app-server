@@ -388,12 +388,13 @@ class _DeityArtwork extends StatelessWidget {
     if (path == null || path.isEmpty) {
       return Icon(Icons.spa_rounded, size: 30, color: accent);
     }
+    // Deliberately NO `coverPixels`: this is an admin-uploaded deity icon, not
+    // album art, and `CoverRendition.urlFor` rewrites ANY requested size into
+    // `variants/<pixels>/<name>` — a folder that only exists for the 512px COVER
+    // renditions. Asking for 148 pointed at a URL that does not exist.
     return UniversalImage(
       path: path,
       fit: BoxFit.cover,
-      // A 74dp circle has no use for a 1024px cover.
-      coverPixels: 148,
-      placeholder: null,
     );
   }
 }

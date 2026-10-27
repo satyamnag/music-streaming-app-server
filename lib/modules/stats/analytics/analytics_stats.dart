@@ -233,7 +233,9 @@ class _StatCard extends StatelessWidget {
           else if (footnote != null)
             Text(
               footnote!,
-              maxLines: 1,
+              // Two lines: "You listened on 6 out of 7 days" does not fit on one
+              // line in a half-width card — on a device it was cut to "…out of…".
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.typography.xSmall.copyWith(color: muted),
             ),

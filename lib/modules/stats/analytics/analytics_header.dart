@@ -65,10 +65,10 @@ class AnalyticsHeader extends HookConsumerWidget {
               UniversalImage(
                 path: wallpaper,
                 fit: BoxFit.cover,
-                // The band is a thin strip, not a cover: reading it at the
-                // catalogue's card rendition keeps the upload small in the
-                // image cache instead of decoding a full-size photo.
-                coverPixels: 1080,
+                // No `coverPixels`: the wallpaper is an admin upload, not album
+                // art, and CoverRendition.urlFor rewrites any requested size
+                // into `variants/<pixels>/<name>` — folders that only exist for
+                // the 512px COVER renditions.
               ),
             if (hasWallpaper)
               DecoratedBox(

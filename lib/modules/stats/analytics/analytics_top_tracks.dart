@@ -7,6 +7,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/history/top.dart';
 import 'package:sangeet/provider/history/top/tracks.dart';
+import 'package:sangeet/services/images/cover_renditions.dart';
 
 /// "Your Top Tracks" — the three most-played tracks of the selected period, with
 /// a link to the full list.
@@ -190,7 +191,11 @@ class _TopTrackRow extends StatelessWidget {
                 child: UniversalImage(
                   path: coverUrl,
                   fit: BoxFit.cover,
-                  coverPixels: 176,
+                  // The app's documented cover rendition for cards and list
+                  // rows. Any other size (176 was tried) makes
+                  // CoverRendition.urlFor request `variants/176/…`, which does
+                  // not exist — only the 512 renditions are generated.
+                  coverPixels: CoverRendition.card,
                 ),
               ),
             ),
