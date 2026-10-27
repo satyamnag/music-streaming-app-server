@@ -202,7 +202,7 @@ class _DayDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = AnalyticsStreakAndDeity._leaf;
+    const color = AnalyticsStreakAndDeity._leaf;
     return SizedBox(
       width: 20,
       height: 20,
@@ -235,7 +235,7 @@ class _DeityCard extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final muted = theme.colorScheme.mutedForeground;
-    final accent = AnalyticsStreakAndDeity._heart;
+    const accent = AnalyticsStreakAndDeity._heart;
 
     return Card(
       fillColor: theme.colorScheme.card,
@@ -253,7 +253,7 @@ class _DeityCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.favorite_rounded, size: 16, color: accent),
+                const Icon(Icons.favorite_rounded, size: 16, color: accent),
                 const Gap(5),
                 Expanded(
                   child: Text(

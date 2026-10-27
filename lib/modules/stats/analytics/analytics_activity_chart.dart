@@ -290,13 +290,13 @@ class _ChartBar extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     height: height,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [Color(0xFFF7B733), Color(0xFFEF8A17)],
                       ),
-                      borderRadius: const BorderRadius.vertical(
+                      borderRadius: BorderRadius.vertical(
                         top: Radius.circular(5),
                         bottom: Radius.circular(2),
                       ),
