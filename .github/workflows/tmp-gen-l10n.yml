@@ -63,4 +63,6 @@ jobs:
         with:
           if-no-files-found: error
           name: generated-l10n
-          path: lib/l10n/generated
+          path: |
+            lib/l10n/generated
+            untranslated_messages.json

@@ -1691,4 +1691,121 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get share_analytics_description =>
       'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.';
+
+  @override
+  String get analytics_journey_title => 'My Bhakti Journey';
+
+  @override
+  String get analytics_journey_subtitle =>
+      'Your music, your moments of devotion';
+
+  @override
+  String get analytics_range_7_days => '7 Days';
+
+  @override
+  String get analytics_range_30_days => '30 Days';
+
+  @override
+  String get analytics_listening_time => 'Listening Time';
+
+  @override
+  String get analytics_songs_played => 'Songs Played';
+
+  @override
+  String get analytics_bhakti_streak => 'Bhakti Streak';
+
+  @override
+  String get analytics_devotional_days => 'Devotional Days';
+
+  @override
+  String analytics_day_unit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analytics_min_unit => 'min';
+
+  @override
+  String analytics_best_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Best: $_temp0';
+  }
+
+  @override
+  String analytics_listened_days_of(int days, int total) {
+    return 'You listened on $days out of $total days';
+  }
+
+  @override
+  String analytics_vs_previous_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: 'day',
+    );
+    return 'vs previous $_temp0';
+  }
+
+  @override
+  String get analytics_listening_activity => 'Listening Activity';
+
+  @override
+  String get analytics_minutes_each_day => 'Minutes listened each day';
+
+  @override
+  String get analytics_total_this_week => 'Total this week';
+
+  @override
+  String get analytics_current_streak => 'Your Current Streak';
+
+  @override
+  String get analytics_current_streak_desc =>
+      'Keep listening daily to continue your bhakti journey';
+
+  @override
+  String get analytics_favourite_deity => 'Favourite Deity';
+
+  @override
+  String get analytics_favourite_deity_desc => 'The deity you listened to most';
+
+  @override
+  String get analytics_deity_share_caption => 'of your listening time';
+
+  @override
+  String analytics_deity_blessing(String deity) {
+    return 'May $deity always guide you with peace and positivity.';
+  }
+
+  @override
+  String get analytics_your_top_tracks => 'Your Top Tracks';
+
+  @override
+  String get analytics_top_tracks_desc =>
+      'The songs you loved the most this period';
+
+  @override
+  String analytics_played_times_mins(int count, int mins) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: '1 time',
+    );
+    return 'Played $_temp0 · $mins min';
+  }
+
+  @override
+  String get analytics_see_all => 'See all';
 }

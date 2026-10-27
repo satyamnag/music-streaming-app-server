@@ -3170,6 +3170,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.'**
   String get share_analytics_description;
+
+  /// Title at the top of the Analytics screen
+  ///
+  /// In en, this message translates to:
+  /// **'My Bhakti Journey'**
+  String get analytics_journey_title;
+
+  /// Subtitle under the Analytics screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Your music, your moments of devotion'**
+  String get analytics_journey_subtitle;
+
+  /// Analytics range selector: the current week
+  ///
+  /// In en, this message translates to:
+  /// **'7 Days'**
+  String get analytics_range_7_days;
+
+  /// Analytics range selector: the current month
+  ///
+  /// In en, this message translates to:
+  /// **'30 Days'**
+  String get analytics_range_30_days;
+
+  /// Analytics stat card label for total minutes listened
+  ///
+  /// In en, this message translates to:
+  /// **'Listening Time'**
+  String get analytics_listening_time;
+
+  /// Analytics stat card label for the number of track plays
+  ///
+  /// In en, this message translates to:
+  /// **'Songs Played'**
+  String get analytics_songs_played;
+
+  /// Analytics stat card label for the current consecutive-day listening streak
+  ///
+  /// In en, this message translates to:
+  /// **'Bhakti Streak'**
+  String get analytics_bhakti_streak;
+
+  /// Analytics stat card label for the number of days listened in the period
+  ///
+  /// In en, this message translates to:
+  /// **'Devotional Days'**
+  String get analytics_devotional_days;
+
+  /// Unit shown next to a day count, e.g. '7 days'
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String analytics_day_unit(int count);
+
+  /// Unit shown next to a minutes count, e.g. '125 min'
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get analytics_min_unit;
+
+  /// The user's longest consecutive-day listening streak
+  ///
+  /// In en, this message translates to:
+  /// **'Best: {count, plural, =1{1 day} other{{count} days}}'**
+  String analytics_best_days(int count);
+
+  /// How many days of the selected period had at least one play
+  ///
+  /// In en, this message translates to:
+  /// **'You listened on {days} out of {total} days'**
+  String analytics_listened_days_of(int days, int total);
+
+  /// Comparison window of an analytics trend, e.g. 'vs previous 7 days'
+  ///
+  /// In en, this message translates to:
+  /// **'vs previous {count, plural, =1{day} other{{count} days}}'**
+  String analytics_vs_previous_days(int count);
+
+  /// Title of the per-day minutes chart card
+  ///
+  /// In en, this message translates to:
+  /// **'Listening Activity'**
+  String get analytics_listening_activity;
+
+  /// Subtitle of the per-day minutes chart card
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes listened each day'**
+  String get analytics_minutes_each_day;
+
+  /// Label above the week's total in the chart card
+  ///
+  /// In en, this message translates to:
+  /// **'Total this week'**
+  String get analytics_total_this_week;
+
+  /// Title of the current streak card
+  ///
+  /// In en, this message translates to:
+  /// **'Your Current Streak'**
+  String get analytics_current_streak;
+
+  /// Subtitle of the current streak card
+  ///
+  /// In en, this message translates to:
+  /// **'Keep listening daily to continue your bhakti journey'**
+  String get analytics_current_streak_desc;
+
+  /// Title of the favourite deity card
+  ///
+  /// In en, this message translates to:
+  /// **'Favourite Deity'**
+  String get analytics_favourite_deity;
+
+  /// Subtitle of the favourite deity card
+  ///
+  /// In en, this message translates to:
+  /// **'The deity you listened to most'**
+  String get analytics_favourite_deity_desc;
+
+  /// Caption under the favourite deity's share percentage
+  ///
+  /// In en, this message translates to:
+  /// **'of your listening time'**
+  String get analytics_deity_share_caption;
+
+  /// Blessing line under the favourite deity share
+  ///
+  /// In en, this message translates to:
+  /// **'May {deity} always guide you with peace and positivity.'**
+  String analytics_deity_blessing(String deity);
+
+  /// Title of the top tracks card on the Analytics screen
+  ///
+  /// In en, this message translates to:
+  /// **'Your Top Tracks'**
+  String get analytics_your_top_tracks;
+
+  /// Subtitle of the top tracks card on the Analytics screen
+  ///
+  /// In en, this message translates to:
+  /// **'The songs you loved the most this period'**
+  String get analytics_top_tracks_desc;
+
+  /// A top track row's play count and nominal minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Played {count, plural, =1{1 time} other{{count} times}} · {mins} min'**
+  String analytics_played_times_mins(int count, int mins);
+
+  /// Link that opens the full list from an Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get analytics_see_all;
 }
 
 class _AppLocalizationsDelegate
