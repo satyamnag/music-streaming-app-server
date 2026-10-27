@@ -253,7 +253,7 @@ class _DeityCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.favorite_rounded, size: 16, color: accent),
+                Icon(Icons.favorite_rounded, size: 16, color: accent),
                 const Gap(5),
                 Expanded(
                   child: Text(
