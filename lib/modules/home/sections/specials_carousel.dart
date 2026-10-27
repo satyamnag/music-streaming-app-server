@@ -205,6 +205,10 @@ class HomeSpecialsCarousel extends HookConsumerWidget {
                       return;
                     }
 
+                    // The sign-in dialog is an await, so the shelf may be gone
+                    // by now.
+                    if (!context.mounted) return;
+
                     // Start the shelf's queue FIRST, then open its screen.
                     //
                     // The order matters. Playback is started here rather than

@@ -83,6 +83,8 @@ class PlaylistCard extends HookConsumerWidget {
       // the sign-in dialog comes before anything touches the engine — the same
       // rule the track rows and home cards apply.
       if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
+      // The sign-in dialog is an await, so the card can be gone by now.
+      if (!context.mounted) return;
       try {
         updating.value = true;
         if (isPlaylistPlaying && playing) {

@@ -53,6 +53,8 @@ class ArtistPageTopTracks extends HookConsumerWidget {
       // section's own play control.
       if (!await PremiumAccess.requireSignInToPlay(context, ref)) return;
 
+      // The sign-in dialog is an await, so the page can be gone by now.
+      if (!context.mounted) return;
       isLoading.value = true;
 
       currentTrack ??= tracks.first;
