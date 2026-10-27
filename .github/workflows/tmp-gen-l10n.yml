@@ -6,8 +6,12 @@
 # happens in CI and comes back as an artifact, instead of being hand-written.
 name: TEMP gen-l10n
 
+# `workflow_dispatch` only works for a workflow that exists on the default
+# branch, so this is triggered by the commit that adds it instead.
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/tmp-gen-l10n.yml'
 
 env:
   FLUTTER_VERSION: 3.35.2
