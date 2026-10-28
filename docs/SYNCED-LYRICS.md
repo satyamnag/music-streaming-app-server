@@ -218,6 +218,32 @@ Scope, deliberately: the player's lyrics screen. The `/lyrics` page's Synced tab
 already shows the main line together with every translation beneath it, and its
 Plain tab is untouched.
 
+### How far this was verified on the device
+
+- **Plain multi-language: verified.** With one language selected the sheet showed
+  the Telugu lines (headings as ornament dividers, stanza breaks intact); tapping
+  the English-transliteration chip added the transliteration under every line;
+  tapping the translation chip made it three; deselecting them and then pressing
+  the last remaining chip left the sheet unchanged. Screenshots were taken at each
+  step.
+- **Sync multi-language: NOT seen live, and it cannot be with the current
+  catalogue.** All 79 tracks were checked: every one stores only the Telugu
+  `synced_lyrics`; `synced_lyrics_en` / `_en_tr` / `_hi` / `_hi_tr` are empty for
+  every track, so the Sync tab can only ever offer the Telugu chip. The stacking
+  code is the same per-line block list the Plain sheet renders, and the selection
+  rules behind it are unit-tested, but the visual result on the Sync tab is
+  unverified for that reason.
+- **Anchor: verified by the widget tests, not by eye on this build.** The two
+  tracks used for a look (`Ravamma Mahalakshmi`, `Sukha Madhuvu Kadalilo`) both
+  reported "There is no data" on the Sync tab. That gate (`hasAnySync`) is
+  unchanged code from the previous build and the old single-language view was
+  never constructed either, so the state comes from the lyrics provider, not from
+  this change; the endpoint serves valid SRT for those tracks from the same
+  process. A previous build did render them, so the most likely cause is a stale
+  `lyricsTable` row being used when the server fetch fails (the provider prefers
+  the server and falls back to that cache). Worth a separate look - it is not
+  part of this change, and it blocked the on-device confirmation of the anchor.
+
 ## Verification
 
 - **`test/modules/lyrics/lyrics_auto_center_test.dart`** (widget tests, CI):
