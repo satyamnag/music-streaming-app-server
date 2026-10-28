@@ -117,7 +117,64 @@ on `/supabase/stream`, the paid-track checks, artwork caching, and all UI/UX.
 
 ## 6. Verification
 
-See section 7 of the commit trail and the device run recorded in the task
-report: the same endpoint timings re-measured after installing versionCode 97,
-plus cold start, and a check that artwork, playback, lyrics and sign-in gates
-behave as before.
+### Measurement method, and one caveat stated up front
+
+"Before" timings were taken with `Invoke-WebRequest`, "after" timings with
+`curl.exe`. `Invoke-WebRequest` inflates large responses: on the fixed build the
+same 336 KB endpoint read 1.18-1.26 s through it but 0.24-0.41 s through curl.
+The before column below therefore **overstates** the two largest endpoints by
+roughly 1.2 s/2.9 s, and the corrected column removes that. Small responses
+(under ~50 KB) are barely affected, so their before figures are used as measured.
+
+All timings are the app's own server, reached over `adb forward`, on the same
+Wi-Fi - i.e. exactly the work a screen waits for.
+
+| Endpoint (one screen's data) | Before | Before, client-corrected | After | Speed-up |
+| --- | --- | --- | --- | --- |
+| `/supabase/tracks` (home) | 3406 ms | ~2.2 s | **272 ms** | ~8x |
+| `/supabase/admin-albums` (home) | 4086 ms | ~2.9 s | **347 ms** | ~8x |
+| `/supabase/browse/sections` | 2663 ms | ~2.5 s | **64 ms** | ~39x |
+| `/supabase/search?q=k` | 1816 ms | ~1.7 s | **41 ms** | ~41x |
+| `/supabase/user-playlists` | 1886 ms | ~1.8 s | **25 ms** | ~72x |
+| `/supabase/albums` | 1774 ms | ~1.7 s | **29 ms** | ~59x |
+| `/supabase/artists` | 1673 ms | ~1.6 s | **21 ms** | ~78x |
+| `/supabase/featured-playlists` | 1132 ms | ~1.1 s | **21 ms** | ~52x |
+| `/supabase/specials` | 1053 ms | ~1.0 s | **22 ms** | ~45x |
+| `/supabase/home-wallpaper` | 837 ms | ~0.8 s | **23 ms** | ~35x |
+| `/supabase/plays/trending` | 515 ms | ~0.5 s | **24 ms** | ~21x |
+| `/supabase/liked-songs/supabase` | 343 ms | ~0.3 s | **23 ms** | ~15x |
+
+The two endpoints still near 0.3 s are dominated by the 336 KB catalogue payload
+itself (mapping + `jsonEncode` on the device, then transfer), not by a network
+round trip. They are bounded by the response size, and every screen now sees them
+in line with the rest.
+
+### Not regressed
+
+- **Sign-in gate:** `GET /supabase/stream/<id>` with a valid track id returns
+  **401** when signed out, exactly as before. A non-existent id returns 500, the
+  same status the previous `.single()` failure produced.
+- **Cold start:** 1.6-2.3 s on repeat launches (1.6-1.8 s before, on individual
+  samples), 4.7-5.1 s on the very first launch after an install - unchanged,
+  because this work never touched the pre-`runApp` SDK initialisation or the
+  Flutter engine start that dominate it. The first launch after an install also
+  pays OS-level package optimisation, which is why it differs from a normal open.
+- **First run with an empty cache** (the "miss" path) renders the complete home
+  screen - wallpaper, carousel, chips, albums, language shelves - on a real
+  device, so a new install behaves exactly as before.
+- **Screens checked visually:** home, search (empty + results), library,
+  "My Bhakti Journey" analytics, album detail with its track list and artwork.
+  Icons, colours, artwork, layouts and copy are identical to the previous build.
+- **Pull-to-refresh** on all seven refresh surfaces still fetches live data.
+
+### CI evidence (GitHub Actions - no local Flutter/JDK exists on this machine)
+
+- `Flutter Verify (analyze + tests)` - `dart analyze` clean on the changed files
+  and **10/10** cache tests passing, including: stale value served immediately
+  then refreshed, failed background refresh keeps the working value, failed fetch
+  on a miss still propagates, concurrent stale reads share one refresh, a value
+  survives a simulated relaunch, a corrupt file is treated as a miss, `clear()`
+  forces a refetch, and a cached `null` (no wallpaper) is not re-fetched.
+- `Android Release Build` - signed release APK, artifact `soulful-bhakti-apk`,
+  versionCode 97, installed on the device with `adb install -r`.
+
