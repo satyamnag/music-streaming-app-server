@@ -11,14 +11,14 @@ import 'package:flutter/material.dart' as material;
 ///   * [PaidCrown] — the bare crown, sized to [size] (in logical pixels).
 ///   * [PaidCrownBadge] — a [material.Positioned] overlay that pins the crown to
 ///     the top-right corner of a cover [material.Stack], with an optional inset.
-class PaidCrown extends StatelessWidget {
+class PaidCrown extends material.StatelessWidget {
   final double size;
 
   const PaidCrown({super.key, this.size = 20});
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  material.Widget build(material.BuildContext context) {
+    return material.SizedBox(
       width: size,
       height: size,
       child: material.CustomPaint(
@@ -31,7 +31,7 @@ class PaidCrown extends StatelessWidget {
 /// Positions a [PaidCrown] at the top-right corner of the enclosing
 /// [material.Stack]. Use inside a cover's `Stack(fit: StackFit.expand, ...)`
 /// (the track card) or the cover `Stack` of a track row.
-class PaidCrownBadge extends StatelessWidget {
+class PaidCrownBadge extends material.StatelessWidget {
   final bool paid;
   final double size;
   final material.EdgeInsets inset;
@@ -44,7 +44,7 @@ class PaidCrownBadge extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  material.Widget build(material.BuildContext context) {
     if (!paid) return const material.SizedBox.shrink();
     return material.Positioned(
       top: inset.top,
