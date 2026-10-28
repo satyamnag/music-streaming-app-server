@@ -86,24 +86,42 @@ class LyricsAutoCenter {
       unawaited(_reveal(lineContext, duration, curve));
       return;
     }
+    unawaited(_jumpThenReveal(controller, index, duration, curve));
+  }
 
-    // The line is outside the range the list has built - a seek, or the first
-    // frame after opening the screen mid-song. Jump to the package's estimate
-    // WITHOUT animating (a long slide across the whole song would be a scroll
-    // effect nobody asked for), then centre exactly on the next frame, when the
-    // item exists and its measured height is known.
-    unawaited(
-      controller.scrollToIndex(
+  /// The line is outside the range the list has built - a seek, or the first
+  /// frame after opening the screen mid-song.
+  ///
+  /// Jumps to the package's estimate WITHOUT animating (a long slide across the
+  /// whole song would be a scroll effect nobody asked for), WAITS for that jump to
+  /// be laid out, and only then positions exactly.
+  ///
+  /// The wait is the whole point. A single post-frame attempt races the jump, finds
+  /// the item still unbuilt, and leaves the line wherever the estimate put it -
+  /// `AutoScrollPosition.middle`, i.e. the centre. That was invisible while the
+  /// anchor WAS the centre and became a visible error the moment it moved to 30%,
+  /// which is exactly what the auto-centre test caught.
+  static Future<void> _jumpThenReveal(
+    AutoScrollController controller,
+    int index,
+    Duration duration,
+    Curve curve,
+  ) async {
+    try {
+      await controller.scrollToIndex(
         index,
         preferPosition: AutoScrollPosition.middle,
         duration: jumpDuration,
-      ),
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+      );
+      // The jump has been applied; this completes at the end of the frame that
+      // lays the item out, so `tagMap` now holds it.
+      await WidgetsBinding.instance.endOfFrame;
       final built = _contextOf(controller, index);
-      if (built != null) unawaited(_reveal(built, duration, curve));
-    });
+      if (built == null) return;
+      await _reveal(built, duration, curve);
+    } catch (_) {
+      // The estimate is only ever a hint; the next cue re-attempts positioning.
+    }
   }
 
   /// Returns the view to the beginning, so a track that starts again - or loops

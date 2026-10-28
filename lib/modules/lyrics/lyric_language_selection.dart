@@ -105,6 +105,9 @@ List<PlainLyricRow> buildPlainLyricRows({
   final linesByLanguage = <String, List<String>>{};
   for (final language in languages) {
     final raw = textByLanguage[language] ?? '';
+    // A language with no text at all contributes nothing. Skipping it keeps a
+    // sheet that has no lyrics from producing one blank row.
+    if (raw.trim().isEmpty) continue;
     linesByLanguage[language] = raw
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
@@ -112,6 +115,7 @@ List<PlainLyricRow> buildPlainLyricRows({
         .map((line) => line.trimRight())
         .toList();
   }
+  if (linesByLanguage.isEmpty) return const <PlainLyricRow>[];
 
   var lineCount = 0;
   for (final lines in linesByLanguage.values) {
@@ -136,6 +140,12 @@ List<PlainLyricRow> buildPlainLyricRows({
         isBlank: texts.isEmpty,
       ),
     );
+  }
+
+  // Trailing blank rows come from the final newline of the stored text, not from
+  // spacing the author wrote: drop them so the sheet does not end in an empty gap.
+  while (rows.isNotEmpty && rows.last.isBlank) {
+    rows.removeLast();
   }
   return rows;
 }
