@@ -4,9 +4,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/button/back_button.dart';
+import 'package:sangeet/components/lyrics/lyrics_active_line_capsule.dart';
 import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
 import 'package:sangeet/extensions/context.dart';
+import 'package:sangeet/hooks/controllers/use_auto_scroll_controller.dart';
 import 'package:sangeet/models/lyrics.dart';
+import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/pages/lyrics/multilang_lyrics.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
@@ -14,6 +17,7 @@ import 'package:sangeet/provider/lyrics/synced.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/lyrics/use_synced_lyrics.dart';
 import 'package:sangeet/services/audio_player/audio_player.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 @RoutePage()
 class PlayerLyricsPage extends HookConsumerWidget {
@@ -456,86 +460,99 @@ class _SingleSyncView extends HookConsumerWidget {
         break;
       }
     }
-    final controller = useScrollController();
+    // The singing line is pinned to a FIXED point in the middle of the view and
+    // the lines above it travel upward as the track plays - the same rule the
+    // full-page Sync view uses, from the same module (see LyricsAutoCenter and
+    // docs/SYNCED-LYRICS.md).
+    //
+    // It replaces a proportional jump: `maxScrollExtent * currentIndex / length`.
+    // That put the current line wherever the fraction happened to land - never
+    // the centre - and drifted further off the more the line heights differed
+    // (a banner, a wrapped Telugu line, the blank rows this list renders for
+    // empty variants). Centring uses the line's measured geometry instead.
+    final controller = useAutoScrollController();
     useEffect(() {
-      if (!controller.hasClients || variants.isEmpty) return;
-      final target = controller.position.maxScrollExtent *
-          (currentIndex / variants.length);
-      controller.animateTo(target,
-          duration: const Duration(milliseconds: 350), curve: Curves.easeInOut);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LyricsAutoCenter.centerOnLine(controller, currentIndex);
+      });
       return null;
     }, [currentIndex, variants.length]);
+
     final theme = Theme.of(context);
     final def = kLyricLanguages.firstWhere((d) => d.key == lang,
         orElse: () => kLyricLanguages.first);
+    final windowHeight = MediaQuery.sizeOf(context).height;
+
     return ListView.builder(
       controller: controller,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      // Half a window above and below, so the FIRST and LAST lines can reach the
+      // centre too - without it the fixed centre only held mid-song. This
+      // replaces the old symmetric 8dp padding.
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: windowHeight / 2,
+        bottom: windowHeight / 2,
+      ),
       itemCount: variants.length,
       itemBuilder: (context, index) {
         final text = LyricLanguages.fieldOf(variants[index], lang).trim();
-        if (text.isEmpty) return const SizedBox(height: 8);
+        if (text.isEmpty) {
+          return AutoScrollTag(
+            key: ValueKey(index),
+            index: index,
+            controller: controller,
+            child: const SizedBox(height: 8),
+          );
+        }
         // A line the author wrapped in double braces ({{Music}}) is a banner, not
         // sung text. This tab renders the variant fields directly, so it never saw
         // the markup rules and printed `{{Music}}` verbatim — the same song showed
         // a banner on the lyrics page and raw braces here.
         final marked = parseMarkedLyricsLine(text);
         if (marked.mark == LyricsLineMark.banner) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: LyricsMusicBanner(label: marked.label),
+          return AutoScrollTag(
+            key: ValueKey(index),
+            index: index,
+            controller: controller,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: LyricsMusicBanner(label: marked.label),
+            ),
           );
         }
         final isActive = index == currentIndex;
-        return GestureDetector(
-          onTap: () {
-            if (variants[index].time.isNegative ||
-                variants[index].time > audioPlayer.duration) {
-              return;
-            }
-            audioPlayer.seek(variants[index].time);
-          },
-          behavior: HitTestBehavior.translucent,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeOutBack,
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: EdgeInsets.all(isActive ? 14 : 10),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? theme.colorScheme.primary.withValues(alpha: 0.10)
-                  : Colors.transparent,
-              borderRadius: theme.borderRadiusMd,
-              border: Border(
-                  left: BorderSide(
-                      width: isActive ? 4 : 3,
-                      color: isActive
-                          ? theme.colorScheme.primary
-                          : Colors.transparent)),
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color:
-                            theme.colorScheme.primary.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: AnimatedScale(
-              scale: isActive ? 1.06 : 1.0,
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeOutBack,
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
+        return AutoScrollTag(
+          key: ValueKey(index),
+          index: index,
+          controller: controller,
+          child: GestureDetector(
+            onTap: () {
+              if (variants[index].time.isNegative ||
+                  variants[index].time > audioPlayer.duration) {
+                return;
+              }
+              audioPlayer.seek(variants[index].time);
+            },
+            behavior: HitTestBehavior.translucent,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              // The line that is playing is drawn in the cream capsule from the
+              // reference screen, on its own dark ink: the cream pill is its own
+              // surface, so the language's line colour (chosen for this page's
+              // background) would not be legible on it.
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 240),
                 style: theme.typography.base.copyWith(
-                  color: isActive ? theme.colorScheme.primary : def.color,
+                  color: isActive ? LyricsActiveLineCapsule.ink : def.color,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                   fontSize: isActive ? 19 : 16,
                   height: isActive ? 1.6 : 1.5,
                 ),
+                textAlign: TextAlign.center,
+                child: isActive
+                    ? LyricsActiveLineCapsule(child: Text(text))
+                    : Text(text),
               ),
             ),
           ),

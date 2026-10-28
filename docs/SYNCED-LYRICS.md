@@ -1,6 +1,21 @@
 # Synced Lyrics: fixed-centre singing line
 
-Status: implemented. Version: versionCode 98.
+Status: implemented. Version: versionCode 99.
+
+## There are TWO sync surfaces, and the reference is the second one
+
+The app renders synced lyrics in two places, and the reference screenshot - with
+its `Lyrics` title, `Plain | Sync` control and `తె` language chip - is the second:
+
+| Surface | Widget | Reached from |
+| --- | --- | --- |
+| Full lyrics page | `lib/pages/lyrics/synced_lyrics.dart` (`SyncedLyrics`) | the `/lyrics` route |
+| Player lyrics page | `lib/pages/player/lyrics.dart` (`_SingleSyncView`) | player -> **Lyrics** button |
+
+Found by opening the screen on the device, not by reading the code: the first
+implementation pass covered only the full lyrics page, and the player screen -
+the one a listener actually presses **Lyrics** for - still had its old
+behaviour. Both now use the same rule and the same highlight.
 
 ## What was asked
 
@@ -10,9 +25,9 @@ Refer to the supplied Sync Lyrics reference screen and update ours so that:
    screen**, and
 2. the previous and next lines **move upward** as the track plays.
 
-## What the screen did before
+## What the two screens did before
 
-`SyncedLyrics` already auto-scrolled, but not to a fixed point:
+**Full lyrics page** (`SyncedLyrics`) auto-scrolled, but not to a fixed point:
 
 - `itemBuilder` called `scrollToIndex(..., preferPosition: AutoScrollPosition.middle)`
   **for the active line, during build**, i.e. a side effect inside a build method,
@@ -27,6 +42,18 @@ Refer to the supplied Sync Lyrics reference screen and update ours so that:
   the top of the view;
 - the active line is drawn larger than its neighbours (30 vs 24), so any
   alignment computed before that growth had been laid out was a few pixels off.
+
+**Player lyrics page** (`_SingleSyncView`) was further off:
+
+- it positioned the current line by **scroll fraction** -
+  `animateTo(position.maxScrollExtent * currentIndex / length)` - so the line
+  landed wherever that fraction fell, essentially never the centre, and drifted
+  further the more line heights differed (banners, wrapped Telugu, the blank rows
+  rendered for empty variants);
+- its only padding was 8dp, so neither the first nor the last line could ever
+  reach the middle;
+- the highlight was a card with a maroon left bar and a 1.06 scale, not the
+  reference's capsule.
 
 ## What it does now
 

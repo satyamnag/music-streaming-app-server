@@ -166,28 +166,44 @@ void main() {
     });
   });
 
-  group('Synced Lyrics screen wiring', () {
-    // The behaviour above is useless if the page stops using it or goes back to
+  group('Synced Lyrics screens wiring', () {
+    // The behaviour above is useless if a screen stops using it or goes back to
     // scrolling from inside itemBuilder (during build, against an estimated row
-    // height). This is a cheap guard against that regression.
-    test('the screen centres through LyricsAutoCenter, not from itemBuilder',
-        () {
-      final source = File(
-        'lib/pages/lyrics/synced_lyrics.dart',
-      ).readAsStringSync();
+    // height). These are cheap guards against that regression, on BOTH sync
+    // surfaces: the full lyrics page and the player's lyrics page.
+    void expectCentred(String path) {
+      final source = File(path).readAsStringSync();
+      final name = path.split('/').last;
 
-      expect(source.contains('LyricsAutoCenter.centerOnLine'), isTrue);
+      expect(source.contains('LyricsAutoCenter.centerOnLine'), isTrue,
+          reason: '$name must centre through LyricsAutoCenter');
+      expect(source.contains('scrollToIndex'), isFalse,
+          reason: '$name: scrolling from itemBuilder runs during build and '
+              'uses an estimated row height; the post-frame effect replaces it');
       expect(
-        source.contains('scrollToIndex'),
-        isFalse,
-        reason: 'scrolling from itemBuilder runs during build and uses an '
-            'estimated row height; the post-frame effect replaces it',
-      );
-      expect(
-        source.contains('height: mediaQuery.height / 2'),
+        source.contains('mediaQuery.height / 2') ||
+            source.contains('windowHeight / 2'),
         isTrue,
-        reason: 'without half a viewport above and below, the first and last '
-            'lines can never reach the centre',
+        reason: '$name: without half a viewport above and below, the first and '
+            'last lines can never reach the centre',
+      );
+    }
+
+    test('the full lyrics page centres its lines', () {
+      expectCentred('lib/pages/lyrics/synced_lyrics.dart');
+    });
+
+    test('the player lyrics page centres its lines too', () {
+      expectCentred('lib/pages/player/lyrics.dart');
+
+      // The specific wrong answer that used to be there: a proportional jump that
+      // put the current line wherever a fraction of the scroll extent landed.
+      final source = File('lib/pages/player/lyrics.dart').readAsStringSync();
+      expect(
+        source.contains('maxScrollExtent *'),
+        isFalse,
+        reason: 'the player page must not position lines by scroll fraction - '
+            'that is what left the singing line away from the centre',
       );
     });
   });
