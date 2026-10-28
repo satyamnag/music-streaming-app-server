@@ -198,9 +198,11 @@ void main() {
 
       // The specific wrong answer that used to be there: a proportional jump that
       // put the current line wherever a fraction of the scroll extent landed.
+      // Matched as code (`position.maxScrollExtent`), not as the phrase, because
+      // the file's own comment quotes the expression it replaced.
       final source = File('lib/pages/player/lyrics.dart').readAsStringSync();
       expect(
-        source.contains('maxScrollExtent *'),
+        source.contains('position.maxScrollExtent'),
         isFalse,
         reason: 'the player page must not position lines by scroll fraction - '
             'that is what left the singing line away from the centre',
