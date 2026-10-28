@@ -301,43 +301,29 @@ coverPixels: CoverRendition.card,
                                     onPressed: effectiveSelection
                                         ? null
                                         : () async {
-                                            if (PremiumAccess.isTrackLocked(
-                                                    track, ref) ||
-                                                (() {
-                                                  final c = albumLockContext();
-                                                  return c != null &&
-                                                      PremiumAccess
-                                                          .isAlbumLocked(
-                                                              c, ref);
-                                                })()) {
-                                              await PremiumAccess.gateTrackPlay(
-                                                context: context,
-                                                ref: ref,
-                                                track: track,
-                                                albumLock: albumLockContext(),
-                                                feature: () async {
-                                                  // Play this track, then open the full on-screen player
-                                                  // (PlayerView) instead of the legacy Track detail page.
-                                                  await onTap?.call();
-                                                  if (context.mounted) {
-                                                    ref
-                                                        .read(
-                                                            playerOverlayControllerProvider)
-                                                        .open();
-                                                  }
-                                                },
-                                              );
-                                              return;
-                                            }
-                                            // Play this track, then open the full on-screen player
-                                            // (PlayerView) instead of the legacy Track detail page.
-                                            await onTap?.call();
-                                            if (context.mounted) {
-                                              ref
-                                                  .read(
-                                                      playerOverlayControllerProvider)
-                                                  .open();
-                                            }
+                                            // EVERY track goes through the gate:
+                                            // it requires a signed-in user first
+                                            // (free or paid) and only then decides
+                                            // about the paywall. Gating on the lock
+                                            // alone let a signed-out tap on a FREE
+                                            // track skip the sign-in prompt.
+                                            await PremiumAccess.gateTrackPlay(
+                                              context: context,
+                                              ref: ref,
+                                              track: track,
+                                              albumLock: albumLockContext(),
+                                              feature: () async {
+                                                // Play this track, then open the full on-screen player
+                                                // (PlayerView) instead of the legacy Track detail page.
+                                                await onTap?.call();
+                                                if (context.mounted) {
+                                                  ref
+                                                      .read(
+                                                          playerOverlayControllerProvider)
+                                                      .open();
+                                                }
+                                              },
+                                            );
                                           },
                                     child: Text(
                                       track.name,
