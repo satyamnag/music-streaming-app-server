@@ -10,6 +10,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/hooks/controllers/use_auto_scroll_controller.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/modules/lyrics/lyric_language_selection.dart';
+import 'package:sangeet/modules/lyrics/lyric_parsing.dart';
 import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/pages/lyrics/multilang_lyrics.dart';
@@ -39,10 +40,14 @@ class PlayerLyricsPage extends HookConsumerWidget {
     final query = ref.watch(syncedLyricsProvider(track));
     final subtitle = query.asData?.value;
     final isLoading = query.isLoading || query.isRefreshing;
-    final mapState = ref.watch(syncedLyricsMapProvider(track));
-    // `static` is true when the lyrics have no timestamps (i.e. they are plain,
-    // not synced). The Sync tab must only list timed/synced lyrics.
-    final isStatic = mapState.asData?.value.static ?? true;
+    // Whether these lyrics carry TIMINGS is read from the lyrics themselves, not
+    // from `syncedLyricsMapProvider`. That provider is only needed for the
+    // active-line clock (inside the Sync view); gating the Sync tab on its state
+    // declared the tab empty whenever it was still loading or had errored - while
+    // the timed lines were already in hand. That is exactly the "no synced lyrics
+    // on these tracks" report, on tracks whose admin SRT is present and parses.
+    final hasTimings =
+        subtitle != null && hasRealTimings(subtitle.lyrics.map((l) => l.time));
 
     bool hasPlain(String lang) {
       final stored = plainForTrack(track, lang)?.trim();
@@ -53,7 +58,7 @@ class PlayerLyricsPage extends HookConsumerWidget {
     bool hasSync(String lang) {
       // Plain (static, untimed) variants are NOT synced lyrics; they must only
       // appear on the Plain tab, never the Sync tab.
-      if (isStatic) return false;
+      if (!hasTimings) return false;
       final variants = subtitle?.variants ?? const <LyricVariant>[];
       if (variants.isEmpty) return false;
       for (final v in variants) {
@@ -442,11 +447,15 @@ class _MultiSyncView extends HookConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (query.hasError) return const _NoData();
-    // Plain (static/untimed) variants are not synced lyrics — do not render
-    // them in the Sync view.
-    if ((mapState.asData?.value.static ?? true) == true) return const _NoData();
     final variants = subtitle?.variants ?? const <LyricVariant>[];
     if (variants.isEmpty) return const _NoData();
+    // Plain (static/untimed) variants are not synced lyrics - do not render them
+    // in the Sync view. Decided from the variants themselves: `mapState` is only
+    // needed for the clock below, and its state must not be able to hide timed
+    // lines that are already here.
+    if (!variants.any((variant) => variant.time != Duration.zero)) {
+      return const _NoData();
+    }
 
     // Every shown language keeps its own colour so a listener can tell the
     // columns apart; the definitions come from the shared list, so the hues here

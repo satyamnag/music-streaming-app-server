@@ -8,6 +8,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/lyrics/lyrics_active_line_capsule.dart';
 import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
 import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
+import 'package:sangeet/modules/lyrics/lyric_parsing.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
@@ -52,6 +53,12 @@ class SyncedLyrics extends HookConsumerWidget {
     final lyricsState = ref.watch(
       syncedLyricsMapProvider(playlist.activeTrack),
     );
+    // Whether these lyrics carry TIMINGS is read from the lyrics themselves, not
+    // from `syncedLyricsMapProvider`: that provider is only needed for the clock
+    // below, and gating this screen on its state hid the timed lines whenever it
+    // was still loading or had errored (see lyric_parsing.dart's hasRealTimings).
+    final hasTimings = lyricValue != null &&
+        hasRealTimings(lyricValue.lyrics.map((line) => line.time));
     final currentTime = useSyncedLyrics(
       ref,
       lyricsState.asData?.value.lyricsMap ?? {},
@@ -177,9 +184,8 @@ class SyncedLyrics extends HookConsumerWidget {
                   child: SizedBox.shrink(),
                 ),
               ),
-            if (lyricValue != null &&
-                lyricValue.lyrics.isNotEmpty &&
-                lyricsState.asData?.value.static != true) ...[
+            if (lyricValue != null && lyricValue.lyrics.isNotEmpty && hasTimings)
+              ...[
               // NO spacer above the list, deliberately.
               //
               // With half a window of space on top, the first line sat in the
@@ -365,7 +371,9 @@ class SyncedLyrics extends HookConsumerWidget {
               const SliverToBoxAdapter(
                 child: Icon(SangeetIcons.noLyrics, size: 60),
               ),
-            ] else if (lyricsState.asData?.value.static == true)
+            ] else if (lyricValue != null &&
+                lyricValue.lyrics.isNotEmpty &&
+                !hasTimings)
               SliverFillRemaining(
                 child: Center(
                   child: RichText(
