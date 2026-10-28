@@ -3,11 +3,11 @@
 // The behaviour the screens must have, in order:
 //  1. nothing playing / before the first cue: the lyrics begin at the TOP of the
 //     view, not in the middle under an empty half-screen;
-//  2. as the track plays, the singing line travels DOWN towards the centre - it
-//     cannot be centred while it still sits near the top, so the scroll clamps at
+//  2. as the track plays, the singing line travels DOWN towards the anchor - it
+//     cannot reach it while it still sits near the top, so the scroll clamps at
 //     the top and the line simply sits lower with each cue;
-//  3. once it can be centred, it STAYS on that fixed centre for the rest of the
-//     track;
+//  3. once it can reach the anchor (30% from the top), it STAYS there for the rest
+//     of the track;
 //  4. when the track starts again - a repeat, a loop, a new play - the lyrics go
 //     back to the top and the whole descent happens again.
 //
@@ -24,17 +24,12 @@ import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 
 const Size _windowSize = Size(300, 400);
 
-/// Half the viewport height - the space the screens put BELOW the last line (and
-/// deliberately not above the first). A literal because a property access
-/// (`_windowSize.height`) is not a constant expression in Dart.
-const double _halfWindow = 200; // == _windowSize.height / 2
-
 /// Height of one lyric line in the synthetic list.
 const double _rowHeight = 40;
 
 /// A list shaped like the lyrics view: the lines as [AutoScrollTag]s (so `tagMap`
-/// is populated the way the screens' is), then the half-window spacer that lets
-/// the final line reach the centre. No spacer on top.
+/// is populated the way the screens' is), then the trailing space the screens
+/// reserve so the final line can still reach the anchor. No spacer on top.
 Widget _harness(AutoScrollController controller, {int count = 30}) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -58,8 +53,12 @@ Widget _harness(AutoScrollController controller, {int count = 30}) {
                 ),
               ),
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: _halfWindow),
+            SliverToBoxAdapter(
+              // The real helper, so the test breaks if the reservation stops
+              // matching the anchor.
+              child: SizedBox(
+                height: LyricsAutoCenter.trailingSpace(_windowSize.height),
+              ),
             ),
           ],
         ),
@@ -79,23 +78,33 @@ void main() {
     controller.dispose();
   });
 
-  /// The vertical centre of the scroll viewport - the fixed point the singing
-  /// line locks onto.
-  double viewportCentre(WidgetTester tester) =>
-      tester.getCenter(find.byType(CustomScrollView)).dy;
+  /// The fixed vertical point the singing line locks onto: the anchor fraction
+  /// of the viewport, measured from its top.
+  double anchorY(WidgetTester tester) {
+    final viewport = tester.getRect(find.byType(CustomScrollView));
+    return viewport.top + LyricsAutoCenter.alignment * viewport.height;
+  }
 
   /// The vertical top of the scroll viewport.
   double viewportTop(WidgetTester tester) =>
       tester.getTopLeft(find.byType(CustomScrollView)).dy;
 
-  /// How far the given line's centre is from the viewport's centre.
+  /// How far the given line's centre is from the anchor.
   double offBy(WidgetTester tester, int index) =>
-      (tester.getCenter(find.byKey(ValueKey(index))).dy -
-              viewportCentre(tester))
-          .abs();
+      (tester.getCenter(find.byKey(ValueKey(index))).dy - anchorY(tester)).abs();
 
   group('LyricsAutoCenter', () {
-    testWidgets('the FIRST line starts at the TOP, not in the middle',
+    test('the anchor sits just under a third of the way down', () {
+      expect(LyricsAutoCenter.alignment, 0.3);
+      // The trailing reservation is the mirror of the anchor: whatever is NOT
+      // above the anchor has to be reachable below the last line.
+      expect(
+        LyricsAutoCenter.trailingSpace(400),
+        closeTo(400 * 0.7, 0.001),
+      );
+    });
+
+    testWidgets('the FIRST line starts at the TOP, not at the anchor',
         (tester) async {
       await tester.pumpWidget(_harness(controller));
       await tester.pumpAndSettle();
@@ -103,27 +112,25 @@ void main() {
       LyricsAutoCenter.centerOnLine(controller, 0);
       await tester.pumpAndSettle();
 
-      // Its centre is above the top of the viewport, so the offset clamps to 0
-      // and the line sits flush with the top - the lyrics read from the top down
-      // instead of starting under an empty half-screen.
+      // Its centre is above the anchor, so the offset clamps to 0 and the line
+      // sits flush with the top - the lyrics read from the top down instead of
+      // starting under an empty half-screen.
       expect(
         tester.getTopLeft(find.byKey(const ValueKey(0))).dy -
             viewportTop(tester),
         closeTo(0, 1),
       );
       expect(controller.offset, 0);
-      expect(offBy(tester, 0), greaterThan(_windowSize.height / 4),
-          reason: 'the first line must NOT be centred');
     });
 
-    testWidgets('the singing line descends to the centre, then stays there',
+    testWidgets('the singing line descends to the anchor, then stays there',
         (tester) async {
       await tester.pumpWidget(_harness(controller));
       await tester.pumpAndSettle();
 
-      // (2) Lines too close to the top cannot be centred: the list stays at the
-      // top and each cue simply sits one row lower than the last.
-      for (final index in const [0, 1, 2, 3]) {
+      // (2) Lines too close to the top cannot reach the anchor yet: the list
+      // stays at the top and each cue simply sits one row lower than the last.
+      for (final index in const [0, 1, 2]) {
         LyricsAutoCenter.centerOnLine(controller, index);
         await tester.pumpAndSettle();
         expect(controller.offset, 0);
@@ -135,42 +142,35 @@ void main() {
         );
       }
 
-      // (3) From the point where centring is possible, every line lands on the
-      // same fixed centre and the list moves up behind it.
-      for (final index in const [7, 8, 11, 20]) {
+      // (3) From the point where the anchor is reachable, every line lands on the
+      // same fixed point and the list moves up behind it.
+      for (final index in const [5, 6, 9, 20]) {
         LyricsAutoCenter.centerOnLine(controller, index);
         await tester.pumpAndSettle();
         expect(offBy(tester, index), lessThan(1.0),
-            reason: 'line $index must lock onto the fixed centre');
+            reason: 'line $index must lock onto the anchor');
       }
     });
 
-    testWidgets('centres a line in the middle of the list', (tester) async {
+    testWidgets(
+        'the LAST line still reaches the anchor - the lock survives to the end '
+        'of the track', (tester) async {
       await tester.pumpWidget(_harness(controller));
       await tester.pumpAndSettle();
 
-      LyricsAutoCenter.centerOnLine(controller, 15);
-      await tester.pumpAndSettle();
-
-      expect(offBy(tester, 15), lessThan(1.0));
-    });
-
-    testWidgets('centres the LAST line - the lock holds to the end of the track',
-        (tester) async {
-      await tester.pumpWidget(_harness(controller));
-      await tester.pumpAndSettle();
-
+      // This is what the trailing reservation is for: without it the final lines
+      // could not rise as far as the anchor and the lock would silently break.
       LyricsAutoCenter.centerOnLine(controller, 29);
       await tester.pumpAndSettle();
 
       expect(offBy(tester, 29), lessThan(1.0));
     });
 
-    testWidgets('a line that is NOT built yet still ends up centred',
+    testWidgets('a line that is NOT built yet still ends up on the anchor',
         (tester) async {
       // The real case: the screen opens mid-song, so the list has only built the
       // top while the singing line is far down. Jumping to an estimate alone
-      // would leave it near - but not at - the centre.
+      // would leave it near - but not at - the anchor.
       await tester.pumpWidget(_harness(controller, count: 200));
       await tester.pumpAndSettle();
 
@@ -240,44 +240,41 @@ void main() {
   group('Synced Lyrics screens wiring', () {
     // The behaviour above is useless if a screen stops using it, goes back to
     // scrolling from itemBuilder (during build, against an estimated row height),
-    // or re-introduces a spacer above the first line. Cheap guards on BOTH sync
+    // or stops reserving the space the anchor needs. Cheap guards on BOTH sync
     // surfaces: the full lyrics page and the player's lyrics page.
-    void expectCentred(String path, {required String bottomSpacer}) {
+    void expectAnchored(String path) {
       final source = File(path).readAsStringSync();
       final name = path.split('/').last;
 
       expect(source.contains('LyricsAutoCenter.centerOnLine'), isTrue,
-          reason: '$name must centre through LyricsAutoCenter');
+          reason: '$name must position through LyricsAutoCenter');
       expect(source.contains('scrollToIndex'), isFalse,
           reason: '$name: scrolling from itemBuilder runs during build and '
               'uses an estimated row height; the post-frame effect replaces it');
-      expect(source.contains(bottomSpacer), isTrue,
-          reason: '$name: the half-window BELOW the last line is what lets the '
-              'final line reach the centre');
+      expect(
+        source.contains('LyricsAutoCenter.trailingSpace'),
+        isTrue,
+        reason: '$name: the space below the last line must come from the same '
+            'fraction as the anchor, or the final lines cannot reach it',
+      );
+      expect(
+        'trailingSpace'.allMatches(source).length,
+        1,
+        reason: '$name: exactly one trailing reservation - a second one would be '
+            'a spacer above the list, which puts the first line mid-screen',
+      );
     }
 
-    test('the full lyrics page starts at the top and locks to the centre', () {
-      final path = 'lib/pages/lyrics/synced_lyrics.dart';
-      expectCentred(path, bottomSpacer: 'height: mediaQuery.height / 2');
-
-      // Exactly ONE half-window spacer: the one below the list. A second one
-      // above it is what pushed the first line into the middle of the screen.
-      final source = File(path).readAsStringSync();
-      final spacerCount = 'mediaQuery.height / 2'.allMatches(source).length;
-      expect(
-        spacerCount,
-        1,
-        reason: 'only the spacer BELOW the list may remain; an above-list '
-            'spacer puts the first line in the middle of the screen',
-      );
+    test('the full lyrics page starts at the top and locks to the anchor', () {
+      expectAnchored('lib/pages/lyrics/synced_lyrics.dart');
     });
 
-    test('the player lyrics page starts at the top and locks to the centre', () {
+    test('the player lyrics page starts at the top and locks to the anchor', () {
       final path = 'lib/pages/player/lyrics.dart';
-      expectCentred(path, bottomSpacer: 'bottom: windowHeight / 2');
+      expectAnchored(path);
 
       final source = File(path).readAsStringSync();
-      expect(source.contains('top: windowHeight / 2'), isFalse,
+      expect(source.contains('top: windowHeight'), isFalse,
           reason: 'no padding above the first line: the lyrics must begin at '
               'the top of the view');
       // The specific wrong answer that used to be there: a proportional jump that
@@ -286,7 +283,7 @@ void main() {
       // the file's own comment quotes the expression it replaced.
       expect(source.contains('position.maxScrollExtent'), isFalse,
           reason: 'the player page must not position lines by scroll fraction - '
-              'that is what left the singing line away from the centre');
+              'that is what left the singing line away from the anchor');
     });
   });
 }

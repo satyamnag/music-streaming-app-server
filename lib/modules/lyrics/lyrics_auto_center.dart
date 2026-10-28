@@ -10,13 +10,18 @@
 ///
 /// HOW THE POSITION IS CHOSEN
 /// --------------------------
-/// [Scrollable.ensureVisible] with `alignment: 0.5` is the exact primitive for
-/// this. Flutter's documentation for the offset it computes
-/// (`RenderAbstractViewport.getOffsetToReveal`) states: "If alignment is 0.5,
-/// the child must be positioned as close to the center of the viewport as
-/// possible." It resolves that offset from the item's REAL laid-out geometry,
-/// which matters here because the active line is drawn larger than its
-/// neighbours and its height therefore changes as it is highlighted.
+/// [Scrollable.ensureVisible] with a fractional [alignment] is the exact
+/// primitive for this. Flutter's documentation for the offset it computes
+/// (`RenderAbstractViewport.getOffsetToReveal`) describes `alignment` as where
+/// the child is positioned between the leading edge (0.0) and the trailing edge
+/// (1.0) of the viewport, and it resolves that offset from the item's REAL
+/// laid-out geometry - which matters here because the active line is drawn
+/// larger than its neighbours and its height therefore changes as it is
+/// highlighted.
+///
+/// The position used to be the centre (0.5). It is now [alignment] = 0.3, i.e.
+/// just under a third of the way down, which keeps the forthcoming lines in
+/// view instead of spending the bottom half of the screen on them.
 ///
 /// The previous implementation asked `scroll_to_index` for
 /// `AutoScrollPosition.middle` from inside `itemBuilder` - during build, and
@@ -31,10 +36,25 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class LyricsAutoCenter {
   LyricsAutoCenter._();
 
-  /// Where the singing line sits in the viewport. `0.5` is the centre, and it is
-  /// what makes the position FIXED: every line is scrolled to this same
-  /// fraction, so the text moves up behind a stationary focal point.
-  static const double alignment = 0.5;
+  /// Where the singing line sits in the viewport, as a fraction from the TOP.
+  ///
+  /// `0.3` puts it just under a third of the way down - high enough that the two
+  /// or three lines still to come are already visible beneath it, and low enough
+  /// that the line just sung stays visible above it. Every line is scrolled to
+  /// this same fraction, which is what makes the position FIXED: the text moves
+  /// behind a stationary focal point.
+  static const double alignment = 0.3;
+
+  /// The space a lyrics list must reserve BELOW its last line so that line can
+  /// still be placed at [alignment].
+  ///
+  /// With the anchor 30% down, a line needs the remaining 70% of the viewport
+  /// below it to reach it. Reserving less would leave the final lines unable to
+  /// rise to the anchor, so the lock would silently break near the end of the
+  /// track. Callers pass their window height (a little larger than the real
+  /// viewport, which only means slightly more trailing room - harmless).
+  static double trailingSpace(double windowHeight) =>
+      windowHeight * (1 - alignment);
 
   /// Long enough to read as a glide, short enough to land before the next line.
   /// A cue typically lasts seconds, so this never lags the song.

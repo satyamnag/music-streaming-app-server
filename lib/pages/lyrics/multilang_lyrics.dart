@@ -4,12 +4,14 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
+import 'package:sangeet/components/lyrics/lyrics_ornament_divider.dart';
 import 'package:sangeet/components/lyrics/marked_plain_lyrics.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/lyrics.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
+import 'package:sangeet/modules/lyrics/lyric_language_selection.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/use_synced_lyrics.dart';
 import 'package:sangeet/provider/lyrics/synced.dart';
@@ -229,6 +231,111 @@ class PlainLanguageViewBuilder extends HookConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Multi-language PLAIN lyrics: the same line in each selected language, stacked
+/// and colour-coded, so a listener can read one, two, three or all of them at
+/// once - the plain half of the facility the Soulful Bhakti web app's lyrics
+/// panel offers (`components/LyricsPanel.tsx`, `PlainLines`).
+///
+/// The plain text arrives as one block per language (the admin's `plain_lyrics*`
+/// columns, or derived from the synced variants), so the languages are aligned
+/// LINE BY LINE here; [buildPlainLyricRows] does that and is unit-tested.
+/// Stanza breaks are kept as spacing rather than dropped.
+class MultiLanguagePlainView extends HookConsumerWidget {
+  final SangeetTrackObject? track;
+
+  /// The language keys to show, in display order (already resolved against what
+  /// this track has - see [LyricLanguageSelection.activeLanguages]).
+  final List<String> languages;
+
+  const MultiLanguagePlainView({
+    super.key,
+    required this.track,
+    required this.languages,
+  });
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final theme = Theme.of(context);
+    final query = ref.watch(syncedLyricsProvider(track));
+    final subtitle = query.asData?.value;
+
+    if (track == null) return const _NoLyrics();
+    if (query.isLoading || query.isRefreshing) return const ShimmerLyrics();
+    if (query.hasError) return const _NoLyrics();
+
+    final defs = [
+      for (final def in kLyricLanguages)
+        if (languages.contains(def.key)) def,
+    ];
+    if (defs.isEmpty) return const _NoLyrics();
+
+    // Per language: the admin's authored plain text when there is one, else the
+    // text derived from the synced variants - the same precedence the single
+    // language view used.
+    final textByLanguage = <String, String>{};
+    for (final def in defs) {
+      final stored = plainForTrack(track, def.key)?.trim();
+      textByLanguage[def.key] = (stored != null && stored.isNotEmpty)
+          ? stored
+          : plainLyricTextFor(subtitle, def.key);
+    }
+
+    final rows = buildPlainLyricRows(
+      languages: [for (final def in defs) def.key],
+      textByLanguage: textByLanguage,
+    );
+    if (rows.isEmpty) return const _NoLyrics();
+
+    final baseStyle = theme.typography.base.copyWith(
+      color: theme.colorScheme.foreground,
+      fontSize: 20,
+      height: 1.9,
+    );
+
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        12 + context.bottomPlayerReserve,
+      ),
+      itemCount: rows.length,
+      itemBuilder: (context, index) {
+        final row = rows[index];
+        // A blank lyric line is a stanza break: keep its height so the sheet
+        // reads the way it was written instead of collapsing the gap.
+        if (row.isBlank) {
+          return SizedBox(height: baseStyle.fontSize! * baseStyle.height!);
+        }
+
+        // A line the author wrapped in single braces ({Pallavi}) is a section
+        // heading, not sung text - it renders as the ornament divider, exactly as
+        // the web app's plain sheet does.
+        final marked = parseMarkedLyricsLine(row.primary);
+        if (marked.mark == LyricsLineMark.heading) {
+          return LyricsOrnamentDivider(label: marked.label);
+        }
+
+        return Column(
+          children: [
+            for (final def in defs)
+              if ((row.texts[def.key] ?? '').isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  // Selectable per line, so the text stays copyable.
+                  child: SelectableText(
+                    row.texts[def.key]!,
+                    textAlign: TextAlign.center,
+                    style: baseStyle.copyWith(color: def.color),
+                  ),
+                ),
+          ],
+        );
+      },
     );
   }
 }
