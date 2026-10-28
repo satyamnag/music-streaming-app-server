@@ -78,20 +78,32 @@ void main() {
     controller.dispose();
   });
 
-  /// The fixed vertical point the singing line locks onto: the anchor fraction
-  /// of the viewport, measured from its top.
-  double anchorY(WidgetTester tester) {
+  /// Where the API actually puts the line.
+  ///
+  /// `RenderAbstractViewport.getOffsetToReveal` places the item's BOX at
+  /// [LyricsAutoCenter.alignment] of the way from "leading edge aligned" (0.0) to
+  /// "trailing edge aligned" (1.0), i.e. its leading edge sits at
+  /// `alignment * (viewportHeight - itemHeight)` - so its centre lands at
+  /// `alignment * (viewportHeight - itemHeight) + itemHeight / 2`.
+  ///
+  /// At alignment 0.5 that reduces to the viewport centre, which is why this
+  /// distinction was invisible until the anchor moved to 0.3.
+  double anchorY(WidgetTester tester, int index) {
     final viewport = tester.getRect(find.byType(CustomScrollView));
-    return viewport.top + LyricsAutoCenter.alignment * viewport.height;
+    final itemHeight = tester.getSize(find.byKey(ValueKey(index))).height;
+    return viewport.top +
+        LyricsAutoCenter.alignment * (viewport.height - itemHeight) +
+        itemHeight / 2;
   }
 
   /// The vertical top of the scroll viewport.
   double viewportTop(WidgetTester tester) =>
       tester.getTopLeft(find.byType(CustomScrollView)).dy;
 
-  /// How far the given line's centre is from the anchor.
+  /// How far the given line's centre is from where the anchor puts it.
   double offBy(WidgetTester tester, int index) =>
-      (tester.getCenter(find.byKey(ValueKey(index))).dy - anchorY(tester)).abs();
+      (tester.getCenter(find.byKey(ValueKey(index))).dy - anchorY(tester, index))
+          .abs();
 
   group('LyricsAutoCenter', () {
     test('the anchor sits just under a third of the way down', () {

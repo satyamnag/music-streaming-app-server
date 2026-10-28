@@ -74,6 +74,14 @@ It is **0.3** - just under a third of the way down - not 0.5. The centre spent t
 bottom half of the screen on lines still to come; a third keeps the next two or
 three lines visible while leaving the line just sung on screen above the anchor.
 
+Precisely, the API places the line's BOX at that fraction of the way from "top edge
+aligned" (0.0) to "bottom edge aligned" (1.0), so its centre lands at
+`0.3 * (viewportHeight - lineHeight) + lineHeight / 2` - about 32% of the viewport
+for a single line, and a little lower for a block of three languages. At 0.5 every
+reading of the number is the same point, which is why this formula only matters now
+that the anchor moved; the widget test derives the expected position the same way
+instead of assuming a pure fraction (it caught exactly that 8px difference).
+
 Because the anchor is no longer the middle, the space reserved **below** the last
 line has to be the mirror of it: `LyricsAutoCenter.trailingSpace(height)` returns
 `height * (1 - alignment)` (70%), and both screens take it from there so the two

@@ -36,13 +36,19 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class LyricsAutoCenter {
   LyricsAutoCenter._();
 
-  /// Where the singing line sits in the viewport, as a fraction from the TOP.
+  /// Where the singing line sits in the viewport.
   ///
   /// `0.3` puts it just under a third of the way down - high enough that the two
   /// or three lines still to come are already visible beneath it, and low enough
   /// that the line just sung stays visible above it. Every line is scrolled to
   /// this same fraction, which is what makes the position FIXED: the text moves
   /// behind a stationary focal point.
+  ///
+  /// Precisely, Flutter places the line's BOX at this fraction of the way from
+  /// "top edge aligned" (0.0) to "bottom edge aligned" (1.0), so its centre sits
+  /// at `alignment * (viewportHeight - lineHeight) + lineHeight / 2` - about 32%
+  /// of the viewport for a single line. At 0.5 every interpretation is the centre,
+  /// which is why the distinction only becomes visible now that the anchor moved.
   static const double alignment = 0.3;
 
   /// The space a lyrics list must reserve BELOW its last line so that line can
