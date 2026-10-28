@@ -176,7 +176,6 @@ class CatalogCache {
     if (dir == null) return;
     final path = '${dir.path}${Platform.pathSeparator}${_fileNameFor(key)}';
     try {
-      final file = File(path);
       final payload = jsonEncode({
         'at': entry.storedAt.millisecondsSinceEpoch,
         'value': entry.value,
