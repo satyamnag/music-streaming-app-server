@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/provider/server/routes/supabase_data.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 import 'package:sangeet/services/sourced_track/r2_url.dart';
 
 /// Resolves a playable stream URL directly from Supabase, bypassing the
@@ -22,19 +23,30 @@ Future<SangeetAudioSourceStreamObject?> resolveDirectSupabaseStream(
       return null;
     }
 
-    final supabase = ref.read(supabaseClientProvider);
-
-    final row = await supabase
-        .from('tracks')
-        .select('id,storage_path')
-        .eq('id', track.id)
-        .maybeSingle();
-
-    if (row == null || row['storage_path'] == null) {
+    // The storage path first comes from the catalogue the app has already
+    // downloaded: the tracks fetch carries `storage_path` for every row, so
+    // building the URL from it needs no network at all. That matters because
+    // this function is called once per track by the home screen's warm-up;
+    // querying per track made that warm-up one Supabase round trip per song,
+    // all of them competing with the screen the reader was waiting on.
+    //
+    // A miss (catalogue not loaded yet, a track outside it) falls through to
+    // exactly the single-row query this function always ran, so the result and
+    // the failure modes are unchanged.
+    String? storagePath = CatalogCache.instance.storagePaths[track.id];
+    if (storagePath == null || storagePath.isEmpty) {
+      final supabase = ref.read(supabaseClientProvider);
+      final row = await supabase
+          .from('tracks')
+          .select('id,storage_path')
+          .eq('id', track.id)
+          .maybeSingle();
+      storagePath = row?['storage_path']?.toString();
+    }
+    if (storagePath == null || storagePath.isEmpty) {
       return null;
     }
 
-    final storagePath = row['storage_path'].toString();
     final ext = storagePath.split('.').last.toLowerCase();
     final fmt = ext == 'm4a' ? 'mp4' : ext == 'weba' ? 'webm' : ext;
 
