@@ -244,6 +244,52 @@ Plain tab is untouched.
   the server and falls back to that cache). Worth a separate look - it is not
   part of this change, and it blocked the on-device confirmation of the anchor.
 
+## Why some tracks showed no synced lyrics (versionCode 103)
+
+Reported: *Tenela Tiyyani*, *Srinivasa Kalyana Sambaram*, *Tirumala Narayanaa* and
+others showed no synced lyrics. All three store **SRT** in `synced_lyrics`
+(`00:00:10,427 --> 00:00:12,595`), verified against the live table, and each also
+carries `plain_lyrics*`.
+
+Two causes, both fixed:
+
+1. **The format was decided by luck.** The parser tried LRC first and reached SRT
+   only when the LRC attempt produced nothing. SRT has to be *identified*, not
+   inferred: its `-->` arrow never appears in LRC. Parsing now lives in
+   `lib/modules/lyrics/lyric_parsing.dart`, which detects SRT by that marker and
+   parses it first, then falls back to LRC. Real payloads from the reported tracks
+   are unit tests asserting the actual cue times - so what is checked is "the cues
+   arrived with their timings", not merely "something non-empty came back".
+
+2. **The Sync tab's gate read a second provider.** Whether the lyrics were
+   "synced" came from `syncedLyricsMapProvider`, which only the active-line clock
+   needs. While that provider was loading - or after it errored - the tab was
+   declared empty even though the timed lines were already loaded; the plain
+   fallback (every cue at time zero) produces the identical symptom. Both screens
+   now decide it from the lyrics in hand (`hasRealTimings`), so an unrelated
+   provider's state cannot hide them.
+
+Nothing about the text, timings, banners, tap-to-seek, colours or the anchor
+changed: the SRT/LRC payloads, the ordering and the fallbacks are as before apart
+from the format detection.
+
+### Verification of this fix
+
+- `test/modules/lyrics/lyric_parsing_test.dart` - 14 assertions over the real SRT
+  of two of the reported tracks (plus a CRLF variant) and a valid LRC block, so the
+  other format cannot regress: cues keep their exact times (`10.427s`, `12.971s`,
+  `635ms`, ...), `hasRealTimings` classifies those tracks as synced, and text with
+  no cues still yields "no timings" so the plain path is untouched.
+- `dart analyze` clean; release APK built by `Android Release Build` and installed
+  (versionCode 103).
+- **On-device visual check of the Sync tab is outstanding**, and this is the honest
+  limitation: the player sheet's **Lyrics** button did not accept synthetic input
+  in this session (single taps at three vertical positions, a 2 px micro-swipe, and
+  keyboard focus + Enter were all tried). The same button was already unresponsive
+  before this change, so it is a tooling limitation rather than a regression. One
+  manual tap - player -> **Lyrics** -> **Sync** - confirms it on any of those
+  tracks.
+
 ## Verification
 
 - **`test/modules/lyrics/lyrics_auto_center_test.dart`** (widget tests, CI):
