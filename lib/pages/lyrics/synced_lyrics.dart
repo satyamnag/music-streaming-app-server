@@ -334,12 +334,15 @@ class SyncedLyrics extends HookConsumerWidget {
                   );
                 },
               ),
-              // Half a window BELOW the last line, so the final line can still
-              // reach the centre and the lock survives to the end of the track.
-              // The matching space above is intentionally absent - see the note
-              // on the list above.
+              // Space BELOW the last line so the final line can still rise to the
+              // anchor (which is 30% down the view, so it needs the remaining
+              // 70%). LyricsAutoCenter owns that fraction, so the two cannot
+              // disagree. The matching space above is intentionally absent - see
+              // the note on the list above.
               SliverToBoxAdapter(
-                child: SizedBox(height: mediaQuery.height / 2),
+                child: SizedBox(
+                  height: LyricsAutoCenter.trailingSpace(mediaQuery.height),
+                ),
               ),
             ],
             if (playlist.activeTrack != null &&

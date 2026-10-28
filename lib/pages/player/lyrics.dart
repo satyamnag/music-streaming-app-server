@@ -9,6 +9,7 @@ import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/hooks/controllers/use_auto_scroll_controller.dart';
 import 'package:sangeet/models/lyrics.dart';
+import 'package:sangeet/modules/lyrics/lyric_language_selection.dart';
 import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/pages/lyrics/multilang_lyrics.dart';
@@ -28,8 +29,12 @@ class PlayerLyricsPage extends HookConsumerWidget {
     final playlist = ref.watch(audioPlayerProvider);
     final track = playlist.activeTrack;
     final topTab = useState(0); // 0=Plain, 1=Sync
-    final plainSub = useState(0);
-    final syncSub = useState(0);
+
+    // Which lyric languages to show, shared by the Plain and Sync tabs - the
+    // facility the Soulful Bhakti web app's lyrics panel offers: one, two, three
+    // or all of them at once, each in its own colour. Starts on Telugu, and can
+    // never be emptied (see LyricLanguageSelection.toggle).
+    final selectedLangs = useState<Set<String>>({LyricLanguages.te});
 
     final query = ref.watch(syncedLyricsProvider(track));
     final subtitle = query.asData?.value;
@@ -91,16 +96,24 @@ class PlayerLyricsPage extends HookConsumerWidget {
     final hasAnyPlain = availablePlain.isNotEmpty;
     final hasAnySync = availableSync.isNotEmpty;
 
-    useEffect(() {
-      if (plainSub.value >= availablePlain.length &&
-          availablePlain.isNotEmpty) {
-        plainSub.value = 0;
-      }
-      if (syncSub.value >= availableSync.length && availableSync.isNotEmpty) {
-        syncSub.value = 0;
-      }
-      return null;
-    }, [availablePlain.length, availableSync.length]);
+    // What each tab should actually DRAW: the reader's selection narrowed to the
+    // languages that tab has text for, never empty while the tab has any text.
+    final activePlain = LyricLanguageSelection.activeLanguages(
+      available: availablePlain,
+      selected: selectedLangs.value,
+    );
+    final activeSync = LyricLanguageSelection.activeLanguages(
+      available: availableSync,
+      selected: selectedLangs.value,
+    );
+
+    void toggleLang(String language, List<String> available) {
+      selectedLangs.value = LyricLanguageSelection.toggle(
+        selected: selectedLangs.value,
+        language: language,
+        available: available,
+      );
+    }
 
     final theme = Theme.of(context);
 
@@ -149,41 +162,26 @@ class PlayerLyricsPage extends HookConsumerWidget {
       ),
     );
 
-    // Sub tabs for Plain
-    Widget plainSubBar() {
-      if (!hasAnyPlain) return const SizedBox.shrink();
+    // Language chips. Each chip TOGGLES its language rather than replacing the
+    // other, so two or three languages can be read together - the same
+    // multi-select the web app's lyrics panel uses. A chip is drawn selected when
+    // that language is being drawn in the current tab.
+    Widget languageBar(
+      List<String> available,
+      List<String> active,
+    ) {
+      if (available.isEmpty) return const SizedBox.shrink();
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            for (var i = 0; i < availablePlain.length; i++)
+            for (final lang in available)
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: _SubTab(
-                  lang: availablePlain[i],
-                  selected: plainSub.value == i,
-                  onTap: () => plainSub.value = i,
-                ),
-              ),
-          ],
-        ),
-      );
-    }
-
-    // Sub tabs for Sync
-    Widget syncSubBar() {
-      if (!hasAnySync) return const SizedBox.shrink();
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (var i = 0; i < availableSync.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _SubTab(
-                  lang: availableSync[i],
-                  selected: syncSub.value == i,
-                  onTap: () => syncSub.value = i,
+                  lang: lang,
+                  selected: active.contains(lang),
+                  onTap: () => toggleLang(lang, available),
                 ),
               ),
           ],
@@ -196,9 +194,7 @@ class PlayerLyricsPage extends HookConsumerWidget {
       if (!hasAnyPlain) {
         return const _NoData();
       }
-      final lang =
-          availablePlain[plainSub.value.clamp(0, availablePlain.length - 1)];
-      return PlainLanguageViewBuilder(track: track, lang: lang);
+      return MultiLanguagePlainView(track: track, languages: activePlain);
     }
 
     Widget syncContent() {
@@ -206,9 +202,7 @@ class PlayerLyricsPage extends HookConsumerWidget {
       if (!hasAnySync) {
         return const _NoData();
       }
-      final lang =
-          availableSync[syncSub.value.clamp(0, availableSync.length - 1)];
-      return _SingleSyncView(track: track, lang: lang);
+      return _MultiSyncView(track: track, languages: activeSync);
     }
 
     return Scaffold(
@@ -229,12 +223,12 @@ class PlayerLyricsPage extends HookConsumerWidget {
           if (topTab.value == 0)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: plainSubBar(),
+              child: languageBar(availablePlain, activePlain),
             )
           else
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: syncSubBar(),
+              child: languageBar(availableSync, activeSync),
             ),
           const Divider(height: 1),
           Expanded(
@@ -422,10 +416,14 @@ class _NoData extends StatelessWidget {
   }
 }
 
-class _SingleSyncView extends HookConsumerWidget {
+class _MultiSyncView extends HookConsumerWidget {
   final SangeetTrackObject? track;
-  final String lang;
-  const _SingleSyncView({required this.track, required this.lang});
+
+  /// Language keys to draw, in display order (already resolved for this tab).
+  final List<String> languages;
+
+  const _MultiSyncView({required this.track, required this.languages});
+
   @override
   Widget build(BuildContext context, ref) {
     if (track == null) return const _NoData();
@@ -449,9 +447,21 @@ class _SingleSyncView extends HookConsumerWidget {
     if ((mapState.asData?.value.static ?? true) == true) return const _NoData();
     final variants = subtitle?.variants ?? const <LyricVariant>[];
     if (variants.isEmpty) return const _NoData();
-    final hasAny =
-        variants.any((v) => LyricLanguages.fieldOf(v, lang).trim().isNotEmpty);
+
+    // Every shown language keeps its own colour so a listener can tell the
+    // columns apart; the definitions come from the shared list, so the hues here
+    // and in the chip row can never disagree.
+    final defs = [
+      for (final def in kLyricLanguages)
+        if (languages.contains(def.key)) def,
+    ];
+    final hasAny = variants.any(
+      (v) => defs.any(
+        (def) => LyricLanguages.fieldOf(v, def.key).trim().isNotEmpty,
+      ),
+    );
     if (!hasAny) return const _NoData();
+
     var currentIndex = 0;
     for (var i = 0; i < variants.length; i++) {
       if (variants[i].time.inSeconds <= currentTime) {
@@ -460,60 +470,51 @@ class _SingleSyncView extends HookConsumerWidget {
         break;
       }
     }
-    // The singing line is pinned to a FIXED point in the middle of the view and
-    // the lines above it travel upward as the track plays - the same rule the
-    // full-page Sync view uses, from the same module (see LyricsAutoCenter and
-    // docs/SYNCED-LYRICS.md).
-    //
-    // It replaces a proportional jump: `maxScrollExtent * currentIndex / length`.
-    // That put the current line wherever the fraction happened to land - never
-    // the centre - and drifted further off the more the line heights differed
-    // (a banner, a wrapped Telugu line, the blank rows this list renders for
-    // empty variants). Centring uses the line's measured geometry instead.
+
+    // The singing line is pinned to a FIXED fraction of the view - 30% from the
+    // top (see LyricsAutoCenter) - and the lines above it travel upward as the
+    // track plays. This replaces a proportional jump
+    // (`maxScrollExtent * currentIndex / length`), which put the current line
+    // wherever that fraction landed and drifted further the more the line heights
+    // differed.
     final controller = useAutoScrollController();
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         LyricsAutoCenter.centerOnLine(controller, currentIndex);
       });
       return null;
-    }, [currentIndex, variants.length]);
+    }, [currentIndex, variants.length, languages.join(',')]);
 
     final theme = Theme.of(context);
-    final def = kLyricLanguages.firstWhere((d) => d.key == lang,
-        orElse: () => kLyricLanguages.first);
     final windowHeight = MediaQuery.sizeOf(context).height;
 
     return ListView.builder(
       controller: controller,
-      // Half a window BELOW the last line only, so the final line can reach the
-      // centre and the lock holds to the end of the track. There is deliberately
-      // no matching space on top: with it the first line started in the middle of
-      // the screen under a large empty area. Starting from the top means the
-      // lyrics fill the view from the top down, and the singing line travels down
-      // to the centre as the song plays - `Scrollable.ensureVisible` clamps its
-      // target (`clampDouble(target, minScrollExtent, maxScrollExtent)`), so
-      // until the current line can be centred the list stays at the top.
+      // Space BELOW the last line only, so the final line can still rise to the
+      // anchor and the lock holds to the end of the track; LyricsAutoCenter owns
+      // that fraction (the mirror of the 30%-from-the-top anchor). There is
+      // deliberately no matching space on top: with it the first line started in
+      // the middle of the screen under a large empty area. Starting from the top
+      // means the lyrics fill the view from the top down, and the singing line
+      // travels down to the anchor as the song plays - `Scrollable.ensureVisible`
+      // clamps its target (`clampDouble(target, minScrollExtent,
+      // maxScrollExtent)`), so until the current line can reach the anchor the
+      // list stays at the top.
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        bottom: windowHeight / 2,
+        bottom: LyricsAutoCenter.trailingSpace(windowHeight),
       ),
       itemCount: variants.length,
       itemBuilder: (context, index) {
-        final text = LyricLanguages.fieldOf(variants[index], lang).trim();
-        if (text.isEmpty) {
-          return AutoScrollTag(
-            key: ValueKey(index),
-            index: index,
-            controller: controller,
-            child: const SizedBox(height: 8),
-          );
-        }
+        final variant = variants[index];
+
         // A line the author wrapped in double braces ({{Music}}) is a banner, not
         // sung text. This tab renders the variant fields directly, so it never saw
         // the markup rules and printed `{{Music}}` verbatim — the same song showed
-        // a banner on the lyrics page and raw braces here.
-        final marked = parseMarkedLyricsLine(text);
+        // a banner on the lyrics page and raw braces here. Read from the Telugu
+        // field, which is where the other surfaces read the mark too.
+        final marked = parseMarkedLyricsLine(variant.te);
         if (marked.mark == LyricsLineMark.banner) {
           return AutoScrollTag(
             key: ValueKey(index),
@@ -525,6 +526,22 @@ class _SingleSyncView extends HookConsumerWidget {
             ),
           );
         }
+
+        final blocks = <({LyricLanguageDef def, String text})>[];
+        for (final def in defs) {
+          final text = LyricLanguages.fieldOf(variant, def.key).trim();
+          if (text.isEmpty) continue;
+          blocks.add((def: def, text: text));
+        }
+        if (blocks.isEmpty) {
+          return AutoScrollTag(
+            key: ValueKey(index),
+            index: index,
+            controller: controller,
+            child: const SizedBox(height: 8),
+          );
+        }
+
         final isActive = index == currentIndex;
         return AutoScrollTag(
           key: ValueKey(index),
@@ -532,31 +549,68 @@ class _SingleSyncView extends HookConsumerWidget {
           controller: controller,
           child: GestureDetector(
             onTap: () {
-              if (variants[index].time.isNegative ||
-                  variants[index].time > audioPlayer.duration) {
+              if (variant.time.isNegative ||
+                  variant.time > audioPlayer.duration) {
                 return;
               }
-              audioPlayer.seek(variants[index].time);
+              audioPlayer.seek(variant.time);
             },
             behavior: HitTestBehavior.translucent,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
-              // The line that is playing is drawn in the cream capsule from the
-              // reference screen, on its own dark ink: the cream pill is its own
-              // surface, so the language's line colour (chosen for this page's
-              // background) would not be legible on it.
               child: AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 240),
                 style: theme.typography.base.copyWith(
-                  color: isActive ? LyricsActiveLineCapsule.ink : def.color,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                   fontSize: isActive ? 19 : 16,
                   height: isActive ? 1.6 : 1.5,
                 ),
                 textAlign: TextAlign.center,
+                // The line that is playing is drawn in the cream capsule from the
+                // reference screen. Every shown language sits inside it in the
+                // capsule's own dark ink: the per-language colours are chosen
+                // against this page's background and would not be legible on
+                // cream, and the capsule's ink is the one pairing whose contrast
+                // is asserted (>= 4.5:1 on both ends of the gradient).
                 child: isActive
-                    ? LyricsActiveLineCapsule(child: Text(text))
-                    : Text(text),
+                    ? LyricsActiveLineCapsule(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final block in blocks)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 1),
+                                child: Text(
+                                  block.text,
+                                  style: TextStyle(
+                                    color: LyricsActiveLineCapsule.ink,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 19,
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final block in blocks)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 1),
+                              child: Text(
+                                block.text,
+                                style: theme.typography.base.copyWith(
+                                  color: block.def.color,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
               ),
             ),
           ),
