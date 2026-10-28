@@ -101,5 +101,24 @@ every provider and backend route. The only colour decision added is the ink
   Telugu line with four translation sub-lines does not overflow at 320dp; the
   singing ink keeps **≥ 4.5:1** against both ends of the cream gradient; the gold
   and cream match the existing decorations.
-- `dart analyze` clean, built by the `Android Release Build` workflow, installed
-  over versionCode 97 with `adb install -r`.
+- `dart analyze` clean, and the signed release APK (versionCode 98) built by the
+  `Android Release Build` workflow.
+
+### On-device status
+
+Not yet smoke-tested. The phone dropped off the LAN (no `adb devices` entry, no
+mDNS advert, and not answering on its previous address) after the build finished,
+so the install/launch check is still outstanding. Reconnect wireless debugging and
+it is one command:
+
+```
+adb install -r gh-artifacts-v98/app-stable-release.apk
+```
+
+Worth stating plainly: the *behaviour* (fixed centre, upward travel, exact
+alignment at the first/last line and after a far seek) cannot be exercised by eye
+on this build without signing in, because playback is gated behind sign-in and
+audio is what advances the active line. That behaviour is therefore pinned by the
+widget tests above, which run the real `LyricsAutoCenter` against the real scroll
+geometry; the on-device pass only needs to confirm the screen opens and paints
+without a crash or a layout overflow.
