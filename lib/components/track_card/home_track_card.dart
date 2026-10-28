@@ -50,20 +50,23 @@ class HomeTrackCard extends HookConsumerWidget {
         : null;
 
     // Both of the card's tap targets play the track, so both have to clear the
-    // paywall first. One gate for the two of them keeps them from drifting.
+    // gate first. One gate for the two of them keeps them from drifting.
+    //
+    // The gate runs for EVERY track, not only locked ones. `gateTrackPlay`
+    // already requires a signed-in user before anything else (any track, free or
+    // paid) and only then decides whether the paywall is needed, so gating on
+    // `locked` alone left the largest hole in the rule: a signed-out tap on a
+    // FREE track skipped the sign-in prompt and the player refused silently, so
+    // the button appeared dead. `locked` now only decides the crown badge.
     VoidCallback? gated(VoidCallback? action) {
       if (action == null) return null;
       return () async {
-        if (locked) {
-          await PremiumAccess.gateTrackPlay(
-            context: context,
-            ref: ref,
-            track: track,
-            feature: () async => action(),
-          );
-          return;
-        }
-        action();
+        await PremiumAccess.gateTrackPlay(
+          context: context,
+          ref: ref,
+          track: track,
+          feature: () async => action(),
+        );
       };
     }
 

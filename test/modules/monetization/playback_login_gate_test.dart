@@ -300,5 +300,39 @@ void main() {
             'unconditionally',
       );
     });
+
+    test('the shared home card gates EVERY track tap, not only locked ones', () {
+      // Gating on `locked` alone (paid && !premium) meant a signed-out tap on a
+      // FREE track never reached `requireSignInToPlay`: no Google sign-in prompt,
+      // and the player then refused silently, so the button looked dead. This is
+      // the surface the home rows, search, see-all and the analytics grids share.
+      final source =
+          File('lib/components/track_card/home_track_card.dart').readAsStringSync();
+      expect(source.contains('PremiumAccess.gateTrackPlay('), isTrue);
+      expect(
+        RegExp(r'if\s*\(\s*locked\s*\)').hasMatch(source),
+        isFalse,
+        reason: 'the gate must not be skipped for an unlocked (free) track: that '
+            'is exactly the signed-out-free-track hole',
+      );
+    });
+
+    test('the track row gates EVERY tap, not only locked ones', () {
+      final source =
+          File('lib/components/track_tile/track_tile.dart').readAsStringSync();
+      final flat = source.replaceAll(RegExp(r'\s+'), ' ');
+      expect(
+        flat.contains('isTrackLocked( track, ref) ||'),
+        isFalse,
+        reason: 'the row gated on the lock, so a signed-out tap on a FREE track '
+            'skipped the sign-in prompt entirely',
+      );
+      expect(
+        RegExp(r'PremiumAccess\.gateTrackPlay\(').allMatches(source).length,
+        greaterThanOrEqualTo(2),
+        reason: 'both row play paths (the row play button and the title button) '
+            'must go through the gate',
+      );
+    });
   });
 }
