@@ -16,6 +16,11 @@ import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 
 const Size _windowSize = Size(300, 400);
 
+/// Half the viewport height - the spacer the page puts above the first line and
+/// below the last so both ends can reach the centre. A literal because a property
+/// access (`_windowSize.height`) is not a constant expression in Dart.
+const double _halfWindow = 200; // == _windowSize.height / 2
+
 /// A list shaped like the lyrics view: a half-viewport spacer, the lines as
 /// [AutoScrollTag]s (so `tagMap` is populated the way the page's is), then the
 /// matching spacer. Uniform 40dp rows keep the arithmetic checkable.
@@ -31,7 +36,7 @@ Widget _harness(AutoScrollController controller, {int count = 30}) {
           controller: controller,
           slivers: [
             const SliverToBoxAdapter(
-              child: SizedBox(height: _windowSize.height / 2),
+              child: SizedBox(height: _halfWindow),
             ),
             SliverList.builder(
               itemCount: count,
@@ -46,7 +51,7 @@ Widget _harness(AutoScrollController controller, {int count = 30}) {
               ),
             ),
             const SliverToBoxAdapter(
-              child: SizedBox(height: _windowSize.height / 2),
+              child: SizedBox(height: _halfWindow),
             ),
           ],
         ),
