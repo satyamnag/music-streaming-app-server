@@ -21,6 +21,7 @@ import 'package:sangeet/provider/metadata_plugin/artist/related.dart';
 import 'package:sangeet/provider/metadata_plugin/artist/top_tracks.dart';
 import 'package:sangeet/provider/metadata_plugin/artist/wikipedia.dart';
 import 'package:sangeet/provider/metadata_plugin/library/artists.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 
 @RoutePage()
 class ArtistPage extends HookConsumerWidget {
@@ -50,6 +51,10 @@ class ArtistPage extends HookConsumerWidget {
         floatingHeader: true,
         child: material.RefreshIndicator.adaptive(
           onRefresh: () async {
+            // Explicit refresh: drop the catalogue cache so the reload below
+            // reads live data rather than the copy that makes first paint
+            // instant.
+            await CatalogCache.instance.clear();
             ref.invalidate(metadataPluginArtistProvider(artistId));
             ref.invalidate(
               metadataPluginArtistRelatedArtistsProvider(artistId),

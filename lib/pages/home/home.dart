@@ -30,6 +30,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/history/recent_tracks.dart';
 import 'package:sangeet/provider/home_tracks/home_tracks.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 import 'package:sangeet/services/image_cache/artwork_precache.dart';
 import 'package:sangeet/utils/platform.dart';
 
@@ -104,6 +105,12 @@ class HomePage extends HookConsumerWidget {
             color: context.theme.colorScheme.primary,
             backgroundColor: context.theme.colorScheme.background,
             onRefresh: () async {
+              // Pull-to-refresh means "show me what is live NOW", so the
+              // catalogue cache is dropped before the providers below reload.
+              // Without this the reload would be answered from the cache that
+              // keeps every other screen instant, and a deliberate refresh
+              // would appear to do nothing.
+              await CatalogCache.instance.clear();
               ref.invalidate(homeTracksProvider);
               ref.invalidate(homeSectionsProvider);
               ref.invalidate(recentlyPlayedTracksProvider);

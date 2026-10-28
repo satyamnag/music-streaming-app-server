@@ -8,6 +8,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/provider/metadata_plugin/library/albums.dart';
 import 'package:sangeet/provider/metadata_plugin/tracks/album.dart';
 import 'package:sangeet/provider/metadata_plugin/utils/common.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 
 @RoutePage()
 class AlbumPage extends HookConsumerWidget {
@@ -35,6 +36,9 @@ class AlbumPage extends HookConsumerWidget {
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
+        // Explicit refresh: drop the catalogue cache so the reload below reads
+        // live data rather than the copy that makes first paint instant.
+        await CatalogCache.instance.clear();
         ref.invalidate(metadataPluginAlbumTracksProvider(album.id));
         ref.invalidate(metadataPluginIsSavedAlbumProvider(album.id));
       },

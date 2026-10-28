@@ -24,6 +24,7 @@ import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 
 /// Skeleton card for the library's loading state: the same shared home card the
 /// library renders once loaded, so the placeholder matches the loaded grid.
@@ -148,6 +149,9 @@ class UserPlaylistsPage extends HookConsumerWidget {
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
+        // Explicit refresh: drop the catalogue cache so the covers and track
+        // rows reloaded below are live rather than the instant-from-cache copy.
+        await CatalogCache.instance.clear();
         ref.invalidate(userPlaylistsProvider);
       },
       child: SafeArea(

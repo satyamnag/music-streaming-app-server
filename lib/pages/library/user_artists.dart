@@ -20,6 +20,7 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:sangeet/services/metadata/errors/exceptions.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 
 @RoutePage()
 class UserArtistsPage extends HookConsumerWidget {
@@ -73,6 +74,9 @@ class UserArtistsPage extends HookConsumerWidget {
       child: Scaffold(
         child: material.RefreshIndicator.adaptive(
           onRefresh: () async {
+            // Explicit refresh: drop the catalogue cache so the rows reloaded
+            // below are live rather than the instant-from-cache copy.
+            await CatalogCache.instance.clear();
             ref.invalidate(libraryArtistsProvider);
           },
           child: InterScrollbar(

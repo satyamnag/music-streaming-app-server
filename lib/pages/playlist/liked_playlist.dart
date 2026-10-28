@@ -7,6 +7,7 @@ import 'package:sangeet/components/track_presentation/track_presentation.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/pages/playlist/playlist.dart';
 import 'package:sangeet/provider/library/library_data_provider.dart';
+import 'package:sangeet/services/catalog_cache/catalog_cache.dart';
 import 'package:auto_route/auto_route.dart';
 
 @RoutePage()
@@ -29,6 +30,10 @@ class LikedPlaylistPage extends HookConsumerWidget {
 
     return material.RefreshIndicator.adaptive(
       onRefresh: () async {
+        // Explicit refresh: drop the catalogue cache first, so the covers and
+        // track rows reloaded below are read from the network, not from the
+        // copy that keeps this screen instant.
+        await CatalogCache.instance.clear();
         ref.invalidate(likedSongsProvider);
       },
       child: TrackPresentation(
