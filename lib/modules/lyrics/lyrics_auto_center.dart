@@ -42,6 +42,12 @@ class LyricsAutoCenter {
 
   static const Curve animationCurve = Curves.easeInOutCubic;
 
+  /// `scroll_to_index` asserts `duration > Duration.zero` for its own scroll, so
+  /// the "jump" that lands near an unbuilt line is 1 ms rather than zero:
+  /// visually instantaneous for the reader, and the package's precondition holds.
+  /// (Passing zero throws in debug and is what the auto-centre test caught.)
+  static const Duration jumpDuration = Duration(milliseconds: 1);
+
   /// Scrolls [controller] so line [index] sits at [alignment] in the viewport.
   ///
   /// Does nothing when [index] is negative (nothing is playing) or the view has
@@ -70,7 +76,7 @@ class LyricsAutoCenter {
       controller.scrollToIndex(
         index,
         preferPosition: AutoScrollPosition.middle,
-        duration: Duration.zero,
+        duration: jumpDuration,
       ),
     );
 
