@@ -5,7 +5,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
+import 'package:sangeet/components/lyrics/lyrics_active_line_capsule.dart';
 import 'package:sangeet/components/lyrics/lyrics_music_banner.dart';
+import 'package:sangeet/modules/lyrics/lyrics_auto_center.dart';
 import 'package:sangeet/modules/lyrics/lyrics_markup.dart';
 import 'package:sangeet/modules/lyrics/zoom_controls.dart';
 import 'package:sangeet/components/shimmers/shimmer_lyrics.dart';
@@ -58,6 +60,17 @@ class SyncedLyrics extends HookConsumerWidget {
     );
     final textZoomLevel = useState<int>(defaultTextZoom);
 
+    // Which line is playing.
+    //
+    // The highlight itself is still decided per item (a slice is active when its
+    // second matches, so slices that share a second all light up); this index is
+    // the one line the view pins to the centre - the first of any duplicates,
+    // which is the line a reader would call "the current one".
+    final activeIndex = lyricValue == null
+        ? -1
+        : lyricValue.lyrics
+            .indexWhere((line) => line.time.inSeconds == currentTime);
+
     final typography = Theme.of(context).typography;
 
     ref.listen(
@@ -71,6 +84,23 @@ class SyncedLyrics extends HookConsumerWidget {
         ref.read(syncedLyricsDelayProvider.notifier).state = 0;
       },
     );
+
+    // Pin the singing line to a FIXED point in the middle of the view, so the
+    // lines above it travel upward as the track plays and the reader's eye never
+    // has to chase the highlight.
+    //
+    // Runs when the active line changes, and when the reader changes the text
+    // zoom - zoom changes every line's height, which would otherwise leave the
+    // centred line off-centre. Post-frame, so the line is measured at its final
+    // size: the active line is drawn larger than its neighbours, and centring
+    // before that growth has been laid out leaves it a few pixels low.
+    useEffect(() {
+      if (activeIndex < 0) return null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LyricsAutoCenter.centerOnLine(controller, activeIndex);
+      });
+      return null;
+    }, [activeIndex, textZoomLevel.value]);
 
     final headlineTextStyle = (mediaQuery.mdAndUp
             ? typography.h3
@@ -142,7 +172,17 @@ class SyncedLyrics extends HookConsumerWidget {
               ),
             if (lyricValue != null &&
                 lyricValue.lyrics.isNotEmpty &&
-                lyricsState.asData?.value.static != true)
+                lyricsState.asData?.value.static != true) ...[
+              // Half a window of empty space above the first line and below the
+              // last. Without it only the MIDDLE of a song could put its line in
+              // the centre - the first line could never travel down to the focal
+              // point, nor the last one up to it. Sized from the window rather
+              // than the viewport because the viewport's height is only known
+              // after layout, and being slightly generous costs nothing: the
+              // centre itself is set exactly by LyricsAutoCenter.
+              SliverToBoxAdapter(
+                child: SizedBox(height: mediaQuery.height / 2),
+              ),
               SliverList.builder(
                 itemCount: lyricValue.lyrics.length,
                 itemBuilder: (context, index) {
@@ -160,18 +200,18 @@ class SyncedLyrics extends HookConsumerWidget {
                               LyricLanguages.fieldOf(variant, lang),
                         ].where((t) => t.trim().isNotEmpty).toList();
 
-                  if (isActive) {
-                    controller.scrollToIndex(
-                      index,
-                      preferPosition: AutoScrollPosition.middle,
-                    );
-                  }
                   // A line the author wrapped in double braces ({{Music}})
                   // renders as a short "♪ Music ♪" banner instead of sung text.
                   // Checked before the empty-line branch so a banner is never
                   // swallowed as a spacer.
                   final marked = parseMarkedLyricsLine(lyricSlice.text);
 
+                  // The scroll that keeps this line centred is NOT started here
+                  // any more. It runs from one post-frame effect (the
+                  // LyricsAutoCenter call above): a scroll begun inside
+                  // itemBuilder runs during build, against the package's
+                  // estimated row height, and can fire again for every rebuild
+                  // of the active line.
                   return AutoScrollTag(
                     key: ValueKey(index),
                     index: index,
@@ -185,21 +225,17 @@ class SyncedLyrics extends HookConsumerWidget {
                             child: LyricsMusicBanner(label: marked.label),
                           )
                         : lyricSlice.text.isEmpty && subLines.isEmpty
-                            ? Container(
-                                padding:
-                                    index == lyricValue.lyrics.length - 1
-                                        ? EdgeInsets.only(
-                                            bottom: mediaQuery.height / 2,
-                                          )
-                                        : null,
-                              )
+                            // A blank lyric line is a stanza break: it takes no
+                            // height of its own, and the padding on its
+                            // neighbours supplies the gap. The old special case
+                            // that gave the LAST line half a screen of height is
+                            // gone - the sliver after the list is that spacer
+                            // now, and applies at both ends rather than only at
+                            // the bottom.
+                            ? const SizedBox.shrink()
                         : Center(
                             child: Padding(
-                              padding: index == lyricValue.lyrics.length - 1
-                                  ? const EdgeInsets.all(8.0).copyWith(
-                                      bottom: 100,
-                                    )
-                                  : const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(8.0),
                               child: AnimatedDefaultTextStyle(
                                 duration: const Duration(milliseconds: 250),
                                 style: TextStyle(
@@ -218,8 +254,21 @@ class SyncedLyrics extends HookConsumerWidget {
                                   // The active line is distinguished by SIZE and
                                   // WEIGHT rather than by dimming the others, because
                                   // dimming is precisely what costs contrast.
-                                  color: lyricColor,
-                                  shadows: [lyricShadow],
+                                  //
+                                  // The playing line is the one exception, and not
+                                  // for emphasis: it sits ON the cream capsule, where
+                                  // the palette ink - chosen against the artwork -
+                                  // would be white on cream. The capsule owns its
+                                  // surface, so it supplies its own ink.
+                                  color: isActive
+                                      ? LyricsActiveLineCapsule.ink
+                                      : lyricColor,
+                                  // No halo under the capsule: the pill is the
+                                  // backdrop there, and a shadowed glyph on cream
+                                  // reads as a smudge rather than a highlight.
+                                  shadows: isActive
+                                      ? const <Shadow>[]
+                                      : [lyricShadow],
                                   fontWeight: isActive
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -244,13 +293,28 @@ class SyncedLyrics extends HookConsumerWidget {
                                       }
                                       audioPlayer.seek(time);
                                     },
-                                    child: _SyncedLine(
-                                      mainText: lyricSlice.text,
-                                      subLines: subLines,
-                                      color: lyricColor,
-                                      mainFontSize: (isActive ? 28 : 26) *
-                                          (textZoomLevel.value / 100),
-                                    ),
+                                    child: isActive
+                                        // The line that is playing is drawn
+                                        // inside the cream capsule, on its own
+                                        // dark ink - the reference design's
+                                        // highlight, built from the colours the
+                                        // lyric decorations already use.
+                                        ? LyricsActiveLineCapsule(
+                                            child: _SyncedLine(
+                                              mainText: lyricSlice.text,
+                                              subLines: subLines,
+                                              color: LyricsActiveLineCapsule.ink,
+                                              mainFontSize: (isActive ? 28 : 26) *
+                                                  (textZoomLevel.value / 100),
+                                            ),
+                                          )
+                                        : _SyncedLine(
+                                            mainText: lyricSlice.text,
+                                            subLines: subLines,
+                                            color: lyricColor,
+                                            mainFontSize: (isActive ? 28 : 26) *
+                                                (textZoomLevel.value / 100),
+                                          ),
                                   ),
                                 ),
                               ),
@@ -259,6 +323,12 @@ class SyncedLyrics extends HookConsumerWidget {
                   );
                 },
               ),
+              // The matching half-window below the last line, so the final line
+              // of a song can reach the centre too.
+              SliverToBoxAdapter(
+                child: SizedBox(height: mediaQuery.height / 2),
+              ),
+            ],
             if (playlist.activeTrack != null &&
                 (timedLyricsQuery.isLoading || timedLyricsQuery.isRefreshing))
               const SliverToBoxAdapter(child: ShimmerLyrics())
