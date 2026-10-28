@@ -1,6 +1,6 @@
 # Synced Lyrics: fixed-centre singing line
 
-Status: implemented. Version: versionCode 99.
+Status: implemented. Version: versionCode 100.
 
 ## There are TWO sync surfaces, and the reference is the second one
 
@@ -77,9 +77,48 @@ A line that has not been built yet - the screen opening mid-song, or a seek -
 first jumps to an estimate without animating, then centres exactly on the next
 frame. The jump is only ever a hint; the centring is authoritative.
 
-**Half a window of empty space** above the first line and below the last, so the
-first and last lines can reach the centre too. This replaces the old
-half-a-screen pad that was attached to the last item only.
+### The scroll model, corrected
+
+The first version added half a window of space **above** the first line as well as
+below the last. That made the first line start in the MIDDLE of the screen under a
+large empty area while nothing was playing - reported from the device, screenshot
+in hand. The correct model only needs the space BELOW:
+
+| Moment | What happens |
+| --- | --- |
+| Nothing playing / before the first cue | the lyrics begin at the **top** of the view and fill it downwards |
+| Track playing, early lines | the singing line cannot be centred yet, so it sits progressively lower with each cue |
+| Track playing, once centring is possible | the singing line **locks onto the centre** and stays there for the rest of the track |
+| Repeat / loop / new play | the list returns to the **top** and the whole descent happens again |
+
+This falls out of Flutter's own arithmetic rather than any special-casing. In the
+implementation of `ScrollPosition.ensureVisible` (quoted on its API page) the
+resolved offset is clamped:
+
+```dart
+target = viewport.getOffsetToReveal(object, alignment, ...).offset;
+target = clampDouble(target, minScrollExtent, maxScrollExtent);
+```
+
+So while the current line's centre lies above the top of the viewport the target
+is negative, clamps to `minScrollExtent` (0), and the list stays at the top; as
+soon as the line can be centred it is, and every later cue resolves to the same
+alignment - the lock. `LyricsAutoCenter.scrollToStart` handles the return to the
+top when a track restarts or loops and no cue is current yet.
+
+There is deliberately **no** spacer above the list (and no top padding on the
+player list). One half-window spacer BELOW keeps the final line centreable, so the
+lock survives to the end of the track.
+
+### Horizontal alignment of the singing line
+
+The second device report: the highlighted line was not aligned with the others,
+which are centred by `textAlign`. The capsule was a min-width `Row`, and a
+min-width row dropped into a full-width list item sits against the **left** edge.
+It now uses `mainAxisSize: MainAxisSize.max` with `mainAxisAlignment: center`, so
+the capsule centres ITSELF in whatever width it is given and cannot be misaligned
+by a host again; the pill is still the only flexible child, so a long line wraps
+inside the space the ornaments leave and nothing overflows.
 
 **`lib/components/lyrics/lyrics_active_line_capsule.dart`** - the highlight from
 the reference screen, built from the palette the lyric decorations already use
@@ -118,34 +157,24 @@ every provider and backend route. The only colour decision added is the ink
 ## Verification
 
 - **`test/modules/lyrics/lyrics_auto_center_test.dart`** (widget tests, CI):
-  the first, a middle and the last line each land within 1px of the viewport
-  centre; four consecutive cues each land on the *same* centre point while the
-  scroll offset increases (the text travels up behind a fixed point); a line that
-  has not been built yet (opening mid-song) still ends up centred; and a
-  source guard fails if the screen stops using the post-frame centring or
-  resumes scrolling from `itemBuilder`.
-- **`test/components/lyrics/lyrics_active_line_capsule_test.dart`**: a long
-  Telugu line with four translation sub-lines does not overflow at 320dp; the
-  singing ink keeps **≥ 4.5:1** against both ends of the cream gradient; the gold
-  and cream match the existing decorations.
-- `dart analyze` clean, and the signed release APK (versionCode 98) built by the
-  `Android Release Build` workflow.
-
-### On-device status
-
-Not yet smoke-tested. The phone dropped off the LAN (no `adb devices` entry, no
-mDNS advert, and not answering on its previous address) after the build finished,
-so the install/launch check is still outstanding. Reconnect wireless debugging and
-it is one command:
-
-```
-adb install -r gh-artifacts-v98/app-stable-release.apk
-```
-
-Worth stating plainly: the *behaviour* (fixed centre, upward travel, exact
-alignment at the first/last line and after a far seek) cannot be exercised by eye
-on this build without signing in, because playback is gated behind sign-in and
-audio is what advances the active line. That behaviour is therefore pinned by the
-widget tests above, which run the real `LyricsAutoCenter` against the real scroll
-geometry; the on-device pass only needs to confirm the screen opens and paints
-without a crash or a layout overflow.
+  - the FIRST line sits flush with the **top** of the view, never in the middle;
+  - the singing line descends cue by cue (offset stays 0 while it cannot be
+    centred) and then locks onto the centre for every later line;
+  - a middle line, the last line, and a line that has **not been built yet**
+    (opening mid-song) each land within 1px of the viewport centre;
+  - a restart (`scrollToStart`) returns the list to the top, and is a safe no-op
+    at the top or before the list exists;
+  - source guards: both screens centre through `LyricsAutoCenter`, neither scrolls
+    from `itemBuilder`, the full page has exactly ONE half-window spacer (below the
+    list) and the player page has no top padding.
+- **`test/components/lyrics/lyrics_active_line_capsule_test.dart`**:
+  - the capsule's horizontal centre matches the line's centre (the "not aligned"
+    report), which a min-width row fails;
+  - a long Telugu line with four translation sub-lines does not overflow at 320dp;
+  - the singing ink keeps **≥ 4.5:1** against both ends of the cream gradient;
+  - the gold and cream match the existing decorations.
+- `dart analyze` clean, and the signed release APK built by the
+  `Android Release Build` workflow, installed with `adb install -r`, and checked on
+  the device against both reports: lyrics starting at the top before playback, the
+  line travelling down to the centre and locking there, and the capsule aligned
+  with the other lines.

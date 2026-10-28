@@ -95,8 +95,15 @@ class SyncedLyrics extends HookConsumerWidget {
     // size: the active line is drawn larger than its neighbours, and centring
     // before that growth has been laid out leaves it a few pixels low.
     useEffect(() {
-      if (activeIndex < 0) return null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (activeIndex < 0) {
+          // Nothing is being sung yet: before the first cue, or after the track
+          // restarted or looped and the position went back to zero. Put the
+          // lyrics back at the top, so the descent to the centre happens again
+          // from the beginning on every pass.
+          LyricsAutoCenter.scrollToStart(controller);
+          return;
+        }
         LyricsAutoCenter.centerOnLine(controller, activeIndex);
       });
       return null;
@@ -173,16 +180,20 @@ class SyncedLyrics extends HookConsumerWidget {
             if (lyricValue != null &&
                 lyricValue.lyrics.isNotEmpty &&
                 lyricsState.asData?.value.static != true) ...[
-              // Half a window of empty space above the first line and below the
-              // last. Without it only the MIDDLE of a song could put its line in
-              // the centre - the first line could never travel down to the focal
-              // point, nor the last one up to it. Sized from the window rather
-              // than the viewport because the viewport's height is only known
-              // after layout, and being slightly generous costs nothing: the
-              // centre itself is set exactly by LyricsAutoCenter.
-              SliverToBoxAdapter(
-                child: SizedBox(height: mediaQuery.height / 2),
-              ),
+              // NO spacer above the list, deliberately.
+              //
+              // With half a window of space on top, the first line sat in the
+              // MIDDLE of the screen before the song started, under a large empty
+              // area. Without it the lyrics begin at the top of the view and fill
+              // it downwards, and the singing line then travels DOWN to the
+              // centre as the track plays - which is exactly what
+              // `Scrollable.ensureVisible` produces once its target is clamped:
+              // Flutter's ScrollPosition.ensureVisible ends with
+              // `target = clampDouble(target, minScrollExtent, maxScrollExtent)`,
+              // so while the current line's centre lies above the top of the
+              // viewport the offset clamps to 0 and the list simply stays at the
+              // top. As soon as the line can be centred it is, and it stays
+              // centred for the rest of the track.
               SliverList.builder(
                 itemCount: lyricValue.lyrics.length,
                 itemBuilder: (context, index) {
@@ -323,8 +334,10 @@ class SyncedLyrics extends HookConsumerWidget {
                   );
                 },
               ),
-              // The matching half-window below the last line, so the final line
-              // of a song can reach the centre too.
+              // Half a window BELOW the last line, so the final line can still
+              // reach the centre and the lock survives to the end of the track.
+              // The matching space above is intentionally absent - see the note
+              // on the list above.
               SliverToBoxAdapter(
                 child: SizedBox(height: mediaQuery.height / 2),
               ),

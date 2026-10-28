@@ -62,6 +62,28 @@ Widget _harness(Widget child, {double width = 360}) {
 
 void main() {
   group('LyricsActiveLineCapsule', () {
+    testWidgets('sits horizontally centred, like every other lyric line',
+        (tester) async {
+      // The defect this pins: dropped into a full-width list item, a min-width
+      // row hugged the LEFT edge, so the singing line was the one line that did
+      // not line up with the rest (those are centred by `textAlign`).
+      await tester.pumpWidget(
+        _harness(
+          const LyricsActiveLineCapsule(
+            child: Text('రావమ్మ ధన లక్ష్మి!'),
+          ),
+          width: 360,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final capsule = tester.getRect(find.byType(LyricsActiveLineCapsule));
+      final page = tester.getRect(find.byType(material.Scaffold));
+
+      expect(capsule.center.dx, closeTo(page.center.dx, 1.0),
+          reason: 'the capsule must be centred in the line, not pushed left');
+    });
+
     testWidgets('draws the line it is given', (tester) async {
       await tester.pumpWidget(
         _harness(

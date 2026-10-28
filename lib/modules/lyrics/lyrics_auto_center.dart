@@ -86,6 +86,19 @@ class LyricsAutoCenter {
     });
   }
 
+  /// Returns the view to the beginning, so a track that starts again - or loops
+  /// back to the top - takes the lyrics back to the top before the singing line
+  /// travels down to the centre again. No-op when already at the top.
+  static void scrollToStart(
+    AutoScrollController controller, {
+    Duration duration = animationDuration,
+    Curve curve = animationCurve,
+  }) {
+    if (!controller.hasClients) return;
+    if (controller.offset == 0) return;
+    unawaited(controller.animateTo(0, duration: duration, curve: curve));
+  }
+
   static Future<void> _reveal(
     BuildContext lineContext,
     Duration duration,
