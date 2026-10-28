@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/image/universal_image.dart';
-import 'package:sangeet/components/premium/locked_badge.dart';
+import 'package:sangeet/components/premium/paid_crown_badge.dart';
 import 'package:sangeet/components/track_card/card_border.dart';
 import 'package:sangeet/components/track_card/card_colors.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
@@ -557,7 +557,7 @@ class TrackCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         coverPixels: CoverRendition.card,
                       ),
-                  LockedBadge(locked: locked, borderRadius: 0),
+                  PaidCrownBadge(paid: locked),
                 ],
               ),
             ),

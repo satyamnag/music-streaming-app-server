@@ -201,8 +201,8 @@ void main() {
           of: find.byType(TrackCard),
           matching: find.byType(Stack),
         ),
-        // One Stack remains - the cover's, which layers the LockedBadge over the
-        // artwork. A second would be the removed outline layer.
+        // One Stack remains - the cover's, which layers the paid crown badge
+        // over the artwork. A second would be the removed outline layer.
         findsOneWidget,
         reason: 'only the cover keeps a Stack; an extra one is an overlay',
       );

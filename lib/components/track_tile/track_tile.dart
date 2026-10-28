@@ -11,6 +11,7 @@ import 'package:sangeet/components/dialogs/playlist_add_track_dialog.dart';
 import 'package:sangeet/components/heart_button/local_heart_button.dart';
 import 'package:sangeet/components/hover_builder.dart';
 import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/premium/paid_crown_badge.dart';
 import 'package:sangeet/components/track_tile/track_options_button.dart';
 import 'package:sangeet/components/ui/button_tile.dart';
 import 'package:sangeet/extensions/constrains.dart';
@@ -231,15 +232,9 @@ coverPixels: CoverRendition.card,
                                 builder: (context, ref, _) {
                                   final isFetchingActiveTrack =
                                       ref.watch(queryingTrackInfoProvider);
-                                  // Locked (paid) tracks always show a padlock in
-                                  // place of the play/pause indicator and never
-                                  // toggle to pause/loading.
-                                  if (isLocked) {
-                                    return const Icon(
-                                      Icons.lock,
-                                      color: Colors.white,
-                                    );
-                                  }
+                                  // Locked (paid) tracks never toggle to
+                                  // pause/loading; their crown badge is drawn
+                                  // at the cover's top-right corner instead.
                                   return AnimatedSwitcher(
                                     duration: const Duration(milliseconds: 300),
                                     child: switch ((
@@ -272,6 +267,12 @@ coverPixels: CoverRendition.card,
                             ),
                           ),
                         ),
+                        if (isLocked)
+                          PaidCrownBadge(
+                            paid: true,
+                            size: 14,
+                            inset: EdgeInsets.zero,
+                          ),
                       ],
                     ),
                   ],
