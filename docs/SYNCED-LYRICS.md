@@ -251,6 +251,11 @@ others showed no synced lyrics. All three store **SRT** in `synced_lyrics`
 (`00:00:10,427 --> 00:00:12,595`), verified against the live table, and each also
 carries `plain_lyrics*`.
 
+Measured across the whole catalogue: **50 of 79 tracks have `synced_lyrics`, and all
+50 are SRT - none is LRC.** So "some tracks" was exactly the set where the LRC
+attempt happened not to reject the SRT text; the rest only worked because the LRC
+library threw and the SRT branch was reached by accident.
+
 Two causes, both fixed:
 
 1. **The format was decided by luck.** The parser tried LRC first and reached SRT
