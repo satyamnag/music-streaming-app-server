@@ -54,6 +54,10 @@ class PaidCrownBadge extends StatelessWidget {
   }
 }
 
+/// The crown painter exposed for tests: rasterises the real glyph so a test
+/// can assert it is not blank, not a blob, and the right way up.
+final material.CustomPainter paidCrownPainter = _CrownPainter();
+
 /// Paints the crown in the app's brand gold with a thin dark halo so it stays
 /// legible on light artwork. Designed in a 24x24 canvas and scaled to the
 /// requested size.
