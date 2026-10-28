@@ -264,8 +264,6 @@ class MultiLanguagePlainView extends HookConsumerWidget {
     final subtitle = query.asData?.value;
 
     if (track == null) return const _NoLyrics();
-    if (query.isLoading || query.isRefreshing) return const ShimmerLyrics();
-    if (query.hasError) return const _NoLyrics();
 
     final defs = [
       for (final def in kLyricLanguages)
@@ -273,16 +271,33 @@ class MultiLanguagePlainView extends HookConsumerWidget {
     ];
     if (defs.isEmpty) return const _NoLyrics();
 
+    // The admin's authored plain text lives on the TRACK object, so it can be shown
+    // even when the lyrics provider failed - the provider only supplies the
+    // derived fallback. Requiring it (as the single-language view did) blanked the
+    // tab for a track whose plain_lyrics* columns were full but whose lyrics row
+    // was not, which is exactly the case a multi-language sheet must not lose.
+    final storedByLanguage = <String, String>{};
+    for (final def in defs) {
+      final stored = plainForTrack(track, def.key)?.trim();
+      if (stored != null && stored.isNotEmpty) {
+        storedByLanguage[def.key] = stored;
+      }
+    }
+    final hasStoredText = storedByLanguage.isNotEmpty;
+
+    if (!hasStoredText) {
+      if (query.isLoading || query.isRefreshing) return const ShimmerLyrics();
+      if (query.hasError) return const _NoLyrics();
+    }
+
     // Per language: the admin's authored plain text when there is one, else the
     // text derived from the synced variants - the same precedence the single
     // language view used.
-    final textByLanguage = <String, String>{};
-    for (final def in defs) {
-      final stored = plainForTrack(track, def.key)?.trim();
-      textByLanguage[def.key] = (stored != null && stored.isNotEmpty)
-          ? stored
-          : plainLyricTextFor(subtitle, def.key);
-    }
+    final textByLanguage = <String, String>{
+      for (final def in defs)
+        def.key: storedByLanguage[def.key] ??
+            plainLyricTextFor(subtitle, def.key),
+    };
 
     final rows = buildPlainLyricRows(
       languages: [for (final def in defs) def.key],
