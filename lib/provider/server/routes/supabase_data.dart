@@ -417,26 +417,38 @@ class ServerSupabaseDataRoutes {
       final limit = (int.tryParse(uri.queryParameters['limit'] ?? '') ?? 100)
           .clamp(1, 500);
 
-      final sb = await _supabase;
-      PostgrestList raw;
-      if (q.isNotEmpty) {
-        final pattern = '%$q%';
-        raw = await sb
-            .from('tracks')
-            .select()
-            .or('title.ilike.$pattern,artist_names_text.ilike.$pattern')
-            .order('featured_order', ascending: true, nullsFirst: false)
-            .order('created_at', ascending: true)
-            .limit(limit);
-      } else {
-        raw = await sb
-            .from('tracks')
-            .select()
-            .order('featured_order', ascending: true, nullsFirst: false)
-            .order('created_at', ascending: true)
-            .limit(limit);
-      }
-      final data = raw.cast<Map<String, dynamic>>();
+      // Cached per (query, limit), memory-only: a search the reader repeats - or
+      // retypes while the results are still on screen - is answered instantly,
+      // while the set of distinct queries cannot grow a persistent store without
+      // bound. The projection matches the catalogue's, for the same reason:
+      // nothing below reads the synced_lyrics* columns.
+      final data = await CatalogCache.instance.rows(
+        'search-${q.isEmpty ? '__empty__' : q}-$limit',
+        ttl: _catalogueTtl,
+        persist: false,
+        fetch: () async {
+          final sb = await _supabase;
+          final PostgrestList raw;
+          if (q.isNotEmpty) {
+            final pattern = '%$q%';
+            raw = await sb
+                .from('tracks')
+                .select(_trackListColumns)
+                .or('title.ilike.$pattern,artist_names_text.ilike.$pattern')
+                .order('featured_order', ascending: true, nullsFirst: false)
+                .order('created_at', ascending: true)
+                .limit(limit);
+          } else {
+            raw = await sb
+                .from('tracks')
+                .select(_trackListColumns)
+                .order('featured_order', ascending: true, nullsFirst: false)
+                .order('created_at', ascending: true)
+                .limit(limit);
+          }
+          return raw.cast<Map<String, dynamic>>();
+        },
+      );
 
       final matchItems = data
           .map((t) => {
