@@ -56,13 +56,16 @@ class LyricsActiveLineCapsule extends StatelessWidget {
   Widget build(BuildContext context) {
     final scale = Theme.of(context).scaling;
 
-    // `mainAxisSize.min` with the pill as the only flexible child: the ornaments
-    // take their fixed width and the pill gets whatever is left, so a short line
-    // produces a snug capsule and a long line wraps inside the full width - in
-    // both cases with no overflow, because the flexible child can never exceed
-    // the space its siblings leave.
+    // `mainAxisSize.max` + `center`: the capsule centres ITSELF in whatever width
+    // it is given. As a min-width row dropped into a full-width list item it sat
+    // against the left edge, because those items only centre their TEXT
+    // (`textAlign`) - which is why the singing line was the one line that was not
+    // horizontally aligned with the rest. The pill is still the only flexible
+    // child, so a long line wraps inside the space the ornaments leave and
+    // nothing can overflow.
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _Sunburst(size: ornamentSize * scale),

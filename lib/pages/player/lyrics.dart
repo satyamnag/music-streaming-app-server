@@ -485,13 +485,17 @@ class _SingleSyncView extends HookConsumerWidget {
 
     return ListView.builder(
       controller: controller,
-      // Half a window above and below, so the FIRST and LAST lines can reach the
-      // centre too - without it the fixed centre only held mid-song. This
-      // replaces the old symmetric 8dp padding.
+      // Half a window BELOW the last line only, so the final line can reach the
+      // centre and the lock holds to the end of the track. There is deliberately
+      // no matching space on top: with it the first line started in the middle of
+      // the screen under a large empty area. Starting from the top means the
+      // lyrics fill the view from the top down, and the singing line travels down
+      // to the centre as the song plays - `Scrollable.ensureVisible` clamps its
+      // target (`clampDouble(target, minScrollExtent, maxScrollExtent)`), so
+      // until the current line can be centred the list stays at the top.
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: windowHeight / 2,
         bottom: windowHeight / 2,
       ),
       itemCount: variants.length,
