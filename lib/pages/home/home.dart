@@ -10,6 +10,7 @@ import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/image/universal_image.dart';
+import 'package:sangeet/components/notifications/notification_bell.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/auth/profile_dialog.dart';
@@ -397,6 +398,10 @@ class _HomeHeaderRow extends StatelessWidget {
               context.navigateTo(const SearchRoute());
             },
           ),
+          const Gap(10),
+          // Notifications: the OneSignal push + in-app-message inbox, with the
+          // unseen count on the bell. Sits right of search, as in the reference.
+          NotificationBell(color: color, shadows: shadows),
           const Gap(10),
           // Signed-in users see their account avatar (same as the Google
           // account); signed-out users see the user icon.

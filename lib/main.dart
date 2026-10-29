@@ -17,6 +17,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:sangeet/services/analytics/posthog_service.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:sangeet/modules/notifications/app_notification.dart';
+import 'package:sangeet/modules/notifications/notifications_store.dart';
 import 'package:sangeet/services/app_deep_link_router.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
@@ -560,7 +563,15 @@ class Sangeet extends HookConsumerWidget {
 void _registerOneSignalListeners() {
   final links = AppDeepLinkRouter.instance;
 
+  // Load the persisted inbox before anything can add to it, so the header's
+  // unseen count is right on the very first frame instead of starting at zero
+  // and jumping once the widget asks.
+  unawaited(NotificationsStore.instance.ensureLoaded());
+
   OneSignalService.instance.addNotificationClickListener((event) {
+    // Opening a push is also the only way a notification that arrived while the
+    // app was in the BACKGROUND reaches the inbox, so record it here too.
+    _recordPush(event.notification);
     // An explicit link on the notification wins; otherwise fall back to the
     // `deeplink` key set under Additional Data in the OneSignal dashboard.
     final target =
@@ -569,6 +580,13 @@ void _registerOneSignalListeners() {
     final uri = Uri.tryParse(target);
     if (uri == null) return;
     links.handle(uri);
+  });
+
+  // A push that arrives while the app is in the foreground is shown by the SDK
+  // without ever passing through the click handler, so this is the only place
+  // such an arrival can be recorded for the notifications screen.
+  OneSignalService.instance.addForegroundWillDisplayListener((event) {
+    _recordPush(event.notification);
   });
 
   OneSignalService.instance.addInAppMessageClickListener((event) {
@@ -591,9 +609,60 @@ void _registerOneSignalListeners() {
   // integration and a hopeful one. They report only in a verification build.
   OneSignalService.instance.addInAppMessageLifecycleListeners(
     onWillDisplay: (_) => _logInAppMessage('will_display'),
-    onDidDisplay: (_) => _logInAppMessage('did_display'),
+    onDidDisplay: (event) {
+      _logInAppMessage('did_display');
+      // An in-app message is only ever "seen" on screen, so a display is the
+      // event the notifications inbox records for it.
+      _recordInAppMessage(event.message.messageId);
+    },
     onWillDismiss: (_) => _logInAppMessage('will_dismiss'),
     onDidDismiss: (_) => _logInAppMessage('did_dismiss'),
+  );
+}
+
+/// Records a push notification in the app's notifications inbox.
+///
+/// Best-effort and fire-and-forget: recording must never delay or break the
+/// deep-link handling that follows it.
+void _recordPush(OSNotification notification) {
+  final rawTitle = notification.title?.trim();
+  final rawLink = notification.launchUrl ??
+      (notification.additionalData?['deeplink'] is String
+          ? notification.additionalData!['deeplink'] as String
+          : null);
+  unawaited(
+    NotificationsStore.instance.add(
+      AppNotification(
+        id: notification.notificationId,
+        kind: AppNotificationKind.push,
+        title: (rawTitle == null || rawTitle.isEmpty)
+            ? 'Soulful Bhakti'
+            : rawTitle,
+        body: notification.body,
+        deepLink: (rawLink == null || rawLink.isEmpty) ? null : rawLink,
+        receivedAt: DateTime.now(),
+      ),
+    ),
+  );
+}
+
+/// Records an in-app message in the notifications inbox.
+///
+/// The SDK's `OSInAppMessage` exposes ONLY its id (onesignal_flutter 5.5.2,
+/// `src/inappmessage.dart`), so no title or body can be shown — the entry is
+/// deliberately generic rather than invented. The id in the entry id is what
+/// keeps two displays of the same message as two separate rows.
+void _recordInAppMessage(String? messageId) {
+  if (messageId == null || messageId.isEmpty) return;
+  unawaited(
+    NotificationsStore.instance.add(
+      AppNotification(
+        id: 'iam-$messageId-${DateTime.now().millisecondsSinceEpoch}',
+        kind: AppNotificationKind.inApp,
+        title: 'In-app message',
+        receivedAt: DateTime.now(),
+      ),
+    ),
   );
 }
 
