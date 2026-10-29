@@ -52,7 +52,9 @@ class SangeetNavigationBar extends HookConsumerWidget {
     // One tab = icon above its label. The selected tab is tinted with the
     // brand primary while the rest stay neutral, so the current section reads
     // at a glance the way the reference design shows it.
-    Widget tab(int index) {
+    // Returns NavigationButton (not Widget) on purpose: NavigationBar.children
+    // is a List<NavigationBarItem>, and NavigationButton implements that.
+    NavigationButton tab(int index) {
       final tile = navbarTileList[index];
       final selected = index == selectedIndex;
       return NavigationButton(
