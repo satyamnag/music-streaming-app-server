@@ -7,8 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'package:sangeet/collections/spotube_icons.dart';
-import 'package:sangeet/components/button/back_button.dart';
-import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/components/track_card/home_track_card.dart';
 import 'package:sangeet/components/track_card/track_card.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -119,41 +117,15 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
     } else {
       body = CustomScrollView(
         slivers: [
-          // The screen's hero. When this shelf has an admin-uploaded BANNER the
-          // banner is shown here, so opening a banner leads to that banner
-          // rather than a generic glyph circle. Shelves without a banner (the
-          // featured-playlist chips) keep the gradient circle exactly as before.
+          // Full-bleed banner hero, matching the reference screens: the admin's
+          // banner artwork (or a placeholder drawn from the shelf's own
+          // gradient) runs edge to edge and under the status bar, with the back
+          // arrow, title and a decorative song-count divider laid over it.
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16 * scale,
-                16 * scale,
-                16 * scale,
-                8 * scale,
-              ),
-              child: Column(
-                children: [
-                  _HeroArtwork(playlist: playlist),
-                  const Gap(12),
-                  Text(
-                    playlist.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: theme.typography.h3.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.foreground,
-                    ),
-                  ),
-                  const Gap(4),
-                  Text(
-                    context.l10n.songs_count(playlist.tracks.length),
-                    style: theme.typography.small.copyWith(
-                      color: theme.colorScheme.mutedForeground,
-                    ),
-                  ),
-                ],
-              ),
+            child: _BannerHero(
+              playlist: playlist,
+              countLabel: context.l10n.songs_count(playlist.tracks.length),
+              onBack: () => Navigator.of(context).maybePop(),
             ),
           ),
           SliverToBoxAdapter(
@@ -241,55 +213,251 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
       );
     }
 
-    return SafeArea(
-      bottom: false,
-      child: Scaffold(
-        headers: [
-          TitleBar(
-            leading: const [BackButton()],
-            title: Text(playlist?.title ?? id),
-          ),
-        ],
-        child: chipsAsync.isLoading && playlist == null
-            ? const Center(child: CircularProgressIndicator())
-            : body,
-      ),
+    // No TitleBar and no top SafeArea: the banner hero is deliberately
+    // full-bleed to the very top of the screen, so it runs under the status bar
+    // as it does in the reference design. The back arrow is drawn inside the
+    // hero, offset by the status-bar inset.
+    return Scaffold(
+      child: chipsAsync.isLoading && playlist == null
+          ? const Center(child: CircularProgressIndicator())
+          : body,
     );
   }
 }
 
-/// The chip's circle at hero size: the admin gradient, the uploaded icon image
-/// (or the fallback glyph) and the same white-vs-dark glyph rule the chips use.
-/// The detail screen's hero: the shelf's uploaded BANNER when it has one,
-/// otherwise the round icon/glyph circle the chips use.
+/// The full-bleed banner hero shared by BOTH entry points of this page: a
+/// `specials` shelf opened from the home carousel and a featured-playlist chip
+/// (the deity screens) opened from the chip row.
 ///
-/// A banner arrives only from a `specials` shelf that the admin gave a banner
-/// upload (`HomeSpecial.hasBanner`), so chip-opened screens keep their existing
-/// circle unchanged.
-class _HeroArtwork extends StatelessWidget {
-  final FeaturedPlaylist playlist;
+/// It always paints a banner:
+///   * the admin-uploaded banner when there is one, and
+///   * a PLACEHOLDER drawn from the shelf's own gradient and glyph when there
+///     is not — never a blank band, which is the requirement for a deity screen
+///     whose banner the admin has not set yet.
+/// The back arrow, title and song count are overlaid on the artwork.
+class _BannerHero extends StatelessWidget {
+  const _BannerHero({
+    required this.playlist,
+    required this.countLabel,
+    required this.onBack,
+  });
 
-  const _HeroArtwork({required this.playlist});
+  final FeaturedPlaylist playlist;
+  final String countLabel;
+  final VoidCallback onBack;
+
+  /// Title colour from the reference: warm cream over the artwork.
+  static const Color _titleColor = Color(0xFFF6E7C8);
+  static const Color _ornamentColor = Color(0xFFE0A000);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
+    final width = MediaQuery.sizeOf(context).width;
+    final topInset = MediaQuery.paddingOf(context).top;
     final banner = playlist.bannerUrl?.trim() ?? '';
-    if (banner.isEmpty) return _HeroCircle(playlist: playlist);
+    final hasIcon = (playlist.iconUrl?.trim() ?? '').isNotEmpty;
 
-    // 8:3 is the landscape banner ratio the admin uploads; the aspect ratio
-    // keeps the banner undistorted at any width.
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16 * scale),
-      child: AspectRatio(
-        aspectRatio: 8 / 3,
-        child: Image(
-          image: CachedNetworkImageProvider(banner, cacheKey: banner),
-          fit: BoxFit.cover,
-          width: double.infinity,
+    return SizedBox(
+      width: width,
+      // 2:1 — the proportion of the reference banners. Taller than the 8:3
+      // carousel artwork, so `cover` crops its sides rather than letterboxing.
+      height: width / 2,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (banner.isNotEmpty)
+            Image(
+              image: CachedNetworkImageProvider(banner, cacheKey: banner),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _placeholder(theme),
+            )
+          else
+            _placeholder(theme),
+
+          // Scrim: the overlaid text sits on artwork of unknown brightness, so
+          // the top (arrow) and bottom (title) edges are gently darkened.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: .30),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: .62),
+                ],
+                stops: const [0, .45, 1],
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: topInset + 2 * scale,
+            left: 2 * scale,
+            child: IconButton.ghost(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 22,
+                color: Colors.white,
+                shadows: [Shadow(color: Color(0x99000000), blurRadius: 6)],
+              ),
+              onPressed: onBack,
+            ),
+          ),
+
+          Positioned(
+            right: 16 * scale,
+            bottom: 14 * scale,
+            left: 16 * scale,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // The deity screens carry an uploaded square icon, and the
+                // reference shows it as a ringed circle above the title. A
+                // specials banner has no icon, so it shows the title alone.
+                if (hasIcon) ...[
+                  _HeroBadge(playlist: playlist, size: 56 * scale),
+                  Gap(8 * scale),
+                ],
+                Text(
+                  playlist.title,
+                  maxLines: 2,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.typography.h2.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: _titleColor,
+                    shadows: const [
+                      Shadow(color: Color(0xCC000000), blurRadius: 8),
+                    ],
+                  ),
+                ),
+                Gap(6 * scale),
+                _SongCountDivider(
+                  label: countLabel,
+                  color: _ornamentColor,
+                  textStyle: theme.typography.small.copyWith(
+                    color: _titleColor,
+                    letterSpacing: .6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The no-banner fallback: the shelf's own gradient with a faint glyph
+  /// watermark, so the hero is always a banner and never an empty box.
+  Widget _placeholder(ThemeData theme) {
+    final from = playlist.colorFromOr(theme.colorScheme.primary);
+    final to = playlist.colorToOr(theme.colorScheme.primary);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [from, to],
         ),
       ),
+      child: Center(
+        child: Opacity(
+          opacity: .18,
+          child: CustomPaint(
+            size: const Size(110, 110),
+            painter: FeaturedChipGlyphPainter(
+              name: playlist.icon ?? '',
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The ringed circular icon over the banner title (the deity screens).
+///
+/// Reuses [_HeroCircle] — the same gradient/glyph/contrast logic the chip and
+/// the old hero used — scaled down, so there is one implementation of "what a
+/// shelf's icon looks like".
+class _HeroBadge extends StatelessWidget {
+  const _HeroBadge({required this.playlist, required this.size});
+
+  final FeaturedPlaylist playlist;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    const designSize = 88.0;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: DecoratedBox(
+        // A gold ring, as in the reference badge.
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFE0A000), width: 2),
+        ),
+        child: Center(
+          child: ClipOval(
+            child: Transform.scale(
+              scale: size / designSize,
+              child: SizedBox(
+                width: designSize,
+                height: designSize,
+                child: _HeroCircle(playlist: playlist),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "— ◆  12 songs  ◆ —" : the decorative divider under the banner title.
+class _SongCountDivider extends StatelessWidget {
+  const _SongCountDivider({
+    required this.label,
+    required this.color,
+    required this.textStyle,
+  });
+
+  final String label;
+  final Color color;
+  final TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget rule() => Container(
+          width: 26,
+          height: 1,
+          color: color.withValues(alpha: .85),
+        );
+    Widget diamond() => Transform.rotate(
+          angle: math.pi / 4,
+          child: Container(width: 5, height: 5, color: color),
+        );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        rule(),
+        const Gap(6),
+        diamond(),
+        const Gap(8),
+        Text(label, style: textStyle),
+        const Gap(8),
+        diamond(),
+        const Gap(6),
+        rule(),
+      ],
     );
   }
 }

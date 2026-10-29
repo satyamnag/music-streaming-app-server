@@ -1553,6 +1553,14 @@ function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
       : null
   }
 
+  // The BACKGROUND BANNER of this deity's detail screen (migration 030). Empty
+  // clears it, and the app then draws its own placeholder banner instead.
+  if (body.banner_url !== undefined) {
+    row.banner_url = typeof body.banner_url === 'string' && body.banner_url.trim()
+      ? body.banner_url.trim()
+      : null
+  }
+
   // Whether the keywords above add matching tracks on top of the explicit list.
   // false = the admin controls membership entirely by hand.
   if (body.match_keywords !== undefined) row.match_keywords = Boolean(body.match_keywords)
@@ -1774,6 +1782,13 @@ const SPECIAL_BANNER_RATIO = 8 / 3
 const SPECIAL_BANNER_LABEL = '8:3 (2.67:1)'
 const SPECIAL_BANNER_WIDTH = 1440
 const SPECIAL_BANNER_HEIGHT = 540
+
+// The deity / featured-playlist detail banner. The detail hero is 2:1 (worth
+// being stricter than the 8:3 carousel strip, which it would crop heavily).
+const DEITY_BANNER_RATIO = 2
+const DEITY_BANNER_LABEL = '2:1 landscape'
+const DEITY_BANNER_WIDTH = 1080
+const DEITY_BANNER_HEIGHT = 540
 
 // The home wallpaper is NOT a full-screen background. The app draws it as a
 // LANDSCAPE band across the top of the home page, behind the "Soulful Bhakti"
@@ -3101,6 +3116,27 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
           error: `Special banner must be landscape ${SPECIAL_BANNER_LABEL} `
             + `(got ${size.width}x${size.height}). `
             + `Recommended ${SPECIAL_BANNER_WIDTH}x${SPECIAL_BANNER_HEIGHT}.`,
+        })
+      }
+    }
+
+    // The deity / featured-playlist DETAIL banner (migration 030). Strictly
+    // WebP and strictly 2:1, because the detail hero renders at 2:1 and would
+    // crop an 8:3 strip badly. Enforced from the file header so the rule holds
+    // even when the API is called directly rather than through the admin panel.
+    if (req.body && req.body.kind === 'deity_banner') {
+      if (ext !== 'webp') {
+        return res.status(400).json({ error: 'Deity banner must be a WebP file' })
+      }
+      const size = readWebpSize(req.file.buffer)
+      if (!size) {
+        return res.status(400).json({ error: 'Could not read that WebP image (is the file complete?)' })
+      }
+      if (!matchesAspectRatio(size, DEITY_BANNER_RATIO)) {
+        return res.status(400).json({
+          error: `Deity banner must be landscape ${DEITY_BANNER_LABEL} `
+            + `(got ${size.width}x${size.height}). `
+            + `Recommended ${DEITY_BANNER_WIDTH}x${DEITY_BANNER_HEIGHT}.`,
         })
       }
     }

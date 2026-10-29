@@ -2396,6 +2396,7 @@ function renderFeaturedChips() {
     // read here: icons are uploaded images now, so this panel neither shows nor
     // edits the glyph.
     const iconUrl = row.icon_url || '';
+    const bannerUrl = row.banner_url || '';
     const hidden = row.is_hidden === true;
     const orderValue = row.sort_order == null ? '' : String(row.sort_order);
     const picked = Array.isArray(row.trackIds) ? row.trackIds.length : 0;
@@ -2448,6 +2449,17 @@ function renderFeaturedChips() {
             '</span>' +
           '</div>' +
           '<input type="file" id="fpIconInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipIconUpload(this, \'' + esc(id) + '\')">' +
+          '<label class="special-label">Background banner (2:1 landscape WebP)</label>' +
+          '<div class="special-actions" style="margin-top:0;">' +
+            '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'fpBannerInput-' + esc(id) + '\').click()">Upload banner</button>' +
+            (bannerUrl ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearChipBanner(\'' + esc(id) + '\')">Remove banner</button>' : '') +
+            '<span class="special-hint" style="margin-top:0;">' +
+              (bannerUrl
+                ? 'Uploaded banner in use: it is the background of this deity\'s screen.'
+                : 'No banner uploaded yet: the app shows a placeholder banner built from these colors until you upload one.') +
+            '</span>' +
+          '</div>' +
+          '<input type="file" id="fpBannerInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipBannerUpload(this, \'' + esc(id) + '\')">' +
           '<label class="special-label">Sort order (lower shows first)</label>' +
           '<input class="special-input" type="number" id="fpOrder-' + esc(id) + '" value="' + esc(orderValue) + '" placeholder="default">' +
           '<div class="special-actions">' +
@@ -2631,10 +2643,71 @@ async function clearChipIcon(id) {
   } finally { showLoading(false); unlock(); }
 }
 
+// Uploads the deity screen's BACKGROUND BANNER (migration 030). Strictly WebP
+// and strictly 2:1: the detail hero renders at 2:1, so an 8:3 strip would be
+// cropped hard. The server enforces both rules from the file header too.
+async function handleChipBannerUpload(input, id) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    if (!lock()) return;
+    const isWebp = file.type === 'image/webp' || /\.webp$/i.test(file.name);
+    if (!isWebp) {
+      rowHint('featured', id, '&#10007; That is not a WebP file. Export the banner as WebP and try again.', 'is-error');
+      input.value = '';
+      return;
+    }
+
+    rowHint('featured', id, 'Uploading&hellip;', 'is-busy');
+    const form = new FormData();
+    form.append('file', file);
+    form.append('kind', 'deity_banner');
+
+    const up = await authedFetch('/api/admin/upload', {
+      method: 'POST', credentials: 'same-origin', body: form,
+    });
+    if (!up.ok) {
+      const e = await up.json().catch(function () { return {}; });
+      throw new Error(e.error || 'Upload failed');
+    }
+    const uploaded = await up.json();
+    const url = uploaded.thumbnail_url;
+    if (!url) throw new Error('Upload returned no URL');
+
+    await putRow('featured', id, { banner_url: url });
+
+    // 2:1 is required by the server; this note only tells the admin what the
+    // uploaded file's own shape was, so a near-miss is visible.
+    let note = 'Banner uploaded.';
+    try {
+      const dims = await readImageSize(file);
+      note += ' ' + dims.width + 'x' + dims.height + '.';
+    } catch (_) { /* the size read is a nicety, never a failure */ }
+    toast(note);
+    loadFeaturedChips();
+  } catch (e) {
+    if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally {
+    input.value = '';
+  }
+}
+
+// Clears the uploaded banner, so the app goes back to its placeholder banner.
+async function clearChipBanner(id) {
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    await putRow('featured', id, { banner_url: null });
+    toast('Banner removed - the app shows its placeholder banner');
+    loadFeaturedChips();
+  } catch (e) {
+    if (!isSessionExpired(e)) rowHint('featured', id, '&#10007; ' + esc(e.message), 'is-error');
+  } finally { showLoading(false); unlock(); }
+}
+
 // ==================================================================
 // Appearance (home-screen wallpaper)
 // ==================================================================
-
 async function loadWallpaper() {
   const box = document.getElementById('wallpaperBox');
   if (!box) return;

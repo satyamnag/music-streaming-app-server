@@ -81,6 +81,12 @@ class FeaturedPlaylistRow {
   /// Admin-uploaded icon image URL (029). Wins over [icon] when set.
   final String? iconUrl;
 
+  /// Admin-uploaded BACKGROUND BANNER for this deity's detail screen (030).
+  ///
+  /// Null means the admin has not set one yet, and the detail screen falls back
+  /// to the gradient placeholder rather than showing an empty band.
+  final String? bannerUrl;
+
   /// Whether [keywords] add matching tracks on top of [trackIds]. False means
   /// the admin controls membership entirely by hand.
   final bool matchKeywords;
@@ -99,6 +105,7 @@ class FeaturedPlaylistRow {
     this.colorTo,
     this.icon,
     this.iconUrl,
+    this.bannerUrl,
     this.matchKeywords = true,
     this.trackIds = const [],
     this.sortOrder,
@@ -120,6 +127,7 @@ class FeaturedPlaylistRow {
       colorTo: json['colorTo']?.toString(),
       icon: json['icon']?.toString(),
       iconUrl: json['iconUrl']?.toString(),
+      bannerUrl: json['bannerUrl']?.toString(),
       // Only an explicit false turns the rule off, so a missing field from an
       // older server keeps the pre-migration behaviour of matching by keyword.
       matchKeywords: json['matchKeywords'] != false,
@@ -259,6 +267,9 @@ final featuredPlaylistsProvider =
       colorTo: _parseChipColor(row.colorTo),
       icon: row.icon,
       iconUrl: row.iconUrl,
+      // The deity screen's admin background banner (migration 030). Null means
+      // the admin has not set one, and the detail hero draws its placeholder.
+      bannerUrl: row.bannerUrl,
       tracks: matched,
     ));
   }
