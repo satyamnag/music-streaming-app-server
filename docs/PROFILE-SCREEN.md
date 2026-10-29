@@ -77,3 +77,36 @@ still describes the bar correctly, and the other three tabs never change.
   and no actions group; signed in shows the name, email, both account actions and
   the free-plan card with `CURRENT PLAN` and "Upgrade to Pro";
 * signing out asks for confirmation before anything happens.
+
+## Verified on the reported phone
+
+Xiaomi 2302EPCC4I, Android 13, 720x1600 @2x, release APK built by CI from this
+commit. Each state was measured from screenshots (pixel probes, because the
+distinction that matters is visual), then the session was restored:
+
+| check | measurement |
+| --- | --- |
+| home header has no account avatar | green share of the header's right slot: **22.6 % before** the change (the photo avatar) -> **0.0 % after** |
+| bar shows the photo signed in | Profile-tab cell: green **6.6 %** (the Google "K" photo) |
+| profile page, signed in | title text `x[289,396]`, centred like the Library tab; identity block, ACCOUNT group, `YOUR SUBSCRIPTION` card with a full-width maroon "Upgrade to Pro" run `x[66,653]`, notifications switch on |
+| ACCOUNT ACTIONS | Sign out row, and the red Delete-account card |
+| title was glued to the edge before the fix | `x[3,106]`, centroid **54** -> after centring `x[289,396]`, centroid **342** (identical to Library's "Playlists") |
+| sign-out confirmation | page dims (corner brightness 228 -> **46**), destructive pill found at `x[460,636] y[844,910]` |
+| signed out | Profile-tab cell green **0.0 %**, saturation 1.7 % (person glyph); page shows a centred maroon "Sign in" button at `y=392`; no ACCOUNT ACTIONS group |
+| sign back in | `ClerkBridge: signInWithGoogle success`, Profile-tab green returns to **6.6 %** |
+
+### One backend limitation this pass surfaced
+
+Deleting the account on this build reports
+`Self deletion is not enabled for this user` (Clerk's own refusal, logged by
+`ClerkBridge`). The screen surfaces it in its error dialog and stays usable; the
+popup this replaced would have shown exactly the same message. Enabling
+self-deletion is a Clerk dashboard setting, not an app change.
+
+### Evidence
+
+`_v111_home_no_header_avatar.png`, `_v111_profile_signed_in.png`,
+`_v111_profile_account_actions.png`, `_v111_profile_signed_out.png`,
+`_v111_profile_signout_confirm.png`, `_v111_profile_delete_error.png`,
+`_v111_profile_signed_in_again.png` (workspace root).
+
