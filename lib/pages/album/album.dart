@@ -63,6 +63,10 @@ class AlbumPage extends HookConsumerWidget {
           description: album.albumType.name,
           owner: null,
           tracks: tracks.asData?.value.items ?? [],
+          // An album's tracks are drawn as the SAME cover cards the deity
+          // screens and "Top Trending" use (ten, then "see more"), not as a
+          // table of rows: a track should look identical wherever it appears.
+          tracksAsCards: true,
           error: tracks.error,
           routePath: '/album/${album.id}',
           isLiked: isFavoriteAlbum.asData?.value ?? false,

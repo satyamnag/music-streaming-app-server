@@ -27,6 +27,25 @@ Color? miniplayerBackgroundFor(SangeetTrackObject? track) => parseCardColor(
       track is SangeetFullTrackObject ? track.miniplayerBgColor : null,
     );
 
+/// Whether the collapsed mini player must be on screen, for a navigation bar of
+/// [navBarHeight] logical pixels.
+///
+/// `SlidingUpPanel` reports the panel's progress through
+/// [navigationPanelHeight] as `kNavigationBarHeight * (1 - position)`: the full
+/// bar height while the panel is collapsed, `0` while it is fully open. The mini
+/// player exists for the collapsed state — "always there unless the full-screen
+/// player is open" — so that is exactly the test.
+///
+/// A named function rather than an inline comparison so the rule can be TESTED
+/// without standing up the player's providers, streams and panel controller
+/// (see `test/miniplayer_visibility_test.dart`). It replaces an equality against
+/// a literal `50` — the navigation bar's height BEFORE it grew to
+/// [kNavigationBarHeight] (64) — which no longer matched the value the panel
+/// publishes when it closes, so the mini player never came back after the
+/// full-screen player had been opened once.
+bool miniPlayerVisibleAt(double navBarHeight) =>
+    navBarHeight.ceil() >= kNavigationBarHeight;
+
 class PlayerOverlayCollapsedSection extends HookConsumerWidget {
   /// Height of the collapsed mini player.
   ///
@@ -68,15 +87,18 @@ class PlayerOverlayCollapsedSection extends HookConsumerWidget {
     // Admin-configured background for the mini player while THIS track plays.
     final miniBg = miniplayerBackgroundFor(playlist.activeTrack);
 
-    final shouldShow = useState(true);
-
-    ref.listen(navigationPanelHeight, (_, height) {
-      shouldShow.value = height.ceil() == 50;
-    });
+    // Whether the full-screen player panel is COLLAPSED — which is exactly when
+    // the mini player must be on screen. See [miniPlayerVisibleAt], which is
+    // where the rule (and the reason the old one broke) lives.
+    //
+    // Deriving it from the provider on every build instead of copying it into
+    // local state means there is no stale copy to fall out of sync: the mini
+    // player shows whenever the panel is collapsed, full stop.
+    final shouldShow = miniPlayerVisibleAt(ref.watch(navigationPanelHeight));
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 250),
-      child: canShow && shouldShow.value
+      child: canShow && shouldShow
           ? Padding(
               padding: const EdgeInsets.all(5),
               child: SurfaceCard(

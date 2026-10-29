@@ -75,26 +75,31 @@ class JustAudioEngine implements AudioEngine {
   ja.AudioSource _source(SangeetTrackObject t) =>
       ja.AudioSource.uri(Uri.parse(SangeetMedia.uriFor(t, karaoke: _karaoke)));
 
-  /// Whether the playlist is prepared EAGERLY rather than lazily.
+  /// Whether the playlist is prepared LAZILY (the plugin's default).
   ///
-  /// ## Why this is false
-  /// `useLazyPreparation` defaults to true, and the official docs describe that
-  /// as loading each child "as late as possible before needed for playback".
-  /// For a gapless playlist that is the wrong default: the next track is only
-  /// requested when the current one is about to end, so the transition waits on
-  /// a fresh network round trip and the listener hears a gap — the buffering
-  /// seam between tracks.
+  /// ## Why this is true again
+  /// It was set to `false` (eager) to remove the buffering seam between tracks,
+  /// and eager preparation does that by loading EVERY child of the queue up
+  /// front. That is exactly what made tapping a track slow: a 20-track album, or
+  /// a 100-track "see all" list, opened a stream for every item before the first
+  /// one could start, and each of those goes through the local stream server,
+  /// which resolves a signed URL and issues its own upstream HEAD before it
+  /// serves a single byte. On a phone that is a network storm on every tap, and
+  /// any one failed child could fail the whole `setAudioSource` call, so the
+  /// track the user tapped sometimes never started at all.
   ///
-  /// Preparing eagerly makes ExoPlayer hold the following item ready, which is
-  /// what "gapless playlist playback" actually requires.
+  /// The just_audio API documentation for
+  /// `ConcatenatingAudioSource.useLazyPreparation` states: "If
+  /// [useLazyPreparation] is `true`, children will be loaded/buffered as late as
+  /// possible before needed for playback (currently supported on Android, iOS,
+  /// MacOS)". The default is `true`, and ExoPlayer still pre-rolls the NEXT item
+  /// while the current one plays, so ordinary sequential playback stays gapless.
+  /// What is dropped is preparing the WHOLE queue, which nothing needs.
   ///
-  /// Note this does NOT mean downloading the whole queue: ExoPlayer still
-  /// streams each item and keeps its own bounded buffer. It only removes the
-  /// "start fetching at the last moment" behaviour.
-  ///
-  /// Verified against the just_audio API docs for `ConcatenatingAudioSource`
-  /// (`useLazyPreparation`) and `AudioPlayer.setAudioSources`.
-  static const bool _eagerPreparation = false;
+  /// Verified against just_audio 0.9.46's own API documentation (the version
+  /// pinned in `pubspec.lock`) for `ConcatenatingAudioSource` and
+  /// `AudioPlayer.setAudioSource`.
+  static const bool _eagerPreparation = true;
 
   /// The live playlist object handed to the platform, when one is loaded.
   ///
@@ -142,8 +147,15 @@ class JustAudioEngine implements AudioEngine {
     );
     _index = initialIndex;
     _indexCtrl.add(initialIndex);
-    await _applyModes();
-    if (autoPlay) _player.play();
+    // Start audio as soon as the source is ready.
+    //
+    // The loop/shuffle round trips below only decide what happens at the END of
+    // a track, so awaiting them before `play()` added two platform-channel
+    // round trips to every single tap for no audible benefit. They are issued
+    // first and awaited together with the play call instead.
+    final modes = _applyModes();
+    if (autoPlay) unawaited(_player.play());
+    await modes;
   }
 
   /// Rebuilds the queue, keeping the current track and position.

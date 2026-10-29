@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pre-Android-12 launch screen: black backdrop (matching the reference splash)
+     with the full medallion centred at its intrinsic size. The bitmap is NOT
+     scaled and NOT masked on these versions, so it is never cropped. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/black" />
     <item>
         <bitmap android:gravity="center" android:src="@drawable/splash" />
     </item>

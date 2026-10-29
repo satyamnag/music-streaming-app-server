@@ -27,7 +27,11 @@ enum HomeSeeAllKind { albums, newestArrivals, topTrending, language }
 @RoutePage()
 class HomeSeeAllPage extends HookConsumerWidget {
   /// Items revealed per page.
-  static const int pageSize = 100;
+  ///
+  /// Ten: every track screen in the app (Albums, Newest Arrivals, Top Trending,
+  /// a language's songs, Recently Played, a deity and an album) opens on ten
+  /// cards and then offers "see more", so no screen starts as an endless grid.
+  static const int pageSize = 10;
 
   static const name = "home_see_all";
 

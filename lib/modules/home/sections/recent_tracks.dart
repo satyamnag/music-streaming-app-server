@@ -22,7 +22,10 @@ import 'package:sangeet/provider/history/recent_tracks.dart';
 /// next [pageSize] on each tap. Hidden when there is no listening history yet.
 class HomeRecentlyPlayedTracksSection extends HookConsumerWidget {
   /// Number of cards revealed per page.
-  static const int pageSize = 25;
+  ///
+  /// Ten, matching every other track shelf and screen (see
+  /// `HomeTrackSection.pageSize`).
+  static const int pageSize = 10;
 
   const HomeRecentlyPlayedTracksSection({super.key});
 

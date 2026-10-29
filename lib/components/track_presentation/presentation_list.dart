@@ -11,6 +11,9 @@ import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/track_presentation/presentation_props.dart';
 import 'package:sangeet/components/track_presentation/presentation_state.dart';
 import 'package:sangeet/components/track_presentation/use_track_tile_play_callback.dart';
+import 'package:sangeet/components/track_card/home_track_card.dart';
+import 'package:sangeet/components/track_card/track_card.dart';
+import 'package:sangeet/components/track_card/track_grid_section.dart';
 import 'package:sangeet/components/track_tile/track_tile.dart';
 import 'package:sangeet/components/track_presentation/use_is_user_playlist.dart';
 import 'package:sangeet/extensions/context.dart';
@@ -18,7 +21,11 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 import 'package:very_good_infinite_list/very_good_infinite_list.dart';
 
 /// Number of tracks shown before the "See More" expander appears.
-const kPresentationInitialVisibleTracks = 5;
+///
+/// Ten, matching every other track screen in the app (the deity screen, the
+/// home "see all" screens, Recently Played): a collection opens on ten tracks
+/// and then offers "see more".
+const kPresentationInitialVisibleTracks = 10;
 
 class PresentationListSection extends HookConsumerWidget {
   const PresentationListSection({super.key});
@@ -77,6 +84,43 @@ class PresentationListSection extends HookConsumerWidget {
             ],
           ),
         ),
+      );
+    }
+    // Album screens draw the shared TRACK CARDS, in the same responsive grid as
+    // "Top Trending", the deity screens and the home "see all" screens, ten
+    // tracks and then "see more". One widget owns that anatomy so it cannot
+    // drift between surfaces (see TrackGridSection).
+    //
+    // The empty and error states above already returned, so there is always at
+    // least one track here.
+    if (options.tracksAsCards) {
+      // Still loading the first page: show the cards' own skeleton so the
+      // screen never flashes empty before the tracks arrive.
+      if (allTracks.isEmpty) {
+        return SliverPadding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: trackGridPadding,
+            vertical: 4,
+          ),
+          sliver: SliverGrid.builder(
+            itemCount: 6,
+            gridDelegate: trackGridDelegate(context),
+            itemBuilder: (context, index) => Skeletonizer(
+              enabled: true,
+              child: HomeTrackCard(
+                track: FakeData.track,
+                imageUrl: '',
+                onTap: () {},
+              ),
+            ),
+          ),
+        );
+      }
+      return TrackGridSection(
+        tracks: allTracks,
+        pageSize: kPresentationInitialVisibleTracks,
+        hasNextPage: options.pagination.hasNextPage,
+        onFetchMore: () async => options.pagination.onFetchMore(),
       );
     }
 

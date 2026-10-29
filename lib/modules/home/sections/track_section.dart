@@ -29,7 +29,12 @@ class HomeTrackSection extends HookConsumerWidget {
   final VoidCallback? onSeeAll;
 
   /// Number of tracks revealed per page.
-  static const int pageSize = 25;
+  ///
+  /// 10 is the app-wide "first page" for a shelf of tracks: the home rows, the
+  /// "see all" screens, the deity screens, the album screens and Recently
+  /// Played all reveal ten and then offer "see more", so a screen never opens
+  /// on an endless wall of cards the listener has to scroll past.
+  static const int pageSize = 10;
 
   const HomeTrackSection({
     super.key,

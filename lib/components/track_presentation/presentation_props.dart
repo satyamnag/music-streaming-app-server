@@ -52,6 +52,17 @@ class TrackPresentationOptions {
   final String? shareUrl;
   final Object? error;
 
+  /// Whether this collection's tracks are drawn as the shared TRACK CARDS
+  /// (cover + name + play control, in the same responsive grid "Top Trending",
+  /// the deity screens and the home "see all" screens use) instead of the
+  /// table-of-rows list.
+  ///
+  /// Set by the album screens, so an album's tracks look like every other
+  /// track in the app. Playlist-style collections keep the row list (with its
+  /// selection and duration columns) because those rows carry per-collection
+  /// actions the cards do not.
+  final bool tracksAsCards;
+
   // events
   final FutureOr<bool?> Function()? onHeart; // if null heart button will hidden
 
@@ -69,6 +80,7 @@ class TrackPresentationOptions {
     this.isLiked = false,
     this.onHeart,
     this.error,
+    this.tracksAsCards = false,
   }) : assert(collection is SangeetSimpleAlbumObject ||
             collection is SangeetSimplePlaylistObject);
 
@@ -93,7 +105,8 @@ class TrackPresentationOptions {
         other.isLiked == isLiked &&
         other.shareUrl == shareUrl &&
         other.onHeart == onHeart &&
-        other.error == error;
+        other.error == error &&
+        other.tracksAsCards == tracksAsCards;
   }
 
   @override
@@ -109,5 +122,6 @@ class TrackPresentationOptions {
       isLiked.hashCode ^
       shareUrl.hashCode ^
       onHeart.hashCode ^
-      error.hashCode;
+      error.hashCode ^
+      tracksAsCards.hashCode;
 }

@@ -36,23 +36,30 @@ class TrackPresentationModifiersSection extends HookConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Checkbox(
-                  state: state.selectedTracks.length == options.tracks.length
-                      ? CheckboxState.checked
-                      : CheckboxState.unchecked,
-                  onChanged: (value) {
-                    if (value == CheckboxState.checked) {
-                      notifier.selectAllTracks();
-                    } else {
-                      notifier.deselectAllTracks();
-                    }
-                  },
-                ),
-              ],
-            ),
+            // "Select all" belongs to the row list, where each row carries its
+            // own checkbox and a selection is visible. The card grids (the album
+            // screens) have no per-card checkbox, so the actions there always
+            // apply to the whole collection and this control would select
+            // something the listener cannot see. See TrackPresentationOptions
+            // .tracksAsCards.
+            if (!options.tracksAsCards)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    state: state.selectedTracks.length == options.tracks.length
+                        ? CheckboxState.checked
+                        : CheckboxState.unchecked,
+                    onChanged: (value) {
+                      if (value == CheckboxState.checked) {
+                        notifier.selectAllTracks();
+                      } else {
+                        notifier.deselectAllTracks();
+                      }
+                    },
+                  ),
+                ],
+              ),
             Flexible(
               child: Row(
                 mainAxisSize: MainAxisSize.min,

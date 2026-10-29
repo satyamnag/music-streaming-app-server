@@ -29,7 +29,10 @@ import 'package:sangeet/provider/audio_player/audio_player.dart';
 @RoutePage()
 class FeaturedPlaylistPage extends HookConsumerWidget {
   /// Items revealed per page.
-  static const int pageSize = 100;
+  ///
+  /// Ten, like every other track screen in the app: the deity screen opens on
+  /// ten cards and then offers "see more" (see `HomeSeeAllPage.pageSize`).
+  static const int pageSize = 10;
 
   static const name = "featured_playlist";
 
@@ -213,14 +216,23 @@ class FeaturedPlaylistPage extends HookConsumerWidget {
       );
     }
 
-    // No TitleBar and no top SafeArea: the banner hero is deliberately
-    // full-bleed to the very top of the screen, so it runs under the status bar
-    // as it does in the reference design. The back arrow is drawn inside the
-    // hero, offset by the status-bar inset.
+    // No TitleBar: the banner hero is the header.
+    //
+    // The body IS inset by the status bar, though. The app paints the status bar
+    // with an opaque theme colour (see `root_app.dart`), so drawing the banner
+    // at y=0 put its top 32dp BEHIND that bar: the artwork the hero measured was
+    // there, the listener could not see it, and the badge and title were left
+    // crammed against the visible edge. A top `SafeArea` keeps the banner's full
+    // height on screen, starting directly under the status bar, which is what
+    // "sits properly at the top" means here - and it does it the same way on
+    // every device, without touching the system UI style.
     return Scaffold(
-      child: chipsAsync.isLoading && playlist == null
-          ? const Center(child: CircularProgressIndicator())
-          : body,
+      child: SafeArea(
+        bottom: false,
+        child: chipsAsync.isLoading && playlist == null
+            ? const Center(child: CircularProgressIndicator())
+            : body,
+      ),
     );
   }
 }

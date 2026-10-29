@@ -6,9 +6,27 @@
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-        <item name="android:windowSplashScreenBackground">@android:color/transparent</item>
+        <!-- The window behind the starting window.
+             The platform draws the Android 12 splash over this, but an OEM skin
+             that does not honour the windowSplashScreen* attributes still paints
+             whatever this is - so it is the SAME black backdrop with the centred
+             medallion the pre-12 launch screen uses, and the logo can never be
+             missing, white-backed or full-bleed on those devices. -->
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <!-- Black, like the reference splash. It was @android:color/transparent,
+             which falls back to the LIGHT theme's window background, so on a
+             light-themed device the launch showed a white screen with the
+             full-bleed icon clipped by the system's circular mask. -->
+        <item name="android:windowSplashScreenBackground">#FF000000</item>
+        <!-- The medallion, drawn at 42% of its canvas ON PURPOSE: the platform
+             masks the splash icon to its inner two-thirds (the official
+             dimensions are a 288dp icon inside a 192dp visible circle), so
+             anything at or beyond 2/3 is sliced off - which is exactly what
+             shipped in v96 and what the reported screenshot shows. 42% leaves a
+             wide margin on every device and matches the size the legacy launch
+             screen draws the same artwork at. -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FF000000</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your

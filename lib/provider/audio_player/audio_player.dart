@@ -469,10 +469,15 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
     await SangeetMedia.ensurePortReady();
     _log('load(): port ready=${SangeetMedia.serverPort}');
 
-    final medias = tracks
-        .toList()
-        .asMediaList()
-        .unique((a, b) => a.uri == b.uri);
+    final allTracks = tracks.toList();
+
+    // The track the caller tapped, resolved from the ORIGINAL list before any
+    // de-duplication, plus the URI it will stream from.
+    final requested =
+        allTracks[initialIndex.clamp(0, allTracks.length - 1)];
+    final requestedUri = SangeetMedia(requested).uri;
+
+    final medias = allTracks.asMediaList().unique((a, b) => a.uri == b.uri);
 
     _log('load(): ${medias.length} medias after filter');
     if (medias.isNotEmpty) {
@@ -484,27 +489,48 @@ class AudioPlayerNotifier extends Notifier<AudioPlayerState> {
       return;
     }
 
+    // Re-locate the tapped track in the FILTERED list.
+    //
+    // The caller's index indexes the list it passed in. De-duplication can drop
+    // entries before that index, so reusing it would select a DIFFERENT track -
+    // and when the drop pushed the index past the end of the filtered list,
+    // `openPlaylist`'s `initialIndex <= length - 1` assert failed (and, in a
+    // release build, the platform call threw), which is how a tap on a track
+    // could produce no audio at all.
+    var resolvedIndex = medias.indexWhere((media) => media.uri == requestedUri);
+    if (resolvedIndex < 0) resolvedIndex = 0;
+
     state = state.copyWith(
       // These are filtered tracks as well
       tracks: medias.map((media) => media.track).toList(),
-      currentIndex: initialIndex,
+      currentIndex: resolvedIndex,
       collections: [],
     );
 
     _log('load(): state.tracks set, calling openPlaylist...');
-    await audioPlayer.openPlaylist(
-      medias,
-      initialIndex: initialIndex,
-      autoPlay: autoPlay,
-    );
-    _log('load(): openPlaylist completed');
+    try {
+      await audioPlayer.openPlaylist(
+        medias,
+        initialIndex: resolvedIndex,
+        autoPlay: autoPlay,
+      );
+      _log('load(): openPlaylist completed');
+    } catch (e, stack) {
+      // Never let a failed load disappear into an unhandled async error: that
+      // is indistinguishable from "the play button does nothing". The failure
+      // is logged (and forwarded to the crash reporter) and the queue state
+      // stays populated, so the next tap - or the mini player's own play button
+      // - simply tries again.
+      _log('load(): openPlaylist FAILED: $e');
+      AppLogger.reportError(e, stack);
+    }
 
     // Restore saved playback position after crash/restart
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedIdx = prefs.getInt('last_track_index') ?? -1;
       final savedPos = prefs.getInt('last_position_ms') ?? 0;
-      if (savedIdx >= 0 && savedIdx == initialIndex && savedPos > 0) {
+      if (savedIdx >= 0 && savedIdx == resolvedIndex && savedPos > 0) {
         await audioPlayer.seek(Duration(milliseconds: savedPos));
         // Clear saved position so it only restores once
         await prefs.remove('last_position_ms');

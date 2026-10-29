@@ -111,7 +111,44 @@ class PremiumAccess {
   ) async {
     if (!loginRequiredForPlayback) return true;
     if (isSignedIn(ref)) return true;
+
+    // The mirror starts signed OUT and is filled by the first RESOLVED auth
+    // state (see ClerkAuthSignal), so a tap during the first moments of a cold
+    // start — or right after the provider has been invalidated — can read
+    // "signed out" while the session is still being restored. Prompting there
+    // is the "the play button asks me to sign in even though I am signed in"
+    // failure, and the tap then plays nothing at all.
+    //
+    // So when the provider is still resolving, WAIT for it (bounded) and ask
+    // again. Only a state that really resolved as signed out prompts. This does
+    // not weaken the gate: it assumes nothing, it reads the same state one
+    // moment later, and the local stream server still refuses every byte from a
+    // signed-out client.
+    if (_authStillResolving(ref)) {
+      try {
+        await ref
+            .read(clerkAuthProvider.future)
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        // Timeout or a failed refresh: fall through to the sign-in prompt.
+      }
+      if (isSignedIn(ref)) return true;
+    }
+
     return promptSignIn(context, ref);
+  }
+
+  /// Whether [clerkAuthProvider] has not resolved a value yet.
+  ///
+  /// Only then is the signed-out mirror a guess rather than an answer. Any
+  /// resolved state (signed in OR signed out) returns false, so a genuinely
+  /// signed-out listener is prompted immediately, with no added wait.
+  static bool _authStillResolving(dynamic ref) {
+    try {
+      return ref.read(clerkAuthProvider) is AsyncLoading<ClerkAuthState>;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Whether a track is a paid (premium) track.

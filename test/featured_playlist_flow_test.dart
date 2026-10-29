@@ -76,13 +76,26 @@ void main() {
             'what walks the list track by track',
       );
       // ...starting at the chosen index (0 for Play Now)...
+      //
+      // The index the engine receives is the tapped track's position in the
+      // FILTERED queue (`resolvedIndex`), not the caller's raw index: load()
+      // de-duplicates identical stream URIs before it builds the queue, so the
+      // raw index could point at a different track — or past the end, which made
+      // `openPlaylist` throw and the tap play nothing at all. For an unduplicated
+      // list (every featured playlist) the two numbers are identical.
       expect(
-        RegExp(r'openPlaylist\([\s\S]*initialIndex:\s*initialIndex').hasMatch(
+        RegExp(r'openPlaylist\([\s\S]*initialIndex:\s*resolvedIndex').hasMatch(
           source,
         ),
         isTrue,
-        reason: 'openPlaylist must begin at the requested initialIndex so Play '
-            'Now (index 0) starts with the first track',
+        reason: 'openPlaylist must begin at the tap-tracked index so Play Now '
+            '(index 0) starts with the first track',
+      );
+      expect(
+        source.contains('resolvedIndex'),
+        isTrue,
+        reason: 'the index handed to the queue must be re-located in the '
+            'de-duplicated list, never the caller raw index',
       );
       // ...and actually playing, which advances automatically to the end.
       expect(

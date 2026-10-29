@@ -29,54 +29,70 @@ import 'package:just_audio/just_audio.dart' as ja;
 /// through the engine, so the assertion is about the real object the engine
 /// hands the platform.
 void main() {
-  group('the playback queue is prepared EAGERLY', () {
-    test('a freshly built ConcatenatingAudioSource does NOT use lazy preparation',
-        () {
-      // The default is `true`; the fix is passing `false`. This test fails if
-      // someone removes that argument, which is exactly how the seam returns.
+  // PREPARATION IS LAZY, AND WHY.
+  //
+  // This group used to pin `useLazyPreparation: false` (eager), because eager
+  // preparation was the fix for an audible seam between tracks. It is not the
+  // right default either: eager preparation makes the engine load EVERY child of
+  // the queue before the first one can start, and in this app every child is a
+  // request to the local stream server, which resolves a signed URL and issues
+  // an upstream HEAD before it serves a byte. Tapping a track in a 20-track album
+  // therefore opened 20 streams first (the "it takes so long to start" report),
+  // and one failed child could fail the whole `setAudioSource` call, so the
+  // tapped track never played at all.
+  //
+  // Lazy preparation is the plugin's own documented default: with it, children
+  // are loaded "as late as possible before needed for playback", which is also
+  // what ExoPlayer's concatenating source expects when it pre-rolls the NEXT
+  // item while the current one plays. The seam-prevention decisions that remain
+  // in place (never tear down a playing queue for an edit; capture the position
+  // before a rebuild) are asserted below and unchanged.
+  group('the playback queue is prepared LAZILY', () {
+    test('the plugin default is lazy, and that is what the engine uses', () {
       final lazyDefault = ja.ConcatenatingAudioSource(
         children: [ja.AudioSource.uri(Uri.parse('https://example.com/a.mp3'))],
       );
-      final eager = ja.ConcatenatingAudioSource(
+      final explicitLazy = ja.ConcatenatingAudioSource(
         children: [ja.AudioSource.uri(Uri.parse('https://example.com/a.mp3'))],
-        useLazyPreparation: false,
+        useLazyPreparation: true,
       );
 
       expect(
         lazyDefault.useLazyPreparation,
         isTrue,
-        reason: 'documents the default that caused the gap',
+        reason: 'documents the plugin default the engine relies on',
       );
       expect(
-        eager.useLazyPreparation,
-        isFalse,
-        reason: 'eager preparation is what removes the between-track gap',
+        explicitLazy.useLazyPreparation,
+        isTrue,
+        reason: 'the engine states the setting explicitly so a future refactor '
+            'cannot flip it back to eager without this suite noticing',
       );
     });
 
-    test('the engine builds its queue with eager preparation', () {
-      // A source-level guard: the engine must pass `useLazyPreparation: false`.
-      // Asserted on the engine's file so the check cannot pass merely because
-      // some OTHER code path builds an eager source.
+    test('the engine builds its queue with lazy preparation', () {
+      // A source-level guard: the engine must pass
+      // `useLazyPreparation: _eagerPreparation` with the flag TRUE. Asserted on
+      // the engine's file so the check cannot pass merely because some OTHER
+      // code path builds a lazy source.
       final source =
           File('lib/services/audio_player/just_audio_engine.dart').readAsStringSync();
 
       expect(
         source.contains('_eagerPreparation'),
         isTrue,
-        reason: 'the eager setting must be a named, documented decision',
+        reason: 'the preparation setting must be a named, documented decision',
       );
       expect(
         source.contains('useLazyPreparation: _eagerPreparation'),
         isTrue,
-        reason: 'the queue builder must actually apply the eager setting; '
-            'without it ConcatenatingAudioSource defaults to lazy and the gap '
-            'comes back',
+        reason: 'the queue builder must actually apply the setting',
       );
       expect(
-        source.contains('_eagerPreparation = false'),
+        source.contains('_eagerPreparation = true'),
         isTrue,
-        reason: 'eager preparation requires the flag to be FALSE',
+        reason: 'lazy preparation requires the flag to be TRUE: eager loads '
+            'every item in the queue before the first one starts',
       );
     });
 

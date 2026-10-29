@@ -46,7 +46,10 @@ class _LanguageSection extends HookConsumerWidget {
   final HomeLanguageGroup group;
 
   /// Number of tracks revealed per page.
-  static const int pageSize = 25;
+  ///
+  /// Ten, matching every other track shelf and screen (see
+  /// `HomeTrackSection.pageSize`).
+  static const int pageSize = 10;
 
   const _LanguageSection({required this.group});
 
