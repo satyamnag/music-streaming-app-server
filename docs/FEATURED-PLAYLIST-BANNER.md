@@ -57,24 +57,39 @@ which is precisely what triggers the placeholder.
 
 ## REQUIRED: apply the migration
 
-Migrations in this repo are applied by hand (there is no runner). Until 030 is
-applied:
+Migrations in this repo are applied by hand (there is no runner).
+
+**Confirmed still unapplied** by a read-only probe of the live database (anon key):
+
+```
+GET /rest/v1/featured_playlists?select=id,banner_url
+-> 400 {"code":"42703","message":"column featured_playlists.banner_url does not exist"}
+```
+
+Until 030 is applied:
 
 - the app still works — `select('*')` simply has no `banner_url`, which trims to
   null and shows the placeholder (verified on device in v108);
-- but the admin **Upload banner** button will fail, because the column does not
-  exist yet.
+- the admin **Upload banner** button fails, but now with an actionable message
+  naming this file instead of a raw Postgres code.
 
 Apply `server/migrations/030_featured_playlist_banner.sql` in the Supabase SQL
 editor (or `supabase db push`), then reload the admin panel.
+
+No service-role key and no `DATABASE_URL` exist in `.env`, so the app's own
+credentials cannot run DDL — which is why this step needs the owner.
 
 ## Verification
 
 - `flutter-verify` 40852143222 and `android-release` 40852151399 green on
   `898b0f0e`; the new tests were confirmed in the run log as executing.
-- Installed as versionCode 108. On-device: the deity screen shows the full-bleed
-  placeholder hero, back arrow, ringed lotus badge, "Durga", "◆ 16 songs ◆" and
-  the 3-column Newest Arrivals grid.
+- Installed as versionCode 108. On-device, BOTH reference screens were checked:
+  - the deity screen (`Durga`): full-bleed PLACEHOLDER hero (gradient + glyph
+    watermark), back arrow, gold-ringed lotus badge, cream title,
+    "◆ 16 songs ◆", 3-column Newest Arrivals grid;
+  - the specials screen (`Soulful Special`): full-bleed uploaded banner, back
+    arrow, cream title, "◆ 2 songs ◆", NO icon badge (specials have no icon), and
+    the same 3-column grid (third cell empty with two tracks).
 - `test/deity_banner_plumbing_test.dart` guards all six links, plus the
   full-bleed / placeholder / grid invariants.
 
