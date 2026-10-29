@@ -75,6 +75,29 @@ class OneSignalService {
     return OneSignal.Notifications.requestPermission(fallbackToSettings);
   }
 
+  /// Whether the app currently has push-notification permission.
+  ///
+  /// Reads the SDK's cached answer (`OneSignal.Notifications.permission`, which
+  /// the plugin documents as "whether this app has push notification
+  /// permission" and keeps in step with the OS through its own permission
+  /// observer), so the profile screen's switch can show the REAL state instead
+  /// of a local guess that survives a trip to the system settings.
+  bool get hasPushPermission => OneSignal.Notifications.permission;
+
+  /// Fires whenever the push-notification permission changes — including a
+  /// change made outside the app in the system settings. The caller keeps the
+  /// observer alive; [removePermissionObserver] unregisters it.
+  void addPermissionObserver(OnNotificationPermissionChangeObserver observer) {
+    OneSignal.Notifications.addPermissionObserver(observer);
+  }
+
+  /// Unregisters an observer added by [addPermissionObserver].
+  void removePermissionObserver(
+    OnNotificationPermissionChangeObserver observer,
+  ) {
+    OneSignal.Notifications.removePermissionObserver(observer);
+  }
+
   /// Associates the current user with an external identifier (e.g. the Clerk
   /// user id) for cross-device messaging.
   Future<void> login(String externalId) => OneSignal.login(externalId);

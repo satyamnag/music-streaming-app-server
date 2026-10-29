@@ -9,12 +9,9 @@ import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 import 'package:sangeet/collections/routes.gr.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/fallbacks/error_box.dart';
-import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/components/notifications/notification_bell.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/modules/auth/profile_dialog.dart';
-import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/playlists.dart';
@@ -56,8 +53,7 @@ class HomePage extends HookConsumerWidget {
     // looking at placeholders on every visit. Bounded and best-effort - see
     // lib/services/image_cache/artwork_precache.dart.
     ref.watch(precacheHomeArtworkProvider);
-    final clerkAuth = ref.watch(clerkAuthProvider);
-    final clerkState = clerkAuth.valueOrNull ?? const ClerkAuthState();
+
     // Admin-managed home wallpaper. Null (unset, table absent, or a failed
     // fetch) simply renders the normal themed background.
     final wallpaperUrl = ref.watch(homeWallpaperProvider).valueOrNull;
@@ -165,7 +161,7 @@ class HomePage extends HookConsumerWidget {
                               _HomeHeaderRow(
                                 color: headerColor,
                                 shadows: headerShadows,
-                                clerkState: clerkState,
+
                               )
                             else if (kIsMacOS)
                               const Gap(10),
@@ -307,8 +303,11 @@ class HomePage extends HookConsumerWidget {
   }
 }
 
-/// The home screen's header row: the brand logo, the app name and the three
-/// actions, drawn over the wallpaper.
+/// The home screen's header row: the brand mark and the two actions (search and
+/// the notifications bell), drawn over the wallpaper.
+///
+/// The account has no entry point here any more: it lives in the bottom bar's
+/// Profile tab, which shows the listener's photo once signed in.
 ///
 /// It replaces a `SliverAppBar` because the header had to become part of the
 /// wallpaper block: the artwork runs behind the header AND the carousel, so the
@@ -322,12 +321,10 @@ class HomePage extends HookConsumerWidget {
 class _HomeHeaderRow extends StatelessWidget {
   final Color color;
   final List<Shadow> shadows;
-  final ClerkAuthState clerkState;
 
   const _HomeHeaderRow({
     required this.color,
     required this.shadows,
-    required this.clerkState,
   });
 
   @override
@@ -402,40 +399,11 @@ class _HomeHeaderRow extends StatelessWidget {
           // Notifications: the OneSignal push + in-app-message inbox, with the
           // unseen count on the bell. Sits right of search, as in the reference.
           NotificationBell(color: color, shadows: shadows),
-          const Gap(10),
-          // Signed-in users see their account avatar (same as the Google
-          // account); signed-out users see the user icon.
-          IconButton.ghost(
-            icon: (clerkState.signedIn && clerkState.imageUrl != null)
-                ? Container(
-                    // A hairline white ring keeps a photo avatar legible against
-                    // a photo wallpaper, which a bare circle is not.
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
-                    ),
-                    child: ClipOval(
-                      child: UniversalImage(
-                        path: clerkState.imageUrl!,
-                        height: 26,
-                        width: 26,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  )
-                : Icon(
-                    SangeetIcons.user,
-                    size: 20,
-                    color: color,
-                    shadows: shadows,
-                  ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => const ProfileDialog(),
-              );
-            },
-          ),
+          // The account entry point lives ONLY in the bottom bar's Profile tab
+          // now (which shows the listener's photo once signed in). The avatar
+          // that used to sit here opened a profile popup, and the popup is gone:
+          // the profile is a full screen, so a second, smaller doorway to the
+          // same account next to the brand mark was redundant.
           const Gap(10),
         ],
       ),

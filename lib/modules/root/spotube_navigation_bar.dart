@@ -7,9 +7,11 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shadcn_flutter/shadcn_flutter_extension.dart';
 
 import 'package:sangeet/collections/side_bar_tiles.dart';
+import 'package:sangeet/components/image/universal_image.dart';
 import 'package:sangeet/extensions/constrains.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/database/database.dart';
+import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
 /// Height of the bottom navigation bar, in logical pixels.
@@ -61,23 +63,31 @@ class SangeetNavigationBar extends HookConsumerWidget {
 
     final theme = Theme.of(context);
 
-    // One tab = icon above its label. The selected tab is tinted with the
-    // brand primary while the rest stay neutral, so the current section reads
-    // at a glance the way the reference design shows it.
-    // Returns NavigationButton (not Widget) on purpose: NavigationBar.children
-    // is a List<NavigationBarItem>, and NavigationButton implements that.
+    // The Profile tab carries the listener's identity: the generic person icon
+    // while signed out, their own photo once signed in. Only the RENDERED tab
+    // changes — the tile list, its labels and its order are untouched, so the
+    // signed-out bar is exactly the four-tab bar it has always been.
+    final authState = ref.watch(clerkAuthProvider).valueOrNull;
+    final avatarUrl = authState?.imageUrl;
+    final showAvatar = authState?.signedIn == true &&
+        avatarUrl != null &&
+        avatarUrl.isNotEmpty;
+
+    /// One tab = icon above its label. The selected tab is tinted with the
+    /// brand primary while the rest stay neutral, so the current section reads
+    /// at a glance the way the reference design shows it.
+    ///
+    /// Returns NavigationButton (not Widget) on purpose: NavigationBar.children
+    /// is a List<NavigationBarItem>, and NavigationButton implements that.
     NavigationButton tab(int index) {
       final tile = navbarTileList[index];
       final selected = index == selectedIndex;
+      final isProfileTab = tile.id == 'profile';
+
       return NavigationButton(
         style: selected
             ? const ButtonStyle.fixed(density: ButtonDensity.icon)
             : const ButtonStyle.muted(density: ButtonDensity.icon),
-        child: Icon(
-          tile.icon,
-          size: 22,
-          color: selected ? theme.colorScheme.primary : null,
-        ),
         label: Text(
           tile.title,
           maxLines: 1,
@@ -86,6 +96,35 @@ class SangeetNavigationBar extends HookConsumerWidget {
         onPressed: () {
           context.navigateTo(tile.route);
         },
+        // `child` last, per the widget-constructor convention this repo lints
+        // for.
+        child: (isProfileTab && showAvatar)
+            ? Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  // A hairline ring keeps a photo legible against the bar and
+                  // makes the selected tab read the same as the icon tabs.
+                  border: Border.all(
+                    color: selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.border,
+                    width: 1.5,
+                  ),
+                ),
+                child: ClipOval(
+                  child: UniversalImage(
+                    path: avatarUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+            : Icon(
+                tile.icon,
+                size: 22,
+                color: selected ? theme.colorScheme.primary : null,
+              ),
       );
     }
 
