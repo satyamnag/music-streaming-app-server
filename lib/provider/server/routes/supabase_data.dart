@@ -1675,6 +1675,10 @@ class ServerSupabaseDataRoutes {
                 'colorTo': trimmed(r['color_to']),
                 'icon': trimmed(r['icon']),
                 'iconUrl': trimmed(r['icon_url']),
+                // The deity screen's background banner (migration 030). Absent
+                // column (pre-030) trims to null, which the app renders as its
+                // placeholder banner rather than an empty band.
+                'bannerUrl': trimmed(r['banner_url']),
                 'trackIds':
                     membership[r['id']?.toString() ?? ''] ?? const <String>[],
                 'sortOrder': r['sort_order'],
