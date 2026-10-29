@@ -1628,7 +1628,20 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
       .upsert({ id, ...row }, { onConflict: 'id' })
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) {
+      // A missing `banner_url` means migration 030 was never applied. Say so in
+      // plain words: the raw Postgres 42703 ("column ... does not exist") gives
+      // the operator nothing to act on, and this is the one failure a banner
+      // upload can hit that is not the admin's fault.
+      if (error.code === '42703' && /banner_url/.test(error.message || '')) {
+        return res.status(400).json({
+          error: 'The database has no featured_playlists.banner_url column yet. '
+            + 'Apply server/migrations/030_featured_playlist_banner.sql in Supabase '
+            + '(it is a single "add column if not exists"), then try again.',
+        })
+      }
+      return res.status(500).json({ error: error.message })
+    }
     res.json(data)
   } catch (err) { next(err) }
 })
