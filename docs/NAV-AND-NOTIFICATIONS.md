@@ -68,14 +68,37 @@ app-side, which is what this feature does.
   exposes only its id. The row is therefore labelled "In-app message".
 - The unseen count is per device, since it is nothing but this local list.
 
+## Tapping a row (added in v109)
+
+A tap does both things the screen promises, via `handleNotificationTap`
+(`lib/modules/notifications/notification_actions.dart`):
+
+1. the entry is marked **read**; and
+2. the deep link the notification carried is **followed**, through
+   `AppDeepLinkRouter` — the same router the OneSignal click handler uses.
+
+A missing, blank or unparseable link navigates nowhere and still marks read. This
+behaviour is split out of the widget so it is testable without a router, because
+a tap that silently only marks read looks perfectly normal in the UI.
+
 ## Verification
 
-`flutter-verify` 40848310530 + `android-release` 40848316859 green on
-`ed0804d0`; installed on the device as versionCode 107. On-device checks: the
-bar shows the four labelled tabs; the header shows search and the bell; tapping
-the bell opens the screen with its title, back button and empty state.
+- v107 (`flutter-verify` 40848310530, `android-release` 40848316859): the bar
+  shows the four labelled tabs; the header shows search and the bell; tapping the
+  bell opens the screen with its title, back button and empty state.
+- v109 (`flutter-verify` 40858861806, `android-release` 40858867384, commit
+  `848b7c06`): tap-through added; installed on the device as versionCode 109.
 
-Tests: `test/modules/notifications/notifications_store_test.dart` (JSON round
-trip, ordering, de-duplication preserving read, unread counting, the 100 cap,
-restore from disk) and `test/bottom_nav_and_header_test.dart` (the four labels
-and icons in order, no search tab, header search, and the shared bar height).
+Tests:
+
+- `test/modules/notifications/notifications_store_test.dart` — JSON round trip,
+  ordering, de-duplication preserving read, unread counting, the 100 cap,
+  restore from disk.
+- `test/modules/notifications/notification_bell_test.dart` — the unseen count
+  renders on the REAL widget, read entries are excluded, zero shows no badge, and
+  a backlog caps at `99+`. (Added because the device pass could not exercise a
+  non-zero count with an empty inbox.)
+- `test/modules/notifications/notification_actions_test.dart` — a tap marks read,
+  follows a valid link, and tolerates missing/blank links.
+- `test/bottom_nav_and_header_test.dart` — the four labels and icons in order, no
+  search tab, header search, and the shared bar height.
