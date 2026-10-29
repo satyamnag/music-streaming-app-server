@@ -46,6 +46,7 @@ import 'package:sangeet/pages/stats/playlists/playlists.dart' as _i29;
 import 'package:sangeet/pages/stats/stats.dart' as _i28;
 import 'package:sangeet/pages/stats/streams/streams.dart' as _i31;
 import 'package:sangeet/pages/track/track.dart' as _i32;
+import 'package:sangeet/pages/notifications/notifications.dart' as _i39;
 import 'package:shadcn_flutter/shadcn_flutter.dart' as _i38;
 
 /// generated route for
@@ -561,6 +562,22 @@ class ProfileRoute extends _i35.PageRouteInfo<void> {
     name,
     builder: (data) {
       return const _i19.ProfilePage();
+    },
+  );
+}
+
+/// generated route for
+/// [_i39.NotificationsScreen]
+class NotificationsRoute extends _i35.PageRouteInfo<void> {
+  const NotificationsRoute({List<_i35.PageRouteInfo>? children})
+    : super(NotificationsRoute.name, initialChildren: children);
+
+  static const String name = 'NotificationsRoute';
+
+  static _i35.PageInfo page = _i35.PageInfo(
+    name,
+    builder: (data) {
+      return const _i39.NotificationsScreen();
     },
   );
 }

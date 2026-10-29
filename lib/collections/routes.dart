@@ -129,6 +129,10 @@ class AppRouter extends RootStackRouter {
               page: ProfileRoute.page,
             ),
             AutoRoute(
+              path: "notifications",
+              page: NotificationsRoute.page,
+            ),
+            AutoRoute(
               path: "stats",
               page: StatsRoute.page,
             ),
