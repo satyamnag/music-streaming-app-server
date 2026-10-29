@@ -12,7 +12,19 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
-final navigationPanelHeight = StateProvider<double>((ref) => 50);
+/// Height of the bottom navigation bar, in logical pixels.
+///
+/// 50 was enough for icon-only tabs. A labelled tab adds the label line under
+/// the icon, and at 50 the label was laid out but clipped away by the bar's own
+/// height, so the bar showed four bare icons. 64 is the height the reference
+/// design uses and leaves room for icon + label.
+///
+/// The player's slide maths reads this same constant (see
+/// `player_overlay.dart` and `player.dart`), so the three cannot drift.
+const double kNavigationBarHeight = 64;
+
+final navigationPanelHeight =
+    StateProvider<double>((ref) => kNavigationBarHeight);
 
 class SangeetNavigationBar extends HookConsumerWidget {
   const SangeetNavigationBar({

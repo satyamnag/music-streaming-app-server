@@ -82,6 +82,38 @@ void main() {
     });
   });
 
+  group('the bar height is one shared constant, not per-file magic numbers', () {
+    test('the bar defines the height and the player reads it', () {
+      final bar = File(
+        'lib/modules/root/spotube_navigation_bar.dart',
+      ).readAsStringSync();
+      expect(
+        bar.contains('const double kNavigationBarHeight = '),
+        isTrue,
+        reason: 'a labelled tab needs more room than the old icon-only 50dp; '
+            'the height must live in one place',
+      );
+
+      final overlay =
+          File('lib/modules/player/player_overlay.dart').readAsStringSync();
+      expect(overlay.contains('kNavigationBarHeight * invertedPosition'), isTrue);
+      expect(
+        overlay.contains('50 * invertedPosition'),
+        isFalse,
+        reason: 'the slide maths must follow the bar height, otherwise the '
+            'mini player no longer sits on top of the bar',
+      );
+
+      final player = File('lib/modules/player/player.dart').readAsStringSync();
+      expect(player.contains('kNavigationBarHeight'), isTrue);
+      expect(
+        player.contains('== 50'),
+        isFalse,
+        reason: 'the collapse test must compare against the same constant',
+      );
+    });
+  });
+
   group('the home header keeps search reachable', () {
     final home = File('lib/pages/home/home.dart').readAsStringSync();
 

@@ -34,7 +34,8 @@ class PlayerOverlay extends HookConsumerWidget {
       minHeight: canShow ? PlayerOverlayCollapsedSection.collapsedHeight : 0,
       onPanelSlide: (position) {
         final invertedPosition = 1 - position;
-        ref.read(navigationPanelHeight.notifier).state = 50 * invertedPosition;
+        ref.read(navigationPanelHeight.notifier).state =
+            kNavigationBarHeight * invertedPosition;
       },
       controller: panelController,
       color: Colors.transparent,
