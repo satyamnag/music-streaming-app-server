@@ -60,6 +60,18 @@ void main() {
       expect(admin.contains('banner_url: url'), isTrue);
       expect(admin.contains('banner_url: null'), isTrue);
     });
+
+    test('the panel states the exact size to upload (1080x540)', () {
+      // The size was only ever surfaced by a rejection message, so an admin
+      // found it after a failed upload instead of before one.
+      expect(admin.contains('const DEITY_BANNER_WIDTH = 1080;'), isTrue);
+      expect(admin.contains('const DEITY_BANNER_HEIGHT = 540;'), isTrue);
+      expect(
+        admin.contains("DEITY_BANNER_WIDTH + '&times;' + DEITY_BANNER_HEIGHT"),
+        isTrue,
+        reason: 'the hint must print the numbers, not just name a ratio',
+      );
+    });
   });
 
   group('the app carries the banner from the server into the model', () {

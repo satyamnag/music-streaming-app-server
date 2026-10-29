@@ -1693,6 +1693,16 @@ const SPECIAL_BANNER_WIDTH = 1440;
 const SPECIAL_BANNER_HEIGHT = 540;
 const SPECIAL_BANNER_LABEL = '8:3 landscape (2.667:1)';
 
+// The deity screen's BACKGROUND BANNER (migration 030). The detail hero draws
+// it at 2:1 across the full width, so 1080x540 is the size to ask for: that is
+// exactly what a 1080px-wide phone renders, and it is the size the upload
+// endpoint names when it rejects a wrongly-shaped file. Must stay in step with
+// DEITY_BANNER_* in server.js.
+const DEITY_BANNER_RATIO = 2;
+const DEITY_BANNER_WIDTH = 1080;
+const DEITY_BANNER_HEIGHT = 540;
+const DEITY_BANNER_LABEL = '2:1 landscape';
+
 let specialRows = [];
 
 async function loadSpecials() {
@@ -2449,7 +2459,7 @@ function renderFeaturedChips() {
             '</span>' +
           '</div>' +
           '<input type="file" id="fpIconInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipIconUpload(this, \'' + esc(id) + '\')">' +
-          '<label class="special-label">Background banner (2:1 landscape WebP)</label>' +
+          '<label class="special-label">Background banner</label>' +
           '<div class="special-actions" style="margin-top:0;">' +
             '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'fpBannerInput-' + esc(id) + '\').click()">Upload banner</button>' +
             (bannerUrl ? '<button class="btn btn-danger btn-sm" type="button" onclick="clearChipBanner(\'' + esc(id) + '\')">Remove banner</button>' : '') +
@@ -2460,6 +2470,13 @@ function renderFeaturedChips() {
             '</span>' +
           '</div>' +
           '<input type="file" id="fpBannerInput-' + esc(id) + '" accept=".webp,image/webp" style="display:none" onchange="handleChipBannerUpload(this, \'' + esc(id) + '\')">' +
+          '<div class="special-hint">' +
+            'Upload a <strong>WebP</strong> (lossy, quality 80&ndash;85, no alpha), ' +
+            '<strong>' + DEITY_BANNER_LABEL + '</strong>, sized ' +
+            '<strong>' + DEITY_BANNER_WIDTH + '&times;' + DEITY_BANNER_HEIGHT + '</strong>. ' +
+            'That is the exact size this banner is drawn at, so it stays sharp at every phone width. ' +
+            'Keep text and faces away from the top edge (the status bar sits over it) and from the bottom-right corner (the title and song count sit there).' +
+          '</div>' +
           '<label class="special-label">Sort order (lower shows first)</label>' +
           '<input class="special-input" type="number" id="fpOrder-' + esc(id) + '" value="' + esc(orderValue) + '" placeholder="default">' +
           '<div class="special-actions">' +
