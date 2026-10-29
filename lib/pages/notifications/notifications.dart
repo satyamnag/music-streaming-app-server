@@ -33,14 +33,19 @@ class NotificationsScreen extends HookConsumerWidget {
       return null;
     }, [store]);
 
-    return Scaffold(
-      headers: [
-        TitleBar(
-          leading: const [BackButton()],
-          title: const Text('Notifications'),
-        ),
-      ],
-      child: ValueListenableBuilder<List<AppNotification>>(
+    // SafeArea(bottom: false) wraps the Scaffold exactly as the other routed
+    // pages do (see home_see_all.dart): without it the TitleBar — and with it the
+    // back button — is laid out under the status bar and is invisible.
+    return SafeArea(
+      bottom: false,
+      child: Scaffold(
+        headers: [
+          TitleBar(
+            leading: const [BackButton()],
+            title: const Text('Notifications'),
+          ),
+        ],
+        child: ValueListenableBuilder<List<AppNotification>>(
         valueListenable: store.items,
         builder: (context, entries, _) {
           final unread = entries.where((e) => !e.read).length;
@@ -88,7 +93,8 @@ class NotificationsScreen extends HookConsumerWidget {
               ),
             ],
           );
-        },
+          },
+        ),
       ),
     );
   }
