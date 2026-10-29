@@ -38,9 +38,14 @@ Per the official splash screen documentation
 foreground is masked. So the artwork may occupy **at most two thirds** of the
 canvas, and anything at that boundary is one OEM rounding away from being cut.
 
-The shipped icon therefore draws the medallion at **101 dp inside a 240 dp
-canvas (42%)** — the same 101 dp the legacy launch window draws, with a wide
-margin against the mask. It is generated (never hand-edited) by:
+The shipped icon therefore draws the medallion at **35% of its canvas**, a
+fraction chosen from measurement rather than taste: Android lays a
+background-less splash icon out in a **288 dp** box, the reference phone renders
+the icon that way (`203 px` medallion on a 2x screen = 101 dp), so
+`101 / 288 = 35%` reproduces the reference exactly on it. A device that honours
+`windowSplashScreenIconBackgroundColor` and uses the 240 dp box draws the same
+art at 84 dp — smaller, never bigger — and both are far inside the 67 % mask.
+It is generated (never hand-edited) by:
 
 ```
 python tool/generate_android12_splash.py          # writes all five densities
@@ -73,7 +78,7 @@ device on Android 15 show the same launch screen.
 1. Replace `drawable-xxxhdpi/splash.png` with the new medallion (transparent
    background, artwork touching the canvas edges).
 2. Run `python tool/generate_android12_splash.py`.
-3. Re-check the ratio: the medallion must stay near 42% of the canvas. Anything
+3. Re-check the ratio: the medallion must stay near 35% of the canvas. Anything
    above 66% is inside the platform's mask and will be cropped on some devices.
 4. Install on a real phone and watch the launch (the splash lives for well under
    a second; `adb shell screenrecord` is the reliable way to see it).

@@ -21,14 +21,21 @@ part of the lettering.
 
 ## What this script draws
 
-A 240x240 dp transparent canvas with the medallion at 101x101 dp in the centre:
+A 240x240 dp transparent canvas whose medallion occupies the same FRACTION of the
+canvas that the reference splash shows.
 
-  * 101 dp is exactly the size the legacy (pre-Android-12) launch screen draws
-    the same medallion at (`drawable-*/splash.png` is 101x101 dp), so every
-    Android version now shows the same splash at the same size;
-  * 101/240 = 42% of the canvas, well inside the documented 2/3 (160dp of a
-    240dp box) safe circle, so no mask on any device or OEM skin can reach the
-    artwork.
+The fraction is derived from the platform's own geometry rather than picked by
+eye. Android lays the splash icon out at 288 dp when no icon background is drawn
+(the reference phone renders exactly 101 dp of medallion that way, measured from
+the owner's screenshot: a 203 px medallion on a 2x screen), and every density
+bucket below therefore carries `101 / 288 = 35%` of the canvas as artwork:
+
+  * a device that uses the 288 dp box shows the medallion at 101 dp, the size the
+    legacy (pre-Android-12) launch screen draws the same artwork at;
+  * a device that honours `windowSplashScreenIconBackgroundColor` and uses the
+    240 dp box shows it at 84 dp - smaller, never bigger;
+  * both are far inside the documented two-thirds safe circle (the mask can only
+    reach 2/3 = 67%), so no mask on any device or OEM skin can touch the artwork.
 
 Usage:  python tool/generate_android12_splash.py [--check]
 """
@@ -51,9 +58,14 @@ DENSITIES = {
     "xxxhdpi": 4.0,
 }
 
-# dp of the splash icon canvas and of the medallion inside it.
+# dp of the splash icon canvas, and the medallion size the reference shows when
+# the platform lays the icon out in its 288 dp box (see the module docstring).
 CANVAS_DP = 240
-ART_DP = 101
+REFERENCE_ICON_BOX_DP = 288
+MEDALLION_DP = 101
+
+# Fraction of the canvas the medallion keeps clear around it.
+ART_FRACTION = MEDALLION_DP / REFERENCE_ICON_BOX_DP
 
 # The highest-resolution copy of the medallion, used as the source artwork.
 MASTER = RES / "drawable-xxxhdpi/splash.png"
@@ -65,7 +77,7 @@ def generate(check_only: bool = False) -> int:
 
     for bucket, density in DENSITIES.items():
         canvas_px = round(CANVAS_DP * density)
-        art_px = round(ART_DP * density)
+        art_px = max(1, round(canvas_px * ART_FRACTION))
         art = master.resize((art_px, art_px), Image.LANCZOS)
 
         canvas = Image.new("RGBA", (canvas_px, canvas_px), (0, 0, 0, 0))
@@ -83,7 +95,10 @@ def generate(check_only: bool = False) -> int:
                 f"{'would write' if check_only else 'write':<11} "
                 f"{directory}/android12splash.png  "
                 f"{canvas_px}x{canvas_px}px  art {art_px}px "
-                f"({ART_DP}dp of {CANVAS_DP}dp = {ART_DP / CANVAS_DP:.0%})"
+                f"({ART_FRACTION:.1%} of canvas -> "
+                f"{ART_FRACTION * REFERENCE_ICON_BOX_DP:.1f}dp in a "
+                f"{REFERENCE_ICON_BOX_DP}dp box, "
+                f"{ART_FRACTION * CANVAS_DP:.1f}dp in a {CANVAS_DP}dp box)"
             )
             changed += 1
             if not check_only:
