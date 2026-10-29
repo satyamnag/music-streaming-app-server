@@ -55,29 +55,40 @@ screen and preserving existing functionality.
 `banner_url` is nullable on purpose: null means "the admin has not chosen one",
 which is precisely what triggers the placeholder.
 
-## REQUIRED: apply the migration
+## Migration 030: APPLIED and verified
 
-Migrations in this repo are applied by hand (there is no runner).
-
-**Confirmed still unapplied** by a read-only probe of the live database (anon key):
+Migrations in this repo are applied by hand (there is no runner). The owner ran
+`server/migrations/030_featured_playlist_banner.sql`; the live database now
+confirms it:
 
 ```
-GET /rest/v1/featured_playlists?select=id,banner_url
--> 400 {"code":"42703","message":"column featured_playlists.banner_url does not exist"}
+GET /rest/v1/featured_playlists?select=id,title,banner_url
+-> 200 [{"id":"venkateswara","title":"Venkateswara","banner_url":null}, ...]
 ```
 
-Until 030 is applied:
+All five deity rows expose the column, currently null — which is exactly the
+"admin has not chosen one yet" state that shows the placeholder.
 
-- the app still works — `select('*')` simply has no `banner_url`, which trims to
-  null and shows the placeholder (verified on device in v108);
-- the admin **Upload banner** button fails, but now with an actionable message
-  naming this file instead of a raw Postgres code.
+### Also verified against the live database
 
-Apply `server/migrations/030_featured_playlist_banner.sql` in the Supabase SQL
-editor (or `supabase db push`), then reload the admin panel.
+- **The app's own data path emits the field.** Reading the running app's local
+  server over `adb forward` (port 19876) returned real JSON containing
+  `"bannerUrl": null` per chip. That proves DB column -> PostgREST -> local route
+  -> JSON, on the device, not just in a unit test.
+- **RLS still protects the table.** An anon `PATCH` with
+  `Prefer: return=representation` affected `[]` rows, so the anon key (which ships
+  inside the APK) cannot rewrite chips and banners. The earlier "204" was a
+  no-match, not a write; nothing was modified by the check.
+- **The server's own suites pass** (`node test/admin-static-verify.cjs`,
+  `node test/admin-filters.test.cjs` — 25/25 PASS), so the `server.js` and
+  `admin.html` edits did not break the panel's markup/JS contracts.
 
-No service-role key and no `DATABASE_URL` exist in `.env`, so the app's own
-credentials cannot run DDL — which is why this step needs the owner.
+### Still not verified by me
+
+The admin **upload round trip** — picking a 2:1 WebP, saving it, and seeing that
+image on the deity screen — needs an admin session. `.env` holds no admin
+credential (and anon cannot write), so that last step must be done in the admin
+panel. Everything it depends on is now in place and verified above.
 
 ## Verification
 
