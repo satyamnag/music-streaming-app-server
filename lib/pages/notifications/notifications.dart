@@ -6,7 +6,9 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/components/button/back_button.dart';
 import 'package:sangeet/components/titlebar/titlebar.dart';
 import 'package:sangeet/modules/notifications/app_notification.dart';
+import 'package:sangeet/modules/notifications/notification_actions.dart';
 import 'package:sangeet/modules/notifications/notifications_store.dart';
+import 'package:sangeet/services/app_deep_link_router.dart';
 
 /// The dedicated notifications screen.
 ///
@@ -87,7 +89,14 @@ class NotificationsScreen extends HookConsumerWidget {
                         itemBuilder: (context, index) => _NotificationTile(
                           entry: entries[index],
                           theme: theme,
-                          onTap: () => store.markRead(entries[index].id),
+                          // Marks the row read AND follows the link it carried,
+                          // through the same deep-link router the OneSignal
+                          // click handler uses.
+                          onTap: () => handleNotificationTap(
+                            entries[index],
+                            markRead: store.markRead,
+                            openLink: AppDeepLinkRouter.instance.handle,
+                          ),
                         ),
                       ),
               ),
