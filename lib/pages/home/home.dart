@@ -381,10 +381,22 @@ class _HomeHeaderRow extends StatelessWidget {
               ),
             ),
           ),
-          // Account: the only action icon kept in the header. Search was removed
-          // (a dedicated Search screen exists) and Settings moved into the
-          // profile popup, so the row reads logo | wordmark | account and the
-          // wordmark keeps the room it needs.
+          // Actions: search, then the account avatar. Search moved into this
+          // header when the bottom bar became Home / Library / My Bhakti /
+          // Profile — the reference design puts search at the top right — so it
+          // keeps a one-tap entry from the home screen.
+          const Gap(10),
+          IconButton.ghost(
+            icon: Icon(
+              SangeetIcons.search,
+              size: 20,
+              color: color,
+              shadows: shadows,
+            ),
+            onPressed: () {
+              context.navigateTo(const SearchRoute());
+            },
+          ),
           const Gap(10),
           // Signed-in users see their account avatar (same as the Google
           // account); signed-out users see the user icon.
