@@ -67,7 +67,15 @@ class ProfilePage extends HookConsumerWidget {
           headers: [
             TitleBar(
               automaticallyImplyLeading: false,
-              title: Text(context.l10n.profile),
+              // Centred, exactly like the Library and My Bhakti tabs: without a
+              // Centre the title hugs the leading edge (and clips), and a back
+              // chevron would have to invent a destination on a bottom-nav tab.
+              title: Center(
+                child: Text(
+                  context.l10n.profile,
+                  style: theme.typography.h4,
+                ),
+              ),
             ),
           ],
           child: CustomScrollView(
