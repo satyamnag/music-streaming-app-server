@@ -61,20 +61,30 @@ List<SideBarTiles> getSidebarLibraryTileList(AppLocalizations l10n) => [
       ),
     ];
 
+/// The bottom navigation bar's four tabs, in order:
+/// Home, Library, My Bhakti, Profile.
+///
+/// The labels are exactly the four words the product spec asks for, and each
+/// tab's icon is the one shown in the reference screens:
+///   * Home      — house            -> the /home screen
+///   * Library   — books/library    -> the user's playlists (the /library shell)
+///   * My Bhakti — music note       -> the listening-stats screen (/stats)
+///   * Profile   — person           -> the account screen (/profile)
+///
+/// Search deliberately has no tab: it moved to the Home header, which is what
+/// the reference design shows. The route itself is untouched, so the desktop
+/// sidebar and the search intents still reach it.
+///
+/// "Home" and "My Bhakti" are literals on purpose: there is no `home` l10n key,
+/// and "My Bhakti" is a product/brand name that is not translated. Library and
+/// Profile reuse the existing localised strings.
 List<SideBarTiles> getNavbarTileList(AppLocalizations l10n) => [
       SideBarTiles(
         id: "home",
         pathPrefix: "/home",
         route: const HomeRoute(),
         icon: SangeetIcons.home,
-        title: l10n.browse,
-      ),
-      SideBarTiles(
-        id: "search",
-        pathPrefix: "/search",
-        route: const SearchRoute(),
-        icon: SangeetIcons.search,
-        title: l10n.search,
+        title: 'Home',
       ),
       SideBarTiles(
         id: "library",
@@ -84,10 +94,17 @@ List<SideBarTiles> getNavbarTileList(AppLocalizations l10n) => [
         title: l10n.library,
       ),
       SideBarTiles(
-        id: "stats",
+        id: "my_bhakti",
         pathPrefix: "/stats",
         route: const StatsRoute(),
-        icon: SangeetIcons.chart,
-        title: l10n.stats,
+        icon: SangeetIcons.music,
+        title: 'My Bhakti',
+      ),
+      SideBarTiles(
+        id: "profile",
+        pathPrefix: "/profile",
+        route: const ProfileRoute(),
+        icon: SangeetIcons.user,
+        title: l10n.profile,
       ),
     ];

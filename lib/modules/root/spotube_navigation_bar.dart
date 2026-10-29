@@ -12,7 +12,19 @@ import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 
-final navigationPanelHeight = StateProvider<double>((ref) => 50);
+/// Height of the bottom navigation bar, in logical pixels.
+///
+/// 50 was enough for icon-only tabs. A labelled tab adds the label line under
+/// the icon, and at 50 the label was laid out but clipped away by the bar's own
+/// height, so the bar showed four bare icons. 64 is the height the reference
+/// design uses and leaves room for icon + label.
+///
+/// The player's slide maths reads this same constant (see
+/// `player_overlay.dart` and `player.dart`), so the three cannot drift.
+const double kNavigationBarHeight = 64;
+
+final navigationPanelHeight =
+    StateProvider<double>((ref) => kNavigationBarHeight);
 
 class SangeetNavigationBar extends HookConsumerWidget {
   const SangeetNavigationBar({
@@ -47,6 +59,36 @@ class SangeetNavigationBar extends HookConsumerWidget {
       return const SizedBox();
     }
 
+    final theme = Theme.of(context);
+
+    // One tab = icon above its label. The selected tab is tinted with the
+    // brand primary while the rest stay neutral, so the current section reads
+    // at a glance the way the reference design shows it.
+    // Returns NavigationButton (not Widget) on purpose: NavigationBar.children
+    // is a List<NavigationBarItem>, and NavigationButton implements that.
+    NavigationButton tab(int index) {
+      final tile = navbarTileList[index];
+      final selected = index == selectedIndex;
+      return NavigationButton(
+        style: selected
+            ? const ButtonStyle.fixed(density: ButtonDensity.icon)
+            : const ButtonStyle.muted(density: ButtonDensity.icon),
+        child: Icon(
+          tile.icon,
+          size: 22,
+          color: selected ? theme.colorScheme.primary : null,
+        ),
+        label: Text(
+          tile.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        onPressed: () {
+          context.navigateTo(tile.route);
+        },
+      );
+    }
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       height: panelHeight,
@@ -56,19 +98,15 @@ class SangeetNavigationBar extends HookConsumerWidget {
             const Divider(),
             NavigationBar(
               index: selectedIndex,
+              // Labels are always visible, under the icon: the bar shows
+              // Home / Library / My Bhakti / Profile exactly as specified.
+              labelType: NavigationLabelType.all,
+              labelPosition: NavigationLabelPosition.bottom,
+              labelSize: NavigationLabelSize.small,
               surfaceBlur: context.theme.surfaceBlur,
               surfaceOpacity: context.theme.surfaceOpacity,
               children: [
-                for (final tile in navbarTileList)
-                  NavigationButton(
-                    style: navbarTileList[selectedIndex] == tile
-                        ? const ButtonStyle.fixed(density: ButtonDensity.icon)
-                        : const ButtonStyle.muted(density: ButtonDensity.icon),
-                    child: Icon(tile.icon),
-                    onPressed: () {
-                      context.navigateTo(tile.route);
-                    },
-                  )
+                for (var i = 0; i < navbarTileList.length; i++) tab(i),
               ],
             ),
           ],
