@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'package:sangeet/services/logger/logger.dart';
 
@@ -36,18 +37,28 @@ class FirebaseAnalyticsService {
   /// The decision most recently pushed to GA4 (for diagnostics/tests).
   bool get lastApplied => _lastApplied;
 
+  /// Replaces the real GA4 call in tests.
+  ///
+  /// A seam rather than a mock framework because the SDK entry point is a static
+  /// singleton: without it, "the Settings switch actually enables and disables
+  /// Google Analytics" could only be asserted against source text, and that is
+  /// exactly the kind of claim that silently stops being true.
+  @visibleForTesting
+  Future<void> Function(bool granted)? debugSetCollectionOverride;
+
   /// Applies [granted] — the same switch that drives PostHog
   /// (`Settings → Privacy → Share analytics`) — to Google Analytics.
   ///
   /// A no-op when Firebase has not been initialised, which is the case in unit
-  /// tests and on platforms without a Firebase app.
+  /// tests and on platforms without a Firebase app (the decision is still
+  /// recorded in [lastApplied], so callers can assert on it).
   Future<void> applyConsent(bool granted) async {
-    if (Firebase.apps.isEmpty) {
-      _lastApplied = granted;
-      return;
-    }
     try {
-      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(granted);
+      if (debugSetCollectionOverride != null) {
+        await debugSetCollectionOverride!(granted);
+      } else if (Firebase.apps.isNotEmpty) {
+        await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(granted);
+      }
       _lastApplied = granted;
     } catch (e, stack) {
       AppLogger.reportError(e, stack, 'analytics: GA4 consent');

@@ -92,7 +92,21 @@ collection to be disclosed in a legally adequate privacy notification
 | Disclosed to users | `PRIVACY_POLICY.md` — summary bullet, the analytics section's "Advertising identifier" paragraph, the processor table — and the Settings → Privacy subtitle now names GA4 and the identifier |
 | Consent | collection is off by default (manifest flag) and on only after the opt-in switch; turning it off stops GA4 collection immediately |
 
-**Tripwires.** `test/play_advertising_id_test.dart` asserts the permission, the
+**Runtime evidence (Realme RMX2027, Android 11, release APK).** GA4's own log
+confirms the manifest switch reaches the SDK:
+
+```text
+I FA : App measurement disabled via the manifest
+I FA : App measurement initialized, version: 192007
+```
+
+That line is the SDK reporting `firebase_analytics_collection_enabled=false` — the
+app is running, GA4 is present, and no measurement happens until the listener
+opts in.
+**Tripwires.** `test/analytics_consent_wiring_test.dart` drives the REAL Settings
+switch and asserts GA4 receives `setAnalyticsCollectionEnabled(true)` on opt-in and
+`false` on opt-out (through the seam in `FirebaseAnalyticsService`), and
+`test/play_advertising_id_test.dart` asserts the permission, the
 two manifest flags, the Gradle/pubspec artifacts, both consent call sites and the
 policy disclosure — and it fails if anyone re-adds
 `google_analytics_adid_collection_enabled=false` (which would make the Console's
