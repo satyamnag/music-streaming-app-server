@@ -5,7 +5,7 @@ services collect, why, and how you can control it. It replaces the earlier
 policy inherited from the upstream open-source project this app is built on,
 which described different software and different data practices.
 
-*Last updated: 2026-10-25*
+*Last updated: 2026-10-30*
 
 ---
 
@@ -14,7 +14,11 @@ which described different software and different data practices.
 - Product analytics is **opt-in and off by default**. Nothing is collected for
   analytics until you turn it on in *Settings → Privacy → Share analytics*, and
   you can turn it off again at any time.
-- We do not sell your data, and we do not use it for advertising.
+- We do not sell your data and we do not use it for advertising. Like almost
+  every Android app, the app can read your device's **advertising identifier**,
+  but only while you have analytics switched on and only for measurement and
+  diagnostics — never to target ads at you and never for personalized
+  advertising. See *Advertising identifier* below.
 - Signing in is optional for free listening. If you never sign in, we do not
   have your name or email address at all.
 - This summary is a convenience only; the rest of this policy is what applies.
@@ -30,15 +34,31 @@ and listening history attached to you across devices, and to identify your
 subscription. Signing in is optional unless you buy a plan.
 
 **2. Product analytics (opt-in only).** If — and only if — you enable
-*Settings → Privacy → Share analytics*, the app sends usage data to
-**PostHog** (PostHog, Inc.) through PostHog's EU or US ingestion endpoint. This
-includes: which screens you open, app lifecycle events (app opened, backgrounded,
-installed, updated), app version, device model and operating system, and errors
-the app handles itself. If you are signed in, these events are linked to your
-account identifier so we can tell a real usage pattern from a broken one.
-We do not send your email address, name, phone number, search text, or the audio
-you listen to. Enabling this is your choice, and turning it off stops collection
-immediately and clears the analytics identifier stored on your device.
+*Settings → Privacy → Share analytics*, the app sends usage data to two
+analytics providers:
+
+- **PostHog** (PostHog, Inc.), through PostHog's EU or US ingestion endpoint;
+- **Google Analytics for Firebase** (Google LLC), through Firebase/Google
+  Analytics.
+
+This includes: which screens you open, app lifecycle events (app opened,
+backgrounded, installed, updated), app version, device model and operating
+system, and errors the app handles itself. If you are signed in, these events are
+linked to your account identifier so we can tell a real usage pattern from a
+broken one. We do not send your email address, name, phone number, search text,
+or the audio you listen to. Enabling this is your choice, and turning it off stops
+collection immediately for both providers and clears the analytics identifier
+stored on your device.
+
+**Advertising identifier.** While analytics is on, Google Analytics for Firebase
+reads your device's advertising identifier (the Android Advertising ID) and uses
+it for measurement and diagnostics only — for example, to count installs and to
+attribute them to a partner's QR code. We do **not** use it to target advertising
+at you, we do **not** use it for personalized advertising (the app turns
+personalized-ads signals off), we do **not** connect it to your name or email
+address, and we do **not** sell it. It is read only while analytics is on: turn
+that switch off and the app stops reading it. The app itself serves no ads and
+contains no advertising SDK.
 
 **3. Crash and diagnostic reports.** Crash reports are sent to **Google Firebase
 Crashlytics** so we can find and fix crashes. They contain a stack trace, the app
@@ -68,7 +88,9 @@ commissions.
 
 - We do not collect or store the audio you listen to.
 - We do not collect your contacts, photos, calendar, or SMS.
-- We do not use advertising identifiers, and the app contains no ad SDKs.
+- We do not use the advertising identifier to target ads at you, we do not use it
+  for personalized advertising, and the app contains no advertising SDK. It is
+  read only for measurement, and only while analytics is on (see above).
 - We do not sell personal data to anyone.
 
 **Permissions the app asks for, and why**
@@ -96,6 +118,7 @@ future processing; it does not affect processing already carried out.
 | Provider | Purpose | Their policy |
 | --- | --- | --- |
 | PostHog, Inc. | Product analytics (opt-in) | https://posthog.com/privacy |
+| Google (Analytics for Firebase) | Product analytics and measurement, including the advertising identifier, only while analytics is on (opt-in) | https://firebase.google.com/support/privacy Â· https://policies.google.com/privacy |
 | Google (Firebase Crashlytics) | Crash reporting | https://firebase.google.com/support/privacy |
 | Google Play Services | Distribution, purchases, install referrer | https://policies.google.com/privacy |
 | Clerk | Sign-in and account identity | https://clerk.com/legal/privacy |
@@ -110,8 +133,9 @@ above to those locations.
 **Retention**
 
 Analytics events are retained in PostHog according to the retention period
-configured for the project. Crash reports are retained by Firebase Crashlytics
-according to its retention settings. Account data (playlists, likes, history) is
+configured for the project, and in Google Analytics according to the retention
+configured for the Firebase project. Crash reports are retained by Firebase
+Crashlytics according to its retention settings. Account data (playlists, likes, history) is
 retained while your account exists and is deleted when you delete your account in
 the app.
 

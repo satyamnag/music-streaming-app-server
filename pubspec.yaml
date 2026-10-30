@@ -229,9 +229,18 @@ dependencies:
   onesignal_flutter: 5.5.2
   firebase_core: ^4.13.0
   firebase_crashlytics: ^5.2.7
-  # Product analytics. Replaces firebase_analytics, which was initialised
-  # unconditionally in main.dart and reported no consent decision at all.
-  # Env-gated (POSTHOG_API_KEY) and consent-gated (opt-in, default OFF) in
+  # Google Analytics for Firebase. Declared because the Play Console
+  # "Advertising ID" declaration is now answered YES: GA4 is the component that
+  # uses the advertising identifier (for measurement/attribution only - the
+  # manifest sets google_analytics_default_allow_ad_personalization_signals
+  # =false). Collection is OFF until the listener opts in (Settings -> Privacy),
+  # via firebase_analytics_collection_enabled=false in the manifest plus
+  # setAnalyticsCollectionEnabled() in
+  # lib/services/analytics/firebase_analytics_service.dart. See
+  # docs/PLAY_DATA_SAFETY.md.
+  firebase_analytics: ^12.4.6
+  # Product analytics. Runs ALONGSIDE GA4 and is also opt-in; env-gated
+  # (POSTHOG_API_KEY) and consent-gated (default OFF) in
   # lib/services/analytics/posthog_service.dart.
   posthog_flutter: ^5.56.2
   share_plus: ^12.0.2

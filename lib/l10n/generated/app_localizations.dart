@@ -3159,7 +3159,7 @@ abstract class AppLocalizations {
   /// **'Privacy'**
   String get privacy;
 
-  /// Label of the opt-in toggle for product analytics (PostHog)
+  /// Label of the opt-in toggle for product analytics (PostHog + Google Analytics for Firebase)
   ///
   /// In en, this message translates to:
   /// **'Share analytics'**
@@ -3168,7 +3168,7 @@ abstract class AppLocalizations {
   /// Subtitle explaining exactly what the analytics opt-in sends
   ///
   /// In en, this message translates to:
-  /// **'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.'**
+  /// **'Share usage data to help improve the app: screens you open, errors and performance, sent to PostHog and Google Analytics. While this is on, Google Analytics reads your device advertising ID for measurement only - never for advertising. Linked to your account when you are signed in. Off by default.'**
   String get share_analytics_description;
 
   /// Title at the top of the Analytics screen

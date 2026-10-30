@@ -645,13 +645,13 @@ jobs:
         # artifact a RELEASE hands to Play, because that is the one Play Console's
         # Data safety answers describe, and the debug build is only a proxy for it.
         #
-        # The permission that matters is com.google.android.gms.permission.AD_ID:
-        # when it is merged, Play requires the "Device or other IDs -> Advertising
-        # ID" declaration. It can arrive from a transitive AAR that nothing in this
-        # repo declares, which is exactly how it got in once - a leftover
-        # firebase-analytics Gradle dependency kept Google Analytics for Firebase
-        # alive and pulled play-services-measurement in with it. See
-        # docs/PLAY_DATA_SAFETY.md; the warning below is the tripwire for a repeat.
+        # The permission that matters is com.google.android.gms.permission.AD_ID.
+        # The Console declaration is answered YES, so this step now FAILS when the
+        # permission is absent (Play blocks a Yes-declared release whose artifact
+        # lacks it). It can arrive from a transitive AAR that nothing in this repo
+        # declares, which is how it once vanished: a leftover firebase-analytics
+        # Gradle dependency was removed and the permission went with it. See
+        # docs/PLAY_DATA_SAFETY.md section A.1.
         run: |
           set -u
           APK="$(find build/app/outputs/flutter-apk -name '*.apk' 2>/dev/null | head -n1)"
@@ -697,10 +697,18 @@ jobs:
             fi
           } | tee "$OUT"
           echo "--- verdict ---"
+          # The Console declaration is answered YES (App content -> Advertising
+          # ID), so the artifact MUST carry the permission: Play blocks a release
+          # whose declaration says Yes while the manifest lacks AD_ID. A missing
+          # permission is therefore an error here, not a pass - it means the app
+          # no longer contains the component that uses the identifier
+          # (firebase-analytics) or the explicit declaration was dropped.
           if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' "$OUT"; then
-            echo "::warning::AD_ID is present in the release artifact: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
+            echo "AD_ID is present, as the Play Console 'Advertising ID -> Yes' declaration requires."
+            echo "Data safety must keep the 'Device or other IDs -> Advertising ID' row; see docs/PLAY_DATA_SAFETY.md section A.1."
           else
-            echo "AD_ID is absent from the release artifact: no Advertising ID declaration is required."
+            echo "::error::AD_ID is MISSING from the release artifact, but Play Console declares 'uses advertising ID: Yes'. Such a release is blocked by Play. Restore com.google.firebase:firebase-analytics and the explicit uses-permission (docs/PLAY_DATA_SAFETY.md A.1)."
+            exit 1
           fi
           {
             echo "### Release artifact permissions"

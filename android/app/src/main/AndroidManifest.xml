@@ -12,6 +12,22 @@
        This is a special permission, not a runtime prompt. -->
   <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
+  <!-- ADVERTISING ID.
+       Play Console: App content -> Advertising ID -> "Yes", because Google
+       Analytics for Firebase (declared in android/app/build.gradle) reads the
+       advertising ID for measurement and attribution when analytics is on.
+
+       It is declared EXPLICITLY rather than left to the manifest merger: Play
+       blocks a release whose declaration says "Yes" while the artifact lacks
+       this permission, so it must not be possible for a dependency change to
+       remove it silently. test/play_advertising_id_test.dart and the release
+       workflow's permission audit both fail if it disappears.
+
+       The identifier is never used for personalized advertising (see the
+       google_analytics_default_allow_ad_personalization_signals meta-data
+       below) and never while analytics is off. -->
+  <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
   <queries>
     <!-- If your app opens https URLs -->
     <intent>
@@ -32,6 +48,29 @@
     <!-- <meta-data
       android:name="io.flutter.embedding.android.EnableImpeller"
       android:value="false" /> -->
+
+    <!-- Analytics consent. Product analytics is opt-in in this app (Settings ->
+         Privacy -> Share analytics), and these two flags make the SDKs honour
+         that decision from the very first launch:
+
+         * firebase_analytics_collection_enabled=false disables Google Analytics
+           for Firebase collection until the listener turns analytics on; the
+           app re-enables it with FirebaseAnalytics.setAnalyticsCollectionEnabled
+           (lib/services/analytics/firebase_analytics_service.dart). This is the
+           documented mechanism for "get end-user consent before collecting data":
+           https://firebase.google.com/docs/analytics/android/configure-data-collection
+
+         * google_analytics_default_allow_ad_personalization_signals=false keeps
+           the advertising identifier OUT of personalized advertising: it is used
+           for measurement/analytics only, which is what the privacy policy and
+           the Play Ads policy promise. The identifier itself is still collected
+           when analytics is on - which is what the Console "Yes" declares. -->
+    <meta-data
+      android:name="firebase_analytics_collection_enabled"
+      android:value="false" />
+    <meta-data
+      android:name="google_analytics_default_allow_ad_personalization_signals"
+      android:value="false" />
 
     <activity
       android:name="com.sangeet.app.MainActivity"

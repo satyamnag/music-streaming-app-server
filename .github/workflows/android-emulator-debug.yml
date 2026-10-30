@@ -270,9 +270,11 @@ jobs:
           } | tee permissions.txt
           echo "--- verdict ---"
           if grep -q 'com\.google\.android\.gms\.permission\.AD_ID' permissions.txt; then
-            echo "::warning::AD_ID is present in the shipped manifest: Play requires the Data safety 'Device or other IDs -> Advertising ID' declaration. Keep docs/PLAY_DATA_SAFETY.md and the Console answer in sync."
+            echo "AD_ID is present, as the Play Console 'Advertising ID -> Yes' declaration requires."
+            echo "Data safety must keep the 'Device or other IDs -> Advertising ID' row; see docs/PLAY_DATA_SAFETY.md section A.1."
           else
-            echo "AD_ID is absent: no Advertising ID declaration is required for this build."
+            echo "::error::AD_ID is MISSING from the shipped manifest, but Play Console declares 'uses advertising ID: Yes'. A release from this tree would be blocked by Play. Restore com.google.firebase:firebase-analytics and the explicit uses-permission (docs/PLAY_DATA_SAFETY.md A.1)."
+            exit 1
           fi
           echo "--- which dependency contributes it ---"
           # Knowing THAT AD_ID is merged is not enough to act on: the developer

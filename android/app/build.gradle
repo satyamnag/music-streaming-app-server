@@ -183,24 +183,39 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
     implementation 'com.google.code.gson:gson:2.11.0'
 
-    // Firebase BoM only (matches the FlutterFire-managed BOM version 34.17.0, so
+    // Firebase BoM (matches the FlutterFire-managed BOM version 34.17.0, so
     // Gradle deduplicates).
-    //
-    // There is deliberately no `com.google.firebase:firebase-analytics` artifact
-    // here. It used to be declared explicitly, and it was the ONLY thing pulling
-    // play-services-measurement into the APK - which is what merged
-    // com.google.android.gms.permission.AD_ID and the two Privacy Sandbox
-    // ACCESS_ADSERVICES permissions into the shipped manifest, obliging an
-    // Advertising ID declaration in Play Console (and an advertising-identifier
-    // disclosure in the privacy policy) for an app that serves no ads. The Dart
-    // side was already migrated to PostHog; the raw Gradle artifact was left
-    // behind and kept Google Analytics for Firebase collecting.
-    //
-    // Crashlytics does not need it: firebase-crashlytics' own POM depends on
-    // firebase-sessions, firebase-installations and firebase-measurement-
-    // connector, none of which pull play-services-measurement. Verified by
-    // reading the resolved artifact POMs, and re-verified on every build by the
-    // "Audit merged manifest permissions" step in
-    // .github/workflows/android-emulator-debug.yml. See docs/PLAY_DATA_SAFETY.md.
     implementation platform('com.google.firebase:firebase-bom:34.17.0')
+
+    // Google Analytics for Firebase (GA4).
+    //
+    // ## Why this is declared again
+    // It was removed once, on purpose, because it was the only artifact pulling
+    // play-services-measurement into the APK - which is what merges
+    // com.google.android.gms.permission.AD_ID and the two Privacy Sandbox
+    // ACCESS_ADSERVICES permissions into the shipped manifest. The owner has now
+    // decided to declare the advertising ID in Play Console (App content ->
+    // Advertising ID -> Yes) instead of avoiding it, so the app has to carry a
+    // component that genuinely uses the identifier; this is that component.
+    //
+    // Google's own Android documentation states that Analytics for Firebase
+    // collects the Advertising ID by default - it documents how to switch that
+    // off (google_analytics_adid_collection_enabled=false), which is only
+    // meaningful because collection is on unless disabled:
+    // https://firebase.google.com/docs/analytics/android/configure-data-collection
+    //
+    // ## What keeps this safe, and in step with the Console answer
+    //   * collection is OFF until the listener turns analytics on, via the
+    //     documented `firebase_analytics_collection_enabled=false` manifest
+    //     meta-data plus `FirebaseAnalytics.setAnalyticsCollectionEnabled` on
+    //     consent (lib/services/analytics/firebase_analytics_service.dart);
+    //   * the identifier is never used for personalized advertising:
+    //     `google_analytics_default_allow_ad_personalization_signals=false`;
+    //   * the permission is declared explicitly in the manifest, so it cannot
+    //     disappear while the Console says Yes (Play blocks releases whose
+    //     declaration says Yes but whose artifact lacks it);
+    //   * test/play_advertising_id_test.dart + the release workflow's permission
+    //     audit fail if any of the three drift.
+    // docs/PLAY_DATA_SAFETY.md holds the Console answers and the evidence.
+    implementation 'com.google.firebase:firebase-analytics'
 }

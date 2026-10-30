@@ -16,6 +16,7 @@ import 'package:local_notifier/local_notifier.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:metadata_god/metadata_god.dart';
+import 'package:sangeet/services/analytics/firebase_analytics_service.dart';
 import 'package:sangeet/services/analytics/posthog_service.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:sangeet/modules/notifications/app_notification.dart';
@@ -194,6 +195,13 @@ Future<void> main(List<String> rawArgs) async {
       // from a stable one's. The version is left to the native default.
       environment: Env.releaseChannel.name,
     );
+
+    // Google Analytics for Firebase obeys the SAME decision, applied right after
+    // the stored one is loaded. It starts switched off in the manifest
+    // (firebase_analytics_collection_enabled=false), so this is the only place
+    // collection can be turned on - and only for a listener who opted in.
+    await FirebaseAnalyticsService.instance
+        .applyConsent(PostHogService.instance.hasConsent);
 
     // Installation-verification harness. A no-op in every shipping build: it
     // needs BOTH the compile-time define POSTHOG_VERIFY_OPTIN (passed only by

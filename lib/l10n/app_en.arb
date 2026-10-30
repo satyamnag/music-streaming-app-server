@@ -513,9 +513,9 @@
   },
   "share_analytics": "Share analytics",
   "@share_analytics": {
-    "description": "Label of the opt-in toggle for product analytics (PostHog)"
+    "description": "Label of the opt-in toggle for product analytics (PostHog + Google Analytics for Firebase)"
   },
-  "share_analytics_description": "Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.",
+  "share_analytics_description": "Share usage data to help improve the app: screens you open, errors and performance, sent to PostHog and Google Analytics. While this is on, Google Analytics reads your device advertising ID for measurement only - never for advertising. Linked to your account when you are signed in. Off by default.",
   "@share_analytics_description": {
     "description": "Subtitle explaining exactly what the analytics opt-in sends"
   },

@@ -1679,7 +1679,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get share_analytics_description =>
-      'Share usage data to help improve the app: screens you open, errors and performance. Linked to your account when you are signed in. Off by default.';
+      'Share usage data to help improve the app: screens you open, errors and performance, sent to PostHog and Google Analytics. While this is on, Google Analytics reads your device advertising ID for measurement only - never for advertising. Linked to your account when you are signed in. Off by default.';
 
   @override
   String get analytics_journey_title => 'My Bhakti Journey';

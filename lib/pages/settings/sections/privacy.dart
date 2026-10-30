@@ -6,6 +6,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/services/analytics/firebase_analytics_service.dart';
 import 'package:sangeet/services/analytics/posthog_service.dart';
 import 'package:sangeet/services/logger/logger.dart';
 
@@ -47,6 +48,13 @@ class SettingsPrivacySection extends HookConsumerWidget {
               consent.value = granted;
               try {
                 await PostHogService.instance.setConsent(granted);
+
+                // Google Analytics for Firebase follows the SAME switch. It is
+                // switched off in the manifest until consent arrives, so this
+                // call is what starts (or stops) GA4 collection - and with it
+                // the advertising identifier GA4 reads for measurement. The
+                // wrapper never throws, so a GA4 failure cannot fail the toggle.
+                await FirebaseAnalyticsService.instance.applyConsent(granted);
 
                 // Consent can be granted long after sign-in (this toggle is
                 // reachable at any time), and the auth notifier only syncs

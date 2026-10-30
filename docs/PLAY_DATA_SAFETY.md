@@ -1,7 +1,9 @@
 # Play Console — Data safety answer sheet
 
 Written against the Android app tree at commit `760a437c` (branch
-`fix/drop-leftover-firebase-analytics`), on 2026-10-25.
+`fix/drop-leftover-firebase-analytics`), on 2026-10-25; **updated 2026-10-30** when
+the owner decided to DECLARE the advertising ID instead of avoiding it (see
+section A.1).
 Play Console path: **Policy and program → App content → Data safety**.
 
 Every row below is answered from the shipped code, and each one names the evidence. Where an answer
@@ -35,7 +37,8 @@ the answer to "Is this data shared?" is **No** for every row.
 | 5 | App activity | **App interactions** | Yes | No | No | Optional | Analytics | PostHog app-lifecycle and screen events, only while the opt-in is on; the anonymous play counter |
 | 6 | App info and performance | **Crash logs** | Yes | No | No | Required | App functionality | Firebase Crashlytics |
 | 7 | App info and performance | **Diagnostics** | Yes | No | No | Required | App functionality | Firebase Crashlytics (device metadata, app state) |
-| 8 | Device or other IDs | **Device or other IDs** — *not* the advertising ID | Yes | No | No | Required | App functionality; Analytics | Crashlytics installation id (Firebase installations SDK, no opt-out); PostHog distinct id (opt-in); OneSignal subscription id (push permission); Play Install Referrer code |
+| 8a | Device or other IDs | **Device or other IDs** | Yes | No | No | Required | App functionality; Analytics | Crashlytics installation id (Firebase installations SDK, no opt-out); PostHog distinct id (opt-in); OneSignal subscription id (push permission); Play Install Referrer code |
+| 8b | Device or other IDs | **Advertising ID** | Yes | No | No | Optional (the Settings → Privacy switch turns it off) | Analytics; Measurement/attribution | Google Analytics for Firebase, only while analytics is on — see A.1 |
 
 Evidence, file by file:
 
@@ -52,20 +55,52 @@ crash reporting and the identifiers it carries are collected with no in-app opt-
 that a type may be declared optional only if **all** users can opt out, so a partially opt-in data
 type is still declared *required*.
 
-### The advertising ID: was collected, cause found, fix verified
+### A.1 The advertising ID: now DECLARED (Console answer: Yes)
 
-Nothing in this repo declared the permission, which is why it was read off the built APK instead of
-inferred from the dependency list. The APK did carry it — run
-<https://github.com/satyamnag/music-streaming-app-server/actions/runs/40189466351>:
+**Status change, 2026-10-30.** The app used to avoid the identifier: the leftover
+`firebase-analytics` Gradle dependency was removed, the `AD_ID` permission fell
+out of the merged manifest, and this sheet said "do not declare it".
 
-```text
-uses-permission: name='android.permission.ACCESS_ADSERVICES_AD_ID'
-uses-permission: name='android.permission.ACCESS_ADSERVICES_ATTRIBUTION'
-uses-permission: name='com.google.android.gms.permission.AD_ID'
-```
+The owner has chosen to declare it instead, so that the Console declaration is
+answered **Yes** and the release is not blocked on it. That means the app now has
+to carry a component that genuinely uses the identifier, and it does:
 
-The manifest merger's blame report named the source: **Google Analytics for Firebase, still present
-as a raw Gradle dependency** after the Dart plugin had already been replaced by PostHog.
+| what | where | why |
+| --- | --- | --- |
+| `com.google.firebase:firebase-analytics` | `android/app/build.gradle` | Google's Android docs state GA4 collects the Advertising ID by default — they document `google_analytics_adid_collection_enabled=false` to switch that off, which only makes sense because it is on |
+| `com.google.android.gms.permission.AD_ID` (explicit) | `android/app/src/main/AndroidManifest.xml` | Play blocks a release whose declaration says Yes while the artifact lacks the permission, so it must not be possible for a dependency change to remove it silently |
+| `firebase_analytics_collection_enabled=false` | same manifest | Google's documented "get end-user consent before collecting data" switch. Collection stays off until the listener turns analytics on |
+| `google_analytics_default_allow_ad_personalization_signals=false` | same manifest | the identifier is used for measurement only — never personalized advertising, which is what the privacy policy and the Play Ads policy promise |
+| `FirebaseAnalyticsService.applyConsent` | `lib/services/analytics/firebase_analytics_service.dart`, called from `main.dart` and the Settings → Privacy toggle | applies that switch to GA4 (`setAnalyticsCollectionEnabled`) |
+
+Sources, both official and both read before the change:
+<https://firebase.google.com/docs/analytics/android/configure-data-collection> ·
+<https://developer.android.com/about/versions/13/behavior-changes-13>
+
+**What the declaration obliges, and how each obligation is met.** The Play Ads
+policy requires the identifier to be used *only* for "advertising and user
+analytics", forbids connecting it to personally-identifiable information or
+associating it with a persistent identifier for analytics, and requires its
+collection to be disclosed in a legally adequate privacy notification
+(<https://support.google.com/googleplay/android-developer/answer/9857753>):
+
+| Obligation | How this app meets it |
+| --- | --- |
+| Only advertising/user-analytics use | GA4 measurement and attribution only; `google_analytics_default_allow_ad_personalization_signals=false` keeps it out of personalized advertising; the app serves no ads |
+| Not connected to PII | no `setUserId`, no email/name on any GA4 call; the app passes nothing to GA4 beyond the SDK's own automatic events |
+| Not associated with a persistent identifier *for analytics* | the analytics identifiers that do exist (PostHog distinct id, Crashlytics installation id) belong to separate vendors and are not linked to the advertising ID |
+| Disclosed to users | `PRIVACY_POLICY.md` — summary bullet, the analytics section's "Advertising identifier" paragraph, the processor table — and the Settings → Privacy subtitle now names GA4 and the identifier |
+| Consent | collection is off by default (manifest flag) and on only after the opt-in switch; turning it off stops GA4 collection immediately |
+
+**Tripwires.** `test/play_advertising_id_test.dart` asserts the permission, the
+two manifest flags, the Gradle/pubspec artifacts, both consent call sites and the
+policy disclosure — and it fails if anyone re-adds
+`google_analytics_adid_collection_enabled=false` (which would make the Console's
+"Yes" untrue). The release workflow's permission audit now treats a MISSING
+`AD_ID` as an error rather than a pass.
+
+**Historical evidence, kept for context.** Before the removal, the merged
+manifest carried the permission and the blame report named the source:
 
 ```text
 com.google.android.gms.permission.AD_ID          <- com.google.android.gms:play-services-measurement(-api):23.2.0
@@ -73,40 +108,25 @@ android.permission.ACCESS_ADSERVICES_ATTRIBUTION <- com.google.android.gms:play-
 android.permission.ACCESS_ADSERVICES_AD_ID       <- com.google.android.gms:play-services-measurement-api:23.2.0
 ```
 
-Those modules enter only through `implementation 'com.google.firebase:firebase-analytics'` in
-`android/app/build.gradle`: no other resolved Google POM declares `play-services-measurement`, and
-`gradlew :app:dependencyInsight` shows the app module's own declaration as the only path. The line
-was wrong twice over — it kept a second analytics vendor running next to PostHog, and it was the only
-reason the app could read the advertising ID.
+Run <https://github.com/satyamnag/music-streaming-app-server/actions/runs/40189466351>
+carried all three; run
+<https://github.com/satyamnag/music-streaming-app-server/actions/runs/40193002183>
+carried none after the removal. Both `ACCESS_ADSERVICES_*` permissions come back
+with GA4 and need no separate declaration: Play has no Privacy Sandbox
+declaration, only the Advertising ID one (see section E).
 
-Branch `fix/drop-leftover-firebase-analytics` removes it, and the removal is verified rather than
-assumed. Crashlytics is unaffected: `firebase-crashlytics`' own POM depends on `firebase-sessions`,
-`firebase-installations` and `firebase-measurement-connector`, none of which pull
-`play-services-measurement`.
+**Console answers that go with this** (App content → Advertising ID):
 
-| | Build carrying the leftover dependency | After the fix |
-| --- | --- | --- |
-| `aapt2 dump permissions` | AD_ID and both `ACCESS_ADSERVICES_*` present | all three **gone** |
-| Audit verdict | `AD_ID is present …` (warning) | `AD_ID is absent: no Advertising ID declaration is required for this build.` |
-| Run | [40189466351](https://github.com/satyamnag/music-streaming-app-server/actions/runs/40189466351) | [40193002183](https://github.com/satyamnag/music-streaming-app-server/actions/runs/40193002183) |
+- "Does your app use advertising ID?" → **Yes**
+- "Is the advertising ID used for advertising?" → **No** (analytics/measurement
+  only; this is what the manifest flag enforces)
+- Advertise/promote your app with the identifier, or use it to build user
+  profiles → **No**
 
-Per Android's own behaviour-change note, an app without the permission receives a string of zeroes
-instead of the advertising ID
-(<https://developer.android.com/about/versions/13/behavior-changes-13>).
-
-**So: do not declare the advertising ID, provided the build you ship contains this fix.** For any
-build cut from `main` before it merges, the opposite holds — declare it under `Device or other IDs`,
-because Google's declaration guide lists the `AD_ID` permission as a trigger for that type, and
-Google documents that Analytics for Firebase collects the advertising ID by default
-(<https://developer.android.com/privacy-and-security/declare-data-use> ·
-<https://support.google.com/analytics/answer/11582702>). That state also drags in the Play Ads
-policy, which requires the identifier to be **"only … used for advertising and user analytics"**,
-forbids connecting it to **"personally-identifiable information"** or associating it with a
-persistent identifier for analytics, and requires its collection and use to be
-**"disclosed to users in a legally adequate privacy notification"**
-(<https://support.google.com/googleplay/android-developer/answer/9857753>). Removing the dependency
-satisfies all of that by not collecting the identifier at all.
-
+And in Data safety, row 8 changes: `Device or other IDs` now includes the
+**advertising ID**, is still **collected**, still **not shared**, and its purpose
+gains **Analytics** alongside App functionality; it becomes **optional**, because
+every listener can switch analytics off and with it the identifier.
 ## B. Data types deliberately NOT declared
 
 | Not declared | Why |
@@ -118,7 +138,7 @@ satisfies all of that by not collecting the identifier at all.
 | App activity → In-app search history | Search runs against our own catalog on the device; queries are not transmitted. |
 | App activity → Installed apps | The app checks whether the optional external YouTube engine is installed (`lib/hooks/configurators/use_check_yt_dlp_installed.dart`), but that result stays on the device and is never sent anywhere. |
 | App activity → Other user-generated content | Playlists, likes and history live in the on-device database; they are never uploaded. |
-| Device or other IDs → Advertising ID | Verified absent from the shipped manifest once the leftover Analytics dependency is removed — see section A. |
+| Device or other IDs → Advertising ID | **Now declared** — see A.1. It was previously absent from the manifest and therefore not declared. |
 
 ## C. Security practices
 
@@ -143,12 +163,10 @@ Two notes on the encryption answer, because it is all-or-nothing and covers ever
 
 ## D. Open items before submitting
 
-1. **Ship the advertising-ID fix before answering the form.** It is resolved on branch
-   `fix/drop-leftover-firebase-analytics` and verified by run 40193002183. Until it merges, any build
-   cut from `main` still collects the advertising ID and must be declared. The hosted-policy PR
-   (<https://github.com/satyamnag/music-streaming-web/pull/1>) drops the Firebase Analytics
-   disclosure on that same assumption, so it must not be deployed ahead of this fix — if the fix is
-   abandoned, that PR has to restore the disclosure instead.
+1. ~~Ship the advertising-ID fix before answering the form.~~ **Superseded on 2026-10-30:** the app
+   now DECLARES the identifier (A.1) rather than removing it, so the Console answer is **Yes** and the
+   hosted policy must disclose GA4 and the advertising identifier again — the opposite of what web PR
+   #1 did. Update the hosted policy before publishing this build.
 2. **Deletion must reach the processors.** Google requires that when an account is deleted you
    "delete the user data associated with that app account" and, where service providers process it,
    "request the service provider to do the same." The app currently resets local identity
