@@ -2220,6 +2220,16 @@ function isValidSrtText(text) {
   })
 }
 
+// The synced columns this endpoint may produce. Used both to validate a caller's
+// `columns` restriction and to keep the response honest about what it touched.
+const SYNC_COLUMNS = [
+  'synced_lyrics',
+  'synced_lyrics_en',
+  'synced_lyrics_hi',
+  'synced_lyrics_en_tr',
+  'synced_lyrics_hi_tr',
+]
+
 // ============================================================================
 // POST /api/admin/tracks/:id/auto-sync
 // ============================================================================
@@ -2541,7 +2551,20 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     // Opt-in per request. Absent/false keeps the legacy line-only output, so an
     // existing client that never sends this field behaves exactly as before.
     const wantEnhance = req.body && (req.body.enhance === true || req.body.enhance === 'true')
-    const toWrite = wantEnhance ? enhanced : proposed
+
+    // Optional column restriction, so the admin can run ONE column at a time
+    // (Telugu, then the translation, then the transliteration), review it, save
+    // it, and only then move on. Absent = every column present, as before.
+    const requestedColumns = Array.isArray(req.body && req.body.columns)
+      ? req.body.columns.filter((c) => typeof c === 'string' && SYNC_COLUMNS.includes(c))
+      : null
+    const restrict = (obj) => (requestedColumns
+      ? Object.fromEntries(Object.entries(obj).filter(([k]) => requestedColumns.includes(k)))
+      : obj)
+
+    const proposedOut = restrict(proposed)
+    const enhancedOut = restrict(enhanced)
+    const toWrite = wantEnhance ? enhancedOut : proposedOut
 
     let writeResult = { wrote: false, reason: 'not_requested', columns: [] }
 
@@ -2599,7 +2622,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
                 await supabase.from('tracks').update(previousSrt).eq('id', track.id)
                 writeResult = { wrote: false, reason: 'readback_mismatch', detail: mismatched.join(', ') }
               } else {
-                writeResult = { wrote: true, reason: null, columns: Object.keys(proposed) }
+                writeResult = { wrote: true, reason: null, columns: Object.keys(toWrite) }
               }
             }
           } catch (writeExcept) {
@@ -2717,11 +2740,13 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
         flagged: l.startSeconds === null || l.confidence < effFloor,
       })),
       // Proposed SRT text per column — pre-filled into the editor, NOT saved.
-      proposed,
+      proposed: proposedOut,
       // The same proposal with {{Music}} gaps and repeated occurrences timed.
       // Returned alongside the legacy shape so the admin can choose, and so an
       // older client that only reads `proposed` is unaffected.
-      proposed_enhanced: enhanced,
+      proposed_enhanced: enhancedOut,
+      // Which columns this run actually produced (respects `columns`).
+      columns: Object.keys(toWrite),
       enhance_requested: wantEnhance,
       music_cue_count: cueBuild.musicCueCount,
       repeat_cue_count: cueBuild.repeatCueCount,
