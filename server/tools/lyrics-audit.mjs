@@ -144,7 +144,7 @@ for (const t of rows) {
 
     // Structural verdict: only missing/repeated content is a "content" issue;
     // timing problems are their own, more serious, class.
-    const coverage = lyricLines.length ? (1 - missing / lyricLines.length) : 1
+    const coverage = lyricLines.length ? (1 - missingLines / lyricLines.length) : 1
 
     if (problems.length) {
       findings.push({
