@@ -86,8 +86,8 @@ from ctc_forced_aligner import (
 
 model, tokenizer = load_alignment_model(
     args.device,
+    args.model,
     dtype=torch.float32,
-    model_name=args.model,
 )
 
 audio_waveform = load_audio(audio_url, model.dtype, model.device)
@@ -101,8 +101,10 @@ text = " ".join(lyric_lines)
 
 emissions, stride = generate_emissions(model, audio_waveform, batch_size=4)
 
-# Native Telugu script: the telugu wav2vec2 tokenizer is char-based over Devanagari-like
-# script, so no romanization is needed and the words stay readable and mappable.
+# Native Telugu script: the telugu wav2vec2 tokenizer is char-based over the
+# Telugu script, so no romanization is needed and the words stay readable and
+# mappable. (v0.3.0 signature: preprocess_text(text, romanize, language,
+# split_size="word", star_frequency="segment").)
 tokens_starred, text_starred = preprocess_text(text, romanize=False, language="tel")
 segments, scores, blank_token = get_alignments(emissions, tokens_starred, tokenizer)
 spans = get_spans(tokens_starred, segments, blank_token)
