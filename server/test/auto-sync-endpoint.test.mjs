@@ -512,6 +512,32 @@ try {
     } finally { s.child.kill() }
   })
 
+  await test('a write never touches any plain_lyrics column', async () => {
+    // The plain column is the author's script and the app renders its headings
+    // as dividers, so Auto-Sync must read it and never write it. This asserts
+    // the guarantee at the API level: every column reported as written is a
+    // SYNCED column.
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { enhance: true, write: true })
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      if (body.wrote_to_database) {
+        assert.ok(body.written_columns.length > 0, 'a write must report its columns')
+        for (const col of body.written_columns) {
+          assert.ok(col.startsWith('synced_lyrics'), `unexpected non-synced column written: ${col}`)
+        }
+        // The source of the write must never contain a plain column either.
+        for (const col of Object.keys(body.proposed_enhanced || {})) {
+          assert.ok(col.startsWith('synced_lyrics'), `enhanced proposal leaked plain column: ${col}`)
+        }
+      } else {
+        assert.equal(body.write_blocked_reason, 'alignment_not_ok')
+      }
+    } finally { s.child.kill() }
+  })
+
   await test('write:true NEVER overwrites a track with existing sync lyrics', async () => {
     const timed = { ...baseTrack, synced_lyrics: '[00:05.80]HAND TIMED\n' }
     const s = await launch({ track: timed, deepgramPort: dg.port })

@@ -322,6 +322,31 @@ test('renderCuesForVariant skips a line the column has no text for, without shif
   assert.ok(!blocks.some((b) => b[2] === P2), 'untranslated line must not leak Telugu into this column')
 })
 
+test('headings stay in the plain column untouched, and never enter the SRT', () => {
+  const before = PLAIN
+  const lines = PLAIN.split('\n')
+  const idx = lines.findIndex((l) => l.trim() === P1)
+  const alignment = { ok: true, lines: [placed(idx, P1, 10, 14), placed(idx + 1, P2, 14, 18)] }
+
+  const { cues } = buildSyncCues({ plainLyrics: PLAIN, alignment, words: [], audioDuration: 20 })
+  const srt = renderCuesForVariant(cues, PLAIN, lines.length)
+
+  // 1. The builder is a pure reader: the plain column is byte-identical after.
+  eq(PLAIN, before, 'the plain lyrics value must not be mutated')
+
+  // 2. The headings are still THERE in the plain column — that is the whole
+  //    point: the app renders them as ornament dividers, so the database keeps
+  //    them exactly as the author typed them.
+  for (const label of ['{Pallavi}', '{Anupallavi}', '{Charanam 1}']) {
+    assert.ok(PLAIN.includes(label), `${label} must remain in the plain lyrics`)
+  }
+
+  // 3. ...and not one of them reached the generated SRT.
+  for (const label of ['{Pallavi}', '{Anupallavi}', '{Charanam 1}']) {
+    assert.ok(!srt.includes(label), `${label} leaked into the SRT`)
+  }
+})
+
 // ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
