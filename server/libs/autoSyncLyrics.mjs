@@ -1236,9 +1236,20 @@ export function parseSrtTimeline(raw) {
  * @param {string} args.targetPlain  the target column's plain lyrics
  * @returns {{srt:string, cues:number, matched:number, skipped:number}}
  */
-export function deriveVariantSrt({ teluguPlain, timeline, targetPlain }) {
+export function deriveVariantSrt({ teluguPlain, timeline, targetPlain, lineMap = null }) {
   const teLines = splitLyricLines(teluguPlain).map((l) => l.trim())
-  const target = splitVariantLines(targetPlain, teLines.length)
+  // `splitVariantLines` truncates a longer variant to the lyric count. That is
+  // the right default, but it means a translation that SPLITS one Telugu line
+  // into two loses text. When a `lineMap` is supplied it wins: lineMap[i] is the
+  // target index for Telugu line i (-1 = no translation for that line).
+  const positional = splitVariantLines(targetPlain, teLines.length)
+  const targetAll = splitLyricLines(targetPlain).map((l) => l.trim())
+  const targetAt = (i) => {
+    if (!Array.isArray(lineMap)) return positional[i]
+    const mapped = lineMap[i]
+    if (mapped === -1 || mapped === null || mapped === undefined) return ''
+    return targetAll[mapped] ?? ''
+  }
   const cues = Array.isArray(timeline) ? timeline : []
 
   const blocks = []
@@ -1267,7 +1278,7 @@ export function deriveVariantSrt({ teluguPlain, timeline, targetPlain }) {
     }
     if (idx >= 0) cursor = idx + 1
 
-    const text = idx >= 0 ? String(target[idx] || '').trim() : ''
+    const text = idx >= 0 ? String(targetAt(idx) || '').trim() : ''
     if (!text) { skipped += 1; continue }
 
     matched += 1

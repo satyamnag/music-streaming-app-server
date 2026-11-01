@@ -30,6 +30,7 @@ import {
 import {
   applySecondOpinion,
   secondOpinionPicks,
+  mapTranslationLines,
   segmentTranscript,
 } from './libs/openaiLyricSecondOpinion.mjs'
 
@@ -2801,10 +2802,41 @@ app.post('/api/admin/tracks/:id/sync-variant', requireAdmin, async (req, res, ne
       })
     }
 
+    // --- Line correspondence ------------------------------------------------
+    //
+    // A translation is not always line-parallel: one Telugu line may become two
+    // English lines, or two Telugu lines one English sentence. Positional mapping
+    // then puts the wrong text on a cue and truncates the tail. When the counts
+    // differ (or the caller asks), the model supplies the CORRESPONDENCE only -
+    // no audio, no timings, and this path never calls Deepgram.
+    //
+    // Deterministic whenever the columns are parallel; the model is a fallback,
+    // and a failure simply falls back to positional mapping (today's behaviour).
+    const teLines = splitLyricLines(track.plain_lyrics).map((l) => l.trim())
+    const targetLines = splitLyricLines(targetPlain).map((l) => l.trim())
+    const wantMap = req.body && (req.body.use_openai === true || req.body.use_openai === 'true')
+    const nonParallel = targetLines.length !== teLines.length
+
+    let lineMap = null
+    let mapping = null
+    if (wantMap || nonParallel) {
+      if (!secrets.openai_api_key) {
+        mapping = { ok: false, reason: 'no_api_key' }
+      } else {
+        mapping = await mapTranslationLines({
+          apiKey: secrets.openai_api_key,
+          teluguLines: teLines,
+          targetLines,
+        })
+        if (mapping.ok) lineMap = mapping.map
+      }
+    }
+
     const derived = deriveVariantSrt({
       teluguPlain: track.plain_lyrics,
       timeline,
       targetPlain,
+      lineMap,
     })
 
     // `matched` (not `cues`) is the real signal: the {{Music}} banner is
@@ -2857,6 +2889,12 @@ app.post('/api/admin/tracks/:id/sync-variant', requireAdmin, async (req, res, ne
       cues: derived.cues,
       matched: derived.matched,
       skipped: derived.skipped,
+      // How the target lines were matched to the Telugu ones. `positional` means
+      // the columns were parallel (no model call); `model` means the counts
+      // differed and the correspondence came from the model.
+      line_counts: { telugu: teLines.length, target: targetLines.length },
+      line_mapping: lineMap ? 'model' : 'positional',
+      mapping_reason: mapping && !mapping.ok ? mapping.reason : null,
       proposed: { [spec.synced]: derived.srt },
       wrote_to_database: wrote,
       write_requested: wantWrite,

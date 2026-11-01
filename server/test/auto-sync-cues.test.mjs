@@ -22,6 +22,7 @@ import {
   renderCuesToSrt,
   unclaimedRuns,
 } from '../libs/autoSyncLyrics.mjs'
+import { validateLineMap } from '../libs/openaiLyricSecondOpinion.mjs'
 
 let passed = 0
 let failed = 0
@@ -574,6 +575,48 @@ test('an empty translation keeps the music banner but emits no lyric text', () =
   assert.match(out.srt, /\{\{Music\}\}/)
   assert.ok(!out.srt.includes('వాసవి'))
   assert.ok(!out.srt.includes('కావలిని'))
+})
+
+// ---------------------------------------------------------------------------
+// 9. Line correspondence for non-parallel translations
+// ---------------------------------------------------------------------------
+
+test('a lineMap overrides positional mapping when a translation splits a line', () => {
+  const tePlain = `{Pallavi}\nఒకటి\nరెండు`
+  const enPlain = `{Pallavi}\nOne (part a)\nOne (part b)\nTwo`
+  const timeline = [
+    { start: 1, end: 2, text: 'ఒకటి' },
+    { start: 3, end: 4, text: 'రెండు' },
+  ]
+  // Telugu line 1 ("ఒకటి") was split into English lines 1 and 2; we place part a,
+  // then skip part b, then line 2 -> English line 3.
+  const lineMap = [-1, 1, 3]
+  const out = deriveVariantSrt({ teluguPlain: tePlain, timeline, targetPlain: enPlain, lineMap })
+  eq(out.matched, 2)
+  assert.match(out.srt, /00:00:01,000 --> 00:00:02,000\nOne \(part a\)/)
+  assert.match(out.srt, /00:00:03,000 --> 00:00:04,000\nTwo/)
+})
+
+test('a -1 in the lineMap skips that line rather than guessing', () => {
+  const tePlain = `{Pallavi}\nఒకటి\nరెండు`
+  const enPlain = `{Pallavi}\nOne`
+  const timeline = [
+    { start: 1, end: 2, text: 'ఒకటి' },
+    { start: 3, end: 4, text: 'రెండు' },
+  ]
+  const out = deriveVariantSrt({ teluguPlain: tePlain, timeline, targetPlain: enPlain, lineMap: [-1, 1, -1] })
+  eq(out.matched, 1)
+  eq(out.skipped, 1)
+  assert.ok(!out.srt.includes('రెండు'))
+})
+
+test('validateLineMap rejects garbage, out-of-range indices and empty maps', () => {
+  eq(validateLineMap('not json', { teluguCount: 2, targetCount: 2 }), null)
+  eq(validateLineMap({ map: [{ telugu_index: 9, target_index: 0 }] }, { teluguCount: 2, targetCount: 2 }), null)
+  eq(validateLineMap({ map: [{ telugu_index: 0, target_index: 99 }] }, { teluguCount: 2, targetCount: 2 }), null)
+  // A map that translates nothing is not better than positional mapping.
+  eq(validateLineMap({ map: [{ telugu_index: 0, target_index: -1 }] }, { teluguCount: 2, targetCount: 2 }), null)
+  eq(validateLineMap({ map: [{ telugu_index: 0, target_index: 1 }] }, { teluguCount: 2, targetCount: 2 }), [1, -1])
 })
 
 // ---------------------------------------------------------------------------

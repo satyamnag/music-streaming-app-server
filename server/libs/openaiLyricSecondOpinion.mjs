@@ -267,3 +267,130 @@ export function applySecondOpinion(alignment, picks, segments, {
 
   return { placed, considered }
 }
+
+// ============================================================================
+// Line mapping between a Telugu column and its translation
+// ============================================================================
+//
+// The translation of a song is not always line-parallel: a translator may merge
+// two Telugu lines into one English sentence, or split one line into two. The
+// positional renderer (`splitVariantLines`) then puts the wrong text on a cue, or
+// silently truncates the tail.
+//
+// This asks the model for the CORRESPONDENCE only - "which English line
+// translates Telugu line N" - which is a text task with no audio involved. Times
+// are never requested: the timeline still comes from the Telugu sync lyrics.
+//
+// Fail-closed: any error returns `{ ok: false, map: null }` and the caller falls
+// back to positional mapping, i.e. exactly today's behaviour.
+
+const MAP_SCHEMA = {
+  type: 'object',
+  properties: {
+    map: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          telugu_index: { type: 'integer' },
+          target_index: { type: 'integer' },
+        },
+        required: ['telugu_index', 'target_index'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['map'],
+  additionalProperties: false,
+}
+
+const MAP_SYSTEM_PROMPT =
+  'You map song lyric lines between a source language and its translation. ' +
+  'A translation may MERGE several source lines into one target line, or SPLIT one ' +
+  'source line across several. Return, for every source line index, the target line ' +
+  'index that translates it, or -1 when the target has no translation for it. ' +
+  'Use only indices that were supplied. Never invent text.'
+
+/** Normalise a model answer into a dense array of length `teluguCount`. */
+export function validateLineMap(raw, { teluguCount, targetCount }) {
+  let parsed
+  try { parsed = typeof raw === 'string' ? JSON.parse(raw) : raw } catch { return null }
+  const list = Array.isArray(parsed?.map) ? parsed.map : null
+  if (!list) return null
+
+  const map = new Array(teluguCount).fill(-1)
+  let used = 0
+  for (const entry of list) {
+    const t = Number(entry?.telugu_index)
+    const g = Number(entry?.target_index)
+    if (!Number.isInteger(t) || t < 0 || t >= teluguCount) continue
+    if (!Number.isInteger(g) || g < -1 || g >= targetCount) continue
+    if (map[t] !== -1) continue          // first answer wins
+    map[t] = g
+    if (g >= 0) used += 1
+  }
+  // A map that translates nothing is not better than the positional default.
+  if (!used) return null
+  return map
+}
+
+/**
+ * Ask the model which target line translates each source line.
+ *
+ * @returns {Promise<{ok:boolean, reason:string|null, map:number[]|null, model:string, elapsed_ms:number}>}
+ *          Never rejects.
+ */
+export async function mapTranslationLines({
+  apiKey,
+  teluguLines,
+  targetLines,
+  model = OPENAI_DEFAULT_MODEL,
+  baseUrl = 'https://api.openai.com',
+  timeoutMs = 45000,
+}) {
+  const startedAt = Date.now()
+  const done = (ok, reason, map = null) => ({ ok, reason, map, model, elapsed_ms: Date.now() - startedAt })
+
+  if (!apiKey) return done(false, 'no_api_key')
+  if (!Array.isArray(teluguLines) || !teluguLines.length) return done(false, 'no_source_lines')
+  if (!Array.isArray(targetLines) || !targetLines.length) return done(false, 'no_target_lines')
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const src = teluguLines.map((l, i) => `${i}: ${l}`).join('\n')
+    const tgt = targetLines.map((l, i) => `${i}: ${l}`).join('\n')
+    const res = await fetch(`${baseUrl}/v1/responses`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        temperature: 0,
+        max_output_tokens: 2000,
+        input: [
+          { role: 'system', content: MAP_SYSTEM_PROMPT },
+          { role: 'user', content: `SOURCE LINES:\n${src}\n\nTARGET LINES:\n${tgt}` },
+        ],
+        text: { format: { type: 'json_schema', name: 'line_map', strict: true, schema: MAP_SCHEMA } },
+      }),
+      signal: controller.signal,
+    })
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '')
+      return done(false, `http_${res.status}${detail ? `: ${detail.slice(0, 160)}` : ''}`)
+    }
+    const payload = await res.json()
+    const { text, refusal } = extractOutputText(payload)
+    if (refusal) return done(false, 'model_refusal')
+    if (!text) return done(false, 'no_output_text')
+
+    const map = validateLineMap(text, { teluguCount: teluguLines.length, targetCount: targetLines.length })
+    if (!map) return done(false, 'no_valid_map')
+    return done(true, null, map)
+  } catch (err) {
+    const aborted = err && (err.name === 'AbortError' || err.code === 'ABORT_ERR')
+    return done(false, aborted ? 'timeout' : `request_failed: ${String(err && err.message).slice(0, 120)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+}
