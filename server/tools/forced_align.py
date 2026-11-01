@@ -94,6 +94,21 @@ model, tokenizer = load_alignment_model(
     dtype=torch.float32,
 )
 
+# The Telugu model's tokenizer_config.json sets word_delimiter_token="|", which
+# AutoTokenizer.from_pretrained honours even though load_alignment_model passes
+# word_delimiter_token=None (the config-file value wins). That extra "|" makes
+# get_vocab() exceed vocab_size and trips ctc-forced-aligner's get_alignments
+# guard ("Tokenizer vocabulary contains more tokens than expected"). Remove the
+# injected delimiter so the vocab matches the model's vocab_size exactly.
+extra = getattr(tokenizer, "added_tokens_decoder", {}) or {}
+for tok_id, data in list(extra.items()):
+    if str(data.content if hasattr(data, "content") else data).strip("| ") in ("|", ""):
+        try:
+            tokenizer.added_tokens_encoder.pop(data.content, None)
+            tokenizer.added_tokens_decoder.pop(tok_id, None)
+        except Exception:
+            pass
+
 audio_waveform = load_audio(audio_url, model.dtype, model.device)
 
 # --- Align the KNOWN text -------------------------------------------------
