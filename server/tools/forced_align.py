@@ -10,9 +10,16 @@
 # This script is a DRY RUN by design. It outputs, per track, the predicted line
 # times and scores to a JSON report. It makes no database call whatsoever.
 #
-# Official APIs used (verified against ctc-forced-aligner README):
+# Official APIs used (verified against the INSTALLED package's __init__.py,
+# MahmoudAshraf97/ctc-forced-aligner v0.3.0, NOT the README):
 #   load_audio, load_alignment_model, generate_emissions, preprocess_text,
 #   get_alignments, get_spans, postprocess_results
+#
+# IMPORTANT install note: this API is published ONLY as the git source
+#   pip install git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
+# PyPI's `ctc-forced-aligner` (v1.0.2) is a DIFFERENT package (Deskpai fork)
+# with the AlignmentTorch/generate_srt API and no permissive Telugu model; it
+# does NOT export load_alignment_model and makes this script fail immediately.
 #
 # Model chosen for commercial use: jonatasgrosman/wav2vec2-large-xlsr-53-telugu
 # (Apache-2.0). The library's DEFAULT model is CC-BY-NC and is deliberately NOT

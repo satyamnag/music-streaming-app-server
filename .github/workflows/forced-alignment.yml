@@ -67,7 +67,12 @@ jobs:
           set -eu
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --quiet ctc-forced-aligner
+          # MUST install from GitHub source. PyPI's `ctc-forced-aligner` is a
+          # DIFFERENT package (Deskpai's fork, v1.0.2) with an incompatible API
+          # (AlignmentTorch / generate_srt) and no permissive Telugu model. This
+          # script uses the MahmoudAshraf97 API (load_alignment_model, ...) whose
+          # only published install path is the git URL below.
+          pip install --quiet git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
 
       - name: Run forced alignment (dry run)
         run: |
