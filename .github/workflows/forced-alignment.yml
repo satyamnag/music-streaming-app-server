@@ -1,0 +1,96 @@
+name: Forced Alignment (dry run)
+
+# Forced alignment of known Telugu lyrics to audio, using ctc-forced-aligner
+# (BSD-2) with a permissive Telugu wav2vec2 (jonatasgrosman/wav2vec2-large-xlsr-
+# 53-telugu, Apache-2.0). The library's default model is CC-BY-NC and is NOT used.
+#
+# This job is a DRY RUN: it predicts per-line times + scores and writes NOTHING
+# to the database. It exists to prove how many currently-missing lines can be
+# recovered before any write is ever built.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id to align (find via the audit)'
+        required: true
+      model:
+        description: 'Alignment model (permissive license only)'
+        required: false
+        default: 'jonatasgrosman/wav2vec2-large-xlsr-53-telugu'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: forced-alignment
+  cancel-in-progress: false
+
+jobs:
+  align:
+    name: Forced alignment (dry run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      FA_MODEL: ${{ inputs.model }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Resolve credentials (masked)
+        run: |
+          set -eu
+          for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SUPABASE_SERVICE_ROLE_KEY TRACK_ID; do
+            eval "val=\${$v:-}"
+            if [ -z "$val" ]; then echo "::error::$v is not set"; exit 1; fi
+          done
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          CDN_URL="$(aws secretsmanager get-secret-value --secret-id r2/base-url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$CDN_URL" ]; then
+            echo "::error::could not resolve supabase/url or r2/base-url"; exit 1
+          fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "R2_BASE_URL=$CDN_URL" >> "$GITHUB_ENV"
+
+      - name: Install alignment dependencies
+        run: |
+          set -eu
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet ctc-forced-aligner
+
+      - name: Run forced alignment (dry run)
+        run: |
+          set -eu
+          python server/tools/forced_align.py --track "$TRACK_ID" --model "$FA_MODEL" --out forced-align.json | tee forced-align.log
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forced-alignment
+          path: |
+            forced-align.json
+            forced-align.log
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Forced alignment (dry run)"
+            echo ""
+            if [ -f forced-align.log ]; then tail -n 40 forced-align.log; fi
+            echo ""
+            echo "Model: **$FA_MODEL** · DRY RUN - nothing was written."
+          } >> "$GITHUB_STEP_SUMMARY"
