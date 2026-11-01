@@ -136,3 +136,70 @@ that gates the write, so the list and the headline count cannot disagree.
 | `DEEPGRAM_API_KEY` / Vault `deepgram_api_key` | required for Auto-Sync at all |
 | `OPENAI_SECOND_OPINION=1` | turns the lyric second opinion on |
 | `AWS_SECRETS_ENABLED=1` | secrets from AWS Secrets Manager (see `SECRETS-AWS.md`) |
+
+---
+
+## 9. Building the columns one at a time
+
+`Propose & Save` writes every column in one go, which means a translation can be
+saved before anyone has read it. The panel therefore also offers three separate
+steps, each of which fills **only its own** Sync tab and saves nothing:
+
+| Step | Button | Call | Transcribes? |
+|---|---|---|---|
+| 1 | `1 · Telugu (from audio)` | `auto-sync` with `columns: ['synced_lyrics']` | **yes**, once |
+| 2 | `2 · English (Translation)` | `sync-variant` `target: en` | no |
+| 3 | `3 · English (Transliteration)` | `sync-variant` `target: en_tr` | no |
+
+After each step the admin reviews the column and presses **Save**, so a save can
+never carry a column that has not been looked at.
+
+`columns` is an optional restriction on `auto-sync`, validated against the five
+synced columns. Omitting it keeps the old behaviour (every column), so an older
+client is unaffected. The response reports the columns the run actually
+produced, and the write result reports the restricted set - not every proposed
+column.
+
+### Deriving a column from an existing Telugu SRT
+
+`POST /api/admin/tracks/:id/sync-variant` `{ target: en|en_tr|hi|hi_tr, write? }`
+builds one column from the track's **stored Telugu sync lyrics** without
+transcribing anything. Its three inputs are each optional by design:
+
+- the Telugu sync lyrics (required - they are the timeline being copied),
+- the Telugu plain column (the line-parallel reference),
+- the target column's own plain lyrics (the text placed on that timeline).
+
+Rules, all tested:
+
+- times are copied **verbatim** from the Telugu cues - same milliseconds;
+- a line the target column does not have is **skipped**, never filled with
+  Telugu text (a shorter correct column beats a mixed-language one);
+- a line sung twice maps to both occurrences, in order;
+- `{{Music}}` carries through, because a banner is language-independent;
+- the write is opt-in, touches **one** column, and is verified by re-reading the
+  row (reverted on mismatch).
+
+**Non-parallel translations.** A translator may split one Telugu line into two,
+or merge two into one. Positional mapping would then put the wrong text on a cue
+and truncate the tail, so `deriveVariantSrt` accepts a `lineMap`
+(Telugu index -> target index, `-1` = no translation) and
+`mapTranslationLines` asks the model for that correspondence only - text to
+text, no audio, no timings. It is used automatically when the two columns have
+different line counts, and the response says which happened:
+`line_mapping: "positional" | "model"`. Any failure (no key, timeout, refusal,
+malformed JSON, out-of-range indices, or an answer that translates nothing)
+falls back to positional mapping.
+
+### The documented order
+
+1. Fill **Plain Telugu**, save the track (a stored id is required).
+2. **Step 1** -> review the Telugu cues (`words n/m`, flagged list) -> **Save**.
+3. Fill **Plain English (Translation)** -> **Step 2** -> review -> **Save**.
+4. Fill **Plain English (Transliteration)** -> **Step 3** -> review -> **Save**.
+
+`test/auto-sync-endpoint.test.mjs` runs exactly this sequence against the real
+HTTP endpoints and asserts: each step writes only its own column, steps 2-3 make
+no Deepgram call at all, and the English and Transliteration cue times are
+identical to the Telugu ones.
+
