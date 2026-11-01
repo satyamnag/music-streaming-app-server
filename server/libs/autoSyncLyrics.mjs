@@ -707,3 +707,233 @@ export function fillUnsungTimings(lineTimings) {
   }
   return out
 }
+
+// ---------------------------------------------------------------------------
+// Cue construction: sung lines + repeated occurrences + {{Music}} gaps
+// ---------------------------------------------------------------------------
+//
+// The plain-lyrics column is the AUTHOR'S script: it carries `{Pallavi}` /
+// `{Charanam 1}` headings and blank separators that are structural, not sung.
+// The cue list below therefore contains ONLY sung text plus generated
+// `{{Music}}` banners — a section heading can never become a cue, because it
+// would otherwise occupy a line of the timeline that no voice occupies.
+//
+// Two behaviours the plain column cannot express on its own:
+//
+//   1. A line the author wrote ONCE may be sung SEVERAL times (a repeated
+//      pallavi or charanam). The transcript hears every occurrence, so each
+//      unclaimed run of words that matches a placed line produces its own cue.
+//      Without this, the second and later repetitions would highlight the
+//      first occurrence instead of the audio actually being heard.
+//
+//   2. Whatever the voice does not cover is music. Leading intro, interludes
+//      and the outro are emitted as `{{Music}}` cues so the timeline is
+//      continuous from 00:00:00,000 to the end of the audio, with no silent
+//      hole where the highlight would otherwise freeze or disappear.
+
+/** The banner text the apps render as "♪ Music ♪" (see libs/lyricsMarkup.ts). */
+export const MUSIC_LABEL = '{{Music}}'
+
+/**
+ * Shortest gap that becomes a `{{Music}}` cue.
+ *
+ * Deliberately above the ~2 s a singer routinely holds between phrases: a
+ * held note is not an interlude, and inventing a banner for every breath would
+ * put "♪ Music ♪" on screen mid-line. At 3 s the banner only appears where
+ * there is a genuine instrumental stretch.
+ */
+export const MUSIC_GAP_MIN_SECONDS = 3
+
+/** Smallest cue this builder will emit, so no cue is zero-length on screen. */
+export const CUE_MIN_SECONDS = 0.35
+
+/** Mean word similarity for an unclaimed run to count as a repeat. */
+export const REPEAT_MIN_SIMILARITY = 0.6
+
+/** Share of a line's words a run must cover before it may be called a repeat. */
+export const REPEAT_MIN_KEY_RATIO = 0.5
+
+const splitWords = (text) => String(text || '').split(/\s+/).filter(Boolean)
+
+/** Mean best-similarity of `runWords` against the words of one line. */
+function meanSimilarity(runWords, lineKeys) {
+  if (!runWords.length || !lineKeys.length) return 0
+  let total = 0
+  for (const w of runWords) {
+    let best = 0
+    for (const k of lineKeys) {
+      const s = w === k ? 1 : wordSimilarity(k, w)
+      if (s > best) best = s
+    }
+    total += best
+  }
+  return total / runWords.length
+}
+
+/**
+ * Transcript words that no placed line claimed, grouped into consecutive runs.
+ *
+ * A word is "claimed" when its start falls inside a placed line's
+ * [startSeconds, endSeconds] span. Runs shorter than `minWords` are ignored so
+ * a stray misheard syllable never becomes a lyric cue.
+ */
+export function unclaimedRuns(words, placedCues, { minWords = 2, tolerance = 0.05 } = {}) {
+  const spans = placedCues
+    .filter((c) => typeof c.start === 'number' && typeof c.end === 'number')
+    .map((c) => [c.start, c.end])
+    .sort((a, b) => a[0] - b[0])
+
+  const claimed = (t) => spans.some(([s, e]) => t >= s - tolerance && t <= e + tolerance)
+
+  const ordered = (Array.isArray(words) ? words : [])
+    .filter((w) => w && typeof w.start === 'number' && typeof w.end === 'number')
+    .slice()
+    .sort((a, b) => a.start - b.start)
+
+  const runs = []
+  let current = null
+  for (const w of ordered) {
+    if (claimed(w.start)) { current = null; continue }
+    if (!current) { current = { words: [], start: w.start, end: w.end }; runs.push(current) }
+    current.words.push(String(w.word || ''))
+    current.end = Math.max(current.end, w.end)
+  }
+  return runs.filter((r) => r.words.length >= minWords)
+}
+
+/**
+ * Build the ordered cue list for one track.
+ *
+ * @param {object} args
+ * @param {string} args.plainLyrics                 the Telugu `plain_lyrics`
+ * @param {object} args.alignment                   result of alignLyrics()
+ * @param {Array}  [args.words]                     Deepgram word timings
+ * @param {number|null} [args.audioDuration]        seconds, from the transcription
+ * @param {number} [args.musicGapSeconds]           gap that becomes a banner
+ * @returns {{cues: Array<object>, lyricCueCount: number, repeatCueCount: number, musicCueCount: number}}
+ */
+export function buildSyncCues({
+  plainLyrics,
+  alignment,
+  words = [],
+  audioDuration = null,
+  musicGapSeconds = MUSIC_GAP_MIN_SECONDS,
+}) {
+  const lines = splitLyricLines(plainLyrics)
+
+  // ---- 1. Sung lines only. `{Pallavi}` / blank rows never become cues. -----
+  const lyricCues = []
+  for (const l of alignment?.lines || []) {
+    if (l.startSeconds === null || l.startSeconds === undefined) continue
+    const text = String(l.text ?? lines[l.lineIndex] ?? '').trim()
+    if (classifyLine(text) !== 'lyric') continue
+    lyricCues.push({
+      kind: 'lyric',
+      text,
+      start: Number(l.startSeconds),
+      end: Number(l.endSeconds ?? l.startSeconds),
+      lineIndex: l.lineIndex,
+      confidence: typeof l.confidence === 'number' ? l.confidence : null,
+      repeated: false,
+    })
+  }
+  if (!lyricCues.length) {
+    return { cues: [], lyricCueCount: 0, repeatCueCount: 0, musicCueCount: 0 }
+  }
+  lyricCues.sort((a, b) => a.start - b.start)
+
+  // ---- 2. Repeated occurrences the plain column lists only once. -----------
+  const repeatCues = []
+  for (const run of unclaimedRuns(words, lyricCues)) {
+    let best = null
+    for (const cue of lyricCues) {
+      const keys = splitWords(cue.text)
+      const needed = Math.max(2, Math.ceil(keys.length * REPEAT_MIN_KEY_RATIO))
+      if (run.words.length < needed) continue
+      const score = meanSimilarity(run.words, keys)
+      if (!best || score > best.score) best = { score, cue }
+    }
+    if (best && best.score >= REPEAT_MIN_SIMILARITY) {
+      repeatCues.push({
+        kind: 'lyric',
+        text: best.cue.text,
+        start: run.start,
+        end: run.end,
+        lineIndex: best.cue.lineIndex,
+        confidence: Number(best.score.toFixed(4)),
+        repeated: true,
+      })
+    }
+  }
+
+  // ---- 3. Merge, drop overlaps, keep strict time order. -------------------
+  const sung = [...lyricCues, ...repeatCues]
+    .sort((a, b) => a.start - b.start || a.end - b.end)
+    .reduce((out, cue) => {
+      const prev = out[out.length - 1]
+      // A repeat that starts inside the previously kept cue is the same
+      // utterance heard twice, not a new occurrence.
+      if (prev && cue.start < prev.end - 0.01) return out
+      out.push(cue)
+      return out
+    }, [])
+
+  // ---- 4. `{{Music}}` for every stretch the voice does not cover. ---------
+  const musicCue = (start, end) => ({
+    kind: 'music',
+    text: MUSIC_LABEL,
+    start: Math.max(0, start),
+    end,
+    lineIndex: null,
+    confidence: null,
+    repeated: false,
+  })
+  const cues = []
+  const first = sung[0]
+  if (first && first.start >= musicGapSeconds) cues.push(musicCue(0, first.start))
+  for (let i = 0; i < sung.length; i++) {
+    const cue = sung[i]
+    const next = sung[i + 1]
+    cues.push(cue)
+    if (next && next.start - cue.end >= musicGapSeconds) cues.push(musicCue(cue.end, next.start))
+  }
+  const last = sung[sung.length - 1]
+  if (audioDuration && audioDuration - last.end >= musicGapSeconds) {
+    cues.push(musicCue(last.end, audioDuration))
+  }
+
+  // ---- 5. Ends: every cue holds until the next one starts. ---------------
+  // That is what keeps the highlight on screen through a held note or an
+  // interlude instead of blinking off in the gap after a line is sung.
+  for (let i = 0; i < cues.length; i++) {
+    const next = cues[i + 1]
+    if (next) cues[i].end = next.start
+    if (!(cues[i].end > cues[i].start)) cues[i].end = cues[i].start + CUE_MIN_SECONDS
+  }
+
+  return {
+    cues,
+    lyricCueCount: cues.filter((c) => c.kind === 'lyric').length,
+    repeatCueCount: cues.filter((c) => c.kind === 'lyric' && c.repeated).length,
+    musicCueCount: cues.filter((c) => c.kind === 'music').length,
+  }
+}
+
+/**
+ * Render cues as SRT: `N` / `HH:MM:SS,mmm --> HH:MM:SS,mmm` / text.
+ *
+ * Millisecond precision is kept exactly as supplied — no rounding to whole
+ * seconds, no re-derivation — so what the admin reviews is byte-for-byte the
+ * timeline the aligner measured.
+ */
+export function renderCuesToSrt(cues) {
+  const blocks = []
+  let n = 0
+  for (const c of cues || []) {
+    const text = String(c.text || '').trim()
+    if (!text) continue
+    n += 1
+    blocks.push(`${n}\n${formatSrtTime(c.start)} --> ${formatSrtTime(c.end)}\n${text}`)
+  }
+  return blocks.join('\n\n') + (blocks.length ? '\n' : '')
+}
