@@ -117,6 +117,11 @@ async function transcribe(audio) {
   return { words, duration: Number(j?.metadata?.duration) || null }
 }
 
+/** Count cues that carry SUNG text ({{Music}} banners are language scaffolding). */
+function lyricCueCount(srt) {
+  return parseSrtTimeline(srt).filter((c) => String(c.text || '').trim() !== '{{Music}}').length
+}
+
 const rows = []
 for (let from = 0; ; from += 500) {
   const page = await supaGet(`tracks?select=${FIELDS}&order=title.asc`, {
@@ -163,16 +168,26 @@ for (const [i, t] of targets.entries()) {
     }
 
     const newCues = parseSrtTimeline(payload.synced_lyrics).length
+    // The decision is made on SUNG cues only. The new timeline also inserts
+    // {{Music}} banners, which inflate the total: comparing totals would let a
+    // track be "upgraded" merely because banners were added, replacing timings
+    // that may already be better than anything ASR can produce. Only a strict
+    // gain in SUNG cues - i.e. genuinely recovered repeated lines - may replace.
+    const existingLyric = lyricCueCount(t.synced_lyrics)
+    const newLyric = lyricCueCount(payload.synced_lyrics)
     rec.existing_cues = existingCues
     rec.new_cues = newCues
+    rec.existing_lyric_cues = existingLyric
+    rec.new_lyric_cues = newLyric
+    rec.banners_added = Math.max(0, newCues - newLyric) - Math.max(0, existingCues - existingLyric)
     rec.repeats = build.repeatCueCount
     rec.music = build.musicCueCount
 
     // The one rule that makes a catalogue-wide rewrite safe: only replace when
-    // the new timeline places STRICTLY MORE cues than the stored one.
-    if (newCues <= existingCues) {
+    // the new timeline places STRICTLY MORE SUNG cues than the stored one.
+    if (newLyric <= existingLyric) {
       rec.action = 'keep'
-      rec.reason = `no gain (${existingCues} -> ${newCues})`
+      rec.reason = `no sung-cue gain (${existingLyric} -> ${newLyric})`
       report.push(rec)
       continue
     }
@@ -184,7 +199,7 @@ for (const [i, t] of targets.entries()) {
     rec.reason = String(err && err.message).slice(0, 180)
   }
   report.push(rec)
-  console.log(`[${i + 1}/${targets.length}] ${rec.action.padEnd(12)} ${t.title || t.id}  ${rec.existing_cues ?? '?'} -> ${rec.new_cues ?? '?'}  ${rec.reason || ''}`)
+  console.log(`[${i + 1}/${targets.length}] ${rec.action.padEnd(12)} ${t.title || t.id}  sung ${rec.existing_lyric_cues ?? '?'} -> ${rec.new_lyric_cues ?? '?'} (total ${rec.existing_cues ?? '?'} -> ${rec.new_cues ?? '?'}, banners +${rec.banners_added ?? 0})  ${rec.reason || ''}`)
   await new Promise((r) => setTimeout(r, 50))
 }
 
@@ -198,7 +213,8 @@ const summary = {
   kept: report.filter((r) => r.action === 'keep').length,
   errors: report.filter((r) => r.action === 'error').length,
   skipped: report.filter((r) => r.action === 'skip').length,
-  total_cues_gained: report.reduce((a, r) => a + Math.max(0, (r.new_cues || 0) - (r.existing_cues || 0)), 0),
+  // Gain in SUNG cues only - the number that represents recovered repeats.
+  total_lyric_cues_gained: report.reduce((a, r) => a + Math.max(0, (r.new_lyric_cues || 0) - (r.existing_lyric_cues || 0)), 0),
   detail: report,
 }
 fs.writeFileSync(OUT, JSON.stringify(summary, null, 2))
