@@ -69,6 +69,11 @@ jobs:
             echo "::error::could not resolve supabase/url, deepgram/api-key or r2/base-url"
             exit 1
           fi
+          # Mask every value that came back from AWS. These are NOT registered
+          # GitHub secrets, so GitHub does not redact them; `::add-mask::` tells it
+          # to, so a resolved value can never leak into this PUBLIC repo's logs.
+          echo "::add-mask::$DG_KEY"
+          echo "::add-mask::$SUPA_URL"
           echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
           echo "DEEPGRAM_API_KEY=$DG_KEY" >> "$GITHUB_ENV"
           # The bucket is served publicly, so audio is fetched over HTTPS from the

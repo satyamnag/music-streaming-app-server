@@ -203,13 +203,22 @@ for (const [i, t] of targets.entries()) {
     const { words, duration } = await transcribe(audio)
     if (!words.length) { rec.reason = 'no words heard'; report.push(rec); continue }
 
+    // The DATABASE duration is what the app draws and where the audit measures
+    // "in range". Deepgram's measured length can exceed it (it sees the audio,
+    // not the stored number), which produced `out_of_range` cues that run past
+    // the track's displayed end. Clamp the timeline to the stored duration so a
+    // cue can never outlive what the player shows.
+    const storedDur = Number(t.duration) > 0 ? Number(t.duration) : null
+    const measuredDur = Number(duration) > 0 ? Number(duration) : null
+    const ceiling = (storedDur && measuredDur) ? Math.min(storedDur, measuredDur) : (storedDur || measuredDur || null)
+
     const alignment = alignLyrics({
       plainLyrics: t.plain_lyrics,
       words,
-      audioDuration: duration || Number(t.duration) || null,
+      audioDuration: ceiling,
     })
     const totalLines = splitLyricLines(t.plain_lyrics).length
-    const build = buildSyncCues({ plainLyrics: t.plain_lyrics, alignment, words, audioDuration: duration })
+    const build = buildSyncCues({ plainLyrics: t.plain_lyrics, alignment, words, audioDuration: ceiling })
     if (!build.cues.length) { rec.reason = 'no cues built'; report.push(rec); continue }
 
     const payload = {
