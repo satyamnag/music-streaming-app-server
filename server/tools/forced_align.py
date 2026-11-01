@@ -21,9 +21,13 @@
 # with the AlignmentTorch/generate_srt API and no permissive Telugu model; it
 # does NOT export load_alignment_model and makes this script fail immediately.
 #
-# Model chosen for commercial use: jonatasgrosman/wav2vec2-large-xlsr-53-telugu
-# (Apache-2.0). The library's DEFAULT model is CC-BY-NC and is deliberately NOT
-# used here.
+# Model chosen for commercial use, VERIFIED on Hugging Face:
+#   anuragshas/wav2vec2-large-xlsr-53-telugu  (license: Apache-2.0,
+#   base facebook/wav2vec2-large-xlsr-53, ~1.2M downloads). The library's
+#   DEFAULT model (MahmoudAshraf/mms-300m-1130-forced-aligner) is CC-BY-NC and
+#   is deliberately NOT used. The earlier string
+#   "jonatasgrosman/wav2vec2-large-xlsr-53-telugu" does NOT exist on the Hub
+#   (401/RepositoryNotFoundError) and was removed.
 #
 # Env: TRACK_ID, R2_BASE_URL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 # Usage: python server/tools/forced_align.py [--track <id>] [--out out.json]
@@ -39,7 +43,7 @@ def fail(msg):
 ap = argparse.ArgumentParser()
 ap.add_argument("--track", default=os.environ.get("TRACK_ID"))
 ap.add_argument("--out", default="forced-align.json")
-ap.add_argument("--model", default="jonatasgrosman/wav2vec2-large-xlsr-53-telugu")
+ap.add_argument("--model", default="anuragshas/wav2vec2-large-xlsr-53-telugu")
 ap.add_argument("--device", default="cpu")
 args = ap.parse_args()
 

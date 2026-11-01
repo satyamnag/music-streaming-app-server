@@ -17,7 +17,7 @@ on:
       model:
         description: 'Alignment model (permissive license only)'
         required: false
-        default: 'jonatasgrosman/wav2vec2-large-xlsr-53-telugu'
+        default: 'anuragshas/wav2vec2-large-xlsr-53-telugu'
 
 permissions:
   contents: read
