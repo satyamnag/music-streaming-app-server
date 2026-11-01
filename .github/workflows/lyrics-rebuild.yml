@@ -1,0 +1,116 @@
+name: Lyrics Rebuild (repeats)
+
+# Rebuilds sync lyrics for the catalogue on a runner, because it downloads every
+# track's audio and transcribes it - far too heavy for the web dyno.
+#
+# SAFETY: a track is replaced ONLY when the new timeline has STRICTLY MORE CUES
+# than the stored one, which is exactly the reported defect (repeats sung in the
+# audio but never timed). A track that is already good is left untouched.
+#
+# Default is a DRY RUN. Set `write` to true only after reading the report.
+
+on:
+  workflow_dispatch:
+    inputs:
+      write:
+        description: 'Write the rebuilt columns to the database (leave false for a dry run)'
+        type: boolean
+        default: false
+      limit:
+        description: 'Only process the first N tracks (0 = all)'
+        required: false
+        default: '0'
+      ids:
+        description: 'Comma-separated track ids to restrict to (blank = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lyrics-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: Rebuild sync lyrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DOTENV_RELEASE: ${{ secrets.DOTENV_RELEASE }}
+      WRITE_FLAG: ${{ inputs.write }}
+      LIMIT: ${{ inputs.limit }}
+      IDS: ${{ inputs.ids }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        run: npm ci --omit=dev
+        working-directory: server
+
+      - name: Resolve credentials
+        run: |
+          set -eu
+          for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SUPABASE_SERVICE_ROLE_KEY DOTENV_RELEASE; do
+            eval "val=\${$v:-}"
+            if [ -z "$val" ]; then echo "::error::$v is not set"; exit 1; fi
+          done
+
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          DG_KEY="$(aws secretsmanager get-secret-value --secret-id deepgram/api-key --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$DG_KEY" ]; then echo "::error::could not resolve supabase/url or deepgram/api-key"; exit 1; fi
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "DEEPGRAM_API_KEY=$DG_KEY" >> "$GITHUB_ENV"
+
+          # R2 credentials live in the app's .env bundle, not in a single secret.
+          printf '%s' "$DOTENV_RELEASE" > /tmp/release.env
+          for k in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do
+            val="$(grep -E "^${k}=" /tmp/release.env | head -n1 | cut -d= -f2- | tr -d '\r' || true)"
+            if [ -n "$val" ]; then echo "${k}=${val}" >> "$GITHUB_ENV"; fi
+          done
+          rm -f /tmp/release.env
+          echo "resolved: supabase url, deepgram key, and $(grep -c '^R2_' "$GITHUB_ENV" || true) R2 value(s)"
+
+      - name: Rebuild
+        working-directory: server
+        run: |
+          set -eu
+          ARGS="--out lyrics-rebuild.json"
+          if [ "$WRITE_FLAG" = "true" ]; then ARGS="$ARGS --write"; fi
+          if [ -n "${LIMIT:-}" ] && [ "$LIMIT" != "0" ]; then ARGS="$ARGS --limit $LIMIT"; fi
+          if [ -n "${IDS:-}" ]; then ARGS="$ARGS --ids $IDS"; fi
+          node tools/lyrics-rebuild.mjs $ARGS | tee rebuild.log
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyrics-rebuild
+          path: |
+            server/lyrics-rebuild.json
+            server/rebuild.log
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Lyrics rebuild"
+            echo ""
+            if [ -f server/rebuild.log ]; then tail -n 20 server/rebuild.log; fi
+            echo ""
+            echo "Mode: **$([ "$WRITE_FLAG" = "true" ] && echo WRITE || echo DRY RUN)**"
+            echo "Only tracks whose new timeline had MORE cues were replaced."
+          } >> "$GITHUB_STEP_SUMMARY"
