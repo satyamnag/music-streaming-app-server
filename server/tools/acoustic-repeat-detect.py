@@ -163,17 +163,65 @@ def _group_phrases(onsets, phrase_gap=1.2):
     return phrases
 
 
+def _windowed_repeats(onsets, min_words=4, min_repeat_gap=6.0, similarity=0.6, max_span=40.0):
+    """
+    Windowed self-similarity: slide a window of `min_words` consecutive onsets
+    across the track and compare its relative-onset signature against every later
+    window of the same size. Recovers repeated stanzas even when they are sung
+    back-to-back (no silence separates them), which phrase grouping cannot see.
+
+    Returns {a,b,similarity} pairs; a/b are the window's first/last onset times.
+    """
+    starts = [o["start"] for o in onsets]
+    n = len(onsets)
+    if n < min_words:
+        return []
+
+    def sig(times):
+        span = (times[-1] - times[0]) or 1.0
+        return [(t - times[0]) / span for t in times]
+
+    repeats = []
+    seen = set()
+    for i in range(0, n - min_words + 1):
+        wa = starts[i:i + min_words]
+        sig_a = sig(wa)
+        for j in range(i + min_words, n - min_words + 1):
+            if starts[j] - starts[i] < min_repeat_gap:
+                continue
+            if starts[j + min_words - 1] - starts[i] > max_span:
+                continue
+            wb = starts[j:j + min_words]
+            sim = _sig_similarity(sig_a, sig(wb))
+            if sim >= similarity:
+                key = (round(starts[i], 2), round(starts[j], 2))
+                if key in seen:
+                    continue
+                seen.add(key)
+                repeats.append({
+                    "a": {"start": round(starts[i], 3), "end": round(starts[i + min_words - 1], 3)},
+                    "b": {"start": round(starts[j], 3), "end": round(starts[j + min_words - 1], 3)},
+                    "similarity": round(sim, 4),
+                })
+    return repeats
+
+
 def detect_repeats(onsets, min_repeat_gap=8.0, similarity=0.6, max_span=40.0, phrase_gap=1.2):
     """
     Find repeated sung stanzas from onset timing alone.
 
-    Onsets are grouped into phrases (silence-bounded). Each phrase carries a
-    relative-onset signature; two non-overlapping phrases whose signatures match
-    above `similarity` are the same stanza sung twice (or more). Returns
-    {a, b, similarity} where a is the earlier phrase and b the later one.
+    Two complementary strategies:
+      1. PHRASE self-similarity: silence-bounded phrases compared pairwise.
+      2. WINDOWED self-similarity: any later window of onsets whose relative
+         timing matches an earlier one — catches back-to-back repetitions that
+         phrase grouping merges into one long phrase.
+
+    Both produce {a, b, similarity} where a is the earlier occurrence and b the
+    later one. Results are deduplicated by (a.start, b.start).
     """
+    # Phrase-based matches.
     phrases = _group_phrases(onsets, phrase_gap)
-    repeats = []
+    out = []
     for i in range(len(phrases)):
         pa = phrases[i]
         a_sig = [o["start"] for o in pa]
@@ -194,18 +242,29 @@ def detect_repeats(onsets, min_repeat_gap=8.0, similarity=0.6, max_span=40.0, ph
             b_norm = [(t - b_sig[0]) / b_span for t in b_sig]
             sim = _sig_similarity(a_norm, b_norm)
             if sim >= similarity:
-                # Error bound = the onset hop error of the FIRST onset in each
-                # span (both spans share the same frame hop, so take the max of
-                # the two first onsets' per-boundary uncertainty).
                 ae = pa[0].get("error", 0.0)
                 be = pb[0].get("error", 0.0)
                 err = round(max(ae, be), 3)
-                repeats.append({
+                out.append({
                     "a": {"start": round(a_sig[0], 3), "end": round(a_sig[-1], 3), "error": err},
                     "b": {"start": round(b_sig[0], 3), "end": round(b_sig[-1], 3), "error": err},
                     "similarity": round(sim, 4),
                 })
-    return repeats
+
+    # Windowed matches (back-to-back repetitions).
+    for r in _windowed_repeats(onsets, min_repeat_gap=min_repeat_gap, similarity=similarity, max_span=max_span):
+        ae = onsets[0].get("error", 0.0)
+        r["a"]["error"] = ae
+        r["b"]["error"] = ae
+        out.append(r)
+
+    # De-duplicate by (a.start, b.start) keeping the higher-similarity entry.
+    best = {}
+    for r in out:
+        key = (r["a"]["start"], r["b"]["start"])
+        if key not in best or r["similarity"] > best[key]["similarity"]:
+            best[key] = r
+    return sorted(best.values(), key=lambda r: (r["a"]["start"], r["b"]["start"]))
 
 
 # ---------------------------------------------------------------------------

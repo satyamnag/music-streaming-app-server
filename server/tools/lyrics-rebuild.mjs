@@ -148,6 +148,7 @@ async function runAcoustic(audioBytes) {
     const script = path.join(TOOLS_DIR, 'acoustic-repeat-detect.py')
     const { stdout } = await execFileP('python3', [script, '--audio', tmp], { maxBuffer: 64 * 1024 * 1024 })
     const parsed = JSON.parse(stdout)
+    process.stdout.write(`[acoustic] onsets=${parsed.onsets?.length ?? 0} repeats=${parsed.repeats?.length ?? 0}\n`)
     return Array.isArray(parsed.repeats) ? parsed.repeats : []
   } catch (err) {
     console.warn(`[acoustic] skipped for this track (${err && err.message ? err.message : err})`)
