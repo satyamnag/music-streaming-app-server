@@ -88,43 +88,31 @@ from ctc_forced_aligner import (
     postprocess_results,
 )
 
-model, tokenizer = load_alignment_model(
+model, _tokenizer_discard = load_alignment_model(
     args.device,
     args.model,
     dtype=torch.float32,
 )
 
-# The Telugu model's tokenizer_config.json declares bos_token="<s>" and
-# eos_token="</s>", which AutoTokenizer.from_pretrained ADDS to the 66-item
-# base vocab. ctc-forced-aligner's get_alignments guard asserts
-#   len(tokenizer.get_vocab()) <= tokenizer.vocab_size  (= 66)
-# and these two extra special tokens push get_vocab() to 68, tripping the guard
-# ("Tokenizer vocabulary contains more tokens than expected"). They carry no
-# CTC meaning for alignment, so drop them to make vocab match vocab_size. This
-# is a tokenizer-only, server-side adjustment - the model weights are untouched.
-for extra_id, td in list((getattr(tokenizer, "added_tokens_decoder", None) or {}).items()):
-    content = getattr(td, "content", td)
-    if str(content) in ("<s>", "</s>"):
-        tokenizer.added_tokens_decoder.pop(extra_id, None)
-        try:
-            tokenizer.added_tokens_encoder.pop(content, None)
-        except Exception:
-            pass
-if getattr(tokenizer, "bos_token", None):
-    tokenizer.bos_token = None
-    tokenizer.bos_token_id = None
-if getattr(tokenizer, "eos_token", None):
-    tokenizer.eos_token = None
-    tokenizer.eos_token_id = None
-
-# Diagnostic: the guard compares len(get_vocab()) > vocab_size. Print the exact
-# numbers and every token whose id >= vocab_size so a mismatch is diagnosed from
-# the log instead of inferred.
+# Re-load the tokenizer WITHOUT the bos/eos special tokens. Verified on a real
+# run: the model's special_tokens_map.json declares bos_token="<s>" and
+# eos_token="</s>", which the library's AutoTokenizer call adds as ids 66 and 67
+# beyond the 66-entry vocab.json, tripping get_alignments' guard
+#   len(get_vocab()) > vocab_size  (68 > 66).
+# Loading Wav2Vec2CTCTokenizer with bos_token=None / eos_token=None yields exactly
+# the 66 entries in vocab.json. Weights are untouched; this is tokenizer-only.
+from transformers import Wav2Vec2CTCTokenizer
+tokenizer = Wav2Vec2CTCTokenizer.from_pretrained(
+    args.model,
+    bos_token=None,
+    eos_token=None,
+    pad_token="[PAD]",
+    unk_token="[UNK]",
+    word_delimiter_token="|",
+)
 _vocab = tokenizer.get_vocab()
 _vsize = int(getattr(tokenizer, "vocab_size", 0))
 print(f"[tokenizer] get_vocab()={len(_vocab)} vocab_size={_vsize}")
-_overflow = sorted((tok, i) for tok, i in _vocab.items() if int(i) >= _vsize)
-print(f"[tokenizer] tokens at id >= vocab_size: {_overflow[:20]}")
 
 audio_waveform = load_audio(audio_url, model.dtype, model.device)
 
