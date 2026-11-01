@@ -1,14 +1,17 @@
 // ============================================================================
-// READ-ONLY audit of every track's sync lyrics.
+// READ-ONLY verification of every track's sync lyrics.
 //
-// Answers, without touching the audio or writing anything:
-//   * which tracks have lyric lines with NO cue (a line silently skipped),
-//   * which tracks repeat a line in PLAIN but have fewer cues for that exact
-//     text in SYNC (a repeated occurrence never timed).
+// Measures, per track and column, the four structural properties that define a
+// CORRECT SRT:
+//   * coverage   - every plain lyric line has >= 1 timed cue,
+//   * monotonic  - cues strictly increasing, never overlapping,
+//   * in-range   - every cue sits inside [0, track duration],
+//   * valid      - no zero/negative cue, no duplicate timestamps.
 //
-// Both are provable from the database alone. Whether an occurrence exists in the
-// AUDIO can only be known by transcribing again, which costs money and would
-// overwrite existing timings - that is deliberately NOT done here.
+// This proves STRUCTURAL correctness. It cannot prove that a timestamp lands on
+// the exact millisecond of the sung syllable - that requires ground truth (a
+// human-timed reference, or forced-alignment output), which no ASR-derived
+// timeline has. The report tells you the difference rather than blurring it.
 //
 // Run: node server/tools/lyrics-audit.mjs [--json out.json]
 // Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -34,13 +37,59 @@ const COLUMNS = [
   { lang: 'hi_tr', plain: 'plain_lyrics_hi_tr', synced: 'synced_lyrics_hi_tr' },
 ]
 
-const select = [...new Set(COLUMNS.flatMap((c) => [c.plain, c.synced]))].join(',')
+const select = [...new Set(COLUMNS.flatMap((c) => [c.plain, c.synced])), 'duration'].join(',')
 
 /** Count how many times each exact line appears. */
 function counts(lines) {
   const m = new Map()
   for (const l of lines) if (l) m.set(l, (m.get(l) || 0) + 1)
   return m
+}
+
+/**
+ * Structural checks for one column's SRT. Returns problems as a list of
+ * {kind, count}, where a count of 0 means the property holds.
+ */
+function structuralProblems(synced, lyricLineCount, duration) {
+  const problems = []
+  const cues = parseSrtTimeline(synced)
+
+  if (!cues.length) {
+    problems.push({ kind: 'no_cues', count: lyricLineCount })
+    return { problems, cues, cueLyricCount: 0 }
+  }
+
+  // coverage: how many distinct plain lines have at least one cue
+  const sungTexts = new Set(cues.map((c) => c.text.trim()))
+  const cueLyricCount = cues.filter((c) => !/^\{\{.*\}\}$/.test(c.text.trim())).length
+
+  // monotonic + no overlap + valid duration
+  let overlap = 0
+  let zeroDur = 0
+  let duplicated = 0
+  for (let i = 0; i < cues.length; i++) {
+    const c = cues[i]
+    if (c.end <= c.start) zeroDur += 1
+    if (i > 0 && c.start < cues[i - 1].end) overlap += 1
+  }
+  const times = new Set(cues.map((c) => c.start))
+  if (times.size !== cues.length) duplicated = cues.length - times.size
+
+  // in range
+  const dur = Number(duration)
+  let outOfRange = 0
+  if (Number.isFinite(dur) && dur > 0) {
+    for (const c of cues) {
+      if (c.start < 0 || c.end > dur + 0.5 || c.start > dur) outOfRange += 1
+    }
+  }
+
+  if (overlap) problems.push({ kind: 'overlapping_cues', count: overlap })
+  if (zeroDur) problems.push({ kind: 'zero_duration_cues', count: zeroDur })
+  if (duplicated) problems.push({ kind: 'duplicate_timestamps', count: duplicated })
+  if (outOfRange) problems.push({ kind: 'out_of_range', count: outOfRange })
+
+  return { problems, cues, cueLyricCount }
 }
 
 async function fetchPage(from, size) {
@@ -76,12 +125,10 @@ for (const t of rows) {
     const lyricLines = splitLyricLines(plain).filter((l) => classifyLine(l) === 'lyric')
     if (!lyricLines.length) continue
 
-    const cues = parseSrtTimeline(synced)
+    const { problems, cues, cueLyricCount } = structuralProblems(synced, lyricLines.length, t.duration)
     const cueTexts = counts(cues.map((c) => c.text.trim()))
 
-    const problems = []
-
-    // 1. A line present in plain but with no cue at all.
+    // coverage: a plain line present but lacking any timed cue
     const plainCounts = counts(lyricLines)
     let missing = 0
     for (const [text, n] of plainCounts) {
@@ -90,10 +137,9 @@ for (const t of rows) {
     }
     if (missing > 0) problems.push({ kind: 'missing_cues', count: missing })
 
-    // 2. A line the author wrote ONCE but the author repeated in plain is
-    //    covered by (1). A repeat that exists only in the AUDIO cannot be seen
-    //    from the database and is reported as unknown rather than guessed.
-    if (!cues.length) problems.push({ kind: 'no_cues_at_all', count: lyricLines.length })
+    // Structural verdict: only missing/repeated content is a "content" issue;
+    // timing problems are their own, more serious, class.
+    const coverage = lyricLines.length ? (1 - missing / lyricLines.length) : 1
 
     if (problems.length) {
       findings.push({
@@ -101,27 +147,41 @@ for (const t of rows) {
         title: t.title,
         status: t.status,
         column: col.lang,
+        duration: Number(t.duration) || null,
         plain_lines: lyricLines.length,
-        cues: cues.length,
+        sung_cues: cueLyricCount,
+        total_cues: cues.length,
+        coverage_pct: Number((coverage * 100).toFixed(1)),
         problems,
       })
     }
   }
 }
 
+const tracks = rows.length
+const summaries = findings.map((f) => f.problems.map((p) => p.kind)).flat()
+const byKind = {}
+for (const k of summaries) byKind[k] = (byKind[k] || 0) + 1
+// count distinct tracks with a TIMING problem (vs mere missing content)
+const timingKinds = new Set(['overlapping_cues', 'zero_duration_cues', 'duplicate_timestamps', 'out_of_range'])
+const tracksWithTimingProblems = new Set(
+  findings.filter((f) => f.problems.some((p) => timingKinds.has(p.kind))).map((f) => f.id),
+).size
+
 const summary = {
   generated_at: new Date().toISOString(),
-  tracks: rows.length,
+  tracks,
   tracks_with_findings: new Set(findings.map((f) => f.id)).size,
   findings: findings.length,
-  by_kind: findings.reduce((acc, f) => {
-    for (const p of f.problems) acc[p.kind] = (acc[p.kind] || 0) + p.count
-    return acc
-  }, {}),
+  tracks_with_timing_problems: tracksWithTimingProblems,
+  // The honest headline: how many tracks have NO measurable defect at all.
+  tracks_fully_valid: Math.max(0, tracks - new Set(findings.map((f) => f.id)).size),
+  by_kind: byKind,
   detail: findings,
 }
 
 console.log(JSON.stringify(summary, null, 2))
 if (OUT) fs.writeFileSync(OUT, JSON.stringify(summary, null, 2))
-console.log(`\n${summary.tracks} tracks · ${summary.tracks_with_findings} with findings · ${summary.findings} column findings`)
+console.log(`\n${summary.tracks} tracks · ${summary.tracks_with_findings} with findings · ${tracksWithTimingProblems} with TIMING problems`)
+console.log(`coverage across flagged columns: see coverage_pct in detail`)
 console.log('READ ONLY - nothing was written.')
