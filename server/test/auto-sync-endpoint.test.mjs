@@ -571,6 +571,82 @@ try {
     } finally { s.child.kill() }
   })
 
+  // ---------------------------------------------------------------------
+  // The documented order, executed end to end:
+  //   Plain Telugu -> Step 1 Telugu sync -> Step 2 English -> Step 3 Transliteration
+  // Each step must write ONLY its own column, and steps 2-3 must not transcribe.
+  // ---------------------------------------------------------------------
+  await test('the documented 3-step order works end to end, one column per step', async () => {
+    const track = {
+      ...WRITABLE,
+      plain_lyrics: '{Pallavi}\nనిలువదు మనసు నిముషము నీ పైన,\nకల్ల జగతి పై కాంక్షలతో కేశవా!',
+      plain_lyrics_en: '{Pallavi}\nThe mind does not stay still on you,\nWith desires for the false world, Keshava!',
+      plain_lyrics_en_tr: '{Pallavi}\nNiluvadu manasu nimushamu nee paina,\nKalla jagati pai kankshalato Keshava!',
+      synced_lyrics: null,
+      synced_lyrics_en: null,
+      synced_lyrics_en_tr: null,
+    }
+    const s = await launch({ track, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const dgStart = dg.state.requests
+
+      // --- Step 1: Telugu, from audio -------------------------------------
+      const r1 = await post(s.port, c, { enhance: true, columns: ['synced_lyrics'], write: true })
+      const b1 = await r1.json()
+      assert.equal(b1.wrote_to_database, true, `step 1 blocked: ${b1.write_blocked_reason}`)
+      assert.deepEqual(b1.written_columns, ['synced_lyrics'],
+        'step 1 must write ONLY the Telugu column')
+      const teSrt = b1.proposed_enhanced.synced_lyrics
+      assert.ok(teSrt.includes('-->'), 'step 1 must produce timed cues')
+
+      const dgAfterStep1 = dg.state.requests
+      assert.ok(dgAfterStep1 > dgStart, 'step 1 is the one that transcribes')
+
+      // --- Step 2: English (Translation), copied from the stored Telugu ---
+      const r2 = await fetch(`http://127.0.0.1:${s.port}/api/admin/tracks/${track.id}/sync-variant`, {
+        method: 'POST',
+        headers: { Cookie: c, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: 'en', write: true }),
+      })
+      const b2 = await r2.json()
+      assert.equal(r2.status, 200, `step 2 failed: ${JSON.stringify(b2)}`)
+      assert.equal(b2.wrote_to_database, true, `step 2 blocked: ${b2.write_blocked_reason}`)
+      assert.equal(b2.column, 'synced_lyrics_en')
+      assert.ok(b2.matched > 0, 'step 2 must place translated lines')
+
+      // --- Step 3: English (Transliteration) ------------------------------
+      const r3 = await fetch(`http://127.0.0.1:${s.port}/api/admin/tracks/${track.id}/sync-variant`, {
+        method: 'POST',
+        headers: { Cookie: c, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: 'en_tr', write: true }),
+      })
+      const b3 = await r3.json()
+      assert.equal(r3.status, 200, `step 3 failed: ${JSON.stringify(b3)}`)
+      assert.equal(b3.wrote_to_database, true, `step 3 blocked: ${b3.write_blocked_reason}`)
+      assert.equal(b3.column, 'synced_lyrics_en_tr')
+      assert.ok(b3.matched > 0, 'step 3 must place transliterated lines')
+
+      // --- Steps 2 and 3 must never transcribe ----------------------------
+      assert.equal(dg.state.requests, dgAfterStep1,
+        'steps 2 and 3 must not call Deepgram at all')
+
+      // --- All three columns share the Telugu timeline, cue for cue --------
+      const timesOf = (srt) => (srt.trim().split(/\n\s*\n/).map((b) => b.split('\n')[1]))
+      const teTimes = timesOf(teSrt)
+      const enTimes = timesOf(b2.proposed.synced_lyrics_en)
+      const trTimes = timesOf(b3.proposed.synced_lyrics_en_tr)
+      assert.deepEqual(enTimes, teTimes, 'English cues must carry the exact Telugu times')
+      assert.deepEqual(trTimes, teTimes, 'Transliteration cues must carry the exact Telugu times')
+
+      // --- Text comes from the right column, never from Telugu ------------
+      assert.ok(b2.proposed.synced_lyrics_en.includes('The mind does not stay still'))
+      assert.ok(b3.proposed.synced_lyrics_en_tr.includes('Niluvadu manasu'))
+      assert.ok(!b2.proposed.synced_lyrics_en.includes('నిలువదు'),
+        'Telugu must never leak into the English column')
+    } finally { s.child.kill() }
+  })
+
   await test('write:true NEVER overwrites a track with existing sync lyrics', async () => {
     const timed = { ...baseTrack, synced_lyrics: '[00:05.80]HAND TIMED\n' }
     const s = await launch({ track: timed, deepgramPort: dg.port })
