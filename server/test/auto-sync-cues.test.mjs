@@ -10,6 +10,7 @@ import assert from 'node:assert/strict'
 import {
   MUSIC_GAP_MIN_SECONDS,
   MUSIC_LABEL,
+  alignLyrics,
   buildSyncCues,
   classifyLine,
   renderCuesForVariant,
@@ -617,6 +618,60 @@ test('validateLineMap rejects garbage, out-of-range indices and empty maps', () 
   // A map that translates nothing is not better than positional mapping.
   eq(validateLineMap({ map: [{ telugu_index: 0, target_index: -1 }] }, { teluguCount: 2, targetCount: 2 }), null)
   eq(validateLineMap({ map: [{ telugu_index: 0, target_index: 1 }] }, { teluguCount: 2, targetCount: 2 }), [1, -1])
+})
+
+// ---------------------------------------------------------------------------
+// 10. A line sung more than once must produce a cue per occurrence
+// ---------------------------------------------------------------------------
+
+test('a chorus claimed once is split at silence into one cue per occurrence', () => {
+  // The reported bug: the chorus is sung three times, the plain column lists it
+  // once, and the SRT showed it once. The aligner used to take the min..max of
+  // every claimed word, so one line swallowed all three occurrences and rendered
+  // as a single 47-second cue.
+  const plain = 'మా ఇంటి దైవమా'
+  const words = [
+    { word: 'మా', start: 32.70, end: 33.18, confidence: 0.9 },
+    { word: 'ఇంటి', start: 33.18, end: 34.22, confidence: 0.9 },
+    { word: 'దైవమా', start: 34.22, end: 35.90, confidence: 0.9 },
+    { word: 'మా', start: 44.80, end: 45.44, confidence: 0.9 },
+    { word: 'ఇంటి', start: 45.44, end: 46.24, confidence: 0.9 },
+    { word: 'దైవమా', start: 46.24, end: 47.50, confidence: 0.9 },
+    { word: 'మా', start: 77.40, end: 77.48, confidence: 0.9 },
+    { word: 'ఇంటి', start: 77.48, end: 78.20, confidence: 0.9 },
+    { word: 'దైవమా', start: 78.20, end: 80.00, confidence: 0.9 },
+  ]
+
+  const a = alignLyrics({ plainLyrics: plain, words, audioDuration: 95 })
+  // The line keeps only its FIRST occurrence's span...
+  eq(a.lines[0].startSeconds, 32.70)
+  eq(a.lines[0].endSeconds, 35.90)
+  // ...and the other two are reported as measured repeats.
+  eq(a.repeats.length, 2)
+  eq(a.repeats.map((r) => r.startSeconds), [44.80, 77.40])
+
+  const { cues, repeatCueCount } = buildSyncCues({ plainLyrics: plain, alignment: a, words, audioDuration: 95 })
+  const lyricCues = cues.filter((c) => c.kind === 'lyric')
+  eq(lyricCues.length, 3, 'every sung occurrence needs its own cue')
+  eq(lyricCues.map((c) => c.start), [32.70, 44.80, 77.40])
+  eq(repeatCueCount, 2)
+  // The stretches between occurrences are music, not dead air.
+  assert.ok(cues.some((c) => c.kind === 'music' && c.start === 0 && c.end === 32.70))
+  assert.ok(cues.some((c) => c.kind === 'music' && c.start === 35.90 && c.end === 44.80))
+})
+
+test('a line sung once is never split', () => {
+  const plain = 'ఒకే సారి పాడిన పంక్తి'
+  const words = [
+    { word: 'ఒకే', start: 10, end: 10.5 },
+    { word: 'సారి', start: 10.5, end: 11 },
+    { word: 'పాడిన', start: 11, end: 11.6 },
+    { word: 'పంక్తి', start: 11.6, end: 12.2 },
+  ]
+  const a = alignLyrics({ plainLyrics: plain, words, audioDuration: 20 })
+  eq(a.repeats.length, 0)
+  eq(a.lines[0].startSeconds, 10)
+  eq(a.lines[0].endSeconds, 12.2)
 })
 
 // ---------------------------------------------------------------------------

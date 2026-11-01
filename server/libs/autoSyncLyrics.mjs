@@ -118,6 +118,16 @@ export function wordSimilarity(a, b) {
 /** At or above this, two words are treated as the same sung word. */
 export const WORD_MATCH_THRESHOLD = 0.5
 
+/**
+ * Silence longer than this inside ONE line's claimed words means those words come
+ * from separate sung occurrences, not from one breath.
+ *
+ * 4 s is above the longest pause a singer takes mid-line and below the shortest
+ * gap between repetitions of a chorus, so it separates "held note" from "the line
+ * is sung again". This is what turns min..max into one cue per occurrence.
+ */
+export const REPEAT_SPLIT_GAP_SECONDS = 4
+
 // ---------------------------------------------------------------------------
 // Lyric markup
 // ---------------------------------------------------------------------------
@@ -540,6 +550,9 @@ export function alignLyrics({ plainLyrics, words, audioDuration = null, confiden
 
   let matchedLines = 0
   const lyricResults = []
+  // Extra occurrences of a line, produced when its claimed words span silence
+  // (see REPEAT_SPLIT_GAP_SECONDS). Each entry is a real, measured occurrence.
+  const repeats = []
   let prevEnd = null
 
   for (let li = 0; li < lyricIdx.length; li++) {
@@ -572,6 +585,45 @@ export function alignLyrics({ plainLyrics, words, audioDuration = null, confiden
       for (const w of wordIdxs) {
         const c = usableWords[w].confidence
         if (typeof c === 'number' && c > 0) asrConfidences.push(c)
+      }
+    }
+
+    // A chorus sung three times is ONE lyric line whose words come from three
+    // different stretches of the song. Taking min..max would produce a single cue
+    // spanning the whole track and hide every repetition - the admin then sees a
+    // line that is sung repeatedly in the audio but appears only once in the SRT.
+    //
+    // So the claimed words are split wherever the singing actually stops. The
+    // FIRST cluster is this line's own position; each later cluster is a repeated
+    // occurrence of the same text, reported separately and timed on its own.
+    if (wordIdxs.length) {
+      const clusters = []
+      let current = [wordIdxs[0]]
+      for (let k = 1; k < wordIdxs.length; k++) {
+        const prevW = usableWords[wordIdxs[k - 1]]
+        const thisW = usableWords[wordIdxs[k]]
+        if (thisW.start - prevW.end > REPEAT_SPLIT_GAP_SECONDS) {
+          clusters.push(current)
+          current = [wordIdxs[k]]
+        } else {
+          current.push(wordIdxs[k])
+        }
+      }
+      clusters.push(current)
+
+      if (clusters.length > 1) {
+        const first = clusters[0]
+        start = Math.min(...first.map((w) => usableWords[w].start))
+        end = Math.max(...first.map((w) => usableWords[w].end))
+        for (const cluster of clusters.slice(1)) {
+          repeats.push({
+            lineIndex: absoluteIndex,
+            text: rawLines[absoluteIndex],
+            startSeconds: Math.min(...cluster.map((w) => usableWords[w].start)),
+            endSeconds: Math.max(...cluster.map((w) => usableWords[w].end)),
+            wordCount: cluster.length,
+          })
+        }
       }
     }
 
@@ -624,6 +676,8 @@ export function alignLyrics({ plainLyrics, words, audioDuration = null, confiden
     reason,
     matchRate: Number(matchRate.toFixed(4)),
     lines: lyricResults,
+    // Measured occurrences of a line beyond its first position.
+    repeats,
     buildableLineCount,
     overallConfidence: Number(overallConfidence.toFixed(4)),
   }
@@ -852,6 +906,22 @@ export function buildSyncCues({
 
   // ---- 2. Repeated occurrences the plain column lists only once. -----------
   const repeatCues = []
+  // (a) Occurrences the ALIGNER measured: one lyric line whose claimed words span
+  //     silence is sung more than once, and each stretch after the first is a real
+  //     occurrence with its own measured time.
+  for (const r of alignment?.repeats || []) {
+    repeatCues.push({
+      kind: 'lyric',
+      text: String(r.text || lines[r.lineIndex] || '').trim(),
+      start: Number(r.startSeconds),
+      end: Number(r.endSeconds),
+      lineIndex: r.lineIndex,
+      confidence: null,
+      repeated: true,
+    })
+  }
+  // (b) Occurrences the aligner never claimed at all - words left over between
+  //     placed lines that still match one of them.
   for (const run of unclaimedRuns(words, lyricCues)) {
     let best = null
     for (const cue of lyricCues) {
