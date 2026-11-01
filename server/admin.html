@@ -755,6 +755,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
             <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;">
               <input type="checkbox" id="autoSyncForce"> Re-run tracks that already have sync lyrics
             </label>
+            <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;">
+              <input type="checkbox" id="autoSyncMusic" checked> Add Music banners and repeated lines
+            </label>
           </div>
           <p style="font-size:12px;color:#666;margin:8px 0 0;line-height:1.6;">
             Sends this track's audio to Deepgram (<code>nova-3</code>, Telugu) and matches the
@@ -766,6 +769,12 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
             <em>only</em> when every single line clears the confidence bar and the track has no
             existing sync lyrics &mdash; otherwise it saves nothing and tells you why. Every write
             is verified by re-reading the row and can be rolled back.
+            <br>
+            <strong>Add Music banners</strong> fills every stretch with no singing (intro,
+            interludes, outro) with a <code>{{Music}}</code> cue, so the timeline runs from
+            <code>00:00:00,000</code> to the end of the audio, and gives a line that is sung more
+            than once its own cue for each occurrence. Section headings like
+            <code>{Charanam 1}</code> are never timed.
             <br>
             This is a suggestion, not a guarantee &mdash; singing makes speech models less reliable
             than they are on speech.
@@ -1299,6 +1308,11 @@ async function runAutoSync(doWrite) {
   const rollbackBar = document.getElementById('autoSyncRollbackBar');
   const forceBox = document.getElementById('autoSyncForce');
   const useForce = forceBox && forceBox.checked;
+  // Opt-in per run. A cached/older page without the control sends nothing and
+  // keeps the legacy line-only output, so this can never silently change the
+  // shape of what an existing admin session writes.
+  const musicBox = document.getElementById('autoSyncMusic');
+  const useEnhance = !!(musicBox && musicBox.checked);
 
   // Writing is destructive enough to deserve an explicit confirmation. The
   // server refuses anyway on any doubt, but the admin should knowingly ask.
@@ -1327,7 +1341,7 @@ async function runAutoSync(doWrite) {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ force: useForce, write: doWrite === true }),
+      body: JSON.stringify({ force: useForce, write: doWrite === true, enhance: useEnhance }),
     });
 
     // Read the body exactly once — a Response body cannot be consumed twice.
@@ -1345,7 +1359,11 @@ async function runAutoSync(doWrite) {
 
     // Show the proposal in the editor. After a successful write the editor now
     // holds exactly what the database holds, so this stays consistent.
-    const te = body.proposed && body.proposed.synced_lyrics;
+    // The enhanced proposal (Music banners + repeated occurrences) is used only
+    // when this run asked for it AND the server returned it; otherwise the
+    // legacy line-only proposal is shown, exactly as before.
+    const proposal = (useEnhance && body.proposed_enhanced) ? body.proposed_enhanced : body.proposed
+    const te = proposal && proposal.synced_lyrics;
     if (te) {
       lyricsLevel = 'sync'; lyricsLang = 'te';
       document.querySelectorAll('.lyrics-l1').forEach((b) => b.classList.remove('active'));
@@ -1370,6 +1388,14 @@ async function runAutoSync(doWrite) {
     html += ` &middot; lowest confidence: <strong>${pct(body.overall_confidence)}</strong>`;
     html += ` &middot; words heard: <strong>${body.words}</strong>`;
     html += ` &middot; ${(body.elapsed_ms / 1000).toFixed(1)}s</div>`;
+
+    // Only relevant when the Music-banner option was used; says plainly how many
+    // stretches were filled and how many extra cues the repeated lines produced.
+    if (body.enhance_requested) {
+      html += `<div style="margin-top:4px;color:#666;">Music banners: <strong>${body.music_cue_count || 0}</strong>`
+           + ` &middot; repeated-line cues: <strong>${body.repeat_cue_count || 0}</strong>`
+           + ` &middot; total cues: <strong>${body.cue_count || 0}</strong></div>`;
+    }
 
     if (flagged.length) {
       html += `<div style="margin-top:8px;color:#b06000;"><strong>${flagged.length} line(s) need checking:</strong></div>`;

@@ -472,6 +472,46 @@ try {
     } finally { s.child.kill() }
   })
 
+  await test('enhance:true returns {{Music}} banners and leaves the legacy proposal line-only', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { enhance: true })
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      assert.equal(body.enhance_requested, true)
+      // The legacy shape must be untouched — that is what makes this additive.
+      assert.ok(body.proposed?.synced_lyrics, 'legacy proposal must still be returned')
+      assert.ok(!body.proposed.synced_lyrics.includes('{{Music}}'), 'legacy proposal must stay line-only')
+      // The enhanced shape carries the intro banner: the stub's first sung word
+      // starts at 5.8 s, so 00:00:00,000 -> 00:00:05,800 is music.
+      assert.ok(body.proposed_enhanced?.synced_lyrics, 'enhanced proposal missing')
+      assert.match(body.proposed_enhanced.synced_lyrics, /^1\n00:00:00,000 --> 00:00:05,800\n\{\{Music\}\}/)
+      assert.ok(body.music_cue_count >= 1, 'expected at least one music cue')
+      assert.ok(body.cue_count >= body.music_cue_count)
+      assert.equal(body.wrote_to_database, false, 'a proposal with enhance:true must still write nothing')
+    } finally { s.child.kill() }
+  })
+
+  await test('enhance:true + write:true stores the banner timeline and stays rollback-able', async () => {
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { enhance: true, write: true })
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      if (body.ok) {
+        assert.equal(body.wrote_to_database, true, `expected a write, blocked: ${body.write_blocked_reason}`)
+        assert.ok(body.written_columns.includes('synced_lyrics'))
+        assert.ok(body.proposed_enhanced.synced_lyrics.includes('{{Music}}'))
+        assert.equal(body.rollback_available, true, 'an enhanced write must be rollback-able too')
+      } else {
+        assert.equal(body.wrote_to_database, false, 'a refused alignment must never write')
+        assert.equal(body.write_blocked_reason, 'alignment_not_ok')
+      }
+    } finally { s.child.kill() }
+  })
+
   await test('write:true NEVER overwrites a track with existing sync lyrics', async () => {
     const timed = { ...baseTrack, synced_lyrics: '[00:05.80]HAND TIMED\n' }
     const s = await launch({ track: timed, deepgramPort: dg.port })

@@ -15,8 +15,10 @@ import { registerPartnerRoutes } from './partner_routes.mjs'
 import {
   alignLyrics,
   buildSrtForVariant,
+  buildSyncCues,
   fillUnsungTimings,
   parseTimedLyrics,
+  renderCuesForVariant,
   splitLyricLines,
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
@@ -2365,6 +2367,35 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       synced_lyrics_hi_tr: track.synced_lyrics_hi_tr ?? null,
     }
 
+    // --- Enhanced timeline: {{Music}} banners + repeated occurrences --------
+    //
+    // `proposed` above is the legacy line-only SRT and is left untouched, so
+    // the reviewed output of a track that asks for nothing new is byte-identical
+    // to before. The enhanced timeline adds exactly two things on top of the
+    // same measured word timings:
+    //
+    //   * `{{Music}}` cues wherever the voice covers nothing (intro, interludes,
+    //     outro), so the timeline is continuous from 00:00:00,000 to the end of
+    //     the audio instead of freezing on the last sung line.
+    //   * one cue per SUNG OCCURRENCE of a line, including lines the author
+    //     wrote once but the singer repeats.
+    //
+    // The timeline is built ONCE from the Telugu alignment and then rendered per
+    // column, so all five columns keep the same cue count and the same start/end
+    // times. Rendering separately would let a Telugu-only banner shift every
+    // later row in the translation columns.
+    const cueBuild = buildSyncCues({
+      plainLyrics: plain,
+      alignment,
+      words,
+      audioDuration,
+    })
+    const enhanced = {}
+    for (const [column, plainVariant] of Object.entries(variants)) {
+      if (!plainVariant || !String(plainVariant).trim()) continue
+      enhanced[column] = renderCuesForVariant(cueBuild.cues, plainVariant, totalLines)
+    }
+
     // --- Optional WRITE path (opt-in, gated, verified, reversible) ----------
     //
     // Reached only with an explicit ?write=true. Four independent conditions
@@ -2384,6 +2415,10 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     // The previous values are captured first and stored on the audit row, so
     // the write is reversible via the rollback endpoint.
     const wantWrite = req.body && (req.body.write === true || req.body.write === 'true')
+    // Opt-in per request. Absent/false keeps the legacy line-only output, so an
+    // existing client that never sends this field behaves exactly as before.
+    const wantEnhance = req.body && (req.body.enhance === true || req.body.enhance === 'true')
+    const toWrite = wantEnhance ? enhanced : proposed
 
     let writeResult = { wrote: false, reason: 'not_requested', columns: [] }
 
@@ -2392,7 +2427,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
         writeResult = { wrote: false, reason: 'alignment_not_ok' }
       } else if (existingTimed.length) {
         writeResult = { wrote: false, reason: 'existing_verified_timings' }
-      } else if (!Object.keys(proposed).length) {
+      } else if (!Object.keys(toWrite).length) {
         writeResult = { wrote: false, reason: 'nothing_to_write' }
       } else {
         // (3) The rendered text must contain the author's exact lines.
@@ -2401,7 +2436,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
           (l) => classifyLine(l.text) !== 'lyric' || baseLinesForCheck[l.lineIndex] === l.text
         )
         // (4) Every rendered SRT must be structurally valid.
-        const allValidSrt = Object.values(proposed).every((srt) => isValidSrtText(srt))
+        const allValidSrt = Object.values(toWrite).every((srt) => isValidSrtText(srt))
 
         if (!linesMatchPlain) {
           writeResult = { wrote: false, reason: 'line_text_mismatch' }
@@ -2411,7 +2446,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
           try {
             const { data: written, error: writeErr } = await supabase
               .from('tracks')
-              .update(proposed)
+              .update(toWrite)
               .eq('id', track.id)
               .select('id, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr')
               .single()
@@ -2422,8 +2457,8 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
               // Read-back verification: the row we just wrote must round-trip
               // to exactly the text we sent. This catches a silent
               // partial-update or an encoding mangling between us and Postgres.
-              const mismatched = Object.keys(proposed).filter(
-                (col) => String(written?.[col] ?? '') !== String(proposed[col] ?? '')
+              const mismatched = Object.keys(toWrite).filter(
+                (col) => String(written?.[col] ?? '') !== String(toWrite[col] ?? '')
               )
               if (mismatched.length) {
                 // Put the originals back: a partially-correct write is worse
@@ -2531,6 +2566,14 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       })),
       // Proposed SRT text per column — pre-filled into the editor, NOT saved.
       proposed,
+      // The same proposal with {{Music}} gaps and repeated occurrences timed.
+      // Returned alongside the legacy shape so the admin can choose, and so an
+      // older client that only reads `proposed` is unaffected.
+      proposed_enhanced: enhanced,
+      enhance_requested: wantEnhance,
+      music_cue_count: cueBuild.musicCueCount,
+      repeat_cue_count: cueBuild.repeatCueCount,
+      cue_count: cueBuild.cues.length,
       words: words.length,
       // The write path is opt-in; this reports exactly what happened.
       wrote_to_database: writeResult.wrote,

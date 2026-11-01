@@ -11,6 +11,7 @@ import {
   MUSIC_GAP_MIN_SECONDS,
   MUSIC_LABEL,
   buildSyncCues,
+  renderCuesForVariant,
   renderCuesToSrt,
   unclaimedRuns,
 } from '../libs/autoSyncLyrics.mjs'
@@ -221,6 +222,58 @@ test('millisecond precision is preserved, not rounded to seconds', () => {
     plainLyrics: PLAIN, alignment, words: [], audioDuration: 2.345,
   }).cues)
   assert.match(srt, /00:00:01,234 --> 00:00:02,345/)
+})
+
+// ---------------------------------------------------------------------------
+// 5. One timeline, five columns
+// ---------------------------------------------------------------------------
+
+test('every language column gets the same {{Music}} cues at the same times', () => {
+  const lines = PLAIN.split('\n')
+  const idx = lines.findIndex((l) => l.trim() === P1)
+  const alignment = { ok: true, lines: [placed(idx, P1, 10, 14), placed(idx + 1, P2, 14, 18)] }
+  const { cues } = buildSyncCues({ plainLyrics: PLAIN, alignment, words: [], audioDuration: 30 })
+
+  // The plain columns are line-parallel, so an English translation has the same
+  // shape; only its text differs.
+  const plainEn = lines.map((l) => (l.trim() === P1 ? 'Kavalini Eledi Kanaka Durga,' : l.trim() === P2 ? 'Vasavi Kanneka Viswamata!' : l)).join('\n')
+
+  const te = renderCuesForVariant(cues, PLAIN, lines.length)
+  const en = renderCuesForVariant(cues, plainEn, lines.length)
+
+  const parse = (srt) => srt.trim().split(/\n\s*\n/).map((b) => {
+    const parts = b.split('\n')
+    return { time: parts[1], text: parts[2] }
+  })
+  const teCues = parse(te)
+  const enCues = parse(en)
+
+  // Same number of cues, and every cue carries the same time range.
+  eq(teCues.length, enCues.length)
+  for (let i = 0; i < teCues.length; i++) eq(enCues[i].time, teCues[i].time, `cue ${i + 1} drifted`)
+
+  // Banners are identical in every column; lyric text comes from that column.
+  const musicTe = teCues.filter((c) => c.text === MUSIC_LABEL)
+  const musicEn = enCues.filter((c) => c.text === MUSIC_LABEL)
+  eq(musicEn.length, musicTe.length)
+  assert.ok(teCues.some((c) => c.text === P1), 'Telugu column keeps its own line')
+  assert.ok(enCues.some((c) => c.text === 'Kavalini Eledi Kanaka Durga,'), 'English column keeps its own line')
+})
+
+test('renderCuesForVariant skips a line the column has no text for, without shifting times', () => {
+  const lines = PLAIN.split('\n')
+  const idx = lines.findIndex((l) => l.trim() === P1)
+  const alignment = { ok: true, lines: [placed(idx, P1, 10, 14), placed(idx + 1, P2, 14, 18)] }
+  const { cues } = buildSyncCues({ plainLyrics: PLAIN, alignment, words: [], audioDuration: 30 })
+
+  // A column that only translated the first line.
+  const onlyFirst = lines.map((l, i) => (i === idx ? 'First line only' : '')).join('\n')
+  const srt = renderCuesForVariant(cues, onlyFirst, lines.length)
+  const blocks = srt.trim().split(/\n\s*\n/).map((b) => b.split('\n'))
+  // The banner is still there at its exact time; the untranslated line is absent.
+  assert.ok(blocks.some((b) => b[1] === '00:00:10,000 --> 00:00:14,000' && b[2] === 'First line only'))
+  assert.ok(blocks.some((b) => b[2] === MUSIC_LABEL))
+  assert.ok(!blocks.some((b) => b[2] === P2), 'untranslated line must not leak Telugu into this column')
 })
 
 // ---------------------------------------------------------------------------

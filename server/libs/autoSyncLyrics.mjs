@@ -937,3 +937,30 @@ export function renderCuesToSrt(cues) {
   }
   return blocks.join('\n\n') + (blocks.length ? '\n' : '')
 }
+
+/**
+ * Render the SAME cue timeline for one language column.
+ *
+ * All five lyric columns must share one timeline or the app's per-line
+ * language stacking drifts: a `{{Music}}` cue that exists only in Telugu would
+ * shift every later row in the other columns. So the timeline (cue count,
+ * kinds, start/end) comes from the Telugu alignment once, and only the TEXT of
+ * a lyric cue is taken from this column. A column with no text for a given
+ * line is skipped rather than emitted blank, because a blank cue is invisible
+ * on screen but still consumes a row.
+ */
+export function renderCuesForVariant(cues, variantText, totalLines) {
+  const lines = splitVariantLines(variantText, totalLines)
+  const blocks = []
+  let n = 0
+  for (const c of cues || []) {
+    let text
+    if (c.kind === 'music') text = MUSIC_LABEL
+    else if (c.lineIndex !== null && c.lineIndex !== undefined) text = String(lines[c.lineIndex] || '').trim()
+    else text = String(c.text || '').trim()
+    if (!text) continue
+    n += 1
+    blocks.push(`${n}\n${formatSrtTime(c.start)} --> ${formatSrtTime(c.end)}\n${text}`)
+  }
+  return blocks.join('\n\n') + (blocks.length ? '\n' : '')
+}
