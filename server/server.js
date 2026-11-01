@@ -23,6 +23,11 @@ import {
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
 } from './libs/autoSyncLyrics.mjs'
+import {
+  applySecondOpinion,
+  secondOpinionPicks,
+  segmentTranscript,
+} from './libs/openaiLyricSecondOpinion.mjs'
 
 dotenv.config()
 
@@ -158,6 +163,11 @@ const secrets = {
   // auto-sync endpoint fails closed with a clear message rather than doing
   // anything partial.
   deepgram_api_key: process.env.DEEPGRAM_API_KEY || '',
+  // OpenAI key for the OPTIONAL lyric "second opinion" (see
+  // libs/openaiLyricSecondOpinion.mjs). Off unless OPENAI_SECOND_OPINION=1, and
+  // absent means the feature simply never runs. Vault-preferred, same as
+  // Deepgram, so a leaked Render env is not a billable credential.
+  openai_api_key: process.env.OPENAI_API_KEY || '',
   // --- Partner Program ---------------------------------------------------
   // NO EMAIL CONFIGURATION. The portal sends no automatic email: every send
   // path was removed (see the "NO AUTOMATIC EMAIL" note in partner_routes.mjs).
@@ -199,6 +209,7 @@ const VAULT_SECRET_KEYS = [
   // Auto-Sync Lyrics (Deepgram). Vault-preferred so a leaked Render env does
   // not hand over a billable third-party credential.
   'deepgram_api_key',
+  'openai_api_key',
   // Partner Program secrets. Stored in Vault rather than the deployment env
   // wherever possible, so a leaked Render env is not a leaked KEK.
   //
@@ -2333,6 +2344,42 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       confidenceFloor: Number.isFinite(floor) && floor > 0 && floor <= 1 ? floor : DEFAULT_CONFIDENCE_FLOOR,
     })
 
+    // --- Optional second opinion (OpenAI) ----------------------------------
+    //
+    // DEFAULT OFF: requires OPENAI_SECOND_OPINION=1 AND a key. Its only power is
+    // to POSITION A LINE THE ALIGNER COULD NOT PLACE, using the MEASURED
+    // start/end of an existing transcript segment - it is never asked for a
+    // timestamp and cannot create one. Assisted lines are capped below the
+    // confidence floor on purpose, so this can never turn a refused alignment
+    // into an automatic database write. Every failure mode (no key, disabled,
+    // timeout, refusal, bad JSON) leaves the deterministic result untouched.
+    let secondOpinion = null
+    if (process.env.OPENAI_SECOND_OPINION === '1' && secrets.openai_api_key) {
+      try {
+        const lyricLines = splitLyricLines(plain)
+          .map((text, index) => ({ index, text: String(text).trim() }))
+          .filter((l) => classifyLine(l.text) === 'lyric')
+        const segments = segmentTranscript(words)
+        secondOpinion = await secondOpinionPicks({
+          apiKey: secrets.openai_api_key,
+          lines: lyricLines,
+          segments,
+        })
+        secondOpinion.applied = 0
+        if (secondOpinion.ok) {
+          const applied = applySecondOpinion(alignment, secondOpinion.picks, segments)
+          secondOpinion.applied = applied.placed
+          // Keep the reported placement count truthful after the assist.
+          alignment.buildableLineCount = alignment.lines.filter(
+            (l) => l.startSeconds !== null && l.startSeconds !== undefined
+          ).length
+        }
+      } catch (_) {
+        // Fail closed: the deterministic alignment stands on its own.
+        secondOpinion = { ok: false, reason: 'unexpected_error', picks: [], applied: 0 }
+      }
+    }
+
     // --- Render the proposed SRT for every language column ------------------
     // Line timings are keyed by the plain-lyrics line index, so all five
     // columns share one timeline. Unsung lines ({Section}, blank separators)
@@ -2549,6 +2596,15 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       audit_id: auditId,
       elapsed_ms: Date.now() - startedAt,
       match_rate: alignment.matchRate,
+      // Present only when the optional OpenAI assist actually ran. `applied` is
+      // the number of previously-unplaced lines it positioned.
+      second_opinion: secondOpinion ? {
+        enabled: true,
+        ok: secondOpinion.ok,
+        reason: secondOpinion.reason || null,
+        model: secondOpinion.model || null,
+        applied: secondOpinion.applied || 0,
+      } : null,
       overall_confidence: alignment.overallConfidence,
       line_total: alignment.lines.length,
       line_placed: alignment.buildableLineCount,
