@@ -1374,7 +1374,12 @@ async function runAutoSync(doWrite) {
       if (ta) ta.value = te;
     }
 
-    const flagged = (body.lines || []).filter((l) => l.start_seconds === null || l.confidence < 0.55);
+    // The server marks each line with the SAME threshold that gates the write,
+    // so the review list cannot drift from the number of flagged lines shown.
+    // The old heuristic is kept only as a fallback for an older server.
+    const flagged = (body.lines || []).filter((l) => (typeof l.flagged === 'boolean'
+      ? l.flagged
+      : (l.start_seconds === null || l.confidence < 0.55)));
     const pct = (n) => (Math.round((Number(n) || 0) * 1000) / 10) + '%';
     const otherLangs = Object.keys(body.proposed || {}).filter((k) => k !== 'synced_lyrics');
 
@@ -1402,8 +1407,15 @@ async function runAutoSync(doWrite) {
       html += '<ul style="margin:4px 0 0;padding-left:18px;max-height:180px;overflow:auto;">';
       for (const l of flagged.slice(0, 40)) {
         const time = l.start_seconds === null ? 'not placed' : formatLrcTime(l.start_seconds);
+        // `word_count`/`total_keys` are what the server sends. This used to read
+        // `l.words`, which does not exist, so EVERY flagged line claimed "no
+        // words heard" — including lines that had been placed from several.
+        const heard = Number(l.word_count) || 0;
+        const ofLine = Number(l.total_keys) || 0;
         html += `<li><code>${esc(time)}</code> ${esc((l.text || '').slice(0, 60))}`
-             + ` <span style="color:#888;">(conf ${pct(l.confidence)}${l.words ? '' : ', no words heard'})</span></li>`;
+             + ` <span style="color:#888;">(conf ${pct(l.confidence)}`
+             + ` &middot; words ${heard}/${ofLine}`
+             + `${heard ? '' : ' &middot; nothing heard'})</span></li>`;
       }
       html += '</ul>';
     }

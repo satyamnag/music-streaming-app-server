@@ -538,6 +538,39 @@ try {
     } finally { s.child.kill() }
   })
 
+  await test('every line reports server-side flagged truth and its heard-word count', async () => {
+    // The review panel used to read `l.words`, a field the server never sends, so
+    // every flagged line was labelled "no words heard" even when it had been
+    // placed from several words. This pins the contract the panel now reads.
+    const s = await launch({ track: WRITABLE, deepgramPort: dg.port })
+    try {
+      const c = await adminCookie(s.port)
+      const res = await post(s.port, c, { enhance: true })
+      const body = await res.json()
+      assert.equal(res.status, 200, `expected 200, got ${res.status}`)
+      assert.ok(Array.isArray(body.lines) && body.lines.length > 0, 'expected per-line detail')
+
+      for (const l of body.lines) {
+        assert.equal(typeof l.flagged, 'boolean', `line "${l.text}" has no flagged flag`)
+        assert.equal(typeof l.word_count, 'number', `line "${l.text}" has no word_count`)
+        // The flag must agree with the threshold that gates the write.
+        assert.equal(l.flagged, l.start_seconds === null || l.confidence < 0.55,
+          `flagged disagrees with the floor for "${l.text}"`)
+      }
+      // The headline count and the per-line flags are the same truth.
+      assert.equal(body.line_flagged, body.lines.filter((l) => l.flagged).length,
+        'the flagged count and the flagged lines must agree')
+
+      // A placed line necessarily heard at least one word, so the panel must
+      // never be able to call it "nothing heard".
+      const placed = body.lines.filter((l) => l.start_seconds !== null)
+      assert.ok(placed.length > 0, 'expected at least one placed line')
+      for (const l of placed) {
+        assert.ok(l.word_count > 0, `placed line "${l.text}" reports zero words heard`)
+      }
+    } finally { s.child.kill() }
+  })
+
   await test('write:true NEVER overwrites a track with existing sync lyrics', async () => {
     const timed = { ...baseTrack, synced_lyrics: '[00:05.80]HAND TIMED\n' }
     const s = await launch({ track: timed, deepgramPort: dg.port })

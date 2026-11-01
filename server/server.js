@@ -2530,8 +2530,11 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     }
 
     // --- Respond. NOTE: nothing above wrote to `tracks`. --------------------
+    // One floor, used for BOTH the count and the per-line flag, so the review UI
+    // can never disagree with the number it is shown.
+    const effFloor = Number.isFinite(floor) && floor > 0 && floor <= 1 ? floor : DEFAULT_CONFIDENCE_FLOOR
     const unacceptable = alignment.lines.filter(
-      (l) => l.startSeconds === null || l.confidence < (Number.isFinite(floor) ? floor : DEFAULT_CONFIDENCE_FLOOR)
+      (l) => l.startSeconds === null || l.confidence < effFloor
     )
 
     res.json({
@@ -2563,6 +2566,9 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
         total_keys: l.totalKeys,
         word_count: l.wordCount,
         asr_confidence: l.asrConfidence,
+        // Server-side truth for "needs checking", so the UI never re-derives it
+        // with a different threshold than the one that gates the write.
+        flagged: l.startSeconds === null || l.confidence < effFloor,
       })),
       // Proposed SRT text per column — pre-filled into the editor, NOT saved.
       proposed,
