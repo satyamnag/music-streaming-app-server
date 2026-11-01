@@ -53,35 +53,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: server/package-lock.json
-
-      - name: Install server dependencies
-        run: npm ci --omit=dev
-        working-directory: server
 
       - name: Resolve credentials
         run: |
           set -eu
-          for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SUPABASE_SERVICE_ROLE_KEY DOTENV_RELEASE; do
+          for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SUPABASE_SERVICE_ROLE_KEY; do
             eval "val=\${$v:-}"
             if [ -z "$val" ]; then echo "::error::$v is not set"; exit 1; fi
           done
 
           SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
           DG_KEY="$(aws secretsmanager get-secret-value --secret-id deepgram/api-key --query SecretString --output text)"
-          if [ -z "$SUPA_URL" ] || [ -z "$DG_KEY" ]; then echo "::error::could not resolve supabase/url or deepgram/api-key"; exit 1; fi
+          CDN_URL="$(aws secretsmanager get-secret-value --secret-id r2/base-url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$DG_KEY" ] || [ -z "$CDN_URL" ]; then
+            echo "::error::could not resolve supabase/url, deepgram/api-key or r2/base-url"
+            exit 1
+          fi
           echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
           echo "DEEPGRAM_API_KEY=$DG_KEY" >> "$GITHUB_ENV"
-
-          # R2 credentials live in the app's .env bundle, not in a single secret.
-          printf '%s' "$DOTENV_RELEASE" > /tmp/release.env
-          for k in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do
-            val="$(grep -E "^${k}=" /tmp/release.env | head -n1 | cut -d= -f2- | tr -d '\r' || true)"
-            if [ -n "$val" ]; then echo "${k}=${val}" >> "$GITHUB_ENV"; fi
-          done
-          rm -f /tmp/release.env
-          echo "resolved: supabase url, deepgram key, and $(grep -c '^R2_' "$GITHUB_ENV" || true) R2 value(s)"
+          # The bucket is served publicly, so audio is fetched over HTTPS from the
+          # CDN base - no R2 credential is needed (an empty one is what failed the
+          # first run).
+          echo "R2_BASE_URL=$CDN_URL" >> "$GITHUB_ENV"
+          echo "resolved: supabase url, deepgram key, cdn base"
 
       - name: Rebuild
         working-directory: server

@@ -13,9 +13,10 @@
 //
 // Default is a DRY RUN: it prints what it would do and writes nothing.
 //
-// Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DEEPGRAM_API_KEY,
-//      R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
-//      (R2_BUCKET optional, default soulful-bhakti)
+// Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, DEEPGRAM_API_KEY, R2_BASE_URL
+//      (R2_BASE_URL is the PUBLIC CDN base, e.g. https://music.example.com - the
+//      bucket is served publicly for playback, so no R2 key is needed here. An
+//      S3 client with an empty credential is exactly what failed the first run.)
 //
 // Usage:
 //   node server/tools/lyrics-rebuild.mjs [--write] [--limit N]
@@ -23,7 +24,6 @@
 // ============================================================================
 
 import fs from 'node:fs'
-import { S3Client, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3'
 import { alignLyrics, buildSyncCues, parseSrtTimeline, renderCuesForVariant, splitLyricLines } from '../libs/autoSyncLyrics.mjs'
 
 const arg = (name, dflt = null) => {
@@ -38,19 +38,14 @@ const OUT = arg('out', 'lyrics-rebuild.json')
 const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const DG = process.env.DEEPGRAM_API_KEY || ''
-const BUCKET = process.env.R2_BUCKET || 'soulful-bhakti'
+// The R2 bucket is served publicly for playback, so the audio is fetched over
+// HTTPS from the CDN base. That removes the need for any R2 credential here -
+// an S3 client with missing keys is exactly what failed the first run.
+const CDN = (process.env.R2_BASE_URL || '').replace(/\/+$/, '')
 
 if (!SUPA || !KEY) { console.error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY required'); process.exit(2) }
 if (!DG) { console.error('DEEPGRAM_API_KEY required'); process.exit(2) }
-
-const r2 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-})
+if (!CDN) { console.error('R2_BASE_URL required (public CDN base, e.g. https://music.example.com)'); process.exit(2) }
 
 const FIELDS = [
   'id', 'title', 'storage_path', 'duration',
@@ -80,13 +75,22 @@ async function supaPatch(id, body) {
 
 const MAX_AUDIO = 40 * 1024 * 1024
 
+/** Public CDN URL for an object key, matching the server's r2PublicUrl(). */
+function cdnUrl(storagePath) {
+  const key = String(storagePath || '').replace(/^\/+/, '')
+  return `${CDN}/${key.split('/').map(encodeURIComponent).join('/')}`
+}
+
 async function audioFor(storagePath) {
-  const head = await r2.send(new HeadObjectCommand({ Bucket: BUCKET, Key: storagePath }))
-  const size = Number(head.ContentLength) || 0
-  if (!size) return null
+  const url = cdnUrl(storagePath)
+  const head = await fetch(url, { method: 'HEAD' })
+  if (!head.ok) throw new Error(`audio HEAD ${head.status} for ${url}`)
+  const size = Number(head.headers.get('content-length')) || 0
+  if (!size) throw new Error('audio has no content-length')
   if (size > MAX_AUDIO) throw new Error(`audio ${(size / 1048576).toFixed(1)} MB exceeds the 40 MB cap`)
-  const obj = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: storagePath }))
-  return Buffer.from(await obj.Body.transformToByteArray())
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`audio GET ${res.status} for ${url}`)
+  return Buffer.from(await res.arrayBuffer())
 }
 
 async function transcribe(audio) {
