@@ -128,14 +128,19 @@ for (const t of rows) {
     const { problems, cues, cueLyricCount } = structuralProblems(synced, lyricLines.length, t.duration)
     const cueTexts = counts(cues.map((c) => c.text.trim()))
 
-    // coverage: a plain line present but lacking any timed cue
+    // coverage: distinguish "the line has NO cue" from "the line is written N
+    // times but timed fewer than N". The second is exactly the complaint
+    // "repeated lines' timelines are not there".
     const plainCounts = counts(lyricLines)
-    let missing = 0
+    let missingLines = 0     // distinct plain lines with zero cues
+    let undertimed = 0       // written N times, timed 1..N-1
     for (const [text, n] of plainCounts) {
       const have = cueTexts.get(text) || 0
-      if (have < n) missing += (n - have)
+      if (have === 0) missingLines += 1
+      else if (have < n) undertimed += (n - have)
     }
-    if (missing > 0) problems.push({ kind: 'missing_cues', count: missing })
+    if (missingLines > 0) problems.push({ kind: 'missing_lines', count: missingLines })
+    if (undertimed > 0) problems.push({ kind: 'repeated_line_undertimed', count: undertimed })
 
     // Structural verdict: only missing/repeated content is a "content" issue;
     // timing problems are their own, more serious, class.
