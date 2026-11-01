@@ -128,6 +128,14 @@ export const WORD_MATCH_THRESHOLD = 0.5
 //   `{{Music}}`   -> a "music" banner
 // These lines carry NO sung audio, so they must never consume an alignable
 // transcript word. They are timed from their neighbours instead.
+//
+// `{Section}` is ANY label the author writes — `{Pallavi}`, `{Anupallavi}`,
+// `{Charanam 5}`, `{Intro}`, `{Sthayi}`, `{any_text}` — NOT a fixed list of
+// known section names. The test `ANY single-brace label is excluded` pins that
+// generality, because narrowing this to a hardcoded list would silently start
+// timing headings as sung lines. The pattern is deliberately identical to the
+// one both renderers use, so what the apps draw as a divider is exactly what
+// the timeline excludes.
 const MUSIC_LINE = /^\{\{.*\}\}$/
 const SECTION_LINE = /^\{[^{}]*\}$/
 

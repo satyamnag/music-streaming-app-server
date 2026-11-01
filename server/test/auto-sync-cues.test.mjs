@@ -11,6 +11,7 @@ import {
   MUSIC_GAP_MIN_SECONDS,
   MUSIC_LABEL,
   buildSyncCues,
+  classifyLine,
   renderCuesForVariant,
   renderCuesToSrt,
   unclaimedRuns,
@@ -52,6 +53,51 @@ const placed = (lineIndex, text, start, end, confidence = 0.9) => ({
 // ---------------------------------------------------------------------------
 // 1. Section headings are never cues
 // ---------------------------------------------------------------------------
+
+test('ANY single-brace label is excluded, not just Pallavi/Anupallavi/Charanam', () => {
+  // The rule is generic on purpose: authors invent their own labels. A future
+  // "optimisation" that switches this to a fixed list of known section names
+  // would silently start timing headings as sung lines, so every one of these
+  // shapes is pinned here.
+  const labels = ['{Pallavi}', '{Anupallavi}', '{Charanam 1}', '{Charanam 5}', '{Intro}', '{Sthayi}', '{any_text}', '{తెలుగు}', '{  spaced  }']
+
+  const lyrics = [
+    '{Intro}',
+    'మొదటి పంక్తి సాహిత్యం',
+    '{Sthayi}',
+    'రెండవ పంక్తి సాహిత్యం',
+    '{Charanam 5}',
+    '{any_text}',
+    'మూడవ పంక్తి సాహిత్యం',
+  ].join('\n')
+
+  const lines = lyrics.split('\n')
+  const idx = (t) => lines.findIndex((l) => l.trim() === t)
+  const alignment = {
+    ok: true,
+    lines: [
+      placed(idx('మొదటి పంక్తి సాహిత్యం'), 'మొదటి పంక్తి సాహిత్యం', 5, 9),
+      placed(idx('రెండవ పంక్తి సాహిత్యం'), 'రెండవ పంక్తి సాహిత్యం', 9, 13),
+      placed(idx('మూడవ పంక్తి సాహిత్యం'), 'మూడవ పంక్తి సాహిత్యం', 13, 17),
+    ],
+  }
+
+  const { cues } = buildSyncCues({ plainLyrics: lyrics, alignment, words: [], audioDuration: 20 })
+
+  // No cue may carry a brace label, of any spelling.
+  for (const c of cues) {
+    assert.ok(!/^\{[^{}]*\}$/.test(c.text), `a heading leaked into the timeline: ${c.text}`)
+  }
+  // ...and every one of the labels above is genuinely classified as a heading.
+  for (const l of labels) eq(classifyLine(l), 'section', `${l} was not treated as a heading`)
+
+  // The sung lines survive, in order.
+  eq(cues.filter((c) => c.kind === 'lyric').map((c) => c.text), [
+    'మొదటి పంక్తి సాహిత్యం',
+    'రెండవ పంక్తి సాహిత్యం',
+    'మూడవ పంక్తి సాహిత్యం',
+  ])
+})
 
 test('{Pallavi}/{Anupallavi}/{Charanam} headings never become cues', () => {
   const lines = PLAIN.split('\n')
