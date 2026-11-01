@@ -102,29 +102,80 @@ spans = get_spans(tokens_starred, segments, blank_token)
 word_timestamps = postprocess_results(text_starred, spans, stride, scores)
 
 # --- Reconstruct per-LINE timing -----------------------------------------
-# word_timestamps is a list of {text, start, end, score}. Words flow in the same
-# order as `lyric_lines`, so a line's span is the first word's start to the last
-# word's end. Repeats are handled naturally: each occurrence is its own word run.
+# word_timestamps is a list of {text, start, end, score} in AUDIO order. A line
+# that is sung twice yields its words TWICE, interleaved in time order. The
+# correct mapping therefore assigns each word to its best-matching lyric line
+# (by token overlap) and then groups CONSECUTIVE words assigned to the same line
+# into ONE occurrence. Repeats fall out naturally: two separated runs -> two
+# timed spans for the same line.
+#
+# This replaces the previous text-order split, which assumed each line appears
+# exactly once and silently merged both occurrences of a repeated line into one.
+def text_similarity(a, b):
+    """Token-set Dice similarity between two strings."""
+    sa = set(a.lower().split())
+    sb = set(b.lower().split())
+    if not sa or not sb:
+        return 0.0
+    return (2.0 * len(sa & sb)) / (len(sa) + len(sb))
+
+# Pre-tokenise each lyric line once.
+line_tokens = []
+for li, line in enumerate(lyric_lines):
+    line_tokens.append((li, line, line.lower().split()))
+
+occurrences = []  # one entry per timed occurrence: {line_index, text, start, end, score, words}
+for w in word_timestamps:
+    wtext = str(w.get("text") or "").strip()
+    if not wtext:
+        continue
+    # Best-matching lyric line for this single word.
+    best = max(
+        ((text_similarity(wtext, line), li, line) for li, line, _ in line_tokens),
+        key=lambda x: x[0],
+    )
+    occurrences.append({
+        "line_index": best[1],
+        "text": best[2],
+        "start": float(w.get("start") or 0.0),
+        "end": float(w.get("end") or 0.0),
+        "score": float(w.get("score") or 0.0),
+    })
+
+# Group CONSECUTIVE words assigned to the same line into one occurrence, so a
+# repeat (a second, later run of the same line) becomes a distinct span.
 report_lines = []
 i = 0
-for li, line in enumerate(lyric_lines):
-    n_words = len(line.split())
-    run = word_timestamps[i:i + n_words] if i < len(word_timestamps) else []
-    i += n_words
-    if not run:
-        report_lines.append({"line_index": li, "text": line, "start": None, "end": None, "score": 0.0})
-        continue
+while i < len(occurrences):
+    li = occurrences[i]["line_index"]
+    run = [occurrences[i]]
+    j = i + 1
+    while j < len(occurrences) and occurrences[j]["line_index"] == li:
+        run.append(occurrences[j])
+        j += 1
     start = run[0]["start"]
     end = run[-1]["end"]
-    score = sum((w.get("score") or 0.0) for w in run) / max(1, len(run))
+    score = sum(o["score"] for o in run) / max(1, len(run))
+    text = lyric_lines[li] if li < len(lyric_lines) else run[0]["text"]
     report_lines.append({
         "line_index": li,
-        "text": line,
+        "occurrence": len([r for r in report_lines if r["line_index"] == li]),
+        "text": text,
         "start": round(start, 3),
         "end": round(end, 3),
         "score": round(score, 4),
         "words": len(run),
     })
+    i = j
+
+# Sort by start time for a clean timeline, keeping occurrences in audio order.
+report_lines.sort(key=lambda l: (l["start"], l["line_index"]))
+
+# Count occurrences per line and report repetition explicitly.
+occurrence_count = {}
+for l in report_lines:
+    occurrence_count[l["line_index"]] = occurrence_count.get(l["line_index"], 0) + 1
+repeated_lines = {li: n for li, n in occurrence_count.items() if n >= 2}
 
 report = {
     "track_id": track.get("id"),
@@ -133,8 +184,10 @@ report = {
     "device": args.device,
     "audio_duration_s": track.get("duration"),
     "lyric_lines": len(lyric_lines),
-    "lines_timed": sum(1 for l in report_lines if l["start"] is not None),
-    "lines_untimed": sum(1 for l in report_lines if l["start"] is None),
+    "occurrences": len(report_lines),
+    "lines_timed": len(set(l["line_index"] for l in report_lines)),
+    "repeated_lines": {str(li): n for li, n in repeated_lines.items()},
+    "repeat_occurrences": sum(n - 1 for n in repeated_lines.values()),
     "lines": report_lines,
 }
 
@@ -143,6 +196,6 @@ with open(args.out, "w", encoding="utf-8") as f:
 
 print(json.dumps({k: v for k, v in report.items() if k != "lines"}, ensure_ascii=False, indent=2))
 for l in report_lines:
-    t = " - " if l["start"] is None else f"{l['start']:7.2f} -> {l['end']:7.2f}"
-    print(f"  {t}  (score {l['score']})  {l['text']}")
+    occ = f"#{l['occurrence']} " if l["occurrence"] else ""
+    print(f"  {l['start']:7.2f} -> {l['end']:7.2f}  (score {l['score']})  {occ}{l['text']}")
 print("\nDRY RUN - nothing was written to the database.")
