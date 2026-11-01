@@ -110,6 +110,15 @@ tokenizer = Wav2Vec2CTCTokenizer.from_pretrained(
     unk_token="[UNK]",
     word_delimiter_token="|",
 )
+# The special_tokens_map.json re-adds "<s>"/"</s>" (ids 66,67) even with
+# bos_token=None, because that map's values override a falsy kwarg. Drop them
+# from the slow tokenizer's vocab dict itself, plus any added-token records, so
+# get_vocab() coincides with vocab_size (66).
+for _k in ("<s>", "</s>"):
+    if hasattr(tokenizer, "encoder"):
+        tokenizer.encoder.pop(_k, None)
+    tokenizer.added_tokens_encoder.pop(_k, None)
+    tokenizer.added_tokens_decoder.pop(next((i for i, t in (tokenizer.added_tokens_decoder.items() if hasattr(tokenizer, "added_tokens_decoder") else []) if str(getattr(t, "content", t)) == _k), None), None)
 _vocab = tokenizer.get_vocab()
 _vsize = int(getattr(tokenizer, "vocab_size", 0))
 print(f"[tokenizer] get_vocab()={len(_vocab)} vocab_size={_vsize}")
