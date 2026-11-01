@@ -94,20 +94,28 @@ model, tokenizer = load_alignment_model(
     dtype=torch.float32,
 )
 
-# The Telugu model's tokenizer_config.json sets word_delimiter_token="|", which
-# AutoTokenizer.from_pretrained honours even though load_alignment_model passes
-# word_delimiter_token=None (the config-file value wins). That extra "|" makes
-# get_vocab() exceed vocab_size and trips ctc-forced-aligner's get_alignments
-# guard ("Tokenizer vocabulary contains more tokens than expected"). Remove the
-# injected delimiter so the vocab matches the model's vocab_size exactly.
-extra = getattr(tokenizer, "added_tokens_decoder", {}) or {}
-for tok_id, data in list(extra.items()):
-    if str(data.content if hasattr(data, "content") else data).strip("| ") in ("|", ""):
+# The Telugu model's tokenizer_config.json declares bos_token="<s>" and
+# eos_token="</s>", which AutoTokenizer.from_pretrained ADDS to the 66-item
+# base vocab. ctc-forced-aligner's get_alignments guard asserts
+#   len(tokenizer.get_vocab()) <= tokenizer.vocab_size  (= 66)
+# and these two extra special tokens push get_vocab() to 68, tripping the guard
+# ("Tokenizer vocabulary contains more tokens than expected"). They carry no
+# CTC meaning for alignment, so drop them to make vocab match vocab_size. This
+# is a tokenizer-only, server-side adjustment - the model weights are untouched.
+for extra_id, td in list((getattr(tokenizer, "added_tokens_decoder", None) or {}).items()):
+    content = getattr(td, "content", td)
+    if str(content) in ("<s>", "</s>"):
+        tokenizer.added_tokens_decoder.pop(extra_id, None)
         try:
-            tokenizer.added_tokens_encoder.pop(data.content, None)
-            tokenizer.added_tokens_decoder.pop(tok_id, None)
+            tokenizer.added_tokens_encoder.pop(content, None)
         except Exception:
             pass
+if getattr(tokenizer, "bos_token", None):
+    tokenizer.bos_token = None
+    tokenizer.bos_token_id = None
+if getattr(tokenizer, "eos_token", None):
+    tokenizer.eos_token = None
+    tokenizer.eos_token_id = None
 
 audio_waveform = load_audio(audio_url, model.dtype, model.device)
 
