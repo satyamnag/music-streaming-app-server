@@ -244,6 +244,44 @@ async function loadSecretsFromVault() {
   }
 }
 
+// Optional AWS Secrets Manager source. ENABLED ONLY BY AWS_SECRETS_ENABLED=1.
+//
+// When it is on, AWS values are applied AFTER the vault, so AWS is the
+// authoritative store and the vault stays as the fallback for anything AWS
+// cannot supply. When it is off, this returns immediately and the module is
+// never even imported, so behaviour is byte-identical to before.
+//
+// Fail-closed and never fatal: a missing SDK, a timeout, AccessDenied or a
+// deleted secret all leave the vault/env values in place. Secret VALUES are
+// never logged - only names and short error codes.
+async function loadSecretsFromAws() {
+  if (process.env.AWS_SECRETS_ENABLED !== '1') return
+  try {
+    const { loadAwsSecrets, createAwsSecretsClient, resolveAwsRegion } =
+      await import('./libs/awsSecrets.mjs')
+    const region = resolveAwsRegion()
+    const built = await createAwsSecretsClient({ region })
+    if (!built) {
+      console.warn('[secrets] aws disabled: @aws-sdk/client-secrets-manager is not installed')
+      return
+    }
+    const res = await loadAwsSecrets({
+      names: VAULT_SECRET_KEYS,
+      client: built.client,
+      GetSecretValueCommand: built.GetSecretValueCommand,
+    })
+    for (const name of res.loaded) {
+      secrets[name] = name === 'admin_token' ? normalizeAdminToken(res.values[name]) : res.values[name]
+      console.log(`[secrets] ${name} loaded from aws (${region})`)
+    }
+    for (const f of res.failed) {
+      console.warn(`[secrets] aws read failed for ${f.name}: ${f.reason}`)
+    }
+  } catch (err) {
+    console.warn(`[secrets] aws error (continuing with vault/env): ${err.message}`)
+  }
+}
+
 const app = express()
 app.set('trust proxy', 1)
 app.use(cors())
@@ -3709,6 +3747,8 @@ const port = process.env.PORT || 3000
 
 async function start() {
   await loadSecretsFromVault()
+// Optional second source. No-op unless AWS_SECRETS_ENABLED=1.
+await loadSecretsFromAws()
   initClerkClient()
   initR2Client()
   const server = app.listen(port, () => {
