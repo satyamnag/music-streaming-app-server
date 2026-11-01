@@ -225,6 +225,13 @@ if (IDS.length) targets = targets.filter((t) => IDS.includes(String(t.id)))
 if (LIMIT > 0) targets = targets.slice(0, LIMIT)
 
 console.log(`tracks scanned: ${rows.length} · candidates: ${targets.length} · mode: ${WRITE ? 'WRITE' : 'DRY RUN'}`)
+// Diagnostic: when `candidates` is 0 while rows exist, the runner is talking to
+// a DIFFERENT Supabase project than the one holding the lyrics (typically a
+// retired project ref in the `supabase/url` AWS secret). Print the resolved
+// project host and how many rows actually carry lyric/audio data, so a stale
+// secret is diagnosed from the log instead of guessed at.
+console.log(`supabase project: ${SUPA.replace(/^https?:\/\//, '').split('.')[0]}`)
+console.log(`rows with plain_lyrics: ${rows.filter((t) => String(t.plain_lyrics || '').trim()).length} · rows with storage_path: ${rows.filter((t) => String(t.storage_path || '').trim()).length}`)
 
 const report = []
 // Previous values of every column this run overwrites, so any write can be undone.
