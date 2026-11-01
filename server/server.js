@@ -20,6 +20,7 @@ import {
   parseTimedLyrics,
   renderCuesForVariant,
   rescueUnplacedLines,
+  interpolateUnplacedLines,
   splitLyricLines,
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
@@ -2438,6 +2439,20 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       }
     }
 
+    // --- Final stage: never emit an incomplete timeline ---------------------
+    //
+    // Whatever the two passes above could not place is now given a cue inside its
+    // own neighbour gap, so no line is silently SKIPPED by the SRT. These lines
+    // carry confidence 0 and `interpolated: true`, which means the write gate
+    // still refuses them unless the operator explicitly allows it
+    // (AUTOSYNC_ALLOW_INTERPOLATED=1) - a guess is never written silently.
+    const interpolation = interpolateUnplacedLines(alignment)
+    if (interpolation.interpolated) {
+      alignment.buildableLineCount = alignment.lines.filter(
+        (l) => l.startSeconds !== null && l.startSeconds !== undefined
+      ).length
+    }
+
     // --- Render the proposed SRT for every language column ------------------
     // Line timings are keyed by the plain-lyrics line index, so all five
     // columns share one timeline. Unsung lines ({Section}, blank separators)
@@ -2528,7 +2543,17 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     let writeResult = { wrote: false, reason: 'not_requested', columns: [] }
 
     if (wantWrite) {
-      if (!alignment.ok) {
+      // Opt-in relaxation: allow a write when some lines are only interpolated,
+      // PROVIDED every lyric line at least HAS a position. Off by default because
+      // an interpolated cue is an estimate, not evidence; turning it on is the
+      // operator's explicit decision to accept that.
+      const allowInterpolated = process.env.AUTOSYNC_ALLOW_INTERPOLATED === '1'
+      const allLyricLinesPlaced = alignment.lines.every(
+        (l) => classifyLine(l.text) !== 'lyric'
+          || (l.startSeconds !== null && l.startSeconds !== undefined)
+      )
+      const gatePassed = alignment.ok || (allowInterpolated && allLyricLinesPlaced)
+      if (!gatePassed) {
         writeResult = { wrote: false, reason: 'alignment_not_ok' }
       } else if (existingTimed.length) {
         writeResult = { wrote: false, reason: 'existing_verified_timings' }
@@ -2656,6 +2681,8 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       match_rate: alignment.matchRate,
       // Lines the bounded rescue gave a position to (they had NO words at all).
       rescued_lines: rescue.rescued || 0,
+      // Lines placed only by bounded interpolation (confidence 0, estimate only).
+      interpolated_lines: interpolation.interpolated || 0,
       // Present only when the optional OpenAI assist actually ran. `applied` is
       // the number of previously-unplaced lines it positioned.
       second_opinion: secondOpinion ? {

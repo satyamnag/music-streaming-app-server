@@ -1088,3 +1088,84 @@ export function rescueUnplacedLines(alignment, words, {
 
   return { rescued }
 }
+
+// ---------------------------------------------------------------------------
+// Final stage: bounded interpolation, so the timeline is never incomplete
+// ---------------------------------------------------------------------------
+//
+// Even after the deterministic pass and the bounded rescue, a line can still be
+// empty (the model heard nothing resembling it). An empty line means the SRT
+// silently SKIPS it, which is the one outcome the admin cannot fix later by
+// reviewing - there is nothing on screen to review.
+//
+// So the last stage guarantees every lyric line has a cue, by dividing the space
+// BETWEEN the line's placed neighbours. It is:
+//
+//   * confined to that gap - it can never cross a placed line, so it cannot
+//     reorder the song;
+//   * sequential and non-overlapping, so cues stay monotonic;
+//   * confidence 0 and `interpolated: true`, so a write gate that requires real
+//     evidence will always refuse it unless the operator explicitly allows it.
+
+/** Confidence assigned to an interpolated line: no evidence, so no confidence. */
+export const INTERPOLATED_CONFIDENCE = 0
+
+/** Shortest cue the interpolator will create. */
+export const INTERPOLATED_MIN_SECONDS = 0.8
+
+/**
+ * Give every remaining empty lyric line a cue, inside its neighbour gap.
+ *
+ * @param {object} alignment result of alignLyrics(), already rescued/assisted
+ * @returns {{interpolated:number}}
+ */
+export function interpolateUnplacedLines(alignment) {
+  const lines = Array.isArray(alignment?.lines) ? alignment.lines : []
+  if (!lines.length) return { interpolated: 0 }
+
+  const placedAt = (l) => l.startSeconds !== null && l.startSeconds !== undefined
+  let interpolated = 0
+
+  // Walk in LINE order and handle each maximal run of empty lines between two
+  // placed anchors (or between an anchor and the edge of the lyric).
+  let i = 0
+  while (i < lines.length) {
+    if (placedAt(lines[i]) || classifyLine(lines[i].text) !== 'lyric') { i += 1; continue }
+
+    let j = i
+    while (j < lines.length && !placedAt(lines[j]) && classifyLine(lines[j].text) === 'lyric') j += 1
+    const run = lines.slice(i, j)
+
+    const prev = [...lines.slice(0, i)].reverse().find((l) => placedAt(l))
+    const next = lines.slice(j).find((l) => placedAt(l))
+
+    let lo = prev ? Number(prev.endSeconds ?? prev.startSeconds) : null
+    let hi = next ? Number(next.startSeconds) : null
+
+    // Nothing to anchor to at all: leave the run empty rather than invent a
+    // position with no reference whatsoever.
+    if (lo === null && hi === null) { i = j; continue }
+
+    if (lo === null) lo = Math.max(0, hi - INTERPOLATED_MIN_SECONDS * run.length)
+    if (hi === null) hi = lo + INTERPOLATED_MIN_SECONDS * run.length
+    if (!(hi > lo)) { i = j; continue }
+
+    const slot = (hi - lo) / run.length
+    if (!(slot > 0)) { i = j; continue }
+
+    for (let k = 0; k < run.length; k++) {
+      const start = lo + slot * k
+      const end = Math.min(hi, start + slot)
+      if (!(end > start)) continue
+      run[k].startSeconds = start
+      run[k].endSeconds = end
+      run[k].confidence = INTERPOLATED_CONFIDENCE
+      run[k].interpolated = true
+      interpolated += 1
+    }
+
+    i = j
+  }
+
+  return { interpolated }
+}

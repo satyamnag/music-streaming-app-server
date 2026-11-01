@@ -15,6 +15,8 @@ import {
   renderCuesForVariant,
   rescueUnplacedLines,
   RESCUE_CONFIDENCE_CAP,
+  interpolateUnplacedLines,
+  INTERPOLATED_CONFIDENCE,
   renderCuesToSrt,
   unclaimedRuns,
 } from '../libs/autoSyncLyrics.mjs'
@@ -414,6 +416,79 @@ test('a rescued line can never reach the write floor on its own', () => {
   ]
   rescueUnplacedLines(alignment, words)
   assert.ok(alignment.lines[1].confidence < 0.55, 'a rescued guess must stay below the 0.55 gate')
+})
+
+// ---------------------------------------------------------------------------
+// 7. Final stage: the timeline is never incomplete
+// ---------------------------------------------------------------------------
+
+test('a run of empty lines is filled evenly between its placed neighbours', () => {
+  const alignment = { lines: [
+    { lineIndex: 0, text: 'ఒకటి', startSeconds: 10, endSeconds: 14, confidence: 0.9 },
+    { lineIndex: 1, text: 'రెండు', startSeconds: null, endSeconds: null, confidence: 0 },
+    { lineIndex: 2, text: 'మూడు', startSeconds: null, endSeconds: null, confidence: 0 },
+    { lineIndex: 3, text: 'నాలుగు', startSeconds: 20, endSeconds: 24, confidence: 0.9 },
+  ] }
+  const out = interpolateUnplacedLines(alignment)
+  eq(out.interpolated, 2)
+
+  // Confined to the 14..20 gap, sequential, non-overlapping, monotonic.
+  eq(alignment.lines[0].startSeconds, 10)
+  eq(alignment.lines[1].startSeconds, 14)
+  eq(alignment.lines[2].startSeconds, 17)
+  eq(alignment.lines[1].endSeconds, alignment.lines[2].startSeconds)
+  eq(alignment.lines[2].endSeconds, 20)
+
+  // No evidence, so no confidence, and marked as an estimate.
+  for (const i of [1, 2]) {
+    eq(alignment.lines[i].confidence, INTERPOLATED_CONFIDENCE)
+    eq(alignment.lines[i].interpolated, true)
+  }
+})
+
+test('interpolation never moves a placed line and never crosses it', () => {
+  const alignment = { lines: [
+    { lineIndex: 0, text: 'ఒకటి', startSeconds: 5, endSeconds: 9, confidence: 0.8 },
+    { lineIndex: 1, text: 'రెండు', startSeconds: null, endSeconds: null, confidence: 0 },
+    { lineIndex: 2, text: 'మూడు', startSeconds: 12, endSeconds: 16, confidence: 0.8 },
+  ] }
+  interpolateUnplacedLines(alignment)
+  eq(alignment.lines[0].startSeconds, 5)
+  eq(alignment.lines[2].startSeconds, 12)
+  assert.ok(alignment.lines[1].startSeconds >= 9, 'must not start before the previous line ends')
+  assert.ok(alignment.lines[1].endSeconds <= 12, 'must not end after the next line starts')
+})
+
+test('a trailing run after the last placed line still gets cues', () => {
+  const alignment = { lines: [
+    { lineIndex: 0, text: 'ఒకటి', startSeconds: 2, endSeconds: 6, confidence: 0.9 },
+    { lineIndex: 1, text: 'రెండు', startSeconds: null, endSeconds: null, confidence: 0 },
+  ] }
+  const out = interpolateUnplacedLines(alignment)
+  eq(out.interpolated, 1)
+  assert.ok(alignment.lines[1].startSeconds >= 6)
+  assert.ok(alignment.lines[1].endSeconds > alignment.lines[1].startSeconds)
+})
+
+test('with no anchor at all nothing is invented', () => {
+  const alignment = { lines: [
+    { lineIndex: 0, text: 'ఒకటి', startSeconds: null, endSeconds: null, confidence: 0 },
+    { lineIndex: 1, text: 'రెండు', startSeconds: null, endSeconds: null, confidence: 0 },
+  ] }
+  const out = interpolateUnplacedLines(alignment)
+  eq(out.interpolated, 0)
+  eq(alignment.lines[0].startSeconds, null)
+  eq(alignment.lines[1].startSeconds, null)
+})
+
+test('headings are never interpolated', () => {
+  const alignment = { lines: [
+    { lineIndex: 0, text: 'ఒకటి', startSeconds: 2, endSeconds: 6, confidence: 0.9 },
+    { lineIndex: 1, text: '{Charanam 2}', startSeconds: null, endSeconds: null, confidence: 0 },
+  ] }
+  const out = interpolateUnplacedLines(alignment)
+  eq(out.interpolated, 0)
+  eq(alignment.lines[1].startSeconds, null)
 })
 
 // ---------------------------------------------------------------------------
