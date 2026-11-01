@@ -1,0 +1,87 @@
+name: Lyrics Audit (read only)
+
+# Read-only audit of every track's sync lyrics. It never writes to the database
+# and never calls Deepgram, so it is safe to run at any time and as often as you
+# like. See docs/LYRICS-AUTOSYNC-PIPELINE.md for what the findings mean.
+#
+# Manual only on purpose: a scheduled job that quietly reads the whole catalogue
+# adds no value and turns into noise.
+
+on:
+  workflow_dispatch:
+    inputs:
+      json_out:
+        description: 'Path for the JSON report inside the workspace'
+        required: false
+        default: 'lyrics-audit.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lyrics-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit sync lyrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      JSON_OUT: ${{ inputs.json_out }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL from AWS Secrets Manager
+        run: |
+          set -eu
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are not set"
+            exit 1
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"
+            exit 1
+          fi
+          URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "SUPABASE_URL=$URL" >> "$GITHUB_ENV"
+          echo "Resolved Supabase URL (host only): $(printf '%s' "$URL" | sed -E 's#https?://##; s#/.*##')"
+
+      - name: Run the audit
+        run: |
+          set -eu
+          node server/tools/lyrics-audit.mjs --json "$JSON_OUT" | tee audit.log
+
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lyrics-audit
+          path: |
+            ${{ inputs.json_out }}
+            audit.log
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          set -eu
+          {
+            echo "### Lyrics audit (read only)"
+            echo ""
+            if [ -f audit.log ]; then tail -n 8 audit.log; else echo "audit did not produce a log"; fi
+            echo ""
+            echo "Nothing was written to the database. Fix per track from the admin portal."
+          } >> "$GITHUB_STEP_SUMMARY"
