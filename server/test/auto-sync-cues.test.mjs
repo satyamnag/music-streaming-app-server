@@ -1,4 +1,4 @@
-﻿// Tests for the Telugu plain-lyrics -> sync-lyrics cue builder.
+// Tests for the Telugu plain-lyrics -> sync-lyrics cue builder.
 //
 // Run: node test/auto-sync-cues.test.mjs
 //
