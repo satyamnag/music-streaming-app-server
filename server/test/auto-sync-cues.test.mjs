@@ -1,4 +1,4 @@
-// Tests for the Telugu plain-lyrics -> sync-lyrics cue builder.
+﻿// Tests for the Telugu plain-lyrics -> sync-lyrics cue builder.
 //
 // Run: node test/auto-sync-cues.test.mjs
 //
@@ -13,6 +13,8 @@ import {
   buildSyncCues,
   classifyLine,
   renderCuesForVariant,
+  rescueUnplacedLines,
+  RESCUE_CONFIDENCE_CAP,
   renderCuesToSrt,
   unclaimedRuns,
 } from '../libs/autoSyncLyrics.mjs'
@@ -28,22 +30,22 @@ const eq = (a, b, m) => assert.deepEqual(a, b, m)
 // ---------------------------------------------------------------------------
 
 const PLAIN = `{Pallavi}
-కావలిని ఏలేడి కనక దుర్గా,
-వాసవి కన్నెక విశ్వమాత!
+à°•à°¾à°µà°²à°¿à°¨à°¿ à°à°²à±‡à°¡à°¿ à°•à°¨à°• à°¦à±à°°à±à°—à°¾,
+à°µà°¾à°¸à°µà°¿ à°•à°¨à±à°¨à±†à°• à°µà°¿à°¶à±à°µà°®à°¾à°¤!
 
 {Anupallavi}
-పరమేశ్వరి గౌరి. పరమార్థ దాయని!
-గౌరి, శాంభవి, జనని, గంగ భవాని
+à°ªà°°à°®à±‡à°¶à±à°µà°°à°¿ à°—à±Œà°°à°¿. à°ªà°°à°®à°¾à°°à±à°¥ à°¦à°¾à°¯à°¨à°¿!
+à°—à±Œà°°à°¿, à°¶à°¾à°‚à°­à°µà°¿, à°œà°¨à°¨à°¿, à°—à°‚à°— à°­à°µà°¾à°¨à°¿
 
 {Charanam 1}
-ఐదు వరహము లీయ ఐశ్వర్య మిచ్చెదవు
-మేదిని యున్న విద్య లిచ్చెదవు
-వదన బింబము నీదు ఒక సారి కనినంత,
-వేద విద్యలు యిచ్చి వన్నే గూర్చెదవు.`
+à°à°¦à± à°µà°°à°¹à°®à± à°²à±€à°¯ à°à°¶à±à°µà°°à±à°¯ à°®à°¿à°šà±à°šà±†à°¦à°µà±
+à°®à±‡à°¦à°¿à°¨à°¿ à°¯à±à°¨à±à°¨ à°µà°¿à°¦à±à°¯ à°²à°¿à°šà±à°šà±†à°¦à°µà±
+à°µà°¦à°¨ à°¬à°¿à°‚à°¬à°®à± à°¨à±€à°¦à± à°’à°• à°¸à°¾à°°à°¿ à°•à°¨à°¿à°¨à°‚à°¤,
+à°µà±‡à°¦ à°µà°¿à°¦à±à°¯à°²à± à°¯à°¿à°šà±à°šà°¿ à°µà°¨à±à°¨à±‡ à°—à±‚à°°à±à°šà±†à°¦à°µà±.`
 
-const P1 = 'కావలిని ఏలేడి కనక దుర్గా,'
-const P2 = 'వాసవి కన్నెక విశ్వమాత!'
-const A1 = 'పరమేశ్వరి గౌరి. పరమార్థ దాయని!'
+const P1 = 'à°•à°¾à°µà°²à°¿à°¨à°¿ à°à°²à±‡à°¡à°¿ à°•à°¨à°• à°¦à±à°°à±à°—à°¾,'
+const P2 = 'à°µà°¾à°¸à°µà°¿ à°•à°¨à±à°¨à±†à°• à°µà°¿à°¶à±à°µà°®à°¾à°¤!'
+const A1 = 'à°ªà°°à°®à±‡à°¶à±à°µà°°à°¿ à°—à±Œà°°à°¿. à°ªà°°à°®à°¾à°°à±à°¥ à°¦à°¾à°¯à°¨à°¿!'
 
 // A placed-line result shaped exactly like alignLyrics() returns.
 const placed = (lineIndex, text, start, end, confidence = 0.9) => ({
@@ -59,16 +61,16 @@ test('ANY single-brace label is excluded, not just Pallavi/Anupallavi/Charanam',
   // "optimisation" that switches this to a fixed list of known section names
   // would silently start timing headings as sung lines, so every one of these
   // shapes is pinned here.
-  const labels = ['{Pallavi}', '{Anupallavi}', '{Charanam 1}', '{Charanam 5}', '{Intro}', '{Sthayi}', '{any_text}', '{తెలుగు}', '{  spaced  }']
+  const labels = ['{Pallavi}', '{Anupallavi}', '{Charanam 1}', '{Charanam 5}', '{Intro}', '{Sthayi}', '{any_text}', '{à°¤à±†à°²à±à°—à±}', '{  spaced  }']
 
   const lyrics = [
     '{Intro}',
-    'మొదటి పంక్తి సాహిత్యం',
+    'à°®à±Šà°¦à°Ÿà°¿ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
     '{Sthayi}',
-    'రెండవ పంక్తి సాహిత్యం',
+    'à°°à±†à°‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
     '{Charanam 5}',
     '{any_text}',
-    'మూడవ పంక్తి సాహిత్యం',
+    'à°®à±‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
   ].join('\n')
 
   const lines = lyrics.split('\n')
@@ -76,9 +78,9 @@ test('ANY single-brace label is excluded, not just Pallavi/Anupallavi/Charanam',
   const alignment = {
     ok: true,
     lines: [
-      placed(idx('మొదటి పంక్తి సాహిత్యం'), 'మొదటి పంక్తి సాహిత్యం', 5, 9),
-      placed(idx('రెండవ పంక్తి సాహిత్యం'), 'రెండవ పంక్తి సాహిత్యం', 9, 13),
-      placed(idx('మూడవ పంక్తి సాహిత్యం'), 'మూడవ పంక్తి సాహిత్యం', 13, 17),
+      placed(idx('à°®à±Šà°¦à°Ÿà°¿ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚'), 'à°®à±Šà°¦à°Ÿà°¿ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚', 5, 9),
+      placed(idx('à°°à±†à°‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚'), 'à°°à±†à°‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚', 9, 13),
+      placed(idx('à°®à±‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚'), 'à°®à±‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚', 13, 17),
     ],
   }
 
@@ -93,9 +95,9 @@ test('ANY single-brace label is excluded, not just Pallavi/Anupallavi/Charanam',
 
   // The sung lines survive, in order.
   eq(cues.filter((c) => c.kind === 'lyric').map((c) => c.text), [
-    'మొదటి పంక్తి సాహిత్యం',
-    'రెండవ పంక్తి సాహిత్యం',
-    'మూడవ పంక్తి సాహిత్యం',
+    'à°®à±Šà°¦à°Ÿà°¿ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
+    'à°°à±†à°‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
+    'à°®à±‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿ à°¸à°¾à°¹à°¿à°¤à±à°¯à°‚',
   ])
 })
 
@@ -174,16 +176,16 @@ test('a line the transcript hears twice produces two cues for that line', () => 
 
   // Second occurrence of the pallavi at 20-24, its words claimed by no line.
   const words = [
-    { word: 'కావలిని', start: 2, end: 2.6 },
-    { word: 'ఏలేడి', start: 2.6, end: 3.4 },
-    { word: 'కనక', start: 3.4, end: 4.2 },
-    { word: 'దుర్గా', start: 4.2, end: 5.4 },
-    { word: 'వాసవి', start: 6, end: 6.8 },
+    { word: 'à°•à°¾à°µà°²à°¿à°¨à°¿', start: 2, end: 2.6 },
+    { word: 'à°à°²à±‡à°¡à°¿', start: 2.6, end: 3.4 },
+    { word: 'à°•à°¨à°•', start: 3.4, end: 4.2 },
+    { word: 'à°¦à±à°°à±à°—à°¾', start: 4.2, end: 5.4 },
+    { word: 'à°µà°¾à°¸à°µà°¿', start: 6, end: 6.8 },
     // repeat
-    { word: 'కావలిని', start: 20, end: 20.6 },
-    { word: 'ఏలేడి', start: 20.6, end: 21.4 },
-    { word: 'కనక', start: 21.4, end: 22.2 },
-    { word: 'దుర్గా', start: 22.2, end: 23.4 },
+    { word: 'à°•à°¾à°µà°²à°¿à°¨à°¿', start: 20, end: 20.6 },
+    { word: 'à°à°²à±‡à°¡à°¿', start: 20.6, end: 21.4 },
+    { word: 'à°•à°¨à°•', start: 21.4, end: 22.2 },
+    { word: 'à°¦à±à°°à±à°—à°¾', start: 22.2, end: 23.4 },
   ]
 
   const { cues, repeatCueCount } = buildSyncCues({
@@ -241,8 +243,8 @@ test('SRT uses HH:MM:SS,mmm and numbers cues from 1 with no gaps or overlaps', (
   const srt = renderCuesToSrt(cues)
 
   assert.match(srt, /^1\n00:00:00,000 --> 00:02:17,440\n\{\{Music\}\}/m)
-  assert.match(srt, /00:02:17,440 --> 00:02:20,375\nకావలిని ఏలేడి కనక దుర్గా,/m)
-  assert.match(srt, /00:02:20,375 --> 00:02:24,000\nవాసవి కన్నెక విశ్వమాత!/m)
+  assert.match(srt, /00:02:17,440 --> 00:02:20,375\nà°•à°¾à°µà°²à°¿à°¨à°¿ à°à°²à±‡à°¡à°¿ à°•à°¨à°• à°¦à±à°°à±à°—à°¾,/m)
+  assert.match(srt, /00:02:20,375 --> 00:02:24,000\nà°µà°¾à°¸à°µà°¿ à°•à°¨à±à°¨à±†à°• à°µà°¿à°¶à±à°µà°®à°¾à°¤!/m)
 
   // Every cue but the last ends exactly where the next begins.
   for (let i = 0; i < cues.length - 1; i++) {
@@ -334,7 +336,7 @@ test('headings stay in the plain column untouched, and never enter the SRT', () 
   // 1. The builder is a pure reader: the plain column is byte-identical after.
   eq(PLAIN, before, 'the plain lyrics value must not be mutated')
 
-  // 2. The headings are still THERE in the plain column — that is the whole
+  // 2. The headings are still THERE in the plain column â€” that is the whole
   //    point: the app renders them as ornament dividers, so the database keeps
   //    them exactly as the author typed them.
   for (const label of ['{Pallavi}', '{Anupallavi}', '{Charanam 1}']) {
@@ -345,6 +347,73 @@ test('headings stay in the plain column untouched, and never enter the SRT', () 
   for (const label of ['{Pallavi}', '{Anupallavi}', '{Charanam 1}']) {
     assert.ok(!srt.includes(label), `${label} leaked into the SRT`)
   }
+})
+
+// ---------------------------------------------------------------------------
+// 6. Bounded rescue of lines with zero matched words
+// ---------------------------------------------------------------------------
+
+const RESCUE_LINES = () => [
+  { lineIndex: 0, text: 'à°®à±Šà°¦à°Ÿà°¿ à°ªà°‚à°•à±à°¤à°¿', startSeconds: 10, endSeconds: 14, confidence: 0.9 },
+  { lineIndex: 1, text: 'à°¦à±à°°à±à°µà°¾à°° à°•à±ƒà°ªà°¾à°£à°¿, à°¦à°¿à°µà±à°¯à°¾à°¸à±à°¤à±à°° à°ªà°¾à°£à°¿,', startSeconds: null, endSeconds: null, confidence: 0 },
+  { lineIndex: 2, text: 'à°°à±†à°‚à°¡à°µ à°ªà°‚à°•à±à°¤à°¿', startSeconds: 20, endSeconds: 24, confidence: 0.9 },
+]
+
+test('a zero-word line is rescued from words between its neighbours', () => {
+  const alignment = { lines: RESCUE_LINES() }
+  const words = [
+    { word: 'à°¦à±à°°à±à°µà°¾à°°', start: 15.0, end: 15.6 },
+    { word: 'à°•à±ƒà°ªà°¾à°£à°¿', start: 15.6, end: 16.4 },
+    { word: 'à°¦à°¿à°µà±à°¯à°¾à°¸à±à°¤à±à°°', start: 16.4, end: 17.0 },
+    { word: 'à°ªà°¾à°£à°¿', start: 17.0, end: 17.6 },
+  ]
+  const out = rescueUnplacedLines(alignment, words)
+  eq(out.rescued, 1)
+  const line = alignment.lines[1]
+  eq(line.startSeconds, 15.0)
+  assert.ok(line.endSeconds >= 17.6)
+  assert.ok(line.confidence > 0 && line.confidence <= RESCUE_CONFIDENCE_CAP)
+  eq(line.rescued, true)
+})
+
+test('rescue never moves a line that already had a measured time', () => {
+  const alignment = { lines: RESCUE_LINES() }
+  const words = [{ word: 'à°®à±Šà°¦à°Ÿà°¿', start: 11, end: 11.5 }, { word: 'à°ªà°‚à°•à±à°¤à°¿', start: 11.5, end: 12 }]
+  rescueUnplacedLines(alignment, words)
+  eq(alignment.lines[0].startSeconds, 10)
+  eq(alignment.lines[0].endSeconds, 14)
+  eq(alignment.lines[0].confidence, 0.9)
+  assert.equal(alignment.lines[0].rescued, undefined)
+})
+
+test('rescue cannot pull words from outside the neighbour window', () => {
+  const alignment = { lines: RESCUE_LINES() }
+  // Correct words, but at 40 s - far past the next placed line at 20 s.
+  const words = [
+    { word: 'à°¦à±à°°à±à°µà°¾à°°', start: 40.0, end: 40.6 },
+    { word: 'à°•à±ƒà°ªà°¾à°£à°¿', start: 40.6, end: 41.4 },
+  ]
+  const out = rescueUnplacedLines(alignment, words)
+  eq(out.rescued, 0)
+  eq(alignment.lines[1].startSeconds, null)
+})
+
+test('rescue leaves the line empty when nothing in the window matches it', () => {
+  const alignment = { lines: RESCUE_LINES() }
+  const words = [{ word: 'completely', start: 15, end: 15.5 }, { word: 'different', start: 15.5, end: 16 }]
+  const out = rescueUnplacedLines(alignment, words)
+  eq(out.rescued, 0)
+  eq(alignment.lines[1].startSeconds, null)
+})
+
+test('a rescued line can never reach the write floor on its own', () => {
+  const alignment = { lines: RESCUE_LINES() }
+  const words = [
+    { word: 'à°¦à±à°°à±à°µà°¾à°°', start: 15, end: 15.6 },
+    { word: 'à°•à±ƒà°ªà°¾à°£à°¿', start: 15.6, end: 16.4 },
+  ]
+  rescueUnplacedLines(alignment, words)
+  assert.ok(alignment.lines[1].confidence < 0.55, 'a rescued guess must stay below the 0.55 gate')
 })
 
 // ---------------------------------------------------------------------------

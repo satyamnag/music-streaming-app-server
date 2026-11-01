@@ -972,3 +972,119 @@ export function renderCuesForVariant(cues, variantText, totalLines) {
   }
   return blocks.join('\n\n') + (blocks.length ? '\n' : '')
 }
+
+// ---------------------------------------------------------------------------
+// Bounded rescue of lines the global pass left EMPTY
+// ---------------------------------------------------------------------------
+//
+// Symptom this addresses: a line reports `words 0/4` - the transcript produced
+// nothing that cleared the aligner's 0.5 bar for it, so it has no time at all
+// and the SRT simply skips it.
+//
+// The cause is usually pronunciation drift (a vowel sign differs, a word is
+// split across beats) rather than silence. The global DP prefers leaving a word
+// unclaimed over a weak pairing, which is correct for the WHOLE song but leaves
+// these lines stranded.
+//
+// The rescue is deliberately small and bounded:
+//   * it only touches lines that have NO time - a measured line is never moved;
+//   * it may only search BETWEEN the line's placed neighbours, so it can never
+//     pull a word from another stanza or jump across the song;
+//   * it accepts a weaker similarity (0.35) than the global bar, and
+//   * it caps confidence at 0.45 - BELOW the 0.55 write floor - so a rescued
+//     guess can never be written to the database automatically and always stays
+//     in the review list.
+
+/** Weaker bar for the bounded rescue than the global 0.5. */
+export const RESCUE_MIN_SIMILARITY = 0.35
+
+/** Rescued lines can never reach the 0.55 write floor. */
+export const RESCUE_CONFIDENCE_CAP = 0.45
+
+/**
+ * Give empty lines a position from words inside their own neighbour window.
+ *
+ * Mutates `alignment.lines` in place and marks what it touched with
+ * `rescued: true`, so the caller can report it.
+ *
+ * @param {object} alignment           result of alignLyrics()
+ * @param {Array}  words               Deepgram word timings
+ * @param {object} [options]
+ * @returns {{rescued:number}}
+ */
+export function rescueUnplacedLines(alignment, words, {
+  minSimilarity = RESCUE_MIN_SIMILARITY,
+  confidenceCap = RESCUE_CONFIDENCE_CAP,
+} = {}) {
+  const lines = Array.isArray(alignment?.lines) ? alignment.lines : []
+  const usable = (Array.isArray(words) ? words : [])
+    .filter((w) => w && typeof w.start === 'number' && typeof w.end === 'number')
+    .slice()
+    .sort((a, b) => a.start - b.start)
+  if (!lines.length || !usable.length) return { rescued: 0 }
+
+  const placed = lines
+    .filter((l) => l.startSeconds !== null && l.startSeconds !== undefined)
+    .slice()
+    .sort((a, b) => a.lineIndex - b.lineIndex)
+
+  let rescued = 0
+
+  for (const line of lines) {
+    if (line.startSeconds !== null && line.startSeconds !== undefined) continue
+    if (classifyLine(line.text) !== 'lyric') continue
+
+    const keys = String(line.text || '')
+      .split(/\s+/).filter(Boolean).map(normaliseWord).filter(Boolean)
+    if (!keys.length) continue
+
+    // The window the line MUST occupy: after the previous placed line ends and
+    // before the next placed line starts.
+    const prev = [...placed].reverse().find((p) => p.lineIndex < line.lineIndex)
+    const next = placed.find((p) => p.lineIndex > line.lineIndex)
+    const lo = prev && typeof prev.endSeconds === 'number' ? prev.endSeconds : 0
+    const hi = next && typeof next.startSeconds === 'number' ? next.startSeconds : Infinity
+    if (!(hi > lo)) continue
+
+    const cand = usable.filter((w) => w.start >= lo - 0.05 && w.start <= hi + 0.05)
+    if (!cand.length) continue
+
+    // Sliding window over the candidate words, scored by how many lyric words it
+    // accounts for and how similar those pairings are.
+    const maxLen = Math.max(2, keys.length * 2)
+    let best = null
+    for (let s = 0; s < cand.length; s++) {
+      const limit = Math.min(maxLen, cand.length - s)
+      for (let len = 1; len <= limit; len++) {
+        const slice = cand.slice(s, s + len)
+        let matched = 0
+        let simSum = 0
+        for (let idx = 0; idx < slice.length; idx++) {
+          const nw = normaliseWord(slice[idx].word)
+          let b = 0
+          for (const k of keys) {
+            const sim = k === nw ? 1 : wordSimilarity(k, nw)
+            if (sim > b) b = sim
+          }
+          simSum += b
+          if (b >= minSimilarity) matched += 1
+        }
+        if (!matched) continue
+        const score = matched * 2 + simSum / slice.length
+        if (!best || score > best.score) best = { score, slice, matched, simSum }
+      }
+    }
+    if (!best) continue
+
+    const meanSim = best.simSum / best.slice.length
+    if (meanSim < minSimilarity) continue
+
+    line.startSeconds = best.slice[0].start
+    line.endSeconds = Math.max(...best.slice.map((w) => w.end))
+    line.confidence = Math.min(confidenceCap, Math.round(meanSim * confidenceCap * 10000) / 10000)
+    line.rescued = true
+    rescued += 1
+  }
+
+  return { rescued }
+}

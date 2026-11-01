@@ -19,6 +19,7 @@ import {
   fillUnsungTimings,
   parseTimedLyrics,
   renderCuesForVariant,
+  rescueUnplacedLines,
   splitLyricLines,
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
@@ -2387,6 +2388,20 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       confidenceFloor: Number.isFinite(floor) && floor > 0 && floor <= 1 ? floor : DEFAULT_CONFIDENCE_FLOOR,
     })
 
+    // --- Bounded rescue of lines the global pass left EMPTY -----------------
+    //
+    // A line reporting `words 0/4` has no time at all, so the SRT would skip it.
+    // The rescue may only look BETWEEN that line's placed neighbours and caps
+    // confidence at 0.45 (below the 0.55 write floor), so it can never move a
+    // measured line, never pull a word from another stanza, and never write
+    // itself to the database. Rescued lines always stay in the review list.
+    const rescue = rescueUnplacedLines(alignment, words)
+    if (rescue.rescued) {
+      alignment.buildableLineCount = alignment.lines.filter(
+        (l) => l.startSeconds !== null && l.startSeconds !== undefined
+      ).length
+    }
+
     // --- Optional second opinion (OpenAI) ----------------------------------
     //
     // DEFAULT OFF: requires OPENAI_SECOND_OPINION=1 AND a key. Its only power is
@@ -2639,6 +2654,8 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       audit_id: auditId,
       elapsed_ms: Date.now() - startedAt,
       match_rate: alignment.matchRate,
+      // Lines the bounded rescue gave a position to (they had NO words at all).
+      rescued_lines: rescue.rescued || 0,
       // Present only when the optional OpenAI assist actually ran. `applied` is
       // the number of previously-unplaced lines it positioned.
       second_opinion: secondOpinion ? {

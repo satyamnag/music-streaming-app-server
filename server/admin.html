@@ -1402,6 +1402,20 @@ async function runAutoSync(doWrite) {
            + ` &middot; total cues: <strong>${body.cue_count || 0}</strong></div>`;
     }
 
+    // Whether the bounded rescue and the optional OpenAI pass actually ran, and
+    // what each managed to place. Silence here would leave the admin guessing why
+    // a line is still unplaced.
+    if (body.rescued_lines || body.second_opinion) {
+      const so = body.second_opinion;
+      html += `<div style="margin-top:4px;color:#666;">Rescued by local re-match: <strong>${body.rescued_lines || 0}</strong>`;
+      if (so) {
+        html += ` &middot; OpenAI second opinion: <strong>${so.ok ? (so.applied || 0) + ' placed' : 'unavailable (' + esc(so.reason || 'error') + ')'}</strong>`;
+      } else {
+        html += ` &middot; OpenAI second opinion: <strong>off</strong>`;
+      }
+      html += `</div>`;
+    }
+
     if (flagged.length) {
       html += `<div style="margin-top:8px;color:#b06000;"><strong>${flagged.length} line(s) need checking:</strong></div>`;
       html += '<ul style="margin:4px 0 0;padding-left:18px;max-height:180px;overflow:auto;">';
