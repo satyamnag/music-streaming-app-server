@@ -980,14 +980,49 @@ export function buildSyncCues({
     cues.push(musicCue(last.end, audioDuration))
   }
 
-  // ---- 5. Ends: every cue holds until the next one starts. ---------------
-  // That is what keeps the highlight on screen through a held note or an
-  // interlude instead of blinking off in the gap after a line is sung.
-  for (let i = 0; i < cues.length; i++) {
-    const next = cues[i + 1]
-    if (next) cues[i].end = next.start
-    if (!(cues[i].end > cues[i].start)) cues[i].end = cues[i].start + CUE_MIN_SECONDS
+  // ---- 5. Enforce a structurally valid timeline. --------------------------
+  //
+  // Upstream merging (repeats from two sources, equal-start cues) can still leave
+  // a cue that overlaps the previous one, starts at the same instant, or has no
+  // positive duration. That produces the "TIMING problems" the verification
+  // reported. This pass makes it impossible to emit such a timeline:
+  //   * sort by start, then drop any cue whose start equals the previous one
+  //     (duplicate timestamps),
+  //   * force every start >= the previous end (no overlap, monotonic),
+  //   * force a positive duration,
+  //   * clamp to [0, audioDuration] when the duration is known.
+  cues.sort((a, b) => a.start - b.start || a.end - b.end)
+  const clean = []
+  for (const cue of cues) {
+    const prev = clean[clean.length - 1]
+    let start = Number(cue.start)
+    let end = Number(cue.end)
+    if (!Number.isFinite(start)) start = 0
+    if (!Number.isFinite(end)) end = start + CUE_MIN_SECONDS
+    if (prev && start <= prev.end - 0.001) start = prev.end
+    if (end <= start) end = start + CUE_MIN_SECONDS
+    if (prev && start === prev.start && end === prev.end) continue // exact dupe
+    if (audioDuration && start > audioDuration) break            // past the song
+    if (audioDuration && end > audioDuration) end = audioDuration
+    if (end <= start) end = start + CUE_MIN_SECONDS
+    cue.start = start
+    cue.end = end
+    clean.push(cue)
   }
+  // Re-derive holds: each cue ends where the next begins...
+  for (let i = 0; i < clean.length; i++) {
+    const next = clean[i + 1]
+    if (next) clean[i].end = next.start
+    if (!(clean[i].end > clean[i].start)) clean[i].end = clean[i].start + CUE_MIN_SECONDS
+  }
+  // ...except the last, which ends at the audio end (or a minimum hold).
+  if (clean.length) {
+    const last = clean[clean.length - 1]
+    if (audioDuration && audioDuration > last.start) last.end = audioDuration
+    else if (!(last.end > last.start)) last.end = last.start + CUE_MIN_SECONDS
+  }
+
+  cues.splice(0, cues.length, ...clean)
 
   return {
     cues,

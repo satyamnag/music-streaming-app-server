@@ -675,6 +675,54 @@ test('a line sung once is never split', () => {
 })
 
 // ---------------------------------------------------------------------------
+// 11. The timeline must be structurally valid no matter the upstream mess
+// ---------------------------------------------------------------------------
+
+test('output cues are always monotonic, non-overlapping and positive-duration', () => {
+  // A nasty input: a repeat that shares the first cue's start, a repeat that
+  // overlaps the previous line, and an out-of-order repeat. None of this may
+  // survive as duplicate timestamps, overlaps or zero-duration cues.
+  const PLAIN = '{Pallavi}\nఒకటి\nరెండు'
+  const lines = PLAIN.split('\n')
+  const i1 = lines.findIndex((l) => l.trim() === 'ఒకటి')
+  const i2 = lines.findIndex((l) => l.trim() === 'రెండు')
+  const alignment = {
+    ok: true,
+    lines: [
+      placed(i1, 'ఒకటి', 10, 14, 0.9),
+      placed(i2, 'రెండు', 14, 18, 0.9),
+    ],
+    // A repeat with the SAME start as line 1, one that overlaps line 1, and one
+    // that is out of order (before line 1).
+    repeats: [
+      { lineIndex: i1, text: 'ఒకటి', startSeconds: 10, endSeconds: 12 },
+      { lineIndex: i1, text: 'ఒకటి', startSeconds: 12, endSeconds: 20 },
+      { lineIndex: i2, text: 'రెండు', startSeconds: 5, endSeconds: 9 },
+    ],
+  }
+  const words = [
+    { word: 'ఒకటి', start: 10, end: 12 },
+    { word: 'రెండు', start: 14, end: 18 },
+  ]
+
+  const { cues } = buildSyncCues({ plainLyrics: PLAIN, alignment, words, audioDuration: 24 })
+  const srt = renderCuesForVariant(cues, PLAIN, lines.length)
+  const parsed = parseSrtTimeline(srt)
+
+  assert.ok(parsed.length > 0, 'expected cues')
+  const starts = parsed.map((c) => c.start)
+  // strictly increasing
+  for (let i = 1; i < starts.length; i++) assert.ok(starts[i] > starts[i - 1], 'starts must strictly increase')
+  // no overlap, positive duration, in [0, 24]
+  for (let i = 0; i < parsed.length; i++) {
+    const c = parsed[i]
+    assert.ok(c.end > c.start, 'positive duration')
+    assert.ok(c.start >= 0 && c.end <= 24 + 0.001, 'within duration')
+    if (i > 0) assert.ok(c.start >= parsed[i - 1].end, 'no overlap')
+  }
+})
+
+// ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
 

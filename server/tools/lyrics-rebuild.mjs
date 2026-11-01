@@ -124,6 +124,30 @@ function lyricCueCount(srt) {
   return parseSrtTimeline(srt).filter((c) => String(c.text || '').trim() !== '{{Music}}').length
 }
 
+/**
+ * True when the stored SRT has a TIMING defect: overlapping or zero-duration cues,
+ * a duplicate start, or a cue outside [0, duration]. These are the "TIMING
+ * problems" the read-only verification reports, and a re-run that regenerates the
+ * column cleanly may repair them even when the sung-cue count is unchanged.
+ */
+function hasTimingDefects(srt, duration) {
+  const cues = parseSrtTimeline(srt)
+  if (!cues.length) return false
+  const starts = new Set()
+  for (let i = 0; i < cues.length; i++) {
+    const c = cues[i]
+    if (c.end <= c.start) return true
+    if (i > 0 && c.start < cues[i - 1].end) return true
+  }
+  const dur = Number(duration)
+  for (const c of cues) {
+    if (starts.has(c.start)) return true
+    starts.add(c.start)
+    if (Number.isFinite(dur) && dur > 0 && (c.start < 0 || c.end > dur + 0.5)) return true
+  }
+  return false
+}
+
 const SYNCED_COLUMNS = ['synced_lyrics', 'synced_lyrics_en', 'synced_lyrics_en_tr', 'synced_lyrics_hi', 'synced_lyrics_hi_tr']
 
 // --- Restore mode -----------------------------------------------------------
@@ -214,9 +238,19 @@ for (const [i, t] of targets.entries()) {
     rec.repeats = build.repeatCueCount
     rec.music = build.musicCueCount
 
-    // The one rule that makes a catalogue-wide rewrite safe: only replace when
-    // the new timeline places STRICTLY MORE SUNG cues than the stored one.
-    if (newLyric <= existingLyric) {
+    // The one rule that makes a catalogue-wide rewrite safe, now two-part:
+    //   * strictly more SUNG cues (recovered repeats), OR
+    //   * the STORED timeline has a timing defect and the new one is structurally
+    //     clean (this repairs the 31 tracks the verification flagged with
+    //     overlapping / zero-duration / duplicate / out-of-range cues).
+    const existingDefective = hasTimingDefects(t.synced_lyrics, t.duration)
+    const newDefective = hasTimingDefects(payload.synced_lyrics, t.duration)
+    rec.existing_timing_defect = existingDefective
+    rec.new_timing_defect = newDefective
+
+    const gain = newLyric > existingLyric
+    const repair = existingDefective && !newDefective
+    if (!gain && !repair) {
       rec.action = 'keep'
       rec.reason = `no sung-cue gain (${existingLyric} -> ${newLyric})`
       report.push(rec)
