@@ -203,3 +203,43 @@ HTTP endpoints and asserts: each step writes only its own column, steps 2-3 make
 no Deepgram call at all, and the English and Transliteration cue times are
 identical to the Telugu ones.
 
+---
+
+## 10. Fully-automatic catalogue rebuild (no human intervention)
+
+The `lyrics-rebuild.yml` workflow runs automatically on a **daily schedule**
+(`cron: 5 3 * * *`) and, on the scheduled trigger, **auto-writes** — a human is
+never required.
+
+### Automatic write policy (never guesses)
+
+A track is written automatically ONLY when the new timeline is *provably
+better* than the one stored, under a two-part rule (`server/tools/lyrics-rebuild.mjs`):
+
+1. **Strict sung-cue gain** — the new SRT has more sung cues than the stored one
+   (recovered repeated lines), **or**
+2. **Structural-defect repair** — the stored SRT has a timing defect (overlap /
+   zero-duration / duplicate / out-of-range) and the new one is clean.
+
+Anything that is equal or worse is left untouched. Every write is preceded by a
+backup (`lyrics-backup.json`) and is restorable with `--restore`.
+
+### Honest measured result (never a "100%" claim)
+
+The report carries, per track and in the catalogue summary:
+
+- `coverage_pct` — share of distinct plain-lyric lines that received a cue
+- `sung n -> m` — existing vs new sung-cue count
+- `avg_coverage_pct_written` — mean coverage over written tracks
+
+Structural correctness (monotonic, in-range, every timed line is a plain line,
+no missing repeats that the audio yields) is the guarantee. **Millisecond-exact
+timestamps are not** — sung Telugu has no machine-checkable ground truth, so the
+report states measured coverage rather than claiming perfection.
+
+### Why manual dispatch remains
+
+`workflow_dispatch` still defaults to **dry-run** (`write` off) so a human can
+inspect before any write. The schedule is the no-human path; the dispatcher is
+the cautious path. Both share the identical write gate.
+

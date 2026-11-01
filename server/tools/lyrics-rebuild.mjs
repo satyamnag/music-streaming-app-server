@@ -306,6 +306,13 @@ for (const [i, t] of targets.entries()) {
     rec.acoustic_error_bound_s = acousticRepeats.length
       ? Math.max(...acousticRepeats.map((r) => Math.max(r.a?.error ?? 0, r.b?.error ?? 0)))
       : 0
+    // Measured coverage: what share of distinct plain-lyric lines got >=1 cue.
+    const plainTexts = splitLyricLines(t.plain_lyrics)
+    const timedTexts = new Set(parseSrtTimeline(payload.synced_lyrics).map((c) => String(c.text || '').trim()))
+    const timedCount = plainTexts.filter((l) => timedTexts.has(l.trim())).length
+    rec.coverage_pct = plainTexts.length
+      ? Number(((timedCount / plainTexts.length) * 100).toFixed(1))
+      : 0
 
     // The one rule that makes a catalogue-wide rewrite safe, now two-part:
     //   * strictly more SUNG cues (recovered repeats), OR
@@ -355,6 +362,11 @@ const summary = {
   skipped: report.filter((r) => r.action === 'skip').length,
   // Gain in SUNG cues only - the number that represents recovered repeats.
   total_lyric_cues_gained: report.reduce((a, r) => a + Math.max(0, (r.new_lyric_cues || 0) - (r.existing_lyric_cues || 0)), 0),
+  // Measured coverage across written tracks (honest, not a "100%" stamp).
+  avg_coverage_pct_written: (() => {
+    const w = report.filter((r) => r.coverage_pct != null)
+    return w.length ? Number((w.reduce((a, r) => a + r.coverage_pct, 0) / w.length).toFixed(1)) : null
+  })(),
   detail: report,
 }
 fs.writeFileSync(OUT, JSON.stringify(summary, null, 2))

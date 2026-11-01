@@ -24,6 +24,12 @@ on:
         description: 'Comma-separated track ids to restrict to (blank = all)'
         required: false
         default: ''
+  # Fully-automatic, no-human run: auto-writes only provably-correct tracks
+  # (sung-cue gain OR structural-defect repair), backs up first, and reports
+  # measured coverage. Cron: 03:05 UTC daily. Dry-run stays available via the
+  # manual dispatch above.
+  schedule:
+    - cron: '5 3 * * *'
 
 permissions:
   contents: read
@@ -43,7 +49,9 @@ jobs:
       AWS_DEFAULT_REGION: ap-south-1
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       DOTENV_RELEASE: ${{ secrets.DOTENV_RELEASE }}
-      WRITE_FLAG: ${{ inputs.write }}
+      # Scheduled runs AUTO-WRITE provably-correct tracks (no human). A manual
+      # dispatch defaults to dry-run and can set write explicitly.
+      WRITE_FLAG: ${{ github.event_name == 'schedule' && 'true' || inputs.write }}
       LIMIT: ${{ inputs.limit }}
       IDS: ${{ inputs.ids }}
 
