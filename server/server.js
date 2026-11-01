@@ -21,6 +21,8 @@ import {
   renderCuesForVariant,
   rescueUnplacedLines,
   interpolateUnplacedLines,
+  parseSrtTimeline,
+  deriveVariantSrt,
   splitLyricLines,
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
@@ -2736,6 +2738,133 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
 })
 
 // Delete track
+// ============================================================================
+// POST /api/admin/tracks/:id/sync-variant
+// ============================================================================
+//
+// Builds ONE translation / transliteration SYNC column from the track's EXISTING
+// Telugu sync lyrics, without transcribing anything again.
+//
+// Inputs, each optional by design:
+//   * Telugu sync lyrics (required - they are the timeline being copied),
+//   * the Telugu plain column (the line-parallel reference),
+//   * the target column's own plain lyrics (the text placed on that timeline).
+//
+// It never invents text: a line the target column does not have is skipped, so a
+// partially translated column comes out shorter rather than mixing languages.
+// Times are copied verbatim from the Telugu cues - the same milliseconds.
+//
+// Writes only when `write: true`, only that one column, and always verified by
+// re-reading the row (reverted on mismatch).
+app.post('/api/admin/tracks/:id/sync-variant', requireAdmin, async (req, res, next) => {
+  try {
+    const TARGETS = {
+      en: { plain: 'plain_lyrics_en', synced: 'synced_lyrics_en', label: 'English (Translation)' },
+      en_tr: { plain: 'plain_lyrics_en_tr', synced: 'synced_lyrics_en_tr', label: 'English (Transliteration)' },
+      hi: { plain: 'plain_lyrics_hi', synced: 'synced_lyrics_hi', label: 'Hindi (Translation)' },
+      hi_tr: { plain: 'plain_lyrics_hi_tr', synced: 'synced_lyrics_hi_tr', label: 'Hindi (Transliteration)' },
+    }
+    const target = String((req.body && req.body.target) || '').trim()
+    const spec = TARGETS[target]
+    if (!spec) {
+      return res.status(400).json({ error: 'target must be one of: en, en_tr, hi, hi_tr' })
+    }
+
+    const { data: track, error } = await supabase
+      .from('tracks')
+      .select(`id, title, plain_lyrics, synced_lyrics, ${spec.plain}, ${spec.synced}`)
+      .eq('id', req.params.id)
+      .maybeSingle()
+    if (error) return res.status(500).json({ error: error.message })
+    if (!track) return res.status(404).json({ error: 'Track not found' })
+
+    if (!String(track.plain_lyrics || '').trim()) {
+      return res.status(400).json({ error: 'This track has no Telugu plain lyrics to align against.' })
+    }
+    if (!String(track.synced_lyrics || '').trim()) {
+      return res.status(400).json({
+        error: 'This track has no Telugu sync lyrics yet. Run Auto-Sync first - ' +
+               'it produces the Telugu timeline every other column is copied from.',
+      })
+    }
+    const targetPlain = String(track[spec.plain] || '')
+    if (!targetPlain.trim()) {
+      return res.status(400).json({
+        error: `This track has no ${spec.label} plain lyrics to place on the timeline.`,
+      })
+    }
+
+    const timeline = parseSrtTimeline(track.synced_lyrics)
+    if (!timeline.length) {
+      return res.status(400).json({
+        error: 'The Telugu sync lyrics could not be parsed as SRT. Re-run Auto-Sync.',
+      })
+    }
+
+    const derived = deriveVariantSrt({
+      teluguPlain: track.plain_lyrics,
+      timeline,
+      targetPlain,
+    })
+
+    // `matched` (not `cues`) is the real signal: the {{Music}} banner is
+    // language-independent, so a column with no translated lines could otherwise
+    // look like a success with one banner in it.
+    if (!derived.matched) {
+      return res.status(422).json({
+        error: `No ${spec.label} line could be matched to the Telugu timeline. ` +
+               'Check that the plain columns are line-parallel.',
+        timeline_cues: timeline.length,
+        skipped: derived.skipped,
+      })
+    }
+
+    const wantWrite = req.body && (req.body.write === true || req.body.write === 'true')
+    let wrote = false
+    let writeError = null
+
+    if (wantWrite) {
+      if (!isValidSrtText(derived.srt)) {
+        writeError = 'invalid_srt'
+      } else {
+        const previous = track[spec.synced] ?? null
+        const { data: written, error: writeErr } = await supabase
+          .from('tracks')
+          .update({ [spec.synced]: derived.srt })
+          .eq('id', track.id)
+          .select(`id, ${spec.synced}`)
+          .single()
+        if (writeErr) {
+          writeError = writeErr.message
+        } else if (String(written?.[spec.synced] ?? '') !== derived.srt) {
+          // Never leave a half-written column behind.
+          await supabase.from('tracks').update({ [spec.synced]: previous }).eq('id', track.id)
+            .then(() => {}, () => {})
+          writeError = 'readback_mismatch'
+        } else {
+          wrote = true
+        }
+      }
+    }
+
+    res.json({
+      ok: true,
+      track_id: track.id,
+      target,
+      column: spec.synced,
+      label: spec.label,
+      timeline_cues: timeline.length,
+      cues: derived.cues,
+      matched: derived.matched,
+      skipped: derived.skipped,
+      proposed: { [spec.synced]: derived.srt },
+      wrote_to_database: wrote,
+      write_requested: wantWrite,
+      write_blocked_reason: wantWrite && !wrote ? writeError : null,
+    })
+  } catch (err) { next(err) }
+})
+
 // ============================================================================
 // POST /api/admin/tracks/:id/auto-sync/rollback/:runId
 // ============================================================================

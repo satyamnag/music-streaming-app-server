@@ -17,6 +17,8 @@ import {
   RESCUE_CONFIDENCE_CAP,
   interpolateUnplacedLines,
   INTERPOLATED_CONFIDENCE,
+  parseSrtTimeline,
+  deriveVariantSrt,
   renderCuesToSrt,
   unclaimedRuns,
 } from '../libs/autoSyncLyrics.mjs'
@@ -489,6 +491,89 @@ test('headings are never interpolated', () => {
   const out = interpolateUnplacedLines(alignment)
   eq(out.interpolated, 0)
   eq(alignment.lines[1].startSeconds, null)
+})
+
+// ---------------------------------------------------------------------------
+// 8. Deriving a translated column from an EXISTING Telugu SRT
+// ---------------------------------------------------------------------------
+
+const TE_SRT = `1
+00:00:00,000 --> 00:02:17,440
+{{Music}}
+
+2
+00:02:17,440 --> 00:02:20,375
+కావలిని ఏలేడి కనక దుర్గా,
+
+3
+00:02:20,375 --> 00:02:24,000
+వాసవి కన్నెక విశ్వమాత!`
+
+const TE_PLAIN = `{Pallavi}
+కావలిని ఏలేడి కనక దుర్గా,
+వాసవి కన్నెక విశ్వమాత!`
+
+const EN_PLAIN = `{Pallavi}
+O Kanaka Durga who rules as we wish,
+Vasavi, the mother of the universe!`
+
+test('parseSrtTimeline keeps BOTH ends (unlike parseTimedLyrics)', () => {
+  const tl = parseSrtTimeline(TE_SRT)
+  eq(tl.length, 3)
+  eq(tl[0], { start: 0, end: 137.44, text: '' + MUSIC_LABEL })
+  eq(tl[1].start, 137.44)
+  eq(tl[1].end, 140.375)
+  eq(parseSrtTimeline(''), [])
+  eq(parseSrtTimeline('not an srt'), [])
+})
+
+test('a translated column inherits the exact Telugu timings, line by line', () => {
+  const tl = parseSrtTimeline(TE_SRT)
+  const out = deriveVariantSrt({ teluguPlain: TE_PLAIN, timeline: tl, targetPlain: EN_PLAIN })
+  eq(out.cues, 3)
+  eq(out.matched, 2)
+  eq(out.skipped, 0)
+  // Same milliseconds as the Telugu cues - not re-derived, not rounded.
+  assert.match(out.srt, /^1\n00:00:00,000 --> 00:02:17,440\n\{\{Music\}\}/)
+  assert.match(out.srt, /00:02:17,440 --> 00:02:20,375\nO Kanaka Durga who rules as we wish,/)
+  assert.match(out.srt, /00:02:20,375 --> 00:02:24,000\nVasavi, the mother of the universe!/)
+})
+
+test('a line the translation does not have is skipped, never filled with Telugu', () => {
+  const tl = parseSrtTimeline(TE_SRT)
+  const partial = `{Pallavi}\nO Kanaka Durga who rules as we wish,`
+  const out = deriveVariantSrt({ teluguPlain: TE_PLAIN, timeline: tl, targetPlain: partial })
+  eq(out.cues, 2)
+  eq(out.matched, 1)
+  eq(out.skipped, 1)
+  assert.ok(!out.srt.includes('వాసవి'), 'Telugu text must never leak into the translated column')
+})
+
+test('a line sung twice maps to both of its occurrences, in order', () => {
+  const plain = `{Pallavi}\nఒకటి\nరెండు`
+  const plainEn = `{Pallavi}\nOne\nTwo`
+  const timeline = [
+    { start: 1, end: 2, text: 'ఒకటి' },
+    { start: 5, end: 6, text: 'రెండు' },
+    { start: 9, end: 10, text: 'ఒకటి' },   // repeated line
+  ]
+  const out = deriveVariantSrt({ teluguPlain: plain, timeline, targetPlain: plainEn })
+  eq(out.cues, 3)
+  eq(out.matched, 3)
+  assert.match(out.srt, /00:00:01,000 --> 00:00:02,000\nOne/)
+  assert.match(out.srt, /00:00:09,000 --> 00:00:10,000\nOne/)
+})
+
+test('an empty translation keeps the music banner but emits no lyric text', () => {
+  const tl = parseSrtTimeline(TE_SRT)
+  const out = deriveVariantSrt({ teluguPlain: TE_PLAIN, timeline: tl, targetPlain: '   ' })
+  // `{{Music}}` is language-independent, so the banner survives; no Telugu may
+  // leak into the column, and nothing counts as matched.
+  eq(out.matched, 0)
+  eq(out.cues, 1)
+  assert.match(out.srt, /\{\{Music\}\}/)
+  assert.ok(!out.srt.includes('వాసవి'))
+  assert.ok(!out.srt.includes('కావలిని'))
 })
 
 // ---------------------------------------------------------------------------

@@ -1169,3 +1169,115 @@ export function interpolateUnplacedLines(alignment) {
 
   return { interpolated }
 }
+
+// ---------------------------------------------------------------------------
+// Deriving a translation / transliteration column from an EXISTING Telugu SRT
+// ---------------------------------------------------------------------------
+//
+// A fresh Auto-Sync run already renders every language column from one shared
+// Telugu timeline (renderCuesForVariant). This covers the other case: the track
+// already HAS Telugu sync lyrics - hand-timed, or written by an earlier run -
+// and the English columns must be produced from them WITHOUT transcribing again.
+//
+// The two inputs the operator asked for, each optional by design:
+//   * Telugu sync lyrics (the timeline to copy),
+//   * the target column's own plain lyrics (the text to place on that timeline).
+// Nothing is invented: times come from the Telugu cues, text comes from the
+// target column. A line the target column does not have is skipped rather than
+// filled with the Telugu text, because a half-translated column is worse than a
+// shorter one.
+
+/**
+ * Parse an SRT document into cues that KEEP their end time.
+ *
+ * `parseTimedLyrics` deliberately drops ends (it only needs starts, for the
+ * "already timed" check). Reusing an existing timeline needs both ends.
+ *
+ * @param {string} raw
+ * @returns {Array<{start:number, end:number, text:string}>}
+ */
+export function parseSrtTimeline(raw) {
+  const text = String(raw || '').replace(/\r/g, '')
+  if (!text.trim()) return []
+  const toSec = (h, mi, s, ms) =>
+    (+h) * 3600 + (+mi) * 60 + (+s) + parseInt(ms, 10) / Math.pow(10, String(ms).length)
+
+  const out = []
+  for (const block of text.split(/\n\s*\n/)) {
+    const lines = block.split('\n').map((l) => l.trim()).filter(Boolean)
+    if (!lines.length) continue
+    let i = 0
+    if (/^\d+$/.test(lines[0])) i = 1
+    const m = /^(\d{1,3}):(\d{2}):(\d{2})[.,](\d{1,3})\s*-->\s*(\d{1,3}):(\d{2}):(\d{2})[.,](\d{1,3})/
+      .exec(lines[i] || '')
+    if (!m) continue
+    const body = lines.slice(i + 1).join(' ').trim()
+    if (!body) continue
+    out.push({
+      start: toSec(m[1], m[2], m[3], m[4]),
+      end: toSec(m[5], m[6], m[7], m[8]),
+      text: body,
+    })
+  }
+  return out.sort((a, b) => a.start - b.start)
+}
+
+/**
+ * Build one language column's SRT from an existing Telugu cue timeline.
+ *
+ * Each cue's text identifies its line in the Telugu plain column; the target
+ * column's text at that same index is what gets emitted. Matching walks forward
+ * and wraps once, so a line sung twice maps to both of its occurrences and never
+ * to the wrong stanza.
+ *
+ * @param {object} args
+ * @param {string} args.teluguPlain  the Telugu plain column (line-parallel reference)
+ * @param {Array}  args.timeline     from parseSrtTimeline()
+ * @param {string} args.targetPlain  the target column's plain lyrics
+ * @returns {{srt:string, cues:number, matched:number, skipped:number}}
+ */
+export function deriveVariantSrt({ teluguPlain, timeline, targetPlain }) {
+  const teLines = splitLyricLines(teluguPlain).map((l) => l.trim())
+  const target = splitVariantLines(targetPlain, teLines.length)
+  const cues = Array.isArray(timeline) ? timeline : []
+
+  const blocks = []
+  let cursor = 0
+  let matched = 0
+  let skipped = 0
+
+  for (const cue of cues) {
+    // A music banner is not a lyric line: it carries through unchanged.
+    if (classifyLine(cue.text) === 'music') {
+      blocks.push(`${blocks.length + 1}\n${formatSrtTime(cue.start)} --> ${formatSrtTime(cue.end)}\n${MUSIC_LABEL}`)
+      continue
+    }
+
+    const wanted = String(cue.text || '').trim()
+    let idx = -1
+    for (let i = cursor; i < teLines.length; i++) {
+      if (teLines[i] === wanted) { idx = i; break }
+    }
+    if (idx === -1) {
+      // Repeated line written once: fall back to a full search, then continue
+      // forward from there so the next occurrence is not matched to this one.
+      for (let i = 0; i < teLines.length; i++) {
+        if (teLines[i] === wanted) { idx = i; break }
+      }
+    }
+    if (idx >= 0) cursor = idx + 1
+
+    const text = idx >= 0 ? String(target[idx] || '').trim() : ''
+    if (!text) { skipped += 1; continue }
+
+    matched += 1
+    blocks.push(`${blocks.length + 1}\n${formatSrtTime(cue.start)} --> ${formatSrtTime(cue.end)}\n${text}`)
+  }
+
+  return {
+    srt: blocks.join('\n\n') + (blocks.length ? '\n' : ''),
+    cues: blocks.length,
+    matched,
+    skipped,
+  }
+}
