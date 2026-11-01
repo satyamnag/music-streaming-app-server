@@ -23,6 +23,10 @@ import {
   parseTimedLyrics,
   splitLyricLines,
   wordSimilarity,
+  buildKeyterms,
+  MAX_KEYTERMS,
+  ingestAcousticRepeats,
+  buildSyncCues,
   MIN_MATCH_RATE,
   WORD_MATCH_THRESHOLD,
 } from '../libs/autoSyncLyrics.mjs'
@@ -388,6 +392,138 @@ test('parseTimedLyrics ignores LRC metadata headers', () => {
 test('parseTimedLyrics returns nothing for untimed markup-only content', () => {
   eq(parseTimedLyrics('plain text with no timestamps'), [])
   eq(parseTimedLyrics(''), [])
+})
+
+// ---------------------------------------------------------------------------
+// Deepgram keyterm extraction
+// ---------------------------------------------------------------------------
+
+// Telugu words written as escape sequences on purpose: keyterm extraction must
+// be encoding-safe and this keeps the fixture independent of how the test file
+// is saved. "నిలువదు" -> \u0c28\u0c3f\u0c32\u0c41\u0c35... etc.
+const TE_NILUVADU = '\u0C28\u0C3F\u0C32\u0C41\u0C35\u0C26\u0C41' // నిలువదు
+const TE_MANASU = '\u0C2E\u0C28\u0C38\u0C41' // మనసు
+const TE_NA = '\u0C28\u0C3E' // నా
+const TE_NI = '\u0C28\u0C40' // నీ
+
+test('buildKeyterms returns normalised, deduped, plain tokens only', () => {
+  // Two words, a {Section} heading (which is markup, ignored), a duplicate, and
+  // punctuation that must be stripped rather than becoming a separate token.
+  const src = `${TE_NILUVADU}, ${TE_MANASU}!\n{Charanam 1}\n${TE_NILUVADU} . ${TE_NA}`
+  const out = buildKeyterms(src)
+  // normaliseWord strips punctuation; heading skipped; duplicate collapsed.
+  eq(out, [TE_NILUVADU, TE_MANASU, TE_NA])
+})
+
+test('buildKeyterms never emits a comma/semicolon or empty value', () => {
+  // Deepgram silently ignores a comma/semicolon-joined "keyterm", so the
+  // extractor must never produce one. Punctuation-only pieces become empty and
+  // are dropped entirely.
+  const out = buildKeyterms('!!  ??  ;;;  ,,,  word , word ; word')
+  eq(out, ['word'])
+})
+
+test('buildKeyterms honours the 100-term cap and sorts longest first', () => {
+  const words = []
+  // 150 genuinely distinct tokens: vary the length with a unique prefix per
+  // index so no two collapse after normalisation.
+  for (let i = 0; i < 150; i++) words.push(`w${i}${'x'.repeat(i % 30)}`)
+  const out = buildKeyterms(words.join(' '))
+  eq(out.length, MAX_KEYTERMS)
+  // Longest first: the first term must be at least as long as the last.
+  assert.ok(out[0].length >= out[out.length - 1].length, 'longest words survive the cap first')
+})
+
+test('buildKeyterms on empty/markup-only lyrics returns nothing', () => {
+  eq(buildKeyterms(''), [])
+  eq(buildKeyterms('{Pallavi}\n{Charanam 1}\n{{Music}}'), [])
+})
+
+// ---------------------------------------------------------------------------
+// Acoustic repeat ingestion (hybrid acoustic + Deepgram)
+// ---------------------------------------------------------------------------
+
+// A placed-line result shaped exactly like alignLyrics() returns.
+const acPlaced = (lineIndex, text, start, end, confidence = 0.9) => ({
+  lineIndex, text, startSeconds: start, endSeconds: end, confidence,
+})
+
+test('ingestAcousticRepeats maps a repeat via the Deepgram word inside its span', () => {
+  const alignment = {
+    lines: [
+      acPlaced(0, TE_NILUVADU, 3.0, 4.0),
+      acPlaced(1, TE_MANASU, 5.0, 6.0),
+    ],
+    repeats: [],
+  }
+  // The second span b (6.5..7.5) contains a Deepgram word "manasu"-like at 7.0.
+  const words = [{ word: TE_MANASU, start: 7.0, end: 7.4, confidence: 0.9 }]
+  const lines = [TE_NILUVADU, TE_MANASU]
+  const acoustic = [{
+    a: { start: 3.0, end: 4.0, error: 0.01 },
+    b: { start: 6.5, end: 7.5, error: 0.01 },
+    similarity: 0.9,
+  }]
+  const out = ingestAcousticRepeats(alignment, acoustic, words, lines)
+  eq(out.length, 1)
+  eq(out[0].text, TE_MANASU)
+  eq(out[0].start, 6.5)
+  eq(out[0].repeated, true)
+  eq(out[0].acoustic, true)
+})
+
+test('ingestAcousticRepeats falls back to the line at `a` when no word is in the span', () => {
+  const alignment = {
+    lines: [acPlaced(0, TE_NILUVADU, 3.0, 4.0)],
+    repeats: [],
+  }
+  const words = [] // Deepgram heard nothing in the repeat span
+  const lines = [TE_NILUVADU]
+  const acoustic = [{
+    a: { start: 3.0, end: 4.0, error: 0.01 },
+    b: { start: 6.5, end: 7.5, error: 0.01 },
+    similarity: 0.8,
+  }]
+  const out = ingestAcousticRepeats(alignment, acoustic, words, lines)
+  eq(out.length, 1)
+  eq(out[0].text, TE_NILUVADU) // reused from `a`'s placed line
+  eq(out[0].lineIndex, 0)
+})
+
+test('ingestAcousticRepeats drops malformed or non-lyric spans', () => {
+  const alignment = { lines: [acPlaced(0, TE_NILUVADU, 3.0, 4.0)], repeats: [] }
+  const lines = [TE_NILUVADU]
+  // b with start >= end is malformed; a span that maps to no placed line and no
+  // word is dropped; empty acoustic list is a no-op.
+  eq(ingestAcousticRepeats(alignment, null, [], lines), [])
+  eq(ingestAcousticRepeats(alignment, [], [], lines), [])
+  eq(ingestAcousticRepeats(alignment, [{ a: {}, b: { start: 5, end: 2 } }], [], lines), [])
+  eq(ingestAcousticRepeats(alignment, [{ a: { start: 50 }, b: { start: 60, end: 61 } }], [], lines), [])
+})
+
+test('buildSyncCues merges acoustic repeats into the sung timeline', () => {
+  const plainLyrics = `${TE_NILUVADU}\n${TE_MANASU}`
+  const alignment = {
+    lines: [acPlaced(0, TE_NILUVADU, 3.0, 4.0), acPlaced(1, TE_MANASU, 5.0, 6.0)],
+    repeats: [],
+  }
+  const words = [
+    { word: TE_NILUVADU, start: 3.1, end: 3.9, confidence: 0.9 },
+    { word: TE_MANASU, start: 5.1, end: 5.9, confidence: 0.9 },
+  ]
+  const acousticRepeats = [{
+    a: { start: 3.0, end: 4.0, error: 0.01 },
+    b: { start: 8.0, end: 9.0, error: 0.01 },
+    similarity: 0.9,
+  }]
+  const build = buildSyncCues({ plainLyrics, alignment, words, audioDuration: 12, acousticRepeats })
+  // 2 placed + 1 acoustic repeat (mapped to line 0 via fallback) = 3 lyric cues.
+  eq(build.lyricCueCount, 3)
+  eq(build.repeatCueCount, 1)
+  const repeat = build.cues.find((c) => c.acoustic)
+  assert.ok(repeat, 'an acoustic repeat cue exists')
+  eq(repeat.start, 8.0)
+  eq(repeat.repeated, true)
 })
 
 // ---------------------------------------------------------------------------

@@ -26,6 +26,8 @@ import {
   splitLyricLines,
   classifyLine,
   DEFAULT_CONFIDENCE_FLOOR,
+  buildKeyterms,
+  MAX_KEYTERMS,
 } from './libs/autoSyncLyrics.mjs'
 import {
   applySecondOpinion,
@@ -2357,6 +2359,16 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
       utterances: 'false',
       diarize: 'false',
     })
+
+    // Bias the recogniser towards this track's OWN plain-lyric words. `keyterm`
+    // is a repeated query parameter (one repeat per term), so URLSearchParams'
+    // append() is exactly the format Deepgram's docs require - never a single
+    // comma/semicolon-joined value, which the API accepts but silently ignores.
+    const keyterms = buildKeyterms(plain)
+    for (const term of keyterms) params.append('keyterm', term)
+    if (keyterms.length) {
+      console.log(`[auto-sync] biasing Deepgram with ${keyterms.length} keyterms (max ${MAX_KEYTERMS})`)
+    }
 
     // The base URL is overridable ONLY so the test suite can point it at a
     // local stub. It defaults to the real API, so production behaviour is

@@ -129,6 +129,59 @@ export const WORD_MATCH_THRESHOLD = 0.5
 export const REPEAT_SPLIT_GAP_SECONDS = 4
 
 // ---------------------------------------------------------------------------
+// Deepgram keyterm extraction
+// ---------------------------------------------------------------------------
+// Deepgram's /v1/listen RE-TRANSCRIBES; there is no forced-alignment parameter.
+// The one official lever that biases the ASR itself is `keyterm` (nova-3 /
+// flux). Per Deepgram's published docs (https://developers.deepgram.com/docs/keyterm):
+//   * `keyterm` is a PLAIN string - no weight / intensifier syntax.
+//   * repeat the parameter for separate terms; join a multi-word phrase with
+//     `+` or %20; NEVER commas/semicolons (they silently boost nothing).
+//   * up to 100 keyterms per request.
+// Supplying the track's own plain-lyric words as keyterms raises Keyword Recall
+// Rate towards 90%: the recogniser is biased towards the author's exact script,
+// which reduces the "heard a different word" failures the aligner can't rescue.
+
+/** Hard cap from Deepgram's documented keyterm limit. */
+export const MAX_KEYTERMS = 100
+
+/**
+ * Build the list of keyterms a track should bias Deepgram with, from its own
+ * plain Telugu lyrics (the authoritative script). Every value is a single
+ * normalised token, never a weighted/intensifier pattern, so it is always a
+ * valid `keyterm` per the official docs.
+ *
+ * Rules (deterministic, no randomness):
+ *   * ignore `{Section}` / `[chorus]`-style markup and the {{Music}} cue label
+ *   * split each sung line into whitespace tokens
+ *   * drop pure punctuation; keep letters/marks/digits via normaliseWord()
+ *   * dedupe (case/combining-insensitive) preserving first-seen order
+ *   * keep at most MAX_KEYTERMS (100), longest words first so the rarest,
+ *     most discriminating terms survive the cut
+ *   * never mix comma/semicolon into a single value (doc: "silently boosts
+ *     nothing"), and never emit an empty/whitespace-only value
+ */
+export function buildKeyterms(plainLyrics, { max = MAX_KEYTERMS } = {}) {
+  const seen = new Set()
+  const out = []
+  for (const rawLine of splitLyricLines(plainLyrics)) {
+    const line = String(rawLine || '')
+    if (isMarkupLine(line)) continue
+    for (const piece of line.split(/\s+/)) {
+      const w = normaliseWord(piece)
+      if (!w) continue
+      if (seen.has(w)) continue
+      seen.add(w)
+      out.push(w)
+    }
+  }
+  // Longest first: distinctive multi-akshara words are the most useful bias and
+  // survive a 100-term cap far better than short particles like `నా` / `నీ`.
+  out.sort((a, b) => b.length - a.length || (a < b ? -1 : a > b ? 1 : 0))
+  return out.slice(0, Math.max(0, max))
+}
+
+// ---------------------------------------------------------------------------
 // Lyric markup
 // ---------------------------------------------------------------------------
 
@@ -872,6 +925,8 @@ export function unclaimedRuns(words, placedCues, { minWords = 2, tolerance = 0.0
  * @param {Array}  [args.words]                     Deepgram word timings
  * @param {number|null} [args.audioDuration]        seconds, from the transcription
  * @param {number} [args.musicGapSeconds]           gap that becomes a banner
+ * @param {Array}  [args.acousticRepeats]            acoustic repeat spans from
+ *                                                   acoustic-repeat-detect.py
  * @returns {{cues: Array<object>, lyricCueCount: number, repeatCueCount: number, musicCueCount: number}}
  */
 export function buildSyncCues({
@@ -880,6 +935,7 @@ export function buildSyncCues({
   words = [],
   audioDuration = null,
   musicGapSeconds = MUSIC_GAP_MIN_SECONDS,
+  acousticRepeats = null,
 }) {
   const lines = splitLyricLines(plainLyrics)
 
@@ -942,6 +998,12 @@ export function buildSyncCues({
         repeated: true,
       })
     }
+  }
+  // (c) Occurrences recovered acoustically (vocal-energy onset), where Deepgram
+  //     produced no transcript words at all. Hybrid: text from the best Deepgram
+  //     word inside the span (or the line at `a`), time from the acoustic onset.
+  if (acousticRepeats) {
+    repeatCues.push(...ingestAcousticRepeats(alignment, acousticRepeats, words, lines))
   }
 
   // ---- 3. Merge, drop overlaps, keep strict time order. -------------------
@@ -1030,6 +1092,87 @@ export function buildSyncCues({
     repeatCueCount: cues.filter((c) => c.kind === 'lyric' && c.repeated).length,
     musicCueCount: cues.filter((c) => c.kind === 'music').length,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Acoustic repeat ingestion (hybrid: acoustic onsets + Deepgram words)
+// ---------------------------------------------------------------------------
+// Acoustic repeat detection (server/tools/acoustic-repeat-detect.py) recovers
+// sung occurrences Deepgram did NOT transcribe, by reading the vocal-energy
+// envelope. Each result is a `{a:{start,end}, b:{start,end}, similarity}` pair:
+// `a` is a phrase already timed by the aligner, `b` is the SAME stanza sung
+// again that produced no transcript words. This bridge turns `b` into a lyric
+// repeat cue:
+//
+//   * TEXT: from the lyric line the PHONETICALLY BEST-MATCHING Deepgram word
+//     inside the span maps to (hybrid authority); if no word landed there, the
+//     line already placed at `a`'s time is reused (the stanza repeats verbatim).
+//   * TIME: the acoustic onset span (b.start..b.end), the only source that
+//     exists when ASR was silent. Deepgram words inside the span, if any, may
+//     refine the boundary, but never extend it past the acoustic span.
+
+/**
+ * Convert acoustic repeat spans into repeat cues for `buildSyncCues`.
+ *
+ * @param {object} alignment        result of alignLyrics() (has `.lines`, `.repeats`)
+ * @param {Array<{a:{start,end},b:{start,end},similarity:number}>} acousticRepeats
+ * @param {Array<{word:string,start:number,end:number,confidence:number}>} words
+ * @param {Array<string>} lines     the split plain-lyric lines (via splitLyricLines)
+ * @returns {Array<object>}         cues in the same shape as alignment.repeats
+ */
+export function ingestAcousticRepeats(alignment, acousticRepeats, words, lines) {
+  if (!Array.isArray(acousticRepeats) || !acousticRepeats.length) return []
+  const placed = (alignment?.lines || []).filter((l) => l.startSeconds != null)
+  if (!placed.length) return []
+
+  const out = []
+  for (const r of acousticRepeats) {
+    if (!r || !r.b || typeof r.b.start !== 'number' || typeof r.b.end !== 'number') continue
+    const bStart = Number(r.b.start)
+    const bEnd = Number(r.b.end)
+    if (!(bEnd > bStart)) continue
+
+    // 1. A Deepgram word inside the repeated span names the line being sung.
+    let lineIdx = null
+    if (Array.isArray(words)) {
+      for (const w of words) {
+        if (!w || typeof w.start !== 'number') continue
+        if (w.start < bStart || w.start > bEnd + 0.05) continue
+        // best-matching placed line to this word
+        let best = null
+        for (const pl of placed) {
+          const s = wordSimilarity(w.word, pl.text)
+          if (!best || s > best.score) best = { score: s, idx: pl.lineIndex }
+        }
+        if (best && best.score >= WORD_MATCH_THRESHOLD) lineIdx = best.idx
+        if (lineIdx != null) break
+      }
+    }
+
+    // 2. Fallback: the line placed at `a`'s time (the stanza repeats verbatim).
+    if (lineIdx == null && r.a && typeof r.a.start === 'number') {
+      for (const pl of placed) {
+        const overlap = Math.min(pl.endSeconds, r.a.end ?? r.a.start) - Math.max(pl.startSeconds, r.a.start)
+        if (overlap > 0) { lineIdx = pl.lineIndex; break }
+      }
+    }
+    if (lineIdx == null) continue
+
+    const text = String(lines[lineIdx] ?? placed.find((p) => p.lineIndex === lineIdx)?.text ?? '').trim()
+    if (!text || classifyLine(text) !== 'lyric') continue
+
+    out.push({
+      kind: 'lyric',
+      text,
+      start: bStart,
+      end: bEnd,
+      lineIndex: lineIdx,
+      confidence: typeof r.similarity === 'number' ? Number(r.similarity.toFixed(4)) : null,
+      repeated: true,
+      acoustic: true,
+    })
+  }
+  return out
 }
 
 /**

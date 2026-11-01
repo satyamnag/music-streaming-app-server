@@ -24,7 +24,16 @@
 // ============================================================================
 
 import fs from 'node:fs'
-import { alignLyrics, buildSyncCues, parseSrtTimeline, renderCuesForVariant, splitLyricLines } from '../libs/autoSyncLyrics.mjs'
+import os from 'node:os'
+import path from 'node:path'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { fileURLToPath } from 'node:url'
+import { alignLyrics, buildSyncCues, parseSrtTimeline, renderCuesForVariant, splitLyricLines, buildKeyterms } from '../libs/autoSyncLyrics.mjs'
+
+const execFileP = promisify(execFile)
+const TOOLS_DIR = path.dirname(fileURLToPath(import.meta.url))
+const ACOUSTIC = process.env.ACOUSTIC !== '0'
 
 const arg = (name, dflt = null) => {
   const i = process.argv.indexOf(`--${name}`)
@@ -95,11 +104,14 @@ async function audioFor(storagePath) {
   return Buffer.from(await res.arrayBuffer())
 }
 
-async function transcribe(audio) {
+async function transcribe(audio, plainLyrics) {
   const q = new URLSearchParams({
     model: 'nova-3', language: 'te',
     smart_format: 'false', punctuate: 'false', utterances: 'false', diarize: 'false',
   })
+  // Bias nova-3 towards this track's own lyric words (one repeat per term, as
+  // Deepgram's keyterm docs require - never a comma/semicolon-joined value).
+  for (const term of buildKeyterms(plainLyrics)) q.append('keyterm', term)
   const res = await fetch(`https://api.deepgram.com/v1/listen?${q}`, {
     method: 'POST',
     headers: { Authorization: `Token ${DG}`, 'Content-Type': 'application/octet-stream' },
@@ -117,6 +129,32 @@ async function transcribe(audio) {
       }))
     : []
   return { words, duration: Number(j?.metadata?.duration) || null }
+}
+
+/**
+ * Run the acoustic repeat detector (Python, docs/ACOUSTIC-REPEAT-DETECTION.md)
+ * against a track's audio bytes. The detector reads the vocal-energy envelope
+ * and returns spans where a stanza is sung again but Deepgram heard no words.
+ *
+ * Returns `{ repeats, error }` — `repeats` is the `repeats` array from the
+ * detector's JSON, or `[]` when the detector cannot run (no ffmpeg/python),
+ * in which case `error` is set and the pipeline continues with transcript-only
+ * repeats (never a hard failure: acoustic recovery is additive).
+ */
+async function runAcoustic(audioBytes) {
+  const tmp = path.join(os.tmpdir(), `soulful-bhakti-${Date.now()}-${Math.random().toString(36).slice(2)}.audio`)
+  try {
+    fs.writeFileSync(tmp, audioBytes)
+    const script = path.join(TOOLS_DIR, 'acoustic-repeat-detect.py')
+    const { stdout } = await execFileP('python3', [script, '--audio', tmp], { maxBuffer: 64 * 1024 * 1024 })
+    const parsed = JSON.parse(stdout)
+    return Array.isArray(parsed.repeats) ? parsed.repeats : []
+  } catch (err) {
+    console.warn(`[acoustic] skipped for this track (${err && err.message ? err.message : err})`)
+    return []
+  } finally {
+    fs.rmSync(tmp, { force: true })
+  }
 }
 
 /** Count cues that carry SUNG text ({{Music}} banners are language scaffolding). */
@@ -200,7 +238,7 @@ for (const [i, t] of targets.entries()) {
     const audio = await audioFor(t.storage_path)
     if (!audio) { rec.reason = 'no audio'; report.push(rec); continue }
 
-    const { words, duration } = await transcribe(audio)
+    const { words, duration } = await transcribe(audio, t.plain_lyrics)
     if (!words.length) { rec.reason = 'no words heard'; report.push(rec); continue }
 
     // The DATABASE duration is what the app draws and where the audit measures
@@ -218,7 +256,17 @@ for (const [i, t] of targets.entries()) {
       audioDuration: ceiling,
     })
     const totalLines = splitLyricLines(t.plain_lyrics).length
-    const build = buildSyncCues({ plainLyrics: t.plain_lyrics, alignment, words, audioDuration: ceiling })
+    // Acoustic repeat recovery: spans where a stanza is sung again but Deepgram
+    // heard no words. Additive only — a detector failure leaves transcript-only
+    // repeats and never aborts the build.
+    const acousticRepeats = ACOUSTIC ? await runAcoustic(audio) : []
+    const build = buildSyncCues({
+      plainLyrics: t.plain_lyrics,
+      alignment,
+      words,
+      audioDuration: ceiling,
+      acousticRepeats,
+    })
     if (!build.cues.length) { rec.reason = 'no cues built'; report.push(rec); continue }
 
     const payload = {
@@ -246,6 +294,10 @@ for (const [i, t] of targets.entries()) {
     rec.banners_added = Math.max(0, newCues - newLyric) - Math.max(0, existingCues - existingLyric)
     rec.repeats = build.repeatCueCount
     rec.music = build.musicCueCount
+    rec.acoustic_repeats = acousticRepeats.length
+    rec.acoustic_error_bound_s = acousticRepeats.length
+      ? Math.max(...acousticRepeats.map((r) => Math.max(r.a?.error ?? 0, r.b?.error ?? 0)))
+      : 0
 
     // The one rule that makes a catalogue-wide rewrite safe, now two-part:
     //   * strictly more SUNG cues (recovered repeats), OR

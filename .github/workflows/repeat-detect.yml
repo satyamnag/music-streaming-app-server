@@ -1,0 +1,126 @@
+name: Acoustic repeat detection (sync lyrics)
+
+# Recovers sung lines that were repeated in the audio but never timed, because
+# Deepgram's /v1/listen re-transcribes and did NOT hear the second occurrence.
+# This job runs the acoustic detector (vocal-energy onsets) on the runner, feeds
+# the recovered repeats back through the rebuild pipeline, and — in DRY RUN only
+# by default — reports how many occurrences each track's SRT is missing.
+#
+# SAFETY (identical to lyrics-rebuild.yml):
+#   * a track is replaced ONLY when the new timeline has STRICTLY MORE sung cues
+#     (recovered repeats) OR repairs a structural timing defect;
+#   * every write is preceded by a backup and restorable via --restore;
+#   * default is a DRY RUN. Set `write` to true only after reading the report.
+#
+# Compute (ffmpeg + Python onset detection) runs here, never on the web dyno.
+
+on:
+  workflow_dispatch:
+    inputs:
+      write:
+        description: 'Write the rebuilt columns to the database (leave false for a dry run)'
+        type: boolean
+        default: false
+      limit:
+        description: 'Only process the first N tracks (0 = all)'
+        required: false
+        default: '0'
+      ids:
+        description: 'Comma-separated track ids to restrict to (blank = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acoustic-repeat-detect
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    name: Detect acoustic repeats
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DOTENV_RELEASE: ${{ secrets.DOTENV_RELEASE }}
+      WRITE_FLAG: ${{ inputs.write }}
+      LIMIT: ${{ inputs.limit }}
+      IDS: ${{ inputs.ids }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ffmpeg
+
+      - name: Resolve credentials
+        run: |
+          set -eu
+          for v in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY SUPABASE_SERVICE_ROLE_KEY; do
+            eval "val=\${$v:-}"
+            if [ -z "$val" ]; then echo "::error::$v is not set"; exit 1; fi
+          done
+
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          DG_KEY="$(aws secretsmanager get-secret-value --secret-id deepgram/api-key --query SecretString --output text)"
+          CDN_URL="$(aws secretsmanager get-secret-value --secret-id r2/base-url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$DG_KEY" ] || [ -z "$CDN_URL" ]; then
+            echo "::error::could not resolve supabase/url, deepgram/api-key or r2/base-url"
+            exit 1
+          fi
+          # Mask every value that came back from AWS. These are NOT registered
+          # GitHub secrets, so GitHub does not redact them; `::add-mask::` tells it
+          # to, so a resolved value can never leak into this PUBLIC repo's logs.
+          echo "::add-mask::$DG_KEY"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "DEEPGRAM_API_KEY=$DG_KEY" >> "$GITHUB_ENV"
+          echo "R2_BASE_URL=$CDN_URL" >> "$GITHUB_ENV"
+          echo "resolved: supabase url, deepgram key, cdn base"
+
+      - name: Detect + rebuild (with acoustic repeats)
+        working-directory: server
+        run: |
+          set -eu
+          ARGS="--out lyrics-rebuild.json"
+          if [ "$WRITE_FLAG" = "true" ]; then ARGS="$ARGS --write"; fi
+          if [ -n "${LIMIT:-}" ] && [ "$LIMIT" != "0" ]; then ARGS="$ARGS --limit $LIMIT"; fi
+          if [ -n "${IDS:-}" ]; then ARGS="$ARGS --ids $IDS"; fi
+          node tools/lyrics-rebuild.mjs $ARGS | tee rebuild.log
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acoustic-repeat-detect
+          path: |
+            server/lyrics-rebuild.json
+            server/lyrics-backup.json
+            server/rebuild.log
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Acoustic repeat detection"
+            echo ""
+            if [ -f server/rebuild.log ]; then tail -n 40 server/rebuild.log; fi
+            echo ""
+            echo "Mode: **$([ "$WRITE_FLAG" = "true" ] && echo WRITE || echo DRY RUN)**"
+            echo "Recovered repeats (acoustic) are reflected in the per-track \`acoustic_repeats\` count."
+          } >> "$GITHUB_STEP_SUMMARY"
