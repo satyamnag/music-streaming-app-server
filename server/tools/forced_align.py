@@ -117,6 +117,15 @@ if getattr(tokenizer, "eos_token", None):
     tokenizer.eos_token = None
     tokenizer.eos_token_id = None
 
+# Diagnostic: the guard compares len(get_vocab()) > vocab_size. Print the exact
+# numbers and every token whose id >= vocab_size so a mismatch is diagnosed from
+# the log instead of inferred.
+_vocab = tokenizer.get_vocab()
+_vsize = int(getattr(tokenizer, "vocab_size", 0))
+print(f"[tokenizer] get_vocab()={len(_vocab)} vocab_size={_vsize}")
+_overflow = sorted((tok, i) for tok, i in _vocab.items() if int(i) >= _vsize)
+print(f"[tokenizer] tokens at id >= vocab_size: {_overflow[:20]}")
+
 audio_waveform = load_audio(audio_url, model.dtype, model.device)
 
 # --- Align the KNOWN text -------------------------------------------------
