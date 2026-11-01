@@ -34,6 +34,8 @@ const WRITE = process.argv.includes('--write')
 const LIMIT = Number(arg('limit', 0)) || 0
 const IDS = String(arg('ids', '') || '').split(',').map((s) => s.trim()).filter(Boolean)
 const OUT = arg('out', 'lyrics-rebuild.json')
+const BACKUP = arg('backup', 'lyrics-backup.json')
+const RESTORE = arg('restore', null)
 
 const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -122,6 +124,31 @@ function lyricCueCount(srt) {
   return parseSrtTimeline(srt).filter((c) => String(c.text || '').trim() !== '{{Music}}').length
 }
 
+const SYNCED_COLUMNS = ['synced_lyrics', 'synced_lyrics_en', 'synced_lyrics_en_tr', 'synced_lyrics_hi', 'synced_lyrics_hi_tr']
+
+// --- Restore mode -----------------------------------------------------------
+// Writing 64 tracks with no way back is not a safe operation. Every write this
+// tool makes is preceded by dumping the PREVIOUS value of each synced column it
+// is about to touch, and this mode puts them back.
+if (RESTORE) {
+  const backup = JSON.parse(fs.readFileSync(String(RESTORE), 'utf8'))
+  const ids = Object.keys(backup)
+  console.log(`restoring ${ids.length} track(s) from ${RESTORE}`)
+  let ok = 0
+  for (const id of ids) {
+    const patch = {}
+    for (const c of SYNCED_COLUMNS) {
+      if (Object.prototype.hasOwnProperty.call(backup[id], c)) patch[c] = backup[id][c]
+    }
+    if (!Object.keys(patch).length) continue
+    await supaPatch(id, patch)
+    ok += 1
+    console.log(`  restored ${id}`)
+  }
+  console.log(`restored ${ok}/${ids.length}`)
+  process.exit(0)
+}
+
 const rows = []
 for (let from = 0; ; from += 500) {
   const page = await supaGet(`tracks?select=${FIELDS}&order=title.asc`, {
@@ -138,6 +165,10 @@ if (LIMIT > 0) targets = targets.slice(0, LIMIT)
 console.log(`tracks scanned: ${rows.length} · candidates: ${targets.length} · mode: ${WRITE ? 'WRITE' : 'DRY RUN'}`)
 
 const report = []
+// Previous values of every column this run overwrites, so any write can be undone.
+// Written to disk after EACH track, so a timeout mid-run still leaves a usable
+// backup rather than only an in-memory one.
+const backup = {}
 for (const [i, t] of targets.entries()) {
   const rec = { id: t.id, title: t.title, action: 'skip', reason: null }
   try {
@@ -193,7 +224,13 @@ for (const [i, t] of targets.entries()) {
     }
 
     rec.action = WRITE ? 'written' : 'would_write'
-    if (WRITE) await supaPatch(t.id, payload)
+    if (WRITE) {
+      // Capture what is about to be replaced BEFORE replacing it.
+      backup[t.id] = {}
+      for (const c of Object.keys(payload)) backup[t.id][c] = t[c] ?? null
+      await supaPatch(t.id, payload)
+      fs.writeFileSync(BACKUP, JSON.stringify(backup, null, 2))
+    }
   } catch (err) {
     rec.action = 'error'
     rec.reason = String(err && err.message).slice(0, 180)

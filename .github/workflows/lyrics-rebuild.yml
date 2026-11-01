@@ -94,6 +94,7 @@ jobs:
           name: lyrics-rebuild
           path: |
             server/lyrics-rebuild.json
+            server/lyrics-backup.json
             server/rebuild.log
           if-no-files-found: warn
 
