@@ -257,7 +257,7 @@ async function loadSecretsFromVault() {
 async function loadSecretsFromAws() {
   if (process.env.AWS_SECRETS_ENABLED !== '1') return
   try {
-    const { loadAwsSecrets, createAwsSecretsClient, resolveAwsRegion } =
+    const { loadAwsSecrets, createAwsSecretsClient, resolveAwsNames, resolveAwsRegion } =
       await import('./libs/awsSecrets.mjs')
     const region = resolveAwsRegion()
     const built = await createAwsSecretsClient({ region })
@@ -265,14 +265,19 @@ async function loadSecretsFromAws() {
       console.warn('[secrets] aws disabled: @aws-sdk/client-secrets-manager is not installed')
       return
     }
+    // AWS names follow the account's `service/api-key` convention; the internal
+    // keys keep their existing names, so only the lookup name is translated.
+    const mapping = resolveAwsNames(VAULT_SECRET_KEYS)
     const res = await loadAwsSecrets({
-      names: VAULT_SECRET_KEYS,
+      names: mapping.map((m) => m.aws),
       client: built.client,
       GetSecretValueCommand: built.GetSecretValueCommand,
     })
-    for (const name of res.loaded) {
-      secrets[name] = name === 'admin_token' ? normalizeAdminToken(res.values[name]) : res.values[name]
-      console.log(`[secrets] ${name} loaded from aws (${region})`)
+    for (const m of mapping) {
+      const value = res.values[m.aws]
+      if (value === undefined) continue
+      secrets[m.internal] = m.internal === 'admin_token' ? normalizeAdminToken(value) : value
+      console.log(`[secrets] ${m.internal} loaded from aws (${region}, ${m.aws})`)
     }
     for (const f of res.failed) {
       console.warn(`[secrets] aws read failed for ${f.name}: ${f.reason}`)

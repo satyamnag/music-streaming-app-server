@@ -23,6 +23,31 @@ export const AWS_DEFAULT_TIMEOUT_MS = 3000
 export const AWS_REGION_FALLBACK = 'ap-south-1'
 
 /**
+ * AWS secret names follow this account's `<service>/<key>` convention, which the
+ * rest of the account already uses (`superwall/api-key`, `onesignal/api-key`,
+ * `posthog/api-key`, `clerk/publishable-key`, `r2/base-url`, ...).
+ *
+ * The server's INTERNAL key names stay exactly as they are (`deepgram_api_key`,
+ * `openai_api_key`) so nothing else in the codebase, the Vault path or the
+ * admin UI has to change - only the AWS lookup name is translated.
+ */
+export const AWS_SECRET_NAME_OVERRIDES = {
+  deepgram_api_key: 'deepgram/api-key',
+  openai_api_key: 'openai/api-key',
+}
+
+/**
+ * Translate internal secret keys to AWS secret names.
+ *
+ * @param {string[]} keys
+ * @param {Record<string,string>} [overrides]
+ * @returns {Array<{internal:string, aws:string}>}
+ */
+export function resolveAwsNames(keys, overrides = AWS_SECRET_NAME_OVERRIDES) {
+  return (Array.isArray(keys) ? keys : []).map((k) => ({ internal: k, aws: overrides[k] || k }))
+}
+
+/**
  * Load secret names from AWS Secrets Manager.
  *
  * @param {object} args

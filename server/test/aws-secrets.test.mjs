@@ -8,7 +8,7 @@
 // never throw, so a dead AWS cannot keep the server from booting.
 
 import assert from 'node:assert/strict'
-import { AWS_REGION_FALLBACK, loadAwsSecrets, resolveAwsRegion } from '../libs/awsSecrets.mjs'
+import { AWS_REGION_FALLBACK, loadAwsSecrets, resolveAwsNames, resolveAwsRegion } from '../libs/awsSecrets.mjs'
 
 let passed = 0
 let failed = 0
@@ -108,6 +108,20 @@ test('region resolves env-first, then the region the secrets live in', () => {
   eq(resolveAwsRegion({ AWS_DEFAULT_REGION: 'us-east-2' }), 'us-east-2')
   eq(resolveAwsRegion({ AWS_SECRETS_REGION: 'ap-south-1' }), 'ap-south-1')
   eq(resolveAwsRegion({}), AWS_REGION_FALLBACK)
+})
+
+test('internal keys are translated to the account service/api-key convention', () => {
+  // The rest of the account stores secrets as `superwall/api-key`,
+  // `onesignal/api-key`, `posthog/api-key`. These two follow the same shape
+  // while the server keeps its original internal names.
+  const mapped = resolveAwsNames(['deepgram_api_key', 'openai_api_key', 'admin_token'])
+  eq(mapped, [
+    { internal: 'deepgram_api_key', aws: 'deepgram/api-key' },
+    { internal: 'openai_api_key', aws: 'openai/api-key' },
+    { internal: 'admin_token', aws: 'admin_token' },
+  ])
+  eq(resolveAwsNames([]), [])
+  eq(resolveAwsNames(null), [])
 })
 
 // ---------------------------------------------------------------------------
