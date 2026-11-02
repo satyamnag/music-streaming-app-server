@@ -30,6 +30,7 @@ import {
   splitVariantLines,
   classifyLine,
   normaliseWord,
+  renderCuesToSrt,
   MUSIC_LABEL,
 } from '../libs/autoSyncLyrics.mjs'
 
@@ -148,6 +149,30 @@ function lyricCueCount(srt) {
   return parseSrtTimeline(srt).filter((c) => c.text.trim() !== MUSIC_LABEL).length
 }
 
+/**
+ * Guarantee the cue list covers the whole track.
+ *
+ * When the first sung line starts a second or two in, the builder emits no
+ * banner for that lead-in (it is under MUSIC_GAP_MIN_SECONDS), so the timeline
+ * begins late: the player would show nothing and any measured word there looks
+ * "outside every cue". Prepending/appending a {{Music}} banner makes coverage
+ * complete without inventing any lyric time.
+ */
+function coverTimeline(srt, duration) {
+  const cues = parseSrtTimeline(srt)
+  if (!cues.length) return srt
+  const dur = Number(duration) || cues[cues.length - 1].end
+  const out = cues.map((c) => ({ kind: c.text.trim() === MUSIC_LABEL ? 'music' : 'lyric', text: c.text, start: c.start, end: c.end }))
+  if (out[0].start > 0.05) {
+    out.unshift({ kind: 'music', text: MUSIC_LABEL, start: 0, end: out[0].start })
+  }
+  const last = out[out.length - 1]
+  if (last.end < dur - 0.05) {
+    out.push({ kind: 'music', text: MUSIC_LABEL, start: last.end, end: dur })
+  }
+  return renderCuesToSrt(out)
+}
+
 // --- process one track ----------------------------------------------------
 function segmentTrack(track, plainLyrics, words, duration) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'syncseg-'))
@@ -192,14 +217,21 @@ const patch = {}
 const backup = {}
 let written = 0
 
+/** Record a result and always print it, so no skip is silent. */
+const emit = (rec, t, i) => {
+  report.push(rec)
+  const detail = rec.reason || `cues ${rec.cues} (lyric ${rec.lyric_cues})`
+  console.log(`[${i + 1}/${tracks.length}] ${String(rec.status).padEnd(12)} ${String(t.title).slice(0, 40).padEnd(40)} ${detail}`)
+}
+
 for (const [i, t] of tracks.entries()) {
   const rec = { id: t.id, title: t.title, status: 'skip', reason: null }
   try {
     const w = byId.get(t.id)
-    if (!w) { rec.reason = 'no whisper transcription'; report.push(rec); continue }
-    if (w.error) { rec.reason = `whisper error: ${w.error}`; report.push(rec); continue }
+    if (!w) { rec.reason = 'no whisper transcription'; emit(rec, t, i); continue }
+    if (w.error) { rec.reason = `whisper error: ${w.error}`; emit(rec, t, i); continue }
     const words = Array.isArray(w.words) ? w.words : []
-    if (words.length < 10) { rec.reason = `insufficient audio (${words.length} words)`; report.push(rec); continue }
+    if (words.length < 10) { rec.reason = `insufficient audio (${words.length} words)`; emit(rec, t, i); continue }
 
     // plain lyrics are READ ONLY - never modified
     const q = await fetch(
@@ -208,10 +240,11 @@ for (const [i, t] of tracks.entries()) {
       { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } },
     )
     const [row] = await q.json()
-    if (!row || !String(row.plain_lyrics || '').trim()) { rec.reason = 'no plain lyrics'; report.push(rec); continue }
+    if (!row || !String(row.plain_lyrics || '').trim()) { rec.reason = 'no plain lyrics'; emit(rec, t, i); continue }
     const duration = Number(row.duration) || t.duration || (words[words.length - 1].end + 1)
 
-    const srt = segmentTrack(t, row.plain_lyrics, words, duration)
+    const srtRaw = segmentTrack(t, row.plain_lyrics, words, duration)
+    const srt = coverTimeline(srtRaw, duration)
     // Always persist the proposed SRT so a rejected track can be diagnosed.
     const tlFile = path.join(OUT_DIR, `${t.id}.te.srt`)
     fs.writeFileSync(tlFile, srt, 'utf8')
@@ -220,7 +253,7 @@ for (const [i, t] of tracks.entries()) {
     rec.lyric_cues = cues.filter((c) => c.text.trim() !== MUSIC_LABEL).length
 
     const audit = auditColumn(cues, duration, row.plain_lyrics)
-    if (audit.problems.length) { rec.reason = audit.problems.join('; '); report.push(rec); continue }
+    if (audit.problems.length) { rec.reason = audit.problems.join('; '); emit(rec, t, i); continue }
     rec.missing_lines = audit.missing.length
     rec.coverage_pct = audit.lyricLines.length
       ? Number((((audit.lyricLines.length - audit.missing.length) / audit.lyricLines.length) * 100).toFixed(1))
@@ -228,8 +261,12 @@ for (const [i, t] of tracks.entries()) {
 
     // audio truth: every word inside a cue, no lyric hidden under music
     const cueAt = (time) => cues.findIndex((c) => time >= c.start - 0.001 && time < c.end)
-    const orphans = words.filter((x) => cueAt(x.start) === -1).length
-    if (orphans) { rec.reason = `${orphans} word(s) outside every cue`; report.push(rec); continue }
+    // Words at or beyond the stored duration are Whisper hallucination appended
+    // past the end of the audio (measured: 4 tokens at 411.2-411.7 s on a 411 s
+    // track). They sit outside the player's timeline and must not fail a track.
+    const inTimeline = words.filter((x) => x.start >= 0 && x.start < duration)
+    const orphans = inTimeline.filter((x) => cueAt(x.start) === -1).length
+    if (orphans) { rec.reason = `${orphans} word(s) outside every cue`; emit(rec, t, i); continue }
 
     const lyricWordSims = []
     let hiddenUnderMusic = 0
@@ -257,7 +294,7 @@ for (const [i, t] of tracks.entries()) {
       }
       lyricWordSims.push(bestRunAgreement(c.text, inside))
     }
-    if (hiddenUnderMusic) { rec.reason = `${hiddenUnderMusic} lyric word(s) hidden under a music banner`; report.push(rec); continue }
+    if (hiddenUnderMusic) { rec.reason = `${hiddenUnderMusic} lyric word(s) hidden under a music banner`; emit(rec, t, i); continue }
     const worst = lyricWordSims.length ? Math.min(...lyricWordSims) : 0
     const weak = lyricWordSims.filter((s) => s < 0.5).length
     rec.worst_cue_match = Number(worst.toFixed(3))
@@ -268,14 +305,40 @@ for (const [i, t] of tracks.entries()) {
     // misalignment and blocks the write.
     if (worst < 0.35 || weak >= 2) {
       rec.reason = `cue/audio agreement too low (worst ${worst.toFixed(2)}, ${weak} weak cue(s))`
-      report.push(rec)
+      emit(rec, t, i)
       continue
     }
 
     // render EN / EN-TR from the SAME timeline
+    //
+    // A translation column can only be rendered when it is LINE-PARALLEL with the
+    // Telugu plain lyrics AND has text on every sung line. Otherwise the renderer
+    // would emit fewer cues than the timeline (blank lines are skipped), which
+    // would desynchronise the apps' per-row language stacking. In that case the
+    // whole track is skipped rather than writing Telugu alone - leaving the old
+    // translation on a different timeline would be worse than not touching it.
+    const totalLines = splitLyricLines(row.plain_lyrics).length
+    const teLines = splitLyricLines(row.plain_lyrics)
     const cols = []
-    if (String(row.plain_lyrics_en || '').trim()) cols.push('en')
-    if (String(row.plain_lyrics_en_tr || '').trim()) cols.push('en_tr')
+    for (const [col, field] of [['en', 'plain_lyrics_en'], ['en_tr', 'plain_lyrics_en_tr']]) {
+      const text = String(row[field] || '')
+      if (!text.trim()) continue
+      const vlines = splitLyricLines(text)
+      if (vlines.length !== totalLines) {
+        rec.reason = `translation ${field} is not line-parallel (te ${totalLines} vs ${vlines.length}) - fix the translation, then re-run`
+        break
+      }
+      // A sung Telugu line must have text in the translation at the same index,
+      // or the renderer would drop that cue and desynchronise the columns.
+      const emptySung = teLines.filter((l, i) =>
+        classifyLine(String(l)) === 'lyric' && !String(vlines[i] || '').trim()).length
+      if (emptySung) {
+        rec.reason = `translation ${field} has ${emptySung} empty sung line(s)`
+        break
+      }
+      cols.push(col)
+    }
+    if (rec.reason) { emit(rec, t, i); continue }
 
     let payload = { synced_lyrics: srt }
     if (cols.length) {
@@ -290,7 +353,7 @@ for (const [i, t] of tracks.entries()) {
       const same = cc.length === cues.length && cc.every((x, j) => Math.abs(x.start - cues[j].start) < 1e-6 && Math.abs(x.end - cues[j].end) < 1e-6)
       if (!same) { rec.reason = `${k} timeline drift`; payload = null; break }
     }
-    if (!payload) { report.push(rec); continue }
+    if (!payload) { emit(rec, t, i); continue }
 
     rec.columns = Object.keys(payload)
 
@@ -305,7 +368,7 @@ for (const [i, t] of tracks.entries()) {
     if (newLyric <= existingLyric) {
       rec.status = 'keep'
       rec.reason = `no sung-cue gain (${existingLyric} -> ${newLyric})`
-      report.push(rec)
+      emit(rec, t, i)
       continue
     }
 
@@ -338,12 +401,14 @@ for (const [i, t] of tracks.entries()) {
     }
   } catch (e) {
     rec.status = 'error'
-    rec.reason = String(e && e.message).slice(0, 160)
+    // Surface the child process's own stderr: a bare "Command failed" hides the
+    // actual reason (bad path, validation failure, missing column, ...).
+    const stderr = e && e.stderr ? String(e.stderr).trim().split('\n').slice(-2).join(' ') : ''
+    rec.reason = `${String(e && e.message).slice(0, 120)}${stderr ? ' :: ' + stderr.slice(0, 200) : ''}`
   }
   report.push(rec)
   console.log(`[${i + 1}/${tracks.length}] ${rec.status.padEnd(12)} ${String(t.title).slice(0, 40).padEnd(40)} ${rec.reason || `cues ${rec.cues} (lyric ${rec.lyric_cues})`}`)
 }
-
 const summary = {
   generated_at: new Date().toISOString(),
   mode: WRITE ? 'write' : 'dry_run',
