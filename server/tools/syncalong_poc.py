@@ -131,7 +131,19 @@ def main():
         open(audio, "wb").write(http_get(url))
         txt = os.path.join(args.out_dir, "lyrics.txt")
         open(txt, "w", encoding="utf-8").write("\n".join(lines) + "\n")
-        cmd = [sys.executable, "-m", "syncalong", txt, audio, "--model", args.model]
+
+        # `python -m syncalong` does not exist; the package installs a `syncalong`
+        # console script. Probe --help so flags are only passed if supported.
+        import shutil
+        exe = shutil.which("syncalong") or "syncalong"
+        help_p = subprocess.run([exe, "--help"], capture_output=True, text=True)
+        help_text = (help_p.stdout or "") + (help_p.stderr or "")
+        print("\n--- syncalong --help (first 40 lines) ---")
+        print("\n".join(help_text.splitlines()[:40]))
+
+        cmd = [exe, txt, audio]
+        if "--model" in help_text:
+            cmd += ["--model", args.model]
         print("\n$ " + " ".join(cmd), flush=True)
         p = subprocess.run(cmd, capture_output=True, text=True)
         print(f"--- cli: exit {p.returncode}")
