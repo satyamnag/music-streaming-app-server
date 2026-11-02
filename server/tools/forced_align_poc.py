@@ -89,18 +89,34 @@ def http_get(url, headers=None, timeout=180):
         return r.read()
 
 
+def ffmpeg_exe():
+    """A usable ffmpeg binary.
+
+    The GitHub runner image does not guarantee ffmpeg on PATH, so prefer the
+    static binary shipped by the `imageio-ffmpeg` wheel (no sudo, version-pinned)
+    and fall back to a system ffmpeg when one exists.
+    """
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return "ffmpeg"
+
+
 def load_audio(url):
-    """Download and decode to 16 kHz mono float32 via ffmpeg (present on runners)."""
+    """Download and decode to 16 kHz mono float32."""
     raw = http_get(url)
     with tempfile.TemporaryDirectory() as tmp:
         src = os.path.join(tmp, "in.audio")
         with open(src, "wb") as f:
             f.write(raw)
         pcm = subprocess.run(
-            ["ffmpeg", "-v", "error", "-i", src, "-f", "s16le", "-acodec", "pcm_s16le",
+            [ffmpeg_exe(), "-v", "error", "-i", src, "-f", "s16le", "-acodec", "pcm_s16le",
              "-ar", str(SAMPLE_RATE), "-ac", "1", "-"],
             capture_output=True, check=True,
         ).stdout
+    if not pcm:
+        raise RuntimeError("ffmpeg produced no audio for " + url)
     return np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768.0
 
 
