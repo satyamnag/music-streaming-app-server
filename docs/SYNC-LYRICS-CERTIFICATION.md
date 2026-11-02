@@ -83,10 +83,12 @@ permits exactly this rewrite when, on measured evidence:
 
 Gopala Baala: onset coverage `0.9279 -> 0.9341`, suspect `0 -> 0`.
 
-## Other tracks this same refinement would improve (measured, **not** applied)
+## Refinement batch APPLIED 2026-11-02 (run `41525877006`)
 
-A catalogue dry run with `refine=true` reports 10 such tracks. Applying them was
-deliberately left to an explicit decision rather than bundled with this one:
+A catalogue dry run with `refine=true` identified these tracks as having an optimal
+cue **count** but stale **boundaries**. All were rewritten through the gated
+workflow (`write=true`, `refine=true`, explicit id list — no other row was touched):
+**9 written, 0 errors.**
 
 | track | cues | onset coverage | suspect |
 | --- | --- | --- | --- |
@@ -99,6 +101,29 @@ deliberately left to an explicit decision rather than bundled with this one:
 | Ramuni Keerthi | 34 | 0.9103 → 0.9230 | 1 → 0 |
 | Shiva Shankara Vinutha | 30 | 0.7196 → 0.7252 | 1 → 0 |
 | Veyi Naamaala | 34 | 0.8991 → 0.9041 | 0 → 0 |
+
+Veyi Naamaala sits exactly at the +0.005 threshold; it cleared the gate on the
+unrounded values and is non-regressive on every other axis.
+
+### Verification of the batch
+
+| check | result |
+| --- | --- |
+| written / errors | **9 / 0** |
+| per-track audit (structure, shared timeline, exact plain-lyric text, agreement) | **9 of 9 pass** on every structural axis |
+| pre-write backup captured | 9 tracks, exactly `synced_lyrics`, `_en`, `_en_tr` — **no plain-lyric column** |
+| plain lyrics unchanged across all 79 tracks | **YES** |
+| lyric line lost by the rewrite | **0** — the cued-line set is identical before/after in all 9 |
+| post-condition: re-running the same refine pass | **`would_write` 0** (64 keep, 15 blocked, 0 errors) |
+| Gopala Baala from the earlier certification | column hashes still `99f1728e…` / `4c87da40…` / `ba1387db…` |
+
+The 4 untimed lines inside this batch are **pre-existing content issues**, unchanged
+by the rewrite:
+
+- Mangala Ganapati — `మధుర భక్తితో షోడశ పూజలు,` and `విధిగ పూజలో చేసేమయ్యా..`
+- Shiva Shankara Vinutha — `శివశంకర వినుత శ్రీరామ.` (short-form duplicate of the
+  sung pallavi) and `రాగం: సింధుభైరవి` (a **metadata line** — "Ragam:
+  Sindhubhairavi" — not a sung lyric at all)
 
 ## Notes
 
