@@ -234,19 +234,26 @@ def main():
                 report.append({"line": line, "skipped": "window too short for target length"})
                 continue
             al, sc = res["alignment"], res["scores"]
-            kept = al[al >= 0]
-            if kept.size == 0:
-                report.append({"line": line, "skipped": "backtrack produced no aligned frames"})
-                continue
-            # per-character frame spans
-            spans = {}
+            # `forced_align` returns the ALPHABET label id per frame (-1 / blank for
+            # unassigned frames), not the position within the target. Walk the path
+            # left to right and consume the target characters in order, collapsing
+            # consecutive identical labels the way CTC does.
+            spans, p, prev = {}, -1, -2
             for frame, tok in enumerate(al):
-                if tok < 0:
+                if tok < 0 or tok == blank:
                     continue
-                if tok not in spans:
-                    spans[tok] = [frame, frame]
+                if tok != prev:
+                    p += 1
+                    prev = tok
+                    if p >= len(ids):
+                        break          # more tokens than targets: alignment desync
+                if p not in spans:
+                    spans[p] = [frame, frame]
                 else:
-                    spans[tok][1] = frame
+                    spans[p][1] = frame
+            if not spans:
+                report.append({"line": line, "skipped": "no frame was assigned to the line"})
+                continue
             words = line.split()
             wspan = {}
             for ti, (f0, f1) in spans.items():
@@ -258,7 +265,10 @@ def main():
                     wspan[wi][1] = max(wspan[wi][1], f1)
             a_start = res["t_from"] + min(f for f, _ in spans.values()) * FRAME_SECONDS
             a_end = res["t_from"] + (max(f for _, f in spans.values()) + 1) * FRAME_SECONDS
-            mean_lp = float(sc[al >= 0].mean())
+            # score only the frames actually assigned to a character (blank frames
+            # are reported as -1, and defensively as the blank id itself).
+            assigned = (al >= 0) & (al != blank)
+            mean_lp = float(sc[assigned].mean()) if assigned.any() else float("nan")
             word_times = [
                 {
                     "w": words[wi],
