@@ -34,6 +34,10 @@ on:
         description: 'Comma-separated track ids to restrict to (blank = all)'
         required: false
         default: ''
+      refine:
+        description: 'Also rewrite when the cue count is unchanged but the boundaries are measurably better'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,6 +59,7 @@ jobs:
       WRITE_FLAG: ${{ inputs.write }}
       LIMIT: ${{ inputs.limit }}
       IDS: ${{ inputs.ids }}
+      REFINE_FLAG: ${{ inputs.refine }}
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +85,7 @@ jobs:
           set -eu
           ARGS="--out-dir sync-out"
           if [ "$WRITE_FLAG" = "true" ]; then ARGS="$ARGS --write"; fi
+          if [ "${REFINE_FLAG:-false}" = "true" ]; then ARGS="$ARGS --refine"; fi
           if [ -n "${LIMIT:-}" ] && [ "$LIMIT" != "0" ]; then ARGS="$ARGS --limit $LIMIT"; fi
           if [ -n "${IDS:-}" ]; then ARGS="$ARGS --ids $IDS"; fi
           node sync-all-tracks.mjs $ARGS | tee sync.log

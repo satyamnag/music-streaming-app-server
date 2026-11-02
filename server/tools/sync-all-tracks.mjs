@@ -39,6 +39,10 @@ const arg = (n, d = null) => {
   return i === -1 ? d : (process.argv[i + 1] ?? true)
 }
 const WRITE = process.argv.includes('--write')
+// --refine: allow a rewrite when the cue COUNT is unchanged but the boundaries are
+// measurably better (see the comparative gate). Off by default so an ordinary run
+// behaves exactly as before.
+const REFINE = process.argv.includes('--refine')
 const LIMIT = Number(arg('limit', 0)) || 0
 const ONLY = String(arg('ids', '') || '').split(',').map((s) => s.trim()).filter(Boolean)
 const OUT_DIR = arg('out-dir', 'sync-out')
@@ -119,8 +123,70 @@ function bestRunAgreement(text, wordsInSpan) {
   }
   return Math.max(best, perKeyBest)
 }
-function auditColumn(cues, duration, plainLyrics) {
-  const problems = []
+/**
+ * Anchored-start character coverage: how much of a lyric line the cue's words
+ * explain WHEN THE CUE'S FIRST WORD MUST BELONG TO THE LINE.
+ *
+ * The plain agreement measure is free to start anywhere inside a span, so a cue
+ * that starts a second early - on a token belonging to something else - still
+ * scores well. Measured on Gopala Baala: the stored pallavi cue started at
+ * 417.88 s, which is the token `మామ్`, while `గోపాల` is only sung from 419.06 s.
+ * Scoring the span from its first character exposes exactly that.
+ */
+function onsetCoverage(line, span) {
+  if (!line || !span) return 0
+  if (span.startsWith(line)) return 1
+  const n = line.length, m = span.length
+  if (!n || !m) return 0
+  let prev = new Uint16Array(m + 1)
+  let cur = new Uint16Array(m + 1)
+  for (let j = 0; j <= m; j++) prev[j] = j
+  for (let i = 1; i <= n; i++) {
+    cur[0] = i
+    const c = line.charCodeAt(i - 1)
+    for (let j = 1; j <= m; j++) {
+      const d = prev[j - 1] + (c === span.charCodeAt(j - 1) ? 0 : 1)
+      const up = prev[j] + 1
+      const left = cur[j - 1] + 1
+      cur[j] = d < up ? (d < left ? d : left) : (up < left ? up : left)
+    }
+    const t = prev; prev = cur; cur = t
+  }
+  let best = prev[m]
+  for (let j = 1; j <= m; j++) if (prev[j] < best) best = prev[j]
+  return Math.max(0, 1 - best / n)
+}
+
+/**
+ * Measured quality of a whole timeline against the audio, used to decide whether
+ * a rewrite without a cue-count gain is still an improvement.
+ *   meanOnset - average anchored-start coverage over lyric cues (higher is better)
+ *   suspect   - cues whose span no lyric line explains, or that another line
+ *               explains clearly better (lower is better)
+ */
+function timelineQuality(cues, words, lyricLines) {
+  const lineChars = lyricLines.map((l) => String(l).split(/\s+/).map(normaliseWord).filter(Boolean).join(''))
+  const sung = cues.filter((c) => c.text.trim() !== MUSIC_LABEL)
+  let onsetTotal = 0
+  let suspect = 0
+  for (const c of sung) {
+    const spanWords = words.filter((x) => x.start >= c.start - 0.05 && x.start < c.end)
+    const span = spanWords.map((x) => normaliseWord(x.word)).join('')
+    const li = lyricLines.findIndex((l) => String(l).trim() === c.text.trim())
+    const cov = li >= 0 ? onsetCoverage(lineChars[li], span) : 0
+    onsetTotal += cov
+    let alt = 0
+    for (let k = 0; k < lineChars.length; k++) {
+      if (k === li) continue
+      const s = onsetCoverage(lineChars[k], span)
+      if (s > alt) alt = s
+    }
+    if (!spanWords.length || (alt >= 0.6 && alt > cov + 0.15) || cov < 0.5) suspect += 1
+  }
+  return { meanOnset: sung.length ? onsetTotal / sung.length : 0, suspect, lyricCues: sung.length }
+}
+
+function auditColumn(cues, duration, plainLyrics) {  const problems = []
   let overlap = 0, zero = 0, oor = 0, blank = 0
   const starts = new Set()
   for (let i = 0; i < cues.length; i++) {
@@ -363,15 +429,43 @@ for (const [i, t] of tracks.entries()) {
     // track's timeline when the new one has STRICTLY MORE sung cues. Every hard
     // check above already passed, so this can only improve a track - never
     // regress one whose stored timeline is already richer.
+    //
+    // A timeline can also improve WITHOUT gaining cues: a cue boundary can move
+    // onto the right measured onset. That is invisible to a cue count, so with
+    // --refine the two timelines are compared on a measured quality test instead.
+    // The rewrite is allowed only when it is provably not worse:
+    //   * the same number of sung cues,
+    //   * no more suspect cues, and
+    //   * strictly better mean anchored-onset coverage (> 0.005, ~1 cue's worth).
     const existingLyric = lyricCueCount(row.synced_lyrics || '')
     const newLyric = cues.filter((c) => c.text.trim() !== MUSIC_LABEL).length
     rec.existing_lyric_cues = existingLyric
     rec.new_lyric_cues = newLyric
-    if (newLyric <= existingLyric) {
+    if (newLyric < existingLyric || (newLyric === existingLyric && !REFINE)) {
       rec.status = 'keep'
       rec.reason = `no sung-cue gain (${existingLyric} -> ${newLyric})`
       emit(rec, t, i)
       continue
+    }
+    if (newLyric === existingLyric) {
+      const lyricLines = splitLyricLines(row.plain_lyrics)
+        .filter((l) => classifyLine(l) === 'lyric')
+        .map((l) => String(l).trim())
+      const before = timelineQuality(parseSrtTimeline(row.synced_lyrics || ''), words, lyricLines)
+      const after = timelineQuality(cues, words, lyricLines)
+      rec.existing_onset = Number(before.meanOnset.toFixed(4))
+      rec.new_onset = Number(after.meanOnset.toFixed(4))
+      rec.existing_suspect = before.suspect
+      rec.new_suspect = after.suspect
+      const improves = after.suspect <= before.suspect && after.meanOnset > before.meanOnset + 0.005
+      if (!improves) {
+        rec.status = 'keep'
+        rec.reason = `no measurable refinement (onset ${before.meanOnset.toFixed(3)} -> ${after.meanOnset.toFixed(3)}, suspect ${before.suspect} -> ${after.suspect})`
+        emit(rec, t, i)
+        continue
+      }
+      rec.refined = true
+      rec.reason = `refined cue boundaries (onset coverage ${before.meanOnset.toFixed(4)} -> ${after.meanOnset.toFixed(4)})`
     }
 
     rec.status = WRITE ? 'written' : 'would_write'
