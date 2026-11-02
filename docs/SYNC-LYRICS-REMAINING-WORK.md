@@ -61,28 +61,67 @@ entirely — even where its Telugu segmentation is excellent.
 plain lyrics). Once the counts match, these tracks sync automatically on the next
 gated run.
 
-## Group C — correct data, blocked by a deliberately conservative gate (5)
+## Group C — blocked by the cue/audio gate, and **the gate is right**
 
-The write gate rejects a track when 2+ cues score under 0.5 against the
-transcription. On mantra-style tracks whisper merges words so heavily that the
-transcription distorts systematically and the metric under-reports.
+An earlier hypothesis was that the gate (reject a track when 2+ cues score under
+0.5 against the transcription) is over-conservative on mantra-style tracks, where
+whisper merges words so heavily that character similarity under-reports. It was
+tested directly and **the hypothesis is refuted**.
 
-Verified by inspection on **Om Vigneshwaraya Namah**: all 36 occurrences carry the
-correct plain-lyric line at the correct time, and **34 of 36** consumed *fewer*
-tokens than the line has words (heavy merging), e.g.
+Test used (`server/tools/_cue_review.mjs`): a *seamless single-character coverage*
+score — the plain-lyric line aligned against any substring of the words actually
+sung in that cue's span. Word boundaries are irrelevant, so heavy merging still
+scores high, while a **different** line does not. A cue is `SUSPECT` only when its
+span is empty, when another lyric line explains the span clearly better, or when
+no line explains it.
 
-```
-TEXT  గం గం గం గం మహాగణపతయే నమః.
-SUNG  గంగం గంగం మాగణ పతెయేనమా        (18.9-24.4s, score 0.670)
-```
+Stored vs proposed timeline, same tracks, same test:
 
-Same pattern: `Chintaamani Ganapathi`, `Kausalya Suta Raama`, `Om Vigneshwaraya
-Namah`, `Raavayya Maa Intiki`, `Ravi Vamsha Sudhaambhudi Soma`, `Vandanam
-Sreeraama! Inakula Soma`.
+| track | suspect cues stored → proposed | lyric cues |
+| --- | --- | --- |
+| Bhadradri Ramayya Nidra Levayya | 17 → **0** | 24 → 29 |
+| Ganesh Gayatri Mantra | 9 → **0** | 29 → 63 |
+| Intitho Raamuni Poolaata | 14 → **0** | 21 → 33 |
+| Sukha Madhuvu Kadalilo | 13 → **0** | 21 → 32 |
+| Haaratulettare Sreeraamuniki | 16 → 1 | 26 → 37 |
+| Kalyaanamu Loka Kalyaanamu | 25 → 6 | 26 → 36 |
+| Kausalya Suta Raama | 17 → 3 | 24 → 29 |
+| Raama Raamaa Yanare | 15 → 2 | 21 → 26 |
+| Raavayya Maa Intiki | 5 → 2 | 13 → 20 |
+| Ravi Vamsha Sudhaambhudi Soma | 10 → 2 | 14 → 23 |
+| Vandanam Sreeraama! Inakula Soma | 15 → 9 | 22 → 26 |
+| Om Vigneshwaraya Namah | 15 → **26** | 21 → 40 |
+| Chintaamani Ganapathi | 3 → 5 | 3 → 5 |
+| **total** | **205 → 56** | |
 
-**Deliberately not bypassed.** Relaxing the gate, or adding an override, would
-remove a safety net that currently prevents wrong cues from reaching the app.
-Unblocking these needs a per-cue human review first — not a threshold change.
+Two conclusions:
+
+1. **The gate is not blocking anything demonstrably correct.** The only four tracks
+   whose proposed timeline is completely clean (0 suspect cues) are blocked by
+   **translations** (Group B), not by the gate — so no algorithm change would
+   unblock them; they need the translation fixed first.
+2. **Where the gate does block, the proposal really is wrong.** Concrete example,
+   Om Vigneshwaraya Namah, proposed cue `13.8–18.9 s` carries the text
+   `ఈం ఈం ఈం ఈం ఈశ్వర పుత్రాయనమః` while the words sung there are
+   `ఒం విగ్నే ఇశ్వరాయనమా` — a different line. That line's real audio
+   (`ఇమీమీమీమీమీష్వర పుత్రాయనమహా`) sits at 24.4–44.9 s, inside a music banner.
+   This specific track was previously believed to be correct; that impression came
+   from a walk dump produced with stale scoring and was **wrong**.
+
+**Therefore no gate change and no override were made.** Bypassing it would push
+wrong cues into the app for 9 tracks. The safety net is doing its job.
+
+### Product consequence worth a decision
+
+The 15 blocked tracks are still serving their **old** stored timeline, and this
+review measured **205 wrong cues** across those old timelines. A wrong synced line
+is arguably worse for a user than an honest "no sync": the app shows text that
+does not match what is being sung. A defensive option — not implemented, because
+it is a UX change — would be to serve the Plain tab (no highlight) for those 15
+tracks until their content or segmentation is fixed. That decision belongs to the
+product owner, not to tooling.
+
+
 
 ## Group D — individual untimed lines that are lyric variants (13 of 13 classified)
 
