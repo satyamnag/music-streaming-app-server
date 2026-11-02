@@ -89,7 +89,9 @@ function bestRunAgreement(text, wordsInSpan) {
   const keys = String(text).split(/\s+/).map(normaliseWord).filter(Boolean)
   if (!keys.length || !wordsInSpan.length) return 0
   const keyStr = keys.join('')
-  const minLen = Math.max(1, Math.ceil(keys.length * 0.4))
+  // 1 (not ceil(k*0.4)): a whole sung line can arrive as ONE merged Whisper
+  // token, and a floor above 1 would score such a cue 0 and wrongly reject it.
+  const minLen = 1
   const maxLen = keys.length + 2
   let best = 0
   for (let a = 0; a < wordsInSpan.length; a++) {

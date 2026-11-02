@@ -125,31 +125,35 @@ console.log(`words: ${words.length}  lyric lines: ${lyric.length}  duration: ${d
 // covered by 2 words and its mean per-key similarity lands just under 0.5.
 const MIN_SCORE = 0.45
 
-/** Best lyric line matching the words starting at `w`. */
-function bestAt(w) {
+// Whisper sometimes emits a short burst of nonsense before a real line
+// (`ముక్కు ముకు ముకు ముకు` then `అందాల హంసపై`). Matching from w would absorb
+// those tokens into the line and wreck the cue's start, so allow starting a few
+// words later - charged a small penalty so a skip only happens when the later
+// window is genuinely better.
+// 4 / 0.06 is the calibrated pair: larger skip or a smaller penalty made the
+// walk jump over a REAL sung occurrence (measured on Kavalini Eleti: lyric cues
+// dropped 32 -> 31). Leading hallucination noise is tolerated by the audit
+// instead, which scores the best run inside a cue's span.
+const MAX_SKIP = 4
+const SKIP_PENALTY = 0.06
+
+/** Best lyric line matching the words starting at `w`, allowed to start up to `maxSkip` words later. */
+function bestAt(w, maxSkip = MAX_SKIP) {
   let best = null
-  // Whisper sometimes emits a short burst of nonsense before a real line
-  // (`ముక్కు ముకు ముకు ముకు` then `అందాల హంసపై`). Matching from w would absorb
-  // those tokens into the line and wreck the cue's text/audio agreement, so
-  // allow starting a few words later - charged a small penalty so a skip only
-  // happens when the later window is genuinely better.
-  // 4 / 0.06 is the calibrated pair: larger skip or a smaller penalty made the
-  // walk jump over a REAL sung occurrence (measured on Kavalini Eleti: lyric cues
-  // dropped 32 -> 31). Leading hallucination noise is tolerated by the audit
-  // instead, which scores the best run inside a cue's span.
-  const MAX_SKIP = 4
-  const SKIP_PENALTY = 0.06
-  for (let s = w; s <= Math.min(w + MAX_SKIP, words.length - 1); s++) {
+  for (let s = w; s <= Math.min(w + maxSkip, words.length - 1); s++) {
     const skipCost = SKIP_PENALTY * (s - w)
     for (const L of lyric) {
       const k = L.keys.length
       // A line's words are contiguous, so only consider windows near its own
-      // length. Without the upper cap a longer window always scores >= a shorter
-      // one (each key takes its best over the run), so the line would swallow the
-      // words of the NEXT line and that line would never be placed. The lower cap
-      // still allows MERGED singing, where one Whisper token carries two or more
-      // lyric words (`అతిశయముగ నీవు` -> `అదిషయముగనివు`).
-      const minLen = Math.max(1, Math.ceil(k * 0.4))
+      // length. The upper cap stops a line swallowing the NEXT line's words.
+      //
+      // The lower bound is 1 on purpose: Whisper routinely merges a whole sung
+      // line into a SINGLE token (`గోపాల బాల గోవింద నామా` ->
+      // `గోపాలబాలగోవిందనామా`). Requiring >=2 words there made such occurrences
+      // unmatchable, so they fell into `{{Music}}` banners even though the singer
+      // was singing (measured: 3 such banners on Gopala Baala). The concatenated
+      // character comparison in scoreWindow is what makes a 1-token window safe.
+      const minLen = 1
       const maxEnd = Math.min(words.length, s + k + 2)
       const minEnd = s + minLen
       for (let end = minEnd; end <= maxEnd; end++) {
@@ -161,7 +165,7 @@ function bestAt(w) {
           || score > best.score + 1e-9
           || (Math.abs(score - best.score) < 1e-9 && run.length < best.runLen)
           || (Math.abs(score - best.score) < 1e-9 && run.length === best.runLen && span < best.span)
-        if (better) best = { L, score, end, runLen: run.length, span, start: run[0].start, stop: run[run.length - 1].end }
+        if (better) best = { L, s, score, end, runLen: run.length, span, start: run[0].start, stop: run[run.length - 1].end }
       }
     }
   }
@@ -169,6 +173,7 @@ function bestAt(w) {
 }
 
 const occurrences = []
+const spans = []
 let w = 0
 let skipped = 0
 while (w < words.length) {
@@ -181,6 +186,7 @@ while (w < words.length) {
     end: Number(b.stop.toFixed(3)),
     score: Number(b.score.toFixed(3)),
   })
+  spans.push({ s: b.s, e: b.end })
   w = b.end
 }
 console.log(`occurrences: ${occurrences.length}  (unmatched words skipped: ${skipped})`)
@@ -197,7 +203,9 @@ function fillMissing(occs) {
   for (const L of lyric) {
     if (placedIdx.has(L.lineIndex)) continue
     const k = L.keys.length
-    const minLen = Math.max(1, Math.ceil(k * 0.4))
+    // 1 for the same reason as the main walk: a whole line can arrive as one
+    // merged Whisper token.
+    const minLen = 1
     const maxLen = k + 2
     let best = null
     for (let a = 0; a < words.length; a++) {
@@ -245,6 +253,77 @@ if (filled.length) {
   occurrences.push(...filled)
   occurrences.sort((a, b) => a.start - b.start)
   console.log(`second pass placed ${filled.length} line(s): ${filled.map((f) => f.text.slice(0, 24)).join(' | ')}`)
+}
+
+// --- Third pass: sung lines hidden inside the words the walk skipped over ---
+// The walk advances past a whole word run whenever a LATER line scores higher
+// from a couple of words ahead, so the skipped words are never represented by a
+// cue and later become a `{{Music}}` banner. Measured catalogue-wide (79 tracks):
+// 252 skip decisions, 121 of which abandoned a run that matches a distinct lyric
+// line. On Gopala Baala that put 18.3 s of `ఓపిక నావై ఒకసారి రావా` and 17.3 s of
+// `గోపాల బాల గోవింద నామా` under a music banner while the singer was singing.
+//
+// This pass is strictly ADDITIVE: it only looks at word indices no existing
+// occurrence covers, so it can never move, shorten or re-time a cue the walk
+// already produced. Every added cue still starts and ends on measured Whisper
+// word boundaries. The bar is higher than the walk's (0.60 vs 0.45) because an
+// uncovered run is the only place a stray match could invent a cue.
+const FILL_MIN_SCORE = 0.6
+
+function fillGaps(spans, existing) {
+  const covered = new Uint8Array(words.length)
+  for (const sp of spans) for (let i = sp.s; i < sp.e; i++) covered[i] = 1
+  // Index ranges of consecutive uncovered words.
+  const runs = []
+  for (let i = 0; i < words.length; i++) {
+    if (covered[i]) continue
+    let j = i
+    while (j < words.length && !covered[j]) j++
+    runs.push({ a: i, b: j })
+    i = j - 1
+  }
+  const added = []
+  for (const r of runs) {
+    let cursor = r.a
+    while (cursor < r.b) {
+      let best = null
+      for (const L of lyric) {
+        const k = L.keys.length
+        for (let a = cursor; a < r.b; a++) {
+          for (let len = 1; len <= k + 2 && a + len <= r.b; len++) {
+            const window = words.slice(a, a + len)
+            const score = scoreWindow(L.keys, window)
+            if (score < FILL_MIN_SCORE) continue
+            const start = window[0].start
+            const end = window[window.length - 1].end
+            if (existing.some((o) => start < o.end - 0.05 && end > o.start + 0.05)) continue
+            if (added.some((o) => start < o.end - 0.05 && end > o.start + 0.05)) continue
+            if (!best || score > best.score + 1e-9
+              || (Math.abs(score - best.score) < 1e-9 && len < best.len)) {
+              best = { L, a, len, score, start, end }
+            }
+          }
+        }
+      }
+      if (!best) break
+      added.push({
+        lineIndex: best.L.lineIndex,
+        text: best.L.text,
+        start: Number(best.start.toFixed(3)),
+        end: Number(best.end.toFixed(3)),
+        score: Number(best.score.toFixed(3)),
+      })
+      cursor = best.a + best.len
+    }
+  }
+  return added
+}
+
+const gapFilled = fillGaps(spans, occurrences)
+if (gapFilled.length) {
+  occurrences.push(...gapFilled)
+  occurrences.sort((a, b) => a.start - b.start)
+  console.log(`third pass recovered ${gapFilled.length} sung line(s) from skipped words: ${gapFilled.map((f) => f.start.toFixed(1) + ' ' + f.text.slice(0, 20)).join(' | ')}`)
 }
 
 // --- Build the cue timeline (reuses the shared music-gap + sanitise pass) --
