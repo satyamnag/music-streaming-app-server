@@ -128,27 +128,37 @@ const MIN_SCORE = 0.45
 /** Best lyric line matching the words starting at `w`. */
 function bestAt(w) {
   let best = null
-  for (const L of lyric) {
-    const k = L.keys.length
-    // A line's words are contiguous, so only consider windows near its own
-    // length. Without the upper cap a longer window always scores >= a shorter
-    // one (each key takes its best over the run), so the line would swallow the
-    // words of the NEXT line and that line would never be placed. The lower cap
-    // still allows MERGED singing, where one Whisper token carries two or more
-    // lyric words (`అతిశయముగ నీవు` -> `అదిషయముగనివు`).
-    const minLen = Math.max(1, Math.ceil(k * 0.4))
-    const maxEnd = Math.min(words.length, w + k + 2)
-    const minEnd = w + minLen
-    for (let end = minEnd; end <= maxEnd; end++) {
-      const run = words.slice(w, end)
-      const score = scoreWindow(L.keys, run)
-      if (score < MIN_SCORE) continue
-      const span = run[run.length - 1].end - run[0].start
-      const better = !best
-        || score > best.score + 1e-9
-        || (Math.abs(score - best.score) < 1e-9 && run.length < best.runLen)
-        || (Math.abs(score - best.score) < 1e-9 && run.length === best.runLen && span < best.span)
-      if (better) best = { L, score, end, runLen: run.length, span, start: run[0].start, stop: run[run.length - 1].end }
+  // Whisper sometimes emits a short burst of nonsense before a real line
+  // (`ముక్కు ముకు ముకు ముకు` then `అందాల హంసపై`). Matching from w would absorb
+  // those tokens into the line and wreck the cue's text/audio agreement, so
+  // allow starting a few words later - charged a small penalty so a skip only
+  // happens when the later window is genuinely better.
+  const MAX_SKIP = 4
+  const SKIP_PENALTY = 0.06
+  for (let s = w; s <= Math.min(w + MAX_SKIP, words.length - 1); s++) {
+    const skipCost = SKIP_PENALTY * (s - w)
+    for (const L of lyric) {
+      const k = L.keys.length
+      // A line's words are contiguous, so only consider windows near its own
+      // length. Without the upper cap a longer window always scores >= a shorter
+      // one (each key takes its best over the run), so the line would swallow the
+      // words of the NEXT line and that line would never be placed. The lower cap
+      // still allows MERGED singing, where one Whisper token carries two or more
+      // lyric words (`అతిశయముగ నీవు` -> `అదిషయముగనివు`).
+      const minLen = Math.max(1, Math.ceil(k * 0.4))
+      const maxEnd = Math.min(words.length, s + k + 2)
+      const minEnd = s + minLen
+      for (let end = minEnd; end <= maxEnd; end++) {
+        const run = words.slice(s, end)
+        const score = scoreWindow(L.keys, run) - skipCost
+        if (score < MIN_SCORE) continue
+        const span = run[run.length - 1].end - run[0].start
+        const better = !best
+          || score > best.score + 1e-9
+          || (Math.abs(score - best.score) < 1e-9 && run.length < best.runLen)
+          || (Math.abs(score - best.score) < 1e-9 && run.length === best.runLen && span < best.span)
+        if (better) best = { L, score, end, runLen: run.length, span, start: run[0].start, stop: run[run.length - 1].end }
+      }
     }
   }
   return best

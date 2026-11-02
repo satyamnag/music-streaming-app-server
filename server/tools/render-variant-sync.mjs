@@ -41,6 +41,9 @@ const TRACK_ID = arg('track')
 const COLS = String(arg('cols', 'en,en_tr')).split(',').map((s) => s.trim()).filter(Boolean)
 const OUT_DIR = arg('out-dir', '.')
 const EMIT_PAYLOAD = process.argv.includes('--emit-payload')
+// Read the Telugu timeline from a local SRT instead of the database. Used by the
+// catalogue orchestrator, which renders the variants BEFORE anything is written.
+const TIMELINE_FILE = arg('timeline-file', null)
 
 const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ''
@@ -71,7 +74,9 @@ const [track] = await res.json()
 if (!track) { console.error('track not found'); process.exit(2) }
 
 const teluguPlain = String(track.plain_lyrics || '')
-const teluguSrt = String(track.synced_lyrics || '').trim()
+const teluguSrt = TIMELINE_FILE
+  ? String(fs.readFileSync(TIMELINE_FILE, 'utf8')).trim()
+  : String(track.synced_lyrics || '').trim()
 if (!teluguPlain.trim()) { console.error('no plain_lyrics'); process.exit(2) }
 if (!teluguSrt) { console.error('no synced_lyrics (Telugu timeline is required first)'); process.exit(2) }
 
