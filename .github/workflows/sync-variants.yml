@@ -1,0 +1,139 @@
+name: Sync language variants (from Telugu timeline)
+
+# Renders the English (translation) and English (transliteration) sync columns
+# from the AUTHORITATIVE Telugu timeline, then writes them with a backup.
+#
+# WHY THIS SHAPE
+#   All five lyric columns must share ONE cue timeline, or the apps' per-line
+#   language stacking drifts. So the timeline is taken from the already-verified
+#   Telugu `synced_lyrics`; only the TEXT comes from each column. That is exactly
+#   what libs/autoSyncLyrics.renderCuesForVariant does (also used by the admin
+#   `POST /api/admin/tracks/:id/sync-variant` endpoint) - reused here rather than
+#   re-implemented, so its invariants are guaranteed.
+#
+# SAFETY
+#   * render-variant-sync.mjs VALIDATES before anything is written: cue count must
+#     match the Telugu timeline, every time must be identical index-by-index, and
+#     there must be no overlap / zero-duration / out-of-range / duplicate / blank
+#     cue. It exits non-zero on any problem, and this job then writes nothing.
+#   * the current values of every column it touches are captured to a backup
+#     artifact BEFORE the PATCH.
+#   * it only ever writes the columns listed in `cols`.
+#
+# Compute note: this is pure rendering (no transcription), so it is cheap, but it
+# still runs here rather than on any long-lived process.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id whose variants to re-render'
+        required: true
+        default: '72e585fd-7a6e-42ff-a8e6-d56a9a836f33'
+      cols:
+        description: 'Comma-separated variant columns (en, en_tr, hi, hi_tr)'
+        required: false
+        default: 'en,en_tr'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-variants-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  render:
+    name: Render + write variants
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      COLS: ${{ inputs.cols }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1
+          fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Render + validate (writes nothing)
+        working-directory: server
+        run: |
+          set -eu
+          node tools/render-variant-sync.mjs \
+            --track "$TRACK_ID" --cols "$COLS" --out-dir . --emit-payload | tee render.log
+
+      - name: Backup current values
+        working-directory: server
+        run: |
+          set -eu
+          node -e '
+            const fs = require("fs");
+            const cols = process.env.COLS.split(",").map((c) => c.trim()).filter(Boolean);
+            const map = { en: "synced_lyrics_en", en_tr: "synced_lyrics_en_tr", hi: "synced_lyrics_hi", hi_tr: "synced_lyrics_hi_tr" };
+            const sel = ["id", "synced_lyrics", ...cols.map((c) => map[c])].join(",");
+            (async () => {
+              const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + process.env.TRACK_ID + "&select=" + sel, {
+                headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
+              });
+              const rows = await r.json();
+              fs.writeFileSync("variants-backup.json", JSON.stringify(rows[0] || {}, null, 2));
+              console.log("backup written for columns:", sel);
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - name: Write variants
+        working-directory: server
+        run: |
+          set -eu
+          if [ ! -f payload.json ]; then echo "::error::payload.json missing - refusing to write"; exit 1; fi
+          CODE="$(curl -sS -o /dev/null -w '%{http_code}' -X PATCH \
+            "$SUPABASE_URL/rest/v1/tracks?id=eq.$TRACK_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            --data-binary @payload.json)"
+          echo "PATCH http=$CODE"
+          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then echo "::error::write failed (http $CODE)"; exit 1; fi
+          echo "WROTE variant column(s) for track $TRACK_ID"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-variants
+          path: |
+            server/render.log
+            server/payload.json
+            server/variants-backup.json
+            server/*-synced_*.srt
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Sync language variants"
+            echo ""
+            echo "Track: \`${{ inputs.track_id }}\` · columns: \`${{ inputs.cols }}\`"
+            echo ""
+            if [ -f server/render.log ]; then tail -n 30 server/render.log; fi
+          } >> "$GITHUB_STEP_SUMMARY"
