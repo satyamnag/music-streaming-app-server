@@ -1,0 +1,127 @@
+name: Aeneas + OpenAI evaluation (read-only)
+
+# Answers two questions with evidence, on ONE track:
+#   1. can aeneas produce this track's sync lyrics?
+#   2. does an independent language model agree with the timeline we already ship?
+#
+# STRICTLY READ-ONLY. Nothing is written to the database. Only artifacts.
+#
+# Official aeneas facts driving this job (v1.7.3, 2017):
+#   * Python 2.7 / 3.5+, requires ffmpeg + eSpeak, source-only on PyPI
+#   * "Confirmed working on 38 languages" - Telugu is NOT among them
+#   * Limitations: "Audio is assumed to be spoken: not suitable for song captioning"
+#   * AGPL v3 (copyleft)
+# The job therefore pins Python 3.7, installs eSpeak, and tries BOTH `te` and `eng`
+# so the log shows exactly where it stands rather than an assertion.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: 'Track id to evaluate'
+        required: true
+        default: '9f2a7923-142f-49e5-bd3b-bff886b8d7a5'
+
+permissions:
+  contents: read
+
+jobs:
+  aeneas:
+    name: aeneas attempt
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      IDS: ${{ inputs.ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.7'
+
+      - name: System deps (eSpeak + ffmpeg, both required by aeneas)
+        run: |
+          set -eu
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak libespeak-dev ffmpeg build-essential
+          espeak --version || true
+          ffmpeg -version | head -n 1
+
+      - name: Install aeneas (source build - no wheels exist on PyPI)
+        run: |
+          set -eu
+          python -m pip install --upgrade "pip<24" "setuptools<60" wheel
+          python -m pip install "numpy<1.22"
+          python -m pip install aeneas==1.7.3.0
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Run aeneas (read-only)
+        working-directory: server/tools
+        run: |
+          set -eu
+          python aeneas_poc.py --id "$IDS" --languages te,eng --out-dir aeneas-out 2>&1 | tee aeneas.log || true
+          echo "--- artifact listing ---"
+          ls -la aeneas-out || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aeneas-evaluation
+          path: |
+            server/tools/aeneas.log
+            server/tools/aeneas-out/
+          if-no-files-found: warn
+
+  openai-verify:
+    name: OpenAI independent verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      IDS: ${{ inputs.ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          OAI="$(aws secretsmanager get-secret-value --secret-id openai/api-key --query SecretString --output text)"
+          if [ -z "$OAI" ]; then echo "::error::openai/api-key missing"; exit 1; fi
+          echo "::add-mask::$ANON"; echo "::add-mask::$OAI"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+          echo "OPENAI_API_KEY=$OAI" >> "$GITHUB_ENV"
+
+      - name: Verify the shipped timeline independently
+        working-directory: server/tools
+        run: |
+          set -eu
+          node openai_verify_timeline.mjs "$IDS" openai-verify.json 2>&1 | tee openai-verify.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openai-verification
+          path: |
+            server/tools/openai-verify.log
+            server/tools/openai-verify.json
+          if-no-files-found: warn
