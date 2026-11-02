@@ -1,0 +1,83 @@
+name: Restore sync lyrics (rollback)
+
+# Puts sync-lyrics columns back to their values from a previous rebuild's
+# lyrics-backup.json artifact. Use after a write you want to undo.
+#
+# SAFETY: this restores EXACTLY the columns captured in the backup (the three
+# language columns the rebuild writes: synced_lyrics, _en, _en_tr). Nothing else
+# is touched. Restoring is idempotent - the same backup applied twice is a no-op
+# the second time.
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Workflow run id whose lyrics-backup.json artifact to restore'
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: lyrics-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    name: Restore sync lyrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download backup artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lyrics-rebuild
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::error::AWS creds not set"; exit 1
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY not set"; exit 1
+          fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Restore
+        working-directory: server
+        run: |
+          set -eu
+          if [ ! -f lyrics-backup.json ]; then
+            echo "::error::lyrics-backup.json not found in the artifact"; exit 1
+          fi
+          node tools/lyrics-rebuild.mjs --restore lyrics-backup.json | tee restore.log
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Restored sync lyrics"
+            echo ""
+            if [ -f server/restore.log ]; then tail -n 40 server/restore.log; fi
+            echo ""
+            echo "Restored from run: **${{ inputs.run_id }}**"
+          } >> "$GITHUB_STEP_SUMMARY"
