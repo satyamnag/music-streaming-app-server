@@ -72,12 +72,30 @@ def parse_srt(text):
     return cues
 
 
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+
+
+def http_get(url, headers=None, timeout=180):
+    """GET with a browser User-Agent.
+
+    Both the Supabase edge and the music CDN answer 403 to the default
+    `Python-urllib/x.y` User-Agent, so it is set explicitly here.
+    """
+    h = {"User-Agent": USER_AGENT, "Accept": "*/*"}
+    if headers:
+        h.update(headers)
+    req = urllib.request.Request(url, headers=h)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
+
+
 def load_audio(url):
     """Download and decode to 16 kHz mono float32 via ffmpeg (present on runners)."""
+    raw = http_get(url)
     with tempfile.TemporaryDirectory() as tmp:
         src = os.path.join(tmp, "in.audio")
-        with urllib.request.urlopen(url, timeout=180) as r, open(src, "wb") as f:
-            f.write(r.read())
+        with open(src, "wb") as f:
+            f.write(raw)
         pcm = subprocess.run(
             ["ffmpeg", "-v", "error", "-i", src, "-f", "s16le", "-acodec", "pcm_s16le",
              "-ar", str(SAMPLE_RATE), "-ac", "1", "-"],
@@ -166,12 +184,12 @@ def main():
         if not t:
             print(f"!! {tid} not in track-list.json")
             continue
-        req = urllib.request.Request(
+        body = http_get(
             f"{supa}/rest/v1/tracks?id=eq.{tid}&select=plain_lyrics,synced_lyrics,duration",
-            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+            headers={"apikey": key, "Authorization": f"Bearer {key}", "Accept": "application/json"},
+            timeout=120,
         )
-        with urllib.request.urlopen(req, timeout=120) as r:
-            row = json.loads(r.read())[0]
+        row = json.loads(body)[0]
 
         print(f"\n=== {t['title']}  ({t['duration']}s) ===")
         wav = load_audio(t["url"])
