@@ -48,7 +48,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install syncalong
           python -c "import syncalong, inspect; print('syncalong', getattr(syncalong, '__version__', 'unknown'))"
-          python -c "from syncalong.align import align_lyrics_to_transcript as f; print('align signature:', inspect.signature(f))"
+          python -c "import syncalong, inspect; from syncalong.align import align_lyrics_to_transcript as f; print('align signature:', inspect.signature(f))"
 
       - name: Resolve secrets (masked)
         run: |
