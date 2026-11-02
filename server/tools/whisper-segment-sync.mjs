@@ -91,7 +91,21 @@ function scoreWindow(keys, run) {
     for (const wd of run) { const v = sim(key, wd.n); if (v > s) s = v }
     total += s
   }
-  const perKey = total / keys.length
+  // COVERAGE. A run must contain ONE token per lyric word, no more. When a run
+  // carries surplus tokens, those tokens are somebody else's singing: the per-key
+  // mean awards each line-word its best match anywhere in the run and therefore
+  // ignores the surplus completely, so absorbing a neighbouring line still scored
+  // a perfect 1.000. Measured on Niluvadu Manasu: `పరతత్వ మెరుగదు.` arrives as ONE
+  // token, the walk then matched `అందాలు వేటలో,` over THREE tokens
+  // (`పరతత్వమేరుగదు అందాలు వేటలో`) at 0.950 versus 0.923 for the line actually
+  // sung there, so the app showed the wrong line for 3 seconds. Scaling the
+  // per-key mean by how much of the run the line explains (keys/run) puts the
+  // correct line first; the same defect hid 8 lines across 5 written tracks.
+  //
+  // Runs SHORTER than the line are deliberately not penalised: that is Whisper
+  // merging several sung words into one token, which is a correct match.
+  const coverage = run.length > keys.length ? keys.length / run.length : 1
+  const perKey = (total / keys.length) * coverage
   const concat = levRatio(keys.join(''), run.map((x) => x.n).join(''))
   const extra = Math.max(0, run.length - keys.length)
   return Math.max(perKey, concat) - 0.05 * extra
