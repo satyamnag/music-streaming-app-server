@@ -125,6 +125,56 @@ by the rewrite:
   sung pallavi) and `రాగం: సింధుభైరవి` (a **metadata line** — "Ragam:
   Sindhubhairavi" — not a sung lyric at all)
 
+## Catalogue-wide certification sweep (2026-11-02)
+
+Every one of the 79 tracks was run through the full check set in one read-only pass
+(`_certify_all.mjs`): structure, shared three-column timeline, exact plain-lyric
+text, every line timed, zero suspect cues, no banner hiding a lyric, and the
+cue/audio agreement gate. The single-track certification above is the same set.
+
+| | |
+| --- | --- |
+| **tracks passing every check** | **36 / 79** |
+| tracks with at least one finding | 43 |
+| pending writes the pipeline could still make | **0** |
+
+This is stricter than the write gate — it adds the per-cue suspect test and the
+banner test — so it exposes residual quality that the gate never looked at.
+
+### Findings by class
+
+| finding | tracks | fixable by tooling? |
+| --- | --- | --- |
+| suspect cue(s) — one to three per track | 35 | No: the pipeline's alternative scores no better (`would_write 0`) |
+| weak cues | 16 | No — same reason |
+| banner hides a lyric | 14 | No — same reason |
+| structural: does not end at duration / column cue count differs | **12** | No — **all 12 are `skip` tracks**, blocked on content |
+| untimed lines | 27 | No — content (see `SYNC-LYRICS-REMAINING-WORK.md`) |
+
+### The important structural finding
+
+**8 tracks currently have language columns with different cue counts**
+(`column cue count differs`), and **9 do not end at their track duration**. Both are
+real defects in what the app is serving today, because those rows still hold
+timelines written before `coverTimeline` and the shared-timeline fix existed.
+
+They cannot be repaired by rebuilding: each one is a `skip` track whose translation
+column is not line-parallel, so the renderer cannot produce three aligned columns.
+The repair is the content edit described in `SYNC-LYRICS-REMAINING-WORK.md`.
+
+Affected: Bhadradri Ramayya Nidra, Ganesh Gayatri, Haaratulettare, Intitho Raamuni
+Poolaata, Kalyaanamu Loka Kalyaanamu, Raama Raamaa Yanare, Ravi Vamsha
+Sudhaambhudi, Sukha Madhuvu Kadalilo, Vandanam Sreeraama, plus Raavayya Maa Intiki,
+Kanaka Durga Teru and Madvacharya Nutha (duration only).
+
+### Why no further writes are possible
+
+The pipeline reports `would_write 0` even with `--refine`: for every track it is
+allowed to write, its own proposal is not measurably better than what is stored. The
+43 findings above sit either on tracks it may not write (content-blocked) or on
+tracks where the alternative timeline is not better. Reaching beyond that would mean
+either editing plain lyrics or loosening a gate.
+
 ## Notes
 
 - `--refine` is **off by default**; without it the run behaves exactly as before.
