@@ -72,7 +72,50 @@ function wordsToText(words) {
     .join('\n') + '\n'
 }
 
-// --- audit one column against the measured words -------------------------
+/** Character Levenshtein similarity between two strings. */
+function simStr(a, b) { return lev(a, b) }
+
+/**
+ * Best agreement between a line's text and ANY contiguous run of words inside a
+ * span.
+ *
+ * The audit must not score the whole cue span: a cue holds until the next one
+ * starts, so it can contain Whisper's hallucinated bursts or an adjacent
+ * phrase. Measuring the BEST run inside the span answers the question that
+ * actually matters - "is this line sung somewhere in this cue?".
+ */
+function bestRunAgreement(text, wordsInSpan) {
+  const keys = String(text).split(/\s+/).map(normaliseWord).filter(Boolean)
+  if (!keys.length || !wordsInSpan.length) return 0
+  const keyStr = keys.join('')
+  const minLen = Math.max(1, Math.ceil(keys.length * 0.4))
+  const maxLen = keys.length + 2
+  let best = 0
+  for (let a = 0; a < wordsInSpan.length; a++) {
+    for (let len = minLen; len <= maxLen && a + len <= wordsInSpan.length; len++) {
+      const run = wordsInSpan.slice(a, a + len).map((w) => normaliseWord(w.word)).join('')
+      const score = simStr(keyStr, run)
+      if (score > best) best = score
+    }
+  }
+  // A single short token can score deceptively high against a whole line, so
+  // also consider a per-key mean for windows that cover most of the line.
+  let perKeyBest = 0
+  for (let a = 0; a < wordsInSpan.length; a++) {
+    for (let len = minLen; len <= maxLen && a + len <= wordsInSpan.length; len++) {
+      const run = wordsInSpan.slice(a, a + len)
+      let total = 0
+      for (const k of keys) {
+        let s = 0
+        for (const w of run) { const v = simStr(k, normaliseWord(w.word)); if (v > s) s = v }
+        total += s
+      }
+      const score = total / keys.length
+      if (score > perKeyBest) perKeyBest = score
+    }
+  }
+  return Math.max(best, perKeyBest)
+}
 function auditColumn(cues, duration, plainLyrics) {
   const problems = []
   let overlap = 0, zero = 0, oor = 0, blank = 0
@@ -197,22 +240,37 @@ for (const [i, t] of tracks.entries()) {
       const inside = words.filter((x) => x.start >= c.start - 0.001 && x.start < c.end)
       if (!inside.length) continue
       if (c.text.trim() === MUSIC_LABEL) {
-        for (const x of inside) {
+        // A music banner is only "hiding a lyric" if a RUN of several words
+        // matches plain lyric words. A single short token matching by chance is
+        // not evidence (measured false positive: 1 word tripped this).
+        const hit = inside.map((x) => {
           const n = normaliseWord(x.word)
-          let best = 0
-          for (const k of plainWords) { const v = Math.max(0, lev(k, n)); if (v > best) best = v }
-          if (best >= 0.75) hiddenUnderMusic += 1
-        }
+          let b = 0
+          for (const k of plainWords) { const v = lev(k, n); if (v > b) b = v }
+          return b >= 0.8
+        })
+        let run = 0
+        let maxRun = 0
+        for (const h of hit) { run = h ? run + 1 : 0; if (run > maxRun) maxRun = run }
+        if (maxRun >= 3) hiddenUnderMusic += maxRun
         continue
       }
-      const keys = c.text.split(/\s+/).map(normaliseWord).filter(Boolean).join('')
-      const heard = inside.map((x) => normaliseWord(x.word)).join('')
-      lyricWordSims.push(lev(keys, heard))
+      lyricWordSims.push(bestRunAgreement(c.text, inside))
     }
     if (hiddenUnderMusic) { rec.reason = `${hiddenUnderMusic} lyric word(s) hidden under a music banner`; report.push(rec); continue }
     const worst = lyricWordSims.length ? Math.min(...lyricWordSims) : 0
+    const weak = lyricWordSims.filter((s) => s < 0.5).length
     rec.worst_cue_match = Number(worst.toFixed(3))
-    if (worst < 0.55) { rec.reason = `a cue text does not match the words sung (${worst.toFixed(2)})`; report.push(rec); continue }
+    rec.weak_cues = weak
+    // Judge the track on the SHAPE of its agreement, not one outlier: a single
+    // garbled sung line is common and must not reject a track whose other cues
+    // are excellent. Two or more weak cues, or one gross mismatch, is a real
+    // misalignment and blocks the write.
+    if (worst < 0.35 || weak >= 2) {
+      rec.reason = `cue/audio agreement too low (worst ${worst.toFixed(2)}, ${weak} weak cue(s))`
+      report.push(rec)
+      continue
+    }
 
     // render EN / EN-TR from the SAME timeline
     const cols = []

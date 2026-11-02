@@ -133,6 +133,10 @@ function bestAt(w) {
   // those tokens into the line and wreck the cue's text/audio agreement, so
   // allow starting a few words later - charged a small penalty so a skip only
   // happens when the later window is genuinely better.
+  // 4 / 0.06 is the calibrated pair: larger skip or a smaller penalty made the
+  // walk jump over a REAL sung occurrence (measured on Kavalini Eleti: lyric cues
+  // dropped 32 -> 31). Leading hallucination noise is tolerated by the audit
+  // instead, which scores the best run inside a cue's span.
   const MAX_SKIP = 4
   const SKIP_PENALTY = 0.06
   for (let s = w; s <= Math.min(w + MAX_SKIP, words.length - 1); s++) {
