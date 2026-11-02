@@ -12,6 +12,52 @@ Generated from a read-only catalogue verification on 2026-11-02.
 | with problems | **28** |
 | sung lyric cues in the database | 2479 |
 | plain-lyric lines still untimed | 127 |
+| tracks whose timeline the pipeline cannot improve further (`would_write` 0) | **64** |
+
+## Measured classification of every remaining untimed line
+
+Each untimed line was located in the measured word stream and classified. This is the
+answer to "can tooling still fix these": for the 13 tracks the pipeline can write,
+the answer is no.
+
+| cause | lines | fixable by tooling? |
+| --- | --- | --- |
+| `NOT_IN_AUDIO` — nothing in the transcript fits the line at ≥0.45 | **67** | No — the text is not what is sung |
+| `RECOVERABLE_STRADDLE` — fits, but its window overlaps an existing cue | 36 | Not without creating overlapping cues |
+| `BLOCKED_OVERLAP` — fits, but sits entirely inside another cue's span | 12 | No — structurally forbidden |
+| `RECOVERABLE_NOT_PLACED` — fits in free space | 11 | Only on `skip` tracks, which cannot be written |
+| `VARIANT_CONTENT` — a cued line already covers that audio with other wording | 9 | No — the lyrics list two forms, the singer uses one |
+
+Split by whether the pipeline is even allowed to write the track:
+
+| | tracks | untimed lines |
+| --- | --- | --- |
+| `keep` — pipeline already at its ceiling | 13 | **38** |
+| `skip` — blocked, cannot be written at all | 12 | **97** |
+
+**All 11 `RECOVERABLE_NOT_PLACED` lines are on `skip` tracks**, i.e. on tracks that
+are blocked for a content reason — so there is no line left that tooling can place
+on a track it is allowed to write. The 13 `keep` tracks are at the measured ceiling:
+re-running the pipeline reports `would_write 0`.
+
+### Seven "untimed lines" are not lyrics at all
+
+These are section / raga headings that `classifyLine` currently treats as sung lyric
+lines, so they can never be timed:
+
+| track | line | meaning |
+| --- | --- | --- |
+| Haaratulettare Sreeraamuniki | `పల్లవి.` | "Pallavi" |
+| Haaratulettare Sreeraamuniki | `అనుపల్లవి.` | "Anupallavi" |
+| Raavayya Maa Intiki | `పల్లవి.` | "Pallavi" |
+| Raavayya Maa Intiki | `అనుపల్లవి.` | "Anupallavi" |
+| Kausalya Suta Raama | `రాగం: సింహేంద్ర మధ్యం` | "Ragam: Simhendra Madhyamam" |
+| Raama Raamaa Yanare | `రామం: నాట` | "Ragam: Nata" |
+| Shiva Shankara Vinutha | `రాగం: సింధుభైరవి` | "Ragam: Sindhubhairavi" |
+
+Fixing this is a **classifier** fix, not a content edit — but it does not complete any
+track on its own (it only makes the counts honest), so it is listed as a
+recommendation rather than applied.
 
 The pipeline, the write gate and the safety properties are unchanged. The items
 below are the remainder, grouped by **what would actually fix them**. A track can
