@@ -1,0 +1,68 @@
+name: Write Kavalini Eleti Whisper SRT
+
+# One-shot: write the Whisper-driven corrected Telugu SRT for Kavalini Eleti,
+# with a backup of the previous value. Manual only.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  write:
+    name: Write Kavalini Eleti synced_lyrics
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      TRACK_ID: 72e585fd-7a6e-42ff-a8e6-d56a9a836f33
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Supabase URL + service key (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          SRK="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+          if [ -z "$SUPA_URL" ] || [ -z "$SRK" ]; then echo "::error::missing supabase url/key"; exit 1; fi
+          echo "::add-mask::$SRK"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SRK" >> "$GITHUB_ENV"
+
+      - name: Backup current SRT
+        run: |
+          set -eu
+          curl -sS "$SUPABASE_URL/rest/v1/tracks?id=eq.$TRACK_ID&select=synced_lyrics" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" > backup-before.json
+          echo "backup fetched: $(wc -c < backup-before.json) bytes"
+
+      - name: Build payload + write
+        run: |
+          set -eu
+          node -e '
+            const fs=require("fs");
+            const srt=fs.readFileSync("server/tools/Kavalini-Eleti-whisper-srt.txt","utf8").trim();
+            fs.writeFileSync("payload.json", JSON.stringify({ synced_lyrics: srt }));
+          '
+          curl -sS -X PATCH "$SUPABASE_URL/rest/v1/tracks?id=eq.$TRACK_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            --data-binary @payload.json
+          echo ""
+          echo "WROTE synced_lyrics for Kavalini Eleti"
+
+      - name: Upload backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kavalini-backup
+          path: |
+            backup-before.json
+            payload.json
+          if-no-files-found: warn
