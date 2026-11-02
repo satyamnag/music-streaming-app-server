@@ -1,0 +1,126 @@
+name: SyncAlong + OpenAI evaluation (read-only)
+
+# Evaluates syncalong on ONE track. STRICTLY READ-ONLY: no database writes.
+#
+# Official syncalong facts (MIT, 2.x):
+#   * Whisper word timestamps + a Needleman-Wunsch style MONOTONIC aligner
+#   * "Each lyric line takes the timestamp of its earliest matched word"
+#   * unmatched lines are INTERPOLATED / EXTRAPOLATED, i.e. timings are invented
+#   * output is LRC: one start time per lyric line
+# So it emits at most one cue per lyric line. This track sings the refrain 8 times
+# while the plain lyrics list it once, which is the structural question being tested.
+#
+# Job `injected` gives syncalong the best transcript that exists for this track
+# (our committed large-v3 word stream) so the measurement is not limited by a weaker
+# Whisper. Job `cli` runs the tool's own end-to-end path as a wiring check.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: 'Track id to evaluate'
+        required: true
+        default: '9f2a7923-142f-49e5-bd3b-bff886b8d7a5'
+
+permissions:
+  contents: read
+
+jobs:
+  injected:
+    name: syncalong (best available transcript)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      IDS: ${{ inputs.ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install syncalong (core only - no torch needed for the aligner)
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          python -m pip install syncalong
+          python -c "import syncalong, inspect; print('syncalong', getattr(syncalong, '__version__', 'unknown'))"
+          python -c "from syncalong.align import align_lyrics_to_transcript as f; print('align signature:', inspect.signature(f))"
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Align with syncalong (read-only)
+        working-directory: server/tools
+        run: |
+          set -eu
+          python syncalong_poc.py --id "$IDS" --mode injected --out-dir syncalong-out 2>&1 | tee syncalong.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: syncalong-injected
+          path: |
+            server/tools/syncalong.log
+            server/tools/syncalong-out/
+          if-no-files-found: warn
+
+  cli:
+    name: syncalong CLI end-to-end (tiny model, wiring check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      IDS: ${{ inputs.ids }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install syncalong with Whisper + ffmpeg
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0
+          python -m pip install "syncalong[whisper]"
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -n 1
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Run the tool's own pipeline (read-only)
+        working-directory: server/tools
+        run: |
+          set -eu
+          python syncalong_poc.py --id "$IDS" --mode cli --model tiny --out-dir syncalong-cli-out 2>&1 | tee syncalong-cli.log || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: syncalong-cli
+          path: |
+            server/tools/syncalong-cli.log
+            server/tools/syncalong-cli-out/
+          if-no-files-found: warn
