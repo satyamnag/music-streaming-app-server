@@ -1,0 +1,86 @@
+name: Forced-align PoC (read-only)
+
+# Answers one question with evidence: does acoustic forced alignment of the KNOWN
+# plain lyrics give better cue boundaries than whisper's word timings?
+#
+# This job is strictly READ-ONLY. It never PATCHes the database. It writes nothing
+# but its own JSON report, uploaded as an artifact.
+#
+# Model + API are the official ones whisperx itself uses for Telugu:
+#   DEFAULT_ALIGN_MODELS_HF["te"] = anuragshas/wav2vec2-large-xlsr-53-telugu
+#   torchaudio.functional.forced_align
+#
+# Compute stays on GitHub Actions (CPU): wav2vec2-large forward passes per cue
+# window, ~1 min per track on a runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: 'Comma-separated track ids to analyse'
+        required: true
+        default: '9f2a7923-142f-49e5-bd3b-bff886b8d7a5'
+      pad:
+        description: 'Seconds of context around each inter-cue gap'
+        required: false
+        default: '1.0'
+
+permissions:
+  contents: read
+
+jobs:
+  align:
+    name: Forced align PoC
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      IDS: ${{ inputs.ids }}
+      PAD: ${{ inputs.pad }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install (CPU torch)
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0
+          python -m pip install torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers==4.57.1" numpy
+          python -c "import torch, torchaudio, transformers; print('torch', torch.__version__, '| torchaudio', torchaudio.__version__, '| transformers', transformers.__version__)"
+          python -c "import torchaudio.functional as F; print('forced_align present:', hasattr(F, 'forced_align'))"
+          ffmpeg -version | head -n 1
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ]; then echo "::error::missing supabase secrets"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "::add-mask::$ANON"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Run PoC (read-only)
+        working-directory: server/tools
+        run: |
+          set -eu
+          python forced_align_poc.py --ids "$IDS" --pad "$PAD" --out forced-align-poc.json | tee poc.log
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forced-align-poc
+          path: |
+            server/tools/poc.log
+            server/tools/forced-align-poc.json
+          if-no-files-found: warn
