@@ -33,6 +33,7 @@ import re
 import subprocess
 import sys
 import urllib.request
+from pathlib import Path
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 MARKER = re.compile(r"^\s*\{.*\}\s*$")
@@ -102,7 +103,10 @@ def main():
         ]
         print(f"injected transcript: {len(transcript)} words (committed large-v3 stream)")
 
-        lyric_lines = parse_lyrics("\n".join(lines))
+        # parse_lyrics() takes a Path (it calls .read_text()), so hand it a file.
+        lyrics_path = Path(args.out_dir) / "lyrics.txt"
+        lyrics_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        lyric_lines = parse_lyrics(lyrics_path)
         print(f"syncalong parsed {len(lyric_lines)} lyric line(s)")
 
         pairs = align_lyrics_to_transcript(lyric_lines, transcript)
