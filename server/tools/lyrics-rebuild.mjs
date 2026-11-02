@@ -55,8 +55,13 @@ const DG = process.env.DEEPGRAM_API_KEY || ''
 const CDN = (process.env.R2_BASE_URL || '').replace(/\/+$/, '')
 
 if (!SUPA || !KEY) { console.error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY required'); process.exit(2) }
-if (!DG) { console.error('DEEPGRAM_API_KEY required'); process.exit(2) }
-if (!CDN) { console.error('R2_BASE_URL required (public CDN base, e.g. https://music.example.com)'); process.exit(2) }
+// Restore mode never transcribes or downloads audio, so Deepgram/CDN are only
+// required for the rebuild path. (Previously these guards ran before the
+// RESTORE branch, so `--restore` wrongly demanded a Deepgram key.)
+if (!RESTORE) {
+  if (!DG) { console.error('DEEPGRAM_API_KEY required'); process.exit(2) }
+  if (!CDN) { console.error('R2_BASE_URL required (public CDN base, e.g. https://music.example.com)'); process.exit(2) }
+}
 
 const FIELDS = [
   'id', 'title', 'storage_path', 'duration',
