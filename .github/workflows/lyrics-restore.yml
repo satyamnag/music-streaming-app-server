@@ -63,13 +63,15 @@ jobs:
           echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
 
       - name: Restore
-        working-directory: server
         run: |
           set -eu
+          # download-artifact extracts to the workspace ROOT; the rebuild job
+          # uploaded it from its `server` working-directory, so the backup is at
+          # ./lyrics-backup.json here, not ./server/lyrics-backup.json.
           if [ ! -f lyrics-backup.json ]; then
             echo "::error::lyrics-backup.json not found in the artifact"; exit 1
           fi
-          node tools/lyrics-rebuild.mjs --restore lyrics-backup.json | tee restore.log
+          (cd server && node tools/lyrics-rebuild.mjs --restore ../lyrics-backup.json | tee restore.log)
 
       - name: Summary
         if: always()
