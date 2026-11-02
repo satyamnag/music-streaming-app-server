@@ -59,13 +59,14 @@ cues.forEach((c, i) => {
 })
 
 const perLine = lines.map((l) => {
-  const pick = res.picks.find((p) => p.line_index === l.index) || null
+  // validatePicks() returns camelCase: { lineIndex, segmentIndex, agreement, reason }
+  const pick = res.picks.find((p) => p.lineIndex === l.index) || null
   const ours = oursForLine.get(l.index) || []
-  const agrees = pick ? (pick.segment_index === -1 ? 'never_sung' : (ours.includes(pick.segment_index) ? 'agrees' : 'disagrees')) : 'no_pick'
+  const agrees = pick ? (pick.segmentIndex === -1 ? 'never_sung' : (ours.includes(pick.segmentIndex) ? 'agrees' : 'disagrees')) : 'no_pick'
   return {
     line_index: l.index,
     text: l.text,
-    model_segment: pick ? pick.segment_index : null,
+    model_segment: pick ? pick.segmentIndex : null,
     model_agreement: pick ? pick.agreement : null,
     model_reason: pick ? pick.reason : null,
     our_segments: ours,
@@ -83,5 +84,5 @@ const total = perLine.length
 const agrees = tally.agrees || 0
 console.log(`independent agreement on placed lines: ${agrees}/${total} (${((agrees / Math.max(1, total)) * 100).toFixed(0)}%)`)
 
-fs.writeFileSync(OUT, JSON.stringify({ id: ID, title: row.title, model: res.model, tally, perLine }, null, 1), 'utf8')
+fs.writeFileSync(OUT, JSON.stringify({ id: ID, title: row.title, model: res.model, tally, picks: res.picks, perLine }, null, 1), 'utf8')
 console.log(`wrote ${OUT}`)
