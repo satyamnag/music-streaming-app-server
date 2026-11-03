@@ -8,9 +8,14 @@ name: Build 3-language sync lyrics from an uploaded SRT
 # English translation and transliteration from the plain columns, and writes all three
 # columns in ONE PATCH with a backup.
 #
+# `srt_path` is an alternative source for the script: a committed file under
+# server/tools/inputs/. It is used so a track whose sync columns are still EMPTY can be
+# built without staging an untimed SRT into the database first. The DB is still not
+# touched until finalize_payload has validated the finished timeline.
+#
 # SAFETY
 #   * `write` defaults to false: a run without it validates only.
-#   * prepare refuses unless every cue is an EXACT plain-lyric line, in plain order.
+#   * prepare refuses unless every cue is an EXACT plain-lyric line.
 #   * finalize refuses unless the three columns share one timeline, are contiguous,
 #     span 0 -> duration, and every sung cue carries text in all three.
 #   * the current three columns are backed up before the PATCH, and the row is re-read
@@ -22,9 +27,13 @@ on:
   workflow_dispatch:
     inputs:
       track_id:
-        description: 'Supabase track id (its synced_lyrics must already hold the uploaded SRT)'
+        description: 'Supabase track id (its synced_lyrics must already hold the uploaded SRT, unless srt_path is set)'
         required: true
         default: '6bae22b4-73e4-4216-8477-c3634d1911be'
+      srt_path:
+        description: 'Optional repo path to the SRT (e.g. server/tools/inputs/X.source.srt). When set it is used instead of synced_lyrics, so nothing is staged into the database.'
+        required: false
+        default: ''
       write:
         description: 'Write the three columns. Leave false to validate only.'
         type: boolean
@@ -60,6 +69,7 @@ jobs:
       AWS_DEFAULT_REGION: ap-south-1
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TRACK_ID: ${{ inputs.track_id }}
+      SRT_PATH: ${{ inputs.srt_path }}
       WRITE_FLAG: ${{ inputs.write }}
       SHIFT: ${{ inputs.shift }}
       MUSIC_GAP: ${{ inputs.music_gap }}
@@ -104,7 +114,11 @@ jobs:
         working-directory: server/tools
         run: |
           set -euo pipefail
-          node prepare_srt_job.mjs --track "$TRACK_ID" --out-dir out | tee prepare.log
+          if [ -n "${SRT_PATH:-}" ]; then
+            node prepare_srt_job.mjs --track "$TRACK_ID" --srt-file "$GITHUB_WORKSPACE/$SRT_PATH" --out-dir out | tee prepare.log
+          else
+            node prepare_srt_job.mjs --track "$TRACK_ID" --out-dir out | tee prepare.log
+          fi
 
       - name: WhisperX alignment
         working-directory: server/tools

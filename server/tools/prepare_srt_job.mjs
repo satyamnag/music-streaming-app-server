@@ -5,9 +5,15 @@
 // `synced_lyrics`, and this step turns it into the alignment SCRIPT the runner needs:
 //   * the lyric cues only (the {{Music}} banners are re-derived from the audio, never
 //     trusted from the upload)
-//   * validated: every cue text must be an EXACT plain-lyric line, in plain-lyric
-//     order, with no duplicates beyond the plain lyric's own repeat count
+//   * validated: every cue text must be an EXACT plain-lyric line, with no duplicates
+//     beyond the plain lyric's own repeat count
 //   * the audio URL comes from R2_BASE_URL + storage_path, never from the client
+//
+// --srt-file <path> reads the script from a committed file instead of `synced_lyrics`.
+// That exists so a track whose sync columns are still EMPTY can be built without
+// staging an untimed SRT into the database first (nothing is written until
+// finalize_payload validates the finished timeline). Absent the flag, behaviour is
+// exactly as before: the SRT must already be in `synced_lyrics`.
 //
 // Outputs (to --out-dir): script.srt, job.json  { track, duration, audio_url, cues }
 import fs from 'node:fs'
@@ -20,6 +26,7 @@ const arg = (n, d = null) => {
 }
 const TRACK = arg('track')
 const OUT = arg('out-dir', 'out')
+const SRT_FILE = arg('srt-file')
 const SUPA = (process.env.SUPABASE_URL || 'https://ngemrcsdfxufxnazeqke.supabase.co').replace(/\/$/, '')
 const KEY = process.env.SUPABASE_ANON_KEY
 const R2 = (process.env.R2_BASE_URL || '').replace(/\/+$/, '')
@@ -39,9 +46,22 @@ const duration = Number(track.duration)
 if (!(duration > 0)) { console.error('track has no duration'); process.exit(1) }
 if (!track.storage_path) { console.error('track has no audio file'); process.exit(1) }
 
-const uploaded = parseSrtTimeline(track.synced_lyrics || '')
+// The alignment script comes either from --srt-file (a committed file, used when the
+// track's sync columns are still empty) or from what the admin uploaded.
+let uploadedText
+if (SRT_FILE) {
+  if (!fs.existsSync(SRT_FILE)) { console.error(`REFUSING: --srt-file ${SRT_FILE} does not exist`); process.exit(1) }
+  uploadedText = fs.readFileSync(SRT_FILE, 'utf8')
+  console.log(`script source: file ${SRT_FILE}`)
+} else {
+  uploadedText = track.synced_lyrics || ''
+  console.log('script source: the track\'s synced_lyrics (admin upload)')
+}
+const uploaded = parseSrtTimeline(uploadedText)
 if (!uploaded.length) {
-  console.error('REFUSING: synced_lyrics is empty - upload the SRT through the admin first')
+  console.error(SRT_FILE
+    ? `REFUSING: --srt-file ${SRT_FILE} contains no SRT cues`
+    : 'REFUSING: synced_lyrics is empty - upload the SRT through the admin first')
   process.exit(1)
 }
 const lyricCues = uploaded.filter((c) => c.text.trim() !== MUSIC_LABEL)

@@ -286,7 +286,13 @@ def main():
     srt = []
     for i, e in enumerate(timeline, 1):
         srt.append(f"{i}\n{emit_time(e['start'])} --> {emit_time(e['end'])}\n{e['text']}\n")
-    out_srt = os.path.join(args.out_dir, "Peru-Teliyakunna.aligned.srt")
+    # The output name follows the INPUT file, so an artifact can never be mistaken for
+    # another track's. "X.source.srt" -> "X.aligned.srt" (identical to the previous
+    # hard-coded Peru-Teliyakunna name when the input is Peru-Teliyakunna.source.srt).
+    stem = os.path.basename(args.srt)
+    stem = re.sub(r"\.srt$", "", stem, flags=re.I)
+    stem = re.sub(r"\.source$", "", stem, flags=re.I)
+    out_srt = os.path.join(args.out_dir, f"{stem}.aligned.srt")
     open(out_srt, "w", encoding="utf-8").write("\n".join(srt))
 
     report = {
