@@ -1,0 +1,88 @@
+name: Fix Ganesh Gayatri English column (guarded, one-off)
+
+# ONE-OFF content fix, owner-approved.
+#
+# plain_lyrics_en for "Ganesh Gayatri Mantra" has 14 lines while plain_lyrics (the
+# source of truth) and plain_lyrics_en_tr both have 19, and it merged two lines per
+# stanza - so the track cannot be synced (its stored columns hold 48 / 29 / 48 cues).
+#
+# This rebuilds plain_lyrics_en as exactly 19 line-parallel lines:
+#   * 16 lines are the EXISTING author text, moved to the correct index, verbatim
+#   * 3 lines are new and were approved by the owner:
+#       "We meditate on the One with the great belly."
+#       "We meditate on the One with the curved trunk."
+#       "Om, let us meditate on the Supreme Person;"
+#
+# Guards enforce that plain_lyrics and plain_lyrics_en_tr are byte-identical to the
+# hashes captured at approval; plain_lyrics is never written.
+#
+# Run this, then the sync workflow with write=true to build the three synced columns.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type APPLY to write plain_lyrics_en'
+        required: true
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  fix:
+    name: Apply guarded English column
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refuse without explicit confirmation
+        run: |
+          set -eu
+          if [ "${CONFIRM:-}" != "APPLY" ]; then
+            echo "::error::confirm input was not APPLY - refusing to write"; exit 1
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY missing"; exit 1
+          fi
+
+      - name: Resolve anon key (masked)
+        run: |
+          set -eu
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          echo "::add-mask::$ANON"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Dry run (must pass guards)
+        working-directory: server/tools
+        run: |
+          set -eu
+          node fix_ganesh_en.mjs | tee fix-dry.log
+
+      - name: Apply
+        working-directory: server/tools
+        run: |
+          set -eu
+          node fix_ganesh_en.mjs --write | tee fix-apply.log
+
+      - name: Upload backup + logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ganesh-en-fix
+          path: |
+            server/tools/fix-dry.log
+            server/tools/fix-apply.log
+            server/tools/ganesh-en-backup.json
+          if-no-files-found: warn
