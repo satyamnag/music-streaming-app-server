@@ -13,6 +13,110 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Certified track: Pattabhi Raamuni (2026-11-03)
+
+`50320a38-84ed-4da5-afe2-95dab5ab2b61` — 292 s, **41 supplied cues**, 20 distinct
+plain-lyric lines, **47 cues / 41 sung / 6 music**. Written by run `41664755012`.
+
+This is the track that proved the whole-track alignment cannot be trusted on every
+recording, and the first one rebuilt through **windowed** alignment
+(`segments_from` = the supplied SRT).
+
+### Is the WAV master the same audio as the opus the app serves?
+
+Measured (16 kHz mono, what the model receives):
+
+| | `(S) SB29 …V04.wav` | R2 opus |
+| --- | --- | --- |
+| duration | 292.800 s | **292.800 s** |
+| best envelope lag | — | **0.00 s** |
+| envelope correlation | — | **0.9993** |
+| per-second profile correlation | — | **0.9999** |
+
+Same recording, sample aligned. The opus is what the app serves, so that is what the
+pipeline aligns against.
+
+### Why this track needed windowed alignment
+
+The monotone whole-track pass **fails structurally** here: it emitted line 1 at 2.4 s
+(before the 29.7 s intro) and packed all 41 cues into 2.4 → 131.5 s, then left
+131.5 → 292.0 s as a single banner (55 % of the track). Reproduced twice, on two
+different supplied scripts. The cause is the same one documented for the head repair:
+a monotone path has no state for an unscripted passage, and on this recording it
+found it cheaper to compress the script than to stretch it.
+
+Windowed alignment fixes it, because each line is only ever placed inside its own
+neighbourhood:
+
+| | |
+| --- | --- |
+| lines placed acoustically | **40 / 41** |
+| per-line posterior | median **0.743**, p10 0.594, 39 of 41 ≥ 0.5 |
+| the one line kept at the supplied time | line 36 (see below) |
+| independent ASR in-span coverage | mean **0.810**, median 0.929 |
+
+The repeats were preserved exactly as supplied — **11× the pallavi line, 10× its
+partner**, plus the anupallavi pair 2× and every charanam line once or twice — which
+is the direct answer to "can WhisperX deal with repetitive lines": it can, because
+the repetitions are in the script.
+
+### What the alignment corrected
+
+The supplied grid was consistently **~1.2 s late** (median −1.19 s, p10 −1.50 s,
+largest 1.78 s). The four refrain cues the owner reported as missing — around 4:25,
+4:35 and 4:40 — are now sung lines rather than one 25.3 s cue or a music banner:
+
+| | before (stored) | after |
+| --- | --- | --- |
+| cues | 43 (37 sung, 6 music) | **47 (41 sung, 6 music)** |
+| pallavi occurrences | 8 | **11** |
+| partner-line occurrences | 9 | **10** |
+| 4:25 / 4:35 / 4:40 | one 25.3 s cue + banner | **4:24.2 pallavi, 4:35.2 pallavi, 4:40.1 ఇట్టే** |
+| longest sung cue | 25.3 s | **8.3 s** |
+
+The instrumental passages — which the supplied cues had swallowed — became six real
+`{{Music}}` cues:
+
+```
+{{Music}}   0.00 -  29.79   ( 29.8s)   intro
+{{Music}}  68.34 -  88.98   ( 20.6s)
+{{Music}} 118.34 - 134.06   ( 15.7s)
+{{Music}} 173.69 - 190.06   ( 16.4s)
+{{Music}} 218.99 - 225.45   (  6.5s)
+{{Music}} 288.35 - 292.00   (  3.7s)   outro
+```
+
+### The one line that rests on the supplied time
+
+Supplied cue 36 is **19 milliseconds** long (`00:04:20,894 → 00:04:20,913`). No line of
+24 characters can be sung in 19 ms, so that row carries no usable time; the windowed
+pass therefore refused its window (posterior 0.000) and kept the supplied position,
+which the timeline rendered as **4:19.7–4:21.4 (1.66 s)**.
+
+The stretch around it cannot be resolved by any of the three independent signals: the
+ASR collapses 253.9 → 275.2 into a single 21.3 s "సర్వము", and the acoustic onset
+detector sees one unbroken 26.6 s energy burst (252.1 → 278.6) with no phrase
+boundary. So the line is kept, in the owner's order, at the owner's position — the
+pipeline's rule is that a line is never dropped. If that row is a stray duplicate
+rather than a real occurrence, deleting it from the supplied SRT and re-running is the
+correct fix.
+
+### Verification
+
+| check | result |
+| --- | --- |
+| database `synced_lyrics` / `_en` / `_en_tr` | PATCH `204`, read-back **identical** for all three |
+| stored Telugu vs the run artifact | **byte-identical** |
+| columns | 47 / 47 / 47, identical start+end at every index, identical music mask |
+| structure | 0 → 292 s, contiguous, no gap/overlap, no zero-length, no duplicate start |
+| every plain line cued; every cue an exact plain-lyric line | **yes — 20/20** |
+| repetitions | every line with exactly its supplied occurrence count |
+| music | 6 cues, longest 29.79 s = 10.2 % (limit 25 %) |
+| per-line posterior | median 0.743, 39/41 ≥ 0.5, 1 at 0.000 (the 19 ms row) |
+| genuine misplacement suspects | **0 of 41** |
+| independent ASR agreement | mean in-span coverage 0.810, median 0.929 |
+| plain lyrics | never written |
+
 ## Certified track: Rama Naamamu Madhuramu (2026-11-03)
 
 `2bdf7163-f40a-4c6e-83cb-d5da2c101d76` — 284 s, **48 supplied cues**, 20 distinct
