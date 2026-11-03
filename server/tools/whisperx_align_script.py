@@ -145,6 +145,10 @@ def main():
                     help="seconds of context on each side of a supplied cue (windowed mode)")
     ap.add_argument("--window-margin-frac", type=float, default=0.35,
                     help="extra context as a fraction of the supplied cue's own length")
+    ap.add_argument("--window-max-rate", type=float, default=8.0,
+                    help="characters/second; a supplied cue whose window cannot hold its "
+                         "own text at this rate is aligned together with its neighbours "
+                         "in one regional trellis instead")
     ap.add_argument("--window-min-score", type=float, default=0.10,
                     help="below this a windowed placement is not trusted and the supplied "
                          "time is kept instead (the line is never dropped)")
@@ -281,47 +285,129 @@ def main():
                 raise SystemExit(f"--segments-from cue {i + 1} is not the same line as the "
                                  f"script's cue {i + 1}")
         print(f"\nwindowed mode: {len(bounded)} windows from {args.segments_from}")
-        win_lines = []
-        prev_end = 0.0
+
+        def align_region(tokens_list, clean_text, lo, hi):
+            """One CTC trellis over [lo, hi] for the given tokens; merged segments or None."""
+            seg_wav = wav[int(lo * SAMPLE_RATE):int(hi * SAMPLE_RATE)]
+            em = emissions_for(model, seg_wav, device)
+            tr = get_trellis(em, tokens_list, blank)
+            pa = backtrack(tr, em, tokens_list, blank)
+            if pa is None:
+                return None
+            return merge_repeats(pa, clean_text)
+
+        # Per-line windows: the supplied cue plus a margin, clamped by the neighbouring
+        # cues so the supplied ORDER is kept (monotonicity of the RESULT is enforced
+        # later by the cursor).
+        windows = []
         for i, c in enumerate(bounded):
             dur = max(0.5, c["end"] - c["start"])
             margin = max(args.window_margin, args.window_margin_frac * dur)
             lo = max(0.0, c["start"] - margin)
             hi = min(audio_seconds, c["end"] + margin)
-            # Keep the supplied ORDER by clamping to the neighbouring cues, and keep the
-            # RESULT monotone with the previous line's aligned end. (Bounding by the
-            # neighbours' midpoints instead was measured on Rama Naamamu Madhuramu to
-            # drift the whole closing refrain ~1.5 s early, so the tighter clamp stands.)
             if i > 0:
                 lo = max(lo, bounded[i - 1]["end"] + 0.02)
             if i < len(bounded) - 1:
                 hi = min(hi, bounded[i + 1]["start"] - 0.02)
+            windows.append((lo, hi))
+
+        # A supplied cue can be far too short to hold its own text - measured on Pattabhi
+        # Raamuni: 19 ms supplied for a 24-character line, so no placement inside it can
+        # be right. Rather than dropping the line (never an option) or keeping a timestamp
+        # the audio does not support, such a line is aligned TOGETHER with its immediate
+        # neighbours in one regional trellis: the audio then distributes those few lines
+        # inside the combined region, exactly as the whole-track pass does, but scoped to
+        # a few seconds instead of the whole track.
+        need = [len(line_tokens[i][0]) / args.window_max_rate for i in range(len(bounded))]
+        hard = [i for i in range(len(bounded))
+                if windows[i][1] - windows[i][0] < max(0.8, need[i])]
+        groups, taken = {}, set()
+        for i in hard:
+            members = [j for j in (i - 1, i, i + 1) if 0 <= j < len(bounded) and j not in taken]
+            if not members:
+                continue
+            groups[members[0]] = members
+            taken.update(members)
+        if hard:
+            print(f"crowded cues: {len(hard)} line(s) whose supplied time is too short for "
+                  f"their own text -> regional group(s) "
+                  f"{[[m + 1 for m in g] for g in groups.values()]}")
+            for i in hard:
+                print(f"  line {i + 1}: supplied {bounded[i]['end'] - bounded[i]['start']:.3f}s "
+                      f"for {len(line_tokens[i][0])} characters")
+
+        win_lines = [None] * len(bounded)
+
+        def supplied_fallback(i):
+            c = bounded[i]
+            lo, hi = windows[i]
+            s = max(lo, c["start"])
+            e = min(hi, max(s + 0.5, c["end"]))
+            return {"text": texts[i], "start": round(s, 3), "end": round(e, 3), "score": 0.0,
+                    "supplied": [c["start"], c["end"]], "source": "supplied"}
+
+        prev_end = 0.0
+        i = 0
+        while i < len(bounded):
+            if i in groups:
+                members = groups[i]
+                lo = max(windows[members[0]][0], prev_end)
+                hi = windows[members[-1]][1]
+                toks, owner, clean_parts = [], [], []
+                for m in members:
+                    t, cl = line_tokens[m]
+                    toks.extend(t)
+                    owner.extend([m] * len(t))
+                    clean_parts.append(cl)
+                ss = align_region(toks, "".join(clean_parts), lo, hi) if toks and hi - lo >= 0.4 else None
+                if ss:
+                    spans, scores = {}, {}
+                    for cdx, seg in enumerate(ss):
+                        m = owner[cdx]
+                        if m not in spans:
+                            spans[m] = [seg.start, seg.end]
+                            scores[m] = [seg.score, 1]
+                        else:
+                            spans[m][0] = min(spans[m][0], seg.start)
+                            spans[m][1] = max(spans[m][1], seg.end)
+                            scores[m][0] += seg.score
+                            scores[m][1] += 1
+                    for m in members:
+                        c = bounded[m]
+                        if m in spans:
+                            s = lo + spans[m][0] * FRAME_SECONDS
+                            e = lo + (spans[m][1] + 1) * FRAME_SECONDS
+                            win_lines[m] = {"text": texts[m], "start": round(s, 3),
+                                            "end": round(e, 3),
+                                            "score": round(scores[m][0] / scores[m][1], 4),
+                                            "supplied": [c["start"], c["end"]], "source": "region"}
+                            prev_end = max(prev_end, round(e, 3))
+                for m in members:
+                    if win_lines[m] is None:
+                        win_lines[m] = supplied_fallback(m)
+                        prev_end = max(prev_end, win_lines[m]["end"])
+                i = members[-1] + 1
+                continue
+
+            c = bounded[i]
+            lo, hi = windows[i]
             lo = max(lo, prev_end)                           # keep the result monotone
             toks, cl = line_tokens[i]
             placed = None
             if toks and hi - lo >= 0.4:
-                seg_wav = wav[int(lo * SAMPLE_RATE):int(hi * SAMPLE_RATE)]
-                em = emissions_for(model, seg_wav, device)
-                tr = get_trellis(em, toks, blank)
-                pa = backtrack(tr, em, toks, blank)
-                if pa is not None:
-                    ss = merge_repeats(pa, cl)
-                    if ss:
-                        s = lo + ss[0].start * FRAME_SECONDS
-                        e = lo + ss[-1].end * FRAME_SECONDS
-                        sc = sum(x.score for x in ss) / len(ss)
-                        if sc >= args.window_min_score and e - s >= 0.2:
-                            placed = (round(s, 3), round(e, 3), round(sc, 4), "window")
-            if placed is None:
-                # The acoustics did not support a windowed placement: keep the supplied
-                # time rather than dropping the line.
-                s = max(lo, c["start"])
-                e = min(hi, max(s + 0.5, c["end"]))
-                placed = (round(s, 3), round(e, 3), 0.0, "supplied")
-            s, e, sc, src = placed
-            prev_end = e
-            win_lines.append({"text": texts[i], "start": s, "end": e, "score": sc,
-                              "supplied": [c["start"], c["end"]], "source": src})
+                ss = align_region(toks, cl, lo, hi)
+                if ss:
+                    s = lo + ss[0].start * FRAME_SECONDS
+                    e = lo + ss[-1].end * FRAME_SECONDS
+                    sc = sum(x.score for x in ss) / len(ss)
+                    if sc >= args.window_min_score and e - s >= 0.2:
+                        placed = {"text": texts[i], "start": round(s, 3), "end": round(e, 3),
+                                  "score": round(sc, 4), "supplied": [c["start"], c["end"]],
+                                  "source": "window"}
+            win_lines[i] = placed or supplied_fallback(i)
+            prev_end = max(prev_end, win_lines[i]["end"])
+            i += 1
+
         lines = win_lines
 
     placed = [l for l in lines if l["start"] is not None]
@@ -391,6 +477,7 @@ def main():
         "segments_from": args.segments_from,
         "source_counts": {
             "window": sum(1 for l in lines if l.get("source") == "window"),
+            "region": sum(1 for l in lines if l.get("source") == "region"),
             "supplied": sum(1 for l in lines if l.get("source") == "supplied"),
             "global": sum(1 for l in lines if l.get("source") == "global"),
             "unplaced": sum(1 for l in lines if l.get("source") == "unplaced"),
@@ -411,8 +498,8 @@ def main():
           f"span {timeline[0]['start']:.3f} -> {timeline[-1]['end']:.3f}")
     if args.segments_from:
         c = report["source_counts"]
-        print(f"placements: {c['window']} windowed, {c['supplied']} kept at the supplied time, "
-              f"{c['unplaced']} unplaced")
+        print(f"placements: {c['window']} windowed, {c.get('region', 0)} in a regional group, "
+              f"{c['supplied']} kept at the supplied time, {c['unplaced']} unplaced")
     print(f"weak lines (score < 0.3): {len(report['weak_lines'])}")
     print(f"wrote {out_srt}")
 
