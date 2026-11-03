@@ -288,10 +288,18 @@ def main():
             margin = max(args.window_margin, args.window_margin_frac * dur)
             lo = max(0.0, c["start"] - margin)
             hi = min(audio_seconds, c["end"] + margin)
+            # Bound the window against the NEIGHBOURING CUES' MIDPOINTS, not against
+            # their boundaries. Clamping to the neighbour's supplied end/start cancels
+            # the margin exactly where it is needed: measured on Rama Naamamu Madhuramu,
+            # the supplied boundary between two refrain lines was 0.66 s later than the
+            # words the ASR actually heard, so a boundary clamp forbade the model from
+            # placing the line where it is sung and the cue came out too short.
             if i > 0:
-                lo = max(lo, bounded[i - 1]["end"] + 0.02)   # keep supplied order
+                prev = bounded[i - 1]
+                lo = max(lo, (prev["start"] + prev["end"]) / 2)
             if i < len(bounded) - 1:
-                hi = min(hi, bounded[i + 1]["start"] - 0.02)
+                nxt = bounded[i + 1]
+                hi = min(hi, (nxt["start"] + nxt["end"]) / 2)
             lo = max(lo, prev_end)                           # keep the result monotone
             toks, cl = line_tokens[i]
             placed = None
