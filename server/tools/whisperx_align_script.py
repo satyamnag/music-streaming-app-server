@@ -177,6 +177,29 @@ def main():
     emission = emissions_for(model, wav, device)
     print(f"emission frames: {emission.shape[0]}  ({emission.shape[0] / (1 / FRAME_SECONDS):.1f}s)")
 
+    # Singing evidence per second: 1 - p(blank). The CTC blank state means "no
+    # character here", so a high value means speech-like content the script could
+    # occupy. This is the independent check for whether a cue was placed where the
+    # audio actually has singing.
+    sing = (1.0 - emission[:, blank].exp()).numpy()
+    per_second = []
+    for s in range(int(audio_seconds)):
+        lo, hi = int(s / FRAME_SECONDS), int((s + 1) / FRAME_SECONDS)
+        hi = min(hi, sing.shape[0])
+        per_second.append(float(sing[lo:hi].mean()) if hi > lo else 0.0)
+    print("\nsinging evidence (1 - p(blank)) per second, last 40 s:")
+    row = []
+    for s in range(max(0, int(audio_seconds) - 40), int(audio_seconds)):
+        row.append(f"{s}:{per_second[s]:.2f}")
+    for i in range(0, len(row), 10):
+        print("  " + "  ".join(row[i:i + 10]))
+    strong = [s for s, v in enumerate(per_second) if v > 0.15]
+    print(f"seconds with singing evidence >0.15: {len(strong)}"
+          + (f"  (first {strong[0]}s, last {strong[-1]}s)" if strong else ""))
+    # where does the scripted singing plausibly end?
+    tail_strong = [s for s in strong if s >= int(audio_seconds) - 25]
+    print(f"  of those, in the last 25 s: {tail_strong}")
+
     trellis = get_trellis(emission, chars, blank)
     path = backtrack(trellis, emission, chars, blank)
     if path is None:
@@ -272,6 +295,11 @@ def main():
         "timeline": timeline,
         "aligned_lines": len(placed),
         "weak_lines": [l["text"] for l in placed if l["score"] < 0.3],
+        "low_confidence_lines": [{"line": i + 1, "text": l["text"], "score": l["score"],
+                                  "start": l["start"], "supplied": l["supplied"]}
+                                 for i, l in enumerate(lines)
+                                 if l["start"] is not None and l["score"] < 0.6],
+        "singing_evidence_per_second": [round(v, 4) for v in per_second],
         "music_cues": sum(1 for e in timeline if e["kind"] == "music"),
     }
     json.dump(report, open(os.path.join(args.out_dir, "whisperx-align-report.json"), "w", encoding="utf-8"),
