@@ -1,0 +1,156 @@
+name: Build sync lyrics for one track from its audio
+
+# For tracks that are NOT in the committed whisper-words.json snapshot, and for tracks
+# whose hand-uploaded SRT does not describe the whole song.
+#
+# The timeline is derived from the AUDIO, not from a supplied file:
+#   1 transcribe_track.py       faster-whisper large-v3, word timestamps
+#   2 whisper-segment-sync.mjs  greedy segmentation -> ONE cue per sung occurrence
+#                               (this is the part WhisperX structurally cannot do:
+#                                it models the repeated refrain instead of collapsing it)
+#   3 cover_with_music.mjs      anchor the timeline at 0 and at the duration
+#   4 render-variant-sync.mjs   English translation + transliteration from the plain columns
+#   5 finalize_payload.mjs      validate (incl. the longest-{{Music}} guard), backup,
+#                               ONE PATCH, read-back byte comparison
+#
+# `write` defaults to false: a run without it validates only.
+# The plain lyric columns are never written.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id'
+        required: true
+        default: '50320a38-84ed-4da5-afe2-95dab5ab2b61'
+      write:
+        description: 'Write the three columns. Leave false to validate only.'
+        type: boolean
+        default: false
+      music_gap:
+        description: 'Gaps at least this long become a {{Music}} cue'
+        required: false
+        default: '3.0'
+      max_music_fraction:
+        description: 'Refuse to write if one {{Music}} cue covers more than this share (0.25 = 25%)'
+        required: false
+        default: '0.25'
+      beam:
+        description: 'Whisper beam size'
+        required: false
+        default: '5'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-track-audio-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Transcribe, segment, render, write
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      WRITE_FLAG: ${{ inputs.write }}
+      MUSIC_GAP: ${{ inputs.music_gap }}
+      MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
+      BEAM: ${{ inputs.beam }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install faster-whisper (CPU)
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          python -m pip install faster-whisper imageio-ffmpeg
+          python -c "import faster_whisper, importlib.metadata as m; print('faster-whisper', m.version('faster-whisper'))"
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          R2="$(aws secretsmanager get-secret-value --secret-id r2/base-url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ] || [ -z "$R2" ]; then echo "::error::missing secrets"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"; echo "::add-mask::$R2"
+          {
+            echo "SUPABASE_URL=$SUPA_URL"
+            echo "SUPABASE_ANON_KEY=$ANON"
+            echo "R2_BASE_URL=$R2"
+          } >> "$GITHUB_ENV"
+
+      - name: Transcribe the track
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          python transcribe_track.py --track "$TRACK_ID" --beam "$BEAM" --out-dir audio-out | tee transcribe.log
+
+      - name: Greedy segmentation (one cue per sung occurrence)
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e 'console.log(require("./audio-out/job.json").duration)')"
+          node whisper-segment-sync.mjs \
+            --words audio-out/words.txt \
+            --plain audio-out/plain.txt \
+            --duration "$DURATION" \
+            --out audio-out/segmented.srt 2>&1 | tee segment.log
+
+      - name: Anchor the timeline at 0 and the duration
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e 'console.log(require("./audio-out/job.json").duration)')"
+          node cover_with_music.mjs --srt audio-out/segmented.srt \
+            --duration "$DURATION" --out audio-out/final.srt | tee cover.log
+
+      - name: Render English translation + transliteration
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          node render-variant-sync.mjs --track "$TRACK_ID" --cols en,en_tr \
+            --timeline-file audio-out/final.srt --out-dir audio-out --emit-payload | tee render.log
+
+      - name: Validate, then write all three columns
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e 'console.log(require("./audio-out/job.json").duration)')"
+          ARGS="--track $TRACK_ID --final audio-out/final.srt --variant audio-out/payload.json --duration $DURATION --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
+          node finalize_payload.mjs $ARGS | tee finalize-dry.log
+          if [ "${WRITE_FLAG:-false}" = "true" ]; then
+            node finalize_payload.mjs $ARGS --write | tee finalize-write.log
+          else
+            echo "validate-only run (write=false) - nothing written"
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-track-from-audio
+          path: |
+            server/tools/transcribe.log
+            server/tools/segment.log
+            server/tools/cover.log
+            server/tools/render.log
+            server/tools/finalize-dry.log
+            server/tools/finalize-write.log
+            server/tools/sync-from-srt-backup.json
+            server/tools/audio-out/
+          if-no-files-found: warn
