@@ -67,10 +67,13 @@ jobs:
       - name: Align the supplied SRT
         working-directory: server/tools
         run: |
-          set -eu
+          set -euo pipefail
+          # $SRT is repo-relative; this step runs inside server/tools.
+          SRT_ABS="$GITHUB_WORKSPACE/$SRT"
+          test -f "$SRT_ABS" || { echo "::error::srt not found at $SRT_ABS"; exit 1; }
           python whisperx_align_script.py \
             --url "$URL" \
-            --srt "$SRT" \
+            --srt "$SRT_ABS" \
             --duration "$DURATION" \
             --music-gap 3.0 \
             --out-dir whisperx-out 2>&1 | tee whisperx-align.log
