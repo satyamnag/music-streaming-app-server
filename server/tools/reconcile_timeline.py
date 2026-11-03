@@ -39,6 +39,26 @@ MIN_GAIN = 0.30
 # refused. The genuine corrections on Peru Teliyakunna were 5.3 s and 7.7 s.
 MAX_MOVE_SECONDS = 20.0
 
+# --- head repair ----------------------------------------------------------------
+# A monotone whole-track alignment has no state for an instrumental break: every
+# script character has to be emitted somewhere, so the line that follows a long
+# unscripted passage can have its FIRST character dragged back into that passage.
+# Measured on Darshanamu Neeyara: the boundary between the refrain line and the next
+# line was placed at 170.88 s, while the independent ASR heard the next line's words
+# only from 183.30 s and the aligner's own singing evidence was 0.00 for 179-183 s -
+# a 12.4 s error, and the only head in that track that far unsupported.
+#
+# Both signals are required, because neither alone is proof: the ASR misses words in
+# singing, and a slow line can legitimately hold for 20 s (that track really does,
+# after every refrain). A head is repaired only when it is wordless for at least
+# HEAD_GAP_MIN seconds AND the cue's character rate is too slow to have been sung in
+# one pass. The new start is the first ASR word minus the track's OWN measured offset
+# between a cue start and its first word, so no absolute constant is invented.
+HEAD_GAP_MIN = 4.0        # seconds of wordless head before a late start is believed
+HEAD_RATE_MAX = 2.0       # characters/second; below this the span cannot be one pass
+HEAD_MOVE_MIN = 2.0       # smallest repair worth making
+ASSOC_TOL = 1.5           # seconds of tolerance when tying an ASR word to a cue
+
 
 def parse_srt(path):
     text = open(path, encoding="utf-8").read().replace("\r\n", "\n").strip()
@@ -162,6 +182,59 @@ def main():
     if not moves:
         print("  no line needed moving")
 
+    # ---- head repair (see HEAD_GAP_MIN / HEAD_RATE_MAX above) -------------------
+    def assoc(c):
+        return [w for w in words
+                if c["start"] - ASSOC_TOL <= w["start"] < c["end"] + ASSOC_TOL]
+
+    # The track's own offset between a cue start and its first ASR word, measured only
+    # on heads that are already tight. No absolute constant is invented.
+    offs = []
+    for s in stats:
+        w = assoc(s["cue"])
+        if not w:
+            continue
+        d = w[0]["start"] - s["cue"]["start"]
+        if 0.0 <= d <= HEAD_GAP_MIN:
+            offs.append(d)
+    offs.sort()
+    offset = offs[len(offs) // 2] if offs else 0.0
+    print(f"  head offset measured on {len(offs)} tight heads: {offset:.2f}s")
+
+    repairs = []
+    for i, s in enumerate(stats):
+        c = s["cue"]
+        w = assoc(c)
+        if not w:
+            continue
+        gap = w[0]["start"] - c["start"]
+        chars = len(c["text"].replace(" ", ""))
+        rate = chars / max(1e-6, c["end"] - c["start"])
+        if gap < HEAD_GAP_MIN or rate >= HEAD_RATE_MAX:
+            continue
+        new_start = round(w[0]["start"] - offset, 3)
+        if new_start - c["start"] < HEAD_MOVE_MIN or new_start >= c["end"] - 1.0:
+            continue
+        if new_start - c["start"] > MAX_MOVE_SECONDS:
+            continue
+        prev = stats[i - 1]["cue"] if i else None
+        if prev is not None and new_start <= prev["start"] + 0.5:
+            continue
+        repairs.append({"index": i, "text": c["text"], "from": [c["start"], c["end"]],
+                        "to": [new_start, c["end"]], "head_gap": gap, "rate": rate,
+                        "first_word": w[0]["start"]})
+        # The previous cue holds through the passage instead of a new {{Music}} banner:
+        # the supplied structure is preserved (only the boundary moves).
+        if prev is not None and prev["end"] < new_start:
+            prev["end"] = new_start
+        c["start"] = new_start
+    for r in repairs:
+        print(f"  REPAIRED head line {r['index'] + 1}: {r['from'][0]:.2f}-{r['from'][1]:.2f} -> "
+              f"{r['to'][0]:.2f}-{r['to'][1]:.2f}  (wordless head {r['head_gap']:.2f}s, "
+              f"rate {r['rate']:.2f} c/s, first word {r['first_word']:.2f}s)")
+    if not repairs:
+        print("  no head needed repairing")
+
     lyric.sort(key=lambda c: c["start"])
     timeline = []
     if lyric[0]["start"] > 0.05:
@@ -190,7 +263,8 @@ def main():
     print(f"\ntimeline: {len(timeline)} cues ({len(timeline) - music} sung, {music} music), "
           f"span {timeline[0]['start']:.3f} -> {timeline[-1]['end']:.3f}")
     if args.report:
-        json.dump({"duration": args.duration, "cues": len(timeline), "moved": moves, "timeline": timeline},
+        json.dump({"duration": args.duration, "cues": len(timeline), "moved": moves,
+                   "head_offset": offset, "head_repairs": repairs, "timeline": timeline},
                   open(args.report, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
         print(f"wrote {args.report}")
     print(f"wrote {args.out}")
