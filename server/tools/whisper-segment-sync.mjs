@@ -137,6 +137,15 @@ console.log(`words: ${words.length}  lyric lines: ${lyric.length}  duration: ${d
 // 0.45 (not 0.5): Whisper MERGES several sung words into one token (e.g.
 // `అతిశయముగ నీవు` -> `అదిషయముగనివు`), so a 5-word line can legitimately be
 // covered by 2 words and its mean per-key similarity lands just under 0.5.
+// A sung lyric line is roughly 2-3s per word. This is the longest span a run may cover
+// and still be believed for a line of `k` words. 3s/word + 2s of slack passes every
+// legitimate cue measured on this catalogue (Peru Teliyakunna's slowest line is 16.26s
+// for 6 words => bound 20s) while refusing runs that swallow neighbouring lines
+// (Pattabhi Raamuni: 25.3s for 6 words).
+const SECONDS_PER_WORD = 3
+const SPAN_SLACK = 2
+const maxSpanForLine = (k) => k * SECONDS_PER_WORD + SPAN_SLACK
+
 const MIN_SCORE = 0.45
 
 // Whisper sometimes emits a short burst of nonsense before a real line
@@ -175,6 +184,15 @@ function bestAt(w, maxSkip = MAX_SKIP) {
         const score = scoreWindow(L.keys, run) - skipCost
         if (score < MIN_SCORE) continue
         const span = run[run.length - 1].end - run[0].start
+        // DURATION BOUND. scoreWindow penalises a run with MORE tokens than the line has
+        // words, but it has no sense of time. Whisper merges sung words into a few very
+        // long tokens, so a 6-word line can match 2-3 huge tokens with no surplus at all
+        // and then span tens of seconds, swallowing the neighbouring lines. Measured on
+        // Pattabhi Raamuni: one 25.3s `ఇట్టే తీరును` cue ate two whole refrain pairs, and
+        // the పట్టాభి/ఇట్టే lines at 4:25, 4:35 and 4:40 never got a cue.
+        // A real sung line is roughly 2-3s per word; Peru's longest legitimate cue is
+        // 16.26s for 6 words, so this bound leaves it untouched while refusing 25s.
+        if (span > maxSpanForLine(k)) continue
         const better = !best
           || score > best.score + 1e-9
           || (Math.abs(score - best.score) < 1e-9 && run.length < best.runLen)
