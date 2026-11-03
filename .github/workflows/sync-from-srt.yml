@@ -1,0 +1,167 @@
+name: Build 3-language sync lyrics from an uploaded SRT
+
+# The production pipeline behind the admin "Build from SRT" action.
+#
+# The admin writes the uploaded SRT into the track's `synced_lyrics`; this job reads it
+# back as the alignment SCRIPT, aligns it to the real audio with WhisperX, reconciles it
+# against an independent Whisper transcript, derives the {{Music}} cues, renders the
+# English translation and transliteration from the plain columns, and writes all three
+# columns in ONE PATCH with a backup.
+#
+# SAFETY
+#   * `write` defaults to false: a run without it validates only.
+#   * prepare refuses unless every cue is an EXACT plain-lyric line, in plain order.
+#   * finalize refuses unless the three columns share one timeline, are contiguous,
+#     span 0 -> duration, and every sung cue carries text in all three.
+#   * the current three columns are backed up before the PATCH, and the row is re-read
+#     and compared byte-for-byte afterwards.
+#
+# Compute stays here: WhisperX alignment plus a large-v3 ASR cross-check.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id (its synced_lyrics must already hold the uploaded SRT)'
+        required: true
+        default: '6bae22b4-73e4-4216-8477-c3634d1911be'
+      write:
+        description: 'Write the three columns. Leave false to validate only.'
+        type: boolean
+        default: false
+      shift:
+        description: 'Optional constant offset in seconds for all columns, e.g. -0.5'
+        required: false
+        default: '0'
+      music_gap:
+        description: 'Gaps at least this long become a {{Music}} cue'
+        required: false
+        default: '3.0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-from-srt-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Align, reconcile, render, write
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      WRITE_FLAG: ${{ inputs.write }}
+      SHIFT: ${{ inputs.shift }}
+      MUSIC_GAP: ${{ inputs.music_gap }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install WhisperX (CPU)
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          # whisperx 3.8.6 requires torch~=2.8.0; torch, torchaudio AND torchvision
+          # must all be CPU builds or Wav2Vec2ForCTC fails to import.
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu \
+            torch==2.8.0 torchaudio==2.8.0 torchvision==0.23.0
+          python -m pip install whisperx imageio-ffmpeg
+          python -c "import importlib.metadata as m, torch; print('whisperx', m.version('whisperx'), '| torch', torch.__version__)"
+
+      - name: Resolve secrets (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          R2="$(aws secretsmanager get-secret-value --secret-id r2/base-url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ] || [ -z "$R2" ]; then echo "::error::missing secrets"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"; echo "::add-mask::$R2"
+          {
+            echo "SUPABASE_URL=$SUPA_URL"
+            echo "SUPABASE_ANON_KEY=$ANON"
+            echo "R2_BASE_URL=$R2"
+          } >> "$GITHUB_ENV"
+
+      - name: Prepare the alignment script from the uploaded SRT
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          node prepare_srt_job.mjs --track "$TRACK_ID" --out-dir out | tee prepare.log
+
+      - name: WhisperX alignment
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          URL="$(node -e 'console.log(require("./out/job.json").audio_url)')"
+          DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
+          python whisperx_align_script.py --url "$URL" --srt out/script.srt \
+            --duration "$DURATION" --music-gap "$MUSIC_GAP" --out-dir out 2>&1 | tee align.log
+
+      - name: Independent Whisper cross-check
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          URL="$(node -e 'console.log(require("./out/job.json").audio_url)')"
+          python whisper_crosscheck.py --url "$URL" \
+            --srt "$(ls out/*.aligned.srt | head -n 1)" --out-dir out 2>&1 | tee crosscheck.log
+
+      - name: Reconcile against the ASR evidence
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
+          python reconcile_timeline.py \
+            --aligned "$(ls out/*.aligned.srt | head -n 1)" \
+            --words out/whisper-words.json \
+            --duration "$DURATION" --music-gap "$MUSIC_GAP" \
+            --out out/final.srt --report out/reconcile-report.json | tee reconcile.log
+
+      - name: Render English translation + transliteration from the plain columns
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          node render-variant-sync.mjs --track "$TRACK_ID" --cols en,en_tr \
+            --timeline-file out/final.srt --out-dir out --emit-payload | tee render.log
+
+      - name: Validate, then write all three columns
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
+          ARGS="--track $TRACK_ID --final out/final.srt --variant out/payload.json --duration $DURATION --shift $SHIFT"
+          node finalize_payload.mjs $ARGS | tee finalize-dry.log
+          if [ "${WRITE_FLAG:-false}" = "true" ]; then
+            node finalize_payload.mjs $ARGS --write | tee finalize-write.log
+          else
+            echo "validate-only run (write=false) - nothing written"
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-from-srt
+          path: |
+            server/tools/prepare.log
+            server/tools/align.log
+            server/tools/crosscheck.log
+            server/tools/reconcile.log
+            server/tools/render.log
+            server/tools/finalize-dry.log
+            server/tools/finalize-write.log
+            server/tools/sync-from-srt-backup.json
+            server/tools/out/
+          if-no-files-found: warn
