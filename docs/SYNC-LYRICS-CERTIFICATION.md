@@ -13,6 +13,114 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Certified track: Darshanamu Neeyara (2026-11-03)
+
+`72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
+plain-lyric lines (the pallavi pair 8× each, the two anupallavi lines 2×, charanam 1
+2×, **charanam 2 once**, charanams 3 and 4 2× each), **50 cues / 48 sung / 2 music**.
+Written by run `41613044079`.
+
+Built from the owner's SRT (`server/tools/inputs/Darshanamu-Neeyara.source.srt`)
+through `sync-from-srt.yml` using the new `srt_path` input, so **nothing was staged
+into `synced_lyrics` first**. The backup the run wrote proves the columns were
+empty before it: `synced_lyrics`, `synced_lyrics_en`, `synced_lyrics_en_tr` all
+`0 chars`. `plain_lyrics` / `plain_lyrics_en` / `plain_lyrics_en_tr` were read
+only — `finalize_payload.mjs` PATCHes exactly the three `synced_*` columns.
+
+### Can forced alignment handle the repeated lines?
+
+Yes — and precisely because the repeats are already in the **script**. WhisperX's
+aligner is not a segmenter: `align()` walks a *known* transcript monotonically
+through the audio (`get_trellis` → `backtrack` → `merge_repeats`, see
+`whisperx/alignment.py`). A line that appears 8× in the script is simply 8
+consecutive runs of its characters, so nothing has to decide "which occurrence is
+this". What the aligner *cannot* do is invent an occurrence the script does not
+list, or decide that two adjacent occurrences are the same one — those are
+segmentation questions, which is why `whisper-segment-sync.mjs` (greedy over ASR
+words, one cue per sung occurrence) exists for tracks with no supplied script.
+
+Measured on this track with the 48 cues supplied as one monotone script:
+
+| | |
+| --- | --- |
+| lines placed | **48 / 48** |
+| per-line posterior | median **0.747**, p10 0.673, **min 0.612**; 0 lines below 0.3 |
+| occurrences per line vs the supplied SRT | **identical — 0 differ** |
+| the pallavi pair | 8× each at 22.4 / 37.0 / 64.9 / 149.0 / 225.1 / 307.9 / 364.8 / 380.1 and 29.5 / 44.0 / 72.4 / 156.1 / 232.0 / 315.1 / 370.9 / 384.3 |
+| lines genuinely better explained elsewhere | **0 of 48** |
+
+The 12 cues the cross-check flags as "a better fit exists" are all either a window
+that *contains* the cue (2) or **another occurrence of the same line** (10). That is
+inherent to a refrain — identical text matches at every occurrence — and it is
+harmless because the monotone timeline fixes which occurrence is which.
+
+### What the alignment corrected in the supplied timing
+
+Median deviation **−0.01 s**, p10 −0.49 s, p90 +0.09 s: the supplied grid was nearly
+right but not exact. The head and tail became real `{{Music}}` cues (0 → 22.44 s and
+394.48 → 398 s), and four lines moved by more than 0.9 s. On every large correction
+the independent faster-whisper transcript agrees with the **produced** value, not the
+supplied one:
+
+| line | supplied start | produced start | words the ASR actually hears |
+| --- | --- | --- | --- |
+| 19 `ఓంకార, స్వస్తి, గద, చక్ర భూష` | 183.686 | **182.780** | `ముకార` @183.30, `స్వస్తి` @184.70 |
+| 45 `దర్శనము నీయర, దశవతార రామ` | 366.298 | **364.780** | `సెం`…`దిషన` @364.80 |
+| 46 `దరి మమ్ము చేర్చర, దశరథ సుత రామ` | 373.218 | **370.940** | `రాము`…`దిమము` @371.16 |
+| 48 `దరి మమ్ము చేర్చర, దశరథ సుత రామ` | 387.057 | **384.280** | `కరిమంము` @385.78 |
+
+Largest deviation from the supplied file is now **2.78 s**, and on the three largest
+of those the supplied grid is the outlier.
+
+### The one defect the first alignment had, and the rule that fixes it
+
+The first validate-only run put the boundary between lines 18 and 19 at **170.88 s**.
+Three independent sources disagreed with it:
+
+- the aligner's own singing evidence `1 − p(blank)` was **0.00 for 179–183 s**,
+- the independent ASR heard no word at all between 162.12 s and 183.30 s, then line
+  19's second half (`ముకార`, `స్వస్తి`, `గదచ`, `క్రభూషా`) from 183.30 s,
+- the owner's SRT had that boundary at 183.686 s.
+
+A whole-track monotone alignment has no state for an instrumental break: every
+script character must be emitted somewhere, so line 19's first character was dragged
+back into the 21 s interlude and the rest of the line squeezed forward. The cue
+therefore displayed its text **12.4 s before it is sung**.
+
+`reconcile_timeline.py` now has a **head-repair** pass. It runs after the ASR
+cross-check (so it has independent evidence) and repairs a head only when *both*
+hold: the head is wordless for ≥ 4.0 s **and** the cue's character rate is below
+2.0 c/s (it cannot have been sung in one pass). Both are required because neither
+alone is proof — the ASR misses words in singing, and a slow line can legitimately
+hold for 20 s (this track really does, after every refrain, and the owner's file
+agrees). The replacement start is the first ASR word minus the track's **own**
+measured cue-start-to-first-word offset, so no absolute constant is invented. The
+previous cue extends to the new boundary, so the supplied structure (48 lyric cues,
+music only at the head and tail) is preserved.
+
+Result: exactly **one repair**, `170.88 → 182.78`.
+
+### Verification
+
+| check | result |
+| --- | --- |
+| database `synced_lyrics` / `_en` / `_en_tr` | PATCH `204`, read-back **identical** for all three |
+| stored Telugu vs the run artifact | **byte-identical** |
+| columns | 50 / 50 / 50, identical start+end at every index, identical music mask |
+| structure | 0 → 398 s, contiguous, no gap/overlap, no zero-length, no duplicate start |
+| every Telugu cue an EXACT plain-lyric line; every plain line cued | **yes — 20/20** |
+| repetitions | every line with exactly its supplied occurrence count |
+| music | only `0.00–22.44` and `394.48–398.00`; longest 22.44 s = 5.6 % of the track (limit 25 %) |
+| `{{Music}}` vs singing evidence | music mean **0.042** vs sung mean **0.102** |
+| per-line posterior | median 0.747, min 0.612, 0 weak |
+| genuine misplacement suspects | **0 of 48** |
+| plain lyrics | never written |
+
+Regression: re-running the patched `reconcile_timeline.py` on **Peru Teliyakunna**'s
+stored cross-check artifacts still reports *no head needed repairing*, produces the
+same 43 cues and the same two relocations, and the only difference from the stored
+column is the 0.5 s shift the owner asked for afterwards.
+
 ## Certified track: Ganesh Gayatri Mantra (2026-11-03)
 
 `f64c8a76-2b7e-4e85-8bc6-863b6daf9120` — 309 s, 179 measured words, 15 lyric lines
