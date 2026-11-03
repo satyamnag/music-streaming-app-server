@@ -33,6 +33,11 @@ SRT_TIME = re.compile(r"(\d+):(\d+):(\d+),(\d+) --> (\d+):(\d+):(\d+),(\d+)")
 LOW_COVERAGE = 0.30
 GOOD_COVERAGE = 0.80
 MIN_GAIN = 0.30
+# An ASR transcript can MISS whole passages (measured: 145 words for 41 sung lines), so
+# "no ASR words in the aligned span" is not proof of misplacement. Forced alignment is
+# locally accurate; a relocation of more than this is not credible evidence and is
+# refused. The genuine corrections on Peru Teliyakunna were 5.3 s and 7.7 s.
+MAX_MOVE_SECONDS = 20.0
 
 
 def parse_srt(path):
@@ -110,14 +115,26 @@ def main():
         stats.append({"cue": c, "in_span": cov, "words": len(w)})
     confident = [s for s in stats if s["in_span"] >= LOW_COVERAGE]
 
+    # MONOTONE CURSOR. A relocation must start at or after the previous line's end,
+    # otherwise two low-coverage lines can both pick the same best-matching ASR window
+    # and the rebuilt timeline overlaps (measured: lines 37, 38 and 40 all jumped onto
+    # 245.18-249.62, which the validator then correctly refused). The cursor only moves
+    # forward, so moves cascade in order instead of colliding.
+    cursor = 0.0
     moves = []
     for i, s in enumerate(stats):
         if s["in_span"] >= LOW_COVERAGE:
+            cursor = max(cursor, s["cue"]["end"])
             continue
-        lo = next((p["cue"]["end"] for p in reversed(stats[:i]) if p["in_span"] >= LOW_COVERAGE), 0.0)
+        lo = max(cursor, next((p["cue"]["end"] for p in reversed(stats[:i])
+                               if p["in_span"] >= LOW_COVERAGE), 0.0))
         hi = next((n["cue"]["start"] for n in stats[i + 1:] if n["in_span"] >= LOW_COVERAGE), args.duration)
+        if hi - lo < 0.2:
+            cursor = max(cursor, s["cue"]["end"])
+            continue
         cand = [w for w in words if w["start"] >= lo - 0.05 and w["end"] <= hi + 0.05]
         if not cand:
+            cursor = max(cursor, s["cue"]["end"])
             continue
         line = norm(s["cue"]["text"])
         k = max(2, round(len(line) / 5))
@@ -130,10 +147,14 @@ def main():
                 if sc > best[0]:
                     best = (sc, cand[a]["start"], cand[a + ln - 1]["end"])
         sc, bs, be = best
-        if bs is not None and sc >= GOOD_COVERAGE and sc > s["in_span"] + MIN_GAIN:
+        if (bs is not None and sc >= GOOD_COVERAGE and sc > s["in_span"] + MIN_GAIN
+                and abs(bs - s["cue"]["start"]) <= MAX_MOVE_SECONDS):
             moves.append({"index": i, "text": s["cue"]["text"], "from": [s["cue"]["start"], s["cue"]["end"]],
                           "to": [bs, be], "in_span": s["in_span"], "best": sc, "window": [lo, hi]})
             s["cue"]["start"], s["cue"]["end"] = bs, be
+            cursor = max(cursor, be)
+        else:
+            cursor = max(cursor, s["cue"]["end"])
 
     for m in moves:
         print(f"  MOVED line {m['index'] + 1}: {m['from'][0]:.2f}-{m['from'][1]:.2f} -> "
