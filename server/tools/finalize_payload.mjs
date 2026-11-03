@@ -99,6 +99,37 @@ if (!fail && OFFSET_MS) {
     if (after[0].s !== 0 || after[after.length - 1].e !== Math.round(DURATION * 1000)) failIf(true, `${tag} lost its 0 -> duration anchor`)
   }
 }
+// --- "the upload does not describe the whole song" guard --------------------
+// A {{Music}} cue covering a huge share of the track means the aligner ran out of
+// script and had nothing left to place: measured on Pattabhi Raamuni, 41 cues were
+// packed into the first 131s and one banner then covered 131.5 -> 292.0 (55% of the
+// track) while the independent ASR still heard words at 288.9s. Structurally valid,
+// semantically wrong. Refuse rather than ship a half-timed track; a genuinely long
+// instrumental can be allowed with --max-music-fraction.
+const MAX_MUSIC_FRACTION = Number(arg('max-music-fraction', 0.25))
+const durationMs = Math.round(DURATION * 1000)
+const musicCues = out.te.filter((c) => c.text === MUSIC_LABEL)
+let longestMusic = { len: 0, s: 0, e: 0 }
+for (const c of musicCues) {
+  const len = c.e - c.s
+  if (len > longestMusic.len) longestMusic = { len, s: c.s, e: c.e }
+}
+const musicShare = longestMusic.len / durationMs
+if (musicShare > MAX_MUSIC_FRACTION) {
+  fail++
+  console.error(
+    `\nFAIL  one {{Music}} cue covers ${(musicShare * 100).toFixed(1)}% of the track ` +
+    `(${(longestMusic.s / 1000).toFixed(2)}s -> ${(longestMusic.e / 1000).toFixed(2)}s of ${DURATION}s), ` +
+    `above the ${(MAX_MUSIC_FRACTION * 100).toFixed(0)}% limit.\n` +
+    '      That almost always means the uploaded SRT does not list every sung line, so the\n' +
+    '      aligner ran out of script part-way through. Check the upload first. If this track\n' +
+    '      genuinely has a long instrumental passage, re-run with --max-music-fraction 0.5.',
+  )
+} else {
+  console.log(`longest {{Music}} cue: ${(longestMusic.len / 1000).toFixed(2)}s ` +
+              `(${(musicShare * 100).toFixed(1)}% of the track, limit ${(MAX_MUSIC_FRACTION * 100).toFixed(0)}%)`)
+}
+
 if (fail) { console.error(`\n${fail} finding(s) - REFUSING to write`); process.exit(1) }
 
 const musicCount = out.te.filter((c) => c.text === MUSIC_LABEL).length

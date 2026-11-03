@@ -37,6 +37,10 @@ on:
         description: 'Gaps at least this long become a {{Music}} cue'
         required: false
         default: '3.0'
+      max_music_fraction:
+        description: 'Refuse to write if one {{Music}} cue covers more than this share of the track (0.25 = 25%)'
+        required: false
+        default: '0.25'
 
 permissions:
   contents: read
@@ -59,6 +63,7 @@ jobs:
       WRITE_FLAG: ${{ inputs.write }}
       SHIFT: ${{ inputs.shift }}
       MUSIC_GAP: ${{ inputs.music_gap }}
+      MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
     steps:
       - uses: actions/checkout@v4
 
@@ -141,7 +146,7 @@ jobs:
         run: |
           set -euo pipefail
           DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
-          ARGS="--track $TRACK_ID --final out/final.srt --variant out/payload.json --duration $DURATION --shift $SHIFT"
+          ARGS="--track $TRACK_ID --final out/final.srt --variant out/payload.json --duration $DURATION --shift $SHIFT --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
           node finalize_payload.mjs $ARGS | tee finalize-dry.log
           if [ "${WRITE_FLAG:-false}" = "true" ]; then
             node finalize_payload.mjs $ARGS --write | tee finalize-write.log
