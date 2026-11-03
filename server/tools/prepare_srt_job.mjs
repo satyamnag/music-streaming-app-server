@@ -57,19 +57,19 @@ if (bad.length) {
   console.error(`REFUSING: ${bad.length} cue(s) are not exact plain-lyric lines, e.g. ${JSON.stringify(bad[0].text.slice(0, 40))}`)
   process.exit(1)
 }
-// the upload must be in plain-lyric order (repeats allowed, but never out of order)
-let cursor = -1
-for (const c of lyricCues) {
-  const idx = plainLines.indexOf(c.text.trim())
-  if (idx >= cursor) cursor = idx
-  // a line may repeat; it may not go backwards past the previous distinct line
-}
-const seq = lyricCues.map((c) => plainLines.indexOf(c.text.trim()))
-const regressions = seq.filter((v, i) => i > 0 && v < seq[i - 1]).length
-if (regressions) {
-  console.error(`REFUSING: the uploaded SRT is not in plain-lyric order (${regressions} backward jump(s))`)
+// NOTE ON ORDER: a bhajan legitimately RETURNS to the pallavi after every charanam, so a
+// backward jump in plain-lyric index is normal structure, not an error (measured on Peru
+// Teliyakunna: 8 such returns). Monotonicity is therefore NOT a valid guard - the
+// exact-line check above is, plus a sanity bound on the cue count.
+const distinctUsed = new Set(lyricCues.map((c) => c.text.trim())).size
+if (lyricCues.length > distinctUsed * 10) {
+  console.error(`REFUSING: ${lyricCues.length} cues for ${distinctUsed} distinct lines looks like a broken upload`)
   process.exit(1)
 }
+const seq = lyricCues.map((c) => plainLines.indexOf(c.text.trim()))
+const returns = seq.filter((v, i) => i > 0 && v < seq[i - 1]).length
+console.log(`order: ${returns} return(s) to an earlier plain-lyric line (expected for a refrain structure)`)
+console.log(`distinct lines used: ${distinctUsed} of ${plainLines.length}`)
 
 const audioUrl = `${R2}/${track.storage_path.split('/').map(encodeURIComponent).join('/')}`
 const scriptSrt = lyricCues.map((c, i) => `${i + 1}\n00:00:00,000 --> 00:00:01,000\n${c.text.trim()}\n`).join('\n')
