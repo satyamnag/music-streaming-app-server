@@ -60,8 +60,7 @@ jobs:
           # as "Could not import module 'Wav2Vec2ForCTC'".
           python -m pip install --index-url https://download.pytorch.org/whl/cpu \
             torch==2.8.0 torchaudio==2.8.0 torchvision==0.23.0
-          python -m pip install whisperx imageio-ffmpeg
-          python -c "import importlib.metadata as m, torch, torchaudio, torchvision; print('whisperx', m.version('whisperx'), '| torch', torch.__version__, '| torchaudio', torchaudio.__version__, '| torchvision', torchvision.__version__)"
+          python -m pip install whisperx imageio-ffmpeg          python -c "import importlib.metadata as m, torch, torchaudio, torchvision; print('whisperx', m.version('whisperx'), '| torch', torch.__version__, '| torchaudio', torchaudio.__version__, '| torchvision', torchvision.__version__)"
           python -c "from whisperx.alignment import load_align_model, get_trellis, backtrack, merge_repeats; print('alignment functions import OK')"
 
       - name: Align the supplied SRT
@@ -77,6 +76,15 @@ jobs:
             --duration "$DURATION" \
             --music-gap 3.0 \
             --out-dir whisperx-out 2>&1 | tee whisperx-align.log
+
+      - name: Whisper cross-check (independent evidence)
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          python whisper_crosscheck.py \
+            --url "$URL" \
+            --srt whisperx-out/Peru-Teliyakunna.aligned.srt \
+            --out-dir whisperx-out 2>&1 | tee whisper-crosscheck.log
 
       - name: Verify output structure
         working-directory: server/tools
