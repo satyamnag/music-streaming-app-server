@@ -744,6 +744,53 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <div class="sync-header"><h2>Lyrics — <span id="syncTrackTitle"></span></h2></div>
         <p id="syncMsg" style="color:#555;font-size:13px;"></p>
 
+        <!-- Build from SRT: upload a hand-timed SRT and the GitHub Actions pipeline
+             re-times it against the real audio (WhisperX + Whisper cross-check) and
+             writes all three columns. Self-contained: it does not read or write any
+             other panel's state. -->
+        <div id="buildFromSrtPanel" style="border:1px solid #e2e2e2;border-radius:8px;padding:12px;margin:0 0 14px;background:#fafafa;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <strong style="font-size:13px;">Build sync lyrics from an SRT</strong>
+            <button type="button" id="buildFromSrtOpen" style="padding:4px 10px;cursor:pointer;">Upload SRT…</button>
+            <span style="font-size:12px;color:#666;">Re-times an uploaded SRT against the audio and fills all three columns via GitHub Actions.</span>
+          </div>
+        </div>
+
+        <div id="buildFromSrtModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+          <div style="background:#fff;border-radius:10px;padding:20px;width:min(620px,92vw);max-height:86vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.25);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <strong style="font-size:15px;">Build sync lyrics from an SRT</strong>
+              <button type="button" id="buildFromSrtClose" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+            <div style="font-size:12px;color:#555;margin-bottom:12px;">
+              The Telugu lines are re-timed against the real audio, then the English translation and
+              transliteration are rendered from the plain columns. Every uploaded line must already be
+              an exact plain-lyric line of the chosen track. Nothing is written unless every validation passes.
+            </div>
+            <label style="display:block;font-size:12px;font-weight:600;margin:10px 0 4px;">Track</label>
+            <select id="buildFromSrtTrack" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:6px;">
+              <option value="">Loading tracks…</option>
+            </select>
+            <label style="display:block;font-size:12px;font-weight:600;margin:10px 0 4px;">SRT file</label>
+            <input type="file" id="buildFromSrtFile" accept=".srt,text/plain" style="width:100%;padding:4px;">
+            <div style="display:flex;gap:12px;margin-top:10px;">
+              <div style="flex:1;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Timing offset (s)</label>
+                <input type="number" id="buildFromSrtShift" value="0" step="0.05" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:6px;">
+              </div>
+              <div style="flex:1;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;">Music gap (s)</label>
+                <input type="number" id="buildFromSrtMusicGap" value="3" step="0.5" min="1" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:6px;">
+              </div>
+            </div>
+            <div id="buildFromSrtStatus" style="margin-top:12px;font-size:12px;color:#333;white-space:pre-wrap;"></div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+              <button type="button" id="buildFromSrtCancel" style="padding:6px 14px;cursor:pointer;">Cancel</button>
+              <button type="button" id="buildFromSrtSubmit" style="padding:6px 14px;cursor:pointer;background:#7a1f1f;color:#fff;border:none;border-radius:6px;">Build</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Auto-Sync: proposes timings from the audio, writes NOTHING.
              It fills the Sync editor below so the admin can review, correct
              and Save through the normal audited path. -->
@@ -5621,6 +5668,88 @@ function unpinAlbum(id) {
 }
 
 checkSession();
+</script>
+<script id="buildFromSrtScript">
+(function () {
+  'use strict';
+  var modal = document.getElementById('buildFromSrtModal');
+  if (!modal || modal.dataset.wired) return;
+  modal.dataset.wired = '1';
+  var byId = function (id) { return document.getElementById(id); };
+  var send = function (url, opts) {
+    return (typeof authedFetch === 'function')
+      ? authedFetch(url, opts)
+      : fetch(url, Object.assign({ credentials: 'same-origin' }, opts || {}));
+  };
+  function setStatus(msg) { byId('buildFromSrtStatus').textContent = msg; }
+
+  function open() {
+    modal.style.display = 'flex';
+    setStatus('');
+    var sel = byId('buildFromSrtTrack');
+    sel.innerHTML = '<option value="">Loading tracks...</option>';
+    send('/api/admin/tracks', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        var list = Array.isArray(body) ? body : (body.tracks || body.data || []);
+        if (!list.length) { sel.innerHTML = '<option value="">No tracks</option>'; return; }
+        list.sort(function (a, b) { return String(a.title).localeCompare(String(b.title)); });
+        sel.innerHTML = list.map(function (t) {
+          var title = String(t.title).replace(/[<>&]/g, '');
+          var dur = t.duration ? ' (' + Math.round(t.duration) + 's)' : '';
+          return '<option value="' + t.id + '">' + title + dur + '</option>';
+        }).join('');
+      })
+      .catch(function (e) {
+        sel.innerHTML = '<option value="">Could not load tracks</option>';
+        setStatus(String(e));
+      });
+  }
+
+  function close() { modal.style.display = 'none'; }
+
+  byId('buildFromSrtOpen').addEventListener('click', open);
+  byId('buildFromSrtClose').addEventListener('click', close);
+  byId('buildFromSrtCancel').addEventListener('click', close);
+
+  byId('buildFromSrtSubmit').addEventListener('click', function () {
+    var id = byId('buildFromSrtTrack').value;
+    var files = byId('buildFromSrtFile').files || [];
+    var file = files[0];
+    if (!id) { setStatus('Choose a track first.'); return; }
+    if (!file) { setStatus('Choose an .srt file first.'); return; }
+    setStatus('Uploading...');
+    var reader = new FileReader();
+    reader.onload = function () {
+      send('/api/admin/tracks/' + encodeURIComponent(id) + '/sync-from-srt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          srt: String(reader.result || ''),
+          shift: Number(byId('buildFromSrtShift').value) || 0,
+          music_gap: Number(byId('buildFromSrtMusicGap').value) || 3
+        })
+      })
+        .then(function (r) {
+          return r.json().then(function (b) { return { ok: r.ok, status: r.status, body: b }; });
+        })
+        .then(function (out) {
+          if (!out.ok) {
+            setStatus((out.body && (out.body.error || out.body.detail)) || ('Failed (HTTP ' + out.status + ')'));
+            return;
+          }
+          setStatus(
+            'Queued: ' + out.body.staged_cues + ' cues staged.\n' +
+            'The job runs on GitHub Actions and writes only if every check passes.\n' +
+            (out.body.run_url || '')
+          );
+        })
+        .catch(function (e) { setStatus('Upload failed: ' + String(e)); });
+    };
+    reader.onerror = function () { setStatus('Could not read the file.'); };
+    reader.readAsText(file, 'utf-8');
+  });
+})();
 </script>
 </body>
 </html>

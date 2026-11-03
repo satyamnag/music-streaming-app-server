@@ -170,6 +170,13 @@ const secrets = {
   // auto-sync endpoint fails closed with a clear message rather than doing
   // anything partial.
   deepgram_api_key: process.env.DEEPGRAM_API_KEY || '',
+  // GitHub Actions token for "Build sync lyrics from an uploaded SRT". The heavy
+  // work (WhisperX forced alignment + Whisper ASR cross-check) runs in GitHub
+  // Actions, never in this process, so the admin needs a token to dispatch it.
+  // Fine-grained PAT with Actions: read & write on the repo. Absent means the
+  // endpoint answers 503 with an explicit message instead of doing anything
+  // partial — the same fail-closed rule as the Deepgram key above.
+  github_actions_token: process.env.GITHUB_ACTIONS_TOKEN || '',
   // OpenAI key for the OPTIONAL lyric "second opinion" (see
   // libs/openaiLyricSecondOpinion.mjs). Off unless OPENAI_SECOND_OPINION=1, and
   // absent means the feature simply never runs. Vault-preferred, same as
@@ -2261,6 +2268,184 @@ const SYNC_COLUMNS = [
 //      ships silently to listeners and looks authoritative.
 //   3. Existing hand-timed LRCs are ground truth and are never overwritten.
 //
+// ============================================================================
+// POST /api/admin/tracks/:id/sync-from-srt
+//
+// Owner uploads an SRT (like a hand-timed draft) and the system builds the three
+// sync columns from it: Telugu re-timed against the real audio, then English
+// (translation) and English (transliteration) rendered from the plain columns.
+//
+// WHERE THE WORK RUNS
+//   The alignment (WhisperX + a Whisper large-v3 cross-check) is compute-heavy and
+//   runs in GitHub Actions, never here. This endpoint only validates the upload,
+//   stages it and dispatches the workflow.
+//
+// HOW THE SRT REACHES THE RUNNER (option C)
+//   It is written into the track's `synced_lyrics` and the runner reads it back as
+//   the alignment script, then overwrites it with the aligned result. No staging
+//   table, no schema change, and nothing appears in public CI logs. If the run
+//   fails the upload simply stays until it is re-run.
+//
+// FAIL-CLOSED
+//   No GitHub token -> 503 with an explicit message, exactly like Auto-Sync when
+//   the Deepgram key is missing. A rejected upload writes nothing.
+// ============================================================================
+const GH_OWNER = 'satyamnag'
+const GH_REPO = 'music-streaming-app-server'
+const GH_WORKFLOW_FILE = 'sync-from-srt.yml'
+const GH_REF = 'main'
+const SYNC_FROM_SRT_MAX_CHARS = 200000
+
+// Minimal, dependency-free SRT reader. Deliberately local: this route must not
+// depend on the shape of any other helper.
+function parseSrtCueList(srt) {
+  const out = []
+  const blocks = String(srt).replace(/\r\n/g, '\n').trim().split(/\n\n+/)
+  for (const block of blocks) {
+    const lines = block.split('\n').filter((l) => l.trim())
+    const timeIdx = lines.findIndex((l) => l.includes('-->'))
+    if (timeIdx === -1) continue
+    const m = lines[timeIdx].match(/(\d+):(\d+):(\d+),(\d+)\s*-->\s*(\d+):(\d+):(\d+),(\d+)/)
+    if (!m) continue
+    const start = +m[1] * 3600 + +m[2] * 60 + +m[3] + +m[4] / 1000
+    const end = +m[5] * 3600 + +m[6] * 60 + +m[7] + +m[8] / 1000
+    const text = lines.slice(timeIdx + 1).join(' ').trim()
+    if (!text || !(end > start)) continue
+    out.push({ start, end, text })
+  }
+  return out
+}
+
+app.post('/api/admin/tracks/:id/sync-from-srt', requireAdmin, async (req, res) => {
+  try {
+    const token = String(secrets.github_actions_token || '').trim()
+    if (!token) {
+      return res.status(503).json({
+        error: 'Build-from-SRT is not configured: the GitHub Actions token is missing. ' +
+               'Store a fine-grained PAT (Actions: read & write) as `github_actions_token`.',
+      })
+    }
+
+    const body = req.body || {}
+    const srt = typeof body.srt === 'string' ? body.srt : ''
+    if (!srt.trim()) return res.status(400).json({ error: 'No SRT content was uploaded.' })
+    if (srt.length > SYNC_FROM_SRT_MAX_CHARS) {
+      return res.status(413).json({ error: `That SRT is ${srt.length} characters, above the ${SYNC_FROM_SRT_MAX_CHARS} limit.` })
+    }
+
+    const cues = parseSrtCueList(srt)
+    if (!cues.length) {
+      return res.status(400).json({
+        error: 'No timed lyric cues were found in that file. Expected SubRip blocks: an index, a ' +
+               '`00:00:00,000 --> 00:00:05,000` line, then the text.',
+      })
+    }
+
+    const { data: track, error } = await supabase
+      .from('tracks')
+      .select('id, title, duration, storage_path, plain_lyrics, synced_lyrics')
+      .eq('id', req.params.id)
+      .maybeSingle()
+    if (error) return res.status(500).json({ error: error.message })
+    if (!track) return res.status(404).json({ error: 'Track not found' })
+    if (!String(track.plain_lyrics || '').trim()) {
+      return res.status(400).json({
+        error: 'This track has no plain Telugu lyrics. They are the script the timings are ' +
+               'matched against and the source of the two English columns, so nothing can be built.',
+      })
+    }
+    if (!track.storage_path) return res.status(400).json({ error: 'This track has no audio file.' })
+
+    // Every uploaded cue must be an EXACT plain-lyric line. Without this the runner
+    // would align text that is not in the song.
+    const plainLines = splitLyricLines(track.plain_lyrics)
+      .map((l) => String(l).trim())
+      .filter((l) => classifyLine(String(l)) === 'lyric')
+    const allowed = new Set(plainLines)
+    const unmatched = cues.filter((c) => !allowed.has(c.text))
+    if (unmatched.length) {
+      return res.status(400).json({
+        error: `${unmatched.length} cue(s) in that SRT are not exact plain-lyric lines of this ` +
+               'track, so they cannot be aligned.',
+        first_unmatched: unmatched[0].text.slice(0, 120),
+        plain_line_count: plainLines.length,
+      })
+    }
+    // A bhajan returns to the pallavi after each charanam, so a backward jump in
+    // plain-lyric index is normal structure - only the count is sanity-checked.
+    const distinct = new Set(cues.map((c) => c.text)).size
+    if (cues.length > distinct * 10) {
+      return res.status(400).json({
+        error: `${cues.length} cues for ${distinct} distinct lines looks like a broken upload.`,
+      })
+    }
+
+    // Stage the upload where the runner will read it (option C).
+    const staged = cues
+      .map((c, i) => `${i + 1}\n${formatSrtTime(c.start)} --> ${formatSrtTime(c.end)}\n${c.text}\n`)
+      .join('\n')
+    const { error: stageErr } = await supabase
+      .from('tracks')
+      .update({ synced_lyrics: staged })
+      .eq('id', track.id)
+    if (stageErr) return res.status(500).json({ error: `Could not stage the upload: ${stageErr.message}` })
+
+    // Dispatch the pipeline. Same request the `gh workflow run` CLI issues.
+    const dispatch = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW_FILE}/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'Content-Type': 'application/json',
+          'User-Agent': 'soulful-bhakti-admin',
+        },
+        body: JSON.stringify({
+          ref: GH_REF,
+          inputs: {
+            track_id: String(track.id),
+            write: 'true',
+            shift: String(Number(body.shift) || 0),
+            music_gap: String(Number(body.music_gap) || 3),
+          },
+        }),
+      },
+    )
+    if (!dispatch.ok) {
+      const detail = await dispatch.text().catch(() => '')
+      return res.status(502).json({
+        error: `GitHub refused the dispatch (HTTP ${dispatch.status}).`,
+        detail: detail.slice(0, 300),
+        note: 'The upload was staged in synced_lyrics but no job is running.',
+      })
+    }
+
+    return res.json({
+      ok: true,
+      staged_cues: cues.length,
+      plain_lines: plainLines.length,
+      workflow: GH_WORKFLOW_FILE,
+      ref: GH_REF,
+      run_url: `https://github.com/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_WORKFLOW_FILE}`,
+      note: 'The three columns are written only if every validation passes; a backup is taken first.',
+    })
+  } catch (err) {
+    console.error('[sync-from-srt]', err)
+    return res.status(500).json({ error: err.message || 'Unexpected error' })
+  }
+})
+
+function formatSrtTime(sec) {
+  const total = Math.max(0, Math.round(Number(sec) * 1000))
+  const h = Math.floor(total / 3600000)
+  const m = Math.floor((total % 3600000) / 60000)
+  const s = Math.floor((total % 60000) / 1000)
+  const ms = total % 1000
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`
+}
+
 // Cost note: each call is a billable Deepgram request. `force` re-runs a track
 // that already has synced lyrics; without it those tracks are refused early so
 // verified work is never even re-transcribed.
