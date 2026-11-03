@@ -13,6 +13,134 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Certified track: Rama Naamamu Madhuramu (2026-11-03)
+
+`2bdf7163-f40a-4c6e-83cb-d5da2c101d76` — 284 s, **48 supplied cues**, 20 distinct
+plain-lyric lines (the pallavi pair 9× each, the anupallavi once, charanam 1 2×,
+**charanam 2 once**, charanams 3 and 4 2× each), **54 cues / 48 sung / 6 music**.
+Written by run `41652558345`.
+
+Built from the owner's SRT (`server/tools/inputs/Rama-Naamamu-Madhuramu.source.srt`)
+through `sync-from-srt.yml` with **windowed alignment** (`segments_from` = the same
+file), so the pipeline never staged an untimed SRT into `synced_lyrics`: the three
+columns held a 30-cue timeline that the new gates would refuse (see below), and they
+were replaced in one PATCH with a backup.
+
+### Is the WAV master better input than the opus the app serves?
+
+The owner asked for the 48 kHz master (`(S) SB25 - Raama Naamamu Madhuramu - V05.wav`)
+to be used "because WhisperX can go through a wav file better". Measured rather than
+assumed — both files decoded to exactly what the model receives (16 kHz mono):
+
+| | master WAV | R2 opus |
+| --- | --- | --- |
+| duration | 284.520 s | **284.520 s** |
+| best envelope lag | — | **0.00 s** |
+| envelope correlation after gain normalisation | — | **1.0000** |
+| band energy 0–1 kHz / 1–3 kHz / 3–6 kHz / 6–8 kHz | 98.06 / 1.68 / 0.19 / 0.07 % | 98.05 / 1.69 / 0.19 / 0.07 % |
+
+They are the same recording, sample-aligned, and the wav2vec2 aligner resamples to
+16 kHz mono, so the opus is not losing anything the CTC model can see. No upload of a
+52 MB WAV to the CDN was needed.
+
+### Can forced alignment handle the repeated lines?
+
+Yes, for the same reason as on Darshanamu Neeyara: the repeats are in the **script**.
+`align()` walks a known transcript monotonically (`get_trellis` → `backtrack` →
+`merge_repeats`), so a line that appears 9× in the script is 9 consecutive runs of its
+characters. What an aligner cannot do is invent an occurrence the script omits.
+
+| | |
+| --- | --- |
+| lines placed | **48 / 48** |
+| per-line posterior | median **0.683**, p10 0.453, **min 0.301**; 0 below 0.3 |
+| occurrences per line vs the supplied SRT | **identical — 0 differ** |
+| the pallavi pair | 9× each at 23.8 / 29.2 / 40.8 / 95.4 / 143.9 / 181.8 / 243.7 / 249.8 / 255.9 and 26.0 / 32.1 / 44.2 / 98.7 / 147.6 / 184.5 / 246.5 / 252.7 / 260.8 |
+| lines genuinely better explained elsewhere | **0 of 48** |
+
+### What the alignment corrected
+
+The supplied grid was close but consistently ~0.5 s late: median **−0.53 s**, p10
+−0.93 s, p90 −0.16 s, largest 1.81 s.
+
+More important, three supplied cues were 27–34 s long because they lumped a refrain
+line together with the instrumental that follows it (cues 8, 18, 34 of the upload).
+Windowed alignment places each line where it is actually sung and leaves the
+instrumental empty, so those passages became real `{{Music}}` cues:
+
+```
+{{Music}}   0.00 -  23.83   ( 23.8s)   intro
+{{Music}}  47.07 -  71.26   ( 24.2s)   after "రమ్యము, రమణీయము."
+{{Music}} 101.79 - 133.04   ( 31.2s)
+{{Music}} 151.00 - 157.64   (  6.6s)
+{{Music}} 186.24 - 219.80   ( 33.6s)   longest = 11.8 % of the track
+{{Music}} 267.02 - 284.00   ( 17.0s)   outro
+```
+
+Music cues carry mean singing evidence `0.078` against `0.162` for the sung cues, so
+they sit where the aligner genuinely heard no Telugu.
+
+### The one thing the aligner could not do here
+
+The CTC model **under-covers fast singing**. In the closing refrain six lines came out
+0.7–1.0 s long for 13–14 characters (20+ characters/second, physically impossible)
+while the independent ASR heard every one of them with p ≥ 0.92 and its words tiled
+the whole stretch 243.6 → 267.0 with no gaps — and two `{{Music}}` cues appeared where
+words were plainly being sung.
+
+`reconcile_timeline.py` now has a **word-snap** pass: where the best contiguous window
+of ASR words explains a line (a) at least 0.75 of its characters, (b) either clearly
+better than the cue's own span (+0.15) or about equally well while the cue's own span
+explains < 0.95, and (c) at a singable rate (≥ 1 character per ⅛ s), the cue takes
+those word boundaries. Order is preserved (a new start is clamped to the previously
+accepted end, and a monotone normalisation pulls an earlier cue's end back to the next
+cue's start when the two models disagree by a few tens of ms).
+
+On this track that produced 11 snaps, including the whole closing refrain:
+
+```
+243.71 - 246.46   రామ నామము మధురము,
+246.46 - 249.84   రమ్యము, రమణీయము.
+249.84 - 252.66   రామ నామము మధురము,
+252.66 - 255.90   రమ్యము, రమణీయము.
+255.90 - 260.82   రామ నామము మధురము,
+260.82 - 267.02   రమ్యము, రమణీయము.
+267.02 - 284.00   {{Music}}
+```
+
+### What was there before
+
+The stored 30-cue timeline was structurally broken in exactly the way the new gates
+forbid — it is worth recording because it is what the app was serving:
+
+| | before | after |
+| --- | --- | --- |
+| cues | 30 (23 sung, 7 music) | **54 (48 sung, 6 music)** |
+| plain lines with **no cue at all** | **3** (`సామ గానము తోటి పలికిన,`, `విన్న, పల్కిన వీను, జిహ్వకు,`, `పరమాన్నము అది పీయుషం`) | **0** |
+| refrain pair occurrences | 1× and 3× (unbalanced) | **9× and 9×** |
+| longest sung cue | 16.9 s for a 13-character line | **6.2 s** |
+| trailing `{{Music}}` | 30.7 s starting at 253.3 (the closing refrain was silent) | 17.0 s starting at 267.0 |
+
+`finalize_payload.mjs` now refuses a timeline that leaves a plain-lyric line uncued
+(and, with `--expect-lyric-cues`, one that drops a supplied occurrence), so this state
+can no longer be written for any track.
+
+### Verification
+
+| check | result |
+| --- | --- |
+| database `synced_lyrics` / `_en` / `_en_tr` | PATCH `204`, read-back **identical** for all three |
+| stored Telugu vs the run artifact | **byte-identical** |
+| columns | 54 / 54 / 54, identical start+end at every index, identical music mask |
+| structure | 0 → 284 s, contiguous, no gap/overlap, no zero-length, no duplicate start |
+| every plain line cued; every cue an exact plain-lyric line | **yes — 20/20** |
+| repetitions | every line with exactly its supplied occurrence count |
+| music | 6 cues, longest 33.56 s = 11.8 % (limit 25 %); evidence 0.078 vs 0.162 sung |
+| per-line posterior | median 0.683, min 0.301, 0 weak |
+| genuine misplacement suspects | **0 of 48** |
+| independent ASR agreement | mean in-span coverage **0.691**, median 0.818 |
+| plain lyrics | never written (backup holds only the three `synced_*` columns) |
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
