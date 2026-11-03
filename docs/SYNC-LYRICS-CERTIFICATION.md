@@ -13,6 +13,42 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Certified track: Ganesh Gayatri Mantra (2026-11-03)
+
+`f64c8a76-2b7e-4e85-8bc6-863b6daf9120` — 309 s, 179 measured words, 15 lyric lines
+(9 unique, the mantras repeat), **67 cues / 63 sung**, 4 music banners.
+
+**All 21 checks pass**, and it was genuinely broken before:
+
+| | before | after |
+| --- | --- | --- |
+| cue counts per column | **48 / 29 / 48** (desynchronised) | **67 / 67 / 67**, identical times |
+| ends at track duration | **no** | yes (309 s) |
+| untimed lyric lines | 2 | **0** |
+| suspect cues | 9 | **0 of 63** |
+| music banners hiding a lyric | 16 | **0 of 4** |
+| worst cue/audio agreement | 0.00 | **0.72** |
+
+### How it was fixed
+
+The Telugu (source of truth) and the transliteration both had 19 lines; the English
+column had **14**, because it merged two lines per stanza. That made the columns
+non-parallel, so no aligned three-column timeline could exist.
+
+Owner-approved content fix (`fix_ganesh_en.mjs`, workflow `fix-ganesh-en.yml`):
+`plain_lyrics_en` rebuilt as 19 line-parallel lines — **16 lines are the existing
+author text moved to the correct index, verbatim**, and **3 are new**:
+
+- `మహోదరాయ ధీమహి` → "We meditate on the One with the great belly."
+- `వక్రతుండాయ ధీమహి` → "We meditate on the One with the curved trunk."
+- `ఓం తత్పురుషాయ విద్మహే` → "Om, let us meditate on the Supreme Person;"
+
+Guards enforced: `plain_lyrics` and `plain_lyrics_en_tr` had to be byte-identical to
+the hashes captured at approval; blank-line positions had to match the Telugu exactly;
+`plain_lyrics` was never written. Post-write hashes confirm the Telugu and the
+transliteration were untouched. The workflow refuses to run unless the `confirm`
+input is `APPLY`, and uploads the before/after backup.
+
 ## Certified track: Gopala Baala
 
 `9f2a7923-142f-49e5-bd3b-bff886b8d7a5` — 454 s, 131 measured words, 20 plain-lyric

@@ -70,11 +70,25 @@ up to 28.
 The transcription is confident (mean confidence 0.93–0.95) but *no* plain-lyric
 line matches it well anywhere in the track, so no timing can exist.
 
+**Madvacharya Nutha — root cause found 2026-11-03: it has the WRONG LYRICS.**
+Its `plain_lyrics` are a **verbatim copy of *Chakkanaina Demuda*** (a different song
+that exists as its own track in the *Venkatesa Mahima* album):
+
+```
+Madvacharya Nutha   [Krishna Madhuryam]   identical plain_lyrics to "Chakkanaina Demuda": TRUE
+                                          26 / 26 non-blank lines identical
+```
+
+The audio *is* the Madvacharya Nutha song — whisper clearly hears
+`మద్వాచార్ యనుతా మంగళాకారా మధుర మధుర నామా` — which is why the best line fit is 0.40
+and the segmenter produces **0 cues**. No aligner, threshold or translation fix can
+help; the correct lyrics must be supplied. Owner decision (2026-11-03): **leave as-is.**
+
 | track | untimed / total | best fit anywhere |
 | --- | --- | --- |
 | Kanaka Durga Teru | 13 / 16 | **0.44** |
 | Chintaamani Ganapathi | 19 / 20 | **0.50** |
-| Madvacharya Nutha | (126 words outside every cue) | **0.40** |
+| Madvacharya Nutha | wrong lyrics (above) | **0.40** |
 
 Example — Kanaka Durga Teru, what the audio actually says:
 `సంతింలింది సంతింలింది కదిలింది నేడు కనక దుర్గతేరు ఇది లాగి చూడు బ్రదుక…`
@@ -91,7 +105,7 @@ entirely — even where its Telugu segmentation is excellent.
 
 | track | telugu vs translation |
 | --- | --- |
-| Ganesh Gayatri Mantra | 19 vs 14 (`en`) |
+| ~~Ganesh Gayatri Mantra~~ | **FIXED 2026-11-03** — `en` rebuilt 14 → 19 lines, track certified |
 | Intitho Raamuni Poolaata | 21 vs 28 (`en`) |
 | Kalyaanamu Loka Kalyaanamu | 30 vs 34 (`en`) |
 | Haaratulettare Sreeraamuniki | 29 vs 23 (`en`) |
