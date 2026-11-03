@@ -86,20 +86,32 @@ The instrumental passages — which the supplied cues had swallowed — became s
 {{Music}} 288.35 - 292.00   (  3.7s)   outro
 ```
 
-### The one line that rests on the supplied time
+### The row that cannot carry a timestamp, and the regional group that fixes it
 
-Supplied cue 36 is **19 milliseconds** long (`00:04:20,894 → 00:04:20,913`). No line of
-24 characters can be sung in 19 ms, so that row carries no usable time; the windowed
-pass therefore refused its window (posterior 0.000) and kept the supplied position,
-which the timeline rendered as **4:19.7–4:21.4 (1.66 s)**.
+Supplied cue 36 is **19 milliseconds** long (`00:04:20,894 → 00:04:20,913`) for a
+24-character line. No placement inside that window can be right, and dropping the line
+is not an option, so the first windowed run had to keep the supplied position — the
+cue displayed for 1.66 s with posterior 0.000 and was the only line in the track with
+no acoustic support at all.
 
-The stretch around it cannot be resolved by any of the three independent signals: the
-ASR collapses 253.9 → 275.2 into a single 21.3 s "సర్వము", and the acoustic onset
-detector sees one unbroken 26.6 s energy burst (252.1 → 278.6) with no phrase
-boundary. So the line is kept, in the owner's order, at the owner's position — the
-pipeline's rule is that a line is never dropped. If that row is a stray duplicate
-rather than a real occurrence, deleting it from the supplied SRT and re-running is the
-correct fix.
+The aligner now detects a cue whose window cannot hold its own text at a singable rate
+(`--window-max-rate`, default 8 characters/second) and aligns that line **together with
+its immediate neighbours in one regional trellis**: the audio distributes the group
+inside the combined region, exactly as the whole-track pass does but scoped to a few
+seconds instead of the whole track. Lines that are not crowded keep the per-line path
+untouched.
+
+On this track: one crowded cue (line 36) → one regional group over lines 35–37, region
+254.95 → 265.96 s (11.0 s for 68 characters = 6.2 characters/second, plausible for the
+fast closing refrain). The three lines came out with posteriors 0.581 / **0.480** /
+0.446 instead of 0.720 / **0.000** / 0.416, and **no line is left at its supplied time
+any more** — 38 windowed + 3 regional, 0 unplaced.
+
+That stretch still cannot be corroborated by the other two signals — the ASR collapses
+253.9 → 275.2 into one 21.3 s "సర్వము", and the acoustic onset detector sees one
+unbroken 26.6 s energy burst (252.1 → 278.6) with no phrase boundary — so the line
+order there rests on the owner's SRT, and every timestamp in it now comes from the
+audio.
 
 ### Verification
 
@@ -110,11 +122,12 @@ correct fix.
 | columns | 47 / 47 / 47, identical start+end at every index, identical music mask |
 | structure | 0 → 292 s, contiguous, no gap/overlap, no zero-length, no duplicate start |
 | every plain line cued; every cue an exact plain-lyric line | **yes — 20/20** |
-| repetitions | every line with exactly its supplied occurrence count |
+| repetitions | every line with exactly its supplied occurrence count (11× / 10× / 2× / 2× + 16) |
 | music | 6 cues, longest 29.79 s = 10.2 % (limit 25 %) |
-| per-line posterior | median 0.743, 39/41 ≥ 0.5, 1 at 0.000 (the 19 ms row) |
+| placements | **38 windowed + 3 regional, 0 kept at the supplied time, 0 unplaced** |
+| per-line posterior | median 0.743, p10 0.591, **min 0.446** |
 | genuine misplacement suspects | **0 of 41** |
-| independent ASR agreement | mean in-span coverage 0.810, median 0.929 |
+| independent ASR agreement | mean in-span coverage 0.807, median 0.929 |
 | plain lyrics | never written |
 
 ## Certified track: Rama Naamamu Madhuramu (2026-11-03)
