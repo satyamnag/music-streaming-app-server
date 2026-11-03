@@ -11,13 +11,23 @@
 //   * identical start/end at every index, identical music mask
 //   * every sung cue carries text in all three columns
 //   * contiguous, 0 -> duration, no zero-length, no negative
+//   * EVERY plain-lyric line is cued at least once, and every cue is an exact
+//     plain-lyric line - so a line can never be silently dropped by the timeline
+//   * with --expect-lyric-cues N, the timeline must carry exactly N sung cues (the
+//     alignment script's own cue count), so an occurrence can never be dropped either
 //   * with --shift, every sung cue moves by exactly that offset (head/tail music absorb
 //     the clamp, so a lyric cue is never clamped)
 // Then, with --write: back up the three columns, PATCH them in ONE request, and
 // re-read to confirm the stored value equals what was produced.
+//
+// --allow-uncued-lines exists for the one legitimate case: a plain-lyric row that is
+// not a sung line at all (the section/raga heading rows such as `రాగం: సింధుభైరవి`
+// that the classifier still counts as a lyric). It is explicit and it is logged.
 import crypto from 'node:crypto'
 import fs from 'node:fs'
-import { parseSrtTimeline, MUSIC_LABEL } from '../libs/autoSyncLyrics.mjs'
+import {
+  parseSrtTimeline, MUSIC_LABEL, splitLyricLines, classifyLine,
+} from '../libs/autoSyncLyrics.mjs'
 
 const arg = (n, d = null) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -29,6 +39,8 @@ const VARIANT = arg('variant', 'out/payload.json')
 const OFFSET_MS = Math.round(Number(arg('shift', 0)) * 1000)
 const DURATION = Number(arg('duration'))
 const WRITE = process.argv.includes('--write')
+const EXPECT_LYRIC_CUES = arg('expect-lyric-cues') === null ? null : Number(arg('expect-lyric-cues'))
+const ALLOW_UNCUED = process.argv.includes('--allow-uncued-lines')
 const SUPA = (process.env.SUPABASE_URL || 'https://ngemrcsdfxufxnazeqke.supabase.co').replace(/\/$/, '')
 const READ_KEY = process.env.SUPABASE_ANON_KEY
 const WRITE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -49,7 +61,7 @@ const render = (cues) => cues.map((c, i) => `${i + 1}\n${fmt(c.s)} --> ${fmt(c.e
 const toCues = (srt) => parseSrtTimeline(srt).map((c) => ({ s: Math.round(c.start * 1000), e: Math.round(c.end * 1000), text: c.text.trim() }))
 
 const te = toCues(fs.readFileSync(FINAL, 'utf8'))
-const [variantRow] = await (await fetch(`${SUPA}/rest/v1/tracks?id=eq.${encodeURIComponent(TRACK)}&select=title,${COLS.join(',')}`, {
+const [variantRow] = await (await fetch(`${SUPA}/rest/v1/tracks?id=eq.${encodeURIComponent(TRACK)}&select=title,plain_lyrics,${COLS.join(',')}`, {
   headers: { apikey: READ_KEY, Authorization: `Bearer ${READ_KEY}` },
 })).json()
 if (!variantRow) { console.error('track not found'); process.exit(1) }
@@ -79,6 +91,57 @@ if (!fail) {
   }
   failIf(te[0].s !== 0, 'Telugu does not start at 0')
   failIf(Math.abs(te[te.length - 1].e - Math.round(DURATION * 1000)) > 50, 'Telugu does not end at the duration')
+}
+
+// --- "no line is ever missed" ------------------------------------------------------
+// The timeline exists to time the plain lyrics. A structurally perfect SRT that omits a
+// whole line is still wrong, and nothing above this point can see that: it only checks
+// the timeline against itself. Measured on Pattabhi Raamuni, one 25.3 s cue carried the
+// refrain once while the singer repeats it three times inside that span (the ASR never
+// transcribed those repeats), so every check here passed and the repeats were simply
+// gone. Both directions are therefore checked against the source of truth:
+//   * every plain-lyric line appears in at least one cue, and
+//   * every cue's text is an exact plain-lyric line.
+const plainLines = splitLyricLines(variantRow.plain_lyrics || '')
+  .map((l) => String(l).trim())
+  .filter((l) => l && classifyLine(l) === 'lyric')
+const sungTexts = te.filter((c) => c.text !== MUSIC_LABEL).map((c) => c.text)
+const cuedSet = new Set(sungTexts)
+const plainSet = new Set(plainLines)
+const uncued = plainLines.filter((l) => !cuedSet.has(l))
+const foreign = [...new Set(sungTexts.filter((t) => !plainSet.has(t)))]
+const counts = new Map()
+for (const t of sungTexts) counts.set(t, (counts.get(t) || 0) + 1)
+
+console.log(`\nplain lyric lines: ${plainLines.length}   sung cues: ${sungTexts.length}`)
+const repeated = [...counts].filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1])
+if (repeated.length) {
+  console.log('repeated lines (occurrences in the timeline):')
+  for (const [t, n] of repeated) console.log(`  ${String(n).padStart(2)}x  ${t.slice(0, 44)}`)
+}
+if (uncued.length) {
+  if (ALLOW_UNCUED) {
+    console.log(`ALLOWED (--allow-uncued-lines): ${uncued.length} plain line(s) have no cue:`)
+    for (const l of uncued) console.log(`  ${l}`)
+  } else {
+    fail++
+    console.error(`FAIL  ${uncued.length} plain-lyric line(s) have NO cue in the timeline:`)
+    for (const l of uncued) console.error(`        ${l}`)
+    console.error('      Refusing to write a timeline that omits a lyric line. If one of these is')
+    console.error('      not a sung line at all (a section/raga heading row), pass')
+    console.error('      --allow-uncued-lines and say so in the commit message.')
+  }
+}
+if (foreign.length) {
+  fail++
+  console.error(`FAIL  ${foreign.length} cue(s) are not exact plain-lyric lines:`)
+  for (const t of foreign.slice(0, 10)) console.error(`        ${t}`)
+}
+if (EXPECT_LYRIC_CUES !== null && Number.isFinite(EXPECT_LYRIC_CUES)) {
+  failIf(sungTexts.length !== EXPECT_LYRIC_CUES,
+    `the alignment script has ${EXPECT_LYRIC_CUES} cue(s) but the timeline has ${sungTexts.length} - an occurrence was dropped`)
+} else {
+  console.log('(no --expect-lyric-cues: occurrences are reported, not gated)')
 }
 
 // optional shift, applied identically to all three columns

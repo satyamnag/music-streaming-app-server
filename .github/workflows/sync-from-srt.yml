@@ -50,6 +50,10 @@ on:
         description: 'Refuse to write if one {{Music}} cue covers more than this share of the track (0.25 = 25%)'
         required: false
         default: '0.25'
+      allow_uncued_lines:
+        description: 'Only for a plain-lyric row that is not a sung line at all (a section/raga heading). Otherwise the run refuses to omit a line.'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -74,6 +78,7 @@ jobs:
       SHIFT: ${{ inputs.shift }}
       MUSIC_GAP: ${{ inputs.music_gap }}
       MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
+      ALLOW_UNCUED_LINES: ${{ inputs.allow_uncued_lines }}
     steps:
       - uses: actions/checkout@v4
 
@@ -160,7 +165,11 @@ jobs:
         run: |
           set -euo pipefail
           DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
-          ARGS="--track $TRACK_ID --final out/final.srt --variant out/payload.json --duration $DURATION --shift $SHIFT --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
+          # The script's own cue count is the number of sung cues the timeline must carry.
+          # If the aligner drops an occurrence, finalize refuses to write.
+          CUES="$(node -e 'console.log(require("./out/job.json").cues)')"
+          ARGS="--track $TRACK_ID --final out/final.srt --variant out/payload.json --duration $DURATION --shift $SHIFT --expect-lyric-cues $CUES --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
+          if [ "${ALLOW_UNCUED_LINES:-false}" = "true" ]; then ARGS="$ARGS --allow-uncued-lines"; fi
           node finalize_payload.mjs $ARGS | tee finalize-dry.log
           if [ "${WRITE_FLAG:-false}" = "true" ]; then
             node finalize_payload.mjs $ARGS --write | tee finalize-write.log
