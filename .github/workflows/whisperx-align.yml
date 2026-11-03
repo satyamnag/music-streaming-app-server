@@ -54,9 +54,10 @@ jobs:
         run: |
           set -eu
           python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0 torchaudio==2.9.0
+          # whisperx 3.8.6 requires torch~=2.8.0, so install CPU torch 2.8.0 first.
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 torchaudio==2.8.0
           python -m pip install whisperx imageio-ffmpeg
-          python -c "import whisperx, torch, torchaudio; print('whisperx', whisperx.__version__, '| torch', torch.__version__)"
+          python -c "import importlib.metadata as m, torch, torchaudio; print('whisperx', m.version('whisperx'), '| torch', torch.__version__, '| torchaudio', torchaudio.__version__)"
           python -c "from whisperx.alignment import load_align_model, get_trellis, backtrack, merge_repeats; print('alignment functions import OK')"
 
       - name: Align the supplied SRT
