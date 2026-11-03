@@ -1,0 +1,102 @@
+name: WhisperX align a supplied SRT (read-only)
+
+# Re-times a provided SRT against the real audio using WhisperX forced alignment, and
+# fills the app's `{{Music}}` cues. Compute stays on GitHub Actions.
+#
+# READ-ONLY with respect to the database: it downloads audio, aligns, and uploads the
+# result as an artifact. Nothing is written to Supabase.
+#
+# Faithful to WhisperX: uses whisperx.load_align_model() for the Telugu model and
+# whisperx's own get_trellis / backtrack / merge_repeats for the CTC alignment, run at
+# whole-track scope so a monotone script (which already lists every repeated
+# occurrence) is aligned end to end instead of per segment.
+#
+# Official sources:
+#   https://github.com/m-bain/whisperX/blob/main/whisperx/alignment.py
+#   https://huggingface.co/anuragshas/wav2vec2-large-xlsr-53-telugu
+
+on:
+  workflow_dispatch:
+    inputs:
+      srt:
+        description: 'Path to the supplied SRT inside the repo'
+        required: true
+        default: 'server/tools/inputs/Peru-Teliyakunna.source.srt'
+      url:
+        description: 'Audio URL'
+        required: true
+        default: 'https://music.soulfulbhakti.com/1793572403997-Peru%20Teliyakunna.opus'
+      duration:
+        description: 'Track duration in seconds'
+        required: true
+        default: '291'
+
+permissions:
+  contents: read
+
+jobs:
+  align:
+    name: WhisperX forced alignment
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SRT: ${{ inputs.srt }}
+      URL: ${{ inputs.url }}
+      DURATION: ${{ inputs.duration }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install WhisperX (CPU)
+        run: |
+          set -eu
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.0 torchaudio==2.9.0
+          python -m pip install whisperx imageio-ffmpeg
+          python -c "import whisperx, torch, torchaudio; print('whisperx', whisperx.__version__, '| torch', torch.__version__)"
+          python -c "from whisperx.alignment import load_align_model, get_trellis, backtrack, merge_repeats; print('alignment functions import OK')"
+
+      - name: Align the supplied SRT
+        working-directory: server/tools
+        run: |
+          set -eu
+          python whisperx_align_script.py \
+            --url "$URL" \
+            --srt "$SRT" \
+            --duration "$DURATION" \
+            --music-gap 3.0 \
+            --out-dir whisperx-out 2>&1 | tee whisperx-align.log
+
+      - name: Verify output structure
+        working-directory: server/tools
+        run: |
+          set -eu
+          python - <<'PY'
+          import json, re
+          p = 'whisperx-out/Peru-Teliyakunna.aligned.srt'
+          t = open(p, encoding='utf-8').read()
+          rep = json.load(open('whisperx-out/whisperx-align-report.json', encoding='utf-8'))
+          blocks = [b for b in re.split(r'\n\n+', t.strip()) if b.strip()]
+          print('cues:', len(blocks), '| music:', rep['music_cues'], '| aligned lines:', rep['aligned_lines'])
+          tl = rep['timeline']
+          assert abs(tl[0]['start']) < 1e-6, 'does not start at 0'
+          assert abs(tl[-1]['end'] - rep['duration']) < 1e-3, 'does not end at duration'
+          for a, b in zip(tl, tl[1:]):
+              assert abs(a['end'] - b['start']) < 1e-6, 'gap/overlap'
+          for e in tl:
+              assert e['end'] > e['start'], 'zero-length cue'
+          print('structure OK: contiguous, 0 ->', rep['duration'])
+          PY
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisperx-aligned-srt
+          path: |
+            server/tools/whisperx-align.log
+            server/tools/whisperx-out/
+          if-no-files-found: warn
