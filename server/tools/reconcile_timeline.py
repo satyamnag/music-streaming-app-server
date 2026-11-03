@@ -59,6 +59,14 @@ HEAD_RATE_MAX = 2.0       # characters/second; below this the span cannot be one
 HEAD_MOVE_MIN = 2.0       # smallest repair worth making
 ASSOC_TOL = 1.5           # seconds of tolerance when tying an ASR word to a cue
 
+# A line whose own span the ASR explains only poorly is re-timed to the ASR's own word
+# boundaries when those boundaries explain it clearly (see the word-snap pass).
+SNAP_COVERAGE = 0.75      # the ASR window must explain at least this much of the line
+SNAP_GAIN = 0.15          # and this much more than the cue's current span does
+SNAP_MIN_MOVE = 0.5       # seconds; smaller corrections are not worth a rewrite
+SNAP_MAX_RATE = 8.0       # characters/second; a faster window is not a believable line
+SNAP_OVERLAP_TOL = 0.25   # seconds a word boundary may precede the previous cue's end
+
 
 def parse_srt(path):
     text = open(path, encoding="utf-8").read().replace("\r\n", "\n").strip()
@@ -182,6 +190,80 @@ def main():
     if not moves:
         print("  no line needed moving")
 
+    # ---- word snap -------------------------------------------------------------
+    # The CTC model under-covers fast singing: measured on Rama Naamamu Madhuramu, six
+    # refrain lines in the closing section came out 0.7-1.0 s long for 18-22 characters
+    # (20+ characters/second, physically impossible) while the independent ASR heard
+    # every one of those lines with p >= 0.92 and its word boundaries tiled the whole
+    # stretch 243.6 -> 267.0 with no gaps.
+    #
+    # So where the ASR clearly explains a line, its own word boundaries win:
+    #   * a contiguous window of associated words must explain >= SNAP_COVERAGE of the
+    #     line's characters (otherwise the ASR is only partly hearing it - it cannot set
+    #     a boundary it did not hear), and
+    #   * it must beat what the cue's own span explains by >= SNAP_GAIN, and
+    #   * the move must be worth at least SNAP_MIN_MOVE seconds.
+    # Order is preserved greedily: a snap is skipped if it would start before the
+    # previously accepted cue's end, and it never moves further than MAX_MOVE_SECONDS.
+    snapped = []
+    accepted_end = 0.0
+    for i, s in enumerate(stats):
+        c = s["cue"]
+        line = norm(c["text"])
+        # Look back from the earlier of the cue start and the accepted end: after a
+        # neighbour snapped, the real cue start is the accepted end, and the words that
+        # belong to this line can start before the pre-snap start.
+        cand = [w for w in words
+                if min(c["start"], accepted_end) - ASSOC_TOL <= w["start"] < c["end"] + ASSOC_TOL]
+        moved = False
+        if cand and len(line) >= 6:
+            k = max(2, round(len(line) / 5))
+            best = (0.0, None, None)
+            for a in range(len(cand)):
+                for ln in range(max(1, k - 3), k + 4):
+                    if a + ln > len(cand):
+                        break
+                    sc = coverage(line, "".join(x["n"] for x in cand[a:a + ln]))
+                    if sc > best[0]:
+                        best = (sc, cand[a]["start"], cand[a + ln - 1]["end"])
+            sc, bs, be = best
+            inside = [w for w in words if w["start"] >= c["start"] - 0.05 and w["start"] < c["end"]]
+            cur_cov = coverage(line, "".join(x["n"] for x in inside))
+            gain = sc > cur_cov + SNAP_GAIN
+            # A cue the ASR fully explains cannot be improved by moving it, however much
+            # the two boundaries differ (the wider ASR window would then be swallowing a
+            # neighbouring word). Below that bar, an equal-quality window whose
+            # boundaries disagree is the CTC cutting the cue short, and the word
+            # boundaries win.
+            tie = cur_cov < 0.95 and sc >= SNAP_COVERAGE and abs(sc - cur_cov) <= 0.05
+            # Never accept a window that would make the line physically impossible to
+            # sing: on this track the ASR sometimes packs a whole line into 1.4 s, which
+            # is faster than any Telugu syllable rate and must not be trusted.
+            rate_ok = bs is not None and (be - bs) >= len(line) / SNAP_MAX_RATE
+            if (bs is not None and sc >= SNAP_COVERAGE and (gain or tie) and rate_ok
+                    and max(abs(bs - c["start"]), abs(be - c["end"])) >= SNAP_MIN_MOVE
+                    and be > bs
+                    and abs(bs - c["start"]) <= MAX_MOVE_SECONDS
+                    and bs >= accepted_end - SNAP_OVERLAP_TOL
+                    and be - max(bs, accepted_end) >= 0.5):
+                # A word boundary can sit a hair before the previous cue's end (the two
+                # models disagree by ~0.1 s). Clamp instead of throwing the whole fix
+                # away: the boundary the fix is really about is the END.
+                bs = max(bs, accepted_end)
+                snapped.append({"index": i, "text": c["text"],
+                                "from": [c["start"], c["end"]], "to": [round(bs, 3), round(be, 3)],
+                                "own": round(cur_cov, 3), "asr": round(sc, 3)})
+                c["start"], c["end"] = round(bs, 3), round(be, 3)
+                moved = True
+        accepted_end = max(accepted_end, c["end"])
+        _ = moved
+    for m in snapped:
+        print(f"  SNAPPED line {m['index'] + 1}: {m['from'][0]:.2f}-{m['from'][1]:.2f} -> "
+              f"{m['to'][0]:.2f}-{m['to'][1]:.2f}  (own span explained {m['own']:.2f}, "
+              f"ASR window {m['asr']:.2f})")
+    if not snapped:
+        print("  no line needed snapping to the ASR word boundaries")
+
     # ---- head repair (see HEAD_GAP_MIN / HEAD_RATE_MAX above) -------------------
     def assoc(c):
         return [w for w in words
@@ -236,6 +318,13 @@ def main():
         print("  no head needed repairing")
 
     lyric.sort(key=lambda c: c["start"])
+    # Two models place a boundary a few tens of milliseconds apart, so a repair can leave
+    # the previous cue ending just past the next one's start. Resolve it by pulling the
+    # EARLIER cue's end back to the later cue's start: the later start is the boundary
+    # that was just derived from words, so it is the one worth keeping.
+    for i in range(len(lyric) - 1):
+        if lyric[i]["end"] > lyric[i + 1]["start"]:
+            lyric[i]["end"] = lyric[i + 1]["start"]
     timeline = []
     if lyric[0]["start"] > 0.05:
         timeline.append({"kind": "music", "text": MUSIC, "start": 0.0, "end": lyric[0]["start"]})
