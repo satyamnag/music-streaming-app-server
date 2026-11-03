@@ -1,0 +1,98 @@
+name: Shift a track's sync timeline (guarded, one-off)
+
+# Moves every cue of a track's sync timeline by a constant offset, in ALL language
+# columns at once, and proves nothing else changed.
+#
+# Owner request: every line reads half a second late, so shift the whole timeline
+# 0.5 s earlier. The three columns must move together or the apps' per-row language
+# stacking desynchronises, so they are written in ONE PATCH.
+#
+# The transform (server/tools/shift-timeline.mjs) refuses to run unless:
+#   * the columns already share one timeline (same count, same times, same music mask)
+#   * after shifting there is no negative time, no gap/overlap, the timeline still
+#     spans 0 -> duration, the text is byte-identical, the cue count is unchanged,
+#     and every SUNG cue moved by exactly the requested offset
+# It writes a before/after backup and re-reads the row to confirm the stored value
+# matches what it produced.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id'
+        required: true
+        default: '6bae22b4-73e4-4216-8477-c3634d1911be'
+      shift:
+        description: 'Offset in seconds (negative = earlier), e.g. -0.5'
+        required: true
+        default: '-0.5'
+      confirm:
+        description: 'Type APPLY to write'
+        required: true
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  shift:
+    name: Shift timeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      SHIFT: ${{ inputs.shift }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Refuse without explicit confirmation
+        run: |
+          set -eu
+          if [ "${CONFIRM:-}" != "APPLY" ]; then
+            echo "::error::confirm input was not APPLY - refusing to write"; exit 1
+          fi
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY missing"; exit 1
+          fi
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ]; then echo "::error::missing supabase secrets"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"; echo "::add-mask::$ANON"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$ANON" >> "$GITHUB_ENV"
+
+      - name: Dry run (must pass every guard)
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/shift-timeline.mjs --track "$TRACK_ID" --shift "$SHIFT" | tee shift-dry.log
+
+      - name: Apply
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/shift-timeline.mjs --track "$TRACK_ID" --shift "$SHIFT" --write | tee shift-apply.log
+
+      - name: Upload backup + logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shift-timeline
+          path: |
+            server/shift-dry.log
+            server/shift-apply.log
+            server/shift-backup.json
+          if-no-files-found: warn
