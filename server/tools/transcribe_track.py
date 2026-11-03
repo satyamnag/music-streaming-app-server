@@ -31,6 +31,10 @@ def main():
     ap.add_argument("--track", required=True)
     ap.add_argument("--out-dir", default="audio-out")
     ap.add_argument("--beam", type=int, default=5)
+    ap.add_argument("--compute-type", default="int8",
+                    help="ctranslate2 compute type: int8 (fast) or float32 (more accurate)")
+    ap.add_argument("--separate-vocals", action="store_true",
+                    help="isolate vocals with Demucs before transcribing (needs demucs installed)")
     args = ap.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
 
@@ -52,9 +56,26 @@ def main():
     print(f"audio bytes: {os.path.getsize(audio)}")
 
     from faster_whisper import WhisperModel
-    model = WhisperModel(MODEL, device="cpu", compute_type="int8")
+    target = audio
+    if args.separate_vocals:
+        # Dense sung passages are where whisper drops words, because music masks the
+        # vocal. Demucs gives it a cleaner signal. Optional: fails loudly if missing.
+        import subprocess
+        import shutil
+        print("separating vocals with demucs...")
+        subprocess.run([shutil.which("demucs") or "demucs", "--two-stems", "vocals",
+                        "-n", "htdemucs", "-o", args.out_dir, audio], check=True)
+        cand = os.path.join(args.out_dir, "htdemucs", os.path.splitext(os.path.basename(audio))[0], "vocals.wav")
+        if not os.path.exists(cand):
+            cand = os.path.join(args.out_dir, "htdemucs", "track", "vocals.wav")
+        if not os.path.exists(cand):
+            raise SystemExit("demucs produced no vocals stem at " + cand)
+        target = cand
+        print(f"vocals stem: {target}")
+
+    model = WhisperModel(MODEL, device="cpu", compute_type=args.compute_type)
     segments, info = model.transcribe(
-        audio,
+        target,
         language="te",
         word_timestamps=True,
         beam_size=args.beam,

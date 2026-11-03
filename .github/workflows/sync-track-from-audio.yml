@@ -35,6 +35,14 @@ on:
         description: 'Refuse to write if one {{Music}} cue covers more than this share (0.25 = 25%)'
         required: false
         default: '0.25'
+      compute_type:
+        description: 'ctranslate2 compute type: int8 (fast) or float32 (more accurate)'
+        required: false
+        default: 'int8'
+      separate_vocals:
+        description: 'Isolate vocals with Demucs first (much better in dense passages)'
+        type: boolean
+        default: false
       beam:
         description: 'Whisper beam size'
         required: false
@@ -62,6 +70,8 @@ jobs:
       MUSIC_GAP: ${{ inputs.music_gap }}
       MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
       BEAM: ${{ inputs.beam }}
+      COMPUTE_TYPE: ${{ inputs.compute_type }}
+      SEPARATE_VOCALS: ${{ inputs.separate_vocals }}
     steps:
       - uses: actions/checkout@v4
 
@@ -98,7 +108,10 @@ jobs:
         working-directory: server/tools
         run: |
           set -euo pipefail
-          python transcribe_track.py --track "$TRACK_ID" --beam "$BEAM" --out-dir audio-out | tee transcribe.log
+          python transcribe_track.py --track "$TRACK_ID" --beam "$BEAM" \
+            --compute-type "${COMPUTE_TYPE:-int8}" \
+            $([ "${SEPARATE_VOCALS:-false}" = "true" ] && echo --separate-vocals) \
+            --out-dir audio-out | tee transcribe.log
 
       - name: Greedy segmentation (one cue per sung occurrence)
         working-directory: server/tools
