@@ -131,6 +131,23 @@ def main():
     ap.add_argument("--duration", type=float, required=True)
     ap.add_argument("--music-gap", type=float, default=3.0,
                     help="gaps at least this long become a {{Music}} cue")
+    ap.add_argument("--segments-from", default=None,
+                    help="SRT whose cue times bound each line (windowed alignment). The "
+                         "monotone whole-track pass cannot represent an instrumental break: "
+                         "every character must be emitted somewhere, so on a track with a "
+                         "long unscripted passage it either squeezes the script into one "
+                         "part of the audio or drags a line head back across the break. "
+                         "With this flag each line is aligned inside its own window "
+                         "instead - the per-segment usage whisperx.alignment.align() is "
+                         "designed for - and the audio still decides the exact boundary "
+                         "inside that window.")
+    ap.add_argument("--window-margin", type=float, default=2.0,
+                    help="seconds of context on each side of a supplied cue (windowed mode)")
+    ap.add_argument("--window-margin-frac", type=float, default=0.35,
+                    help="extra context as a fraction of the supplied cue's own length")
+    ap.add_argument("--window-min-score", type=float, default=0.10,
+                    help="below this a windowed placement is not trusted and the supplied "
+                         "time is kept instead (the line is never dropped)")
     ap.add_argument("--out-dir", default="whisperx-out")
     args = ap.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
@@ -161,7 +178,9 @@ def main():
     # `clean` MUST stay index-aligned with `chars`/`owners`: merge_repeats() maps path
     # token indices back into it.
     chars, owners, clean_chars = [], [], []
+    line_tokens = []          # per line: (token ids, clean text) for the windowed pass
     for li, text in enumerate(texts):
+        toks, cl = [], []
         for ch in text:
             if ch in (" ", "\t", "\u00a0"):
                 continue
@@ -171,6 +190,9 @@ def main():
             chars.append(idx)
             owners.append(li)
             clean_chars.append(ch)
+            toks.append(idx)
+            cl.append(ch)
+        line_tokens.append((toks, "".join(cl)))
     clean = "".join(clean_chars)
     print(f"alignable characters: {len(chars)} (of {sum(len(t) for t in texts)})")
 
@@ -203,48 +225,110 @@ def main():
     trellis = get_trellis(emission, chars, blank)
     path = backtrack(trellis, emission, chars, blank)
     if path is None:
-        raise SystemExit("backtrack failed - the script does not align to this audio")
-    segs = merge_repeats(path, clean)
-    print(f"aligned character segments: {len(segs)}")
+        if not args.segments_from:
+            raise SystemExit("backtrack failed - the script does not align to this audio")
+        # The whole-track path failed. That is exactly the case the windowed pass exists
+        # for, so carry on with per-line windows instead of aborting.
+        print("whole-track backtrack failed; relying on the windowed pass")
+        segs = []
+    else:
+        segs = merge_repeats(path, clean)
+        print(f"aligned character segments: {len(segs)}")
 
-    # line -> frame span (and score)
-    span = {}
-    score = {}
-    for cdx, seg in enumerate(segs):
-        li = owners[cdx]
-        if li not in span:
-            span[li] = [seg.start, seg.end]
-            score[li] = [seg.score, 1]
-        else:
-            span[li][0] = min(span[li][0], seg.start)
-            span[li][1] = max(span[li][1], seg.end)
-            score[li][0] += seg.score
-            score[li][1] += 1
+    def lines_from_segments(segment_list, owner_list):
+        span, score = {}, {}
+        for cdx, seg in enumerate(segment_list):
+            li = owner_list[cdx]
+            if li not in span:
+                span[li] = [seg.start, seg.end]
+                score[li] = [seg.score, 1]
+            else:
+                span[li][0] = min(span[li][0], seg.start)
+                span[li][1] = max(span[li][1], seg.end)
+                score[li][0] += seg.score
+                score[li][1] += 1
+        out = []
+        for li, text in enumerate(texts):
+            if li not in span:
+                out.append({"text": text, "start": None, "end": None, "score": 0.0,
+                            "supplied": [cues_in[li]["start"], cues_in[li]["end"]],
+                            "source": "unplaced"})
+                continue
+            s, e = span[li]
+            out.append({"text": text,
+                        "start": round(s * FRAME_SECONDS, 3),
+                        "end": round((e + 1) * FRAME_SECONDS, 3),
+                        "score": round(score[li][0] / score[li][1], 4),
+                        "supplied": [cues_in[li]["start"], cues_in[li]["end"]],
+                        "source": "global"})
+        return out
 
-    lines = []
-    for li, text in enumerate(texts):
-        if li not in span:
-            lines.append({"text": text, "start": None, "end": None, "score": 0.0,
-                          "supplied": [cues_in[li]["start"], cues_in[li]["end"]]})
-            continue
-        s, e = span[li]
-        lines.append({
-            "text": text,
-            "start": round(s * FRAME_SECONDS, 3),
-            "end": round((e + 1) * FRAME_SECONDS, 3),
-            "score": round(score[li][0] / score[li][1], 4),
-            "supplied": [cues_in[li]["start"], cues_in[li]["end"]],
-        })
+    lines = lines_from_segments(segs, owners)
+
+    # ---- optional WINDOWED pass ------------------------------------------------
+    # The whole-track pass has one structural weakness: it cannot leave a long
+    # unscripted passage empty, so it either squeezes the script into part of the audio
+    # or stretches one line across the passage. With --segments-from each line is aligned
+    # inside its own window instead, so the audio decides the boundary *locally* and a
+    # passage the script does not cover simply stays empty (and becomes {{Music}}).
+    if args.segments_from:
+        bounded = parse_srt(args.segments_from)
+        if len(bounded) != len(cues_in):
+            raise SystemExit(f"--segments-from has {len(bounded)} cues but the script has "
+                             f"{len(cues_in)} - refusing to guess which line is which")
+        for i, (a, b) in enumerate(zip(bounded, cues_in)):
+            if a["text"].strip() != b["text"].strip():
+                raise SystemExit(f"--segments-from cue {i + 1} is not the same line as the "
+                                 f"script's cue {i + 1}")
+        print(f"\nwindowed mode: {len(bounded)} windows from {args.segments_from}")
+        win_lines = []
+        prev_end = 0.0
+        for i, c in enumerate(bounded):
+            dur = max(0.5, c["end"] - c["start"])
+            margin = max(args.window_margin, args.window_margin_frac * dur)
+            lo = max(0.0, c["start"] - margin)
+            hi = min(audio_seconds, c["end"] + margin)
+            if i > 0:
+                lo = max(lo, bounded[i - 1]["end"] + 0.02)   # keep supplied order
+            if i < len(bounded) - 1:
+                hi = min(hi, bounded[i + 1]["start"] - 0.02)
+            lo = max(lo, prev_end)                           # keep the result monotone
+            toks, cl = line_tokens[i]
+            placed = None
+            if toks and hi - lo >= 0.4:
+                seg_wav = wav[int(lo * SAMPLE_RATE):int(hi * SAMPLE_RATE)]
+                em = emissions_for(model, seg_wav, device)
+                tr = get_trellis(em, toks, blank)
+                pa = backtrack(tr, em, toks, blank)
+                if pa is not None:
+                    ss = merge_repeats(pa, cl)
+                    if ss:
+                        s = lo + ss[0].start * FRAME_SECONDS
+                        e = lo + ss[-1].end * FRAME_SECONDS
+                        sc = sum(x.score for x in ss) / len(ss)
+                        if sc >= args.window_min_score and e - s >= 0.2:
+                            placed = (round(s, 3), round(e, 3), round(sc, 4), "window")
+            if placed is None:
+                # The acoustics did not support a windowed placement: keep the supplied
+                # time rather than dropping the line.
+                s = max(lo, c["start"])
+                e = min(hi, max(s + 0.5, c["end"]))
+                placed = (round(s, 3), round(e, 3), 0.0, "supplied")
+            s, e, sc, src = placed
+            prev_end = e
+            win_lines.append({"text": texts[i], "start": s, "end": e, "score": sc,
+                              "supplied": [c["start"], c["end"]], "source": src})
+        lines = win_lines
 
     placed = [l for l in lines if l["start"] is not None]
     print(f"\nlines aligned: {len(placed)}/{len(lines)}")
-    print(f"{'#':>3} {'new start':>9} {'new end':>9} {'supplied':>9} {'delta':>7} {'score':>6}  text")
+    print(f"{'#':>3} {'new start':>9} {'new end':>9} {'supplied':>9} {'delta':>7} {'score':>6} {'src':<9} text")
     for li, l in enumerate(lines):
         if l["start"] is None:
-            print(f"{li + 1:>3} {'---':>9} {'---':>9} {l['supplied'][0]:>9.2f} {'---':>7} {'0':>6}  {l['text'][:38]}")
+            print(f"{li + 1:>3} {'---':>9} {'---':>9} {l['supplied'][0]:>9.2f} {'---':>7} {'0':>6} {'-':<9} {l['text'][:38]}")
             continue
         print(f"{li + 1:>3} {l['start']:>9.3f} {l['end']:>9.3f} {l['supplied'][0]:>9.2f} "
-              f"{l['start'] - l['supplied'][0]:>+7.2f} {l['score']:>6.3f}  {l['text'][:38]}")
+              f"{l['start'] - l['supplied'][0]:>+7.2f} {l['score']:>6.3f} {l.get('source', 'global'):<9} {l['text'][:38]}")
 
     # ---- build the timeline: lines in order, {{Music}} wherever text is not sung ----
     timeline = []
@@ -299,10 +383,19 @@ def main():
         "source_srt": args.srt, "duration": args.duration,
         "supplied_cues": len(cues_in), "lines": lines,
         "timeline": timeline,
+        "windowed": bool(args.segments_from),
+        "segments_from": args.segments_from,
+        "source_counts": {
+            "window": sum(1 for l in lines if l.get("source") == "window"),
+            "supplied": sum(1 for l in lines if l.get("source") == "supplied"),
+            "global": sum(1 for l in lines if l.get("source") == "global"),
+            "unplaced": sum(1 for l in lines if l.get("source") == "unplaced"),
+        },
         "aligned_lines": len(placed),
         "weak_lines": [l["text"] for l in placed if l["score"] < 0.3],
         "low_confidence_lines": [{"line": i + 1, "text": l["text"], "score": l["score"],
-                                  "start": l["start"], "supplied": l["supplied"]}
+                                  "start": l["start"], "supplied": l["supplied"],
+                                  "source": l.get("source")}
                                  for i, l in enumerate(lines)
                                  if l["start"] is not None and l["score"] < 0.6],
         "singing_evidence_per_second": [round(v, 4) for v in per_second],
@@ -312,6 +405,10 @@ def main():
               ensure_ascii=False, indent=1)
     print(f"\ntimeline: {len(timeline)} cues ({report['music_cues']} music), "
           f"span {timeline[0]['start']:.3f} -> {timeline[-1]['end']:.3f}")
+    if args.segments_from:
+        c = report["source_counts"]
+        print(f"placements: {c['window']} windowed, {c['supplied']} kept at the supplied time, "
+              f"{c['unplaced']} unplaced")
     print(f"weak lines (score < 0.3): {len(report['weak_lines'])}")
     print(f"wrote {out_srt}")
 

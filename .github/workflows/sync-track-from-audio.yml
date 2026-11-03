@@ -90,6 +90,16 @@ jobs:
           python -m pip install faster-whisper imageio-ffmpeg
           python -c "import faster_whisper, importlib.metadata as m; print('faster-whisper', m.version('faster-whisper'))"
 
+      # Demucs needs torch/torchaudio, which faster-whisper does not. Kept in its own
+      # step so an ordinary run installs nothing extra.
+      - name: Install Demucs (only when separating vocals)
+        if: ${{ inputs.separate_vocals }}
+        run: |
+          set -eu
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 torchaudio==2.8.0
+          python -m pip install demucs
+          python -c "import importlib.metadata as m, torch; print('demucs', m.version('demucs'), '| torch', torch.__version__)"
+
       - name: Resolve secrets (masked)
         run: |
           set -eu

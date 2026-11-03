@@ -34,6 +34,10 @@ on:
         description: 'Optional repo path to the SRT (e.g. server/tools/inputs/X.source.srt). When set it is used instead of synced_lyrics, so nothing is staged into the database.'
         required: false
         default: ''
+      segments_from:
+        description: 'Optional repo path to the SAME SRT used as per-line windows (windowed alignment). Use it when the supplied cues are close to right, so each line is placed inside its own neighbourhood instead of across the whole track.'
+        required: false
+        default: ''
       write:
         description: 'Write the three columns. Leave false to validate only.'
         type: boolean
@@ -74,6 +78,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       TRACK_ID: ${{ inputs.track_id }}
       SRT_PATH: ${{ inputs.srt_path }}
+      SEGMENTS_FROM: ${{ inputs.segments_from }}
       WRITE_FLAG: ${{ inputs.write }}
       SHIFT: ${{ inputs.shift }}
       MUSIC_GAP: ${{ inputs.music_gap }}
@@ -131,8 +136,15 @@ jobs:
           set -euo pipefail
           URL="$(node -e 'console.log(require("./out/job.json").audio_url)')"
           DURATION="$(node -e 'console.log(require("./out/job.json").duration)')"
-          python whisperx_align_script.py --url "$URL" --srt out/script.srt \
-            --duration "$DURATION" --music-gap "$MUSIC_GAP" --out-dir out 2>&1 | tee align.log
+          if [ -n "${SEGMENTS_FROM:-}" ]; then
+            python whisperx_align_script.py --url "$URL" --srt out/script.srt \
+              --duration "$DURATION" --music-gap "$MUSIC_GAP" \
+              --segments-from "$GITHUB_WORKSPACE/$SEGMENTS_FROM" \
+              --out-dir out 2>&1 | tee align.log
+          else
+            python whisperx_align_script.py --url "$URL" --srt out/script.srt \
+              --duration "$DURATION" --music-gap "$MUSIC_GAP" --out-dir out 2>&1 | tee align.log
+          fi
 
       - name: Independent Whisper cross-check
         working-directory: server/tools
