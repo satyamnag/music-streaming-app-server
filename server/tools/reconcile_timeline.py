@@ -212,21 +212,40 @@ def main():
         line = norm(c["text"])
         # Look back from the earlier of the cue start and the accepted end: after a
         # neighbour snapped, the real cue start is the accepted end, and the words that
-        # belong to this line can start before the pre-snap start.
+        # belong to this line can start before the pre-snap start. The upper bound is the
+        # NEXT cue's start, not this cue's end: a cue the CTC cut short (measured on Ramya
+        # Guna Dhama: 2.8 s for a 22-character line) ends several seconds before the words
+        # it is timing, so a bound of `end + ASSOC_TOL` cannot even see them.
+        next_start = stats[i + 1]["cue"]["start"] if i + 1 < len(stats) else args.duration
         cand = [w for w in words
-                if min(c["start"], accepted_end) - ASSOC_TOL <= w["start"] < c["end"] + ASSOC_TOL]
+                if min(c["start"], accepted_end) - ASSOC_TOL <= w["start"] < next_start + ASSOC_TOL]
         moved = False
         if cand and len(line) >= 6:
             k = max(2, round(len(line) / 5))
-            best = (0.0, None, None)
+            found = []
             for a in range(len(cand)):
+                # A line's words cannot begin before the previous line's end. Applying that
+                # during the search (instead of rejecting the winner afterwards) stops a
+                # window that also contains the previous line's last word from winning just
+                # because it happens to start closer to this cue.
+                if cand[a]["start"] < accepted_end - SNAP_OVERLAP_TOL:
+                    continue
                 for ln in range(max(1, k - 3), k + 4):
                     if a + ln > len(cand):
                         break
                     sc = coverage(line, "".join(x["n"] for x in cand[a:a + ln]))
-                    if sc > best[0]:
-                        best = (sc, cand[a]["start"], cand[a + ln - 1]["end"])
-            sc, bs, be = best
+                    found.append((sc, cand[a]["start"], cand[a + ln - 1]["end"]))
+            if not found:
+                sc, bs, be = 0.0, None, None
+            else:
+                # Several windows can explain the line equally well, because a window that
+                # also contains the PREVIOUS line's last word still covers every character
+                # of this one. Take the best coverage, then the window closest to where the
+                # supplied cue already puts the line - otherwise the snap starts inside the
+                # previous cue and the monotonicity guard throws the fix away.
+                top = max(f[0] for f in found)
+                near = [f for f in found if f[0] >= top - 0.02]
+                sc, bs, be = min(near, key=lambda f: abs(f[1] - c["start"]))
             inside = [w for w in words if w["start"] >= c["start"] - 0.05 and w["start"] < c["end"]]
             cur_cov = coverage(line, "".join(x["n"] for x in inside))
             gain = sc > cur_cov + SNAP_GAIN
