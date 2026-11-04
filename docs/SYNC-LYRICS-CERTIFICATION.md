@@ -13,6 +13,86 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Certified track: Ramya Guna Dhama (2026-11-04)
+
+`c74a0c00-7fe8-4317-9d1b-4c0dff8da750` — 284 s, **36 supplied cues**, 20 distinct
+plain-lyric lines, **42 cues / 36 sung / 6 music**. Written by run `41758326739`.
+
+Built from the owner's SRT (`server/tools/inputs/Ramya-Guna-Dhama.source.srt`) with
+windowed alignment (`segments_from` = the same file).
+
+### Audio
+
+The supplied master and the opus the app serves are the same recording: both
+284.080 s, envelope correlation **0.9989** at zero lag, per-second profile 0.9999.
+
+### Alignment
+
+| | |
+| --- | --- |
+| lines placed | **36 / 36** — 32 windowed + 4 in a regional group, 0 unplaced |
+| per-line posterior | median **0.699**, p10 0.573, min 0.318 |
+| occurrences vs the supplied SRT | **identical** — refrain pair 8× each, charanam 3's first two lines 2× each, the rest once |
+| independent ASR in-span coverage | mean **0.812**, median 0.929 |
+| supplied grid deviation | median **−0.66 s**, p10 −1.03 s, largest 1.33 s |
+
+Two supplied cues cannot hold their own text — cue 22 is 1.118 s for 20 characters
+and cue 23 is 1.435 s for 24 — so the regional-group pass took them together with
+their neighbours (group `[21, 22, 23]`, plus `[24]`), and no line was dropped.
+
+The interludes became six `{{Music}}` cues, the longest 31.40 s (11.1 %):
+
+```
+{{Music}}   0.00 -  31.40   ( 31.4s)   intro
+{{Music}}  79.40 -  91.27   ( 11.9s)
+{{Music}} 126.24 - 139.40   ( 13.2s)
+{{Music}} 173.48 - 184.38   ( 10.9s)
+{{Music}} 220.44 - 232.65   ( 12.2s)
+{{Music}} 279.53 - 284.00   (  4.5s)   outro
+```
+
+Music cues carry mean singing evidence 0.085 against 0.130 for the sung cues.
+
+### One finding the owner should look at: a duplicated stanza
+
+Cues 21–24 of the supplied SRT are the *same two lines* twice:
+
+```
+21  సర్వప్రాణుల యెడల సమభావ ధామా,     23  సర్వప్రాణుల యెడల సమభావ ధామా,   (identical)
+22  సర్వసమర్థ, సౌశీల్య రామా,          24  సర్వసమర్థ, సౌశీల్య రామా,        (identical)
+```
+
+The independent ASR transcribes that stretch completely and finds the stanza **once**:
+
+```
+184.38-185.78 సర్వ   185.78-186.74 ప్రాణుల  186.74-187.38 ఏడల
+187.38-189.52 సమభావ 189.52-190.74 ధామా
+190.74-192.22 సర్వ  192.22-193.22 సమర్థ    193.22-195.40 సవ్షిల్య  195.40-196.78 రామా
+196.78-197.78 ధైర్య 197.78-199.20 స్వభావ   199.20-201.04 క్రోధ ...
+```
+
+Lines 21 and 22 occupy 184.38 → 196.78 and the next word is line 25's first word, so
+there is no room for a second pass. The pipeline never drops a supplied line, so
+cues 23 and 24 are kept and share that span (0.96 s and 3.65 s respectively) — which
+is why one cue in the middle of that stanza is short. If those two rows are indeed
+duplicates, deleting them from the supplied SRT and re-running gives 34 sung cues
+with every line at a natural length.
+
+### Verification
+
+| check | result |
+| --- | --- |
+| database `synced_lyrics` / `_en` / `_en_tr` | PATCH `204`, read-back **identical** for all three |
+| stored Telugu vs the run artifact | **byte-identical** |
+| columns | 42 / 42 / 42, identical start+end at every index, identical music mask |
+| structure | 0 → 284 s, contiguous, no gap/overlap, no zero-length, no duplicate start |
+| every plain line cued; every cue an exact plain-lyric line | **yes — 20/20** |
+| repetitions | every line with exactly its supplied occurrence count |
+| music | 6 cues, longest 31.40 s = 11.1 % (limit 25 %) |
+| per-line posterior | median 0.699, p10 0.573, min 0.318 |
+| genuine misplacement suspects | **0 of 36** |
+| plain lyrics | never written |
+
 ## Certified track: Pattabhi Raamuni (2026-11-03)
 
 `50320a38-84ed-4da5-afe2-95dab5ab2b61` — 292 s, **41 supplied cues**, 20 distinct
