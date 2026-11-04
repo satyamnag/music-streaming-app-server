@@ -93,6 +93,46 @@ with every line at a natural length.
 | genuine misplacement suspects | **0 of 36** |
 | plain lyrics | never written |
 
+### Variants re-rendered after the owner re-segmented the Telugu (2026-11-04)
+
+The owner then edited `synced_lyrics` by hand, splitting every plain line into two cues
+(73 cues over the same 20 plain lines, music banners written as `{{♪ Music ♪}}`). The
+English columns still held the old 42-cue timeline, so they were re-rendered from the
+stored Telugu with `sync-variants.yml` (run `41780206742`), which writes **only**
+`synced_lyrics_en` and `synced_lyrics_en_tr`.
+
+`render-variant-sync.mjs` gained what that structure needs:
+
+* a cue that is a **prefix or suffix of a plain line** is mapped to that line and the
+  variant line is split at the matching point — at the punctuation mark nearest the same
+  relative position when the Telugu split is at punctuation, otherwise at the word
+  boundary nearest it, nudged left when it would end on a dangling function word;
+* any `{{...}}` cue is a music banner and is mirrored **verbatim**, so all three columns
+  carry the same text for a music row;
+* a **hard guard** refuses the write if any cue in a variant column still contains
+  Telugu script, or if a sub-line cue cannot be split. That fallback is how Telugu used
+  to leak into the English columns; it can no longer ship.
+
+| | |
+| --- | --- |
+| cues | **73 / 73 / 73**, identical start+end at every index |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | 42 cues → **73**, 20/20 plain lines covered |
+| Telugu script in either variant | **0 cues** |
+| empty cues / music-mask mismatches | **0 / 0** |
+| stored variants vs the run artifacts | **byte-identical** |
+
+Spot checks of the splits (each piece taken from the plain column, nothing invented):
+
+```
+సర్వప్రాణుల యెడల      Sarva Praanula Yedala        Abode of equanimity
+సమభావ ధామా,           Samabhaava Dhaamaa,          towards all living beings,
+సర్వసమర్థ,             Sarvasamartha,               All-powerful Rama
+సౌశీల్య రామా,          Sausheelya Raamaa,           of noble character,
+అందరిలో మంచిని         Andarilo Manchini            One who sees
+కాంచగల సోమా,           Kaanchagala Somaa,           in everyone,
+```
+
 ## Certified track: Pattabhi Raamuni (2026-11-03)
 
 `50320a38-84ed-4da5-afe2-95dab5ab2b61` — 292 s, **41 supplied cues**, 20 distinct
