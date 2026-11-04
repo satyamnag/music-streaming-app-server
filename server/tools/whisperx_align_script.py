@@ -321,13 +321,30 @@ def main():
         need = [len(line_tokens[i][0]) / args.window_max_rate for i in range(len(bounded))]
         hard = [i for i in range(len(bounded))
                 if windows[i][1] - windows[i][0] < max(0.8, need[i])]
-        groups, taken = {}, set()
-        for i in hard:
-            members = [j for j in (i - 1, i, i + 1) if 0 <= j < len(bounded) and j not in taken]
-            if not members:
-                continue
-            groups[members[0]] = members
-            taken.update(members)
+        # Adjacent crowded cues must end up in ONE group: expanding each of them
+        # separately left a group of a single line (measured on Ramya Guna Dhama, where
+        # two neighbouring cues were both too short), which is the same as no group at
+        # all and left one line with a 0.96 s cue. So take the maximal runs of crowded
+        # indices, widen each run by one line on both sides, and merge runs that touch.
+        groups = {}
+        if hard:
+            runs = []
+            start = prev = hard[0]
+            for i in hard[1:]:
+                if i == prev + 1:
+                    prev = i
+                    continue
+                runs.append((start, prev))
+                start = prev = i
+            runs.append((start, prev))
+            for a, b in runs:
+                lo, hi = max(0, a - 1), min(len(bounded) - 1, b + 1)
+                if groups:
+                    last_key = list(groups)[-1]
+                    if lo <= groups[last_key][-1] + 1:
+                        groups[last_key] = list(range(last_key, hi + 1))
+                        continue
+                groups[lo] = list(range(lo, hi + 1))
         if hard:
             print(f"crowded cues: {len(hard)} line(s) whose supplied time is too short for "
                   f"their own text -> regional group(s) "
