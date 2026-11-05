@@ -103,6 +103,47 @@ focused button or link so the studio's own controls stay keyboard-operable.
    column when the studio saves, its textarea is refreshed — otherwise the next
    "Save" there would write the pre-studio text back.
 
+## Voice graph
+
+A 96 px strip between the stage and the timeline shows the whole track's
+amplitude, the regions that carry voice, and every cue boundary — so a stamp can
+be placed from what is **seen**, not only what is remembered. Stamping by ear
+drifts on sustained notes; an onset is visible.
+
+| Element | Meaning |
+| --- | --- |
+| Grey-blue columns | Peak envelope (min/max per pixel column, extreme-preserving when zoomed out) |
+| Warm band along the bottom | Vocal-energy guide: buckets whose RMS is a meaningful fraction of the loudest one |
+| Gold vertical lines | Every cue start; the selected cue's window is shaded blue |
+| Red line + dot | The playhead, on the same clock as the audio |
+| Hover label | The time under the cursor |
+
+**Controls.** `−` / `+` zoom around the playhead, `Fit` shows the whole track,
+`Focus cue` frames the selected line (its window ± 60 %), `Hide` collapses the
+strip. Clicking the graph seeks; dragging scrubs; clicking within 7 px of a cue
+boundary selects that line and jumps to it. The canvas is focusable, and
+`Home`/`End` jump to the start/end of the analysed track.
+
+**How it is built.** The same bytes the player uses are fetched, decoded **once**
+in the tab through an `OfflineAudioContext` at **11025 Hz** (peaks need
+resolution in time, not audio bandwidth — decoding 15 minutes of stereo at
+44.1 kHz would hold hundreds of MB of `Float32` for a 96 px strip), then reduced
+to 6000 buckets of min/max + RMS and cached per URL (3 entries, ~72 KB each).
+The static layer is rendered once into an offscreen canvas and blitted per frame,
+so following the playhead costs one `drawImage`.
+
+**Honest limits.** The energy band is an *aid*, not voice detection: it is a
+simple adaptive threshold (10 % of the loudest bucket, one-bucket dropouts
+closed) and it is labelled "guide" in the code for that reason. Nothing in the
+validation, export or save path reads it — the timings come from the admin's
+stamps alone.
+
+**Failure is never fatal.** An unsupported codec, a file over 160 MB, or a
+browser without `OfflineAudioContext` degrades to a message plus a `Retry`
+button. The clock, stamping, export and Save keep working, because the graph is
+an aid and never a dependency. A decode superseded by another track is aborted
+and never reported as an error.
+
 ## Media
 
 * Default: the track's own audio via the public `/stream/:id/file` (Range
@@ -118,12 +159,18 @@ focused button or link so the studio's own controls stay keyboard-operable.
 
 * `node --check` on `server.js` and on the extracted studio script; balanced
   markup; no duplicate element ids.
-* **40/40 browser checks** in headless Edge over CDP against a stubbed admin API
-  serving a real 60 s WAV: entry points wired, track/lyrics load, media
-  metadata, stamping (derived ends, tail), nudge, shift-all, exact exported SRT,
-  save → PUT body → stored row, refusal of a backward cue, keyboard `S`, close
-  and reopen from the saved column, LRC detection, and inert markup. Zero page
-  exceptions, zero console errors.
+* **60/60 browser checks** in headless Edge over CDP against a stubbed admin API
+  serving a real 60 s WAV (with a loud/quiet envelope so the energy guide has
+  something real to find), run four times consecutively with zero failures:
+  entry points wired, track/lyrics load, media metadata, **voice graph decoded,
+  canvas sized, drawn, described, energy band rendered, cue count, click-to-seek
+  landing on the right time, playhead pixel at the seek point, selected-cue
+  shading (and no shading elsewhere), zoom / Fit / Focus cue / Hide-Show, and a
+  decode failure that still allows stamping and saving, then a cached track
+  returning instantly**, stamping (derived ends, tail), nudge, shift-all, exact
+  exported SRT, save → PUT body → stored row, refusal of a backward cue,
+  keyboard `S`, close and reopen from the saved column, LRC detection, and inert
+  markup. Zero page exceptions, zero console errors.
 * **17/17 checks** against the validator functions *extracted from the shipped
   `server.js`*: valid SRT (including CRLF and a `{{Music}}` cue) accepted; LRC,
   textless cues, missing timings and noise rejected; `null`/`''`/absent handled.
@@ -143,3 +190,17 @@ focused button or link so the studio's own controls stay keyboard-operable.
   stamping loop reads, and a waveform canvas would add a decode dependency for
   no gain in accuracy.
 * Translation columns are not edited here (see above).
+
+## Changed since the first version
+
+* **Voice graph** added (see above). The earlier note that a waveform "would add
+  a decode dependency for no gain in accuracy" was wrong for this workflow: an
+  onset is easier to place against a visible edge than against memory, which is
+  exactly what slows a hand-timed pass down.
+* **Switching tracks writes the outgoing draft first.** The timeline is replaced
+  wholesale when the track changes, so the pending draft is flushed before the
+  switch; returning to that track offers the timings back instead of a blank
+  editor.
+* **Selecting a line redraws the graph.** The selected cue's window is drawn on
+  the graph, so a selection change has to invalidate that layer — without it the
+  shading stayed on the previously selected line (caught by the pixel check).
