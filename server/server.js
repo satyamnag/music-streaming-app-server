@@ -2054,6 +2054,8 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
     const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
     if (typeof title !== 'string' || !title.trim()) return res.status(400).json({ error: 'title is required' })
     if (typeof storage_path !== 'string' || !storage_path.trim()) return res.status(400).json({ error: 'storage_path is required' })
+    const createLyricsError = syncedLyricsRejection(req.body || {})
+    if (createLyricsError) return res.status(400).json({ error: createLyricsError })
     const cleanTitle = title.trim()
     const cleanArtists = Array.isArray(artist_names) && artist_names.length
       ? artist_names.map((a) => String(a).trim()).filter(Boolean)
@@ -2117,6 +2119,10 @@ app.post('/api/admin/tracks', requireAdmin, async (req, res, next) => {
 app.put('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
   try {
     const { title, artist_names, album, album_id, album_ids, duration, thumbnail, storage_path, karaoke_storage_path, ringtone_storage_path, status, lyrics, synced_lyrics, synced_lyrics_en, synced_lyrics_hi, synced_lyrics_en_tr, synced_lyrics_hi_tr, plain_lyrics, plain_lyrics_en, plain_lyrics_hi, plain_lyrics_en_tr, plain_lyrics_hi_tr, language, tags, featured_order } = req.body || {}
+    // Refuse non-SRT timed lyrics before anything is read or written: this is
+    // the same contract the admin page enforces, now enforced for every caller.
+    const updateLyricsError = syncedLyricsRejection(req.body || {})
+    if (updateLyricsError) return res.status(400).json({ error: updateLyricsError })
     // The pre-update audio paths, needed to delete the R2 objects this row no
     // longer points at after a successful save.
     const { data: existing } = await supabase
@@ -2229,15 +2235,49 @@ function isValidSrtText(text) {
   })
 }
 
-// The synced columns this endpoint may produce. Used both to validate a caller's
-// `columns` restriction and to keep the response honest about what it touched.
-const SYNC_COLUMNS = [
+// Every synced-lyrics column this API accepts. Kept next to the validator so a
+// new column cannot be added to the PUT/POST contract without being validated.
+const SYNCED_LYRIC_COLUMNS = [
   'synced_lyrics',
   'synced_lyrics_en',
   'synced_lyrics_hi',
   'synced_lyrics_en_tr',
   'synced_lyrics_hi_tr',
 ]
+
+// Rejects a write whose timed lyrics are not SRT.
+//
+// WHY THIS IS SERVER-SIDE. The admin page has its own `isValidSrt` guard, but a
+// guard the server does not repeat is only a UI hint: any request that skips the
+// page (an older tab, a script, a direct API call) could store text the app
+// cannot parse. The catalogue's own history shows why that matters - 50 of 79
+// tracks hold SRT and the client parses SRT FIRST, so a malformed value does not
+// degrade gracefully, it removes that song's synced lyrics entirely.
+//
+// `undefined`/`null` mean "leave this column alone" and `''` means "clear it",
+// both of which are allowed. Only a non-empty value has to be valid.
+function syncedLyricsRejection(payload) {
+  if (!payload || typeof payload !== 'object') return null
+  for (const col of SYNCED_LYRIC_COLUMNS) {
+    const value = payload[col]
+    if (value === undefined || value === null) continue
+    if (typeof value !== 'string') {
+      return `${col} must be a string (or null to clear it).`
+    }
+    if (value.trim() && !isValidSrtText(value)) {
+      return `${col} is not valid SRT. Every cue needs a numeric index line, ` +
+        'a `HH:MM:SS,mmm --> HH:MM:SS,mmm` timing line, then at least one text ' +
+        'line, with a blank line between cues.'
+    }
+  }
+  return null
+}
+
+// The synced columns this endpoint may produce. Used both to validate a caller's
+// `columns` restriction and to keep the response honest about what it touched.
+// Same source of truth as the write validator above: one list, so a column can
+// never be writable but unvalidated (or vice versa).
+const SYNC_COLUMNS = SYNCED_LYRIC_COLUMNS
 
 // ============================================================================
 // POST /api/admin/tracks/:id/auto-sync
