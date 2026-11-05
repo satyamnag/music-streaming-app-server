@@ -299,9 +299,16 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-topbtn.ss-danger { border-color: rgba(255,196,196,.55); background: rgba(190,28,40,.34); }
 .ss-topbtn.ss-danger:hover { background: rgba(190,28,40,.5); }
 
-/* ---------- settings drawer ---------- */
+/* ---------- settings drawer ----------
+   Absolutely positioned so opening it CANNOT take height from the workspace
+   below: the voice graph and the timeline keep every pixel they had. `top` is
+   set from the top-bar's measured height (it wraps on narrow screens). */
 .ss-settings {
-  flex: none; background: #f7f4ee; border-bottom: 1px solid #e2dbcd;
+  position: absolute; left: 0; right: 0; top: 64px; z-index: 30;
+  max-height: 72vh; overflow-y: auto;
+  background: #f7f4ee; border-bottom: 1px solid #e2dbcd;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .30);
   padding: 12px 16px; display: none;
 }
 .ss-settings.open { display: block; }
@@ -330,18 +337,37 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-settings-note { font-size: 11.5px; color: #6b5c4a; line-height: 1.55; margin: 10px 0 0; }
 .ss-import-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
 
-/* ---------- body layout ---------- */
+/* ---------- body layout ----------
+   The voice graph and the timeline editor are two halves of ONE workspace and
+   must always be on screen together, so the column is a three-way split rather
+   than "fixed panels + whatever is left":
+
+     now-playing  auto
+     stage        grows/shrinks between 110 and 320 px  (decorative, gives up
+                                                          space first)
+     voice graph  fixed, readable height
+     timeline     grows/shrinks, never below 210 px
+
+   Only if the sum of those minimums exceeds the viewport does the column scroll,
+   and the footer is a separate grid row so Save/Export never scroll away. */
 .ss-body {
-  flex: 1; min-height: 0; display: grid; gap: 12px; padding: 12px;
-  grid-template-columns: minmax(0, 1fr) 352px; align-content: stretch;
+  flex: 1; min-height: 0; display: grid; gap: 10px 12px; padding: 12px;
+  grid-template-columns: minmax(0, 1fr) 352px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-content: stretch;
 }
-.ss-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.ss-main {
+  grid-column: 1; grid-row: 1;
+  min-width: 0; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+}
 .ss-side {
-  min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+  grid-column: 2; grid-row: 1;
+  min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
   padding-right: 2px;
 }
-.ss-side::-webkit-scrollbar, .ss-tablewrap::-webkit-scrollbar { width: 10px; height: 10px; }
-.ss-side::-webkit-scrollbar-thumb, .ss-tablewrap::-webkit-scrollbar-thumb {
+.ss-main::-webkit-scrollbar, .ss-side::-webkit-scrollbar, .ss-tablewrap::-webkit-scrollbar { width: 10px; height: 10px; }
+.ss-main::-webkit-scrollbar-thumb, .ss-side::-webkit-scrollbar-thumb, .ss-tablewrap::-webkit-scrollbar-thumb {
   background: #cbbfae; border-radius: 6px; border: 2px solid transparent; background-clip: content-box;
 }
 .ss-card {
@@ -401,10 +427,15 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 /* ---------- stage (video / artwork + live lyric) ---------- */
 .ss-stage {
-  position: relative; flex: none; height: 232px; border-radius: 12px;
+  position: relative; border-radius: 12px;
+  /* The preview is the only panel that is decorative, so it absorbs the
+     shortfall: it shrinks to 110 px before the timeline loses a single pixel,
+     and grows to 320 px on tall screens. */
+  flex: 1 1 210px; min-height: 110px; max-height: 320px;
   overflow: hidden; background: #160a10; border: 1px solid #2a1c22;
   isolation: isolate;
 }
+.ss-stage.is-collapsed { display: none; }
 .ss-stage-art {
   position: absolute; inset: 0; background-position: center; background-size: cover;
   filter: blur(2px) brightness(.5) saturate(1.05); transform: scale(1.06); z-index: 0;
@@ -464,7 +495,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 }
 
 /* ---------- voice graph (waveform + vocal-energy guide) ---------- */
-.ss-wavecard { flex: none; overflow: hidden; }
+.ss-wavecard { flex: 0 0 auto; overflow: hidden; }
 .ss-wavehead {
   display: flex; align-items: center; gap: 9px; padding: 8px 13px; flex: none;
   border-bottom: 1px solid #f0ece4;
@@ -485,7 +516,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-wavebtn[aria-pressed="true"] { background: #fdf7e7; border-color: #c9a227; color: #7a5b00; }
 .ss-wavebtn:disabled { opacity: .45; cursor: not-allowed; }
 .ss-wavewrap {
-  position: relative; height: 96px; padding: 5px 8px 3px;
+  position: relative; height: clamp(64px, 8.5vh, 104px); padding: 5px 8px 3px;
   background: linear-gradient(180deg, #17121c, #100c14);
 }
 .ss-wave {
@@ -502,7 +533,12 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-waveempty .ss-wavebtn { margin-left: 8px; }
 
 /* ---------- timeline table ---------- */
-.ss-tablecard { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.ss-tablecard {
+  /* The working surface: it may grow as far as the column allows, but never
+     collapses below 210 px — that was the bug this rule exists to prevent. */
+  flex: 2 1 280px; min-height: 210px;
+  display: flex; flex-direction: column; overflow: hidden;
+}
 .ss-tablehead {
   display: flex; align-items: center; gap: 10px; padding: 10px 13px;
   border-bottom: 1px solid #f0ece4; flex: none;
@@ -558,8 +594,11 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-rowbtn.ss-del:hover { background: #fdeaea; border-color: #f3b9b9; color: #b91c1c; }
 .ss-empty-row { padding: 26px 14px; text-align: center; color: #8a8177; font-size: 13px; line-height: 1.7; }
 
-/* ---------- footer ---------- */
+/* ---------- footer ----------
+   Its own grid row, spanning both columns, so Save / Export / Copy stay pinned
+   at the bottom of the overlay no matter how the workspace above scrolls. */
 .ss-footer {
+  grid-column: 1 / -1; grid-row: 2;
   flex: none; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   padding: 9px 13px; background: #fff; border: 1px solid #e6e1d8; border-radius: 12px;
 }
@@ -676,10 +715,24 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 }
 .ss-dialog-note { font-size: 12px; color: #6b5c4a; line-height: 1.6; margin: 0 0 10px; }
 
+/* Narrow viewports: one column, and the overlay scrolls as a whole. The graph
+   and the timeline keep real heights instead of being squeezed, and the footer
+   stays its own row so Save remains reachable. */
 @media (max-width: 1180px) {
-  .ss-body { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
-  .ss-side { overflow: visible; }
-  .ss-stage { height: 200px; }
+  .ss-body {
+    display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+    /* The pinned footer overlaps the last ~56 px of the scrollport, so keep
+       scrollIntoView (the "follow the singing line" scroll) clear of it. */
+    scroll-padding-bottom: 72px;
+  }
+  .ss-main { flex: none; overflow: visible; }
+  .ss-side { flex: none; overflow: visible; }
+  /* Pinned to the bottom of the scrolling overlay: on a narrow screen the
+     timeline is tall, and Save/Export must not need a scroll to reach. */
+  .ss-footer { flex: none; position: sticky; bottom: 0; z-index: 15; box-shadow: 0 -6px 18px rgba(20, 12, 16, .16); }
+  .ss-stage { flex: none; height: clamp(150px, 24vh, 240px); min-height: 0; max-height: none; }
+  .ss-wavewrap { height: clamp(72px, 12vh, 104px); }
+  .ss-tablecard { flex: none; min-height: 340px; max-height: 62vh; }
 }
 @media (max-width: 700px) {
   .ss-brand p { display: none; }
@@ -687,6 +740,18 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   .ss-topbtn { flex: 1 1 auto; justify-content: center; }
   .ss-body { padding: 8px; }
   .ss-cur { font-size: 24px; }
+  .ss-wavehead .ss-meta { display: none; }
+  .ss-wavebtn { padding: 5px 7px; }
+}
+/* Short viewports (a laptop at 125 % zoom, or with the Settings drawer open):
+   the preview gives up its height first so the graph and the timeline stay
+   usable together. */
+@media (max-height: 820px) {
+  .ss-stage { flex: 0 1 140px; min-height: 88px; }
+  .ss-wavewrap { height: clamp(72px, 8.5vh, 92px); }
+  .ss-np { padding: 8px 12px; gap: 10px; }
+  .ss-np-art { width: 46px; height: 46px; border-radius: 8px; font-size: 18px; }
+  .ss-progress { padding-bottom: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ss-chip.is-live .ss-led { animation: none; }
@@ -1389,6 +1454,10 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M22 8v8l-6-4z"/></svg>
         Load Media
       </button>
+      <button type="button" class="ss-topbtn" id="ssTogglePreview" aria-pressed="true" title="Show or hide the live lyric preview, so the voice graph and the timeline get the whole height">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        Preview
+      </button>
       <button type="button" class="ss-topbtn ss-danger" id="ssClose" title="Close the studio (Esc)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
         Close
@@ -1538,22 +1607,6 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         </div>
       </div>
 
-      <div class="ss-footer">
-        <div class="ss-status" id="ssStatus">
-          <span class="ss-status-dot" id="ssStatusDot">&#10003;</span>
-          <span id="ssStatusText">Ready. Load a track to begin.</span>
-        </div>
-        <div class="ss-footer-actions">
-          <button type="button" class="ss-btn ss-ghost" id="ssRestorePrev" hidden>Restore previous</button>
-          <button type="button" class="ss-btn" id="ssExportSrt">Export SRT</button>
-          <button type="button" class="ss-btn" id="ssCopySrt">Copy SRT</button>
-          <button type="button" class="ss-btn" id="ssClear">Clear</button>
-          <button type="button" class="ss-btn ss-primary" id="ssSave">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-            Save to track
-          </button>
-        </div>
-      </div>
     </div>
 
     <aside class="ss-side">
@@ -1646,6 +1699,27 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         </div>
       </div>
     </aside>
+
+    <!-- The footer is a sibling of the workspace, placed LAST so the narrow
+         (single-column) branch can pin it with position:sticky while everything
+         above scrolls. In the wide grid its row/column are explicit, so the DOM
+         order does not matter there. Save is therefore always on screen. -->
+    <div class="ss-footer">
+        <div class="ss-status" id="ssStatus">
+          <span class="ss-status-dot" id="ssStatusDot">&#10003;</span>
+          <span id="ssStatusText">Ready. Load a track to begin.</span>
+        </div>
+        <div class="ss-footer-actions">
+          <button type="button" class="ss-btn ss-ghost" id="ssRestorePrev" hidden>Restore previous</button>
+          <button type="button" class="ss-btn" id="ssExportSrt">Export SRT</button>
+          <button type="button" class="ss-btn" id="ssCopySrt">Copy SRT</button>
+          <button type="button" class="ss-btn" id="ssClear">Clear</button>
+          <button type="button" class="ss-btn ss-primary" id="ssSave">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Save to track
+          </button>
+        </div>
+    </div>
   </div>
 
   <input type="file" id="ssMediaFile" accept="video/*,audio/*,.mp4,.webm,.mkv,.mov,.opus,.ogg,.mp3,.m4a,.wav" hidden>
@@ -7833,6 +7907,53 @@ checkSession();
 
   var waveCache = [];      // newest first; bounded, ~72 KB per entry
 
+  /* ---- workspace split: the preview can yield all its height ---- */
+  //
+  // The voice graph and the timeline editor are two halves of one workspace and
+  // must never hide each other. The preview is the only decorative panel, so it
+  // is the one that gives up height - automatically on short viewports (see the
+  // max-height media query) and on demand through this toggle. The choice is
+  // remembered, because an admin who works maximised stays maximised.
+  var PREVIEW_KEY = 'sb_sync_studio_preview';
+
+  function previewVisible() {
+    var stage = $('ssStage');
+    return !(stage && stage.classList.contains('is-collapsed'));
+  }
+
+  function applyPreview(show) {
+    var stage = $('ssStage');
+    if (stage) stage.classList.toggle('is-collapsed', !show);
+    var btn = $('ssTogglePreview');
+    if (btn) btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+    // The strip's height is derived from the space left, so re-measure it.
+    waveLayout();
+    waveInvalidate();
+  }
+
+  function readPreviewPref() {
+    try {
+      var raw = localStorage.getItem(PREVIEW_KEY);
+      if (raw === '0') return false;
+      if (raw === '1') return true;
+    } catch (_) {}
+    return true;
+  }
+
+  function writePreviewPref(show) {
+    try { localStorage.setItem(PREVIEW_KEY, show ? '1' : '0'); } catch (_) {}
+  }
+
+  // The settings drawer floats over the workspace, so it is anchored under the
+  // measured top bar (which wraps to two rows on narrow screens) instead of
+  // taking height from the graph and the timeline.
+  function positionSettingsDrawer() {
+    var bar = document.querySelector('.ss-topbar');
+    var panel = $('ssSettings');
+    if (!bar || !panel) return;
+    panel.style.top = Math.round(bar.getBoundingClientRect().height) + 'px';
+  }
+
   function waveMeta(text) {
     var el = $('ssWaveMeta');
     if (el) el.textContent = text || '';
@@ -7984,6 +8105,26 @@ checkSession();
     };
   }
 
+  /**
+   * One place for every "the graph is not available" outcome, so the message,
+   * the Retry affordance and the accessible name can never drift apart.
+   */
+  function waveFail(url, why) {
+    W.status = 'error';
+    W.peaks = null;
+    waveLoading(false);
+    waveMeta('Unavailable');
+    waveAria();
+    waveSetEmpty(true,
+      'Voice graph unavailable \u2014 ' + escHtml(why) + '. Timing and Save still work. ' +
+      '<button type="button" class="ss-wavebtn" id="ssWaveRetry">Retry</button>');
+    var retry = $('ssWaveRetry');
+    if (retry) {
+      retry.addEventListener('click', function () { waveLoad(url); }, { once: true });
+    }
+    waveInvalidate();
+  }
+
   function waveLoad(url) {
     if (!url) {
       waveReset('No audio to analyse yet.');
@@ -8004,6 +8145,15 @@ checkSession();
     W.status = 'loading';
     waveLoading(true);
     waveMeta('Decoding\u2026');
+
+    // Fail fast: without an offline decoder there is nothing worth downloading,
+    // so a browser that cannot decode is told immediately instead of after a
+    // pointless full-track fetch.
+    if (!(window.OfflineAudioContext || window.webkitOfflineAudioContext)) {
+      waveFail(url, 'this browser could not decode the audio');
+      return;
+    }
+
     var token = W.token;
     var aborter = (typeof AbortController === 'function') ? new AbortController() : null;
     W.aborter = aborter;
@@ -8033,22 +8183,10 @@ checkSession();
         // A decode superseded by another track is not a failure to report.
         if (token !== W.token) return;
         if (err && (err.name === 'AbortError' || err.code === 20)) return;
-        W.status = 'error';
-        W.peaks = null;
-        waveLoading(false);
         var why = (err && /too large/.test(String(err.message)))
           ? 'this file is too large to analyse'
           : 'this browser could not decode the audio';
-        waveMeta('Unavailable');
-        waveAria();
-        waveSetEmpty(true,
-          'Voice graph unavailable \u2014 ' + escHtml(why) + '. Timing and Save still work. ' +
-          '<button type="button" class="ss-wavebtn" id="ssWaveRetry">Retry</button>');
-        var retry = $('ssWaveRetry');
-        if (retry) {
-          retry.addEventListener('click', function () { waveLoad(url); }, { once: true });
-        }
-        waveInvalidate();
+        waveFail(url, why);
       });
   }
 
@@ -8071,8 +8209,7 @@ checkSession();
   }
 
   function waveLayout() {
-    var canvas = $('ssWave');
-    var wrap = $('ssWaveWrap');
+    var canvas = $('ssWave');    var wrap = $('ssWaveWrap');
     if (!canvas || !wrap) return;
     var rect = wrap.getBoundingClientRect();
     // 8px horizontal + 5/3px vertical padding on .ss-wavewrap
@@ -8496,6 +8633,7 @@ checkSession();
     startLoop();
     // The strip only has a measurable size once the overlay is displayed, so the
     // canvas backing store is sized here rather than at parse time.
+    applyPreview(readPreviewPref());
     waveLayout();
     waveInvalidate();
     setTimeout(function () {
@@ -8551,7 +8689,10 @@ checkSession();
     var panel = $('ssSettings');
     var open = panel.classList.toggle('open');
     $('ssToggleSettings').setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) renderTrackSelect();
+    if (open) {
+      positionSettingsDrawer();
+      renderTrackSelect();
+    }
   });
 
   on('ssTrackSelect', 'change', function (e) { loadTrack(e.target.value); });
@@ -8775,6 +8916,15 @@ checkSession();
     waveSetView(0, dur);
   });
   on('ssWaveFocus', 'click', waveFocusCue);
+  on('ssTogglePreview', 'click', function () {
+    var show = !previewVisible();
+    applyPreview(show);
+    writePreviewPref(show);
+    if (!show) {
+      setStatus('ok', 'Preview hidden \u2014 the voice graph and the timeline now use the full height.');
+    }
+  });
+
   on('ssWaveToggle', 'click', function () {
     W.hidden = !W.hidden;
     var wrap = $('ssWaveWrap');
@@ -8850,6 +9000,7 @@ checkSession();
     window.addEventListener('resize', function () {
       waveLayout();
       waveInvalidate();
+      positionSettingsDrawer();
     });
   })();
 
