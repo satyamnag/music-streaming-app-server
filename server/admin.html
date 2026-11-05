@@ -463,6 +463,44 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   font-size: 11px; color: rgba(255,255,255,.62); pointer-events: none;
 }
 
+/* ---------- voice graph (waveform + vocal-energy guide) ---------- */
+.ss-wavecard { flex: none; overflow: hidden; }
+.ss-wavehead {
+  display: flex; align-items: center; gap: 9px; padding: 8px 13px; flex: none;
+  border-bottom: 1px solid #f0ece4;
+}
+.ss-wavehead h3 {
+  font-size: 13.5px; margin: 0; color: #2a2320; display: flex; align-items: center; gap: 7px;
+  white-space: nowrap;
+}
+.ss-wavehead h3 svg { width: 17px; height: 17px; color: #7a1f1f; }
+.ss-wavehead .ss-meta { font-size: 11.5px; color: #77706a; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-waveactions { margin-left: auto; display: flex; gap: 5px; align-items: center; flex: none; }
+.ss-wavebtn {
+  padding: 5px 9px; border-radius: 7px; border: 1px solid #e2dbcd; background: #fff;
+  color: #4a4038; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.ss-wavebtn:hover { background: #f6f1e7; }
+.ss-wavebtn:focus-visible { outline: 2px solid #7a1f1f; outline-offset: 1px; }
+.ss-wavebtn[aria-pressed="true"] { background: #fdf7e7; border-color: #c9a227; color: #7a5b00; }
+.ss-wavebtn:disabled { opacity: .45; cursor: not-allowed; }
+.ss-wavewrap {
+  position: relative; height: 96px; padding: 5px 8px 3px;
+  background: linear-gradient(180deg, #17121c, #100c14);
+}
+.ss-wave {
+  display: block; width: 100%; height: 100%; cursor: crosshair;
+  touch-action: none; border-radius: 6px;
+}
+.ss-wave:focus-visible { outline: 2px solid #ffd45e; outline-offset: 2px; }
+.ss-wavewrap.is-loading .ss-wave { opacity: .3; }
+.ss-waveempty {
+  position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+  text-align: center; color: #cbbfae; font-size: 12px; line-height: 1.5; padding: 0 18px;
+}
+.ss-waveempty.show { display: flex; }
+.ss-waveempty .ss-wavebtn { margin-left: 8px; }
+
 /* ---------- timeline table ---------- */
 .ss-tablecard { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .ss-tablehead {
@@ -1446,6 +1484,31 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
           <div class="ss-next" id="ssNext"></div>
         </div>
         <div class="ss-stage-hint" id="ssStageHint">S stamps the selected line &middot; E sets its end &middot; &uarr;/&darr; move the selection &middot; Space plays</div>
+      </div>
+
+      <!-- Voice graph: the whole track's amplitude, the regions that carry
+           voice, and every cue boundary, so a stamp can be placed from what is
+           SEEN rather than only what is heard. Purely local: the audio is
+           decoded in this tab and nothing is uploaded. -->
+      <div class="ss-card ss-wavecard" id="ssWaveCard">
+        <div class="ss-wavehead">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h3l2.5-7 3.5 14 3-10 2 3H22"/></svg>
+            Voice graph
+          </h3>
+          <span class="ss-meta" id="ssWaveMeta">No audio decoded yet</span>
+          <div class="ss-waveactions">
+            <button type="button" class="ss-wavebtn" id="ssWaveZoomOut" title="Zoom out (show more of the track)" aria-label="Zoom out">&minus;</button>
+            <button type="button" class="ss-wavebtn" id="ssWaveZoomIn" title="Zoom in around the playhead" aria-label="Zoom in">+</button>
+            <button type="button" class="ss-wavebtn" id="ssWaveFit" title="Show the whole track">Fit</button>
+            <button type="button" class="ss-wavebtn" id="ssWaveFocus" title="Zoom to the selected cue">Focus cue</button>
+            <button type="button" class="ss-wavebtn" id="ssWaveToggle" aria-expanded="true" aria-controls="ssWaveWrap" title="Hide or show the voice graph">Hide</button>
+          </div>
+        </div>
+        <div class="ss-wavewrap" id="ssWaveWrap">
+          <canvas id="ssWave" class="ss-wave" tabindex="0" role="img" aria-label="Audio waveform, not decoded yet"></canvas>
+          <div class="ss-waveempty" id="ssWaveEmpty">Decoding the audio for the voice graph&hellip;</div>
+        </div>
       </div>
 
       <div class="ss-card ss-tablecard">
@@ -6983,6 +7046,12 @@ checkSession();
     renderNowPlaying();
     renderStatusAuto();
     fillEditor();
+    // Cue boundaries and the selected region live on the graph, so every model
+    // change has to mark it dirty; the redraw itself is coalesced into the next
+    // frame (see waveDrawFrame) instead of running once per call.
+    waveInvalidate();
+    waveMetaRefresh();
+    waveAria();
   }
 
   function markActiveRow() {
@@ -7073,6 +7142,7 @@ checkSession();
       } else if (S.track) {
         setStatus('warn', 'This track has no karaoke audio. Pick "Track audio (original)" or a local file.');
       }
+      waveReset('No audio to analyse yet.');
       return;
     }
     if (media.getAttribute('src') !== url) {
@@ -7081,6 +7151,10 @@ checkSession();
     }
     media.playbackRate = Number($('ssRate').value) || 1;
     media.volume = Number($('ssVolume').value);
+    // Same URL the player uses, decoded locally for the voice graph. waveLoad is
+    // idempotent per URL and caches the result, so re-applying a source (a rate
+    // change, a re-open) never re-decodes the track.
+    waveLoad(url);
   }
 
   function currentPlayhead() {
@@ -7096,6 +7170,10 @@ checkSession();
     S.sel = i;
     renderTable();
     fillEditor();
+    // The graph shades the selected cue, so a selection change has to redraw it;
+    // without this the highlight stays on the previously selected line.
+    waveInvalidate();
+    waveAria();
     if (focusEditor) {
       $('ssEditText').focus();
       $('ssEditText').select();
@@ -7378,6 +7456,13 @@ checkSession();
   }
 
   async function loadTrack(id) {
+    // Never lose the outgoing track's work. Switching tracks replaces the whole
+    // timeline, so the pending draft is written first - returning to that track
+    // then offers the timings back instead of a blank editor.
+    if (S.dirty && S.trackId) {
+      cancelDraftWrite();
+      saveDraft();
+    }
     if (!id) {
       S.trackId = null;
       S.track = null;
@@ -7701,6 +7786,527 @@ checkSession();
   }
 
   /* ------------------------------------------------------------------ */
+  /* voice graph (waveform + vocal-energy guide)                        */
+  /* ------------------------------------------------------------------ */
+  //
+  // WHY IT EXISTS: stamping from hearing alone is slow and drifts on sustained
+  // notes - the waveform shows where a phrase actually begins, so the playhead
+  // can be placed against a visible onset instead of a remembered one.
+  //
+  // HOW IT IS BUILT: the SAME bytes the player is using are fetched, decoded
+  // once in this tab at a LOW sample rate (peaks need resolution in time, not
+  // audio bandwidth) and reduced to a fixed bucket table that is cached per URL.
+  // The static layer is drawn once into an offscreen canvas and blitted per
+  // frame, so following the playhead costs one drawImage.
+  //
+  // SAFETY: nothing is uploaded and no endpoint is added. Every failure path
+  // (unsupported codec, oversized file, aborted decode) degrades to a message
+  // in the strip - the studio, the clock and Save keep working, because the
+  // graph is an aid and never a dependency.
+
+  var WAVE_BUCKETS = 6000;
+  var WAVE_CACHE_MAX = 3;
+  var WAVE_MAX_BYTES = 160 * 1024 * 1024;
+  var WAVE_MIN_SPAN = 1.5;
+  var WAVE_CUE_HIT_PX = 7;
+
+  var W = {
+    status: 'idle',        // idle | loading | ready | error
+    token: 0,
+    aborter: null,
+    peaks: null,           // Float32Array(buckets * 2): min, max
+    rms: null,             // Float32Array(buckets)
+    voiced: null,          // Uint8Array(buckets)
+    buckets: 0,
+    duration: 0,
+    url: '',
+    view: { start: 0, end: 0 },
+    layer: null,
+    width: 0,
+    height: 0,
+    dpr: 1,
+    dirty: true,
+    hidden: false,
+    hover: null,
+    dragging: false
+  };
+
+  var waveCache = [];      // newest first; bounded, ~72 KB per entry
+
+  function waveMeta(text) {
+    var el = $('ssWaveMeta');
+    if (el) el.textContent = text || '';
+  }
+
+  function waveSetEmpty(show, html) {
+    var el = $('ssWaveEmpty');
+    if (!el) return;
+    if (html != null) el.innerHTML = html;
+    el.classList.toggle('show', !!show);
+  }
+
+  function waveLoading(on) {
+    var wrap = $('ssWaveWrap');
+    if (wrap) wrap.classList.toggle('is-loading', !!on);
+  }
+
+  function waveInvalidate() { W.dirty = true; }
+
+  function waveAbort() {
+    if (W.aborter) {
+      try { W.aborter.abort(); } catch (_) {}
+      W.aborter = null;
+    }
+  }
+
+  /** Back to "nothing analysed" - used when the track/media changes. */
+  function waveReset(message) {
+    waveAbort();
+    W.token++;
+    W.status = 'idle';
+    W.peaks = null;
+    W.rms = null;
+    W.voiced = null;
+    W.buckets = 0;
+    W.duration = 0;
+    W.url = '';
+    W.view = { start: 0, end: 0 };
+    W.hover = null;
+    W.dragging = false;
+    W.layer = null;
+    W.dirty = true;
+    waveLoading(false);
+    waveMeta('No audio decoded yet');
+    waveSetEmpty(true, escHtml(message || 'Choose a track, or load a media file, to see its voice graph.'));
+    waveLayout();
+    waveAria();
+  }
+
+  function waveCacheGet(url) {
+    for (var i = 0; i < waveCache.length; i++) if (waveCache[i].url === url) return waveCache[i];
+    return null;
+  }
+
+  function waveCachePut(entry) {
+    waveCache.unshift(entry);
+    while (waveCache.length > WAVE_CACHE_MAX) waveCache.pop();
+  }
+
+  /**
+   * An OfflineAudioContext at 11025 Hz: decoding 15 minutes of stereo at
+   * 44.1 kHz would hold hundreds of MB of Float32 for a 96 px strip, and the
+   * graph cannot use more time resolution than the canvas has pixels.
+   */
+  function waveDecodeContext() {
+    var Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Offline) return null;
+    try { return new Offline(1, 1, 11025); } catch (_) { return null; }
+  }
+
+  function waveAdopt(entry) {
+    W.peaks = entry.peaks;
+    W.rms = entry.rms;
+    W.voiced = entry.voiced;
+    W.buckets = entry.buckets;
+    W.duration = entry.duration;
+    W.url = entry.url;
+    W.status = 'ready';
+    W.aborter = null;
+    W.view = { start: 0, end: entry.duration };
+    waveLoading(false);
+    waveSetEmpty(false, '');
+    waveLayout();
+    waveInvalidate();
+    waveMetaRefresh();
+    // The canvas is the only visual of the analysis, so its accessible name has
+    // to stop saying "decoding" the moment the decode lands.
+    waveAria();
+  }
+
+  /**
+   * Reduces a decoded buffer to min/max peaks, RMS and a simple "carries voice"
+   * flag per bucket. The voice flag is adaptive (a fraction of the loudest
+   * bucket) and deliberately labelled a GUIDE in the UI - it is a reading aid,
+   * not voice detection, and nothing in the save path depends on it.
+   */
+  function waveAnalyse(url, buffer) {
+    var channels = Math.max(1, buffer.numberOfChannels);
+    var length = buffer.length;
+    var data = [];
+    for (var c = 0; c < channels; c++) data.push(buffer.getChannelData(c));
+
+    var buckets = Math.max(1, Math.min(WAVE_BUCKETS, length));
+    var peaks = new Float32Array(buckets * 2);
+    var rms = new Float32Array(buckets);
+    var per = length / buckets;
+    var loudest = 0;
+
+    for (var b = 0; b < buckets; b++) {
+      var start = Math.floor(b * per);
+      var end = Math.max(start + 1, Math.min(length, Math.floor((b + 1) * per)));
+      var mn = 0;
+      var mx = 0;
+      var sum = 0;
+      var n = 0;
+      for (var i = start; i < end; i++) {
+        var mix = 0;
+        for (var k = 0; k < channels; k++) {
+          var v = data[k][i];
+          if (v < mn) mn = v;
+          if (v > mx) mx = v;
+          mix += v;
+        }
+        mix /= channels;
+        sum += mix * mix;
+        n++;
+      }
+      peaks[b * 2] = mn;
+      peaks[b * 2 + 1] = mx;
+      rms[b] = n ? Math.sqrt(sum / n) : 0;
+      if (rms[b] > loudest) loudest = rms[b];
+    }
+
+    var threshold = Math.max(0.004, loudest * 0.10);
+    var voiced = new Uint8Array(buckets);
+    for (var q = 0; q < buckets; q++) voiced[q] = rms[q] >= threshold ? 1 : 0;
+    // Close one-bucket dropouts so a sustained note is not cut in half.
+    for (var g = 1; g < buckets - 1; g++) {
+      if (!voiced[g] && voiced[g - 1] && voiced[g + 1]) voiced[g] = 1;
+    }
+
+    return {
+      url: url,
+      peaks: peaks,
+      rms: rms,
+      voiced: voiced,
+      buckets: buckets,
+      duration: buffer.duration
+    };
+  }
+
+  function waveLoad(url) {
+    if (!url) {
+      waveReset('No audio to analyse yet.');
+      return;
+    }
+    if (W.url === url && W.status === 'ready') {
+      waveInvalidate();
+      return;
+    }
+    var cached = waveCacheGet(url);
+    if (cached) {
+      waveAdopt(cached);
+      return;
+    }
+
+    waveReset('Decoding the audio for the voice graph\u2026');
+    W.url = url;
+    W.status = 'loading';
+    waveLoading(true);
+    waveMeta('Decoding\u2026');
+    var token = W.token;
+    var aborter = (typeof AbortController === 'function') ? new AbortController() : null;
+    W.aborter = aborter;
+
+    fetch(url, { credentials: 'same-origin', signal: aborter ? aborter.signal : undefined })
+      .then(function (res) {
+        if (token !== W.token) return null;
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var len = Number(res.headers.get('content-length') || 0);
+        if (len && len > WAVE_MAX_BYTES) throw new Error('too large');
+        return res.arrayBuffer();
+      })
+      .then(function (bytes) {
+        if (!bytes || token !== W.token) return null;
+        if (bytes.byteLength > WAVE_MAX_BYTES) throw new Error('too large');
+        var ctx = waveDecodeContext();
+        if (!ctx) throw new Error('no decoder');
+        return ctx.decodeAudioData(bytes);
+      })
+      .then(function (buffer) {
+        if (!buffer || token !== W.token) return;
+        var entry = waveAnalyse(url, buffer);
+        waveCachePut(entry);
+        waveAdopt(entry);
+      })
+      .catch(function (err) {
+        // A decode superseded by another track is not a failure to report.
+        if (token !== W.token) return;
+        if (err && (err.name === 'AbortError' || err.code === 20)) return;
+        W.status = 'error';
+        W.peaks = null;
+        waveLoading(false);
+        var why = (err && /too large/.test(String(err.message)))
+          ? 'this file is too large to analyse'
+          : 'this browser could not decode the audio';
+        waveMeta('Unavailable');
+        waveAria();
+        waveSetEmpty(true,
+          'Voice graph unavailable \u2014 ' + escHtml(why) + '. Timing and Save still work. ' +
+          '<button type="button" class="ss-wavebtn" id="ssWaveRetry">Retry</button>');
+        var retry = $('ssWaveRetry');
+        if (retry) {
+          retry.addEventListener('click', function () { waveLoad(url); }, { once: true });
+        }
+        waveInvalidate();
+      });
+  }
+
+  function waveSummary() {
+    if (W.status !== 'ready') return '';
+    var cues = 0;
+    for (var i = 0; i < S.lines.length; i++) if (S.lines[i].start != null) cues++;
+    var span = W.view.end - W.view.start;
+    var zoomed = Math.abs(span - W.duration) > 0.05;
+    var text = fmtDur(W.duration) + ' \u00b7 ' + cues + ' cue' + (cues === 1 ? '' : 's');
+    if (zoomed) text += ' \u00b7 ' + fmtShort(W.view.start) + '\u2013' + fmtShort(W.view.end);
+    return text;
+  }
+
+  function waveMetaRefresh() {
+    if (W.status === 'ready') waveMeta(waveSummary());
+    else if (W.status === 'loading') waveMeta('Decoding\u2026');
+    else if (W.status === 'error') waveMeta('Unavailable');
+    else waveMeta('No audio decoded yet');
+  }
+
+  function waveLayout() {
+    var canvas = $('ssWave');
+    var wrap = $('ssWaveWrap');
+    if (!canvas || !wrap) return;
+    var rect = wrap.getBoundingClientRect();
+    // 8px horizontal + 5/3px vertical padding on .ss-wavewrap
+    var cssW = Math.max(80, Math.round(rect.width - 16));
+    var cssH = Math.max(36, Math.round(rect.height - 8));
+    var dpr = Math.min(3, Math.max(1, window.devicePixelRatio || 1));
+    if (W.width === cssW && W.height === cssH && W.dpr === dpr && W.layer) return;
+    W.width = cssW;
+    W.height = cssH;
+    W.dpr = dpr;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    W.layer = document.createElement('canvas');
+    W.layer.width = canvas.width;
+    W.layer.height = canvas.height;
+    waveInvalidate();
+    waveAria();
+  }
+
+  function waveTimeToX(t) {
+    var span = Math.max(0.001, W.view.end - W.view.start);
+    return ((t - W.view.start) / span) * W.width;
+  }
+
+  function waveAria() {
+    var canvas = $('ssWave');
+    if (!canvas) return;
+    if (W.status !== 'ready') {
+      canvas.setAttribute('aria-label', W.status === 'loading'
+        ? 'Audio waveform, decoding'
+        : 'Audio waveform, not available');
+      return;
+    }
+    var cues = 0;
+    for (var i = 0; i < S.lines.length; i++) if (S.lines[i].start != null) cues++;
+    canvas.setAttribute('aria-label',
+      'Audio waveform from ' + fmtShort(W.view.start) + ' to ' + fmtShort(W.view.end) +
+      ', ' + cues + ' cue' + (cues === 1 ? '' : 's') + ' marked. Click to seek; arrow keys also seek.');
+  }
+
+  function waveRenderStatic() {
+    var canvas = $('ssWave');
+    if (!canvas || !W.layer) return;
+    var ctx = W.layer.getContext('2d');
+    if (!ctx) return;
+    var w = W.width;
+    var h = W.height;
+    ctx.setTransform(W.dpr, 0, 0, W.dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    var grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#1a1420');
+    grad.addColorStop(1, '#0e0a12');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    var dur = W.duration || 0;
+    if (W.status === 'ready' && W.peaks && dur > 0 && W.buckets) {
+      var span = Math.max(0.001, W.view.end - W.view.start);
+      var mid = h * 0.52;
+      var amp = Math.max(4, (h - 20) / 2);
+      var perBucket = dur / W.buckets;
+      var x, t0, b;
+
+      // Vocal-energy guide: a warm band along the bottom of the strip.
+      ctx.fillStyle = 'rgba(255,196,92,.30)';
+      for (x = 0; x < w; x++) {
+        t0 = W.view.start + (x / w) * span;
+        b = Math.floor(t0 / perBucket);
+        if (b >= 0 && b < W.buckets && W.voiced[b]) ctx.fillRect(x, h - 8, 1, 6);
+      }
+
+      // Cue regions and boundaries, under the peaks so the peaks stay readable.
+      for (var i = 0; i < S.lines.length; i++) {
+        var st = S.lines[i].start;
+        if (st == null) continue;
+        var en = lineEnd(i);
+        var xa = waveTimeToX(st);
+        var xb = (en == null) ? xa + 1 : waveTimeToX(en);
+        if (xb < 0 || xa > w) continue;
+        if (i === S.sel) {
+          ctx.fillStyle = 'rgba(59,130,246,.20)';
+          ctx.fillRect(Math.max(0, xa), 0, Math.max(1, Math.min(w, xb) - Math.max(0, xa)), h);
+        }
+        ctx.fillStyle = (i === S.sel) ? 'rgba(147,197,253,.95)' : 'rgba(255,212,94,.85)';
+        ctx.fillRect(Math.round(xa), 0, 1, h);
+        ctx.fillRect(Math.round(xa), 0, 3, 4);
+      }
+
+      // Peaks: one column per device-independent pixel, taking the extreme
+      // value of every bucket the column covers so a transient never vanishes.
+      ctx.fillStyle = '#9fadc4';
+      for (x = 0; x < w; x++) {
+        var ta = W.view.start + (x / w) * span;
+        var tb = W.view.start + ((x + 1) / w) * span;
+        var ba = Math.max(0, Math.floor(ta / perBucket));
+        var bb = Math.min(W.buckets - 1, Math.max(ba, Math.floor(tb / perBucket)));
+        var mn = 0;
+        var mx = 0;
+        for (var k = ba; k <= bb; k++) {
+          if (W.peaks[k * 2] < mn) mn = W.peaks[k * 2];
+          if (W.peaks[k * 2 + 1] > mx) mx = W.peaks[k * 2 + 1];
+        }
+        var y1 = mid - mx * amp;
+        var y2 = mid - mn * amp;
+        if (y2 - y1 < 1) y2 = y1 + 1;
+        ctx.fillRect(x, y1, 1, y2 - y1);
+      }
+
+      // Centre line + faint 5 s grid, so the eye has a scale without labels.
+      ctx.fillStyle = 'rgba(255,255,255,.10)';
+      ctx.fillRect(0, Math.round(mid), w, 1);
+      ctx.fillStyle = 'rgba(255,255,255,.06)';
+      for (var g = Math.ceil(W.view.start / 5) * 5; g < W.view.end; g += 5) {
+        ctx.fillRect(Math.round(waveTimeToX(g)), 0, 1, h);
+      }
+    }
+  }
+
+  function waveDrawFrame() {
+    if (!S.open || W.hidden) return;
+    var canvas = $('ssWave');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    if (W.dirty || !W.layer) {
+      waveLayout();
+      waveRenderStatic();
+      W.dirty = false;
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (W.layer) ctx.drawImage(W.layer, 0, 0);
+
+    var dur = W.duration || S.duration || 0;
+    if (W.status !== 'ready' || !dur) return;
+    ctx.setTransform(W.dpr, 0, 0, W.dpr, 0, 0);
+    var w = W.width;
+    var h = W.height;
+
+    var t = Number(media.currentTime) || 0;
+    var x = waveTimeToX(t);
+    if (x >= -1 && x <= w + 1) {
+      ctx.fillStyle = 'rgba(255,90,95,.95)';
+      ctx.fillRect(Math.round(x), 0, 1.5, h);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(Math.round(x) + 0.5, 4, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (W.hover != null) {
+      var hx = waveTimeToX(W.hover);
+      if (hx >= 0 && hx <= w) {
+        ctx.fillStyle = 'rgba(255,255,255,.35)';
+        ctx.fillRect(Math.round(hx), 0, 1, h);
+        var label = fmtShort(W.hover);
+        ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+        var tw = ctx.measureText(label).width + 10;
+        var lx = Math.min(Math.max(2, hx - tw / 2), w - tw - 2);
+        ctx.fillStyle = 'rgba(14,10,18,.88)';
+        ctx.fillRect(lx, h - 20, tw, 14);
+        ctx.fillStyle = '#f2e7d0';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, lx + 5, h - 13);
+      }
+    }
+  }
+
+  function waveSetView(start, end) {
+    var dur = W.duration || S.duration || 0;
+    if (!(dur > 0)) return;
+    var span = Math.max(WAVE_MIN_SPAN, Math.min(dur, end - start));
+    start = Math.max(0, Math.min(start, dur - span));
+    W.view = { start: start, end: start + span };
+    waveInvalidate();
+    waveMetaRefresh();
+    waveAria();
+  }
+
+  function waveZoom(factor) {
+    var dur = W.duration || S.duration || 0;
+    if (!(dur > 0)) return;
+    var center = Number(media.currentTime) || 0;
+    if (center < W.view.start || center > W.view.end) center = (W.view.start + W.view.end) / 2;
+    var span = Math.max(WAVE_MIN_SPAN, Math.min(dur, (W.view.end - W.view.start) / factor));
+    waveSetView(center - span / 2, center + span / 2);
+  }
+
+  function waveFocusCue() {
+    var l = S.lines[S.sel];
+    if (!l || l.start == null) {
+      setStatus('warn', 'Select a timed line first, then Focus cue.');
+      return;
+    }
+    var en = lineEnd(S.sel);
+    var end = (en == null) ? l.start + 2 : en;
+    var pad = Math.max(1.2, (end - l.start) * 0.6);
+    waveSetView(l.start - pad, end + pad);
+  }
+
+  function waveTimeAt(clientX) {
+    var canvas = $('ssWave');
+    if (!canvas) return 0;
+    var rect = canvas.getBoundingClientRect();
+    var w = Math.max(1, rect.width);
+    var frac = Math.max(0, Math.min(1, (clientX - rect.left) / w));
+    var dur = W.duration || S.duration || 0;
+    var span = Math.max(0.001, W.view.end - W.view.start);
+    return Math.max(0, Math.min(dur, W.view.start + frac * span));
+  }
+
+  function waveCueAt(clientX) {
+    var canvas = $('ssWave');
+    if (!canvas) return -1;
+    var rect = canvas.getBoundingClientRect();
+    var w = Math.max(1, rect.width);
+    var span = Math.max(0.001, W.view.end - W.view.start);
+    var localX = clientX - rect.left;
+    var best = -1;
+    var bestDx = WAVE_CUE_HIT_PX;
+    for (var i = 0; i < S.lines.length; i++) {
+      var st = S.lines[i].start;
+      if (st == null) continue;
+      var d = Math.abs(((st - W.view.start) / span) * w - localX);
+      if (d < bestDx) {
+        bestDx = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  /* ------------------------------------------------------------------ */
   /* player                                                             */
   /* ------------------------------------------------------------------ */
 
@@ -7726,6 +8332,10 @@ checkSession();
         try { media.currentTime = start; } catch (_) {}
       }
     }
+
+    // The voice graph follows the same clock, so the cursor and the audio can
+    // never disagree.
+    waveDrawFrame();
   }
 
   function loopFrame() {
@@ -7884,6 +8494,10 @@ checkSession();
     document.addEventListener('keydown', onKeyDown, false);
     window.addEventListener('beforeunload', onBeforeUnload);
     startLoop();
+    // The strip only has a measurable size once the overlay is displayed, so the
+    // canvas backing store is sized here rather than at parse time.
+    waveLayout();
+    waveInvalidate();
     setTimeout(function () {
       if ($('ssPlay')) $('ssPlay').focus();
     }, 40);
@@ -7904,6 +8518,9 @@ checkSession();
     S.open = false;
     stopLoop();
     try { media.pause(); } catch (_) {}
+    // Stop an in-flight decode: it would otherwise keep downloading a track the
+    // admin has already left. The finished analysis stays cached by URL.
+    waveAbort();
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     $('ssLyricsDialog').classList.remove('open');
@@ -8085,6 +8702,8 @@ checkSession();
           S.sel = i;
           renderTable();
           fillEditor();
+          waveInvalidate();
+          waveAria();
           if (l && l.start != null) seekTo(l.start, !media.paused);
           else setStatus('warn', 'Line ' + (i + 1) + ' has no start time yet.');
         } else if (act === 'stamp') {
@@ -8146,6 +8765,93 @@ checkSession();
     replaceLines(parsed.lines, 'Imported ' + parsed.lines.length + ' untimed line(s) \u2014 stamp them with S.');
     setStatus('warn', 'Plain lyrics imported untimed. Play the song and press S on each line.');
   });
+
+  /* ---- voice graph controls ---- */
+  on('ssWaveZoomIn', 'click', function () { waveZoom(1.8); });
+  on('ssWaveZoomOut', 'click', function () { waveZoom(1 / 1.8); });
+  on('ssWaveFit', 'click', function () {
+    var dur = W.duration || S.duration || 0;
+    if (!(dur > 0)) { setStatus('warn', 'Load the audio first.'); return; }
+    waveSetView(0, dur);
+  });
+  on('ssWaveFocus', 'click', waveFocusCue);
+  on('ssWaveToggle', 'click', function () {
+    W.hidden = !W.hidden;
+    var wrap = $('ssWaveWrap');
+    if (wrap) wrap.hidden = W.hidden;
+    var btn = $('ssWaveToggle');
+    if (btn) {
+      btn.textContent = W.hidden ? 'Show' : 'Hide';
+      btn.setAttribute('aria-expanded', W.hidden ? 'false' : 'true');
+    }
+    if (!W.hidden) {
+      waveLayout();
+      waveInvalidate();
+      waveDrawFrame();
+    }
+  });
+
+  (function wireWaveCanvas() {
+    var canvas = $('ssWave');
+    if (!canvas) return;
+
+    canvas.addEventListener('pointerdown', function (e) {
+      if (W.status !== 'ready') return;
+      // Landing on a cue boundary selects that line; anywhere else seeks.
+      var cue = waveCueAt(e.clientX);
+      if (cue >= 0) {
+        selectLine(cue, false);
+        var st = S.lines[cue].start;
+        if (st != null) seekTo(st, false);
+        return;
+      }
+      W.dragging = true;
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      seekTo(waveTimeAt(e.clientX), false);
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('pointermove', function (e) {
+      if (W.status !== 'ready') return;
+      W.hover = waveTimeAt(e.clientX);
+      canvas.title = fmtShort(W.hover);
+      if (W.dragging) seekTo(W.hover, false);
+    });
+
+    function endDrag(e) {
+      W.dragging = false;
+      try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('pointerleave', function () {
+      W.hover = null;
+      W.dragging = false;
+    });
+
+    // Keyboard: the canvas is focusable, and the studio's own arrow/[/] keys
+    // already seek and nudge, so focus here is enough to operate the graph.
+    canvas.addEventListener('keydown', function (e) {
+      if (e.key === 'Home') { e.preventDefault(); seekTo(0, false); }
+      else if (e.key === 'End') { e.preventDefault(); seekTo(W.duration || S.duration || 0, false); }
+    });
+  })();
+
+  (function wireWaveResize() {
+    var wrap = $('ssWaveWrap');
+    if (wrap && typeof ResizeObserver === 'function') {
+      try {
+        new ResizeObserver(function () {
+          waveLayout();
+          waveInvalidate();
+        }).observe(wrap);
+      } catch (_) {}
+    }
+    window.addEventListener('resize', function () {
+      waveLayout();
+      waveInvalidate();
+    });
+  })();
 
   media.addEventListener('loadedmetadata', function () {
     S.duration = (isFinite(media.duration) && media.duration > 0) ? media.duration : (Number(S.track && S.track.duration) || 0);
