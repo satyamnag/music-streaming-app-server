@@ -103,6 +103,48 @@ focused button or link so the studio's own controls stay keyboard-operable.
    column when the studio saves, its textarea is refreshed — otherwise the next
    "Save" there would write the pre-studio text back.
 
+## Workspace layout: the graph and the timeline never hide each other
+
+Both panels are halves of one workspace, so the column is a **three-way split**
+rather than "fixed panels and whatever is left":
+
+| Panel | Rule | Why |
+| --- | --- | --- |
+| Now-playing / transport | `auto` | fixed content |
+| Preview (artwork / video + live lyric) | `flex: 1 1 210px`, **110–320 px** | the only decorative panel, so it absorbs the shortfall first |
+| Voice graph | fixed `clamp(64px, 8.5vh, 104px)` canvas | a squashed waveform is useless; it keeps a readable height |
+| Timeline editor | `flex: 2 1 280px`, **never below 210 px** | the working surface; this floor is what stops it collapsing |
+| Footer (Save / Export) | own grid row, spanning both columns | never scrolls away |
+
+Measured with the layout harness (canvas height / timeline card height):
+
+| Viewport | Preview | Graph | Timeline | Column scrolls? |
+| --- | --- | --- | --- | --- |
+| 1920×1080 | 265 | 84 | 389 | no |
+| 1536×1024 | 248 | 79 | 355 | no |
+| 1440×900 | 210 | 69 | 280 | no |
+| 1366×768 | 126 | 64 | 252 | no |
+| 1280×720 | 110 | 64 | 220 | no |
+| 1093×614 (narrow branch) | 140 | 64 | 381 | yes, by design |
+
+**Short viewports** (`max-height: 820px`) shrink the preview first (to 88 px) and
+tighten the transport, so the graph and timeline keep their heights instead of
+the timeline disappearing.
+
+**`Preview` toggle** (top bar, remembered in `localStorage`): hides the preview
+entirely, which at 1366×768 takes the timeline from 252 px to **400 px**. That is
+the "give me the whole screen" switch.
+
+**Settings drawer floats.** It is absolutely positioned under the measured top
+bar, so opening it takes *zero* height from the workspace — previously it pushed
+the timeline out of view, which is one of the ways the editor could vanish.
+
+**Narrow viewports** (`max-width: 1180px`, which is also where a 1366-wide laptop
+lands at 125 % zoom) switch to one column that scrolls as a whole, with the footer
+pinned by `position: sticky; bottom: 0` and `scroll-padding-bottom: 72px` so the
+"follow the singing line" scroll never parks a row behind it. The graph and the
+timeline keep real heights there too.
+
 ## Voice graph
 
 A 96 px strip between the stage and the timeline shows the whole track's
@@ -171,6 +213,16 @@ and never reported as an error.
   exported SRT, save → PUT body → stored row, refusal of a backward cue,
   keyboard `S`, close and reopen from the saved column, LRC detection, and inert
   markup. Zero page exceptions, zero console errors.
+* **55/55 layout checks** in headless Edge, measuring real geometry at
+  1920×1080, 1536×1024, 1440×900, 1366×768, 1280×720 and four narrow viewports
+  (1180×820, 1093×614, 1024×768, 900×700): the graph is on screen and ≥ 40 px,
+  the timeline is on screen and ≥ 190 px, both sit fully above the pinned footer,
+  the graph is directly above the table, the table scrolls its rows internally
+  rather than the page, the Save button is inside the viewport, hiding the
+  preview grows the timeline (252 → 400 px at 1366×768) while keeping the graph,
+  the toggle reports its state, the canvas re-measures after the change, and the
+  Settings drawer takes no height from the workspace and is anchored under the
+  top bar.
 * **17/17 checks** against the validator functions *extracted from the shipped
   `server.js`*: valid SRT (including CRLF and a `{{Music}}` cue) accepted; LRC,
   textless cues, missing timings and noise rejected; `null`/`''`/absent handled.
@@ -204,3 +256,10 @@ and never reported as an error.
 * **Selecting a line redraws the graph.** The selected cue's window is drawn on
   the graph, so a selection change has to invalidate that layer — without it the
   shading stayed on the previously selected line (caught by the pixel check).
+* **The workspace is a split, not a stack.** The timeline used to be the only
+  panel that could shrink, so on a short viewport — or with the Settings drawer
+  open — it collapsed to nothing while the graph and the preview kept their
+  height. The preview now yields first, the timeline has a 210 px floor, the
+  drawer floats, and the footer is pinned. See "Workspace layout" above.
+* **A missing offline decoder fails fast.** It is detected before the track is
+  downloaded, instead of after a full fetch that could never be used.
