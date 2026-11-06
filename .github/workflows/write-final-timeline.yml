@@ -111,6 +111,7 @@ jobs:
         working-directory: server/tools
         run: |
           set -euo pipefail
+          mkdir -p out
           node render-variant-sync.mjs --track "$TRACK_ID" --cols "$COLS" \
             --timeline-file "$GITHUB_WORKSPACE/$FINAL_SRT" --out-dir out --emit-payload | tee render.log
 
