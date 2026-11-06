@@ -81,11 +81,31 @@ PATCH with a backup. It never runs the aligner: the supplied timeline is the inp
 | music | 9 cues, longest 20.76 s = 8.9 % (limit 25 %) |
 | plain lyric columns | never written (backup holds only the three `synced_*` columns) |
 
-### Known, left as supplied
+### Re-segmented to 40 cues, and the English columns rebuilt (2026-11-06)
 
-`బాలరాముడు, భక్తవరదుడు,` at 198.830–200.664 is 1.83 s for 22 characters (12 chars/s) — the
-owner's own timing. The aligner's alternative there (0.76 s) is worse and the ASR cannot
-separate the two consecutive occurrences, so no evidence supports changing it.
+The owner then replaced the Telugu timeline with their own 40-cue version — 34 sung + 6
+`{{Music}}`, contiguous `0 → 234.000` — and cleared both English columns. Re-rendered with
+`sync-variants.yml` run `42185603891`, which renders from the stored Telugu and writes
+**only** `synced_lyrics_en` and `synced_lyrics_en_tr`.
+
+| | |
+| --- | --- |
+| cues | **40 / 40 / 40**, identical start+end at every index |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | were empty → **34 sung cues each**, 20/20 plain lines covered |
+| music mask | 6 banners in all three columns |
+| Telugu script in either English column | **0** |
+| empty cues | **0** |
+| every English line | a verbatim `plain_lyrics_en` / `plain_lyrics_en_tr` line, none invented |
+| stored vs the run's render | **byte-identical** |
+
+No sub-line splitting was needed: all 34 sung cues are exact plain lines, so each cue takes
+the same-index line of its plain column. The three short banners from the earlier pass
+(83.113, 209.176, 218.702) are absent from this segmentation, so that instrumental now sits
+inside the neighbouring lyric cues instead of being its own banner.
+
+The earlier note about `బాలరాముడు, భక్తవరదుడు,` at 198.830–200.664 being 1.83 s no longer
+applies: this timeline gives that line 4.23 s (191.000–195.080 and 199.230–203.456).
 
 ## Certified track: Ramya Guna Dhama (2026-11-04)
 
