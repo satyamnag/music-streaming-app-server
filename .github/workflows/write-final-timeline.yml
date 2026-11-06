@@ -1,0 +1,163 @@
+name: Write a supplied final timeline (all three sync columns)
+
+# The owner sometimes fixes a timeline by hand and wants exactly THAT timeline in the
+# database, rather than a re-derived one. This job takes a committed final SRT (Telugu,
+# with {{Music}} banners), renders the English translation and transliteration from the
+# plain columns against it, and writes all three columns in ONE PATCH with a backup.
+#
+# It deliberately does NOT run the aligner: the supplied timeline IS the input. Every
+# gate in finalize_payload.mjs still runs before anything is written.
+#
+# SAFETY
+#   * `write` defaults to false: a run without it validates only.
+#   * finalize refuses unless the three columns share one timeline, span 0 -> duration,
+#     every plain lyric line is cued, every cue is an exact plain-lyric line, and no
+#     single {{Music}} cue exceeds the music-share limit.
+#   * the three current values are backed up before the PATCH, and the row is re-read
+#     and compared byte-for-byte afterwards.
+#   * it only ever writes synced_lyrics, synced_lyrics_en and synced_lyrics_en_tr
+#     (plus whichever variant columns `cols` names). Plain lyric columns are never
+#     written.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id'
+        required: true
+        default: '07f2934c-77f7-45d7-aa77-53ce15c7bbb3'
+      final_srt:
+        description: 'Repo path to the final Telugu timeline, e.g. server/tools/inputs/X.final.srt'
+        required: true
+        default: 'server/tools/inputs/Ramudu-Vachadu-Baala.final.srt'
+      expect_lyric_cues:
+        description: 'Number of SUNG cues the supplied timeline must carry'
+        required: true
+        default: '35'
+      cols:
+        description: 'Comma-separated variant columns to render'
+        required: false
+        default: 'en,en_tr'
+      max_music_fraction:
+        description: 'Refuse if one {{Music}} cue covers more than this share of the track'
+        required: false
+        default: '0.25'
+      shift:
+        description: 'Optional constant offset in seconds for all columns, e.g. -0.5'
+        required: false
+        default: '0'
+      write:
+        description: 'Write the three columns. Leave false to validate only.'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: write-final-timeline-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  write:
+    name: Render variants, validate, write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      FINAL_SRT: ${{ inputs.final_srt }}
+      EXPECT_LYRIC_CUES: ${{ inputs.expect_lyric_cues }}
+      COLS: ${{ inputs.cols }}
+      MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
+      SHIFT: ${{ inputs.shift }}
+      WRITE_FLAG: ${{ inputs.write }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1; fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Check the supplied timeline
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          F="$GITHUB_WORKSPACE/$FINAL_SRT"
+          if [ ! -f "$F" ]; then echo "::error::$FINAL_SRT is not in the repo"; exit 1; fi
+          CUES="$(grep -c -- '-->' "$F" || true)"
+          BANNERS="$(grep -c '^{{' "$F" || true)"
+          echo "supplied timeline: $CUES cues, $BANNERS music banners"
+          if [ "$BANNERS" = "0" ]; then echo "::error::the supplied timeline has no {{Music}} banners"; exit 1; fi
+          if [ -z "${EXPECT_LYRIC_CUES:-}" ]; then echo "::error::expect_lyric_cues is required"; exit 1; fi
+          SUNG=$((CUES - BANNERS))
+          echo "sung cues in the supplied timeline: $SUNG (expected $EXPECT_LYRIC_CUES)"
+          if [ "$SUNG" != "$EXPECT_LYRIC_CUES" ]; then echo "::error::supplied timeline has $SUNG sung cues, expected $EXPECT_LYRIC_CUES"; exit 1; fi
+
+      - name: Render English translation + transliteration against this timeline
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          node render-variant-sync.mjs --track "$TRACK_ID" --cols "$COLS" \
+            --timeline-file "$GITHUB_WORKSPACE/$FINAL_SRT" --out-dir out --emit-payload | tee render.log
+
+      - name: Validate, then write all three columns
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          DURATION="$(node -e '
+            (async () => {
+              const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + process.env.TRACK_ID + "&select=duration", {
+                headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
+              });
+              const rows = await r.json();
+              if (!rows[0]) { console.error("track not found"); process.exit(1); }
+              console.log(rows[0].duration);
+            })().catch((e) => { console.error(e); process.exit(1); });
+          ')"
+          echo "duration from the database: $DURATION"
+          ARGS="--track $TRACK_ID --final $GITHUB_WORKSPACE/$FINAL_SRT --variant out/payload.json --duration $DURATION --shift $SHIFT --expect-lyric-cues $EXPECT_LYRIC_CUES --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
+          node finalize_payload.mjs $ARGS | tee finalize-dry.log
+          if [ "${WRITE_FLAG:-false}" = "true" ]; then
+            node finalize_payload.mjs $ARGS --write | tee finalize-write.log
+          else
+            echo "validate-only run (write=false) - nothing written"
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: write-final-timeline
+          path: |
+            server/tools/render.log
+            server/tools/finalize-dry.log
+            server/tools/finalize-write.log
+            server/tools/sync-from-srt-backup.json
+            server/tools/out/
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Write a supplied final timeline"
+            echo ""
+            echo "Track: \`${{ inputs.track_id }}\` · timeline: \`${{ inputs.final_srt }}\` · write: \`${{ inputs.write }}\`"
+            echo ""
+            if [ -f server/tools/finalize-dry.log ]; then echo '```'; tail -n 30 server/tools/finalize-dry.log; echo '```'; fi
+            if [ -f server/tools/finalize-write.log ]; then echo '```'; tail -n 20 server/tools/finalize-write.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
