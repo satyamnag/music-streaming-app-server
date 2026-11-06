@@ -13,6 +13,80 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Written track: Ramudu Vachadu Baala (2026-11-06)
+
+`07f2934c-77f7-45d7-aa77-53ce15c7bbb3` — 234 s, **44 cues: 35 sung + 9 `{{Music}}`**,
+contiguous `0.000 → 234.000`, 20 plain-lyric lines (19 distinct — `బాలరాముడు, భక్తవరదుడు,` is
+rows 28 and 30, and both rows carry the same English).
+
+### Where the music regions came from
+
+The owner supplied an SRT and the WAV master. Before trusting any pipeline timing the WAV was
+compared with the opus the app serves: **identical duration (233.600 s both), envelope
+correlation 0.9995 at zero lag** — the same recording, so pipeline timings transfer.
+
+Regions came from `sync-from-srt.yml` run `42169317314` (validate-only), windowed on the
+supplied cues: WhisperX alignment, an independent Whisper large-v3 cross-check, then
+reconcile. 0 unplaced lines, 0 weak lines. That produced nine instrumental stretches —
+including two the reconcile pass had absorbed into neighbouring lines because each fell under
+its 3.0 s music-gap threshold after snapping (83.113 and 218.702, both restored).
+
+Three boundaries were corrected against the evidence rather than taken from the pipeline:
+
+| region | pipeline said | written | why |
+| --- | --- | --- | --- |
+| outro | starts 226.000 | **229.068** | the aligner compressed a 15-character line into 0.92 s (16.3 chars/s — impossible for singing). The supplied 229.068 gives 3.7 chars/s, and the audio drops from RMS 0.173 (the loudest window in the track) to 0.0999 at 229.2 |
+| short fill | ends 212.263 | **211.780** | the ASR has a word onset inside that span (`రాముడు`, p=0.98) which begins the next line |
+| interlude | ends 155.580 | **154.866** | the supplied cue starts 0.71 s early — ordinary grid tolerance, not swallowed music |
+
+One lyric start was moved: `న్యాయ పోరాటము విజయము కాగా,` sat behind 8.54 s of interlude, so it
+went `104.600 → 113.140` (aligner and ASR both place that line at 113.14–116.40).
+
+### The gap-free version, and the four banners that covered singing
+
+The owner then closed every remaining gap by hand and asked for that version to be fixed and
+written. Four of those closures had pushed a `{{Music}}` banner into the first sung word, so
+those four music ends were pulled back to the measured voice onset with the following lyric
+start moved to match — gap-free, with no banner covering singing:
+
+| music cue | was | now | next line start |
+| --- | --- | --- | --- |
+| 1 | 16.356 | **15.840** | 15.840 |
+| 10 | 65.346 | **64.360** | 64.360 |
+| 32 | 190.850 | **189.780** | 189.780 |
+| 38 | 212.313 | **211.780** | 211.780 |
+
+Banners are stored as the canonical `{{Music}}` (the owner had `{{ Music }}` with spaces), so
+the strict `=== MUSIC_LABEL` comparisons in the server tools now count **35 lyric / 9 banners**
+for all three columns instead of 44 / 0. Both app renderers treat either spelling identically
+(`lib/modules/lyrics/lyrics_markup.dart`, `Soulful Bhakti Web App/libs/lyricsMarkup.ts`).
+
+### How it was written
+
+`write-final-timeline.yml` (added by this work) takes a committed final SRT, renders
+`synced_lyrics_en` / `synced_lyrics_en_tr` against **that** timeline with
+`render-variant-sync.mjs`, then writes all three columns through `finalize_payload.mjs` in one
+PATCH with a backup. It never runs the aligner: the supplied timeline is the input. Run
+`42176568701`.
+
+| check | result |
+| --- | --- |
+| database `synced_lyrics` / `_en` / `_en_tr` | PATCH `204`, read-back **identical** for all three |
+| stored Telugu vs the supplied timeline | text **and** timings identical, cue for cue |
+| columns | 44 / 44 / 44, identical start+end at every index, identical music mask |
+| structure | 0 → 234 s, contiguous, no gap, no overlap, no zero-length cue |
+| every plain line cued; every cue an exact plain-lyric line | **yes — 20/20** |
+| Telugu script in either variant / empty cues | **0 / 0** |
+| variants vs the validated render | **byte-identical** |
+| music | 9 cues, longest 20.76 s = 8.9 % (limit 25 %) |
+| plain lyric columns | never written (backup holds only the three `synced_*` columns) |
+
+### Known, left as supplied
+
+`బాలరాముడు, భక్తవరదుడు,` at 198.830–200.664 is 1.83 s for 22 characters (12 chars/s) — the
+owner's own timing. The aligner's alternative there (0.76 s) is worse and the ASR cannot
+separate the two consecutive occurrences, so no evidence supports changing it.
+
 ## Certified track: Ramya Guna Dhama (2026-11-04)
 
 `c74a0c00-7fe8-4317-9d1b-4c0dff8da750` — 284 s, **36 supplied cues**, 20 distinct
