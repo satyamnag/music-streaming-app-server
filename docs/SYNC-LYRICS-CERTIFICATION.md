@@ -378,6 +378,39 @@ can no longer be written for any track.
 | independent ASR agreement | mean in-span coverage **0.691**, median 0.818 |
 | plain lyrics | never written (backup holds only the three `synced_*` columns) |
 
+### Variants re-rendered after the owner re-segmented the Telugu (2026-11-06)
+
+The owner replaced `synced_lyrics` with their own 54-cue grid — 48 sung cues plus the six
+interludes as `{{ Music }}` — which moved every cue boundary. The English columns still
+held the certified 2026-11-03 timeline: the same cue **count**, different times. They were
+therefore re-rendered from the stored Telugu with `sync-variants.yml` (run `42138526081`),
+which writes **only** `synced_lyrics_en` and `synced_lyrics_en_tr`.
+
+No sub-line splitting was needed. Every one of the 48 sung cues is an exact plain line, so
+each cue took its text from the same-index line of `plain_lyrics_en` / `plain_lyrics_en_tr`,
+and the six banners were mirrored verbatim so all three columns carry the same text per row.
+
+| | |
+| --- | --- |
+| cues | **54 / 54 / 54**, identical start+end at every index |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | certified grid → **the owner's grid**, 20/20 plain lines covered |
+| Telugu script in either variant | **0 cues** |
+| empty cues / music-mask mismatches | **0 / 0** |
+| stored variants vs the run artifacts | **byte-identical** |
+| plain lyric columns | untouched, 20 / 20 / 20 lines |
+| all three columns | span **0.000 → 284.000** |
+
+One consequence of the owner's own spelling, recorded so a later audit is not misled: the
+banners are `{{ Music }}` **with spaces**, not the canonical `MUSIC_LABEL = '{{Music}}'`.
+Every renderer treats any `{{...}}` as a banner — `lib/modules/lyrics/lyrics_markup.dart`,
+`Soulful Bhakti Web App/libs/lyricsMarkup.ts` and `classifyLine()` in
+`server/libs/autoSyncLyrics.mjs` — so the apps render it correctly. But the strict
+`=== MUSIC_LABEL` comparisons in the server tools (`prepare_srt_job`, `finalize_payload`,
+`shift-timeline`, `_certify`, …) count this track as **54 lyric cues / 0 banners** instead
+of 48 / 6. Normalising the six rows to `{{Music}}` restores those counts; it changes no
+timing and nothing user-visible.
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
