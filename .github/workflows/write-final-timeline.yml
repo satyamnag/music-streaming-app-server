@@ -83,14 +83,19 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Resolve Supabase URL (masked)
+      - name: Resolve Supabase credentials (masked)
         run: |
           set -eu
           if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1; fi
           SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
-          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ]; then echo "::error::missing supabase secrets"; exit 1; fi
           echo "::add-mask::$SUPA_URL"
-          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+          echo "::add-mask::$ANON"
+          {
+            echo "SUPABASE_URL=$SUPA_URL"
+            echo "SUPABASE_ANON_KEY=$ANON"
+          } >> "$GITHUB_ENV"
 
       - name: Check the supplied timeline
         working-directory: server/tools
