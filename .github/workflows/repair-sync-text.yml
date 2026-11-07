@@ -1,0 +1,113 @@
+name: Repair the text of a sync column (timings immutable)
+
+# The owner's rule: plain lyrics spellings are the text of record, sync lyrics
+# timestamps are the timing of record. When a sync column drifts in spelling the
+# English columns can no longer be rendered from it, because its cue text stops
+# mapping to a plain line.
+#
+# This job writes ONLY `synced_lyrics`, and only a re-spelling: write-timeline-text.mjs
+# refuses unless every start and end matches the stored column to within 0.5 ms,
+# every changed cue's OLD text is not a plain line and its NEW text is, banners are
+# untouched, and no plain line stops being covered.
+#
+# It exists because finalize_payload.mjs is the wrong gate for a timeline like this
+# one: it also demands contiguity and the canonical {{Music}} label, either of which
+# would force a re-time of the owner's cue boundaries.
+#
+# SAFETY: `write` defaults to false; the current value is backed up before the PATCH
+# and the row is re-read and compared afterwards.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id'
+        required: true
+      srt_path:
+        description: 'Repo path to the corrected SRT (same cues, same timings, corrected spellings)'
+        required: true
+      write:
+        description: 'Write synced_lyrics. Leave false to validate only.'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repair-sync-text-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    name: Validate re-spellings, then write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      SRT_PATH: ${{ inputs.srt_path }}
+      WRITE_FLAG: ${{ inputs.write }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase credentials (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1; fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          ANON="$(aws secretsmanager get-secret-value --secret-id supabase/anon-key --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ] || [ -z "$ANON" ]; then echo "::error::missing supabase secrets"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "::add-mask::$ANON"
+          {
+            echo "SUPABASE_URL=$SUPA_URL"
+            echo "SUPABASE_ANON_KEY=$ANON"
+          } >> "$GITHUB_ENV"
+
+      - name: Validate the re-spelling (writes nothing)
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          F="$GITHUB_WORKSPACE/$SRT_PATH"
+          if [ ! -f "$F" ]; then echo "::error::$SRT_PATH is not in the repo"; exit 1; fi
+          node write-timeline-text.mjs --track "$TRACK_ID" --srt "$F" | tee repair-dry.log
+
+      - name: Write synced_lyrics
+        if: ${{ inputs.write }}
+        working-directory: server/tools
+        run: |
+          set -euo pipefail
+          node write-timeline-text.mjs --track "$TRACK_ID" --srt "$GITHUB_WORKSPACE/$SRT_PATH" --write | tee repair-write.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-sync-text
+          path: |
+            server/tools/repair-dry.log
+            server/tools/repair-write.log
+            server/tools/sync-text-backup.json
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Repair sync column text"
+            echo ""
+            echo "Track: \`${{ inputs.track_id }}\` · srt: \`${{ inputs.srt_path }}\` · write: \`${{ inputs.write }}\`"
+            echo ""
+            for f in server/tools/repair-dry.log server/tools/repair-write.log; do
+              if [ -f "$f" ]; then echo '```'; tail -n 40 "$f"; echo '```'; fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
