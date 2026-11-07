@@ -55,6 +55,36 @@ Four cues are too short for their text: cue 22 is 1.36 s for 24 Telugu character
 The English columns mirror those times exactly, so they are equally unreadable there.
 Reported, not changed — the Telugu timeline is the owner's.
 
+### Re-segmented again to 62 cues with 13 banners (2026-11-07)
+
+The owner then replaced the Telugu with a 62-cue version: 49 sung + **13 `{{Music}}`
+banners**, contiguous `0.000 → 259.200`. The English columns still held the previous 49-cue
+timeline, so they were re-rendered with `sync-variants.yml` run `42335241444`, which writes
+**only** `synced_lyrics_en` and `synced_lyrics_en_tr` and backs up the previous values first.
+
+| | |
+| --- | --- |
+| cues | **62 / 62 / 62**, identical start+end at every index |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | 49 cues → **62**, 21/21 plain lines covered |
+| music mask | **13 banners** in all three columns, same text on every music row |
+| Telugu script in either English column / empty cues | **0 / 0** |
+| every English line | a verbatim `plain_lyrics_en` / `plain_lyrics_en_tr` line |
+| stored vs the render | **byte-identical** |
+
+Two properties of this segmentation, both on the Telugu side and neither changed here:
+
+* seven of the thirteen banners are **0.350 s** long (`62.682`, `101.617`, `140.554`,
+  `153.240`, `179.490`, `191.538`, `214.038`) — they close the inter-phrase gaps, so the
+  banner flickers for a third of a second between phrases;
+* the timeline ends at `259.200` while the track's stored duration is `259`, so the closing
+  banner runs 0.2 s past the end of the track.
+
+The banners are spelled `{{ Music }}` (with spaces), which is how the owner writes them. They
+are mirrored verbatim so all three columns carry the same text on every music row; both app
+renderers treat that spelling as a banner, but the strict `=== MUSIC_LABEL` comparisons in the
+server tools count this track as 62 lyric / 0 banners rather than 49 / 13.
+
 ## Written track: Ramudu Vachadu Baala (2026-11-06)
 
 `07f2934c-77f7-45d7-aa77-53ce15c7bbb3` — 234 s, **44 cues: 35 sung + 9 `{{Music}}`**,
