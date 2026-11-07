@@ -717,6 +717,37 @@ stored cross-check artifacts still reports *no head needed repairing*, produces 
 same 43 cues and the same two relocations, and the only difference from the stored
 column is the 0.5 s shift the owner asked for afterwards.
 
+### Re-segmented by the owner, English columns rebuilt (2026-11-07)
+
+The owner replaced the Telugu with their own 53-cue timeline — 48 sung + **5 `{{Music}}`
+banners**, `0.000 → 398.400` — and cleared both English columns. Re-rendered from the stored
+Telugu with `sync-variants.yml` run `42391467845`, which writes **only** `synced_lyrics_en` and
+`synced_lyrics_en_tr` and backs up the previous values first.
+
+| | |
+| --- | --- |
+| cues | **53 / 53 / 53**, identical start+end at every index |
+| cue numbering | sequential 1…53 in all three columns |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | were empty → 48 sung cues each, 20/20 plain lines covered |
+| music mask | **5 banners**, same text on every music row |
+| every English cue | the translation of **its own** Telugu cue — 0 of 48 wrong |
+| every transliteration | likewise — 0 of 48 wrong |
+| Telugu script / empty cues | **0 / 0** |
+| stored vs the render | **byte-identical** |
+
+This segmentation places the five banners at 22.48 s (intro), 14.54 s, 21.17 s, 14.07 s and
+4.74 s (outro); everything else is sung.
+
+Two notes, neither changed here:
+
+* `plain_lyrics_en` glosses `{of liberation}` **inside** a sung line —
+  `Lead us to the shore {of liberation}, O Rama, son of Dasharatha.` — so that literal text
+  appears in the eight cues carrying the line. The apps only treat a whole line in braces as a
+  divider, so it will show as text.
+* the owner's `synced_lyrics` has no trailing newline while the two English columns do. It
+  parses identically, so this is cosmetic only.
+
 ## Certified track: Ganesh Gayatri Mantra (2026-11-03)
 
 `f64c8a76-2b7e-4e85-8bc6-863b6daf9120` — 309 s, 179 measured words, 15 lyric lines
