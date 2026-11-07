@@ -748,6 +748,45 @@ Two notes, neither changed here:
 * the owner's `synced_lyrics` has no trailing newline while the two English columns do. It
   parses identically, so this is cosmetic only.
 
+### Spelling drift repaired, English columns rebuilt (2026-11-07, second pass)
+
+The owner re-segmented again, and this time the Telugu column drifted in spelling away from
+`plain_lyrics` on four lines — a long vowel added, త→ద in a sandhi, a space removed inside a
+compound, and one word changed. Fourteen of the 48 sung cues then matched no plain line, and
+`render-variant-sync.mjs` correctly refused: *"14 cue(s) still contain Telugu script"*.
+
+The owner's rule decided it: **plain lyrics spellings are the text of record, sync lyrics
+timestamps are the timing of record**. So those four texts were set back to the plain spelling
+with every timestamp untouched, and both English columns were then rendered from the repaired
+column. The plain forms — `దశవతార`, `సత్భావ`, `కమల నయనము`, `వరాహ` — are what all three columns
+now carry; the superseded spellings are preserved in the run's `sync-text-backup.json`.
+
+Doing this needed a writer of its own. `finalize_payload.mjs` is the wrong gate for this
+timeline: it also demands a contiguous timeline and the canonical `{{Music}}` label, and this
+column has short inter-phrase gaps and writes the banner as `{{ Music }}` — satisfying it would
+have forced the owner's cue boundaries to be re-timed. `write-timeline-text.mjs` (with
+`repair-sync-text.yml`) instead enforces exactly the invariant that matters: same cue count,
+every start and end within 0.5 ms of the stored column, every changed cue a re-spelling (its old
+text not a plain line, its new text an exact plain line), banners untouched, and no
+exactly-cued plain line lost.
+
+| | |
+| --- | --- |
+| Telugu column | 14 cue texts re-spelled, **53/53 timings identical**, backed up first |
+| repair run | `42395649887` — PATCH `204`, read-back **identical** |
+| English columns | re-rendered by `sync-variants` `42395710596` — PATCH `204` |
+| cues | **53 / 53 / 53**, identical start+end at every index |
+| cue numbering | sequential 1…53 in all three columns |
+| every Telugu cue an exact plain line | **48/48** |
+| every English cue | the translation of **its own** Telugu cue — 0 of 48 wrong |
+| every transliteration | likewise — 0 of 48 wrong |
+| music mask | **5 banners**, same text in all three columns |
+| Telugu script / empty cues | **0 / 0** |
+| span | all three `0.000 → 398.400` |
+
+Still outstanding on the plain side: `plain_lyrics_en` glosses `{of liberation}` inside a sung
+line, so that literal text appears in the eight cues carrying it.
+
 ## Certified track: Ganesh Gayatri Mantra (2026-11-03)
 
 `f64c8a76-2b7e-4e85-8bc6-863b6daf9120` — 309 s, 179 measured words, 15 lyric lines
