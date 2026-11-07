@@ -85,6 +85,38 @@ are mirrored verbatim so all three columns carry the same text on every music ro
 renderers treat that spelling as a banner, but the strict `=== MUSIC_LABEL` comparisons in the
 server tools count this track as 62 lyric / 0 banners rather than 49 / 13.
 
+### Re-segmented to 52 cues, and a numbered-cue defect fixed (2026-11-07)
+
+The owner replaced the Telugu again — 52 cues, 45 sung + **7 `{{Music}}` banners**,
+`0.000 → 259.200`. The English columns had already been regenerated alongside it, and their
+**content was already correct**: cue by cue, each English line and each transliteration
+matched the plain-column row of its own Telugu cue (0 wrong of 45). Two defects were present
+though, so both columns were re-rendered and written with `sync-variants.yml` run
+`42340074867`:
+
+* `synced_lyrics_en` numbered its 52 cues **1–10 then 12–53** — index 11 was missing and every
+  later index was shifted by one;
+* both English columns lacked the trailing newline the renderer emits.
+
+| | |
+| --- | --- |
+| cues | **52 / 52 / 52**, identical start+end at every index |
+| cue numbering | **sequential 1…52 in all three columns** |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| music mask | **7 banners**, same text on every music row |
+| every English cue | the translation of **its own** Telugu cue — 0 of 45 wrong |
+| every transliteration | likewise — 0 of 45 wrong |
+| Telugu script / empty cues | **0 / 0** |
+| stored vs the render | **byte-identical** |
+
+This segmentation also clears the readability problem recorded above: no cue exceeds 10 Telugu
+characters/s any more (the four tight cues became one 5.26 s cue), the seven 0.350 s flicker
+banners are gone (the shortest banner is now 5.54 s), and a single 0.35 s gap remains, after
+cue 42.
+
+Still outstanding on the plain side: `plain_lyrics_en` row 20 keeps the authoring directive
+`{Repeat Pallavi}` inside a sung line, so it appears as literal text in cue 26.
+
 ## Written track: Ramudu Vachadu Baala (2026-11-06)
 
 `07f2934c-77f7-45d7-aa77-53ce15c7bbb3` — 234 s, **44 cues: 35 sung + 9 `{{Music}}`**,
