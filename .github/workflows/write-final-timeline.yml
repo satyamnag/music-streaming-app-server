@@ -46,6 +46,10 @@ on:
         description: 'Optional constant offset in seconds for all columns, e.g. -0.5'
         required: false
         default: '0'
+      duration_override:
+        description: 'Optional duration in seconds to use instead of the stored one. Needed when the supplied timeline ends slightly past the stored duration (finalize anchors the last cue to it, within 50 ms).'
+        required: false
+        default: ''
       write:
         description: 'Write the three columns. Leave false to validate only.'
         type: boolean
@@ -74,6 +78,7 @@ jobs:
       COLS: ${{ inputs.cols }}
       MAX_MUSIC_FRACTION: ${{ inputs.max_music_fraction }}
       SHIFT: ${{ inputs.shift }}
+      DURATION_OVERRIDE: ${{ inputs.duration_override }}
       WRITE_FLAG: ${{ inputs.write }}
 
     steps:
@@ -135,6 +140,7 @@ jobs:
             })().catch((e) => { console.error(e); process.exit(1); });
           ')"
           echo "duration from the database: $DURATION"
+          if [ -n "${DURATION_OVERRIDE:-}" ]; then DURATION="$DURATION_OVERRIDE"; echo "using duration override: $DURATION"; fi
           ARGS="--track $TRACK_ID --final $GITHUB_WORKSPACE/$FINAL_SRT --variant out/payload.json --duration $DURATION --shift $SHIFT --expect-lyric-cues $EXPECT_LYRIC_CUES --max-music-fraction ${MAX_MUSIC_FRACTION:-0.25}"
           node finalize_payload.mjs $ARGS | tee finalize-dry.log
           if [ "${WRITE_FLAG:-false}" = "true" ]; then
