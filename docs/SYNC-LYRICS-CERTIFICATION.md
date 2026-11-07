@@ -13,6 +13,48 @@ SUPABASE_ANON_KEY=... node _certify.mjs "Gopala Baala"                  # stages
 SUPABASE_ANON_KEY=... node _determinism.mjs <id> "Gopala Baala"        # determinism + DB equality
 ```
 
+## Written track: Ramuniki Jai (2026-11-07)
+
+`2fff9edc-611a-4d35-8cac-829f4ac5fb85` — 259 s. The owner re-segmented the Telugu to
+**49 cues, all sung, with no `{{Music}}` banners**, and cleared both English columns. Rendered
+with `sync-variants.yml` run `42333795925`, which writes **only** `synced_lyrics_en` and
+`synced_lyrics_en_tr`.
+
+The timeline runs `19.707 → 252.925`; the intro (0 → 19.707), the outro (252.925 → 259) and the
+interludes between stanzas are gaps rather than banners, by the owner's segmentation.
+
+| check | result |
+| --- | --- |
+| cues | **49 / 49 / 49**, identical start+end at every index |
+| Telugu column | **unchanged — sha256 identical before and after** |
+| English columns | were empty → 49 sung cues each, 21/21 plain lines covered |
+| music mask | 0 banners in all three columns |
+| Telugu script in either English column | **0** |
+| empty cues | **0** |
+| every English line | a verbatim `plain_lyrics_en` / `plain_lyrics_en_tr` line, none invented |
+| stored vs the run's render | **byte-identical** |
+
+No sub-line splitting was needed: all 49 cues are exact plain lines, so each cue takes the
+same-index line of its plain column.
+
+### Two things in the plain columns, reported not changed
+
+* `plain_lyrics_en` row 20 ends with an authoring directive inside the sung line:
+  `Hail to the divine essence that transforms one's destiny! {Repeat Pallavi}`. That string is
+  now in two synced cues (`135.638` and `138.191`) and renders as **literal text**, because the
+  apps treat a line as a divider only when the whole line is braces.
+* The Anupallavi couplet is reversed in English: the line under `భారతదేశమును భద్రముగ కాచెడి,`
+  reads `To the young Sri Rama,`, which translates the *next* Telugu line. It reads correctly as
+  one English sentence across the pair, but a listener reading both columns stacked sees the
+  following line's translation highlighted.
+
+### Timing note carried over from the Telugu column
+
+Four cues are too short for their text: cue 22 is 1.36 s for 24 Telugu characters
+(22.1 chars/s), cue 23 is 1.20 s (24.2), cue 24 is 2.36 s (12.7), cue 36 is 1.68 s (16.7).
+The English columns mirror those times exactly, so they are equally unreadable there.
+Reported, not changed — the Telugu timeline is the owner's.
+
 ## Written track: Ramudu Vachadu Baala (2026-11-06)
 
 `07f2934c-77f7-45d7-aa77-53ce15c7bbb3` — 234 s, **44 cues: 35 sung + 9 `{{Music}}`**,
