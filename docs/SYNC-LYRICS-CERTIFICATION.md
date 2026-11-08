@@ -709,6 +709,30 @@ trailing newline while the two English columns do — it parses identically.
 The two earlier passes on this track (53 cues with 5 banners, then 50 cues with 2) are recorded
 above; those cue counts are superseded by this one.
 
+### Re-timed by the owner (2026-11-08, fourth pass)
+
+Same 54-cue shape as the pass above (48 sung + 6 `{{Music}}` banners, `0.000 → 284.520`) and
+the same plain spellings — but **28 of the 54 cues carry new timings** (the intro banner's end
+moved `23.711 → 23.760` among them), which left the two English columns out of step at those
+rows: **56 time mismatches**, while their text was still correct.
+
+Re-rendered from the stored Telugu by `sync-variants` run `42451499644` — `problems: NONE`,
+`VALIDATION PASSED`, PATCH `204`.
+
+| | |
+| --- | --- |
+| cues | **54 / 54 / 54**, identical start+end at every index |
+| timing drift vs the Telugu column | **0** (was 56 before this write) |
+| cue numbering | sequential 1…54 in all three columns |
+| every English cue / transliteration | its own Telugu cue's plain line — 0 of 48 wrong |
+| music mask | **6 banners**, same text in all three columns |
+| Telugu script / empty cues | **0 / 0** |
+| span | all three `0.000 → 284.520` |
+
+No text repair was needed: `synced_lyrics` had **0** cues that were not exact plain lines, so
+the plain-spelling rule was already satisfied and only timestamps had moved. Cosmetic only,
+unchanged: the owner's `synced_lyrics` has no trailing newline while the English columns do.
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
