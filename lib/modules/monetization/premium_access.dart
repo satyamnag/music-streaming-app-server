@@ -5,6 +5,7 @@ import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/auth/clerk_auth_view.dart';
 import 'package:sangeet/modules/monetization/superwall_gate.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/services/entitlement/entitlement_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:sangeet/utils/platform.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
@@ -46,10 +47,24 @@ class PremiumAccess {
   /// Whether the current user is considered "premium" (signed in AND has an
   /// active subscription). If status is unknown we default to false (safe).
   ///
+  /// TWO rails can grant premium, and this is the only place they meet:
+  ///
+  ///  1. **Play Billing** via Superwall — sold INSIDE the Play app, the only
+  ///     in-app rail Google's Payments policy allows for this product.
+  ///  2. **Razorpay** via the Node API — sold OUTSIDE the app (web / payment
+  ///     link). [EntitlementSignal] holds the server's answer, refreshed on
+  ///     sign-in and on resume, and it expires on its own.
+  ///
+  /// Both are ANDed with [isSignedIn], so no anonymous session is ever premium.
+  /// The OR is deliberately one-way: a missing/expired Razorpay answer simply
+  /// falls back to Superwall's status, which is the behaviour this app had
+  /// before the web rail existed.
+  ///
   /// [ref] is accepted so the call sites of a widget and of a provider look
   /// identical, but it is deliberately NOT used — see [isSignedIn].
   static bool isPremiumUser(dynamic ref) =>
-      isSignedIn(ref) && _subscriptionStatus.isActive;
+      isSignedIn(ref) &&
+      (_subscriptionStatus.isActive || EntitlementSignal.isActive);
 
   /// Whether this build requires a signed-in user before ANY track can be
   /// listened to, free or paid.

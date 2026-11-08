@@ -9,6 +9,8 @@ import com.clerk.api.network.serialization.errorMessage
 import com.clerk.api.network.serialization.onFailure
 import com.clerk.api.network.serialization.onSuccess
 import com.clerk.api.sso.OAuthProvider
+import com.clerk.api.network.serialization.successOrNull
+import com.clerk.api.session.fetchToken
 import com.clerk.api.user.delete
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -193,6 +195,30 @@ class ClerkBridge(
                                 Verification.Status.VERIFIED),
                     ),
                 )
+            }
+
+            // Returns a short-lived Clerk session JWT so the app can call the
+            // Node API (the Razorpay entitlement endpoint) as an authenticated
+            // user. Minted on demand and NEVER persisted: it expires in about
+            // a minute, and the server verifies it on every request.
+            //
+            // Null (not an error) when there is no session, so the caller can
+            // treat "signed out" as a normal state rather than a failure.
+            "getToken" -> {
+                scope.launch {
+                    val session = Clerk.session
+                    if (session == null) {
+                        result.success(null)
+                        return@launch
+                    }
+                    val token = try {
+                        session.fetchToken().successOrNull()?.jwt
+                    } catch (e: Exception) {
+                        android.util.Log.w("ClerkBridge", "getToken failed", e)
+                        null
+                    }
+                    result.success(token)
+                }
             }
 
             // Sign in with Google via the redirect-based OAuth flow. The Clerk

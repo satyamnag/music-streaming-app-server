@@ -13,6 +13,13 @@ import { createClerkClient } from '@clerk/backend'
 import { readWebpSize, matchesAspectRatio, matchesAspectRatioRange } from './webp_size.js'
 import { registerPartnerRoutes } from './partner_routes.mjs'
 import {
+  createRazorpayClient,
+  createWebhookHandler,
+  normalisePlanSlug,
+  planSlugForPlanId,
+  totalCountForPlan,
+} from './razorpay.mjs'
+import {
   alignLyrics,
   buildSrtForVariant,
   buildSyncCues,
@@ -209,6 +216,17 @@ const secrets = {
   // it is derived from the request (trust proxy is set, so this is correct
   // behind Render's load balancer).
   partner_public_base_url: process.env.PARTNER_PUBLIC_BASE_URL || '',
+  // --- Razorpay subscriptions (web rail) --------------------------------
+  // See docs/RAZORPAY-SUBSCRIPTIONS.md. The key ID and plan IDs are not
+  // secrets (the key ID is public by design and appears in Checkout), so
+  // they live in the deployment env. The key SECRET signs both API calls
+  // and payment verifications, and the webhook secret signs webhook
+  // deliveries; those two are vault-preferred like every other credential.
+  razorpay_key_id: process.env.RAZORPAY_KEY_ID || '',
+  razorpay_key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  razorpay_webhook_secret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+  razorpay_plan_monthly: process.env.RAZORPAY_PLAN_MONTHLY || '',
+  razorpay_plan_yearly: process.env.RAZORPAY_PLAN_YEARLY || '',
 }
 
 const VAULT_SECRET_KEYS = [
@@ -234,6 +252,10 @@ const VAULT_SECRET_KEYS = [
   'partner_kek',
   'partner_ip_salt',
   'partner_admin_alert_email',
+  // Razorpay credentials. Vault-preferred so a leaked Render env does not
+  // hand over the key that can create charges and verify payments.
+  'razorpay_key_secret',
+  'razorpay_webhook_secret',
 ]
 
 // Loads each secret from the vault (overriding the env fallback when a
@@ -498,7 +520,391 @@ async function handleSuperwallEvent(event) {
   }
 }
 
+// ------------------------------------------------------------------
+// Razorpay subscriptions (the web rail)
+// ------------------------------------------------------------------
+//
+// SCOPE / POLICY. The Play-distributed app may not sell its digital
+// subscription through anything but Google Play Billing (or Play's India
+// alternative-billing programme). These routes therefore serve purchases
+// made OUTSIDE the app — a web funnel, or a payment link an admin sends to
+// a user. The app consumes only GET /api/razorpay/entitlement, which reads
+// a row written here. See docs/RAZORPAY-SUBSCRIPTIONS.md §2.
+//
+// TRUST. Every write is derived from a Razorpay-signed payload or an
+// authenticated Razorpay API call:
+//   * webhook  -> verified HMAC over the raw body, then row upsert
+//   * verify   -> verified payment signature, then re-read from the API
+//   * create   -> authenticated Clerk user, never a client-supplied user id
+// The client response is never trusted on its own, and entitlement is
+// never granted from the app.
+
+let razorpay = null
+let razorpayPlans = { monthly: '', yearly: '' }
+
+function initRazorpay() {
+  razorpayPlans = {
+    monthly: secrets.razorpay_plan_monthly || '',
+    yearly: secrets.razorpay_plan_yearly || '',
+  }
+  if (!secrets.razorpay_key_id || !secrets.razorpay_key_secret) {
+    razorpay = null
+    console.warn('[razorpay] disabled: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not configured')
+    return
+  }
+  try {
+    razorpay = createRazorpayClient({
+      keyId: secrets.razorpay_key_id,
+      keySecret: secrets.razorpay_key_secret,
+      webhookSecret: secrets.razorpay_webhook_secret || '',
+      plans: razorpayPlans,
+    })
+    const configuredPlans = Object.entries(razorpayPlans)
+      .filter(([, id]) => id)
+      .map(([slug]) => slug)
+    console.log(`[razorpay] configured plans=${configuredPlans.join(',') || 'none'}`)
+    if (!secrets.razorpay_webhook_secret) {
+      console.warn('[razorpay] RAZORPAY_WEBHOOK_SECRET is missing — the webhook will reject every event')
+    }
+    if (configuredPlans.length === 0) {
+      console.warn('[razorpay] no plan ids configured (RAZORPAY_PLAN_MONTHLY / _YEARLY) — creation will fail')
+    }
+  } catch (err) {
+    razorpay = null
+    console.warn(`[razorpay] init failed: ${err.message}`)
+  }
+}
+
+// Every Razorpay subscription event we act on. Anything else (payments,
+// refunds, disputes) is acknowledged and ignored: subscription state is
+// already carried by these events.
+const RAZORPAY_SUBSCRIPTION_EVENTS = new Set([
+  'subscription.authenticated',
+  'subscription.activated',
+  'subscription.charged',
+  'subscription.pending',
+  'subscription.halted',
+  'subscription.cancelled',
+  'subscription.paused',
+  'subscription.resumed',
+  'subscription.completed',
+  'subscription.updated',
+])
+
+function epochToIso(seconds) {
+  const n = Number(seconds)
+  if (!Number.isFinite(n) || n <= 0) return null
+  return new Date(n * 1000).toISOString()
+}
+
+function razorpayStatusOf(entity) {
+  return String(entity?.status || 'unknown').trim().toLowerCase()
+}
+
+// Upserts the subscription row from a Razorpay subscription entity. Works for
+// both the webhook and the API-read path, so the two converge on one shape.
+//
+// Webhook payloads do not always repeat `notes`, so the owner falls back to
+// the row already stored: an update must never be dropped (or misattributed)
+// because a later event omitted the notes block.
+async function persistRazorpaySubscription(entity, planSlugHint = null, eventId = null) {
+  if (!entity?.id) return false
+
+  let userId = entity.notes?.user_id || null
+  if (!userId) {
+    const { data: existing } = await supabase
+      .from('razorpay_subscriptions')
+      .select('user_id')
+      .eq('subscription_id', entity.id)
+      .maybeSingle()
+    userId = existing?.user_id || null
+  }
+  if (!userId) {
+    // An unattributable row would grant nobody access and would poison the
+    // entitlement function's "newest row wins" ordering. Skip it loudly.
+    console.warn(`[razorpay] subscription ${entity.id} has no owning user id — not stored`)
+    return false
+  }
+
+  const row = {
+    subscription_id: entity.id,
+    user_id: userId,
+    plan_id: entity.plan_id || '',
+    plan_slug: planSlugForPlanId(razorpayPlans, entity.plan_id) || planSlugHint || 'unknown',
+    status: razorpayStatusOf(entity),
+    quantity: Number.isFinite(Number(entity.quantity)) ? Number(entity.quantity) : 1,
+    total_count: Number.isFinite(Number(entity.total_count)) ? Number(entity.total_count) : null,
+    paid_count: Number.isFinite(Number(entity.paid_count)) ? Number(entity.paid_count) : 0,
+    current_start: epochToIso(entity.current_start),
+    current_end: epochToIso(entity.current_end),
+    short_url: entity.short_url || null,
+    last_event_id: eventId,
+    raw: entity,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { error } = await supabase
+    .from('razorpay_subscriptions')
+    .upsert(row, { onConflict: 'subscription_id' })
+  if (error) throw new Error(error.message)
+  return true
+}
+
+async function applyRazorpayEvent(event, eventId) {
+  const name = String(event?.event || '')
+  if (!RAZORPAY_SUBSCRIPTION_EVENTS.has(name)) return
+  const entity = event?.payload?.subscription?.entity
+  if (!entity?.id) return
+  await persistRazorpaySubscription(entity, null, eventId)
+}
+
+async function readEntitlement(userId) {
+  const { data, error } = await supabase.rpc('subscription_entitlement', {
+    p_user_id: userId,
+  })
+  if (error) throw new Error(error.message)
+  const row = Array.isArray(data) ? data[0] : data
+  return {
+    active: Boolean(row?.active),
+    plan: row?.plan_slug || null,
+    current_end: row?.current_end || null,
+    status: row?.status || 'none',
+    source: 'razorpay',
+  }
+}
+
+// Creates (or reuses) a subscription for a user. Shared by the signed-in
+// route and the admin link route so both obey the same "one live
+// subscription per user" rule.
+async function createSubscriptionForUser({ userId, planSlug }) {
+  const planId = razorpay.planIdFor(planSlug)
+  if (!planId) {
+    const err = new Error(`no Razorpay plan id configured for "${planSlug}"`)
+    err.status = 400
+    throw err
+  }
+
+  const { data: rows, error } = await supabase
+    .from('razorpay_subscriptions')
+    .select('subscription_id, status, plan_slug, short_url')
+    .eq('user_id', userId)
+    .in('status', ['created', 'authenticated', 'active', 'pending'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+  if (error) throw new Error(error.message)
+
+  const existing = rows?.[0]
+  if (existing && existing.status !== 'created') {
+    const err = new Error('already subscribed')
+    err.status = 409
+    throw err
+  }
+  // An abandoned `created` subscription for the same plan is reusable: the
+  // customer can still authorise it, and Razorpay caps subscriptions per
+  // plan anyway.
+  if (existing && existing.plan_slug === planSlug) {
+    return {
+      subscription_id: existing.subscription_id,
+      short_url: existing.short_url || null,
+      reused: true,
+    }
+  }
+
+  const entity = await razorpay.createSubscription({
+    planId,
+    userId,
+    totalCount: totalCountForPlan(planSlug),
+  })
+  // `notes` on the create response is not guaranteed; write the owner
+  // explicitly so the very first webhook can attribute the event.
+  const withOwner = { ...entity, notes: { ...(entity.notes || {}), user_id: userId } }
+  await persistRazorpaySubscription({ ...withOwner, status: entity.status || 'created' }, planSlug, null)
+  return {
+    subscription_id: entity.id,
+    short_url: entity.short_url || null,
+    reused: false,
+  }
+}
+
+// Clerk-authenticated middleware for the app/web-app facing routes.
+// `verifyClerkRequest` already swallows token errors and returns null.
+async function requireClerkUser(req, res, next) {
+  const claims = await verifyClerkRequest(req)
+  if (!claims?.sub) return res.status(401).json({ error: 'unauthorized' })
+  req.clerkUserId = String(claims.sub)
+  return next()
+}
+
+// --- Razorpay webhook (raw body BEFORE express.json()) ---
+// Same ordering rule as the Superwall webhook above: the HMAC is over the
+// exact bytes Razorpay sent, so this must be registered before the global
+// JSON parser and must never re-serialise the body.
+// Handler lives in razorpay.mjs so its logic (raw-body requirement, HMAC,
+// idempotency, retry semantics) is unit-tested without booting this server.
+const handleRazorpayWebhook = createWebhookHandler({
+  getClient: () => razorpay,
+  recordEvent: async (eventId, eventType) => {
+    const { error } = await supabase
+      .from('razorpay_webhook_events')
+      .insert({ event_id: eventId, event_type: eventType })
+    if (!error) return 'recorded'
+    if (error.code === '23505') return 'duplicate'
+    return 'error'
+  },
+  deleteEvent: async (eventId) => {
+    await supabase.from('razorpay_webhook_events').delete().eq('event_id', eventId)
+  },
+  applyEvent: applyRazorpayEvent,
+})
+
+app.post(
+  '/api/razorpay/webhook',
+  express.raw({ type: 'application/json' }),
+  handleRazorpayWebhook,
+)
+
 app.use(express.json())
+
+// Limit subscription creation per IP: each call hits Razorpay's API and can
+// leave an abandoned subscription behind, so a loop must not be free.
+const razorpayCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  limit: 10,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many subscription attempts. Try again later.' },
+})
+
+// Creates a subscription for the SIGNED-IN user and returns what Checkout
+// needs. The user id comes from the verified Clerk session, never the body.
+app.post(
+  '/api/razorpay/subscription',
+  razorpayCreateLimiter,
+  requireClerkUser,
+  async (req, res) => {
+    if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
+    const planSlug = normalisePlanSlug(req.body?.plan)
+    if (!planSlug) return res.status(400).json({ error: 'unknown plan' })
+    try {
+      const result = await createSubscriptionForUser({ userId: req.clerkUserId, planSlug })
+      res.set('Cache-Control', 'no-store')
+      res.json({ ...result, key_id: razorpay.keyId, plan: planSlug })
+    } catch (err) {
+      const status = err?.status === 409 ? 409 : err?.status === 400 ? 400 : 502
+      console.error('[razorpay] create failed:', err.message)
+      res.status(status).json({
+        error: status === 409 ? 'already subscribed' : status === 400 ? err.message : 'could not start subscription',
+      })
+    }
+  },
+)
+
+// Verifies Checkout's success response, then re-reads the subscription from
+// the API so the stored state is Razorpay's, not the client's.
+app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
+  if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
+
+  const paymentId = req.body?.razorpay_payment_id
+  const clientSubscriptionId = req.body?.razorpay_subscription_id
+  const signature = req.body?.razorpay_signature
+  if (!paymentId || !clientSubscriptionId || !signature) {
+    return res.status(400).json({ error: 'missing fields' })
+  }
+
+  try {
+    // Ownership is checked against the stored row FIRST, and the signature is
+    // computed with that stored id — a client cannot choose the pair to sign.
+    const { data: row, error } = await supabase
+      .from('razorpay_subscriptions')
+      .select('subscription_id, user_id')
+      .eq('subscription_id', String(clientSubscriptionId))
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!row || row.user_id !== req.clerkUserId) {
+      return res.status(404).json({ error: 'subscription not found' })
+    }
+
+    const valid = razorpay.verifyPaymentSignature({
+      paymentId: String(paymentId),
+      subscriptionId: row.subscription_id,
+      signature: String(signature),
+    })
+    if (!valid) return res.status(400).json({ error: 'invalid signature' })
+
+    const entity = await razorpay.getSubscription(row.subscription_id)
+    if (entity?.notes?.user_id && entity.notes.user_id !== req.clerkUserId) {
+      // Belt and braces: the row said this user, the API says another.
+      return res.status(409).json({ error: 'subscription owner mismatch' })
+    }
+    await persistRazorpaySubscription(entity, null, null)
+
+    const entitlement = await readEntitlement(req.clerkUserId)
+    res.set('Cache-Control', 'no-store')
+    res.json({ verified: true, status: razorpayStatusOf(entity), entitlement })
+  } catch (err) {
+    console.error('[razorpay] verify failed:', err.message)
+    res.status(502).json({ error: 'verification failed' })
+  }
+})
+
+// What the app actually consumes: a server-computed yes/no. No secrets, no
+// Razorpay ids, nothing the client could replay elsewhere.
+app.get('/api/razorpay/entitlement', requireClerkUser, async (req, res) => {
+  try {
+    const entitlement = await readEntitlement(req.clerkUserId)
+    res.set('Cache-Control', 'no-store')
+    res.json(entitlement)
+  } catch (err) {
+    console.error('[razorpay] entitlement lookup failed:', err.message)
+    res.status(500).json({ error: 'entitlement lookup failed' })
+  }
+})
+
+// Cancels the caller's live subscription. Irreversible on Razorpay's side:
+// access continues to current_end (see the entitlement function), then stops.
+app.post('/api/razorpay/cancel', requireClerkUser, async (req, res) => {
+  if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
+  try {
+    const { data: rows, error } = await supabase
+      .from('razorpay_subscriptions')
+      .select('subscription_id, user_id')
+      .eq('user_id', req.clerkUserId)
+      .in('status', ['authenticated', 'active', 'pending'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+    if (error) throw new Error(error.message)
+    const row = rows?.[0]
+    if (!row) return res.status(404).json({ error: 'no active subscription' })
+
+    const entity = await razorpay.cancelSubscription(row.subscription_id)
+    await persistRazorpaySubscription(entity, null, null)
+    res.json({ cancelled: true, status: razorpayStatusOf(entity) })
+  } catch (err) {
+    console.error('[razorpay] cancel failed:', err.message)
+    res.status(502).json({ error: 'cancel failed' })
+  }
+})
+
+// Admin-only: create a subscription for an arbitrary user and hand back the
+// Razorpay-hosted payment link. This is the manual sales channel — the admin
+// sends the link (WhatsApp/email) and the customer pays outside the app.
+app.post('/api/admin/razorpay/link', requireAdmin, async (req, res) => {
+  if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
+  const userId = String(req.body?.user_id || '').trim()
+  const planSlug = normalisePlanSlug(req.body?.plan || 'monthly')
+  if (!userId) return res.status(400).json({ error: 'user_id required' })
+  if (!planSlug) return res.status(400).json({ error: 'unknown plan' })
+  try {
+    const result = await createSubscriptionForUser({ userId, planSlug })
+    res.json({ ...result, plan: planSlug })
+  } catch (err) {
+    const status = err?.status === 409 ? 409 : err?.status === 400 ? 400 : 502
+    console.error('[razorpay] admin link failed:', err.message)
+    res.status(status).json({
+      error: status === 409 ? 'user already subscribed' : status === 400 ? err.message : 'could not create link',
+    })
+  }
+})
 
 function escapePostgrestValue(value) {
   // PostgREST reserved characters (, . ( )) in values must be double-quoted
@@ -4229,6 +4635,9 @@ async function start() {
 await loadSecretsFromAws()
   initClerkClient()
   initR2Client()
+  // Built after the vault/AWS loads so a vault-stored key secret takes effect
+  // without a code change (same reason initClerkClient is re-run here).
+  initRazorpay()
   const server = app.listen(port, () => {
     console.log(`Sangeet Supabase server running on port ${port} - v3`)
     console.log(`[auth] clerkEnabled=${clerkEnabled()} publishableKey=${secrets.clerk_publishable_key ? 'set' : 'missing'}`)

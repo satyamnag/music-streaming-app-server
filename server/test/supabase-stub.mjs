@@ -26,6 +26,10 @@ export const db = {
   audit_log: new Map(),
   audit: [],
   email_events: new Map(),
+  // Razorpay rail (migration 038). Keyed by the table's own primary key
+  // (subscription_id / event_id); the stub's synthesised `id` is irrelevant.
+  razorpay_subscriptions: new Map(),
+  razorpay_webhook_events: new Map(),
 }
 
 // PostgREST table-name aliases. The application queries `partner_documents`,
@@ -38,6 +42,8 @@ export const TABLES = {
   partner_email_events: db.email_events,
   affiliates: db.affiliates,
   coupons: db.coupons,
+  razorpay_subscriptions: db.razorpay_subscriptions,
+  razorpay_webhook_events: db.razorpay_webhook_events,
 }
 
 export const state = {
@@ -60,6 +66,8 @@ export function resetStub() {
   db.coupons.clear()
   db.audit_log.clear()
   db.email_events.clear()
+  db.razorpay_subscriptions.clear()
+  db.razorpay_webhook_events.clear()
   db.audit.length = 0
   state.rpcLog.length = 0
   state.storageObjects.clear()
@@ -70,11 +78,25 @@ function sha256hex(s) {
 }
 
 function makeSupabaseStub() {
+  // Tables whose real primary key is not the stub's synthesised `id`. Inserts
+  // must reject a duplicate key like PostgREST does (code 23505), because the
+  // webhook idempotency path depends on that error.
+  const PRIMARY_KEYS = {
+    razorpay_subscriptions: 'subscription_id',
+    razorpay_webhook_events: 'event_id',
+  }
+
   const chain = (table) => {
-    const st = { table, filters: [], op: 'select', payload: null }
+    const st = { table, filters: [], op: 'select', payload: null, conflict: 'id' }
     const api = {
       select() { st.op = 'select'; return api },
       insert(payload) { st.op = 'insert'; st.payload = payload; return api },
+      upsert(payload, opts) {
+        st.op = 'upsert'
+        st.payload = payload
+        st.conflict = (opts && opts.onConflict) || 'id'
+        return api
+      },
       update(payload) { st.op = 'update'; st.payload = payload; return api },
       delete() { st.op = 'delete'; return api },
       eq(col, val) { st.filters.push([col, val]); return api },
@@ -98,6 +120,21 @@ function makeSupabaseStub() {
 
       if (st.op === 'insert') {
         const rows = Array.isArray(st.payload) ? st.payload : [st.payload]
+        const pk = PRIMARY_KEYS[st.table]
+        if (pk) {
+          const clash = rows.find((r) =>
+            Array.from(store.values()).some((row) => row[pk] === r[pk]),
+          )
+          if (clash) {
+            return {
+              data: null,
+              error: {
+                code: '23505',
+                message: `duplicate key value violates unique constraint "${st.table}_pkey"`,
+              },
+            }
+          }
+        }
         const inserted = rows.map((r) => {
           const row = { id: r.id || uuid(), created_at: new Date().toISOString(), ...r }
           store.set(row.id, row)
@@ -109,6 +146,23 @@ function makeSupabaseStub() {
           return row
         })
         return { data: single ? inserted[0] : inserted, error: null }
+      }
+
+      if (st.op === 'upsert') {
+        const rows = Array.isArray(st.payload) ? st.payload : [st.payload]
+        const written = rows.map((r) => {
+          const existing = Array.from(store.values()).find(
+            (row) => row[st.conflict] === r[st.conflict],
+          )
+          if (existing) {
+            Object.assign(existing, r)
+            return existing
+          }
+          const row = { id: r.id || uuid(), created_at: new Date().toISOString(), ...r }
+          store.set(row.id, row)
+          return row
+        })
+        return { data: single ? written[0] : written, error: null }
       }
 
       const rows = Array.from(store.values()).filter(match)

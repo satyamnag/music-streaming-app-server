@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sangeet/collections/env.dart';
 import 'package:sangeet/provider/database/database.dart';
 import 'package:sangeet/services/analytics/posthog_service.dart';
+import 'package:sangeet/services/entitlement/entitlement_service.dart';
 import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:sangeet/services/kv_store/kv_store.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -199,7 +200,17 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
         // Best-effort: bind the QR install-referrer code to this user (once).
         // Never blocks or disrupts sign-in.
         await ReferrerService.instance.bindToSignedInUser(authState.userId!);
+        // Server-verified Razorpay (web) entitlement. This runs on every
+        // resolved sign-in — including the cold-start session restore — so a
+        // subscription bought on the website unlocks the app. It is
+        // deliberately last: every call above is awaited in sequence, and a
+        // monetisation lookup must never cost the sign-in its push/analytics
+        // wiring if it is slow.
+        await EntitlementService.refreshIfConfigured();
       } else if (!authState.signedIn) {
+        // Signing out must drop the web-rail claim immediately; otherwise the
+        // next user on this device could inherit it until it expires.
+        EntitlementSignal.reset();
         await sw.reset();
         await os.logout();
         await ph.reset();

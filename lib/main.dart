@@ -24,6 +24,8 @@ import 'package:sangeet/modules/notifications/notifications_store.dart';
 import 'package:sangeet/services/app_deep_link_router.dart';
 import 'package:sangeet/services/onesignal_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
+import 'package:sangeet/services/clerk/clerk_session_token.dart';
+import 'package:sangeet/services/entitlement/entitlement_service.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
 import 'package:sangeet/services/install_referrer/referrer_service.dart';
 import 'package:smtc_windows/smtc_windows.dart';
@@ -277,6 +279,14 @@ Future<void> main(List<String> rawArgs) async {
       PremiumAccess.subscribeToStatus();
     }
 
+    // Server-verified entitlement for the Razorpay (web) rail. Configured
+    // unconditionally: with no API_BASE_URL the check is a no-op, so a build
+    // that has not been given one behaves exactly as it did before.
+    //
+    // The first real check runs from ClerkAuthNotifier once the session
+    // resolves — not here, where no session exists yet.
+    EntitlementService.configure(clerkSessionToken);
+
     // OneSignal push notifications & in-app messages, via the centralized
     // service wrapper. The App ID is public by design; initialize only when a
     // VALID App ID is configured. Push permission is NOT requested here — it
@@ -408,6 +418,19 @@ class Sangeet extends HookConsumerWidget {
         audioPlayer.dispose();
       };
     }, []);
+
+    // Re-check the server-side (Razorpay/web) entitlement whenever the app
+    // comes back to the foreground: a purchase completed on the website
+    // unlocks the app on the next resume instead of the next cold start.
+    // No-op on platforms without the Clerk bridge, and while the service is
+    // unconfigured (no API_BASE_URL).
+    useEffect(() {
+      if (!kIsAndroid) return null;
+      final listener = AppLifecycleListener(
+        onResume: () => unawaited(EntitlementService.refreshIfConfigured()),
+      );
+      return listener.dispose;
+    }, const []);
 
     return ShadcnApp.router(
       supportedLocales: L10n.all,

@@ -40,6 +40,19 @@ abstract class Env {
   @EnviedField(varName: 'CLERK_PUBLISHABLE_KEY')
   static final String clerkPublishableKey = _Env.clerkPublishableKey;
 
+  /// Base URL of the Node API (Render), e.g. `https://<service>.onrender.com`.
+  ///
+  /// Public by design (it is just a hostname). Used only by the Razorpay
+  /// entitlement check — see
+  /// `lib/services/entitlement/entitlement_service.dart`.
+  ///
+  /// Empty by default, and empty means the check is SKIPPED: a build that was
+  /// not given this value stays exactly as it is today (Play-only
+  /// entitlement) instead of failing or phoning nowhere. No secret may ever be
+  /// added here: everything in this file ships inside the APK.
+  @EnviedField(varName: 'API_BASE_URL', defaultValue: "")
+  static final String apiBaseUrl = _Env.apiBaseUrl;
+
   /// Superwall publishable API key (paywall/monetization). Public by design.
   @EnviedField(varName: 'SUPERWALL_API_KEY', defaultValue: "")
   static final String superwallApiKey = _Env.superwallApiKey;
