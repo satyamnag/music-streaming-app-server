@@ -1,0 +1,185 @@
+# Google Play compliance rule + full-app audit
+
+Status: audit performed 2026-11-08 against the repository at commit `00267c51`
+Scope: the whole Android app (`Soulful Bhakti Android App & Admin`), not just payments
+Verdict: **NOT 100% safe.** Payments are clean; two inherited, non-payment issues are not (§2).
+
+---
+
+## 0. The rule (binding for every future change)
+
+**Nothing in the Soulful Bhakti Android app may be implemented, kept, or shipped in
+a way that violates Google Play policy, Google's published recommendations, or
+Google's technical documentation.**
+
+This applies to every change — features, copy, permissions, dependencies, SDKs,
+backend behaviour that the app relies on, and release configuration. Concretely:
+
+1. **Payments.** No digital good or service sold inside the Play-distributed app may
+   use anything but Google Play Billing, unless the app is enrolled in an eligible
+   Google programme (e.g. the India alternative-billing programme). No link, button,
+   QR, copy, or nudge inside the app may lead a user to an external payment method.
+   Selling outside the app and honouring that purchase is allowed; steering inside the
+   app is not.
+2. **Permissions.** No permission is added without a user-visible feature that needs
+   it, a Play Console declaration where required, and a matching Data safety answer.
+   Special permissions (`WRITE_SETTINGS`, all-files access, package visibility) are
+   avoided unless the product genuinely depends on them.
+3. **Data.** Every SDK that collects or transmits data appears in the privacy policy
+   and the Data safety form, collection is consent-gated where required, and account
+   deletion is available in-app and linked in Play Console.
+4. **Intellectual property.** No feature, dependency, or string may facilitate access
+   to content the app is not licensed to distribute, or circumvent a third party's
+   terms (YouTube included).
+5. **Documentation-first.** Before any platform-adjacent change, the relevant Google
+   policy page and its technical documentation are read and cited in the PR/commit —
+   never implemented from memory.
+6. **Verification.** A change is not "done" until the behaviour has been observed on a
+   Play-installed build, not just a sideloaded APK or an emulator.
+
+If a request conflicts with this rule, the conflict is raised before implementation
+rather than resolved silently in code.
+
+---
+
+## 1. Method
+
+Repository-wide scan, evidence recorded by `file:line`:
+
+- Android manifest, Gradle config, ProGuard/R8 state.
+- Every declared dependency in `pubspec.yaml` (media sources, analytics, auth, push).
+- Runtime wiring in `lib/main.dart`, root widgets, and providers — i.e. what actually
+  executes on an Android build, not just what is imported.
+- User-visible copy in `lib/l10n/*.arb` (the strings that ship inside the APK).
+- The payments surface (Play Billing + Superwall + the new Razorpay web rail).
+
+---
+
+## 2. Verdict
+
+**Payments: compliant** within what the code can prove (§4). The Razorpay rail sells
+only outside the app, the Play build contains no steering, and Play Billing remains the
+in-app path. The residual payment risk is Google's *classification* judgement, not
+conduct — see the separate note in `docs/RAZORPAY-SUBSCRIPTIONS.md`.
+
+**The app as a whole: not 100% safe.** Two findings are inherited from the Spotube
+fork and have nothing to do with subscriptions:
+
+| # | Severity | Finding |
+|---|---|---|
+| P1 | **Blocker** | YouTube extraction machinery is initialised on Android, and the shipped strings say "I know I'm pirating Music" |
+| P2 | **High** | `WRITE_SETTINGS`, app-wide cleartext HTTP, and advertising-ID declarations that must stay truthful |
+
+---
+
+## 3. Findings
+
+### P1 — YouTube extractor + piracy copy (Play Intellectual Property policy; YouTube ToS)
+
+Evidence:
+
+- `lib/main.dart` — `NewPipeExtractor.init()` runs on **Android** at startup
+  (`if (kIsAndroid || kIsDesktop)`), i.e. the YouTube extractor is initialised in the
+  shipped Play build.
+- `lib/main.dart` — `YtDlp.instance.setBinaryLocation(...)` is wired for desktop, and
+  `YoutubeClientEngine.ytDlp` is a selectable engine (`lib/hooks/configurators/use_check_yt_dlp_installed.dart`,
+  called from `lib/pages/root/root_app.dart`), with `yt_dlp_dart` and
+  `youtube_explode_dart` declared in `pubspec.yaml`.
+- `lib/l10n/app_en.arb:222-226` — user-facing copy that ships inside the APK:
+  - `download_warning`: *"If you download all Tracks at bulk you're clearly pirating
+    Music…"*
+  - `download_agreement_1`: *"I know I'm pirating Music. I'm bad"*
+  - `download_ip_ban_warning`: *"…your IP can get blocked on YouTube…"*
+
+Why this is a policy problem: Google Play's Intellectual Property policy prohibits
+apps that facilitate unauthorised access to copyrighted content, and downloading or
+extracting YouTube streams violates YouTube's Terms of Service. The fact that the
+default playback path now uses your own catalogue (`lib/services/sourced_track/direct_supabase.dart`)
+does not neutralise it: the extractor still initialises, the dependencies still ship,
+and the consent copy still exists in the binary where a reviewer or an automated scan
+can find it. **A single screenshot of "I know I'm pirating Music" is enough to fail a
+review.**
+
+Remediation (must ship before the next Play release):
+
+1. Remove `NewPipeExtractor.init()` from the Android path.
+2. Drop `yt_dlp_dart`, `youtube_explode_dart`, and the `flutter_new_pipe_extractor`
+   dependency, or confine them to a non-Play build via a compile-time guard **and**
+   verify they are absent from the AAB.
+3. Delete the download/piracy keys from every `lib/l10n/app_*.arb` and the
+   `YouTubeEngineNotInstalledDialog` path; then grep the built AAB for `pirat`,
+   `YouTube`, `yt-dlp`, `newpipe` to prove they are gone.
+4. Re-run the scan after the change — absence of the widget is not absence of the
+   string.
+
+### P2 — permission and transport hygiene
+
+| Item | Evidence | Assessment |
+|---|---|---|
+| `WRITE_SETTINGS` | `android/app/src/main/AndroidManifest.xml:13` | Special permission. Justified only by the ringtone feature; Play treats it as sensitive. Keep only if the ringtone setter is user-initiated and prominent; be ready to answer a Play permissions declaration. |
+| `usesCleartextTraffic="true"` | same manifest:46 | App-wide plaintext HTTP. Exists for the local media server. Violates Google's transport-security recommendation and exposes user data. Replace with a network security config scoped to `localhost`/`127.0.0.1`. |
+| `AD_ID` | manifest:29 | Truthful only if the Play Console advertising-ID declaration says Yes **and** the Data safety form declares it. `docs/PLAY_DATA_SAFETY.md` claims they match; that claim needs re-verification in the Console, not just in the repo. |
+| `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE*` | manifest:5-8 | Standard for a music player with push and a media foreground service. Declared correctly, with `foregroundServiceType="mediaPlayback"` (manifest:128). |
+
+### P3 — cannot be verified from this repository
+
+These are Console facts, not code facts. Nobody can call the app "100% safe" until a
+human with Play Console access checks them:
+
+1. Subscription products `soulful_monthly` / `soulful_yearly` exist, active, priced —
+   and Superwall maps those exact IDs.
+2. Payments profile verified (PAN, bank, GST).
+3. Data safety form matches the real SDK set: Firebase Analytics, Crashlytics, PostHog,
+   OneSignal, Clerk, Superwall, Razorpay (web only).
+4. Account deletion: in-app exists (`ClerkBridge.deleteAccount` + profile action); the
+   **web URL required by Play Console** must also be live.
+5. Content rating questionnaire and target-audience answers are current.
+6. Copyright: you hold or licence the rights to every track distributed in the app.
+
+### Licensing note (not Play policy)
+
+`LICENSE` is BSD-4-Clause with the copyright line replaced by "Copyright (c) 2026
+Sangeet". If this codebase derives from Spotube (BSD-4-Clause), the original copyright
+notice must be retained in source and binary distributions. Play does not police this,
+but a rights holder can. Worth a legal review alongside the P1 fix.
+
+---
+
+## 4. Verified clean (payments and platform)
+
+- No alternate payment method inside the app: no Razorpay SDK, no UPI deep link, no
+  checkout copy in UI strings (`lib/l10n/app_en.arb` has no purchase/website/UPI text).
+- Paid tracks are gated fail-closed: `PremiumAccess.isPremiumUser` requires a signed-in
+  user plus an active Play/Superwall or server-verified Razorpay entitlement; a missing
+  configuration shows an error, never free premium.
+- No `MANAGE_EXTERNAL_STORAGE`, no broad storage permissions, no `QUERY_ALL_PACKAGES`
+  (only an `https` VIEW query).
+- No advertising SDK (the `gh-artifacts-ads-*` folders are build experiments; no ad
+  dependency is declared).
+- `targetSdk 36`, Play Billing `8.0.0` — meet the current Play requirements.
+- Foreground media service and its type are declared; media-button receiver is standard.
+
+---
+
+## 5. Remediation order
+
+1. **P1 before anything else.** It is the one finding that can cost the listing, it is
+   unrelated to subscriptions, and it is a deletion job, not a rewrite.
+2. **P2 transport**: scope cleartext to loopback via `network_security_config.xml`.
+3. **P2 permission**: decide whether the ringtone setter justifies `WRITE_SETTINGS`;
+   if it does, document it for a Play declaration.
+4. **P3**: run the six Console checks with screenshots as evidence.
+5. Re-run this audit after each change; the rule in §0 holds for every future commit.
+
+---
+
+## 6. Definition of compliant (re-run whenever the app changes)
+
+- [ ] No `pirat`, `yt-dlp`, `newpipe`, `youtube_explode` strings or libs in the built AAB
+- [ ] No external-payment link/copy inside the app (`grep` UI strings and routes)
+- [ ] Play Billing products live and purchasable on an internal-testing install
+- [ ] Data safety form = actual SDK set; privacy policy names Razorpay for web payments
+- [ ] Account deletion works in-app and its Console URL resolves
+- [ ] Manifest permissions unchanged without a matching declaration
+- [ ] `flutter analyze` clean for every touched file; tests green
+- [ ] Every platform decision cites an official Google page or doc in the commit
