@@ -532,14 +532,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get made_with =>
-      'Made with Ã¢ÂÂ¤Ã¯Â¸Â in BangladeshÃ°Å¸â€¡Â§Ã°Å¸â€¡Â©';
+      'Made with ÃƒÂ¢Ã‚ÂÃ‚Â¤ÃƒÂ¯Ã‚Â¸Ã‚Â in BangladeshÃƒÂ°Ã…Â¸Ã¢â‚¬Â¡Ã‚Â§ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¡Ã‚Â©';
 
   @override
   String get kingkor_roy_tirtho => 'Kingkor Roy Tirtho';
 
   @override
   String copyright(Object current_year) {
-    return 'Ã‚Â© 2021-$current_year Kingkor Roy Tirtho';
+    return 'Ãƒâ€šÃ‚Â© 2021-$current_year Kingkor Roy Tirtho';
   }
 
   @override
@@ -721,27 +721,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'If you download all Tracks at bulk you\'re clearly pirating Music & causing damage to the creative society of Music. I hope you are aware of this. Always, try respecting & supporting Artist\'s hard work';
-
-  @override
-  String get download_ip_ban_warning =>
-      'BTW, your IP can get blocked on YouTube due excessive download requests than usual. IP block means you can\'t use YouTube (even if you\'re logged in) for at least 2-3 months from that IP device. And Soulful Bhakti doesn\'t hold any responsibility if this ever happens';
-
-  @override
   String get by_clicking_accept_terms =>
       'By clicking \'accept\' you agree to following terms:';
-
-  @override
-  String get download_agreement_1 => 'I know I\'m pirating Music. I\'m bad';
-
-  @override
-  String get download_agreement_2 =>
-      'I\'ll support the Artist wherever I can and I\'m only doing this because I don\'t have money to buy their art';
-
-  @override
-  String get download_agreement_3 =>
-      'I\'m completely aware that my IP can get blocked on YouTube & I don\'t hold Soulful Bhakti or his owners/contributors responsible for any accidents caused by my current action';
 
   @override
   String get decline => 'Decline';
@@ -983,11 +964,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skip_this_nonsense => 'Skip this nonsense';
 
   @override
-  String get freedom_of_music => 'Ã¢â‚¬Å“Freedom of MusicÃ¢â‚¬Â';
+  String get freedom_of_music =>
+      'ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œFreedom of MusicÃƒÂ¢Ã¢â€šÂ¬Ã‚Â';
 
   @override
   String get freedom_of_music_palm =>
-      'Ã¢â‚¬Å“Freedom of Music in the palm of your handÃ¢â‚¬Â';
+      'ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œFreedom of Music in the palm of your handÃƒÂ¢Ã¢â€šÂ¬Ã‚Â';
 
   @override
   String get get_started => 'Let\'s get started';
@@ -1785,7 +1767,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

@@ -718,28 +718,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'å¦‚æžœä½ å¤§é‡ä¸‹è½½è¿™äº›æ­Œæ›²ï¼Œä½ æ˜¾ç„¶åœ¨ä¾µçŠ¯éŸ³ä¹çš„ç‰ˆæƒå¹¶å¯¹éŸ³ä¹åˆ›ä½œç¤¾åŒºé€ æˆäº†ä¼¤å®³ã€‚æˆ‘å¸Œæœ›ä½ èƒ½æ„è¯†åˆ°è¿™ä¸€ç‚¹ã€‚æ°¸è¿œè¦å°Šé‡å¹¶æ”¯æŒè‰ºæœ¯å®¶ä»¬çš„è¾›å‹¤å·¥ä½œ';
-
-  @override
-  String get download_ip_ban_warning =>
-      'å°å¿ƒï¼Œå¦‚æžœå‡ºçŽ°è¶…å‡ºæ­£å¸¸çš„ä¸‹è½½è¯·æ±‚é‚£ä½ çš„ IP å¯èƒ½ä¼šè¢« YouTube å°ç¦ï¼Œè¿™æ„å‘³ç€ä½ çš„è®¾å¤‡å°†åœ¨é•¿è¾¾ 2-3 ä¸ªæœˆçš„æ—¶é—´å†…æ— æ³•ä½¿ç”¨è¯¥ IP è®¿é—® YouTubeï¼ˆå³ä½¿ä½ æ²¡ç™»å½•ï¼‰ã€‚Soulful Bhakti å¯¹æ­¤ä¸æ‰¿æ‹…ä»»ä½•è´£ä»»';
-
-  @override
   String get by_clicking_accept_terms =>
       'ç‚¹å‡» \'åŒæ„\' ä»£è¡¨ç€ä½ åŒæ„ä»¥ä¸‹çš„æ¡æ¬¾';
-
-  @override
-  String get download_agreement_1 =>
-      'æˆ‘æ˜Žç™½ä¾µçŠ¯éŸ³ä¹ç‰ˆæƒæ˜¯ä¸€ä»¶ä¸å¥½çš„äº‹æƒ…';
-
-  @override
-  String get download_agreement_2 =>
-      'æˆ‘å°†å°½å¯èƒ½æ”¯æŒè‰ºæœ¯å®¶çš„å·¥ä½œã€‚æˆ‘çŽ°åœ¨ä¹‹æ‰€ä»¥åšä¸åˆ°æ˜¯å› ä¸ºç¼ºä¹èµ„é‡‘æ¥è´­ä¹°æ­£ç‰ˆ';
-
-  @override
-  String get download_agreement_3 =>
-      'æˆ‘å®Œå…¨äº†è§£æˆ‘çš„ IP å­˜åœ¨è¢« YouTubeçš„é£Žé™©ã€‚æˆ‘åŒæ„ Soulful Bhakti çš„æ‰€æœ‰è€…ä¸Žè´¡çŒ®è€…ä»¬æ— é¡»å¯¹æˆ‘ç›®å‰çš„è¡Œä¸ºæ‰€å¯¼è‡´çš„ä»»ä½•åŽæžœè´Ÿè´£';
 
   @override
   String get decline => 'æ‹’ç»';
@@ -1782,7 +1762,7 @@ class AppLocalizationsZh extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override
@@ -2505,28 +2485,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get download_warning =>
-      'å¦‚æžœä½ å¤§é‡ä¸‹è¼‰é€™äº›æ­Œæ›²ï¼Œä½ é¡¯ç„¶åœ¨ä¾µçŠ¯éŸ³æ¨‚çš„ç‰ˆæ¬Šä¸¦å°éŸ³æ¨‚å‰µä½œç¤¾å€é€ æˆäº†å‚·å®³ã€‚æˆ‘å¸Œæœ›ä½ èƒ½æ„è­˜åˆ°é€™ä¸€é»žã€‚æ°¸é è¦å°Šé‡ä¸¦æ”¯æŒè—è¡“å®¶å€‘çš„è¾›å‹¤å·¥ä½œ';
-
-  @override
-  String get download_ip_ban_warning =>
-      'å°å¿ƒï¼Œå¦‚æžœå‡ºç¾è¶…å‡ºæ­£å¸¸çš„ä¸‹è¼‰è«‹æ±‚ï¼Œé‚£ä½ çš„ IP å¯èƒ½æœƒè¢« YouTube å°éŽ–ï¼Œé€™æ„å‘³è‘—ä½ çš„è£ç½®å°‡åœ¨é•·é” 2-3 å€‹æœˆçš„æ™‚é–“å…§ç„¡æ³•ä½¿ç”¨è©² IP è¨ªå• YouTubeï¼ˆå³ä½¿ä½ æ²’ç™»å…¥ï¼‰ã€‚Soulful Bhakti ä¸æœƒå› è€Œæ‰¿æ“”ä»»ä½•è²¬ä»»';
-
-  @override
   String get by_clicking_accept_terms =>
       'é»žæ“Š \'åŒæ„\' ä»£è¡¨ä½ åŒæ„ä»¥ä¸‹çš„æ¢æ¬¾';
-
-  @override
-  String get download_agreement_1 =>
-      'æˆ‘æ˜Žç™½ä¾µå®³éŸ³æ¨‚ç‰ˆæ¬Šæ˜¯ä¸€ä»¶ä¸å¥½çš„äº‹';
-
-  @override
-  String get download_agreement_2 =>
-      'æˆ‘å°‡ç›¡å¯èƒ½æ”¯æŒè—è¡“å®¶çš„å·¥ä½œã€‚æˆ‘ç¾åœ¨ä¹‹æ‰€ä»¥åšä¸åˆ°æ˜¯å› ç‚ºç¼ºä¹è³‡é‡‘ä¾†è³¼è²·æ­£ç‰ˆ';
-
-  @override
-  String get download_agreement_3 =>
-      'æˆ‘å®Œå…¨äº†è§£æˆ‘çš„ IP å­˜åœ¨è¢« YouTube å°éŽ–çš„é¢¨éšªã€‚ä¸¦ä¸”æˆ‘æ˜Žç™½ Soulful Bhakti çš„æ“æœ‰è€…èˆ‡è²¢ç»è€…å€‘ç„¡é ˆå°æˆ‘ç›®å‰çš„è¡Œç‚ºæ‰€å°Žè‡´çš„ä»»ä½•å¾Œæžœè² è²¬';
 
   @override
   String get decline => 'æ‹’çµ•';

@@ -71,8 +71,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:window_manager/window_manager.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:yt_dlp_dart/yt_dlp_dart.dart';
-import 'package:flutter_new_pipe_extractor/flutter_new_pipe_extractor.dart';
-
 Future<void> main(List<String> rawArgs) async {
   if (rawArgs.contains("web_view_title_bar")) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -169,14 +167,6 @@ Future<void> main(List<String> rawArgs) async {
         // Display-mode query stalled/hung — keep the default refresh rate.
       }
     }
-    if (kIsAndroid || kIsDesktop) {
-      try {
-        await NewPipeExtractor.init().timeout(const Duration(seconds: 10));
-      } catch (_) {
-        // Extractor init stalled/hung — continue without it.
-      }
-    }
-
     if (!kIsWeb) {
       MetadataGod.initialize();
     }

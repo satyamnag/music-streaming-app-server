@@ -722,27 +722,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'JeÅ›li hurtowo pobierasz wszystkie utwory, wyraÅºnie piracisz muzykÄ™ i wyrzÄ…dzasz szkody kreatywnej spoÅ‚ecznoÅ›ci muzycznej. Mam nadziejÄ™, Å¼e jesteÅ› tego Å›wiadomy. Zawsze staraj siÄ™ szanowaÄ‡ i wspieraÄ‡ ciÄ™Å¼kÄ… pracÄ™ Artysty';
-
-  @override
-  String get download_ip_ban_warning =>
-      'Przy okazji, TwÃ³j adres IP moÅ¼e zostaÄ‡ zablokowany w YouTube z powodu nadmiernych Å¼Ä…daÅ„ pobierania niÅ¼ zwykle. Blokada IP oznacza, Å¼e nie moÅ¼esz korzystaÄ‡ z YouTube (nawet jeÅ›li jesteÅ› zalogowany) przez co najmniej 2-3 miesiÄ…ce z IP tego urzÄ…dzenia. Soulful Bhakti nie ponosi Å¼adnej odpowiedzialnoÅ›ci, jeÅ›li tak siÄ™ stanie';
-
-  @override
   String get by_clicking_accept_terms =>
       'KlikajÄ…c \'Akceptuj\' zgadzasz siÄ™ z nastÄ™pujÄ…cymi warunkami:';
-
-  @override
-  String get download_agreement_1 => 'Wiem, Å¼e piracÄ™ muzykÄ™. Jestem zÅ‚y.';
-
-  @override
-  String get download_agreement_2 =>
-      'BÄ™dÄ™ wspieraÅ‚ artystÄ™ i robiÄ™ to tylko dlatego, Å¼e nie mam pieniÄ™dzy na albumy wykonawcy. ';
-
-  @override
-  String get download_agreement_3 =>
-      'Jestem caÅ‚kowicie Å›wiadomy, Å¼e moje IP moÅ¼e zostaÄ‡ zablokowane w YouTube i nie pociÄ…gam Soulful Bhakti ani jego wÅ‚aÅ›cicieli/wspÃ³Å‚twÃ³rcÃ³w do odpowiedzialnoÅ›ci za jakiekolwiek wypadki spowodowane moimi obecnymi dziaÅ‚aniami';
 
   @override
   String get decline => 'OdrzuÄ‡';
@@ -1794,7 +1775,7 @@ class AppLocalizationsPl extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

@@ -2,7 +2,9 @@
 
 Status: audit performed 2026-11-08 against the repository at commit `00267c51`
 Scope: the whole Android app (`Soulful Bhakti Android App & Admin`), not just payments
-Verdict: **NOT 100% safe.** Payments are clean; two inherited, non-payment issues are not (§2).
+Verdict: **NOT 100% safe yet.** Payments are clean. P1 is now *partly* remediated
+(the extractor initialisation and every piracy string are gone); the three YouTube
+libraries are still declared, so the AAB still carries extraction code (§3 P1 status).
 
 ---
 
@@ -111,6 +113,30 @@ Remediation (must ship before the next Play release):
    `YouTube`, `yt-dlp`, `newpipe` to prove they are gone.
 4. Re-run the scan after the change — absence of the widget is not absence of the
    string.
+
+**P1 remediation status (2026-11-08, this commit):**
+
+| Step | State |
+|---|---|
+| 1. `NewPipeExtractor.init()` removed from `lib/main.dart` | **done** — no extractor is initialised in the Android build |
+| 3. Piracy / YouTube-IP-ban strings | **done** — 5 keys × 30 locales (150 lines) deleted; `flutter gen-l10n` regenerated; `grep -i pirating lib/l10n` and `lib/l10n/generated` both return 0 |
+| 2. Remove `yt_dlp_dart`, `youtube_explode_dart`, `flutter_new_pipe_extractor` | **NOT done** — see below |
+| 4. Prove absence in the built AAB | **not possible here** (no Android build on this machine) |
+
+Why step 2 is not done in the same change: `MetadataPlugin.create()` takes a
+`YouTubeEngine`, and the `YouTubeEngine` interface itself is typed with
+`youtube_explode_dart`'s `Video` / `StreamManifest`. The engine provider is read by
+~60 files (`provider/metadata_plugin/**`, `services/sourced_track/sourced_track.dart`,
+`provider/server/routes/playback.dart`, `splash_gate`, settings). Deleting the packages
+therefore means changing the metadata-plugin API, and that cannot be done blind: it must
+be a build-and-device-verified change, not a text edit.
+
+**Consequence, stated plainly:** the two things a reviewer can *see and act on* — a live
+extractor initialisation and copy that admits piracy — are gone. The libraries are still
+in the dependency tree, so this app is **not yet** certifiable as 100% safe. The next
+change must be the package removal above, verified by grepping the built AAB for
+`newpipe`, `yt-dlp`, `youtube_explode` and re-running the §6 checklist on a Play-installed
+build.
 
 ### P2 — permission and transport hygiene
 

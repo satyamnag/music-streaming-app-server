@@ -721,28 +721,8 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Se vocÃª baixar todas as faixas em massa, estarÃ¡ claramente pirateando mÃºsica e causando danos Ã  sociedade criativa da mÃºsica. Espero que vocÃª esteja ciente disso. Sempre tente respeitar e apoiar o trabalho Ã¡rduo dos artistas';
-
-  @override
-  String get download_ip_ban_warning =>
-      'AlÃ©m disso, seu IP pode ser bloqueado no YouTube devido a solicitaÃ§Ãµes de download excessivas. O bloqueio de IP significa que vocÃª nÃ£o poderÃ¡ usar o YouTube (mesmo se estiver conectado) por pelo menos 2-3 meses a partir do dispositivo IP. E o Soulful Bhakti nÃ£o se responsabiliza se isso acontecer';
-
-  @override
   String get by_clicking_accept_terms =>
       'Ao clicar em \'aceitar\', vocÃª concorda com os seguintes termos:';
-
-  @override
-  String get download_agreement_1 =>
-      'Eu sei que estou pirateando mÃºsica. Sou mau';
-
-  @override
-  String get download_agreement_2 =>
-      'Vou apoiar o artista onde puder e estou fazendo isso porque nÃ£o tenho dinheiro para comprar sua arte';
-
-  @override
-  String get download_agreement_3 =>
-      'Estou completamente ciente de que meu IP pode ser bloqueado no YouTube e nÃ£o responsabilizo o Soulful Bhakti ou seus proprietÃ¡rios/colaboradores por quaisquer acidentes causados pela minha aÃ§Ã£o atual';
 
   @override
   String get decline => 'Recusar';
@@ -1794,7 +1774,7 @@ class AppLocalizationsPt extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

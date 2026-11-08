@@ -725,28 +725,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Wenn du alle Titel in groÃŸen Mengen herunterlÃ¤dst, betreibst du eindeutig Raubkopien von Musik und schadest der kreativen Gesellschaft der Musik. Ich hoffe, dir ist dies bewusst. Versuche immer, die harte Arbeit der KÃ¼nstler zu respektieren und zu unterstÃ¼tzen.';
-
-  @override
-  String get download_ip_ban_warning =>
-      'Ãœbrigens, deine IP-Adresse kann aufgrund Ã¼bermÃ¤ÃŸiger Downloadanfragen von YouTube gesperrt werden. Eine IP-Sperre bedeutet, dass du YouTube (auch wenn du angemeldet bist) fÃ¼r mindestens 2-3 Monate von diesem IP-GerÃ¤t aus nicht nutzen kannst. Soulful Bhakti Ã¼bernimmt keine Verantwortung, falls dies jemals geschieht.';
-
-  @override
   String get by_clicking_accept_terms =>
       'Durch Klicken auf \'Akzeptieren\' stimmst du den folgenden Bedingungen zu:';
-
-  @override
-  String get download_agreement_1 =>
-      'Ich weiÃŸ, dass ich Raubkopien von Musik betreibe. Ich bin bÃ¶se.';
-
-  @override
-  String get download_agreement_2 =>
-      'Ich werde die KÃ¼nstler, wo immer ich kann, unterstÃ¼tzen, und ich tue dies nur, weil ich kein Geld habe, um ihre Kunst zu kaufen.';
-
-  @override
-  String get download_agreement_3 =>
-      'Mir ist vollkommen bewusst, dass meine IP-Adresse auf YouTube gesperrt werden kann, und ich halte Soulful Bhakti oder seine EigentÃ¼mer/Mitarbeiter nicht fÃ¼r etwaige UnfÃ¤lle verantwortlich, die durch meine derzeitige Handlung verursacht werden.';
 
   @override
   String get decline => 'Ablehnen';
@@ -1800,7 +1780,7 @@ class AppLocalizationsDe extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

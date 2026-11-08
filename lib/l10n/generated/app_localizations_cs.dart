@@ -721,27 +721,8 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Pokud stÃ¡hnete vÅ¡echny skladby najednou, pirÃ¡tÃ­te tÃ­m hudbu a Å¡kodÃ­te kreativnÃ­ spoleÄnosti hudby. DoufÃ¡m, Å¾e jste si toho vÄ›domi. VÅ¾dy se snaÅ¾te respektovat a podporovat tvrdou prÃ¡ci umÄ›lcÅ¯';
-
-  @override
-  String get download_ip_ban_warning =>
-      'Mimochodem, vaÅ¡e IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na kvÅ¯li nadmÄ›rnÃ½m poÅ¾adavkÅ¯m na stahovÃ¡nÃ­. BlokovÃ¡nÃ­ IP znamenÃ¡, Å¾e nemÅ¯Å¾ete pouÅ¾Ã­vat YouTube (i kdyÅ¾ jste pÅ™ihlÃ¡Å¡eni) alespoÅˆ 2-3 mÄ›sÃ­ce ze zaÅ™Ã­zenÃ­ s touto IP. A Soulful Bhakti nenese Å¾Ã¡dnou odpovÄ›dnost, pokud se to nÄ›kdy stane';
-
-  @override
   String get by_clicking_accept_terms =>
       'KliknutÃ­m na \'pÅ™ijmout\' souhlasÃ­te s nÃ¡sledujÃ­cÃ­mi podmÃ­nkami:';
-
-  @override
-  String get download_agreement_1 => 'VÃ­m, Å¾e pirÃ¡tÃ­m hudbu. Jsem Å¡patnÃ½';
-
-  @override
-  String get download_agreement_2 =>
-      'Budu podporovat umÄ›lce, kdekoliv to bude moÅ¾nÃ©, a dÄ›lÃ¡m to jen proto, Å¾e nemÃ¡m penÃ­ze na koupi jejich umÄ›nÃ­';
-
-  @override
-  String get download_agreement_3 =>
-      'Jsem si naprosto vÄ›dom toho, Å¾e moje IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na a nenesu Å¾Ã¡dnou odpovÄ›dnost za nehody zpÅ¯sobenÃ© mÃ½m souÄasnÃ½m jednÃ¡nÃ­m';
 
   @override
   String get decline => 'OdmÃ­tnout';
@@ -1791,7 +1772,7 @@ class AppLocalizationsCs extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

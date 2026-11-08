@@ -1,4 +1,4 @@
-﻿{
+{
   "guest": "Host",
   "browse": "ProchÃ¡zet",
   "search": "Hledat",
@@ -225,12 +225,7 @@
   "are_you_sure": "Jste si jisti?",
   "generating_playlist": "GenerovÃ¡nÃ­ vaÅ¡eho vlastnÃ­ho playlistu...",
   "selected_count_tracks": "VybrÃ¡no {count} skladeb",
-  "download_warning": "Pokud stÃ¡hnete vÅ¡echny skladby najednou, pirÃ¡tÃ­te tÃ­m hudbu a Å¡kodÃ­te kreativnÃ­ spoleÄnosti hudby. DoufÃ¡m, Å¾e jste si toho vÄ›domi. VÅ¾dy se snaÅ¾te respektovat a podporovat tvrdou prÃ¡ci umÄ›lcÅ¯",
-  "download_ip_ban_warning": "Mimochodem, vaÅ¡e IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na kvÅ¯li nadmÄ›rnÃ½m poÅ¾adavkÅ¯m na stahovÃ¡nÃ­. BlokovÃ¡nÃ­ IP znamenÃ¡, Å¾e nemÅ¯Å¾ete pouÅ¾Ã­vat YouTube (i kdyÅ¾ jste pÅ™ihlÃ¡Å¡eni) alespoÅˆ 2-3 mÄ›sÃ­ce ze zaÅ™Ã­zenÃ­ s touto IP. A Soulful Bhakti nenese Å¾Ã¡dnou odpovÄ›dnost, pokud se to nÄ›kdy stane",
   "by_clicking_accept_terms": "KliknutÃ­m na 'pÅ™ijmout' souhlasÃ­te s nÃ¡sledujÃ­cÃ­mi podmÃ­nkami:",
-  "download_agreement_1": "VÃ­m, Å¾e pirÃ¡tÃ­m hudbu. Jsem Å¡patnÃ½",
-  "download_agreement_2": "Budu podporovat umÄ›lce, kdekoliv to bude moÅ¾nÃ©, a dÄ›lÃ¡m to jen proto, Å¾e nemÃ¡m penÃ­ze na koupi jejich umÄ›nÃ­",
-  "download_agreement_3": "Jsem si naprosto vÄ›dom toho, Å¾e moje IP mÅ¯Å¾e bÃ½t na YouTube zablokovÃ¡na a nenesu Å¾Ã¡dnou odpovÄ›dnost za nehody zpÅ¯sobenÃ© mÃ½m souÄasnÃ½m jednÃ¡nÃ­m",
   "decline": "OdmÃ­tnout",
   "accept": "PÅ™ijmout",
   "details": "Podrobnosti",

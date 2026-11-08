@@ -727,28 +727,8 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'TÃ¼m ÅŸarkÄ±larÄ± toplu olarak indiriyorsanÄ±z, aÃ§Ä±kÃ§a mÃ¼zik korsanlÄ±ÄŸÄ± yapÄ±yorsunuz ve mÃ¼zik dÃ¼nyasÄ±nÄ±n yaratÄ±cÄ± topluluÄŸuna zarar veriyorsunuz demektir. Umuyorum bunun farkÄ±ndasÄ±nÄ±zdÄ±r. Her zaman, sanatÃ§Ä±larÄ±n emeÄŸine saygÄ± gÃ¶stermeyi ve desteklemeyi deneyin.';
-
-  @override
-  String get download_ip_ban_warning =>
-      'AyrÄ±ca, normalden fazla indirme istekleri nedeniyle YouTube\'da IP\'niz engellenebilir. IP engeli, en az 2-3 ay boyunca YouTube\'u (hatta oturum aÃ§mÄ±ÅŸ olsanÄ±z bile) o IP cihazÄ±ndan kullanamayacaÄŸÄ±nÄ±z anlamÄ±na gelir. Ve eÄŸer bÃ¶yle bir durum yaÅŸanÄ±rsa, Soulful Bhakti bundan hiÃ§bir sorumluluk kabul etmez.';
-
-  @override
   String get by_clicking_accept_terms =>
       '\"Kabul et\" e tÄ±klayarak aÅŸaÄŸÄ±daki ÅŸartlarÄ± kabul etmiÅŸ olursunuz:';
-
-  @override
-  String get download_agreement_1 =>
-      'MÃ¼zik korsanlÄ±ÄŸÄ± yaptÄ±ÄŸÄ±mÄ± biliyorum. Ben fakir biriyim.';
-
-  @override
-  String get download_agreement_2 =>
-      'SanatÃ§Ä±yÄ± elimden geldiÄŸince destekleyeceÄŸim ve bunu sadece sanatÄ±nÄ± satÄ±n alacak param olmadÄ±ÄŸÄ± iÃ§in yapÄ±yorum';
-
-  @override
-  String get download_agreement_3 =>
-      'YouTube\'da IP\'min engellenebileceÄŸinin tamamen farkÄ±ndayÄ±m ve mevcut eylemlerimden kaynaklanan herhangi bir kaza iÃ§in Soulful Bhakti\'u veya sahiplerini/katkÄ±da bulunanlarÄ± sorumlu tutmuyorum.';
 
   @override
   String get decline => 'Reddet';
@@ -1803,7 +1783,7 @@ class AppLocalizationsTr extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

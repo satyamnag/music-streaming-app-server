@@ -720,28 +720,8 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Jos lataat kaikki laulut kerrÃ¤llÃ¤ olet selkeÃ¤sti Piratoimassa ja aiheuttamassa vahinkoa musiikin luovaan yhteiskuntaan. Toivottavasti olet tietoinen tÃ¤stÃ¤. YritÃ¤ aina kunnioittaa ja tukea Artistin kovaa tyÃ¶tÃ¤.';
-
-  @override
-  String get download_ip_ban_warning =>
-      'BTW, YouTube voi estÃ¤Ã¤ IP-Osoitteesi tavallista liiallisten latauspyyntÃ¶jen takia. IP-Osoitteen esto tarkoittaa sitÃ¤, ettet voi kÃ¤yttÃ¤Ã¤ YouTubea (vaikka olisit kirjautunut) vÃ¤hintÃ¤Ã¤n 2-3kk aikana kyseiseltÃ¤ laitteelta. Soulful Bhakti ei kanna yhtÃ¤Ã¤n vastuuta jos se tapahtuu.';
-
-  @override
   String get by_clicking_accept_terms =>
       'Painamalla \'hyvÃ¤ksy\' hyvÃ¤ksyt seuraaviin ehtoihin:';
-
-  @override
-  String get download_agreement_1 =>
-      'TiedÃ¤n ettÃ¤ Piratoin musiikkia. Olen paha.';
-
-  @override
-  String get download_agreement_2 =>
-      'Tuen Artisteja silloin kun pystyn, ja teen tÃ¤mÃ¤n vain koska minulla ei ole rahaa ostaa heidÃ¤n taidetta';
-
-  @override
-  String get download_agreement_3 =>
-      'YmmÃ¤rrÃ¤n ettÃ¤ minun YouTube voi estÃ¤Ã¤ IP-Osoitteeni ja en pidÃ¤ Soulful Bhaktia tai omistajiinsa/avustajia vastuullisena mistÃ¤Ã¤n omista teoistsani';
 
   @override
   String get decline => 'HylkÃ¤Ã¤';
@@ -1787,7 +1767,7 @@ class AppLocalizationsFi extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

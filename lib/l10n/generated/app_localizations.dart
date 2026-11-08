@@ -1128,7 +1128,7 @@ abstract class AppLocalizations {
   /// No description provided for @made_with.
   ///
   /// In en, this message translates to:
-  /// **'Made with Ã¢ÂÂ¤Ã¯Â¸Â in BangladeshÃ°Å¸â€¡Â§Ã°Å¸â€¡Â©'**
+  /// **'Made with ÃƒÂ¢Ã‚ÂÃ‚Â¤ÃƒÂ¯Ã‚Â¸Ã‚Â in BangladeshÃƒÂ°Ã…Â¸Ã¢â‚¬Â¡Ã‚Â§ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¡Ã‚Â©'**
   String get made_with;
 
   /// No description provided for @kingkor_roy_tirtho.
@@ -1140,7 +1140,7 @@ abstract class AppLocalizations {
   /// No description provided for @copyright.
   ///
   /// In en, this message translates to:
-  /// **'Ã‚Â© 2021-{current_year} Kingkor Roy Tirtho'**
+  /// **'Ãƒâ€šÃ‚Â© 2021-{current_year} Kingkor Roy Tirtho'**
   String copyright(Object current_year);
 
   /// No description provided for @license.
@@ -1473,41 +1473,11 @@ abstract class AppLocalizations {
   /// **'Selected {count} tracks'**
   String selected_count_tracks(Object count);
 
-  /// No description provided for @download_warning.
-  ///
-  /// In en, this message translates to:
-  /// **'If you download all Tracks at bulk you\'re clearly pirating Music & causing damage to the creative society of Music. I hope you are aware of this. Always, try respecting & supporting Artist\'s hard work'**
-  String get download_warning;
-
-  /// No description provided for @download_ip_ban_warning.
-  ///
-  /// In en, this message translates to:
-  /// **'BTW, your IP can get blocked on YouTube due excessive download requests than usual. IP block means you can\'t use YouTube (even if you\'re logged in) for at least 2-3 months from that IP device. And Soulful Bhakti doesn\'t hold any responsibility if this ever happens'**
-  String get download_ip_ban_warning;
-
   /// No description provided for @by_clicking_accept_terms.
   ///
   /// In en, this message translates to:
   /// **'By clicking \'accept\' you agree to following terms:'**
   String get by_clicking_accept_terms;
-
-  /// No description provided for @download_agreement_1.
-  ///
-  /// In en, this message translates to:
-  /// **'I know I\'m pirating Music. I\'m bad'**
-  String get download_agreement_1;
-
-  /// No description provided for @download_agreement_2.
-  ///
-  /// In en, this message translates to:
-  /// **'I\'ll support the Artist wherever I can and I\'m only doing this because I don\'t have money to buy their art'**
-  String get download_agreement_2;
-
-  /// No description provided for @download_agreement_3.
-  ///
-  /// In en, this message translates to:
-  /// **'I\'m completely aware that my IP can get blocked on YouTube & I don\'t hold Soulful Bhakti or his owners/contributors responsible for any accidents caused by my current action'**
-  String get download_agreement_3;
 
   /// No description provided for @decline.
   ///
@@ -1962,13 +1932,13 @@ abstract class AppLocalizations {
   /// No description provided for @freedom_of_music.
   ///
   /// In en, this message translates to:
-  /// **'Ã¢â‚¬Å“Freedom of MusicÃ¢â‚¬Â'**
+  /// **'ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œFreedom of MusicÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'**
   String get freedom_of_music;
 
   /// No description provided for @freedom_of_music_palm.
   ///
   /// In en, this message translates to:
-  /// **'Ã¢â‚¬Å“Freedom of Music in the palm of your handÃ¢â‚¬Â'**
+  /// **'ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œFreedom of Music in the palm of your handÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'**
   String get freedom_of_music_palm;
 
   /// No description provided for @get_started.
@@ -3318,7 +3288,7 @@ abstract class AppLocalizations {
   /// A top track row's play count and nominal minutes
   ///
   /// In en, this message translates to:
-  /// **'Played {count, plural, =1{1 time} other{{count} times}} · {mins} min'**
+  /// **'Played {count, plural, =1{1 time} other{{count} times}} Â· {mins} min'**
   String analytics_played_times_mins(int count, int mins);
 
   /// Link that opens the full list from an Analytics card

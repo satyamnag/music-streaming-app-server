@@ -780,27 +780,8 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'If you download all Tracks at bulk you\'re clearly pirating Music & causing damage to the creative society of Music. I hope you are aware of this. Always, try respecting & supporting Artist\'s hard work';
-
-  @override
-  String get download_ip_ban_warning =>
-      'BTW, your IP can get blocked on YouTube due excessive download requests than usual. IP block means you can\'t use YouTube (even if you\'re logged in) for at least 2-3 months from that IP device. And Soulful Bhakti doesn\'t hold any responsibility if this ever happens';
-
-  @override
   String get by_clicking_accept_terms =>
       'By clicking \'accept\' you agree to following terms:';
-
-  @override
-  String get download_agreement_1 => 'I know I\'m pirating Music. I\'m bad';
-
-  @override
-  String get download_agreement_2 =>
-      'I\'ll support the Artist wherever I can and I\'m only doing this because I don\'t have money to buy their art';
-
-  @override
-  String get download_agreement_3 =>
-      'I\'m completely aware that my IP can get blocked on YouTube & I don\'t hold Soulful Bhakti or his owners/contributors responsible for any accidents caused by my current action';
 
   @override
   String get decline => 'áƒ£áƒáƒ áƒ§áƒáƒ¤áƒ';
@@ -1937,7 +1918,7 @@ class AppLocalizationsKa extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

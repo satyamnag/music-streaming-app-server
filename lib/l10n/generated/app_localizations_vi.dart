@@ -728,28 +728,8 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Táº£i xuá»‘ng táº¥t cáº£ cÃ¡c bÃ i hÃ¡t má»™t láº§n, sáº½ vi pháº¡m báº£n quyá»n Ã¢m nháº¡c vÃ  gÃ¢y thiá»‡t háº¡i cho xÃ£ há»™i sÃ¡ng táº¡o Ã¢m nháº¡c. Hy vá»ng báº¡n nháº­n thá»©c Ä‘Æ°á»£c Ä‘iá»u nÃ y. HÃ£y luÃ´n tÃ´n trá»ng vÃ  á»§ng há»™ cÃ´ng sá»©c cá»§a nghá»‡ sÄ©';
-
-  @override
-  String get download_ip_ban_warning =>
-      'Äá»‹a chá»‰ IP cá»§a báº¡n cÃ³ thá»ƒ bá»‹ cháº·n trÃªn YouTube do yÃªu cáº§u táº£i xuá»‘ng quÃ¡ má»©c so vá»›i bÃ¬nh thÆ°á»ng. Cháº·n IP cÃ³ nghÄ©a lÃ  báº¡n khÃ´ng thá»ƒ sá»­ dá»¥ng YouTube (ngay cáº£ khi báº¡n Ä‘Ã£ Ä‘Äƒng nháº­p) Ã­t nháº¥t 2-3 thÃ¡ng tá»« thiáº¿t bá»‹ IP Ä‘Ã³. VÃ  Soulful Bhakti khÃ´ng chá»‹u trÃ¡ch nhiá»‡m náº¿u Ä‘iá»u nÃ y xáº£y ra';
-
-  @override
   String get by_clicking_accept_terms =>
       'Báº±ng cÃ¡ch nháº¥p vÃ o \'Cháº¥p nháº­n\', báº¡n Ä‘á»“ng Ã½ vá»›i cÃ¡c Ä‘iá»u khoáº£n sau:';
-
-  @override
-  String get download_agreement_1 =>
-      'TÃ´i biáº¿t mÃ¬nh Ä‘ang vi pháº¡m báº£n quyá»n Ã¢m nháº¡c. ÄÃ³ lÃ  khÃ´ng tá»‘t.';
-
-  @override
-  String get download_agreement_2 =>
-      'TÃ´i sáº½ á»§ng há»™ nghá»‡ sÄ© báº¥t cá»© nÆ¡i nÃ o tÃ´i cÃ³ thá»ƒ vÃ  tÃ´i chá»‰ lÃ m Ä‘iá»u nÃ y vÃ¬ tÃ´i khÃ´ng cÃ³ tiá»n Ä‘á»ƒ mua tÃ¡c pháº©m cá»§a há»';
-
-  @override
-  String get download_agreement_3 =>
-      'TÃ´i hoÃ n toÃ n nháº­n thá»©c Ä‘Æ°á»£c ráº±ng Ä‘á»‹a chá»‰ IP cá»§a tÃ´i cÃ³ thá»ƒ bá»‹ cháº·n trÃªn YouTube vÃ  tÃ´i khÃ´ng Ä‘á»• lá»—i cho Soulful Bhakti hoáº·c chá»§ sá»Ÿ há»¯u/ngÆ°á»i Ä‘Ã³ng gÃ³p cá»§a nÃ³ vá» báº¥t ká»³ tai náº¡n nÃ o do hÃ nh Ä‘á»™ng nÃ y cá»§a tÃ´i';
 
   @override
   String get decline => 'Tá»« chá»‘i';
@@ -1813,7 +1793,7 @@ class AppLocalizationsVi extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override

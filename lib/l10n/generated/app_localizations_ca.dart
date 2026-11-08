@@ -723,28 +723,8 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get download_warning =>
-      'Si descarrega totes les canÃ§ons de cop, estÃ  piratejant mÃºsica clarament i causant dany a la societat creativa de la mÃºsica. Espero que sigui conscient d\'aixÃ² i sempre intenti respectar i recolzar la forta feina dels artÃ­stes';
-
-  @override
-  String get download_ip_ban_warning =>
-      'Per cert, la seva IP pot ser bloquejada a YouTube degut a solicituds de descÃ rrega excessives. El bloqueig d\'IP vol dir que no podrÃ  utilitzar YouTube (fins i tot si ha iniciat sessiÃ³) durant un mÃ­nim de 2-3 meses desde esa direcciÃ³n IP. I Soulful Bhakti no es fa responsable si aixÃ² succeeix en alguna ocasiÃ³';
-
-  @override
   String get by_clicking_accept_terms =>
       'Al fer clic a \'Acceptar\', acepta els segÃ¼ents termes:';
-
-  @override
-  String get download_agreement_1 =>
-      'Se que estic piratejant mÃºsica. SÃ³c dolent';
-
-  @override
-  String get download_agreement_2 =>
-      'RecolzarÃ© l\'artista quan pugui i nomÃ©s ho faig perquÃ¨ no tinc diners per comprar el seu art';
-
-  @override
-  String get download_agreement_3 =>
-      'SÃ³c completament conscient que la meva IP pot ser bloqueada per YouTube i no responsabilizo a Soulful Bhakti ni als seus propietaris/contribuents per qualsevol incident causat per la meva acciÃ³ actual';
 
   @override
   String get decline => 'Rebutjar';
@@ -1799,7 +1779,7 @@ class AppLocalizationsCa extends AppLocalizations {
       other: '$count times',
       one: '1 time',
     );
-    return 'Played $_temp0 · $mins min';
+    return 'Played $_temp0 Â· $mins min';
   }
 
   @override
