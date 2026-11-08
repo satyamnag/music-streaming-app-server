@@ -648,6 +648,36 @@ sync timestamps are the timing of record.** The variants take their text verbati
 Cosmetic only: the owner's `synced_lyrics` has no trailing newline while the two English
 columns do. It parses identically.
 
+### Re-segmented to 50 cues with the interludes un-bannered (2026-11-08, second pass)
+
+The owner re-segmented again — 50 cues, 48 sung + **2 `{{ Music }}` banners**, spanning
+`0.000 → 284.520`. The two banners are the **23.71 s intro** and the **18.36 s outro**; the
+interior interludes are no longer banners. The English columns still held the previous 53-cue
+timeline, so this was a replacement, with the old values backed up first.
+
+Again **no spelling drift**: all 48 sung cues were exact plain lines, so no text repair was
+needed and the variants were rendered straight from the stored column by `sync-variants` run
+`42448836339` — `problems: NONE`, `VALIDATION PASSED`, PATCH `204`.
+
+| | |
+| --- | --- |
+| cues | **50 / 50 / 50**, identical start+end at every index |
+| cue numbering | sequential 1…50 in all three columns |
+| Telugu column | unchanged (the owner's), every sung cue an exact plain line — 48/48 |
+| English columns | 53 cues → **50**, 20/20 plain lines covered |
+| every English cue | the translation of **its own** Telugu cue — 0 of 48 wrong |
+| every transliteration | likewise — 0 of 48 wrong |
+| music mask | **2 banners**, same text in all three columns |
+| Telugu script / empty cues | **0 / 0** |
+| span | all three `0.000 → 284.520` |
+
+Rule applied: **plain-lyric spelling is the text of record, Telugu sync timestamps are the
+timing of record.** The variants take their text verbatim from `plain_lyrics_en` /
+`plain_lyrics_en_tr` and their times from `synced_lyrics` exactly.
+
+Cosmetic only, unchanged: the owner's `synced_lyrics` has no trailing newline while the two
+English columns do. It parses identically.
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
