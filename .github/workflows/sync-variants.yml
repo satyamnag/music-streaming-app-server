@@ -76,7 +76,11 @@ jobs:
       - name: Render + validate (writes nothing)
         working-directory: server
         run: |
-          set -eu
+          # pipefail is load-bearing: without it the pipeline's status is tee's, so a
+          # render that exits 1 with "VALIDATION FAILED" would still be written by the
+          # next step. With it, a rejected render stops the job before the backup and
+          # the PATCH.
+          set -euo pipefail
           node tools/render-variant-sync.mjs \
             --track "$TRACK_ID" --cols "$COLS" --out-dir . --emit-payload | tee render.log
 

@@ -255,11 +255,18 @@ for (const col of COLS) {
   let outOfRange = 0
   let dup = 0
   const starts = new Set()
+  // A variant cue is only "out of range" if it runs past BOTH the stored duration and
+  // the Telugu timeline it mirrors. The audio routinely ends a fraction past the
+  // integer `duration` column (e.g. 284.52s of audio against duration=284), and the
+  // Telugu column is the authority on where the song actually ends - so judging the
+  // variants by the integer alone would reject a correct timeline.
+  const teluguEnd = cues.length ? cues[cues.length - 1].end : 0
+  const rangeLimit = Math.max(Number(track.duration) || 0, teluguEnd)
   for (let i = 0; i < renderedCues.length; i++) {
     const c = renderedCues[i]
     if (c.end <= c.start) zero += 1
     if (i > 0 && c.start < renderedCues[i - 1].end - 1e-6) overlap += 1
-    if (c.start < 0 || (track.duration && c.end > Number(track.duration) + 0.5)) outOfRange += 1
+    if (c.start < 0 || (rangeLimit && c.end > rangeLimit + 0.5)) outOfRange += 1
     if (starts.has(c.start)) dup += 1
     starts.add(c.start)
     // Times must be IDENTICAL to the Telugu timeline, index by index.
