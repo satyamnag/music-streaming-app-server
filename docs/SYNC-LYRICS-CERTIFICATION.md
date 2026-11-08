@@ -678,6 +678,37 @@ timing of record.** The variants take their text verbatim from `plain_lyrics_en`
 Cosmetic only, unchanged: the owner's `synced_lyrics` has no trailing newline while the two
 English columns do. It parses identically.
 
+### Re-segmented to 54 cues with the four interludes bannered again (2026-11-08, third pass)
+
+The owner re-segmented once more — 54 cues, 48 sung + **6 `{{ Music }}` banners**, spanning
+`0.000 → 284.520`. The banners are the **23.71 s intro**, four interludes of **24.52 s /
+30.87 s / 6.56 s / 31.17 s**, and the **18.36 s outro**. The English columns still held the
+previous 50-cue timeline, so this was a replacement, with the old values backed up first.
+
+**No spelling drift** again — all 48 sung cues were exact plain lines, so no text repair was
+needed and the variants were rendered straight from the stored column by `sync-variants` run
+`42449565965` — `problems: NONE`, `VALIDATION PASSED`, PATCH `204`.
+
+| | |
+| --- | --- |
+| cues | **54 / 54 / 54**, identical start+end at every index |
+| cue numbering | sequential 1…54 in all three columns |
+| Telugu column | unchanged (the owner's), every sung cue an exact plain line — 48/48 |
+| English columns | 50 cues → **54**, 20/20 plain lines covered |
+| every English cue | the translation of **its own** Telugu cue — 0 of 48 wrong |
+| every transliteration | likewise — 0 of 48 wrong |
+| music mask | **6 banners**, same text in all three columns |
+| Telugu script / empty cues | **0 / 0** |
+| span | all three `0.000 → 284.520` |
+
+Rule applied: **plain-lyric spelling is the text of record, Telugu sync timestamps are the
+timing of record.** Text comes verbatim from `plain_lyrics_en` / `plain_lyrics_en_tr`; times
+come from `synced_lyrics` exactly. Cosmetic only, unchanged: the owner's `synced_lyrics` has no
+trailing newline while the two English columns do — it parses identically.
+
+The two earlier passes on this track (53 cues with 5 banners, then 50 cues with 2) are recorded
+above; those cue counts are superseded by this one.
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
