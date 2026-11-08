@@ -609,6 +609,45 @@ Every renderer treats any `{{...}}` as a banner — `lib/modules/lyrics/lyrics_m
 of 48 / 6. Normalising the six rows to `{{Music}}` restores those counts; it changes no
 timing and nothing user-visible.
 
+### Re-segmented to 53 cues; English columns rebuilt (2026-11-08)
+
+The owner re-segmented the Telugu again — 53 cues, 48 sung + **5 `{{ Music }}` banners** —
+and cleared both English columns. This time there was **no spelling drift**: all 48 sung cues
+were already exact plain lines, so no text repair was needed and the variants could be
+rendered straight from the stored column.
+
+The first run (`42446291603`) exposed two tooling defects rather than a data problem, both
+fixed before the clean run:
+
+* `sync-variants.yml` rendered with `set -eu` and piped to `tee`, so without `pipefail` a
+  render that exits 1 with *"VALIDATION FAILED — do not write."* still fell through to the
+  PATCH. It is now `set -euo pipefail`, and it was the only workflow with validation and write
+  in separate steps;
+* `render-variant-sync.mjs` called a cue out-of-range past `duration + 0.5 s`, but this track's
+  audio is 284.52 s against `duration = 284`, so a correct timeline ending at the true audio
+  end missed by 20 ms. Range is now judged against `max(duration, the Telugu column's last
+  cue)`, which is the authority on where the song ends.
+
+Clean run `42446669342` — `problems: NONE`, `VALIDATION PASSED`, PATCH `204`.
+
+| | |
+| --- | --- |
+| cues | **53 / 53 / 53**, identical start+end at every index |
+| Telugu column | **unchanged** (the owner's), every sung cue an exact plain line — 48/48 |
+| English columns | were empty → 48 sung cues each, 20/20 plain lines covered |
+| every English cue | the translation of **its own** Telugu cue — 0 of 48 wrong |
+| every transliteration | likewise — 0 of 48 wrong |
+| music mask | **5 banners**, same text in all three columns |
+| Telugu script / empty cues | **0 / 0** |
+| span | all three `0.000 → 284.520` |
+
+Rule applied, as the owner states it: **plain-lyric spelling is the text of record, Telugu
+sync timestamps are the timing of record.** The variants take their text verbatim from
+`plain_lyrics_en` / `plain_lyrics_en_tr` and their times from `synced_lyrics` exactly.
+
+Cosmetic only: the owner's `synced_lyrics` has no trailing newline while the two English
+columns do. It parses identically.
+
 ## Certified track: Darshanamu Neeyara (2026-11-03)
 
 `72029c9c-9ed0-43c5-a0c0-f0744a98c61d` — 398 s, **48 supplied cues**, 20 distinct
