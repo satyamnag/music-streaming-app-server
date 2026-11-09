@@ -212,9 +212,9 @@ Simulating the release job's eleven lookups against the real account (`AWS_PROFI
 | `superwall/publishable-key` | OK (24) |
 | `onesignal/api-key` | OK (36) |
 | `posthog/api-key` | OK (48) |
-| `posthog/host` | **FAIL — ResourceNotFoundException** |
+| `posthog/host` | ✅ created 2026-11-09 — `https://us.i.posthog.com` (US cloud) |
 
-10 of 11 come from AWS. `posthog/host` falls back to DOTENV_RELEASE (and the app defaults
+11 of 11 come from AWS. `posthog/host` falls back to DOTENV_RELEASE (and the app defaults
 to `https://us.i.posthog.com` in `env.dart`). Create `posthog/host` to close it.
 
 **Fixed in the workflow the same day:** it still asked for `superwall/api-key`, which had
