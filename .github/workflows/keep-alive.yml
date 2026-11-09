@@ -27,7 +27,7 @@ on:
     # letting the service sleep anyway (scheduled workflows are routinely 5-20
     # minutes late). 10 minutes leaves a full 5-minute margin while still
     # using far fewer requests than the old 5-minute interval.
-    - cron: '*/10 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       url:
