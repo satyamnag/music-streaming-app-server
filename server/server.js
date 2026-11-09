@@ -792,6 +792,29 @@ app.post(
 
 app.use(express.json())
 
+// ------------------------------------------------------------------
+// /health/auth - which integrations this deployment actually has.
+//
+// Booleans ONLY: no key ids, no plan ids, no secret material, nothing that helps
+// an attacker. It exists because "clerkEnabled=false" and "invalid token" both
+// used to surface as 401 at the client, which is undiagnosable from a browser
+// and cost hours of guesswork.
+// ------------------------------------------------------------------
+app.get('/health/auth', (req, res) => {
+  res.set('Cache-Control', 'no-store')
+  res.json({
+    clerkEnabled: clerkEnabled(),
+    clerkPublishableKey: Boolean(secrets.clerk_publishable_key),
+    razorpayMode: razorpay ? (String(process.env.RAZORPAY_MODE || 'live').toLowerCase() === 'test' ? 'test' : 'live') : 'disabled',
+    razorpayConfigured: Boolean(razorpay),
+    razorpayPlans: {
+      yearly: Boolean(razorpayPlans.yearly),
+      monthly: Boolean(razorpayPlans.monthly),
+    },
+    awsSecretsEnabled: process.env.AWS_SECRETS_ENABLED === '1',
+  })
+})
+
 // Limit subscription creation per IP: each call hits Razorpay's API and can
 // leave an abandoned subscription behind, so a loop must not be free.
 const razorpayCreateLimiter = rateLimit({
