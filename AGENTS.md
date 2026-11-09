@@ -457,3 +457,19 @@ NO ASSUMPTION WITHOUT EVIDENCE.
 NO MODIFICATION WITHOUT UNDERSTANDING.
 
 NO COMPLETION WITHOUT VALIDATION.
+
+------------------------------------------------------------------------
+
+# CREDENTIAL SOURCING — NON-NEGOTIABLE
+
+- Every credential is sourced from **AWS Secrets Manager**, region `ap-south-1`,
+  secret names `<service>/<key>` (e.g. `razorpay/key-secret`).
+- On the dev machine the working AWS profile is **`famerelay`**. The `default`
+  profile in `~/.aws/credentials` holds an **invalid** key — never rely on it.
+- The Android app **cannot** read Secrets Manager: that would require shipping AWS
+  keys in the APK. Publishable/client keys are injected at **build time** from AWS
+  into `.env`; secrets never enter the app.
+- Never commit, print, log or paste a credential. Values are never echoed — names only.
+- Secret inventory, known gaps and the one-command verification live in
+  `docs/SECRETS-AWS.md` ("Verified operational facts"). The policy rationale is in
+  `docs/GOOGLE-PLAY-COMPLIANCE.md` section 7.

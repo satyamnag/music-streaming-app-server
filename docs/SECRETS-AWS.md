@@ -113,3 +113,73 @@ remove the stale copy afterwards so only one source of truth remains.
 Do **not** run the service as an administrator identity. AdministratorAccess is for
 provisioning; the runtime credential should be able to read exactly these ARNs and
 nothing else.
+
+---
+
+## Verified operational facts (2026-11-09)
+
+These were confirmed with live calls against the account, not from documentation.
+
+### Access
+
+| Fact | Value |
+|---|---|
+| Working profile | **`famerelay`** (`~/.aws/credentials`), region **ap-south-1** |
+| Broken profile | **`default`** holds an invalid key — every call fails with `UnrecognizedClientException`. Never rely on it |
+| Permissions used | `secretsmanager:ListSecrets`, `secretsmanager:GetSecretValue` |
+
+Always pass the profile explicitly:
+
+```bash
+AWS_PROFILE=famerelay AWS_REGION=ap-south-1 node _probe.mjs
+```
+
+### What exists in the account (19 secrets)
+
+```
+clerk/publishable-key        onesignal/api-key           supabase/anon-key
+deepgram/api-key             onesignal/rest-api-key      supabase/url
+hide-donations               openai/api-key              superwall/api-key
+posthog/api-key              r2/base-url                 release/channel
+update-check/enabled         tutrtalk/prod/* (6 secrets, unrelated project)
+```
+
+### Gaps that block the Razorpay rail
+
+| Secret | State |
+|---|---|
+| `razorpay/key-secret` | **missing** (`ResourceNotFoundException`) |
+| `razorpay/webhook-secret` | **missing** (`ResourceNotFoundException`) |
+| `superwall/api-key` | **holds an `sk_` secret key (len 67)** — wrong type for an SDK key |
+| `superwall/publishable-key` | **missing** — the `pk_…` key is not stored anywhere in AWS |
+
+Consequence: the app cannot initialise Superwall (secret key where `pk_` is expected),
+and a secret credential is inside the APK. Rotate the `sk_`, add
+`superwall/publishable-key`, then add the two Razorpay secrets.
+
+### The app cannot read Secrets Manager — build-time injection instead
+
+A mobile binary calling Secrets Manager would need AWS keys inside the APK, which is
+strictly worse. The compliant pattern: **CI reads the publishable keys from Secrets
+Manager, writes them into the build's `.env`, and compiles** —
+`clerk/publishable-key`, `superwall/publishable-key`, `supabase/anon-key`,
+`onesignal/api-key`, `posthog/api-key`. Secrets never enter the APK; publishable keys
+never sit in the repository.
+
+### Re-verify in one command
+
+```bash
+cd server
+AWS_PROFILE=famerelay AWS_REGION=ap-south-1 node -e "
+import('./libs/awsSecrets.mjs').then(async (m) => {
+  const { SecretsManagerClient, GetSecretValueCommand } = await import('@aws-sdk/client-secrets-manager');
+  const client = new SecretsManagerClient({ region: 'ap-south-1' });
+  const r = await m.loadAwsSecrets({
+    names: ['razorpay/key-secret','razorpay/webhook-secret'],
+    client, GetSecretValueCommand,
+  });
+  console.log('loaded:', r.loaded, 'failed:', r.failed.map(f => f.name + ':' + f.reason));
+});"
+```
+
+`loaded` listing both names is the proof the rail is wired.
