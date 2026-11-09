@@ -227,6 +227,12 @@ const secrets = {
   razorpay_webhook_secret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
   razorpay_plan_monthly: process.env.RAZORPAY_PLAN_MONTHLY || '',
   razorpay_plan_yearly: process.env.RAZORPAY_PLAN_YEARLY || '',
+  // TEST-mode counterparts, selected by RAZORPAY_MODE=test. Switching mode is an
+  // env change, never a code change, so a test key can never meet a live plan id.
+  razorpay_key_id_test: process.env.RAZORPAY_KEY_ID_TEST || '',
+  razorpay_key_secret_test: process.env.RAZORPAY_KEY_SECRET_TEST || '',
+  razorpay_webhook_secret_test: process.env.RAZORPAY_WEBHOOK_SECRET_TEST || '',
+  razorpay_plan_yearly_test: process.env.RAZORPAY_PLAN_YEARLY_TEST || '',
 }
 
 const VAULT_SECRET_KEYS = [
@@ -256,6 +262,8 @@ const VAULT_SECRET_KEYS = [
   // hand over the key that can create charges and verify payments.
   'razorpay_key_secret',
   'razorpay_webhook_secret',
+  'razorpay_key_secret_test',
+  'razorpay_webhook_secret_test',
 ]
 
 // Loads each secret from the vault (overriding the env fallback when a
@@ -543,20 +551,29 @@ let razorpay = null
 let razorpayPlans = { monthly: '', yearly: '' }
 
 function initRazorpay() {
+  // RAZORPAY_MODE selects the credential pair: "test" uses the *_TEST variables
+  // (and razorpay/key-secret-test), anything else uses the live pair.
+  const mode = String(process.env.RAZORPAY_MODE || 'live').toLowerCase() === 'test' ? 'test' : 'live'
+  const keyId = mode === 'test' ? secrets.razorpay_key_id_test : secrets.razorpay_key_id
+  const keySecret = mode === 'test' ? secrets.razorpay_key_secret_test : secrets.razorpay_key_secret
+  const webhookSecret =
+    mode === 'test' ? secrets.razorpay_webhook_secret_test : secrets.razorpay_webhook_secret
+  const planYearly = mode === 'test' ? secrets.razorpay_plan_yearly_test : secrets.razorpay_plan_yearly
   razorpayPlans = {
-    monthly: secrets.razorpay_plan_monthly || '',
-    yearly: secrets.razorpay_plan_yearly || '',
+    monthly: mode === 'test' ? '' : secrets.razorpay_plan_monthly || '',
+    yearly: planYearly || '',
   }
-  if (!secrets.razorpay_key_id || !secrets.razorpay_key_secret) {
+  console.log('[razorpay] mode=' + mode)
+  if (!keyId || !keySecret) {
     razorpay = null
     console.warn('[razorpay] disabled: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not configured')
     return
   }
   try {
     razorpay = createRazorpayClient({
-      keyId: secrets.razorpay_key_id,
-      keySecret: secrets.razorpay_key_secret,
-      webhookSecret: secrets.razorpay_webhook_secret || '',
+      keyId,
+      keySecret,
+      webhookSecret: webhookSecret || '',
       plans: razorpayPlans,
     })
     const configuredPlans = Object.entries(razorpayPlans)
