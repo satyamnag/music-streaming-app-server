@@ -32,6 +32,7 @@ import {
   classifyLine,
   MUSIC_LABEL,
 } from '../libs/autoSyncLyrics.mjs'
+import { variantBannerText } from '../libs/musicBanner.mjs'
 
 const arg = (n, d = null) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -99,14 +100,17 @@ plainLines.forEach((t, i) => {
 
 const cues = []
 const unmapped = []
-const ANY_MARKER = /^\{\{.*\}\}$/
 for (const c of parsed) {
   const text = String(c.text || '').trim()
-  // Any {{...}} marker is a music banner. The owner may write `{{♪ Music ♪}}`; it is
-  // mirrored into the variants verbatim so all three columns carry the SAME text for
-  // the same row (the apps stack languages per row).
-  if (ANY_MARKER.test(text)) {
-    cues.push({ kind: 'music', start: c.start, end: c.end, lineIndex: null, text })
+  // A music banner is written either in the canonical `{{Music}}` form or in the
+  // banner's own note glyphs (`♪ Music ♪`, and `♪ సంగీతం ♪` in a localized column).
+  // Both app parsers accept either spelling, so the banner must be recognised here
+  // too: left unrecognised it matches no plain line, falls through to the unmapped
+  // fallback and puts Telugu text into the English columns. The text emitted for a
+  // banner is language-safe by construction - see libs/musicBanner.mjs.
+  const banner = variantBannerText(text)
+  if (banner !== null) {
+    cues.push({ kind: 'music', start: c.start, end: c.end, lineIndex: null, text: banner })
     continue
   }
   if (textToIndex.has(text)) {

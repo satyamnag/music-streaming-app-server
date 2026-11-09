@@ -24,7 +24,8 @@
                     "test:auto-sync-endpoint":  "node test/auto-sync-endpoint.test.mjs",
                     "test:auto-sync-ui":  "node test/auto-sync-admin-ui.test.cjs",
                     "test:razorpay":  "node test/razorpay.test.mjs",
-                    "test:razorpay-webhook":  "node test/partner-stub-register.mjs test/razorpay-webhook.e2e.mjs"
+                    "test:razorpay-webhook":  "node test/partner-stub-register.mjs test/razorpay-webhook.e2e.mjs",
+                    "test:music-banner":  "node test/music-banner.test.mjs"
                 },
     "dependencies":  {
                          "@aws-sdk/client-s3":  "^3.1111.0",
