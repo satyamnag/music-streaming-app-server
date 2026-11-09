@@ -150,8 +150,8 @@ update-check/enabled         tutrtalk/prod/* (6 secrets, unrelated project)
 |---|---|
 | `razorpay/key-secret` | **missing** (`ResourceNotFoundException`) |
 | `razorpay/webhook-secret` | **missing** (`ResourceNotFoundException`) |
-| `superwall/api-key` | **holds an `sk_` secret key (len 67)** — wrong type for an SDK key |
-| `superwall/publishable-key` | **missing** — the `pk_…` key is not stored anywhere in AWS |
+| `superwall/api-key` | ✅ **retired 2026-11-09** — held the `sk_` org key; revoked in the dashboard, deleted from AWS |
+| `superwall/publishable-key` | ✅ **created 2026-11-09** — `pk_` prefix, len 24, readback verified; `.env` now reads it |
 
 Consequence: the app cannot initialise Superwall (secret key where `pk_` is expected),
 and a secret credential is inside the APK. Rotate the `sk_`, add
@@ -183,3 +183,12 @@ import('./libs/awsSecrets.mjs').then(async (m) => {
 ```
 
 `loaded` listing both names is the proof the rail is wired.
+### State after the Superwall cleanup (2026-11-09)
+
+- The organization `sk_` key was **revoked** in the Superwall dashboard and its AWS copy
+  (`superwall/api-key`) **deleted** (`ForceDeleteWithoutRecovery`). Only
+  `superwall/publishable-key` remains for Superwall.
+- `superwall/publishable-key` holds the **Android** public key (`pk_`, len 24). The local
+  `.env` was switched to it and verified byte-identical on readback.
+- The iOS public key is a **different** value — Android builds must use the Android one.
+- Still outstanding for the web rail: `razorpay/key-secret`, `razorpay/webhook-secret`.
