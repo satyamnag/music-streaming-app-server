@@ -34,6 +34,12 @@ export const AWS_REGION_FALLBACK = 'ap-south-1'
 export const AWS_SECRET_NAME_OVERRIDES = {
   deepgram_api_key: 'deepgram/api-key',
   openai_api_key: 'openai/api-key',
+  // Razorpay credentials. The key SECRET signs API calls AND payment
+  // verifications, and the WEBHOOK secret signs webhook deliveries, so both are
+  // credentials and belong in Secrets Manager. The key ID is not secret (it is
+  // rendered in Checkout), so it stays in the deployment env with the plan ids.
+  razorpay_key_secret: 'razorpay/key-secret',
+  razorpay_webhook_secret: 'razorpay/webhook-secret',
 }
 
 /**

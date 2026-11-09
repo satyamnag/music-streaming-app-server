@@ -209,3 +209,87 @@ but a rights holder can. Worth a legal review alongside the P1 fix.
 - [ ] Manifest permissions unchanged without a matching declaration
 - [ ] `flutter analyze` clean for every touched file; tests green
 - [ ] Every platform decision cites an official Google page or doc in the commit
+
+---
+
+## 7. Credential sourcing — AWS Secrets Manager only
+
+**Rule.** Every credential the app's backend uses is read from **AWS Secrets Manager**
+(`ap-south-1`), named `<service>/<key>`. No credential is committed, written into a
+`.env` that ships anywhere, pasted into a ticket, or kept in a chat.
+
+Resolution order (implemented in `server/server.js` + `server/libs/awsSecrets.mjs`):
+
+```
+AWS Secrets Manager  ->  Supabase Vault  ->  process.env  ->  absent = fail closed
+```
+
+AWS is applied last and therefore wins for any name it supplies. It stays disabled
+unless `AWS_SECRETS_ENABLED=1`, and it needs a least-privilege principal with
+`secretsmanager:GetSecretValue` on the specific ARNs only.
+
+| Credential | AWS secret name |
+|---|---|
+| Deepgram | `deepgram/api-key` |
+| OpenAI | `openai/api-key` |
+| Razorpay key secret | `razorpay/key-secret` |
+| Razorpay webhook secret | `razorpay/webhook-secret` |
+
+The server's **internal** names are unchanged (`deepgram_api_key`,
+`razorpay_key_secret`, ...); only the AWS lookup name is translated, by the explicit
+map in `libs/awsSecrets.mjs`.
+
+### The mobile app is the exception, and it is not negotiable
+
+A Flutter app **cannot** read Secrets Manager: that would require shipping AWS access
+keys inside the APK, which is strictly worse than the problem it solves — anyone who
+unzips the app gets your AWS account.
+
+So the app is allowed to carry **publishable / client-side identifiers only**:
+
+| Allowed in the app | Not allowed, ever |
+|---|---|
+| Clerk publishable key (`pk_live_…`) | Clerk secret key (`sk_live_…`) |
+| Supabase anon key | Supabase service-role key |
+| Superwall publishable key (`pk_…`) | Superwall secret key (`sk_…`) |
+| OneSignal App ID | OneSignal REST key |
+| PostHog project token | Razorpay key secret / webhook secret |
+
+`lib/collections/env.dart` is compiled into the binary by `envied` (obfuscated, trivially
+reversible). Anything placed there is public.
+
+### Known violation to fix
+
+`SUPERWALL_API_KEY=sk_fec748…` in `.env` is a **secret** key being used where the SDK
+expects the publishable `pk_…` key. Two problems at once: Superwall will not initialise
+with it, and a secret credential is inside the binary.
+
+Action: rotate the `sk_` key in the Superwall dashboard, put the `pk_…` key in the
+release `.env`, and never store a secret there again.
+
+### Verification status (2026-11-09)
+
+| Check | Result |
+|---|---|
+| Endpoint reachable from this machine | ✅ `secretsmanager.ap-south-1.amazonaws.com` answered (HTTP 404 on a bare POST = endpoint alive) |
+| Loader test suite (`server/test/aws-secrets.test.mjs`) | ✅ 8/8 — includes timeout, fail-closed, region, name translation |
+| Razorpay name mapping | ✅ `razorpay_key_secret` -> `razorpay/key-secret`, `razorpay_webhook_secret` -> `razorpay/webhook-secret` |
+| AWS source enabled today | ❌ **off** — `AWS_SECRETS_ENABLED !== '1'` returns immediately |
+| `GetSecretValue` authorises for this account | ⚠️ **not testable here** — no AWS credentials on this machine. Must be proven on Render with the real principal |
+
+To close the last row, run this where the deployment credentials live (Render shell),
+and expect each secret to be named and each failure to be an explicit code, never a
+silent fallback:
+
+```bash
+AWS_SECRETS_ENABLED=1 AWS_REGION=ap-south-1 node -e "
+import('./libs/awsSecrets.mjs').then(async (m) => {
+  const { SecretsManagerClient, GetSecretValueCommand } = await import('@aws-sdk/client-secrets-manager');
+  const r = await m.loadAwsSecrets({
+    names: ['razorpay/key-secret','razorpay/webhook-secret'],
+    client: new SecretsManagerClient({ region: 'ap-south-1' }),
+    GetSecretValueCommand,
+  });
+  console.log('loaded:', r.loaded, 'failed:', r.failed.map(f => f.name + ':' + f.reason));
+});"
+```
