@@ -9,7 +9,7 @@ import dotenv from 'dotenv'
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3'
 import QRCode from 'qrcode'
 import { rateLimit } from 'express-rate-limit'
-import { createClerkClient } from '@clerk/backend'
+import { createClerkClient, verifyToken } from '@clerk/backend'
 import { readWebpSize, matchesAspectRatio, matchesAspectRatioRange } from './webp_size.js'
 import { registerPartnerRoutes } from './partner_routes.mjs'
 import {
@@ -1750,14 +1750,15 @@ async function verifyClerkRequest(req) {
       : '')
   if (!token) return null
   try {
-    return await clerkClient.verifyToken(token, {
-      skipJwksCache: false,
-      // Clerk validates the token's `azp` (authorised party) against this list.
-      // Omitting it rejects tokens issued to the web origin even when the
-      // signature is valid and the secret key is correct - which is exactly the
-      // "valid key, valid token, still unauthorized" state this deployment hit.
+    // `verifyToken` is a STANDALONE export of @clerk/backend. The object from
+    // createClerkClient() exposes resources (users, sessions, organizations...)
+    // and has NO verifyToken method, so calling it there threw
+    // "clerkClient.verifyToken is not a function" on every request - and the
+    // silent catch below turned that TypeError into a 401 for the whole session.
+    return (await verifyToken(token, {
+      secretKey: secrets.clerk_secret_key,
       authorizedParties: CLERK_AUTHORIZED_PARTIES,
-    }) || null
+    })) || null
   } catch (err) {
     // Log the REASON, never the token. Until now this catch was silent, so
     // "wrong Clerk instance" and "token rejected for another reason" were
