@@ -260,7 +260,7 @@ reversible). Anything placed there is public.
 
 ### Known violation to fix
 
-`SUPERWALL_API_KEY=sk_fec748…` in `.env` is a **secret** key being used where the SDK
+`SUPERWALL_API_KEY=sk_****redacted****…` in `.env` is a **secret** key being used where the SDK
 expects the publishable `pk_…` key. Two problems at once: Superwall will not initialise
 with it, and a secret credential is inside the binary.
 
