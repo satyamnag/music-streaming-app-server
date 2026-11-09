@@ -1696,6 +1696,15 @@ function readCookie(req, name) {
   return ''
 }
 
+// Authorised parties for session-token verification. Configurable so a preview
+// deployment can add its own origin without a code change; defaults cover the
+// apex and both live hosts.
+const CLERK_AUTHORIZED_PARTIES = (process.env.CLERK_AUTHORIZED_PARTIES ||
+  'https://soulfulbhakti.com,https://www.soulfulbhakti.com,https://admin.soulfulbhakti.com')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean)
+
 async function verifyClerkRequest(req) {
   if (!clerkClient) return null
   const token = readCookie(req, '__session') ||
@@ -1704,8 +1713,19 @@ async function verifyClerkRequest(req) {
       : '')
   if (!token) return null
   try {
-    return await clerkClient.verifyToken(token, { skipJwksCache: false }) || null
-  } catch (_) {
+    return await clerkClient.verifyToken(token, {
+      skipJwksCache: false,
+      // Clerk validates the token's `azp` (authorised party) against this list.
+      // Omitting it rejects tokens issued to the web origin even when the
+      // signature is valid and the secret key is correct - which is exactly the
+      // "valid key, valid token, still unauthorized" state this deployment hit.
+      authorizedParties: CLERK_AUTHORIZED_PARTIES,
+    }) || null
+  } catch (err) {
+    // Log the REASON, never the token. Until now this catch was silent, so
+    // "wrong Clerk instance" and "token rejected for another reason" were
+    // indistinguishable from the outside.
+    console.warn('[auth] token verification failed:', err?.name || 'Error', '-', String(err?.message || '').slice(0, 200))
     return null
   }
 }
