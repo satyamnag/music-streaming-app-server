@@ -746,8 +746,18 @@ async function createSubscriptionForUser({ userId, planSlug }) {
 // Clerk-authenticated middleware for the app/web-app facing routes.
 // `verifyClerkRequest` already swallows token errors and returns null.
 async function requireClerkUser(req, res, next) {
+  // Distinguish "this deployment has no Clerk secret key" from "the caller's
+  // token is invalid". Both used to answer 401 {"error":"unauthorized"}, which
+  // is impossible to diagnose from the client: one is a server configuration
+  // fault, the other a session fault, and the fix is completely different.
+  if (!clerkEnabled()) {
+    return res.status(503).json({ error: 'auth not configured' })
+  }
   const claims = await verifyClerkRequest(req)
-  if (!claims?.sub) return res.status(401).json({ error: 'unauthorized' })
+  if (!claims?.sub) {
+    const hasHeader = Boolean(req.headers.authorization || req.headers.cookie)
+    return res.status(401).json({ error: hasHeader ? 'unauthorized' : 'missing token' })
+  }
   req.clerkUserId = String(claims.sub)
   return next()
 }
