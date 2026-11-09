@@ -40,6 +40,9 @@ export const AWS_SECRET_NAME_OVERRIDES = {
   // rendered in Checkout), so it stays in the deployment env with the plan ids.
   razorpay_key_secret: 'razorpay/key-secret',
   razorpay_webhook_secret: 'razorpay/webhook-secret',
+  // TEST-mode pair, selected by RAZORPAY_MODE=test on the server.
+  razorpay_key_secret_test: 'razorpay/key-secret-test',
+  razorpay_webhook_secret_test: 'razorpay/webhook-secret-test',
 }
 
 /**
