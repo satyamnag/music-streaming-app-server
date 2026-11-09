@@ -192,3 +192,40 @@ import('./libs/awsSecrets.mjs').then(async (m) => {
   `.env` was switched to it and verified byte-identical on readback.
 - The iOS public key is a **different** value — Android builds must use the Android one.
 - Still outstanding for the web rail: `razorpay/key-secret`, `razorpay/webhook-secret`.
+### The app's build-time path, verified (2026-11-09)
+
+The Android app **never** calls Secrets Manager at runtime — it cannot without shipping
+AWS keys. Its keys are **compiled in** by `envied` from `.env`, and that `.env` is
+produced by `android-release.yml` from AWS Secrets Manager first, DOTENV_RELEASE second.
+
+Simulating the release job's eleven lookups against the real account (`AWS_PROFILE=famerelay`):
+
+| Secret | Result |
+|---|---|
+| `supabase/url` | OK (40) |
+| `supabase/anon-key` | OK (208) |
+| `clerk/publishable-key` | OK (40) |
+| `r2/base-url` | OK (31) |
+| `release/channel` | OK (6) |
+| `update-check/enabled` | OK (1) |
+| `hide-donations` | OK (1) |
+| `superwall/publishable-key` | OK (24) |
+| `onesignal/api-key` | OK (36) |
+| `posthog/api-key` | OK (48) |
+| `posthog/host` | **FAIL — ResourceNotFoundException** |
+
+10 of 11 come from AWS. `posthog/host` falls back to DOTENV_RELEASE (and the app defaults
+to `https://us.i.posthog.com` in `env.dart`). Create `posthog/host` to close it.
+
+**Fixed in the workflow the same day:** it still asked for `superwall/api-key`, which had
+been deleted during the rotation — that would have dropped `SUPERWALL_API_KEY` from every
+build and let the DOTENV fallback re-inject the old value. The mapping now reads
+`superwall/publishable-key`, and the "Verify required .env keys" step refuses to ship
+unless `SUPERWALL_API_KEY` starts with `pk_`.
+
+**Still outside AWS:** `API_BASE_URL` (the Node API host used by the entitlement check) is
+not fetched from Secrets Manager — it arrives via DOTENV_RELEASE. It is not a credential,
+but if the rule is to be absolute, create `api-base-url` and add the mapping.
+
+**Not provable from here:** an actual GitHub Actions run. The YAML parses and every AWS
+lookup above was executed for real; the job itself must be observed in Actions.

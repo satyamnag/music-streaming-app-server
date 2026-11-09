@@ -207,7 +207,7 @@ jobs:
             echo "::warning::AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY not set; falling back to DOTENV_RELEASE."
             exit 0
           fi
-          SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/api-key onesignal/api-key posthog/api-key posthog/host"
+          SECRETS="supabase/url supabase/anon-key clerk/publishable-key r2/base-url release/channel update-check/enabled hide-donations superwall/publishable-key onesignal/api-key posthog/api-key posthog/host"
           FAILED=""
           for s in $SECRETS; do
             if ! V="$(aws secretsmanager get-secret-value --secret-id "$s" --query SecretString --output text 2>&1)"; then
@@ -223,7 +223,7 @@ jobs:
               release/channel)       K=RELEASE_CHANNEL ;;
               update-check/enabled)  K=ENABLE_UPDATE_CHECK ;;
               hide-donations)        K=HIDE_DONATIONS ;;
-              superwall/api-key)     K=SUPERWALL_API_KEY ;;
+              superwall/publishable-key) K=SUPERWALL_API_KEY ;;
               onesignal/api-key)     K=ONESIGNAL_APP_ID ;;
               posthog/api-key)       K=POSTHOG_API_KEY ;;
               posthog/host)          K=POSTHOG_HOST ;;
@@ -297,11 +297,20 @@ jobs:
         # this check does. Fail loudly, here.
         run: |
           missing=""
-          for key in SUPABASE_URL SUPABASE_ANON_KEY CLERK_PUBLISHABLE_KEY ONESIGNAL_APP_ID; do
+          for key in SUPABASE_URL SUPABASE_ANON_KEY CLERK_PUBLISHABLE_KEY ONESIGNAL_APP_ID SUPERWALL_API_KEY; do
             grep -q "^${key}=." .env || missing="$missing $key"
           done
           if [ -n "$missing" ]; then
             echo "::error::.env is missing required release keys:$missing"
+            exit 1
+          fi
+          # The Superwall SDK is configured with the PUBLISHABLE key (pk_...).
+          # An sk_ value here means the wrong row was copied from the dashboard:
+          # the SDK cannot initialise with it AND it would ship a secret inside
+          # the APK. Both faults are invisible at build time without this check,
+          # so fail the release rather than publish either of them.
+          if ! grep -q '^SUPERWALL_API_KEY=pk_' .env; then
+            echo "::error::SUPERWALL_API_KEY is not a publishable key (must start with pk_). Refusing to ship."
             exit 1
           fi
           echo "All required release keys are present (values not shown)."
