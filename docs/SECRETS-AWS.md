@@ -229,3 +229,20 @@ but if the rule is to be absolute, create `api-base-url` and add the mapping.
 
 **Not provable from here:** an actual GitHub Actions run. The YAML parses and every AWS
 lookup above was executed for real; the job itself must be observed in Actions.
+### Razorpay credentials — verified against the live API (2026-11-09)
+
+| Item | Value | Evidence |
+|---|---|---|
+| Key ID (public, Render env) | `rzp_live_TxzrGybeVepASY` | `GET /v1/plans` returned 200 with it |
+| Key secret (AWS) | `razorpay/key-secret`, len 24 | authenticates with that key ID — **same mode confirmed** |
+| Plan (Render env) | `plan_Ty0WSKxH35Rfuo` | 12000 paise, INR, period yearly, interval 1 |
+| Webhook secret (AWS) | `razorpay/webhook-secret`, len 64 | identical to the value registered in the Razorpay webhook form |
+
+Render env still required: `RAZORPAY_KEY_ID=rzp_live_TxzrGybeVepASY`,
+`RAZORPAY_PLAN_YEARLY=plan_Ty0WSKxH35Rfuo`, `AWS_SECRETS_ENABLED=1`,
+`AWS_REGION=ap-south-1`, plus the `famerelay` access key pair.
+
+**This is LIVE mode.** There has been no successful test-mode purchase, so the
+payment path (signature → row → entitlement → app unlock) is still unproven
+end-to-end. A test-mode plan and key pair exist separately and cost nothing;
+use them for the rehearsal before a real customer pays.
