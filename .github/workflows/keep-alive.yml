@@ -22,10 +22,12 @@ name: Keep Render Warm
 
 on:
   schedule:
-    # Every 14 minutes. Render's free tier idles after ~15 minutes of
-    # inactivity, so a 5-minute interval (the previous value) burned roughly
-    # 3x the required requests for no benefit.
-    - cron: '*/14 * * * *'
+    # Every 10 minutes. Render's free tier idles after ~15 minutes without
+    # traffic, so a 14-minute schedule sat one delayed GitHub tick away from
+    # letting the service sleep anyway (scheduled workflows are routinely 5-20
+    # minutes late). 10 minutes leaves a full 5-minute margin while still
+    # using far fewer requests than the old 5-minute interval.
+    - cron: '*/10 * * * *'
   workflow_dispatch:
     inputs:
       url:
