@@ -755,6 +755,17 @@ async function requireClerkUser(req, res, next) {
   }
   const claims = await verifyClerkRequest(req)
   if (!claims?.sub) {
+    console.warn(
+      '[auth] rejected',
+      req.method,
+      req.path,
+      '| authorization header:',
+      Boolean(req.headers.authorization),
+      '| session cookie:',
+      Boolean(req.headers.cookie),
+      '| clerk enabled:',
+      clerkEnabled(),
+    )
     const hasHeader = Boolean(req.headers.authorization || req.headers.cookie)
     return res.status(401).json({ error: hasHeader ? 'unauthorized' : 'missing token' })
   }
@@ -1705,6 +1716,32 @@ const CLERK_AUTHORIZED_PARTIES = (process.env.CLERK_AUTHORIZED_PARTIES ||
   .map((value) => value.trim())
   .filter(Boolean)
 
+/**
+ * Non-sensitive description of a session JWT for diagnostics.
+ *
+ * Decodes the PAYLOAD ONLY (no signature check, no trust implied) to report the
+ * issuer, authorised party and expiry - the three claims that decide whether a
+ * key and a token belong together. The token itself, the signature and the full
+ * subject are never logged: `sub` is truncated to 8 characters.
+ */
+function describeSessionToken(token) {
+  const raw = String(token || '')
+  try {
+    const parts = raw.split('.')
+    if (parts.length !== 3) return { malformed: true, len: raw.length, segments: parts.length }
+    const json = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'))
+    return {
+      len: raw.length,
+      iss: json.iss || null,
+      azp: json.azp || null,
+      sub: typeof json.sub === 'string' ? `${json.sub.slice(0, 8)}…` : null,
+      expInSeconds: typeof json.exp === 'number' ? json.exp - Math.floor(Date.now() / 1000) : null,
+    }
+  } catch {
+    return { unparsable: true, len: raw.length }
+  }
+}
+
 async function verifyClerkRequest(req) {
   if (!clerkClient) return null
   const token = readCookie(req, '__session') ||
@@ -1725,7 +1762,16 @@ async function verifyClerkRequest(req) {
     // Log the REASON, never the token. Until now this catch was silent, so
     // "wrong Clerk instance" and "token rejected for another reason" were
     // indistinguishable from the outside.
-    console.warn('[auth] token verification failed:', err?.name || 'Error', '-', String(err?.message || '').slice(0, 200))
+    console.warn(
+      '[auth] token verification failed:',
+      err?.name || 'Error',
+      '-',
+      String(err?.message || '').slice(0, 200),
+      '| expected parties:',
+      CLERK_AUTHORIZED_PARTIES.join(' '),
+      '| token:',
+      JSON.stringify(describeSessionToken(token)),
+    )
     return null
   }
 }
