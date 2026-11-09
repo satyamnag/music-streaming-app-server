@@ -293,3 +293,36 @@ import('./libs/awsSecrets.mjs').then(async (m) => {
   console.log('loaded:', r.loaded, 'failed:', r.failed.map(f => f.name + ':' + f.reason));
 });"
 ```
+### Live verification against the real account (2026-11-09)
+
+Run from this machine with `AWS_PROFILE=famerelay`, `AWS_REGION=ap-south-1`:
+
+| Check | Result |
+|---|---|
+| Authentication | ✅ works with the `famerelay` profile. The `default` profile's key is **invalid** (`UnrecognizedClientException`) — any tooling that picks up `default` will fail |
+| Secrets visible | ✅ 19, including `clerk/publishable-key`, `superwall/api-key`, `supabase/anon-key`, `onesignal/api-key`, `posthog/api-key`, `r2/base-url` |
+| `razorpay/key-secret` | ❌ **does not exist** (`ResourceNotFoundException`) |
+| `razorpay/webhook-secret` | ❌ **does not exist** (`ResourceNotFoundException`) |
+| `superwall/api-key` contents | ⚠️ **`sk_` prefix (secret key), length 67** — see below |
+
+**The Superwall problem is confirmed, and worse than a local typo:** AWS holds the
+**secret** key under `superwall/api-key`, which is the name the build consumes for the
+SDK key. There is no `superwall/publishable-key` at all. So the app ships a secret key
+and no working SDK key at the same time.
+
+Required fix:
+
+1. Rotate the current Superwall `sk_…` key in the dashboard (it is in AWS, in the
+   binary, and in any build made from this `.env`).
+2. Create `superwall/publishable-key` = the `pk_…` key and point the build at it.
+3. Create `razorpay/key-secret` and `razorpay/webhook-secret`.
+4. Ensure CI and Render run with `AWS_PROFILE=famerelay` (or explicit keys), never the
+   invalid `default` profile.
+
+### How the app gets its (publishable) keys from AWS without a runtime call
+
+The app still cannot call Secrets Manager. The compliant pattern is **build-time
+injection**: CI reads `clerk/publishable-key`, `superwall/publishable-key`,
+`supabase/anon-key`, `onesignal/api-key`, `posthog/api-key` from Secrets Manager, writes
+them into the build's `.env`, and compiles. Secrets never enter the APK; publishable
+keys never sit in the repository.
