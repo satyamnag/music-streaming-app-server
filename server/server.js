@@ -946,6 +946,34 @@ app.post('/api/razorpay/cancel', requireClerkUser, async (req, res) => {
   }
 })
 
+// Reconciles the caller's subscription with Razorpay's own record.
+//
+// Exists because a checkout can finish on Razorpay's side while our row still
+// says "created": the browser never called /verify, the webhook was not
+// registered for that mode, or it was missed. Rather than guess, this reads the
+// subscription from the API - the authoritative source - and persists it.
+app.post('/api/razorpay/sync', requireClerkUser, async (req, res) => {
+  if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
+  try {
+    const { data: rows, error } = await supabase
+      .from('razorpay_subscriptions')
+      .select('subscription_id')
+      .eq('user_id', req.clerkUserId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+    if (error) throw new Error(error.message)
+    const row = rows?.[0]
+    if (!row) return res.status(404).json({ error: 'no subscription for this user' })
+
+    const entity = await razorpay.getSubscription(row.subscription_id)
+    await persistRazorpaySubscription(entity, null, null)
+    const entitlement = await readEntitlement(req.clerkUserId)
+    res.json({ synced: true, razorpayStatus: entity.status, entitlement })
+  } catch (err) {
+    console.error('[razorpay] sync failed:', err.message)
+    res.status(502).json({ error: 'sync failed' })
+  }
+})
 // Admin-only: create a subscription for an arbitrary user and hand back the
 // Razorpay-hosted payment link. This is the manual sales channel — the admin
 // sends the link (WhatsApp/email) and the customer pays outside the app.
