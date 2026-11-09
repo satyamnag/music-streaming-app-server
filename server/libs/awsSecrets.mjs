@@ -38,6 +38,10 @@ export const AWS_SECRET_NAME_OVERRIDES = {
   // verifications, and the WEBHOOK secret signs webhook deliveries, so both are
   // credentials and belong in Secrets Manager. The key ID is not secret (it is
   // rendered in Checkout), so it stays in the deployment env with the plan ids.
+  // Clerk secret key: the internal name is clerk_secret_key but the account
+  // stores it as clerk/secret-key, so without this mapping the server reads a
+  // name that does not exist and every authenticated request 401s.
+  clerk_secret_key: 'clerk/secret-key',
   razorpay_key_secret: 'razorpay/key-secret',
   razorpay_webhook_secret: 'razorpay/webhook-secret',
   // TEST-mode pair, selected by RAZORPAY_MODE=test on the server.
