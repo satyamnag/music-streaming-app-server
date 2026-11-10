@@ -911,6 +911,12 @@ app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
 // What the app actually consumes: a server-computed yes/no. No secrets, no
 // Razorpay ids, nothing the client could replay elsewhere.
 app.get('/api/razorpay/entitlement', requireClerkUser, async (req, res) => {
+  // One line per check, with the resolved subject. This is what settles "I paid
+  // on the web but the app says free": either the app is asking (and with which
+  // user id) or it is not asking at all. The token is never logged.
+  console.log(
+    '[entitlement] check user=' + String(req.clerkUserId).slice(0, 12) + '…',
+  )
   try {
     const entitlement = await readEntitlement(req.clerkUserId)
     res.set('Cache-Control', 'no-store')
