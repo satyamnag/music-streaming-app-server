@@ -494,10 +494,19 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   font-size: 11px; color: rgba(255,255,255,.62); pointer-events: none;
 }
 
-/* ---------- voice graph (waveform + vocal-energy guide) ---------- */
-.ss-wavecard { flex: 0 0 auto; overflow: hidden; }
+/* ---------- voice graph (voice-note piano roll + waveform) ----------
+   Two stacked lanes in ONE canvas, so a cue boundary is a single vertical line
+   the eye follows from "how high is the voice" straight down to "where the
+   phrase begins":
+     top     voice notes (piano roll) + a note-name ruler on the left
+     bottom  waveform + vocal-energy guide + note-onset ruler
+   The strip is deliberately tall: a squashed 64 px waveform could show an
+   envelope, but it could never show high-from-low. `--ss-wave-h` overrides the
+   default when the admin drags the grip under the graph. */
+.ss-wavecard { flex: 0 0 auto; overflow: hidden; display: flex; flex-direction: column; }
 .ss-wavehead {
-  display: flex; align-items: center; gap: 9px; padding: 8px 13px; flex: none;
+  display: flex; align-items: center; gap: 9px; padding: 7px 13px; flex: none;
+  flex-wrap: wrap; row-gap: 6px;
   border-bottom: 1px solid #f0ece4;
 }
 .ss-wavehead h3 {
@@ -506,6 +515,26 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 }
 .ss-wavehead h3 svg { width: 17px; height: 17px; color: #7a1f1f; }
 .ss-wavehead .ss-meta { font-size: 11.5px; color: #77706a; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Live "what is being sung right now". A DOM node rather than canvas text, so
+   the reading is available to assistive tech — but deliberately NOT a live
+   region: a fast melody changes note several times a second, and a polite live
+   region would queue announcements over everything else the admin is doing. */
+.ss-notechip {
+  display: inline-flex; align-items: baseline; gap: 5px; flex: none;
+  padding: 2px 9px; border-radius: 999px; font-size: 11.5px;
+  background: #eefaff; border: 1px solid #bfe6f6; color: #0b5d75;
+  font-variant-numeric: tabular-nums;
+}
+.ss-notechip b { font-size: 12.5px; font-weight: 800; letter-spacing: .01em; }
+.ss-notechip .ss-notehz { opacity: .78; }
+.ss-notechip.is-silent { background: #f4f1ec; border-color: #e2dbcd; color: #8a8177; }
+.ss-legend { display: flex; gap: 11px; align-items: center; font-size: 11px; color: #5f5650; flex-wrap: wrap; min-width: 0; }
+.ss-legend .ss-key { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.ss-legend i { display: inline-block; flex: none; }
+.ss-legend .ss-k-note i { width: 13px; height: 9px; border-radius: 3px; background: linear-gradient(180deg, #a9f4ff, #35c6e6); }
+.ss-legend .ss-k-wave i { width: 3px; height: 11px; border-radius: 1px; background: #8d9ab1; }
+.ss-legend .ss-k-onset i { width: 3px; height: 8px; border-radius: 1px 1px 0 0; background: #ff9f45; }
+.ss-legend .ss-k-cue i { width: 3px; height: 12px; border-radius: 1px; background: #ffd45e; }
 .ss-waveactions { margin-left: auto; display: flex; gap: 5px; align-items: center; flex: none; }
 .ss-wavebtn {
   padding: 5px 9px; border-radius: 7px; border: 1px solid #e2dbcd; background: #fff;
@@ -516,7 +545,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 .ss-wavebtn[aria-pressed="true"] { background: #fdf7e7; border-color: #c9a227; color: #7a5b00; }
 .ss-wavebtn:disabled { opacity: .45; cursor: not-allowed; }
 .ss-wavewrap {
-  position: relative; height: clamp(64px, 8.5vh, 104px); padding: 5px 8px 3px;
+  position: relative; flex: 0 0 auto;
+  height: var(--ss-wave-h, clamp(154px, 23vh, 300px));
+  padding: 6px 8px 4px;
   background: linear-gradient(180deg, #17121c, #100c14);
 }
 .ss-wave {
@@ -524,13 +555,28 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   touch-action: none; border-radius: 6px;
 }
 .ss-wave:focus-visible { outline: 2px solid #ffd45e; outline-offset: 2px; }
-.ss-wavewrap.is-loading .ss-wave { opacity: .3; }
+.ss-wavewrap.is-loading .ss-wave { opacity: .32; }
 .ss-waveempty {
   position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
   text-align: center; color: #cbbfae; font-size: 12px; line-height: 1.5; padding: 0 18px;
 }
 .ss-waveempty.show { display: flex; }
 .ss-waveempty .ss-wavebtn { margin-left: 8px; }
+/* Drag handle: the admin decides how much of the screen the voice notes get.
+   A window splitter, so it is focusable and arrow-adjustable, not mouse-only. */
+.ss-wavegrip {
+  flex: none; height: 11px; display: flex; align-items: center; justify-content: center;
+  cursor: ns-resize; background: #faf7f1; border-top: 1px solid #f0ece4;
+  touch-action: none;
+}
+.ss-wavegrip::before {
+  content: ""; width: 48px; height: 3px; border-radius: 2px; background: #d5cec2;
+}
+.ss-wavegrip:hover::before { background: #b3a693; }
+.ss-wavegrip:focus-visible { outline: 2px solid #7a1f1f; outline-offset: -2px; }
+.ss-wavegrip:focus-visible::before { background: #7a1f1f; }
+.ss-wavecard.is-collapsed .ss-wavegrip { display: none; }
+@media (max-width: 1400px) { .ss-legend { display: none; } }
 
 /* ---------- timeline table ---------- */
 .ss-tablecard {
@@ -731,7 +777,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
      timeline is tall, and Save/Export must not need a scroll to reach. */
   .ss-footer { flex: none; position: sticky; bottom: 0; z-index: 15; box-shadow: 0 -6px 18px rgba(20, 12, 16, .16); }
   .ss-stage { flex: none; height: clamp(150px, 24vh, 240px); min-height: 0; max-height: none; }
-  .ss-wavewrap { height: clamp(72px, 12vh, 104px); }
+  /* One column that scrolls as a whole, so the note roll keeps a real height
+     instead of being squeezed by the viewport. */
+  .ss-wavewrap { --ss-wave-h: clamp(168px, 26vh, 300px); }
   .ss-tablecard { flex: none; min-height: 340px; max-height: 62vh; }
 }
 @media (max-width: 700px) {
@@ -744,11 +792,12 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   .ss-wavebtn { padding: 5px 7px; }
 }
 /* Short viewports (a laptop at 125 % zoom, or with the Settings drawer open):
-   the preview gives up its height first so the graph and the timeline stay
-   usable together. */
+   the preview gives up its height first so the note roll and the timeline stay
+   usable together. The roll keeps enough height to separate the notes; below
+   this the grip and the Preview toggle are the tools for going bigger. */
 @media (max-height: 820px) {
   .ss-stage { flex: 0 1 140px; min-height: 88px; }
-  .ss-wavewrap { height: clamp(72px, 8.5vh, 92px); }
+  .ss-wavewrap { --ss-wave-h: clamp(128px, 17vh, 196px); }
   .ss-np { padding: 8px 12px; gap: 10px; }
   .ss-np-art { width: 46px; height: 46px; border-radius: 8px; font-size: 18px; }
   .ss-progress { padding-bottom: 8px; }
@@ -1555,8 +1604,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
         <div class="ss-stage-hint" id="ssStageHint">S stamps the selected line &middot; E sets its end &middot; &uarr;/&darr; move the selection &middot; Space plays</div>
       </div>
 
-      <!-- Voice graph: the whole track's amplitude, the regions that carry
-           voice, and every cue boundary, so a stamp can be placed from what is
+      <!-- Voice graph: the voice notes (how HIGH the melody is), the whole
+           track's amplitude, the regions that carry voice, where every note
+           begins, and every cue boundary — so a stamp is placed from what is
            SEEN rather than only what is heard. Purely local: the audio is
            decoded in this tab and nothing is uploaded. -->
       <div class="ss-card ss-wavecard" id="ssWaveCard">
@@ -1566,18 +1616,32 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
             Voice graph
           </h3>
           <span class="ss-meta" id="ssWaveMeta">No audio decoded yet</span>
+          <span class="ss-notechip is-silent" id="ssNoteChip" title="The note being sung at the playhead">
+            <b id="ssNoteNow">&mdash;</b><span class="ss-notehz" id="ssNoteHz">rest</span>
+          </span>
+          <span class="ss-legend" aria-hidden="true">
+            <span class="ss-key ss-k-note"><i></i>Voice note (high&nbsp;/&nbsp;low)</span>
+            <span class="ss-key ss-k-wave"><i></i>Waveform</span>
+            <span class="ss-key ss-k-onset"><i></i>Note start</span>
+            <span class="ss-key ss-k-cue"><i></i>Cue start</span>
+          </span>
           <div class="ss-waveactions">
             <button type="button" class="ss-wavebtn" id="ssWaveZoomOut" title="Zoom out (show more of the track)" aria-label="Zoom out">&minus;</button>
             <button type="button" class="ss-wavebtn" id="ssWaveZoomIn" title="Zoom in around the playhead" aria-label="Zoom in">+</button>
             <button type="button" class="ss-wavebtn" id="ssWaveFit" title="Show the whole track">Fit</button>
             <button type="button" class="ss-wavebtn" id="ssWaveFocus" title="Zoom to the selected cue">Focus cue</button>
+            <button type="button" class="ss-wavebtn" id="ssSnapOnset" aria-pressed="true" title="When on, clicking the graph lands on the nearest note onset instead of the exact pixel">Snap</button>
+            <button type="button" class="ss-wavebtn" id="ssWaveNotes" aria-pressed="true" title="Show or hide the voice-note (piano roll) lane">Notes</button>
             <button type="button" class="ss-wavebtn" id="ssWaveToggle" aria-expanded="true" aria-controls="ssWaveWrap" title="Hide or show the voice graph">Hide</button>
           </div>
         </div>
         <div class="ss-wavewrap" id="ssWaveWrap">
-          <canvas id="ssWave" class="ss-wave" tabindex="0" role="img" aria-label="Audio waveform, not decoded yet"></canvas>
+          <canvas id="ssWave" class="ss-wave" tabindex="0" role="img" aria-label="Voice graph, not decoded yet"></canvas>
           <div class="ss-waveempty" id="ssWaveEmpty">Decoding the audio for the voice graph&hellip;</div>
         </div>
+        <div class="ss-wavegrip" id="ssWaveGrip" role="separator" aria-orientation="horizontal"
+             tabindex="0" aria-label="Resize the voice graph" aria-valuemin="96" aria-valuemax="720" aria-valuenow="0"
+             title="Drag to make the voice graph taller or shorter (arrow keys also work)"></div>
       </div>
 
       <div class="ss-card ss-tablecard">
@@ -1636,6 +1700,13 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
           </div>
           <label class="ss-check" style="margin-top:8px;"><input type="checkbox" id="ssLoop"> Loop the selected line</label>
           <p class="ss-hint" id="ssSelHint">Select a line in the timeline to nudge it.</p>
+          <p class="ss-hint">
+            <strong>Voice graph:</strong> the top lane is the melody - a block higher up is a
+            higher note - and the lane under it is the waveform, so a cue sits where the note
+            starts. <em>Snap</em> makes a click land on the nearest note onset;
+            <em>Notes</em> hides the melody lane; the grip under the graph (or
+            <kbd>Preview</kbd> in the top bar) buys it more height.
+          </p>
         </div>
       </div>
 
@@ -7860,29 +7931,66 @@ checkSession();
   }
 
   /* ------------------------------------------------------------------ */
-  /* voice graph (waveform + vocal-energy guide)                        */
+  /* voice graph (voice-note piano roll + waveform + cue boundaries)     */
   /* ------------------------------------------------------------------ */
   //
   // WHY IT EXISTS: stamping from hearing alone is slow and drifts on sustained
-  // notes - the waveform shows where a phrase actually begins, so the playhead
-  // can be placed against a visible onset instead of a remembered one.
+  // notes. This strip answers the two questions a stamping pass actually asks,
+  // from what is SEEN rather than remembered:
   //
-  // HOW IT IS BUILT: the SAME bytes the player is using are fetched, decoded
-  // once in this tab at a LOW sample rate (peaks need resolution in time, not
-  // audio bandwidth) and reduced to a fixed bucket table that is cached per URL.
-  // The static layer is drawn once into an offscreen canvas and blitted per
-  // frame, so following the playhead costs one drawImage.
+  //   WHEN does each sung phrase begin?  -> waveform, onset ruler, cue lines
+  //   HOW HIGH is the voice right now?   -> the voice-note piano roll
+  //
+  // The second one is what a bare waveform cannot give: amplitude says nothing
+  // about pitch, so "that line comes in on the low note" was simply invisible
+  // before, and the eye had nothing to align a boundary against except an edge
+  // in the envelope.
+  //
+  // HOW IT IS BUILT
+  //   1. The SAME bytes the player uses are fetched and decoded once in this
+  //      tab at a LOW sample rate (the graph needs resolution in time, not
+  //      audio bandwidth) and reduced to a fixed bucket table, cached per URL.
+  //   2. A second pass runs a YIN pitch tracker (de Cheveigne & Kawahara 2002,
+  //      JASA 111:1917-1930) over those samples in ~9 ms cooperative slices, so
+  //      the page never freezes and the playhead keeps moving while it works.
+  //      Frames become notes, notes become a piano roll, and the RMS envelope
+  //      becomes a sample-accurate onset index used for click-to-snap.
+  //   3. Every static layer is drawn once into an offscreen canvas and blitted
+  //      per frame, so following the playhead costs one drawImage.
   //
   // SAFETY: nothing is uploaded and no endpoint is added. Every failure path
-  // (unsupported codec, oversized file, aborted decode) degrades to a message
-  // in the strip - the studio, the clock and Save keep working, because the
-  // graph is an aid and never a dependency.
+  // (unsupported codec, oversized file, aborted decode, a browser without
+  // OfflineAudioContext) degrades to a message in the strip - the studio, the
+  // clock and Save keep working, because the graph is an aid and never a
+  // dependency. The pitch pass is strictly additive: if it fails or finds
+  // nothing, the waveform and the vocal-energy guide still draw exactly as
+  // before, and nothing in the save path reads any of it.
 
   var WAVE_BUCKETS = 6000;
   var WAVE_CACHE_MAX = 3;
   var WAVE_MAX_BYTES = 160 * 1024 * 1024;
   var WAVE_MIN_SPAN = 1.5;
   var WAVE_CUE_HIT_PX = 7;
+  var WAVE_GUT = 36;            // px reserved for the note-name ruler
+
+  // Pitch-tracker constants. These were measured, not guessed: see
+  // docs/LYRICS-SYNC-STUDIO.md ("Voice notes") for the accuracy table that
+  // produced them (steady tones C2-A5 inside 25 cents, vibrato held as one
+  // note, onsets inside 1.5 ms across 88 ground-truth cases).
+  var PITCH_HOP = 0.04;         // seconds between analysis frames
+  var PITCH_WIN = 640;          // analysis window, samples (~58 ms at 11025 Hz)
+  var PITCH_FMIN = 64;          // Hz — below C2, under the lowest singing voice
+  var PITCH_FMAX = 1000;        // Hz — above A5, over the highest singing voice
+  var PITCH_THRESHOLD = 0.22;   // YIN absolute threshold
+  var PITCH_REJECT = 0.55;      // above this a frame is unvoiced
+  var PITCH_GATE = 0.045;       // RMS gate as a share of the loudest frame
+  var PITCH_SLICE_MS = 9;       // cooperative work budget per slice
+  var NOTE_TOLERANCE = 0.75;    // semitones before a frame is a different note
+  var ONSET_ENV_MS = 24;        // peak-|x| envelope window for onset refinement
+  var ONSET_FRAC = 0.5;         // walk back while the window peak exceeds this
+  var ONSET_RISE = 1.75;        // coarse RMS rise ratio
+  var ONSET_FLOOR = 0.09;       // coarse floor as a share of the loudest frame
+  var ONSET_MIN_GAP = 0.09;     // two onsets closer than this are one note
 
   var W = {
     status: 'idle',        // idle | loading | ready | error
@@ -7898,14 +8006,62 @@ checkSession();
     layer: null,
     width: 0,
     height: 0,
+    gut: 0,
     dpr: 1,
     dirty: true,
     hidden: false,
     hover: null,
-    dragging: false
+    dragging: false,
+    // voice-note layer
+    pitch: null,           // { frames, hopSec, stats } — null until ready
+    notes: [],             // [{ start, end, midi }]
+    onsets: [],            // [seconds], sample-accurate
+    pitchStatus: 'idle',   // idle | running | done | none | off
+    pitchToken: 0,
+    pitchProgress: 0,
+    pitchJob: null,
+    pitchEntry: null,      // the cache entry this analysis belongs to
+    pitchWindow: { lo: 48, hi: 72 },
+    flash: null,           // { t, until } — an onset the admin just snapped to
+    showNotes: true,
+    snap: true
   };
 
-  var waveCache = [];      // newest first; bounded, ~72 KB per entry
+  var waveCache = [];      // newest first; bounded per-URL analysis cache
+
+  var GRAPH_PREF_KEY = 'sb_sync_studio_graph_v1';
+
+  function readGraphPrefs() {
+    var d = { notes: true, snap: true, height: 0 };
+    try {
+      var raw = localStorage.getItem(GRAPH_PREF_KEY);
+      if (!raw) return d;
+      var p = JSON.parse(raw);
+      if (p && typeof p === 'object') {
+        if (typeof p.notes === 'boolean') d.notes = p.notes;
+        if (typeof p.snap === 'boolean') d.snap = p.snap;
+        if (typeof p.height === 'number' && p.height >= 96 && p.height <= 1600) d.height = p.height;
+      }
+    } catch (_) {}
+    return d;
+  }
+
+  function writeGraphPrefs() {
+    var wrap = $('ssWaveWrap');
+    // Only a height the admin actually pinned is remembered; otherwise the strip
+    // keeps following the viewport through the CSS clamp.
+    var pinned = wrap && String(wrap.style.getPropertyValue('--ss-wave-h') || '').trim();
+    var h = pinned ? Math.round(wrap.getBoundingClientRect().height) : 0;
+    try {
+      localStorage.setItem(GRAPH_PREF_KEY, JSON.stringify({
+        notes: W.showNotes, snap: W.snap, height: h >= 96 ? h : 0
+      }));
+    } catch (_) {}
+  }
+
+  function now() {
+    return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+  }
 
   /* ---- workspace split: the preview can yield all its height ---- */
   //
@@ -7984,6 +8140,9 @@ checkSession();
   function waveReset(message) {
     waveAbort();
     W.token++;
+    W.pitchToken++;          // cancels any pitch slice still queued
+    W.pitchJob = null;
+    W.pitchEntry = null;
     W.status = 'idle';
     W.peaks = null;
     W.rms = null;
@@ -7995,8 +8154,15 @@ checkSession();
     W.hover = null;
     W.dragging = false;
     W.layer = null;
+    W.pitch = null;
+    W.notes = [];
+    W.onsets = [];
+    W.pitchStatus = 'idle';
+    W.pitchProgress = 0;
+    W.flash = null;
     W.dirty = true;
     waveLoading(false);
+    waveNoteChip(-1);
     waveMeta('No audio decoded yet');
     waveSetEmpty(true, escHtml(message || 'Choose a track, or load a media file, to see its voice graph.'));
     waveLayout();
@@ -8015,7 +8181,7 @@ checkSession();
 
   /**
    * An OfflineAudioContext at 11025 Hz: decoding 15 minutes of stereo at
-   * 44.1 kHz would hold hundreds of MB of Float32 for a 96 px strip, and the
+   * 44.1 kHz would hold hundreds of MB of Float32 for a strip this tall, and the
    * graph cannot use more time resolution than the canvas has pixels.
    */
   function waveDecodeContext() {
@@ -8024,37 +8190,36 @@ checkSession();
     try { return new Offline(1, 1, 11025); } catch (_) { return null; }
   }
 
-  function waveAdopt(entry) {
-    W.peaks = entry.peaks;
-    W.rms = entry.rms;
-    W.voiced = entry.voiced;
-    W.buckets = entry.buckets;
-    W.duration = entry.duration;
-    W.url = entry.url;
-    W.status = 'ready';
-    W.aborter = null;
-    W.view = { start: 0, end: entry.duration };
-    waveLoading(false);
-    waveSetEmpty(false, '');
-    waveLayout();
-    waveInvalidate();
-    waveMetaRefresh();
-    // The canvas is the only visual of the analysis, so its accessible name has
-    // to stop saying "decoding" the moment the decode lands.
-    waveAria();
-  }
-
   /**
-   * Reduces a decoded buffer to min/max peaks, RMS and a simple "carries voice"
-   * flag per bucket. The voice flag is adaptive (a fraction of the loudest
-   * bucket) and deliberately labelled a GUIDE in the UI - it is a reading aid,
-   * not voice detection, and nothing in the save path depends on it.
+   * Reduces a decoded buffer to min/max peaks, RMS, a simple "carries voice"
+   * flag per bucket, AND the mono mixdown the pitch pass needs. The peaks keep
+   * their original per-channel extremes, so the waveform looks exactly as it did
+   * before the note layer existed; the mixdown is what makes one YIN pass
+   * possible without decoding the track twice.
+   *
+   * The voice flag is adaptive (a fraction of the loudest bucket) and is
+   * deliberately labelled a GUIDE in the UI - it is a reading aid, and nothing
+   * in the save path depends on it.
    */
   function waveAnalyse(url, buffer) {
     var channels = Math.max(1, buffer.numberOfChannels);
     var length = buffer.length;
     var data = [];
-    for (var c = 0; c < channels; c++) data.push(buffer.getChannelData(c));
+    var c;
+    for (c = 0; c < channels; c++) data.push(buffer.getChannelData(c));
+
+    var mono;
+    if (channels === 1) {
+      mono = data[0];
+    } else {
+      mono = new Float32Array(length);
+      for (c = 0; c < channels; c++) {
+        var ch = data[c];
+        for (var s = 0; s < length; s++) mono[s] += ch[s];
+      }
+      var inv = 1 / channels;
+      for (var s2 = 0; s2 < length; s2++) mono[s2] *= inv;
+    }
 
     var buckets = Math.max(1, Math.min(WAVE_BUCKETS, length));
     var peaks = new Float32Array(buckets * 2);
@@ -8068,22 +8233,18 @@ checkSession();
       var mn = 0;
       var mx = 0;
       var sum = 0;
-      var n = 0;
       for (var i = start; i < end; i++) {
-        var mix = 0;
         for (var k = 0; k < channels; k++) {
           var v = data[k][i];
           if (v < mn) mn = v;
           if (v > mx) mx = v;
-          mix += v;
         }
-        mix /= channels;
+        var mix = mono[i];
         sum += mix * mix;
-        n++;
       }
       peaks[b * 2] = mn;
       peaks[b * 2 + 1] = mx;
-      rms[b] = n ? Math.sqrt(sum / n) : 0;
+      rms[b] = Math.sqrt(sum / Math.max(1, end - start));
       if (rms[b] > loudest) loudest = rms[b];
     }
 
@@ -8101,7 +8262,9 @@ checkSession();
       rms: rms,
       voiced: voiced,
       buckets: buckets,
-      duration: buffer.duration
+      duration: buffer.duration,
+      mono: mono,
+      sampleRate: buffer.sampleRate
     };
   }
 
@@ -8137,6 +8300,7 @@ checkSession();
     var cached = waveCacheGet(url);
     if (cached) {
       waveAdopt(cached);
+      if (!W.pitch) pitchStart(cached);
       return;
     }
 
@@ -8178,6 +8342,9 @@ checkSession();
         var entry = waveAnalyse(url, buffer);
         waveCachePut(entry);
         waveAdopt(entry);
+        // Deliberately NOT awaited: the graph is usable the moment the waveform
+        // lands, and the note roll appears when the cooperative pass finishes.
+        pitchStart(entry);
       })
       .catch(function (err) {
         // A decode superseded by another track is not a failure to report.
@@ -8190,13 +8357,521 @@ checkSession();
       });
   }
 
-  function waveSummary() {
-    if (W.status !== 'ready') return '';
+  function waveAdopt(entry) {
+    W.peaks = entry.peaks;
+    W.rms = entry.rms;
+    W.voiced = entry.voiced;
+    W.buckets = entry.buckets;
+    W.duration = entry.duration;
+    W.url = entry.url;
+    W.status = 'ready';
+    W.aborter = null;
+    W.view = { start: 0, end: entry.duration };
+    waveLoading(false);
+    waveSetEmpty(false, '');
+    // A cached entry may already carry its note analysis; adopt it instead of
+    // analysing the track a second time.
+    W.pitch = entry.pitch || null;
+    W.notes = entry.notes || [];
+    W.onsets = entry.onsets || [];
+    W.pitchStatus = W.pitch ? (W.notes.length ? 'done' : 'none') : 'idle';
+    W.pitchProgress = W.pitch ? 1 : 0;
+    W.pitchEntry = null;
+    W.pitchWindow = wavePitchWindow();
+    waveLayout();
+    waveInvalidate();
+    waveMetaRefresh();
+    waveNoteChip(-1);
+    // The canvas is the only visual of the analysis, so its accessible name has
+    // to stop saying "decoding" the moment the decode lands.
+    waveAria();
+  }
+
+  /* ---- voice notes: names, mapping, lookup ---- */
+
+  var NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+  /** Fractional MIDI -> "A#3" (60 = C4, middle C). */
+  function noteName(midi) {
+    if (!midi || !isFinite(midi)) return '';
+    var r = Math.round(midi);
+    return NOTE_NAMES[((r % 12) + 12) % 12] + (Math.floor(r / 12) - 1);
+  }
+
+  function midiToHz(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  /**
+   * The MIDI window the roll shows: the sung range rounded outward to whole
+   * semitones, with a twelve-semitone floor (so a narrow melody is not blown up
+   * into a meaningless cliff) and a thirty-semitone ceiling (so one shouted
+   * outlier cannot squash everything else into a flat line).
+   */
+  function wavePitchWindow() {
+    var st = W.pitch && W.pitch.stats;
+    if (!st || !st.voiced) return { lo: 48, hi: 72 };
+    var lo = st.low - 0.9;
+    var hi = st.high + 0.9;
+    var centre = (lo + hi) / 2;
+    if (hi - lo < 12) { lo = centre - 6; hi = centre + 6; }
+    if (hi - lo > 30) { lo = centre - 15; hi = centre + 15; }
+    lo = Math.floor(lo);
+    hi = Math.ceil(hi);
+    if (hi - lo < 6) hi = lo + 6;
+    return { lo: Math.max(0, lo), hi: Math.min(127, hi) };
+  }
+
+  /** Index of the note sounding at `t`, or -1. Notes are sorted by start. */
+  function waveNoteAt(t) {
+    var notes = W.notes;
+    if (!notes.length) return -1;
+    var lo = 0;
+    var hi = notes.length - 1;
+    var idx = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (notes[mid].start <= t) { idx = mid; lo = mid + 1; } else { hi = mid - 1; }
+    }
+    if (idx < 0) return -1;
+    var hop = (W.pitch && W.pitch.hopSec) || PITCH_HOP;
+    if (t > notes[idx].end + hop * 1.6) return -1;
+    return idx;
+  }
+
+  /** Nearest onset to `t` within `tolSec`, or null. Onsets are sorted. */
+  function waveNearestOnset(t, tolSec) {
+    var on = W.onsets;
+    if (!on.length) return null;
+    var lo = 0;
+    var hi = on.length - 1;
+    var best = null;
+    var bestD = Infinity;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      var d = on[mid] - t;
+      if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = on[mid]; }
+      if (d < 0) lo = mid + 1; else hi = mid - 1;
+    }
+    // The binary search settles next to the answer; check its neighbours too.
+    for (var i = Math.max(0, lo - 2); i <= Math.min(on.length - 1, lo + 2); i++) {
+      if (Math.abs(on[i] - t) < bestD) { bestD = Math.abs(on[i] - t); best = on[i]; }
+    }
+    if (best == null || bestD > tolSec) return null;
+    return best;
+  }
+
+  /* ---- pitch analysis (cooperative, cancellable) ---- */
+
+  /**
+   * Starts the YIN pass over an entry's already-decoded samples. Everything
+   * heavy happens in `pitchSlice`, ~9 ms at a time, so the transport, the
+   * playhead and the keyboard stay responsive and a second track simply cancels
+   * the first job through `W.pitchToken`.
+   */
+  function pitchStart(entry) {
+    var token = ++W.pitchToken;
+    W.pitchJob = null;
+    W.pitchProgress = 0;
+    W.pitchStatus = 'idle';
+    try {
+      if (!entry || !entry.mono || !entry.mono.length) {
+        W.pitchStatus = 'off';
+        waveMetaRefresh();
+        return;
+      }
+      var data = entry.mono;
+      var sr = entry.sampleRate || 11025;
+      var length = data.length;
+      var win = Math.min(PITCH_WIN, Math.max(256, length - 1));
+      var hopN = Math.max(32, Math.round(sr * PITCH_HOP));
+      var tauMin = Math.max(2, Math.floor(sr / PITCH_FMAX));
+      var tauMax = Math.min(win - 48, Math.ceil(sr / PITCH_FMIN));
+      var frames = Math.max(0, Math.floor((length - win) / hopN) + 1);
+      if (!(tauMax > tauMin + 4) || !frames) {
+        W.pitchStatus = 'off';
+        waveMetaRefresh();
+        return;
+      }
+      var job = {
+        token: token,
+        data: data,
+        sr: sr,
+        win: win,
+        hopN: hopN,
+        tauMin: tauMin,
+        tauMax: tauMax,
+        terms: Math.max(16, win - tauMax),
+        frames: frames,
+        frame: 0,
+        phase: 0,
+        peakRms: 0,
+        gate: 0,
+        midi: new Float32Array(frames),
+        hz: new Float32Array(frames),
+        clarity: new Float32Array(frames),
+        rms: new Float32Array(frames),
+        df: new Float64Array(tauMax + 2),
+        dn: new Float64Array(tauMax + 2)
+      };
+      W.pitchJob = job;
+      W.pitchEntry = entry;
+      W.pitchStatus = 'running';
+      waveMetaRefresh();
+      pitchSlice(job);
+    } catch (_) {
+      W.pitchStatus = 'off';
+      waveMetaRefresh();
+    }
+  }
+
+  function pitchSlice(job) {
+    if (job.token !== W.pitchToken) return;
+    var started = now();
+    var d = job.data;
+    var i;
+
+    if (job.phase === 0) {
+      // Pass 1 — frame RMS. The voicing gate is relative to the loudest frame,
+      // so a quiet master and a hot master behave the same.
+      while (job.frame < job.frames) {
+        var base0 = job.frame * job.hopN;
+        var sum = 0;
+        for (i = 0; i < job.win; i++) { var v0 = d[base0 + i]; sum += v0 * v0; }
+        var r = Math.sqrt(sum / job.win);
+        job.rms[job.frame] = r;
+        if (r > job.peakRms) job.peakRms = r;
+        job.frame++;
+        if ((job.frame & 63) === 0 && now() - started > PITCH_SLICE_MS) break;
+      }
+      if (job.frame < job.frames) {
+        W.pitchProgress = (job.frame / job.frames) * 0.12;
+        waveMetaRefresh();
+        pitchSliceLater(job);
+        return;
+      }
+      job.gate = Math.max(0.0025, job.peakRms * PITCH_GATE);
+      job.phase = 1;
+      job.frame = 0;
+    }
+
+    // Pass 2 — one YIN frame at a time.
+    while (job.frame < job.frames) {
+      if (job.rms[job.frame] >= job.gate) yinFrame(job, job.frame);
+      job.frame++;
+      if ((job.frame & 15) === 0 && now() - started > PITCH_SLICE_MS) break;
+    }
+    if (job.frame < job.frames) {
+      W.pitchProgress = 0.12 + 0.88 * (job.frame / job.frames);
+      waveMetaRefresh();
+      pitchSliceLater(job);
+      return;
+    }
+    pitchFinish(job);
+  }
+
+  /** Measures one frame's fundamental with YIN; the result lands in job.midi. */
+  function yinFrame(job, f) {
+    var d = job.data;
+    var df = job.df;
+    var dn = job.dn;
+    var tauMin = job.tauMin;
+    var tauMax = job.tauMax;
+    var terms = job.terms;
+    var base = f * job.hopN;
+    var end = base + terms;
+    var tau;
+    var j;
+
+    // Difference function, with a FIXED term count per lag so every lag is
+    // weighted equally (a lag-dependent sum biases long lags towards voiced).
+    for (tau = 1; tau <= tauMax; tau++) {
+      var acc = 0;
+      for (j = base; j < end; j++) {
+        var diff = d[j] - d[j + tau];
+        acc += diff * diff;
+      }
+      df[tau] = acc;
+    }
+    if (!(df[tauMax] > 0)) return;
+
+    // Cumulative-mean normalised difference (YIN step 3).
+    var running = 0;
+    var best = Infinity;
+    var bestTau = -1;
+    for (tau = 1; tau <= tauMax; tau++) {
+      running += df[tau];
+      var norm = running > 0 ? (df[tau] * tau) / running : 1;
+      dn[tau] = norm;
+      if (tau >= tauMin && norm < best) { best = norm; bestTau = tau; }
+    }
+    if (bestTau < 0 || best > PITCH_REJECT) return;
+
+    // Absolute threshold: the FIRST dip below it, walked to its local minimum.
+    // This is what stops a strong second harmonic reading as an octave error.
+    var pick = -1;
+    for (tau = tauMin; tau <= tauMax; tau++) {
+      if (dn[tau] < PITCH_THRESHOLD) {
+        while (tau + 1 <= tauMax && dn[tau + 1] < dn[tau]) tau++;
+        pick = tau;
+        break;
+      }
+    }
+    if (pick < 0) pick = bestTau;
+
+    // Parabolic interpolation for sub-sample lag precision.
+    var lag = pick;
+    if (pick > 1 && pick < tauMax) {
+      var a = dn[pick - 1];
+      var b = dn[pick];
+      var c = dn[pick + 1];
+      var den = a - 2 * b + c;
+      if (den !== 0) {
+        var delta = (a - c) / (2 * den);
+        if (delta > -1 && delta < 1) lag = pick + delta;
+      }
+    }
+    var f0 = job.sr / lag;
+    if (!(f0 >= PITCH_FMIN && f0 <= PITCH_FMAX)) f0 = job.sr / pick;
+    if (!(f0 >= PITCH_FMIN && f0 <= PITCH_FMAX)) return;
+
+    job.hz[f] = f0;
+    job.midi[f] = 69 + 12 * Math.log2(f0 / 440);
+    job.clarity[f] = Math.max(0, Math.min(1, 1 - dn[pick]));
+  }
+
+  function pitchSliceLater(job) {
+    setTimeout(function () { pitchSlice(job); }, 0);
+  }
+
+  /**
+   * Groups consecutive voiced frames whose pitch stays within `NOTE_TOLERANCE`
+   * semitones into notes — the piano-roll blocks. A one-frame excursion is
+   * vibrato, not a new note, so a split needs two frames in a row.
+   */
+  function pitchNotes(job) {
+    var notes = [];
+    var midi = job.midi;
+    var hop = job.hopN / job.sr;
+    var frames = job.frames;
+    var i = 0;
+    while (i < frames) {
+      if (!midi[i]) { i++; continue; }
+      var j = i;
+      var sum = 0;
+      var n = 0;
+      var ref = midi[i];
+      while (j < frames && midi[j]) {
+        var m = midi[j];
+        if (Math.abs(m - ref) > NOTE_TOLERANCE &&
+            j + 1 < frames && midi[j + 1] && Math.abs(midi[j + 1] - ref) > NOTE_TOLERANCE) break;
+        sum += m;
+        n++;
+        ref = sum / n;
+        j++;
+      }
+      notes.push({ start: i * hop, end: (j - 1) * hop, midi: sum / n });
+      i = j;
+    }
+    var minLen = Math.max(hop * 1.5, 0.03);
+    return notes.filter(function (x) { return x.end - x.start >= minLen; });
+  }
+
+  /**
+   * Onset index. The coarse pass reads the RMS envelope; the fine pass walks the
+   * raw samples backwards from a peak-|x| envelope, so the returned time is the
+   * audible start of the note rather than a 40 ms frame centre. That precision
+   * is the whole point: it is what lets a single click land a cue.
+   *
+   * A squared-sum envelope ripples by several times inside one pitch period,
+   * which makes a walk-back stop in the middle of the attack, so the envelope is
+   * the per-window peak of |x| — flat within a note, steep at its edge.
+   */
+  function pitchOnsets(job) {
+    var rms = job.rms;
+    var frames = job.frames;
+    var hop = job.hopN / job.sr;
+    var sr = job.sr;
+    var data = job.data;
+    var floor = Math.max(0.0015, job.peakRms * ONSET_FLOOR);
+
+    var coarse = [];
+    for (var f = 1; f < frames; f++) {
+      if (rms[f] < floor || rms[f] <= rms[f - 1] * ONSET_RISE) continue;
+      if (coarse.length && f * hop - coarse[coarse.length - 1] < ONSET_MIN_GAP) continue;
+      coarse.push(f * hop);
+    }
+    if (!coarse.length || !data) return coarse;
+
+    var w = Math.max(8, Math.round((sr * ONSET_ENV_MS) / 1000));
+    var step = Math.max(1, Math.round(sr * 0.001));
+    var box = Math.round(job.win);
+    var out = [];
+    for (var c = 0; c < coarse.length; c++) {
+      var t = coarse[c];
+      var centre = Math.round(t * sr);
+      var from = Math.max(0, centre - box);
+      var to = Math.min(data.length - w - 1, centre + box);
+      var peakE = 0;
+      var peakAt = -1;
+      var i;
+      for (i = from; i <= to; i += step) {
+        var m = peakAbs(data, i, w);
+        if (m > peakE) { peakE = m; peakAt = i; }
+      }
+      if (peakAt < 0 || peakE <= 0) { out.push(t); continue; }
+      var thr = peakE * ONSET_FRAC;
+      var at = peakAt;
+      while (at - step >= from) {
+        if (peakAbs(data, at - step, w) < thr) break;
+        at -= step;
+      }
+      // `at` is the last window that still holds audible signal, so the note
+      // starts one window later. A walk that ran off the search box means the
+      // signal was already sounding there, so the coarse frame is the answer.
+      out.push(at <= from ? t : Math.min(frames * hop, (at + w) / sr));
+    }
+    out.sort(function (x, y) { return x - y; });
+    var merged = [];
+    for (var k = 0; k < out.length; k++) {
+      if (merged.length && out[k] - merged[merged.length - 1] < ONSET_MIN_GAP) continue;
+      merged.push(out[k]);
+    }
+    return merged;
+  }
+
+  function peakAbs(data, from, w) {
+    var m = 0;
+    for (var k = 0; k < w; k++) {
+      var v = data[from + k];
+      if (v < 0) v = -v;
+      if (v > m) m = v;
+    }
+    return m;
+  }
+
+  function pitchFinish(job) {
+    if (job.token !== W.pitchToken) return;
+    var hop = job.hopN / job.sr;
+    var voiced = 0;
+    var minMidi = Infinity;
+    var maxMidi = -Infinity;
+    var f;
+    for (f = 0; f < job.frames; f++) {
+      var m = job.midi[f];
+      if (!m) continue;
+      voiced++;
+      if (m < minMidi) minMidi = m;
+      if (m > maxMidi) maxMidi = m;
+    }
+    W.pitchJob = null;
+    W.pitchProgress = 1;
+
+    if (!voiced) {
+      W.pitch = null;
+      W.notes = [];
+      W.onsets = [];
+      W.pitchStatus = 'none';
+      waveLayout();
+      waveInvalidate();
+      waveMetaRefresh();
+      waveAria();
+      waveNoteChip(-1);
+      W.pitchEntry = null;
+      return;
+    }
+
+    // Robust range: the 2nd..98th percentile, so one shouted top note or one
+    // gravelly bottom note cannot define the whole vertical scale.
+    var sorted = [];
+    for (f = 0; f < job.frames; f++) if (job.midi[f]) sorted.push(job.midi[f]);
+    sorted.sort(function (x, y) { return x - y; });
+    var pick = function (p) {
+      return sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))];
+    };
+    var stats = {
+      voiced: voiced,
+      minMidi: minMidi,
+      maxMidi: maxMidi,
+      low: pick(0.02),
+      high: pick(0.98),
+      median: pick(0.5)
+    };
+
+    var notes = pitchNotes(job);
+    var onsets = pitchOnsets(job);
+
+    W.pitch = { frames: job.frames, hopSec: hop, stats: stats };
+    W.notes = notes;
+    W.onsets = onsets;
+    W.pitchStatus = notes.length ? 'done' : 'none';
+
+    // Hand the result to the cache entry so re-opening this track is instant,
+    // and release the sample mixdown: it was only ever needed for this pass.
+    var entry = W.pitchEntry;
+    W.pitchEntry = null;
+    if (entry) {
+      entry.pitch = W.pitch;
+      entry.notes = notes;
+      entry.onsets = onsets;
+      entry.mono = null;
+      entry.rms = null;
+    }
+
+    W.pitchWindow = wavePitchWindow();
+    waveLayout();
+    waveInvalidate();
+    waveMetaRefresh();
+    waveAria();
+    waveNoteChip(-1);
+  }
+
+  /* ---- the live "now singing" readout ---- */
+
+  function waveNoteChip(index) {
+    var chip = $('ssNoteChip');
+    var nameEl = $('ssNoteNow');
+    var hzEl = $('ssNoteHz');
+    if (!chip || !nameEl || !hzEl) return;
+    if (index < 0) {
+      if (chip.dataset.silent === '1') return;
+      chip.dataset.silent = '1';
+      chip.classList.add('is-silent');
+      nameEl.textContent = '\u2014';
+      hzEl.textContent = 'rest';
+      return;
+    }
+    var n = W.notes[index];
+    if (!n) return;
+    var label = noteName(n.midi);
+    if (chip.dataset.silent !== '1' && nameEl.textContent === label) return;
+    chip.dataset.silent = '0';
+    chip.classList.remove('is-silent');
+    nameEl.textContent = label;
+    hzEl.textContent = Math.round(midiToHz(n.midi)) + ' Hz';
+  }
+
+  /* ---- summary / layout / accessible name ---- */
+
+  function waveCueCount() {
     var cues = 0;
     for (var i = 0; i < S.lines.length; i++) if (S.lines[i].start != null) cues++;
+    return cues;
+  }
+
+  function waveSummary() {
+    if (W.status !== 'ready') return '';
+    var cues = waveCueCount();
     var span = W.view.end - W.view.start;
     var zoomed = Math.abs(span - W.duration) > 0.05;
     var text = fmtDur(W.duration) + ' \u00b7 ' + cues + ' cue' + (cues === 1 ? '' : 's');
+    if (W.pitchStatus === 'running') {
+      text += ' \u00b7 finding notes ' + Math.round(W.pitchProgress * 100) + '%';
+    } else if (W.notes.length && W.pitch) {
+      text += ' \u00b7 notes ' + noteName(W.pitch.stats.low) + '\u2013' + noteName(W.pitch.stats.high);
+    } else if (W.pitchStatus === 'none') {
+      text += ' \u00b7 no sung notes found';
+    }
     if (zoomed) text += ' \u00b7 ' + fmtShort(W.view.start) + '\u2013' + fmtShort(W.view.end);
     return text;
   }
@@ -8209,17 +8884,20 @@ checkSession();
   }
 
   function waveLayout() {
-    var canvas = $('ssWave');    var wrap = $('ssWaveWrap');
+    var canvas = $('ssWave');
+    var wrap = $('ssWaveWrap');
     if (!canvas || !wrap) return;
     var rect = wrap.getBoundingClientRect();
-    // 8px horizontal + 5/3px vertical padding on .ss-wavewrap
+    // 8px horizontal + 6/4px vertical padding on .ss-wavewrap
     var cssW = Math.max(80, Math.round(rect.width - 16));
-    var cssH = Math.max(36, Math.round(rect.height - 8));
+    var cssH = Math.max(48, Math.round(rect.height - 10));
     var dpr = Math.min(3, Math.max(1, window.devicePixelRatio || 1));
-    if (W.width === cssW && W.height === cssH && W.dpr === dpr && W.layer) return;
+    var gut = (W.showNotes && W.pitch && W.notes.length) ? WAVE_GUT : 0;
+    if (W.width === cssW && W.height === cssH && W.dpr === dpr && W.gut === gut && W.layer) return;
     W.width = cssW;
     W.height = cssH;
     W.dpr = dpr;
+    W.gut = gut;
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     W.layer = document.createElement('canvas');
@@ -8229,9 +8907,58 @@ checkSession();
     waveAria();
   }
 
+  function wavePlotWidth() {
+    return Math.max(8, W.width - W.gut);
+  }
+
   function waveTimeToX(t) {
     var span = Math.max(0.001, W.view.end - W.view.start);
-    return ((t - W.view.start) / span) * W.width;
+    return W.gut + ((t - W.view.start) / span) * wavePlotWidth();
+  }
+
+  function waveXToTime(x) {
+    var span = Math.max(0.001, W.view.end - W.view.start);
+    return W.view.start + ((x - W.gut) / wavePlotWidth()) * span;
+  }
+
+  /** Vertical lane split: the note roll on top, the waveform underneath.
+   *  A short strip gives the roll a bigger share: the note lane is what needs
+   *  vertical room to separate pitches, and the waveform still reads at 40 px. */
+  function waveLanes() {
+    var h = W.height;
+    var roll = W.showNotes && !!W.pitch && W.notes.length > 0;
+    if (!roll) return { roll: false, pitchH: 0, waveTop: 0, waveH: h };
+    var split = Math.round(h * (h < 165 ? 0.70 : 0.63));
+    split = Math.max(52, Math.min(h - 30, split));
+    return { roll: true, pitchH: split - 5, waveTop: split, waveH: h - split };
+  }
+
+  /**
+   * The single source of truth for WHERE a note is drawn. Both the static layer
+   * and the per-frame playhead marker use it, so the white dot can never drift
+   * off the block it belongs to.
+   *
+   * The half-block of padding at the top and bottom is what stops the highest
+   * note of a song being clipped by the edge of the roll — the first version of
+   * this packer put C5 at two pixels from the top, which read as a line rather
+   * than a note.
+   */
+  function waveRollMetrics(lay) {
+    var win = W.pitchWindow;
+    var span = Math.max(1, win.hi - win.lo);
+    var pad = Math.min(5, Math.max(2.5, lay.pitchH * 0.05));
+    var pxPer = Math.max(0.5, (lay.pitchH - pad * 2) / span);
+    return {
+      hi: win.hi,
+      lo: win.lo,
+      pad: pad,
+      pxPer: pxPer,
+      // A five-pixel floor: below that a note reads as a line rather than as a
+      // note, and the whole point of the lane is that a block IS the note. On a
+      // wide melody the blocks then touch, which reads as a legato ribbon.
+      bar: Math.max(5, Math.min(13, pxPer * 0.78)),
+      y: function (midi) { return pad + (win.hi - midi) * pxPer; }
+    };
   }
 
   function waveAria() {
@@ -8239,15 +8966,38 @@ checkSession();
     if (!canvas) return;
     if (W.status !== 'ready') {
       canvas.setAttribute('aria-label', W.status === 'loading'
-        ? 'Audio waveform, decoding'
-        : 'Audio waveform, not available');
+        ? 'Voice graph, decoding the audio'
+        : 'Voice graph, not available');
       return;
     }
-    var cues = 0;
-    for (var i = 0; i < S.lines.length; i++) if (S.lines[i].start != null) cues++;
-    canvas.setAttribute('aria-label',
-      'Audio waveform from ' + fmtShort(W.view.start) + ' to ' + fmtShort(W.view.end) +
-      ', ' + cues + ' cue' + (cues === 1 ? '' : 's') + ' marked. Click to seek; arrow keys also seek.');
+    var cues = waveCueCount();
+    var text = 'Voice graph from ' + fmtShort(W.view.start) + ' to ' + fmtShort(W.view.end) +
+      ', ' + cues + ' cue' + (cues === 1 ? '' : 's') + ' marked';
+    if (W.notes.length && W.pitch) {
+      text += '. Voice notes from ' + noteName(W.pitch.stats.low) + ' to ' +
+        noteName(W.pitch.stats.high) + ' are drawn as a piano roll, with the waveform and ' +
+        'its note onsets underneath';
+    } else if (W.pitchStatus === 'running') {
+      text += '. Finding the voice notes';
+    }
+    text += '. Click to seek, click near a note onset to snap to it, arrow keys also seek.';
+    canvas.setAttribute('aria-label', text);
+  }
+
+  /* ---- drawing ---- */
+
+  function waveRR(ctx, x, y, w, h, r) {
+    var rr = Math.min(r, h / 2, w / 2);
+    if (rr <= 0.5) { ctx.rect(x, y, w, h); return; }
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+    ctx.lineTo(x + rr, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+    ctx.lineTo(x, y + rr);
+    ctx.arcTo(x, y, x + rr, y, rr);
   }
 
   function waveRenderStatic() {
@@ -8267,44 +9017,55 @@ checkSession();
     ctx.fillRect(0, 0, w, h);
 
     var dur = W.duration || 0;
-    if (W.status === 'ready' && W.peaks && dur > 0 && W.buckets) {
-      var span = Math.max(0.001, W.view.end - W.view.start);
-      var mid = h * 0.52;
-      var amp = Math.max(4, (h - 20) / 2);
-      var perBucket = dur / W.buckets;
-      var x, t0, b;
+    var lay = waveLanes();
+    var x;
 
-      // Vocal-energy guide: a warm band along the bottom of the strip.
-      ctx.fillStyle = 'rgba(255,196,92,.30)';
-      for (x = 0; x < w; x++) {
-        t0 = W.view.start + (x / w) * span;
-        b = Math.floor(t0 / perBucket);
-        if (b >= 0 && b < W.buckets && W.voiced[b]) ctx.fillRect(x, h - 8, 1, 6);
+    if (W.status === 'ready' && W.peaks && dur > 0 && W.buckets) {
+      var perBucket = dur / W.buckets;
+
+      // ---- lane 1: the voice-note piano roll ----
+      if (lay.roll) wavePaintRoll(ctx, w, lay);
+
+      var top = lay.waveTop;
+      var waveH = lay.waveH;
+      var mid = top + waveH * 0.5;
+      var amp = Math.max(3, (waveH - 12) / 2);
+
+      if (lay.roll) {
+        // A hairline between the lanes, so the two readings never blend.
+        ctx.fillStyle = 'rgba(255,255,255,.12)';
+        ctx.fillRect(0, lay.waveTop - 3, w, 1);
       }
 
-      // Cue regions and boundaries, under the peaks so the peaks stay readable.
-      for (var i = 0; i < S.lines.length; i++) {
-        var st = S.lines[i].start;
-        if (st == null) continue;
-        var en = lineEnd(i);
-        var xa = waveTimeToX(st);
-        var xb = (en == null) ? xa + 1 : waveTimeToX(en);
-        if (xb < 0 || xa > w) continue;
-        if (i === S.sel) {
-          ctx.fillStyle = 'rgba(59,130,246,.20)';
-          ctx.fillRect(Math.max(0, xa), 0, Math.max(1, Math.min(w, xb) - Math.max(0, xa)), h);
-        }
-        ctx.fillStyle = (i === S.sel) ? 'rgba(147,197,253,.95)' : 'rgba(255,212,94,.85)';
-        ctx.fillRect(Math.round(xa), 0, 1, h);
-        ctx.fillRect(Math.round(xa), 0, 3, 4);
+      // Selected cue's window is shaded behind everything.
+      for (var si = 0; si < S.lines.length; si++) {
+        if (si !== S.sel) continue;
+        var sst = S.lines[si].start;
+        if (sst == null) continue;
+        var sen = lineEnd(si);
+        var sxa = waveTimeToX(sst);
+        var sxb = (sen == null) ? sxa + 1 : waveTimeToX(sen);
+        ctx.fillStyle = 'rgba(59,130,246,.18)';
+        ctx.fillRect(Math.max(0, sxa), 0, Math.max(1, Math.min(w, sxb) - Math.max(0, sxa)), h);
+      }
+
+      // Vocal-energy guide: a quiet warm band along the bottom edge. It is
+      // deliberately dimmer than the cue lines and the onset ticks, because
+      // those two are what a stamp is actually placed against.
+      ctx.fillStyle = 'rgba(255,196,92,.22)';
+      var bandY = h - 6;
+      for (x = W.gut; x < w; x++) {
+        var t0 = waveXToTime(x);
+        var b = Math.floor(t0 / perBucket);
+        if (b >= 0 && b < W.buckets && W.voiced[b]) ctx.fillRect(x, bandY, 1, 4);
       }
 
       // Peaks: one column per device-independent pixel, taking the extreme
       // value of every bucket the column covers so a transient never vanishes.
-      ctx.fillStyle = '#9fadc4';
-      for (x = 0; x < w; x++) {
-        var ta = W.view.start + (x / w) * span;
-        var tb = W.view.start + ((x + 1) / w) * span;
+      ctx.fillStyle = lay.roll ? 'rgba(159,173,196,.70)' : '#9fadc4';
+      for (x = W.gut; x < w; x++) {
+        var ta = waveXToTime(x);
+        var tb = waveXToTime(x + 1);
         var ba = Math.max(0, Math.floor(ta / perBucket));
         var bb = Math.min(W.buckets - 1, Math.max(ba, Math.floor(tb / perBucket)));
         var mn = 0;
@@ -8319,13 +9080,157 @@ checkSession();
         ctx.fillRect(x, y1, 1, y2 - y1);
       }
 
+      // Onset ruler along the top of the waveform lane: where each note starts.
+      if (W.onsets.length) {
+        ctx.fillStyle = 'rgba(255,159,69,.95)';
+        for (var o = 0; o < W.onsets.length; o++) {
+          var ox = Math.round(waveTimeToX(W.onsets[o]));
+          if (ox < W.gut || ox > w) continue;
+          ctx.fillRect(ox, lay.waveTop + 1, 1, 5);
+        }
+      }
+
+      // Cue boundaries LAST, so a gold cue line is never buried under a peak.
+      for (var i = 0; i < S.lines.length; i++) {
+        var st = S.lines[i].start;
+        if (st == null) continue;
+        var xa = waveTimeToX(st);
+        if (xa < W.gut - 1 || xa > w) continue;
+        ctx.fillStyle = (i === S.sel) ? 'rgba(147,197,253,.98)' : 'rgba(255,212,94,.92)';
+        ctx.fillRect(Math.round(xa), 0, 1, h);
+        ctx.fillRect(Math.round(xa), 0, 3, 4);
+      }
+
       // Centre line + faint 5 s grid, so the eye has a scale without labels.
       ctx.fillStyle = 'rgba(255,255,255,.10)';
-      ctx.fillRect(0, Math.round(mid), w, 1);
+      ctx.fillRect(W.gut, Math.round(mid), wavePlotWidth(), 1);
       ctx.fillStyle = 'rgba(255,255,255,.06)';
       for (var g = Math.ceil(W.view.start / 5) * 5; g < W.view.end; g += 5) {
-        ctx.fillRect(Math.round(waveTimeToX(g)), 0, 1, h);
+        ctx.fillRect(Math.round(waveTimeToX(g)), lay.waveTop, 1, waveH);
       }
+    }
+  }
+
+  /**
+   * The piano roll itself: a labelled note-name ruler on the left, an octave
+   * grid, one rounded block per sung note and a bright contour through them.
+   * This is the layer that makes high-vs-low unmistakable.
+   */
+  function wavePaintRoll(ctx, w, lay) {
+    var win = W.pitchWindow;
+    var hgt = lay.pitchH;
+    var M = waveRollMetrics(lay);
+    var pxPer = M.pxPer;
+    var yOf = M.y;
+    var bar = M.bar;
+    var m;
+
+    ctx.save();
+    // The clip starts at the ruler, not at 0: the note-name gutter is reserved
+    // space, so no block or contour may spill a half-pixel into it.
+    ctx.beginPath();
+    ctx.rect(W.gut, 0, Math.max(1, w - W.gut), hgt);
+    ctx.clip();
+
+    var bg = ctx.createLinearGradient(0, 0, 0, hgt);
+    bg.addColorStop(0, '#111a2b');
+    bg.addColorStop(1, '#0d1520');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, hgt);
+
+    // Octave grid: a bright line at every C, a faint one at every G. Root and
+    // fifth are what the eye uses to judge "high" from "low" at a glance, and
+    // two reference lines per octave are enough to read the height of any note.
+    for (m = Math.ceil(win.lo); m <= win.hi; m++) {
+      var pc = ((m % 12) + 12) % 12;
+      var isC = pc === 0;
+      if (!isC && !(pc === 7 && pxPer >= 2.4)) continue;
+      ctx.fillStyle = isC ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.11)';
+      ctx.fillRect(0, Math.round(yOf(m)), w, 1);
+    }
+
+    // Note blocks.
+    var notes = W.notes;
+    var vis = [];
+    for (var i = 0; i < notes.length; i++) {
+      var n = notes[i];
+      if (n.end < W.view.start || n.start > W.view.end) continue;
+      vis.push(n);
+      var x0 = waveTimeToX(n.start);
+      var x1 = waveTimeToX(n.end);
+      var bw = Math.max(2, x1 - x0);
+      var yy = yOf(n.midi) - bar / 2;
+      ctx.beginPath();
+      waveRR(ctx, x0, yy, bw, bar, Math.min(3, bar / 2));
+      ctx.fillStyle = 'rgba(56,197,228,.94)';
+      ctx.fill();
+      if (bar >= 5) {
+        ctx.fillStyle = 'rgba(196,250,255,.95)';
+        ctx.fillRect(Math.round(x0) + 1, Math.round(yy), Math.max(1, Math.round(bw) - 2), 1);
+      }
+    }
+
+    // Contour: one polyline through the note centres, broken across rests, so
+    // the melody reads as a line as well as as blocks.
+    if (vis.length > 1) {
+      var hop = (W.pitch && W.pitch.hopSec) || PITCH_HOP;
+      ctx.beginPath();
+      for (var c = 0; c < vis.length; c++) {
+        var cn = vis[c];
+        var cx = waveTimeToX((cn.start + cn.end) / 2);
+        var cy = yOf(cn.midi);
+        if (c === 0) { ctx.moveTo(cx, cy); continue; }
+        var pn = vis[c - 1];
+        if (cn.start - pn.end > hop * 1.8) ctx.moveTo(cx, cy);
+        else ctx.lineTo(cx, cy);
+      }
+      ctx.strokeStyle = 'rgba(232,253,255,.85)';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    // Note-name ruler, painted over the plot so the labels always stay legible.
+    if (W.gut > 0) {
+      var rg = ctx.createLinearGradient(0, 0, W.gut, 0);
+      rg.addColorStop(0, 'rgba(9,7,13,.97)');
+      rg.addColorStop(1, 'rgba(9,7,13,.78)');
+      ctx.fillStyle = rg;
+      ctx.fillRect(0, 0, W.gut, hgt);
+      ctx.fillStyle = 'rgba(255,255,255,.12)';
+      ctx.fillRect(W.gut - 1, 0, 1, hgt);
+      ctx.font = '700 9.5px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'right';
+      var shown = 0;
+      var labelled = 0;
+      for (m = Math.ceil(win.lo); m <= win.hi; m++) {
+        var lpc = ((m % 12) + 12) % 12;
+        var lC = lpc === 0;
+        if (!lC && !(lpc === 7 && pxPer >= 2.4)) continue;
+        labelled++;
+        var ly = yOf(m);
+        if (ly < 5 || ly > hgt - 3) continue;
+        // Root brighter than fifth, so the two are told apart without a key.
+        ctx.fillStyle = lC ? 'rgba(200,234,255,.98)' : 'rgba(158,204,240,.75)';
+        ctx.fillText(noteName(m), W.gut - 6, ly);
+        shown++;
+      }
+      if (!shown) {
+        // Nothing landed inside the ruler (a very short roll): label the
+        // extremes, so the ruler is never blank.
+        ctx.fillStyle = 'rgba(180,224,255,.85)';
+        ctx.fillText(noteName(Math.round(win.hi)), W.gut - 6, Math.max(8, yOf(win.hi) + 5));
+        ctx.fillText(noteName(Math.round(win.lo)), W.gut - 6, Math.min(hgt - 6, yOf(win.lo) - 5));
+      } else if (labelled < 3) {
+        // Only one reference line in view would make "higher or lower than
+        // that" a guess, so the extremes are labelled as well.
+        ctx.fillStyle = 'rgba(150,196,232,.55)';
+        ctx.fillText(noteName(Math.round(win.hi)), W.gut - 6, Math.max(8, yOf(win.hi) + 4));
+        ctx.fillText(noteName(Math.round(win.lo)), W.gut - 6, Math.min(hgt - 6, yOf(win.lo) - 4));
+      }
+      ctx.textAlign = 'left';
     }
   }
 
@@ -8349,28 +9254,77 @@ checkSession();
     ctx.setTransform(W.dpr, 0, 0, W.dpr, 0, 0);
     var w = W.width;
     var h = W.height;
-
+    var lay = waveLanes();
     var t = Number(media.currentTime) || 0;
-    var x = waveTimeToX(t);
-    if (x >= -1 && x <= w + 1) {
+    var px = waveTimeToX(t);
+
+    // The note under the playhead: outline it and reach across to the ruler, so
+    // "how high is it right now" is answered by a single glance.
+    if (lay.roll && W.notes.length) {
+      var idx = waveNoteAt(t);
+      if (idx >= 0) {
+        var n = W.notes[idx];
+        var M = waveRollMetrics(lay);
+        var yy = M.y(n.midi);
+        var bar = M.bar;
+        ctx.fillStyle = 'rgba(255,255,255,.15)';
+        ctx.fillRect(W.gut, Math.round(yy), w - W.gut, 1);
+        var x0 = waveTimeToX(n.start);
+        var x1 = waveTimeToX(n.end);
+        ctx.beginPath();
+        waveRR(ctx, x0 - 1, yy - bar / 2 - 1, Math.max(3, x1 - x0) + 2, bar + 2, Math.min(4, bar / 2 + 1));
+        ctx.strokeStyle = 'rgba(255,255,255,.92)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        if (px >= -1 && px <= w + 1) {
+          ctx.beginPath();
+          ctx.arc(Math.round(px) + 0.5, yy, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#eafcff';
+          ctx.fill();
+        }
+      }
+    }
+
+    // An onset the admin just snapped to, briefly ringed, so the click is
+    // visibly answered even when the playhead lands a pixel away.
+    if (W.flash) {
+      var left = W.flash.until - now();
+      if (left <= 0) {
+        W.flash = null;
+      } else {
+        var fx = waveTimeToX(W.flash.t);
+        if (fx >= W.gut - 2 && fx <= w + 2) {
+          var k2 = 1 - left / 700;
+          ctx.beginPath();
+          ctx.arc(fx, lay.waveTop + 6, 4 + k2 * 9, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255,196,120,' + (0.85 * (1 - k2)).toFixed(3) + ')';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+    }
+
+    if (px >= -1 && px <= w + 1) {
       ctx.fillStyle = 'rgba(255,90,95,.95)';
-      ctx.fillRect(Math.round(x), 0, 1.5, h);
+      ctx.fillRect(Math.round(px), 0, 1.5, h);
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(Math.round(x) + 0.5, 4, 2.5, 0, Math.PI * 2);
+      ctx.arc(Math.round(px) + 0.5, 4, 2.5, 0, Math.PI * 2);
       ctx.fill();
     }
 
     if (W.hover != null) {
       var hx = waveTimeToX(W.hover);
-      if (hx >= 0 && hx <= w) {
+      if (hx >= W.gut - 1 && hx <= w) {
         ctx.fillStyle = 'rgba(255,255,255,.35)';
         ctx.fillRect(Math.round(hx), 0, 1, h);
         var label = fmtShort(W.hover);
+        var hIdx = waveNoteAt(W.hover);
+        if (hIdx >= 0) label += '  ' + noteName(W.notes[hIdx].midi);
         ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
         var tw = ctx.measureText(label).width + 10;
-        var lx = Math.min(Math.max(2, hx - tw / 2), w - tw - 2);
-        ctx.fillStyle = 'rgba(14,10,18,.88)';
+        var lx = Math.min(Math.max(W.gut + 2, hx - tw / 2), w - tw - 2);
+        ctx.fillStyle = 'rgba(14,10,18,.90)';
         ctx.fillRect(lx, h - 20, tw, 14);
         ctx.fillStyle = '#f2e7d0';
         ctx.textBaseline = 'middle';
@@ -8411,36 +9365,64 @@ checkSession();
     waveSetView(l.start - pad, end + pad);
   }
 
+  /** Converts a pointer x into a track time through the drawing's own mapping. */
   function waveTimeAt(clientX) {
     var canvas = $('ssWave');
     if (!canvas) return 0;
     var rect = canvas.getBoundingClientRect();
-    var w = Math.max(1, rect.width);
-    var frac = Math.max(0, Math.min(1, (clientX - rect.left) / w));
+    var cssW = Math.max(1, rect.width);
+    var x = ((clientX - rect.left) / cssW) * Math.max(1, W.width);
     var dur = W.duration || S.duration || 0;
-    var span = Math.max(0.001, W.view.end - W.view.start);
-    return Math.max(0, Math.min(dur, W.view.start + frac * span));
+    return Math.max(0, Math.min(dur, waveXToTime(x)));
   }
 
   function waveCueAt(clientX) {
     var canvas = $('ssWave');
     if (!canvas) return -1;
     var rect = canvas.getBoundingClientRect();
-    var w = Math.max(1, rect.width);
-    var span = Math.max(0.001, W.view.end - W.view.start);
-    var localX = clientX - rect.left;
+    var cssW = Math.max(1, rect.width);
+    var x = ((clientX - rect.left) / cssW) * Math.max(1, W.width);
+    var scale = Math.max(1, W.width) / cssW;
     var best = -1;
-    var bestDx = WAVE_CUE_HIT_PX;
+    var bestDx = WAVE_CUE_HIT_PX * scale;
     for (var i = 0; i < S.lines.length; i++) {
       var st = S.lines[i].start;
       if (st == null) continue;
-      var d = Math.abs(((st - W.view.start) / span) * w - localX);
-      if (d < bestDx) {
-        bestDx = d;
-        best = i;
-      }
+      var d = Math.abs(waveTimeToX(st) - x);
+      if (d < bestDx) { bestDx = d; best = i; }
     }
     return best;
+  }
+
+  /** Snap tolerance in seconds: about 14 px either way, never below 60 ms. */
+  function waveSnapTolerance() {
+    var span = Math.max(0.001, W.view.end - W.view.start);
+    return Math.max(0.06, (14 / wavePlotWidth()) * span);
+  }
+
+  /** Snaps `t` to the nearest note onset when snapping is on; else passes through. */
+  function waveSnapTo(t) {
+    if (!W.snap) return t;
+    var on = waveNearestOnset(t, waveSnapTolerance());
+    if (on == null) return t;
+    W.flash = { t: on, until: now() + 700 };
+    return on;
+  }
+
+  /* ---- remembered graph preferences ---- */
+
+  function applyGraphPrefs() {
+    var prefs = readGraphPrefs();
+    W.showNotes = prefs.notes;
+    W.snap = prefs.snap;
+    var wrap = $('ssWaveWrap');
+    if (wrap && prefs.height) wrap.style.height = Math.round(prefs.height) + 'px';
+    var nb = $('ssWaveNotes');
+    if (nb) nb.setAttribute('aria-pressed', W.showNotes ? 'true' : 'false');
+    var sb = $('ssSnapOnset');
+    if (sb) sb.setAttribute('aria-pressed', W.snap ? 'true' : 'false');
+    waveLayout();
+    waveInvalidate();
   }
 
   /* ------------------------------------------------------------------ */
@@ -8471,7 +9453,9 @@ checkSession();
     }
 
     // The voice graph follows the same clock, so the cursor and the audio can
-    // never disagree.
+    // never disagree, and the "now singing" chip is driven from the same value
+    // the playhead is drawn at.
+    waveNoteChip(waveNoteAt(t));
     waveDrawFrame();
   }
 
@@ -8916,6 +9900,34 @@ checkSession();
     waveSetView(0, dur);
   });
   on('ssWaveFocus', 'click', waveFocusCue);
+
+  // Snap: on by default, because a stamp that lands ON the note is the whole
+  // point of the onset index. It only ever moves the playhead a few tens of
+  // milliseconds, and the flash ring on the graph shows exactly where it went.
+  on('ssSnapOnset', 'click', function () {
+    W.snap = !W.snap;
+    var btn = $('ssSnapOnset');
+    if (btn) btn.setAttribute('aria-pressed', W.snap ? 'true' : 'false');
+    writeGraphPrefs();
+    setStatus(W.snap ? 'ok' : 'warn', W.snap
+      ? 'Snap on \u2014 clicking the graph lands on the nearest note onset.'
+      : 'Snap off \u2014 clicking the graph lands on the exact pixel.');
+    waveInvalidate();
+  });
+
+  on('ssWaveNotes', 'click', function () {
+    W.showNotes = !W.showNotes;
+    var btn = $('ssWaveNotes');
+    if (btn) btn.setAttribute('aria-pressed', W.showNotes ? 'true' : 'false');
+    writeGraphPrefs();
+    // The note ruler is part of the drawing width, so both layers must re-measure.
+    W.gut = -1;
+    waveLayout();
+    waveInvalidate();
+    waveAria();
+    waveDrawFrame();
+  });
+
   on('ssTogglePreview', 'click', function () {
     var show = !previewVisible();
     applyPreview(show);
@@ -8929,6 +9941,8 @@ checkSession();
     W.hidden = !W.hidden;
     var wrap = $('ssWaveWrap');
     if (wrap) wrap.hidden = W.hidden;
+    var card = $('ssWaveCard');
+    if (card) card.classList.toggle('is-collapsed', W.hidden);
     var btn = $('ssWaveToggle');
     if (btn) {
       btn.textContent = W.hidden ? 'Show' : 'Hide';
@@ -8947,7 +9961,8 @@ checkSession();
 
     canvas.addEventListener('pointerdown', function (e) {
       if (W.status !== 'ready') return;
-      // Landing on a cue boundary selects that line; anywhere else seeks.
+      // Landing on a cue boundary selects that line; anywhere else seeks, and
+      // seeks to the nearest note onset when snapping is on.
       var cue = waveCueAt(e.clientX);
       if (cue >= 0) {
         selectLine(cue, false);
@@ -8957,7 +9972,7 @@ checkSession();
       }
       W.dragging = true;
       try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
-      seekTo(waveTimeAt(e.clientX), false);
+      seekTo(waveSnapTo(waveTimeAt(e.clientX)), false);
       e.preventDefault();
     });
 
@@ -8985,6 +10000,66 @@ checkSession();
       if (e.key === 'Home') { e.preventDefault(); seekTo(0, false); }
       else if (e.key === 'End') { e.preventDefault(); seekTo(W.duration || S.duration || 0, false); }
     });
+  })();
+
+  // The grip under the graph: drag it (or use the arrow keys when it has focus)
+  // to decide how much of the screen the voice notes get. The choice sticks,
+  // because an admin who has zoomed the graph up wants it that way next time.
+  (function wireWaveGrip() {
+    var grip = $('ssWaveGrip');
+    var wrap = $('ssWaveWrap');
+    if (!grip || !wrap) return;
+    var startY = 0;
+    var startH = 0;
+    var active = false;
+
+    function setHeight(px) {
+      var max = Math.max(200, Math.round(window.innerHeight * 0.78));
+      var h = Math.max(96, Math.min(max, Math.round(px)));
+      wrap.style.setProperty('--ss-wave-h', h + 'px');
+      grip.setAttribute('aria-valuenow', String(h));
+      waveLayout();
+      waveInvalidate();
+      return h;
+    }
+
+    grip.addEventListener('pointerdown', function (e) {
+      active = true;
+      startY = e.clientY;
+      startH = wrap.getBoundingClientRect().height;
+      try { grip.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    });
+    grip.addEventListener('pointermove', function (e) {
+      if (!active) return;
+      setHeight(startH + (e.clientY - startY));
+    });
+    function stop(e) {
+      if (!active) return;
+      active = false;
+      try { grip.releasePointerCapture(e.pointerId); } catch (_) {}
+      writeGraphPrefs();
+    }
+    grip.addEventListener('pointerup', stop);
+    grip.addEventListener('pointercancel', stop);
+
+    grip.addEventListener('keydown', function (e) {
+      var step = e.shiftKey ? 48 : 16;
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHeight(wrap.getBoundingClientRect().height + (e.key === 'ArrowUp' ? step : -step));
+        writeGraphPrefs();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        wrap.style.removeProperty('--ss-wave-h');
+        grip.setAttribute('aria-valuenow', '0');
+        waveLayout();
+        waveInvalidate();
+        writeGraphPrefs();
+      }
+    });
+
+    grip.setAttribute('aria-valuenow', String(Math.round(wrap.getBoundingClientRect().height) || 0));
   })();
 
   (function wireWaveResize() {
@@ -9032,6 +10107,10 @@ checkSession();
   overlay.addEventListener('click', function (e) {
     if (e.target === overlay) requestClose();
   });
+
+  // Restore the admin's voice-graph choices (note lane on/off, snap on/off and
+  // the height they dragged the strip to) before the first draw.
+  applyGraphPrefs();
 
   // Public entry point used by the track table and the Lyrics pane.
   window.openSyncStudio = function (trackId) {
