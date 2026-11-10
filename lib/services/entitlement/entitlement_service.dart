@@ -210,7 +210,23 @@ class EntitlementService {
 
   /// Whether [switches] are wired at all. False when [Env.apiBaseUrl] is empty,
   /// which is the default, so the feature is inert until configured.
-  static bool get isConfigured => Env.apiBaseUrl.trim().isNotEmpty;
+  /// Public API host, used when `API_BASE_URL` was not injected at build time.
+  ///
+  /// A monetisation switch must not silently no-op because a build variable is
+  /// missing: that is exactly how a paid Razorpay subscriber showed as "Free"
+  /// in the Play build (the compiled app contained no host at all, so refresh()
+  /// returned notConfigured and never asked the server). The value is public
+  /// and non-secret; the app still trusts only the server's answer.
+  static const String fallbackBaseUrl = 'https://admin.soulfulbhakti.com';
+
+  /// Base URL for API calls: the injected value when present, else the fallback.
+  static String get baseUrl {
+    final raw = Env.apiBaseUrl.trim();
+    return (raw.isEmpty ? fallbackBaseUrl : raw).replaceAll(RegExp(r'/+$'), '');
+  }
+
+  /// Always true: the fallback host means there is always somewhere to ask.
+  static bool get isConfigured => baseUrl.isNotEmpty;
 
   /// Re-reads the entitlement for the current session.
   ///
@@ -243,7 +259,7 @@ class EntitlementService {
         return EntitlementRefreshResult.unauthenticated;
       }
 
-      final base = Env.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+      final base = baseUrl;
       final response = await http
           .get(
             Uri.parse('$base/api/razorpay/entitlement'),
