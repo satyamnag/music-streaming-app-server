@@ -122,6 +122,10 @@ class EntitlementSignal {
   static void expectUser(String? userId) {
     if (_userId != userId) reset();
     _userId = userId;
+    // A retry chain belongs to the user it was started for. Any declaration of
+    // identity cancels it, so it can never re-populate the signal with the
+    // previous account's answer.
+    EntitlementService._instance?.cancelRetry();
   }
 
   /// Whether the user may currently be treated as a Razorpay subscriber.
@@ -220,6 +224,40 @@ class EntitlementService {
   final Future<String?> Function() _tokenProvider;
 
   static const Duration _requestTimeout = Duration(seconds: 10);
+
+  /// True while a request is genuinely in flight.
+  ///
+  /// The UI uses this to show "checking" instead of "Free plan", and it is
+  /// bounded by construction: the request has a 10 s timeout and at most two
+  /// retries, so the state cannot persist. It is never a `checkedAt == null`
+  /// test, which would spin forever when the fetch can never succeed.
+  static bool get isChecking => _instance?._inFlight ?? false;
+
+  Timer? _retryTimer;
+  int _retryCount = 0;
+
+  /// Schedule one bounded retry chain (60 s apart, at most 3) after an
+  /// unanswered refresh. Every scheduler of identity change cancels it.
+  void scheduleRetry() {
+    if (_retryTimer != null || _retryCount >= 3) return;
+    _retryTimer = Timer(const Duration(seconds: 60), () {
+      _retryTimer = null;
+      _retryCount++;
+      unawaited(
+        refresh(force: true).then((result) {
+          if (result != EntitlementRefreshResult.updated) scheduleRetry();
+        }),
+      );
+    });
+  }
+
+  /// Cancels any pending retry and resets the counter. Called on sign-out and
+  /// from [EntitlementSignal.expectUser].
+  void cancelRetry() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _retryCount = 0;
+  }
 
   /// A single refresh is enough of an answer for a few seconds; this stops
   /// sign-in + resume + startup from each firing a request.
