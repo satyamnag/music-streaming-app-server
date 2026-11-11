@@ -216,7 +216,11 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
       } else if (!authState.signedIn) {
         // Signing out must drop the web-rail claim immediately; otherwise the
         // next user on this device could inherit it until it expires.
-        EntitlementSignal.reset();
+        //
+        // expectUser(null) is used rather than reset(): it clears the owner,
+        // the answer AND cancels any pending retry chain, so a timer scheduled
+        // for this user cannot fire after sign-out and repopulate the signal.
+        EntitlementSignal.expectUser(null);
         await sw.reset();
         await os.logout();
         await ph.reset();
