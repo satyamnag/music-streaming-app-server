@@ -104,6 +104,26 @@ class EntitlementSignal {
   /// When the last successful server answer was received.
   static DateTime? get checkedAt => _checkedAt;
 
+  /// The user this answer was fetched FOR.
+  ///
+  /// The signal used to be global: after an account switch on the same device
+  /// the previous user's "active" answer survived (its 30-minute window had not
+  /// expired), so a user who never paid was shown another account's
+  /// subscription and could play premium tracks. `expectUser` runs on every
+  /// resolved auth state and discards the old answer when the id differs,
+  /// before anything can read it.
+  static String? _userId;
+
+  /// The user the current answer belongs to (null when nothing is held).
+  static String? get userId => _userId;
+
+  /// Declares whose entitlement is expected next; resets when the account
+  /// changed. Calling it again with the same id is a no-op.
+  static void expectUser(String? userId) {
+    if (_userId != userId) reset();
+    _userId = userId;
+  }
+
   /// Whether the user may currently be treated as a Razorpay subscriber.
   static bool get isActive => entitlementIsActive(
     active: _active,

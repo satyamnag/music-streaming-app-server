@@ -206,7 +206,13 @@ class ClerkAuthNotifier extends AsyncNotifier<ClerkAuthState> {
         // deliberately last: every call above is awaited in sequence, and a
         // monetisation lookup must never cost the sign-in its push/analytics
         // wiring if it is slow.
-        await EntitlementService.refreshIfConfigured();
+        // Bind the cached answer to THIS user before refreshing. Without this
+        // an account switch inherited the previous user's subscription for up
+        // to 30 minutes; expectUser() clears it as soon as the id differs.
+        EntitlementSignal.expectUser(authState.userId);
+        await EntitlementService.refreshIfConfigured(
+          force: EntitlementSignal.checkedAt == null,
+        );
       } else if (!authState.signedIn) {
         // Signing out must drop the web-rail claim immediately; otherwise the
         // next user on this device could inherit it until it expires.
