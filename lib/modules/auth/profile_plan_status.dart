@@ -153,9 +153,10 @@ class ProfilePlanStatus extends HookConsumerWidget {
           // "Checking" while a request is genuinely in flight, so a paying user
           // never sees "Free plan" first. Bounded by the request's own timeout
           // and retries (see EntitlementService.isChecking) - this is NOT a
-          // `checkedAt == null` test, which could spin forever.
-          if (loading.value ||
-              (!isPremium && kIsAndroid && EntitlementService.isChecking))
+          // `checkedAt == null` test, which could spin forever. isChecking is
+          // already false on platforms without the service, so no platform
+          // check is needed here.
+          if (loading.value || (!isPremium && EntitlementService.isChecking))
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: SizedBox(
