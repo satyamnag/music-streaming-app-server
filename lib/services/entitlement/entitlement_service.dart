@@ -272,15 +272,22 @@ class EntitlementService {
     _inFlight = true;
     _lastAttempt = DateTime.now();
     try {
-      final token = await (tokenProvider ?? _tokenProvider)();
+      var token = await (tokenProvider ?? _tokenProvider)();
       if (token == null || token.isEmpty) {
-        // The Clerk session token is not minted yet (the usual state in the
-        // first moment after sign-in). This is NOT proof that the user is not
-        // entitled, so the previous answer is left to expire on its own
-        // (maxAge) instead of being wiped - wiping it here made a paying user
-        // show "Free plan" right after signing in, until the 30-minute window
-        // or the next forced refresh.
-        return EntitlementRefreshResult.unauthenticated;
+        // Bounded retry. Right after sign-in the Clerk session token is often
+        // not minted yet, and this used to be ask-once-then-give-up: the paid
+        // user then sat on "Free plan" until the next resume (and the debounce
+        // could skip even that). Two short attempts cost at most ~3 s and only
+        // run when there is nothing to send.
+        for (var attempt = 0; attempt < 2 && (token == null || token.isEmpty); attempt++) {
+          await Future<void>.delayed(const Duration(milliseconds: 1500));
+          token = await (tokenProvider ?? _tokenProvider)();
+        }
+        if (token == null || token.isEmpty) {
+          // Still nothing: the previous answer (if any) is left to expire on
+          // its own rather than being wiped.
+          return EntitlementRefreshResult.unauthenticated;
+        }
       }
 
       final base = baseUrl;
