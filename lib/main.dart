@@ -295,19 +295,24 @@ Future<void> main(List<String> rawArgs) async {
         if (looksValid) {
           // Bounded: OneSignal init is a network/SDK call that can stall on
           // slow or unreachable networks; skip it rather than block startup.
-          try {
-            await OneSignalService.instance
-                .initialize(appId)
-                .timeout(const Duration(seconds: 10));
-            // Listeners are attached ONLY after a successful initialize: the
-            // SDK discards listeners registered before init, so attaching
-            // earlier would compile, run, and silently never fire.
-            _registerOneSignalListeners();
-            // Keeps in-app messages off the player while audio is running.
-            _followPlaybackForInAppMessages();
-          } catch (_) {
-            // OneSignal init stalled/hung — continue without push messaging.
-          }
+          // NOT awaited: this used to block runApp() for up to 10 seconds on a
+          // slow network (measured cold start: 5.75 s). Push messaging is not
+          // needed to paint the first frame, so it now runs alongside it.
+          unawaited(() async {
+            try {
+              await OneSignalService.instance
+                  .initialize(appId)
+                  .timeout(const Duration(seconds: 10));
+              // Listeners are attached ONLY after a successful initialize: the
+              // SDK discards listeners registered before init, so attaching
+              // earlier would compile, run, and silently never fire.
+              _registerOneSignalListeners();
+              // Keeps in-app messages off the player while audio is running.
+              _followPlaybackForInAppMessages();
+            } catch (_) {
+              // OneSignal init stalled/hung — continue without push messaging.
+            }
+          }());
         } else {
           AppLogger.log.w(
             'ONESIGNAL_APP_ID in .env is not a valid OneSignal App ID '
@@ -326,14 +331,19 @@ Future<void> main(List<String> rawArgs) async {
     // of the intermittent 2-3 minute cold-start stall at the splash screen. A
     // timeout simply skips best-effort affiliate attribution.
     if (kIsAndroid) {
-      try {
-        await ReferrerService.instance
-            .readReferrer()
-            .timeout(const Duration(seconds: 5));
-      } catch (_) {
-        // Referrer read hung (no reliable Google Play Services) — skip
-        // best-effort attribution instead of stalling startup.
-      }
+      // NOT awaited either: this native channel is bounded at 5 s and its own
+      // comment names it as the cause of the splash-screen stall. Best-effort
+      // attribution must never hold the first frame.
+      unawaited(() async {
+        try {
+          await ReferrerService.instance
+              .readReferrer()
+              .timeout(const Duration(seconds: 5));
+        } catch (_) {
+          // Referrer read hung (no reliable Google Play Services) — skip
+          // best-effort attribution instead of stalling startup.
+        }
+      }());
     }
 
     runApp(
