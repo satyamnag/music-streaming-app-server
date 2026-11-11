@@ -6,6 +6,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/premium/paid_crown_badge.dart';
 import 'package:sangeet/modules/monetization/premium_access.dart';
+import 'package:sangeet/services/entitlement/entitlement_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
@@ -104,6 +105,16 @@ class ProfilePlanStatus extends HookConsumerWidget {
       }
     }
 
+    // Superwall's CustomerInfo only knows about PLAY purchases. A subscription
+    // bought through Razorpay on the web is granted by EntitlementSignal, so
+    // this card used to say "Free plan" to a user who could already play every
+    // paid track. Both rails are read here; the gate that decides playback is
+    // PremiumAccess, and this card must agree with it.
+    final bool webActive = activeSub == null && EntitlementSignal.isActive;
+    final bool isPremium = activeSub != null || webActive;
+    final String webPlan = EntitlementSignal.plan ?? 'yearly';
+    final DateTime? webEnd = EntitlementSignal.currentEnd;
+
     final primary = theme.colorScheme.primary;
 
     /// Detail lines for a PAID plan: the same facts the popup listed, as one
@@ -157,7 +168,9 @@ class ProfilePlanStatus extends HookConsumerWidget {
               runSpacing: 6 * scale,
               children: [
                 Text(
-                  activeSub != null ? _planName(activeSub.productId) : 'Free plan',
+                  activeSub != null
+                      ? _planName(activeSub.productId)
+                      : (webActive ? _planName(webPlan) : 'Free plan'),
                   style: theme.typography.h4.copyWith(
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.foreground,
@@ -170,12 +183,16 @@ class ProfilePlanStatus extends HookConsumerWidget {
             Text(
               activeSub != null
                   ? paidDetail(activeSub)
-                  : 'Enjoy devotional music and bhakti playlists',
+                  : (webActive
+                      ? (webEnd != null
+                          ? 'Active until ${_fmtDate(webEnd)}'
+                          : 'Active subscription')
+                      : 'Enjoy devotional music and bhakti playlists'),
               style: theme.typography.small.copyWith(
                 color: theme.colorScheme.mutedForeground,
               ),
             ),
-            if (activeSub == null) ...[
+            if (!isPremium) ...[
               Gap(14 * scale),
               SizedBox(
                 width: double.infinity,
