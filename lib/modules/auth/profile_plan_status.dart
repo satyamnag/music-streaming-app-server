@@ -150,13 +150,10 @@ class ProfilePlanStatus extends HookConsumerWidget {
             ),
           ),
           Gap(10 * scale),
-          // "Checking" while a request is genuinely in flight, so a paying user
-          // never sees "Free plan" first. Bounded by the request's own timeout
-          // and retries (see EntitlementService.isChecking) - this is NOT a
-          // `checkedAt == null` test, which could spin forever. isChecking is
-          // already false on platforms without the service, so no platform
-          // check is needed here.
-          if (loading.value || (!isPremium && EntitlementService.isChecking))
+          // "Checking" while an answer for this user is still outstanding, so a
+          // paying user never sees "Free plan" first. isPending is bounded at
+          // 45 s, so it can never become a permanent spinner.
+          if (loading.value || (!isPremium && EntitlementSignal.isPending))
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: SizedBox(

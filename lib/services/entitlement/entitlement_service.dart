@@ -122,10 +122,28 @@ class EntitlementSignal {
   static void expectUser(String? userId) {
     if (_userId != userId) reset();
     _userId = userId;
+    // Marks that a fetch is owed for this user, so the UI can say "checking"
+    // instead of "Free plan" until the first answer for them arrives.
+    _requestedAt = userId == null ? null : DateTime.now();
     // A retry chain belongs to the user it was started for. Any declaration of
     // identity cancels it, so it can never re-populate the signal with the
     // previous account's answer.
     EntitlementService._instance?.cancelRetry();
+  }
+
+  /// When a fetch was first owed for the current user (null when none).
+  static DateTime? _requestedAt;
+
+  /// True while an answer for the current user is still outstanding.
+  ///
+  /// Bounded at 45 s: the request has a 10 s timeout and two 1.5 s token
+  /// retries, so by then either an answer exists (making this false) or the
+  /// session cannot produce one and the UI must show a real state rather than
+  /// spin forever.
+  static bool get isPending {
+    final requested = _requestedAt;
+    if (requested == null || _checkedAt != null || _userId == null) return false;
+    return DateTime.now().difference(requested) < const Duration(seconds: 45);
   }
 
   /// Whether the user may currently be treated as a Razorpay subscriber.
@@ -156,6 +174,7 @@ class EntitlementSignal {
     _plan = null;
     _currentEnd = null;
     _checkedAt = null;
+    _requestedAt = null;
   }
 }
 
