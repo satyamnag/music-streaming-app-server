@@ -274,8 +274,12 @@ class EntitlementService {
     try {
       final token = await (tokenProvider ?? _tokenProvider)();
       if (token == null || token.isEmpty) {
-        // Signed out (or the token could not be minted): the claim is void.
-        EntitlementSignal.reset();
+        // The Clerk session token is not minted yet (the usual state in the
+        // first moment after sign-in). This is NOT proof that the user is not
+        // entitled, so the previous answer is left to expire on its own
+        // (maxAge) instead of being wiped - wiping it here made a paying user
+        // show "Free plan" right after signing in, until the 30-minute window
+        // or the next forced refresh.
         return EntitlementRefreshResult.unauthenticated;
       }
 
@@ -288,7 +292,10 @@ class EntitlementService {
           .timeout(_requestTimeout);
 
       if (response.statusCode == 401) {
-        EntitlementSignal.reset();
+        // Same reasoning as an absent token: a 401 here means the session was
+        // not ready (or was just rejected), not that the subscription is gone.
+        // Sign-out clears the signal explicitly, and a revoked subscription
+        // still expires via maxAge/current_end. Do not reset here.
         return EntitlementRefreshResult.unauthenticated;
       }
       if (response.statusCode != 200) {
