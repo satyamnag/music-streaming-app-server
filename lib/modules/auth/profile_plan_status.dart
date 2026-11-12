@@ -85,7 +85,16 @@ class PlanCardView {
 }
 
 /// The card's decision rule. Pure: no clocks, no channels, no providers.
+///
+/// [signedIn] is NOT optional on purpose. Superwall keeps a status for the
+/// ANONYMOUS device user too, so a fresh install with nobody signed in reports
+/// `subscriptionStatus.isActive` — measured on a real phone, where the card read
+/// "Premium Plan" above "You are not signed in". The playback gate never had
+/// that hole: `PremiumAccess.isPremiumUser` is
+/// `signedIn && (...)`. The card applies the same AND here, in one place, so no
+/// future source can be added without it.
 PlanCardView planCardView({
+  required bool signedIn,
   required CustomerInfo? info,
   required bool playActive,
   required bool webActive,
@@ -94,6 +103,17 @@ PlanCardView planCardView({
   required bool loading,
   required bool entitlementPending,
 }) {
+  // Nobody is premium while signed out — same rule as the gate that decides
+  // whether a paid track actually plays.
+  if (!signedIn) {
+    return const PlanCardView(
+      isPremium: false,
+      isChecking: false,
+      planName: 'Free plan',
+      detail: 'Enjoy devotional music and bhakti playlists',
+    );
+  }
+
   SubscriptionTransaction? activeSub;
   for (final sub in info?.subscriptions ?? const <SubscriptionTransaction>[]) {
     if (sub.isActive && !sub.isRevoked) {
@@ -236,6 +256,9 @@ class ProfilePlanStatus extends HookConsumerWidget {
     }, []);
 
     final view = planCardView(
+      // The gate's own sign-in test, so the card cannot claim a plan for the
+      // anonymous device user Superwall also keeps a status for.
+      signedIn: PremiumAccess.isSignedIn(ref),
       info: customerInfo.value,
       playActive: playActive.value,
       webActive: EntitlementSignal.isActive,

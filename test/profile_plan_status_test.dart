@@ -53,8 +53,10 @@ PlanCardView _view({
   DateTime? webEnd,
   bool loading = false,
   bool entitlementPending = false,
+  bool signedIn = true,
 }) =>
     planCardView(
+      signedIn: signedIn,
       info: info,
       playActive: playActive,
       webActive: webActive,
@@ -111,6 +113,29 @@ void main() {
 
       expect(view.isPremium, isFalse);
       expect(view.planName, 'Free plan');
+    });
+  });
+
+  group('signed out is never premium', () {
+    // Measured on a real phone: a fresh install with nobody signed in showed
+    // "Premium Plan" above "You are not signed in", because Superwall keeps a
+    // status for the ANONYMOUS device user too. The playback gate always ANDed
+    // this with sign-in; the card must apply the same rule.
+    test('an anonymous Superwall status does not name a plan', () {
+      final view = _view(
+        signedIn: false,
+        info: _info(
+          subscriptions: [_tx()],
+          entitlements: [Entitlement(id: 'premium', isActive: true)],
+        ),
+        playActive: true,
+        webActive: true,
+        webPlan: 'yearly',
+      );
+
+      expect(view.isPremium, isFalse);
+      expect(view.planName, 'Free plan');
+      expect(view.isChecking, isFalse);
     });
   });
 
