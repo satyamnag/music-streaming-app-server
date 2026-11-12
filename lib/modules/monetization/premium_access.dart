@@ -66,6 +66,18 @@ class PremiumAccess {
       isSignedIn(ref) &&
       (_subscriptionStatus.isActive || EntitlementSignal.isActive);
 
+  /// Whether Superwall currently grants the Play rail (the exact field
+  /// [isPremiumUser] reads).
+  ///
+  /// Surfaced for the profile card, which used to re-derive the plan from
+  /// `CustomerInfo.subscriptions` — the LOCAL transaction list — while this gate
+  /// reads `subscriptionStatus`, which Superwall derives from the user's ACTIVE
+  /// ENTITLEMENTS. A subscriber whose entitlement was validated server-side
+  /// (purchase recovered, renewed, or attached to the account) can therefore
+  /// have an active entitlement with no local transaction: tracks unlocked,
+  /// card said "Free plan". The card must read the gate, not its own guess.
+  static bool get isPlaySubscriptionActive => _subscriptionStatus.isActive;
+
   /// Whether this build requires a signed-in user before ANY track can be
   /// listened to, free or paid.
   ///

@@ -28,7 +28,14 @@ void main() {
 
     test('the published collapsed height is the one the bar renders', () {
       // The regression was a stale constant, so pin the constant's own value.
-      expect(kNavigationBarHeight, 64);
+      //
+      // 64 -> 76: the labelled bar needs 1dp divider + 74dp of NavigationBar
+      // content = 75dp, which 64 clipped — the labels ended up flush with the
+      // bottom edge, which is the defect the owner reported.
+      // `test/bottom_nav_geometry_test.dart` measures the REAL widget and fails
+      // if its content ever exceeds this constant again, so the two guard the
+      // same number from both sides.
+      expect(kNavigationBarHeight, 76);
     });
   });
 

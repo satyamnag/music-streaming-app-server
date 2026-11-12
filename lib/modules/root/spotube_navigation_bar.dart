@@ -18,12 +18,21 @@ import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart
 ///
 /// 50 was enough for icon-only tabs. A labelled tab adds the label line under
 /// the icon, and at 50 the label was laid out but clipped away by the bar's own
-/// height, so the bar showed four bare icons. 64 is the height the reference
-/// design uses and leaves room for icon + label.
+/// height, so the bar showed four bare icons. 64 was the next guess, and it was
+/// still 11dp SHORT of what the bar actually needs: with `labelType: all`,
+/// `labelPosition: bottom` and `labelSize: small` the real content measures
+/// 1 (divider) + 74 (NavigationBar) = 75dp at the theme scaling this app uses
+/// (`AdaptiveScaling(1)`), which left the labels sitting flush against the
+/// bottom edge of the bar and cut the NavigationBar's own 15dp bottom padding.
+///
+/// 76 is that measured 75 plus 1dp of slack for rounding, so the label always
+/// keeps its designed clearance above the bottom edge. `test/bottom_nav_
+/// geometry_test.dart` measures the REAL NavigationBar and fails if the content
+/// ever grows past this constant again — change the constant, never the test.
 ///
 /// The player's slide maths reads this same constant (see
 /// `player_overlay.dart` and `player.dart`), so the three cannot drift.
-const double kNavigationBarHeight = 64;
+const double kNavigationBarHeight = 76;
 
 final navigationPanelHeight =
     StateProvider<double>((ref) => kNavigationBarHeight);
@@ -132,6 +141,11 @@ class SangeetNavigationBar extends HookConsumerWidget {
       duration: const Duration(milliseconds: 100),
       height: panelHeight,
       child: SingleChildScrollView(
+        // The scroll view exists only so the bar can CLIP as it animates away
+        // behind the full player: with a fixed height the content must be able
+        // to exceed the box without throwing a layout error. It must never be a
+        // scrollable surface, though — dragging the bar itself used to move it.
+        physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
             const Divider(),

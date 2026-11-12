@@ -10,6 +10,168 @@ import 'package:sangeet/services/entitlement/entitlement_service.dart';
 import 'package:sangeet/services/superwall_service.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
+/// Exact Google Play Console product ids for the two subscription plans.
+/// Matched first so plan names never depend on a keyword heuristic.
+const String kMonthlyProductId = 'soulful_monthly';
+const String kYearlyProductId = 'soulful_yearly';
+
+String _fmtDate(DateTime? d) {
+  if (d == null) return '-';
+  final y = d.year.toString().padLeft(4, '0');
+  final m = d.month.toString().padLeft(2, '0');
+  final day = d.day.toString().padLeft(2, '0');
+  return '$y-$m-$day';
+}
+
+bool _isYearly(String productId) =>
+    productId == kYearlyProductId ||
+    productId.toLowerCase().contains('year') ||
+    productId.toLowerCase().contains('annual') ||
+    productId.toLowerCase().contains('12');
+
+bool _isMonthly(String productId) =>
+    productId == kMonthlyProductId || productId.toLowerCase().contains('month');
+
+/// Human name for a store product id ("soulful_yearly" -> "Yearly Plan").
+String planNameFor(String productId) {
+  if (_isYearly(productId)) return 'Yearly Plan';
+  if (_isMonthly(productId)) return 'Monthly Plan';
+  return productId;
+}
+
+/// Everything the "YOUR SUBSCRIPTION" card needs to draw, decided in one pure
+/// function so the rule can be unit-tested without Superwall or a device.
+///
+/// ## Why this exists (the bug it fixes)
+///
+/// The card used to derive the plan from `CustomerInfo.subscriptions` ONLY —
+/// the *local transaction list*. The playback gate
+/// (`PremiumAccess.isPremiumUser`) reads `subscriptionStatus`, which Superwall
+/// derives from the user's **active entitlements**. Those two are not the same
+/// list: a Google Play subscriber whose purchase was validated server-side
+/// (recovered on a new install, renewed, or attached to an existing account)
+/// can hold an active entitlement while `subscriptions` is empty.
+///
+/// The result was exactly what the owner reported: locked tracks unlocked, but
+/// the card said "Free plan / Upgrade to Pro". A card must never contradict the
+/// gate that actually decides playback, so the precedence here is:
+///
+///   1. an active `SubscriptionTransaction`   — richest detail (dates, renewal);
+///   2. an active `Entitlement`               — what actually grants access;
+///   3. Superwall's `subscriptionStatus`      — the gate's own field;
+///   4. the server-verified Razorpay/web answer.
+///
+/// Free is therefore only shown when **every** source says free.
+class PlanCardView {
+  const PlanCardView({
+    required this.isPremium,
+    required this.isChecking,
+    required this.planName,
+    required this.detail,
+  });
+
+  /// Whether the listener holds a paid plan on EITHER rail.
+  final bool isPremium;
+
+  /// Whether an answer is still outstanding: the card shows a spinner instead
+  /// of a plan name, so a paying user never sees "Free plan" first.
+  final bool isChecking;
+
+  /// Plan title, e.g. "Yearly Plan", or "Free plan".
+  final String planName;
+
+  /// One muted line of detail under the title.
+  final String detail;
+}
+
+/// The card's decision rule. Pure: no clocks, no channels, no providers.
+PlanCardView planCardView({
+  required CustomerInfo? info,
+  required bool playActive,
+  required bool webActive,
+  required String? webPlan,
+  required DateTime? webEnd,
+  required bool loading,
+  required bool entitlementPending,
+}) {
+  SubscriptionTransaction? activeSub;
+  for (final sub in info?.subscriptions ?? const <SubscriptionTransaction>[]) {
+    if (sub.isActive && !sub.isRevoked) {
+      activeSub = sub;
+      break;
+    }
+  }
+
+  Entitlement? activeEntitlement;
+  for (final ent in info?.entitlements ?? const <Entitlement>[]) {
+    if (ent.isActive) {
+      activeEntitlement = ent;
+      break;
+    }
+  }
+
+  final isPremium =
+      activeSub != null || activeEntitlement != null || playActive || webActive;
+
+  // Only the web rail is active: it is the one answer that carries a plan slug
+  // and an end date without Superwall's involvement.
+  final webOnly = activeSub == null &&
+      activeEntitlement == null &&
+      !playActive &&
+      webActive;
+
+  final String planName;
+  final String detail;
+
+  if (activeSub != null) {
+    planName = planNameFor(activeSub.productId);
+    final start = _fmtDate(activeSub.purchaseDate);
+    final end = activeSub.expirationDate != null
+        ? _fmtDate(activeSub.expirationDate)
+        : (activeSub.willRenew ? 'renews automatically' : '-');
+    final renew =
+        activeSub.willRenew ? ' · auto-renew on' : ' · auto-renew off';
+    detail = 'Started $start · valid until $end$renew';
+  } else if (activeEntitlement != null) {
+    // The entitlement's own product id is the most specific name available.
+    planName = activeEntitlement.latestProductId != null
+        ? planNameFor(activeEntitlement.latestProductId!)
+        : 'Premium Plan';
+    if (activeEntitlement.expiresAt != null) {
+      final start = activeEntitlement.startsAt != null
+          ? _fmtDate(activeEntitlement.startsAt)
+          : '-';
+      final renew =
+          activeEntitlement.willRenew == true ? ' · auto-renew on' : '';
+      detail =
+          'Started $start · valid until ${_fmtDate(activeEntitlement.expiresAt)}$renew';
+    } else if (activeEntitlement.isLifetime == true) {
+      detail = 'Lifetime access';
+    } else {
+      detail = 'Active subscription';
+    }
+  } else if (playActive) {
+    // The gate says premium but Superwall has not handed us the detail yet.
+    planName = 'Premium Plan';
+    detail = 'Active subscription';
+  } else if (webOnly) {
+    planName = planNameFor(webPlan ?? 'yearly');
+    detail = webEnd != null
+        ? 'Active until ${_fmtDate(webEnd)}'
+        : 'Active subscription';
+  } else {
+    planName = 'Free plan';
+    detail = 'Enjoy devotional music and bhakti playlists';
+  }
+
+  return PlanCardView(
+    isPremium: isPremium,
+    isChecking: !isPremium && (loading || entitlementPending),
+    planName: planName,
+    detail: detail,
+  );
+}
+
 /// The "YOUR SUBSCRIPTION" card on the profile screen.
 ///
 /// Shows the listener's real plan, exactly as the reference design lays it out:
@@ -17,47 +179,12 @@ import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 /// badge, one line of description and — on the free plan — a full-width
 /// "Upgrade to Pro" button.
 ///
-/// The data is unchanged from the popup this replaced: [SuperwallService]'s
-/// [CustomerInfo], whose active, non-revoked [SubscriptionTransaction] (when
-/// there is one) supplies the plan name, the duration and the start/end dates.
-/// The upgrade button runs the same [PremiumAccess.promptForPaidPlan] gate and
-/// then re-reads the customer info, so a fresh purchase is reflected
-/// immediately.
+/// **The card must agree with the playback gate.** Both rails are read here
+/// through [planCardView], whose precedence is documented on that function; the
+/// Play verdict comes from [PremiumAccess.isPlaySubscriptionActive], the same
+/// field `isPremiumUser` uses, so the two cannot disagree again.
 class ProfilePlanStatus extends HookConsumerWidget {
   const ProfilePlanStatus({super.key});
-
-  /// Exact Google Play Console product ids for the two subscription plans.
-  /// Matched first so plan names never depend on the keyword heuristic below.
-  static const String monthlyProductId = 'soulful_monthly';
-  static const String yearlyProductId = 'soulful_yearly';
-
-  String _fmtDate(DateTime? d) {
-    if (d == null) return '-';
-    final y = d.year.toString().padLeft(4, '0');
-    final m = d.month.toString().padLeft(2, '0');
-    final day = d.day.toString().padLeft(2, '0');
-    return '$y-$m-$day';
-  }
-
-  bool _isYearly(String productId) =>
-      productId == yearlyProductId ||
-      productId.toLowerCase().contains('year') ||
-      productId.toLowerCase().contains('annual') ||
-      productId.toLowerCase().contains('12');
-
-  bool _isMonthly(String productId) =>
-      productId == monthlyProductId ||
-      productId.toLowerCase().contains('month');
-
-  String _planName(String productId) {
-    if (_isYearly(productId)) {
-      return 'Yearly Plan';
-    }
-    if (_isMonthly(productId)) {
-      return 'Monthly Plan';
-    }
-    return productId;
-  }
 
   @override
   Widget build(BuildContext context, ref) {
@@ -65,10 +192,15 @@ class ProfilePlanStatus extends HookConsumerWidget {
     final scale = theme.scaling;
     final customerInfo = useState<CustomerInfo?>(null);
     final loading = useState(true);
+    // The gate's own Play verdict, seeded from [PremiumAccess] and kept current
+    // by the same stream that feeds it, so the card can never contradict the
+    // gate that decides whether a paid track plays.
+    final playActive = useState<bool>(PremiumAccess.isPlaySubscriptionActive);
 
     useEffect(() {
       var active = true;
-      StreamSubscription<CustomerInfo>? sub;
+      StreamSubscription<CustomerInfo>? infoSub;
+      StreamSubscription<SubscriptionStatus>? statusSub;
 
       // Initial load: show the spinner until the first info arrives.
       SuperwallService.instance.getCustomerInfo().then((info) {
@@ -82,52 +214,38 @@ class ProfilePlanStatus extends HookConsumerWidget {
       // Refresh whenever customer info changes (e.g. immediately after a
       // checkout or restore completes anywhere in the app), so the plan name,
       // start date and expiry date always reflect the current subscription.
-      sub = SuperwallService.instance.customerInfoStream.listen((info) {
+      infoSub = SuperwallService.instance.customerInfoStream.listen((info) {
         if (!active || !context.mounted) return;
         customerInfo.value = info;
         loading.value = false;
       });
 
+      // The gate's signal. `CustomerInfo` alone is not enough: it lists LOCAL
+      // transactions, while access comes from entitlements / subscriptionStatus
+      // (see planCardView).
+      statusSub = SuperwallService.instance.subscriptionStatus.listen((status) {
+        if (!active || !context.mounted) return;
+        playActive.value = status.isActive;
+      });
+
       return () {
         active = false;
-        sub?.cancel();
+        infoSub?.cancel();
+        statusSub?.cancel();
       };
     }, []);
 
-    final info = customerInfo.value;
-    SubscriptionTransaction? activeSub;
-    if (info != null) {
-      for (final sub in info.subscriptions) {
-        if (sub.isActive && !sub.isRevoked) {
-          activeSub = sub;
-          break;
-        }
-      }
-    }
-
-    // Superwall's CustomerInfo only knows about PLAY purchases. A subscription
-    // bought through Razorpay on the web is granted by EntitlementSignal, so
-    // this card used to say "Free plan" to a user who could already play every
-    // paid track. Both rails are read here; the gate that decides playback is
-    // PremiumAccess, and this card must agree with it.
-    final bool webActive = activeSub == null && EntitlementSignal.isActive;
-    final bool isPremium = activeSub != null || webActive;
-    final String webPlan = EntitlementSignal.plan ?? 'yearly';
-    final DateTime? webEnd = EntitlementSignal.currentEnd;
+    final view = planCardView(
+      info: customerInfo.value,
+      playActive: playActive.value,
+      webActive: EntitlementSignal.isActive,
+      webPlan: EntitlementSignal.plan,
+      webEnd: EntitlementSignal.currentEnd,
+      loading: loading.value,
+      entitlementPending: EntitlementSignal.isPending,
+    );
 
     final primary = theme.colorScheme.primary;
-
-    /// Detail lines for a PAID plan: the same facts the popup listed, as one
-    /// muted sentence instead of a table, so the card keeps the reference's
-    /// shape at both ends of the plan spectrum.
-    String paidDetail(SubscriptionTransaction sub) {
-      final start = _fmtDate(sub.purchaseDate);
-      final end = sub.expirationDate != null
-          ? _fmtDate(sub.expirationDate)
-          : (sub.willRenew ? 'renews automatically' : '-');
-      final renew = sub.willRenew ? ' · auto-renew on' : ' · auto-renew off';
-      return 'Started $start · valid until $end$renew';
-    }
 
     return Container(
       width: double.infinity,
@@ -153,7 +271,7 @@ class ProfilePlanStatus extends HookConsumerWidget {
           // "Checking" while an answer for this user is still outstanding, so a
           // paying user never sees "Free plan" first. isPending is bounded at
           // 45 s, so it can never become a permanent spinner.
-          if (loading.value || (!isPremium && EntitlementSignal.isPending))
+          if (view.isChecking)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: SizedBox(
@@ -171,9 +289,7 @@ class ProfilePlanStatus extends HookConsumerWidget {
               runSpacing: 6 * scale,
               children: [
                 Text(
-                  activeSub != null
-                      ? _planName(activeSub.productId)
-                      : (webActive ? _planName(webPlan) : 'Free plan'),
+                  view.planName,
                   style: theme.typography.h4.copyWith(
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.foreground,
@@ -184,18 +300,12 @@ class ProfilePlanStatus extends HookConsumerWidget {
             ),
             Gap(6 * scale),
             Text(
-              activeSub != null
-                  ? paidDetail(activeSub)
-                  : (webActive
-                      ? (webEnd != null
-                          ? 'Active until ${_fmtDate(webEnd)}'
-                          : 'Active subscription')
-                      : 'Enjoy devotional music and bhakti playlists'),
+              view.detail,
               style: theme.typography.small.copyWith(
                 color: theme.colorScheme.mutedForeground,
               ),
             ),
-            if (!isPremium) ...[
+            if (!view.isPremium) ...[
               Gap(14 * scale),
               SizedBox(
                 width: double.infinity,

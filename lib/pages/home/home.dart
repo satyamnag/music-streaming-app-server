@@ -395,7 +395,22 @@ class _HomeHeaderRow extends StatelessWidget {
               context.navigateTo(const SearchRoute());
             },
           ),
-          const Gap(10),
+          // 2dp between the two actions, measured, not guessed. Each
+          // `IconButton.ghost` is a 36dp box (20dp glyph + 8dp padding per side),
+          // so this puts the GLYPHS 8 + 2 + 8 = 18dp apart — exactly the 18dp
+          // that the trailing `Gap(10)` plus the bell's own 8dp padding leaves
+          // between the bell's glyph and the screen edge (360 - 10 - 8 = 342).
+          // Search and bell are therefore evenly spaced from each other AND from
+          // the edge, which is what makes the pair read as one deliberate group
+          // instead of two icons that drifted apart (with the old 10dp gap here
+          // the glyphs measured 26dp apart against an 18dp edge inset).
+          // Changing either the gap or the trailing inset breaks the equality.
+          //
+          // Tap targets are unchanged: each button keeps its full 36dp hit area
+          // and the two areas stay non-overlapping. (A Material-sized 48dp box
+          // would force a 28dp glyph gap and cannot be made even without moving
+          // the icons further apart than they are now.)
+          const Gap(2),
           // Notifications: the OneSignal push + in-app-message inbox, with the
           // unseen count on the bell. Sits right of search, as in the reference.
           NotificationBell(color: color, shadows: shadows),
