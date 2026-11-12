@@ -31,12 +31,12 @@
                          "@aws-sdk/client-s3":  "^3.1111.0",
                          "@aws-sdk/client-secrets-manager":  "^3.1111.0",
                          "@clerk/backend":  "^1.27.0",
-                         "@supabase/supabase-js":  "2.49.1",
+                         "@supabase/supabase-js":  "2.119.0",
                          "cors":  "^2.8.5",
                          "dotenv":  "^17.4.2",
-                         "express":  "^4.21.0",
+                         "express":  "^4.22.3",
                          "express-rate-limit":  "^8.6.2",
-                         "multer":  "^2.2.0",
+                         "multer":  "^2.5.0",
                          "qrcode":  "^1.5.4"
                      },
     "devDependencies":  {
