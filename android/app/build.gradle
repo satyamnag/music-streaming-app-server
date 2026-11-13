@@ -88,6 +88,21 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            // R8 code shrinking + resource shrinking.
+            //
+            // Play Console ("Improve your app's memory and performance with R8
+            // optimization") requires an optimized release build; until now this
+            // module shipped with BOTH disabled, so no dead code was removed and
+            // no unused resource was stripped.
+            // https://developer.android.com/google/play/vitals/code-optimization
+            //
+            // `proguard-android-optimize.txt` (not the default
+            // `proguard-android.txt`) is what enables the optimising passes; the
+            // project's own rules add the reflection-heavy SDKs' keeps.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
             // Enable Crashlytics native symbol upload so native stack traces
             // are symbolicated in the Crashlytics dashboard.
             firebaseCrashlytics {

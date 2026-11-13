@@ -61,3 +61,24 @@
 -dontwarn jdk.dynalink.linker.support.CompositeTypeBasedGuardingDynamicLinker
 -dontwarn jdk.dynalink.linker.support.Guards
 -dontwarn jdk.dynalink.support.ChainedCallSite
+## ---------------------------------------------------------------------------
+## R8: keeps for the reflection-heavy SDKs.
+##
+## minifyEnabled is now on (Play's R8 advisory). These four SDKs resolve their own
+## classes by name (serialization, JSON binding, OAuth callbacks, notification
+## receivers, paywall reflection), so they are kept whole rather than shaved -
+## losing one of them breaks sign-in, purchases or push at runtime, which is far
+## worse than the few hundred KB they cost.
+## ---------------------------------------------------------------------------
+-keep class com.clerk.** { *; }
+-keep class com.superwall.** { *; }
+-keep class com.onesignal.** { *; }
+-keep class com.posthog.** { *; }
+-keep class com.ryanheise.** { *; }
+
+## WorkManager instantiates workers by class name; Glance schedules them.
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+
+## Keep the app's own entry points that the framework constructs by name.
+-keep class com.sangeet.app.** { *; }

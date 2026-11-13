@@ -1,8 +1,9 @@
 package com.sangeet.app.glance.widgets
 
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import kotlin.math.roundToInt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +24,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.sangeet.app.glance.Breakpoints
+import com.sangeet.app.glance.decodeSampledBitmap
+import com.sangeet.app.glance.decodeSampledResource
 import com.sangeet.app.glance.models.Track
 
 @Composable
@@ -35,24 +38,30 @@ fun TrackDetailsView(activeTrack: Track?) {
     val imgLocalPath = activeTrack?.album?.images?.get(0)?.path;
     val title = activeTrack?.name ?: "<No Track>"
 
+    // The cover is drawn in a 50dp or 100dp square, so decode it at that size in
+    // pixels instead of pulling a full-resolution (often 1024px+) cover into
+    // memory - Play Console flags BitmapFactory calls that skip inSampleSize.
+    val targetDp = if (size.height < 200.dp) 50.dp else 100.dp
+    val targetPx = (targetDp.value * context.resources.displayMetrics.density)
+        .roundToInt()
+        .coerceAtLeast(1)
+
     val fallbackIcon =
-        BitmapFactory.decodeResource(
+        decodeSampledResource(
             context.resources,
-            android.R.drawable.ic_delete
-        )
+            android.R.drawable.ic_delete,
+            targetPx,
+            targetPx,
+        ) ?: Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
+    val cover =
+        imgLocalPath?.let { decodeSampledBitmap(it, targetPx, targetPx) } ?: fallbackIcon
 
     Image(
-        provider =
-        if (imgLocalPath == null)
-            ImageProvider(fallbackIcon)
-        else
-            ImageProvider(BitmapFactory.decodeFile(imgLocalPath) ?: fallbackIcon),
+        provider = ImageProvider(cover),
         contentDescription = "Album Art",
         modifier = GlanceModifier.cornerRadius(8.dp)
-            .size(
-              if (size.height < 200.dp) 50.dp
-              else 100.dp
-            ),
+            .size(targetDp),
         contentScale = ContentScale.Fit
     )
     Spacer(modifier = GlanceModifier.size(6.dp))
