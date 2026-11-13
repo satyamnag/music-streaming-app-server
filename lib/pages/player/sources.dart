@@ -8,8 +8,14 @@ class PlayerTrackSourcesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      child: SiblingTracksSheet(floating: false),
+    // A pushed route, so it is OUTSIDE the root Scaffold's body and gets no
+    // inset from it: without this SafeArea the sheet's title sat under the
+    // status bar (the root no longer consumes the top inset - see root_app.dart).
+    return const SafeArea(
+      bottom: false,
+      child: Scaffold(
+        child: SiblingTracksSheet(floating: false),
+      ),
     );
   }
 }

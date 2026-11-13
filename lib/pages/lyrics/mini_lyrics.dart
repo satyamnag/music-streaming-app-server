@@ -58,228 +58,235 @@ class MiniLyricsPage extends HookConsumerWidget {
           : (event) {
               areaActive.value = false;
             },
-      child: Scaffold(
-        backgroundColor: theme.colorScheme.background.withValues(alpha: 0.4),
-        headers: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: AnimatedCrossFade(
-              duration: const Duration(milliseconds: 200),
-              crossFadeState: areaActive.value
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              secondChild: const SizedBox(),
-              firstChild: DragToMoveArea(
-                child: Row(
-                  spacing: 2,
-                  children: [
-                    const Gap(10),
-                    if (kIsMacOS) const SizedBox(width: 65),
-                    if (showLyrics.value)
-                      Tabs(
-                        index: index.value,
-                        onChanged: (i) {
-                          index.value = i;
-                        },
-                        children: [
-                          TabItem(child: Text(context.l10n.synced)),
-                          TabItem(child: Text(context.l10n.plain)),
-                        ],
-                      ),
-                    const Spacer(),
-                    Tooltip(
-                      tooltip:
-                          TooltipContainer(child: Text(context.l10n.lyrics))
-                              .call,
-                      child: IconButton(
-                        variance: showLyrics.value
-                            ? ButtonVariance.secondary
-                            : ButtonVariance.ghost,
-                        icon: showLyrics.value
-                            ? const Icon(SangeetIcons.lyrics)
-                            : const Icon(SangeetIcons.lyricsOff),
-                        onPressed: () async {
-                          showLyrics.value = !showLyrics.value;
-                          areaActive.value = true;
-                          hoverMode.value = false;
+      child: SafeArea(
+        // A pushed route: it sits outside the root Scaffold's body, so nothing
+        // insets its top for it (the root no longer consumes the top inset - see
+        // root_app.dart). Without this the header sat under the status bar.
+        bottom: false,
+        child: Scaffold(
+          backgroundColor: theme.colorScheme.background.withValues(alpha: 0.4),
+          headers: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                crossFadeState: areaActive.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                secondChild: const SizedBox(),
+                firstChild: DragToMoveArea(
+                  child: Row(
+                    spacing: 2,
+                    children: [
+                      const Gap(10),
+                      if (kIsMacOS) const SizedBox(width: 65),
+                      if (showLyrics.value)
+                        Tabs(
+                          index: index.value,
+                          onChanged: (i) {
+                            index.value = i;
+                          },
+                          children: [
+                            TabItem(child: Text(context.l10n.synced)),
+                            TabItem(child: Text(context.l10n.plain)),
+                          ],
+                        ),
+                      const Spacer(),
+                      Tooltip(
+                        tooltip:
+                            TooltipContainer(child: Text(context.l10n.lyrics))
+                                .call,
+                        child: IconButton(
+                          variance: showLyrics.value
+                              ? ButtonVariance.secondary
+                              : ButtonVariance.ghost,
+                          icon: showLyrics.value
+                              ? const Icon(SangeetIcons.lyrics)
+                              : const Icon(SangeetIcons.lyricsOff),
+                          onPressed: () async {
+                            showLyrics.value = !showLyrics.value;
+                            areaActive.value = true;
+                            hoverMode.value = false;
 
-                          if (kIsDesktop) {
-                            await windowManager.setSize(
-                              showLyrics.value
-                                  ? const Size(400, 500)
-                                  : const Size(400, 150),
-                            );
-                          }
-                        },
+                            if (kIsDesktop) {
+                              await windowManager.setSize(
+                                showLyrics.value
+                                    ? const Size(400, 500)
+                                    : const Size(400, 150),
+                              );
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                    Tooltip(
-                      tooltip: TooltipContainer(
-                        child: Text(context.l10n.show_hide_ui_on_hover),
-                      ).call,
-                      child: IconButton(
-                        variance: hoverMode.value
-                            ? ButtonVariance.secondary
-                            : ButtonVariance.ghost,
-                        icon: hoverMode.value
-                            ? const Icon(SangeetIcons.hoverOn)
-                            : const Icon(SangeetIcons.hoverOff),
-                        onPressed: () async {
-                          areaActive.value = true;
-                          hoverMode.value = !hoverMode.value;
-                        },
+                      Tooltip(
+                        tooltip: TooltipContainer(
+                          child: Text(context.l10n.show_hide_ui_on_hover),
+                        ).call,
+                        child: IconButton(
+                          variance: hoverMode.value
+                              ? ButtonVariance.secondary
+                              : ButtonVariance.ghost,
+                          icon: hoverMode.value
+                              ? const Icon(SangeetIcons.hoverOn)
+                              : const Icon(SangeetIcons.hoverOff),
+                          onPressed: () async {
+                            areaActive.value = true;
+                            hoverMode.value = !hoverMode.value;
+                          },
+                        ),
                       ),
-                    ),
-                    if (kIsDesktop)
-                      FutureBuilder(
-                        future: windowManager.isAlwaysOnTop(),
-                        builder: (context, snapshot) {
-                          return Tooltip(
-                            tooltip: TooltipContainer(
-                              child: Text(context.l10n.always_on_top),
-                            ).call,
-                            child: IconButton(
-                              variance: snapshot.data == true
-                                  ? ButtonVariance.secondary
-                                  : ButtonVariance.ghost,
-                              icon: Icon(
-                                snapshot.data == true
-                                    ? SangeetIcons.pinOn
-                                    : SangeetIcons.pinOff,
+                      if (kIsDesktop)
+                        FutureBuilder(
+                          future: windowManager.isAlwaysOnTop(),
+                          builder: (context, snapshot) {
+                            return Tooltip(
+                              tooltip: TooltipContainer(
+                                child: Text(context.l10n.always_on_top),
+                              ).call,
+                              child: IconButton(
+                                variance: snapshot.data == true
+                                    ? ButtonVariance.secondary
+                                    : ButtonVariance.ghost,
+                                icon: Icon(
+                                  snapshot.data == true
+                                      ? SangeetIcons.pinOn
+                                      : SangeetIcons.pinOff,
+                                ),
+                                onPressed: snapshot.data == null
+                                    ? null
+                                    : () async {
+                                        await windowManager.setAlwaysOnTop(
+                                          snapshot.data == true ? false : true,
+                                        );
+                                        update();
+                                      },
                               ),
-                              onPressed: snapshot.data == null
-                                  ? null
-                                  : () async {
-                                      await windowManager.setAlwaysOnTop(
-                                        snapshot.data == true ? false : true,
-                                      );
-                                      update();
-                                    },
-                            ),
-                          );
-                        },
-                      ),
-                  ],
+                            );
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-        child: Column(
-          children: [
-            if (playlistQueue.activeTrack != null)
-              Text(playlistQueue.activeTrack!.name!).semiBold(),
-            if (showLyrics.value)
-              Expanded(
-                child: IndexedStack(
-                  index: index.value,
+          ],
+          child: Column(
+            children: [
+              if (playlistQueue.activeTrack != null)
+                Text(playlistQueue.activeTrack!.name!).semiBold(),
+              if (showLyrics.value)
+                Expanded(
+                  child: IndexedStack(
+                    index: index.value,
+                    children: [
+                      SyncedLyrics(
+                        palette: PaletteColor(theme.colorScheme.background, 0),
+                        isModal: true,
+                        defaultTextZoom: 65,
+                      ),
+                      PlainLyrics(
+                        palette: PaletteColor(theme.colorScheme.background, 0),
+                        isModal: true,
+                        defaultTextZoom: 65,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                const Gap(8),
+              AnimatedCrossFade(
+                crossFadeState: areaActive.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 200),
+                secondChild: const SizedBox(),
+                firstChild: Row(
                   children: [
-                    SyncedLyrics(
-                      palette: PaletteColor(theme.colorScheme.background, 0),
-                      isModal: true,
-                      defaultTextZoom: 65,
+                    Tooltip(
+                      tooltip: TooltipContainer(
+                        child: Text(context.l10n.queue),
+                      ).call,
+                      child: IconButton.ghost(
+                        icon: const Icon(SangeetIcons.queue),
+                        onPressed: playlistQueue.activeTrack != null
+                            ? () {
+                                openDrawer(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  draggable: true,
+                                  barrierColor: Colors.black.withAlpha(100),
+                                  borderRadius: BorderRadius.circular(10),
+                                  transformBackdrop: false,
+                                  position: OverlayPosition.bottom,
+                                  surfaceBlur: context.theme.surfaceBlur,
+                                  surfaceOpacity: 0.7,
+                                  expands: true,
+                                  builder: (context) => Consumer(
+                                    builder: (context, ref, _) {
+                                      final playlist = ref.watch(
+                                        audioPlayerProvider,
+                                      );
+                                      final playlistNotifier = ref
+                                          .read(audioPlayerProvider.notifier);
+                                      return ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.8,
+                                        ),
+                                        child:
+                                            PlayerQueue.fromAudioPlayerNotifier(
+                                          floating: false,
+                                          playlist: playlist,
+                                          notifier: playlistNotifier,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }
+                            : null,
+                      ),
                     ),
-                    PlainLyrics(
-                      palette: PaletteColor(theme.colorScheme.background, 0),
-                      isModal: true,
-                      defaultTextZoom: 65,
+                    const Flexible(child: PlayerControls(compact: true)),
+                    Tooltip(
+                      tooltip: TooltipContainer(
+                              child: Text(context.l10n.exit_mini_player))
+                          .call,
+                      child: IconButton.ghost(
+                        icon: const Icon(SangeetIcons.maximize),
+                        onPressed: () async {
+                          if (!kIsDesktop) return;
+
+                          try {
+                            await windowManager
+                                .setMinimumSize(const Size(300, 700));
+                            await windowManager.setAlwaysOnTop(false);
+                            if (wasMaximized.value) {
+                              await windowManager.maximize();
+                            } else {
+                              await windowManager.setSize(prevSize);
+                            }
+                            await windowManager.setAlignment(Alignment.center);
+                            if (!kIsLinux) {
+                              await windowManager.setHasShadow(true);
+                            }
+                            await Future.delayed(
+                                const Duration(milliseconds: 200));
+                          } finally {
+                            if (context.mounted) {
+                              context.navigateTo(const LyricsRoute());
+                            }
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
               )
-            else
-              const Gap(8),
-            AnimatedCrossFade(
-              crossFadeState: areaActive.value
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 200),
-              secondChild: const SizedBox(),
-              firstChild: Row(
-                children: [
-                  Tooltip(
-                    tooltip: TooltipContainer(
-                      child: Text(context.l10n.queue),
-                    ).call,
-                    child: IconButton.ghost(
-                      icon: const Icon(SangeetIcons.queue),
-                      onPressed: playlistQueue.activeTrack != null
-                          ? () {
-                              openDrawer(
-                                context: context,
-                                barrierDismissible: true,
-                                draggable: true,
-                                barrierColor: Colors.black.withAlpha(100),
-                                borderRadius: BorderRadius.circular(10),
-                                transformBackdrop: false,
-                                position: OverlayPosition.bottom,
-                                surfaceBlur: context.theme.surfaceBlur,
-                                surfaceOpacity: 0.7,
-                                expands: true,
-                                builder: (context) => Consumer(
-                                  builder: (context, ref, _) {
-                                    final playlist = ref.watch(
-                                      audioPlayerProvider,
-                                    );
-                                    final playlistNotifier =
-                                        ref.read(audioPlayerProvider.notifier);
-                                    return ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxHeight:
-                                            MediaQuery.of(context).size.height *
-                                                0.8,
-                                      ),
-                                      child:
-                                          PlayerQueue.fromAudioPlayerNotifier(
-                                        floating: false,
-                                        playlist: playlist,
-                                        notifier: playlistNotifier,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            }
-                          : null,
-                    ),
-                  ),
-                  const Flexible(child: PlayerControls(compact: true)),
-                  Tooltip(
-                    tooltip: TooltipContainer(
-                            child: Text(context.l10n.exit_mini_player))
-                        .call,
-                    child: IconButton.ghost(
-                      icon: const Icon(SangeetIcons.maximize),
-                      onPressed: () async {
-                        if (!kIsDesktop) return;
-
-                        try {
-                          await windowManager
-                              .setMinimumSize(const Size(300, 700));
-                          await windowManager.setAlwaysOnTop(false);
-                          if (wasMaximized.value) {
-                            await windowManager.maximize();
-                          } else {
-                            await windowManager.setSize(prevSize);
-                          }
-                          await windowManager.setAlignment(Alignment.center);
-                          if (!kIsLinux) {
-                            await windowManager.setHasShadow(true);
-                          }
-                          await Future.delayed(
-                              const Duration(milliseconds: 200));
-                        } finally {
-                          if (context.mounted) {
-                            context.navigateTo(const LyricsRoute());
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );
