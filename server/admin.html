@@ -838,6 +838,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-albums" title="Albums" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Albums</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
+    <button class="sidebar-item" id="nav-arrangeTracks" title="Arrange Top Trending" onclick="showView('arrangeTracks')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11M3 12h11M3 18h11"/><path d="M18 8v8"/><path d="M18 16l-2.5-2.5M18 16l2.5-2.5"/></svg></span><span class="label">Arrange Top Trending</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-specials" title="Specials" onclick="showView('specials')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h6M6 14h4"/><circle cx="17" cy="12" r="2"/></svg></span><span class="label">Specials</span></button>
     <div class="sidebar-divider"></div>
@@ -925,6 +926,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 
 <div id="arrangeAlbumsPanel" class="view">
   <h2 style="margin-bottom:12px;">Arrange Albums</h2>
+  <p style="font-size:12px;color:#888;margin-bottom:12px;">This order is the <strong>Albums</strong> shelf in both the web app and the Android app: pinned albums come first, in exactly this order, then the rest.</p>
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
     <h3 style="margin-bottom:8px;">Featured albums <span id="featuredAlbumsCount" style="font-size:12px;color:#888;"></span></h3>
     <div id="featuredAlbumsList"></div>
@@ -935,6 +937,19 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   </div>
 </div>
 
+<div id="arrangeTracksPanel" class="view">
+  <h2 style="margin-bottom:12px;">Arrange Top Trending</h2>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">Featured songs <span id="featuredTracksCount" style="font-size:12px;color:#888;"></span></h3>
+    <p style="font-size:12px;color:#888;margin-bottom:8px;">This order is the <strong>Top Trending</strong> shelf in both the web app and the Android app: admin-arranged songs come first, in exactly this order, then the rest by play count. Newest Arrivals is NOT affected - it stays strictly newest-first.</p>
+    <div id="featuredTracksList"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
+    <h3 style="margin-bottom:8px;">All songs &mdash; pin to feature</h3>
+    <input id="arrangeTrackSearch" type="text" placeholder="Search songs by title or album..." oninput="arrangeTrackSearchResults()" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;">
+    <div id="arrangeTrackResults"></div>
+  </div>
+</div>
 <div id="specialsPanel" class="view">
   <h2 style="margin-bottom:4px;">Specials</h2>
   <p style="font-size:13px;color:#666;margin-bottom:14px;">
@@ -2798,6 +2813,7 @@ function showView(view) {
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (view === 'arrangeTracks') { loadArrangeTracks(); }
   else if (view === 'specials') { loadSpecials(); }
   else if (view === 'featured') { loadFeaturedChips(); }
   else if (view === 'appearance') { loadWallpaper(); }
@@ -2809,6 +2825,7 @@ function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (currentView === 'arrangeTracks') { loadArrangeTracks(); }
   else if (currentView === 'specials') { loadSpecials(); }
   else if (currentView === 'featured') { loadFeaturedChips(); }
   else if (currentView === 'appearance') { loadWallpaper(); }

@@ -123,9 +123,10 @@ void main() {
     // The reported defect: the search icon sat too far from the bell. Both are
     // `IconButton.ghost`, each a 36dp box (20dp glyph + 8dp padding per side),
     // so the visible gap is padding + row gap + padding. The header's trailing
-    // `Gap(10)` plus the bell's own 8dp padding leaves 18dp between the bell's
-    // glyph and the screen edge; a 2dp row gap makes the glyph-to-glyph distance
-    // 18dp as well. This measures the real widgets rather than trusting the
+    // `Gap(8)` plus the bell's own 8dp padding leaves 16dp between the bell's
+    // glyph and the screen edge; a 0dp row gap makes the glyph-to-glyph distance
+    // 16dp as well - the tightest pair that still keeps both 36dp touch targets
+    // non-overlapping. This measures the real widgets rather than trusting the
     // arithmetic, so a change in shadcn's button padding fails here instead of
     // silently re-breaking the rhythm on the device.
     Widget cluster() => SizedBox(
@@ -137,12 +138,12 @@ void main() {
                 icon: const Icon(Icons.search, size: 20),
                 onPressed: () {},
               ),
-              const Gap(2),
+              const Gap(0),
               IconButton.ghost(
                 icon: const Icon(Icons.notifications_none, size: 20),
                 onPressed: () {},
               ),
-              const Gap(10),
+              const Gap(8),
             ],
           ),
         );
@@ -162,8 +163,8 @@ void main() {
       expect(between, closeTo(edge, 0.01),
           reason: 'the two actions must look evenly spaced: $between between, '
               '$edge to the edge');
-      expect(between, 18,
-          reason: 'the measured rhythm is 8 + 2 + 8 = 18dp; if shadcn changed '
+      expect(between, 16,
+          reason: 'the measured rhythm is 8 + 0 + 8 = 16dp; if shadcn changed '
               'its icon-button padding this number moves with it');
       expect(box.width, greaterThanOrEqualTo(36),
           reason: 'the glyph must keep its 36dp hit area (no overlap between '
@@ -172,7 +173,8 @@ void main() {
           reason: 'WCAG 2.2 AA target size floor');
     });
 
-    testWidgets('home.dart keeps the 2dp + 10dp pair', (tester) async {
+    testWidgets('home.dart keeps the gap-free pair and the 8dp trailing inset',
+        (tester) async {
       final source = File('lib/pages/home/home.dart').readAsStringSync();
       final searchAt = source.indexOf('SangeetIcons.search');
       final bellAt = source.indexOf('NotificationBell(');
@@ -182,9 +184,21 @@ void main() {
           reason: 'search must be the action left of the bell');
 
       final between = source.substring(searchAt, bellAt);
-      expect(between.contains('const Gap(2)'), isTrue,
-          reason: 'the 2dp gap is what makes the glyph spacing even; the old '
-              '10dp gap measured 26dp against an 18dp edge inset');
+      expect(
+        between.contains('const Gap(0)') && !between.contains('const Gap(2)'),
+        isTrue,
+        reason: 'the two actions sit flush; their 8dp internal padding is what '
+            'separates the glyphs (16dp total, the tightest pair that keeps '
+            'both 36dp touch targets non-overlapping)',
+      );
+
+      final after = source.substring(bellAt);
+      expect(
+        after.contains('const Gap(8)'),
+        isTrue,
+        reason: 'the trailing 8dp inset keeps the edge distance equal to the '
+            'glyph-to-glyph distance (16dp), so the pair reads as one group',
+      );
     });
   });
 }

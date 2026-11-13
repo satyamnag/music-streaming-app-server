@@ -14,7 +14,6 @@ import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/language_songs.dart';
-import 'package:sangeet/modules/home/sections/playlists.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
 import 'package:sangeet/modules/home/sections/featured_playlist_chips.dart';
 import 'package:sangeet/modules/home/sections/featured_playlists.dart';
@@ -182,23 +181,27 @@ class HomePage extends HookConsumerWidget {
                 const SliverGap(2),
                 // Collapses to nothing when no chip has matching tracks.
                 const FeaturedPlaylistChips(),
-                // Recently Played sits right under the chips when the listener
-                // has history; Albums is ALWAYS rendered beneath it — below
-                // Recently Played when there is history, directly under Featured
-                // Playlists when there is not. Albums is the catalogue's front
-                // shelf and must never vanish, so the condition only decides
-                // whether Recently Played takes the slot above it.
-                if (recentlyPlayed.isNotEmpty)
-                  const HomeRecentlyPlayedTracksSection(),
+                // Shelf order is the SAME as the web home
+                // (app/(site)/page.tsx): Top Trending -> Albums -> language
+                // shelves -> Newest Arrivals -> Recently Played.
+                //
+                // "Playlists" (the Liked Tracks / my playlist cards) used to sit
+                // between Albums and the language shelves; it is deliberately not
+                // rendered on home any more - the Library tab owns playlists.
                 ...switch (sectionsAsync) {
                   AsyncData(value: final sections) => [
+                      HomeTrackSection(
+                        title: context.l10n.top_trending,
+                        tracks: sections.topTrending,
+                        onSeeAll: () {
+                          context.navigateTo(
+                            HomeSeeAllRoute(
+                              kind: HomeSeeAllKind.topTrending,
+                            ),
+                          );
+                        },
+                      ),
                       HomeAlbumsSection(albums: sections.albums),
-                    ],
-                  _ => [const HomeAlbumsSection(albums: [])],
-                },
-                const HomePlaylistsSection(),
-                ...switch (sectionsAsync) {
-                  AsyncData(value: final sections) => [
                       HomeLanguageSongsSections(languages: sections.languages),
                       HomeTrackSection(
                         title: context.l10n.newest_arrivals,
@@ -211,19 +214,14 @@ class HomePage extends HookConsumerWidget {
                           );
                         },
                       ),
-                      HomeTrackSection(
-                        title: context.l10n.top_trending,
-                        tracks: sections.topTrending,
-                        onSeeAll: () {
-                          context.navigateTo(
-                            HomeSeeAllRoute(
-                              kind: HomeSeeAllKind.topTrending,
-                            ),
-                          );
-                        },
-                      ),
                     ],
                   AsyncLoading() => [
+                      HomeTrackSection(
+                        title: context.l10n.top_trending,
+                        tracks: const [],
+                        isLoading: true,
+                      ),
+                      const HomeAlbumsSection(albums: []),
                       const HomeLanguageSongsSections(languages: []),
                       HomeTrackSection(
                         title: context.l10n.newest_arrivals,
@@ -256,6 +254,11 @@ class HomePage extends HookConsumerWidget {
                       ),
                     ],
                 },
+                // Recently Played closes the page, exactly as it does on the web
+                // home. It stays conditional: with no history there is nothing to
+                // show and the shelf is omitted rather than rendered empty.
+                if (recentlyPlayed.isNotEmpty)
+                  const HomeRecentlyPlayedTracksSection(),
                 SliverToBoxAdapter(
                   // Reserve the floating footer. This deliberately uses the
                   // shared `context.bottomPlayerReserve` (which has a floor of
@@ -398,28 +401,24 @@ class _HomeHeaderRow extends StatelessWidget {
           // 2dp between the two actions, measured, not guessed. Each
           // `IconButton.ghost` is a 36dp box (20dp glyph + 8dp padding per side),
           // so this puts the GLYPHS 8 + 2 + 8 = 18dp apart — exactly the 18dp
-          // that the trailing `Gap(10)` plus the bell's own 8dp padding leaves
-          // between the bell's glyph and the screen edge (360 - 10 - 8 = 342).
-          // Search and bell are therefore evenly spaced from each other AND from
-          // the edge, which is what makes the pair read as one deliberate group
-          // instead of two icons that drifted apart (with the old 10dp gap here
-          // the glyphs measured 26dp apart against an 18dp edge inset).
-          // Changing either the gap or the trailing inset breaks the equality.
+          // 0dp between the two actions, the tightest that keeps both hit areas
+          // non-overlapping. Each `IconButton.ghost` is a 36dp box (20dp glyph +
+          // 8dp padding per side), so adjacent boxes put the GLYPHS 8 + 0 + 8 =
+          // 16dp apart; the trailing `Gap(8)` plus the bell's own 8dp padding
+          // leaves the same 16dp from the bell's glyph to the screen edge, so the
+          // pair stays evenly spaced as well as closer together.
           //
-          // Tap targets are unchanged: each button keeps its full 36dp hit area
-          // and the two areas stay non-overlapping. (A Material-sized 48dp box
-          // would force a 28dp glyph gap and cannot be made even without moving
-          // the icons further apart than they are now.)
-          const Gap(2),
+          // (Measured history: 10dp gap = 26dp apart vs 18dp edge; 2dp gap = 18/18;
+          // 0dp with an 8dp trailing inset = 16/16. Going tighter is impossible
+          // without overlapping the two touch targets.)
+          const Gap(0),
           // Notifications: the OneSignal push + in-app-message inbox, with the
           // unseen count on the bell. Sits right of search, as in the reference.
           NotificationBell(color: color, shadows: shadows),
-          // The account entry point lives ONLY in the bottom bar's Profile tab
-          // now (which shows the listener's photo once signed in). The avatar
-          // that used to sit here opened a profile popup, and the popup is gone:
-          // the profile is a full screen, so a second, smaller doorway to the
-          // same account next to the brand mark was redundant.
-          const Gap(10),
+          // Trailing inset: 8dp, so the bell's glyph sits 8 + 8 = 16dp from the
+          // screen edge - the same 16dp that now separates it from the search
+          // glyph.
+          const Gap(8),
         ],
       ),
     );

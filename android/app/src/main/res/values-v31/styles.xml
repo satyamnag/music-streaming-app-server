@@ -17,7 +17,7 @@
              which falls back to the LIGHT theme's window background, so on a
              light-themed device the launch showed a white screen with the
              full-bleed icon clipped by the system's circular mask. -->
-        <item name="android:windowSplashScreenBackground">#FF000000</item>
+        <item name="android:windowSplashScreenBackground">#FFFFFFFF</item>
         <!-- The medallion, drawn at 42% of its canvas ON PURPOSE: the platform
              masks the splash icon to its inner two-thirds (the official
              dimensions are a 288dp icon inside a 192dp visible circle), so
@@ -26,7 +26,7 @@
              wide margin on every device and matches the size the legacy launch
              screen draws the same artwork at. -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">#FF000000</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFFFFFFF</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your

@@ -155,24 +155,43 @@ final homeAdminAlbumsProvider =
   }
 });
 
-/// Builds the "Newest Arrivals", "Top Trending" and "Albums" lists shown on
-/// the home screen. All three are derived from the same full catalog
+/// Builds the "Top Trending", "Albums", "Newest Arrivals" and language lists
+/// shown on the home screen. All are derived from the same full catalog
 /// ([homeTracksProvider]):
-///  - Newest Arrivals is the catalog sorted by release date, newest first.
-///  - Top Trending is the catalog ordered by global play counts (every user's
-///    plays recorded in the shared `song_plays` table), newest plays first as
-///    a tie-breaker.
+///  - Top Trending is admin-arranged first (`tracks.featured_order`, written by
+///    the admin panel's "Arrange Top Trending" list), then ordered by global play
+///    counts (every user's plays in the shared `song_plays` table), then name.
+///  - Newest Arrivals is strictly the catalog sorted by release date, newest
+///    first - the admin order deliberately does not override it.
 ///  - Albums is the catalog grouped by album name (so songs that share an
-///    album name land in the same album, named after that album), sorted by
-///    total play count (most played first). Each album's cover image is the
-///    thumbnail of its most played song.
+///    album name land in the same album, named after that album); the
+///    admin-created albums come first in `albums.featured_order`, then the
+///    auto-grouped ones by total play count (most played first). Each album's
+///    cover is the thumbnail of its most played song.
 final homeSectionsProvider =
     FutureProvider<HomeSections>((ref) async {
   final tracks = await ref.watch(homeTracksProvider.future);
   final playCounts = await ref.watch(globalPlayCountsProvider.future);
 
+  // STRICTLY newest-first: release date descending, then name.
+  //
+  // This used to put admin-featured tracks first. That made "Newest Arrivals"
+  // stop being newest-first as soon as anything was pinned, which is the opposite
+  // of what the shelf promises. The admin ordering now drives Top Trending only
+  // (see below), and this shelf is purely chronological.
   final newestArrivals = [...tracks]..sort((a, b) {
-      // Featured songs (admin-arranged) always come first.
+      final aDate = DateTime.tryParse(a.album.releaseDate ?? '');
+      final bDate = DateTime.tryParse(b.album.releaseDate ?? '');
+      final cmp = (bDate ?? DateTime.fromMillisecondsSinceEpoch(0))
+          .compareTo(aDate ?? DateTime.fromMillisecondsSinceEpoch(0));
+      if (cmp != 0) return cmp;
+      return a.name.compareTo(b.name);
+    });
+
+  // Admin-arranged first - what the admin panel's "Arrange Top Trending" list
+  // writes (`tracks.featured_order`, via reorder_featured_tracks) - then global
+  // play count, then name. Without this pass the panel had no effect here.
+  final topTrending = [...tracks]..sort((a, b) {
       final aF = a is SangeetFullTrackObject ? a.featuredOrder : null;
       final bF = b is SangeetFullTrackObject ? b.featuredOrder : null;
       if (aF != null || bF != null) {
@@ -182,15 +201,6 @@ final homeSectionsProvider =
           return aF != null ? -1 : 1;
         }
       }
-      final aDate = DateTime.tryParse(a.album.releaseDate ?? '');
-      final bDate = DateTime.tryParse(b.album.releaseDate ?? '');
-      final cmp = (bDate ?? DateTime.fromMillisecondsSinceEpoch(0))
-          .compareTo(aDate ?? DateTime.fromMillisecondsSinceEpoch(0));
-      if (cmp != 0) return cmp;
-      return a.name.compareTo(b.name);
-    });
-
-  final topTrending = [...tracks]..sort((a, b) {
       final cmp = (playCounts[b.id] ?? 0).compareTo(playCounts[a.id] ?? 0);
       if (cmp != 0) return cmp;
       return a.name.compareTo(b.name);
