@@ -78,20 +78,25 @@ All four style files (`values`, `values-night`, `values-v31`,
 `NEVER` and `DEFAULT` are all reinterpreted as `ALWAYS` for non-floating windows,
 so `always` is both the mandated value and the non-deprecated one.
 
-### 3.3 Flutter — icon brightness only
+### 3.3 Flutter — the bar colour stays, in one place
 
-`lib/pages/root/root_app.dart` no longer sends `statusBarColor`. That value
-travelled Dart → engine `PlatformPlugin.setSystemChromeSystemUIOverlayStyle` →
-`Window#setStatusBarColor`, one of the reported sites. The style now sends only
-`statusBarIconBrightness`, so the icons stay legible against whatever the bars
-show.
+`lib/pages/root/root_app.dart` still sends `statusBarColor: backgroundColor`, and
+this is deliberate. It reaches `Window#setStatusBarColor` through the engine's
+`PlatformPlugin.setSystemChromeSystemUIOverlayStyle` — one of the reported sites —
+but it is what keeps the status bar the app's own colour **on Android 14 and
+below**, and on Android 15+ that call is a no-op (the platform's transparent bar
+wins). Removing it was measured and reverted: see §4.2.
+
+What was removed instead is the deprecated *value*: the cutout mode (§3.2).
 
 ### 3.4 Insets are consumed exactly once
 
 `SafeArea(top: true, bottom: true)` at the root; the per-page `SafeArea`s become
 no-ops because a `SafeArea` hands zero padding to its descendants.
 
-## 4. The wrong turn (kept here on purpose)
+## 4. The wrong turns (kept here on purpose)
+
+### 4.1 Removing the helper entirely
 
 The first attempt removed `enableEdgeToEdge()` altogether and tried to get
 transparent bars from the theme
@@ -106,6 +111,14 @@ real device:
 So the flag was reverted, and the helper came back behind the API guard. The
 theme now declares no bar colours at all. This is why the test asserts the flag is
 **absent**.
+
+### 4.2 Removing the Flutter bar colour
+
+The second attempt also stopped sending `statusBarColor` from Flutter. Measured
+again: the status bar stayed **black with dark icons** — this time the colour came
+from the window/engine default, not from the window background, so no theme flag
+could substitute for it below Android 15. That call is back, in exactly one place,
+and the test pins that it stays exactly once.
 
 ## 5. The two library-owned sites (and why they are not a break)
 
