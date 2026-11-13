@@ -150,7 +150,7 @@ update-check/enabled         tutrtalk/prod/* (6 secrets, unrelated project)
 |---|---|
 | `razorpay/key-secret` | **missing** (`ResourceNotFoundException`) |
 | `razorpay/webhook-secret` | **missing** (`ResourceNotFoundException`) |
-| `superwall/api-key` | ✅ **retired 2026-11-09** — held the `sk_` org key; revoked in the dashboard, deleted from AWS |
+| `superwall/api-key` | **re-created 2026-11-13** - read-only `sk_...` key (len 67, readback verified). Used ONLY by the audit tooling (`server/tools/check-paid-user.mjs`) to read the dashboard; it is NOT shipped in the app. The app keeps `superwall/publishable-key` (pk_) |
 | `superwall/publishable-key` | ✅ **created 2026-11-09** — `pk_` prefix, len 24, readback verified; `.env` now reads it |
 
 Consequence: the app cannot initialise Superwall (secret key where `pk_` is expected),
@@ -246,3 +246,44 @@ Render env still required: `RAZORPAY_KEY_ID=rzp_live_TxzrGybeVepASY`,
 payment path (signature → row → entitlement → app unlock) is still unproven
 end-to-end. A test-mode plan and key pair exist separately and cost nothing;
 use them for the rehearsal before a real customer pays.
+---
+
+## Reading the Superwall dashboard (audit path)
+
+Added 2026-11-13. The read-only key lives at **`superwall/api-key`** (AWS, `famerelay`,
+`ap-south-1`). Read it in-process; never print it, never put it in `.env`.
+
+```powershell
+$key = aws secretsmanager get-secret-value --profile famerelay --region ap-south-1 `
+  --secret-id "superwall/api-key" --query SecretString --output text
+```
+
+Verified identifiers (from `GET /v2/projects`):
+
+| Thing | Value |
+|---|---|
+| Organization | `26125` |
+| Project `Soulful Bhakti` | `28422` |
+| Application `Soulful Bhakti` (android, `com.soulfulbhakti.app`) | `52776` |
+
+What the key can and cannot do:
+
+| Endpoint | Use |
+|---|---|
+| `GET /v2/projects` | resolve project/app ids |
+| `GET /v2/users/{id}/subscription-summary?application_id=52776` | **the paid/free answer**: `has_active_subscription`, products, store, expiry |
+| `GET /v2/users/{id}/active-entitlements?application_id=52776` | active entitlements |
+| `GET /v3/users/{id}/subscriptions?application_id=52776` | the subscription records themselves |
+| `GET /v2/projects/28422/applications/52776/recent-transactions?environment=PRODUCTION&from=..&to=..&event_type=all` | every purchase event (**`event_type` must be `all`** — the default subscription-only view returns nothing for this app) |
+| `POST /v2/users/query` | user attributes (`total`, rows); **not** subscription state |
+| `GET /v2/organizations/26125/query/*` | **403** with this key - the warehouse SQL API needs a different scope |
+
+Helper that wraps the per-user calls:
+
+```bash
+SUPERWALL_API_KEY=$(aws secretsmanager get-secret-value --profile famerelay \
+  --region ap-south-1 --secret-id superwall/api-key --query SecretString --output text) \
+  node server/tools/check-paid-user.mjs user_xxx
+```
+
+Rotate this key in Superwall -> Settings -> API keys when it is no longer needed.
