@@ -155,6 +155,16 @@ def glanceVersion = "1.1.1"
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 
+    // Edge-to-edge. `WindowCompat.enableEdgeToEdge(Window)` is the current,
+    // non-deprecated API (it replaced `ComponentActivity.enableEdgeToEdge()`,
+    // which needs the Activity to be a ComponentActivity — MainActivity is an
+    // audio_service / FlutterActivity, not one). It landed in androidx.core
+    // 1.17.0, whose AAR metadata requires compileSdk 36 — exactly what this
+    // module uses. 1.19.x would require compileSdk 37, so 1.17.0 is the correct
+    // pin here. Declared explicitly so the version cannot be downgraded by a
+    // transitive dependency.
+    implementation 'androidx.core:core-ktx:1.17.0'
+
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     // other deps so just ignore
     implementation 'com.android.support:multidex:2.0.1'

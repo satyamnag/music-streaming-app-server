@@ -56,7 +56,20 @@ class RootAppPage extends HookConsumerWidget {
       context: context,
       removeBottom: true,
       child: SafeArea(
-        top: false,
+        // BOTH insets are handled here now.
+        //
+        // `top: false` was correct while the Activity was NOT edge-to-edge: the
+        // window itself started below the status bar, so a page's own SafeArea
+        // was doing the work. `MainActivity` now calls
+        // `WindowCompat.enableEdgeToEdge(window)` (Play's recommendation for
+        // apps targeting SDK 35+), which makes the Flutter view span the whole
+        // screen on EVERY Android version — so the top inset must be consumed
+        // here, or the header would slide under the status bar.
+        //
+        // Nested SafeAreas are harmless: a SafeArea hands zero top padding to
+        // its descendants, so the per-page ones (home, library, profile, …)
+        // simply become no-ops and the app is inset exactly once.
+        top: true,
         child: Scaffold(
           footers: const [
             BottomPlayer(),
