@@ -12,7 +12,6 @@ import 'package:sangeet/components/fallbacks/error_box.dart';
 import 'package:sangeet/components/notifications/notification_bell.dart';
 import 'package:sangeet/models/database/database.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
-import 'package:sangeet/modules/analytics/analytics_consent.dart';
 import 'package:sangeet/modules/home/sections/albums.dart';
 import 'package:sangeet/modules/home/sections/language_songs.dart';
 import 'package:sangeet/modules/home/sections/recent_tracks.dart';
@@ -40,29 +39,6 @@ class HomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final theme = Theme.of(context);
-    // Analytics consent, asked ONCE on first run and in normal usage.
-    //
-    // Play's Prominent Disclosure & Consent requirement says the disclosure must
-    // appear "in the normal usage of the app and not require the user to navigate
-    // into a menu or settings", and that consent must be an affirmative action
-    // taken before collection. Home is the first screen after startup, so this is
-    // where the disclosure belongs; Settings → Privacy remains the place to
-    // withdraw it. Nothing is collected until "Allow analytics" is tapped -
-    // PostHogService.initialize returns early without consent and GA4 starts
-    // with collection disabled.
-    //
-    // Post-frame so the dialog is not shown while the first frame is still being
-    // built, and guarded so a rebuild cannot stack a second copy.
-    final consentAsked = useState(false);
-    useEffect(() {
-      if (consentAsked.value) return null;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        consentAsked.value = true;
-        AnalyticsConsent.promptIfNeeded(context);
-      });
-      return null;
-    }, const []);
     final controller = useScrollController();
     final mediaQuery = MediaQuery.of(context);
     final layoutMode =

@@ -35,18 +35,6 @@ abstract class KVStoreService {
   static Future<void> setAnalyticsConsent(bool value) async =>
       await sharedPreferences.setBool('analyticsConsent', value);
 
-  /// Whether the listener has been ASKED about analytics yet.
-  ///
-  /// A separate flag from the consent value itself, because "never asked" and
-  /// "asked and declined" are different states: only the first should trigger the
-  /// first-run disclosure dialog. Play's Prominent Disclosure and Consent
-  /// requirement needs the disclosure to appear in normal app usage before any
-  /// collection, which is exactly this flag's job.
-  static bool get analyticsConsentDecided =>
-      sharedPreferences.getBool('analyticsConsentDecided') ?? false;
-  static Future<void> setAnalyticsConsentDecided(bool value) async =>
-      await sharedPreferences.setBool('analyticsConsentDecided', value);
-
   static List<String> get recentSearches =>
       sharedPreferences.getStringList('recentSearches') ?? [];
 
