@@ -99,9 +99,22 @@ class PlayerView extends HookConsumerWidget {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           headers: [
-            SafeArea(
-              bottom: false,
-              child: TitleBar(
+            // `PreferredSize` is what makes this header real.
+            //
+            // It used to be a bare `SafeArea(child: TitleBar(...))`. `SafeArea` is
+            // NOT a `PreferredSizeWidget`, so the Scaffold had no height to give
+            // the header: it collapsed to zero and BOTH the close chevron and the
+            // info button were invisible - measured on the device, in every build
+            // until now. Wrapping it in PreferredSize (the bar's own 48dp plus the
+            // status-bar inset) makes the header occupy space, so the body starts
+            // BELOW it instead of underneath it.
+            PreferredSize(
+              preferredSize: Size.fromHeight(
+                48 * theme.scaling + MediaQuery.paddingOf(context).top,
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: TitleBar(
                 surfaceOpacity: 0,
                 surfaceBlur: 0,
                 leading: [
@@ -137,26 +150,18 @@ class PlayerView extends HookConsumerWidget {
                 ],
               ),
             ),
+            ),
           ],
           child: SingleChildScrollView(
             controller: scrollController,
-            // The Scaffold's `headers` slot FLOATS the title bar over the body
-            // instead of reserving layout space, so without this the cover started
-            // at y=0 and its top edge - together with the close chevron and the
-            // info button - was cut by the status bar (reproduced on the device).
-            //
-            // `48 * scaling` is not a guess: it is `TitleBar`'s own default height
-            // and the value its `preferredSize` reports
-            // (lib/components/titlebar/titlebar.dart). The status-bar inset is
-            // added because the bar itself is already offset by it via SafeArea.
+            // No extra top padding: the header now RESERVES its own height
+            // (PreferredSize above), so the body already starts below the bar.
+            // The previous padding was compensating for a zero-height header and
+            // would now double the gap.
             child: Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.paddingOf(context).top + 48 * theme.scaling,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
                     Container(
                       margin: const EdgeInsets.all(8),
                       constraints:
@@ -291,7 +296,6 @@ class PlayerView extends HookConsumerWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
