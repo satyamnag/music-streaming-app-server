@@ -54,6 +54,24 @@ this or a recent batch; the rest were verified as already compliant.
 No location, no contacts, no SMS/call log, no `QUERY_ALL_PACKAGES`, no background
 location, no `MANAGE_EXTERNAL_STORAGE`.
 
+**Permissions the libraries add to the merged manifest** (verified by dumping the
+built AAB with bundletool, not guessed):
+
+| Permission | Added by | Note |
+|---|---|---|
+| `com.android.vending.BILLING` | Play Billing / Superwall | required for the subscription |
+| `com.google.android.gms.permission.AD_ID`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION` | Firebase/GA4 | measurement only; declared as such |
+| `RECEIVE_BOOT_COMPLETED`, `com.google.android.c2dm.permission.RECEIVE` | OneSignal | push + restore after reboot |
+| `CHANGE_WIFI_MULTICAST_STATE`, `ACCESS_NETWORK_STATE` | bonsoir (mDNS) | the LAN Connect discovery |
+| `USE_BIOMETRIC`, `USE_FINGERPRINT` | flutter_secure_storage | optional device unlock |
+| `BIND_GET_INSTALL_REFERRER_SERVICE` | Play Install Referrer | affiliate QR attribution |
+| launcher bag of `*.permission.*BADGE*` / `UPDATE_COUNT` | the notification-badge plugin | launcher-specific badge writes |
+
+None of these is a restricted permission that needs a Play declaration form, and
+the merged `<application>` element carries `allowBackup="false"`,
+`extractNativeLibs="false"`, no `debuggable` and no
+`requestLegacyExternalStorage` — verified in the shipped bundle.
+
 ## 5. Changed in this sweep
 
 1. **`requestLegacyExternalStorage` removed** — deprecated and ignored from API 30.
