@@ -1,141 +1,163 @@
-# Android 15 edge-to-edge (Play Console action item)
+# Android 15 edge-to-edge — both Play Console advisories
 
-Status: fixed and pinned by tests. Triggered by Play Console's advisory:
+Status: fixed. Two advisories arrived in sequence, and the second one changed the
+answer to the first. This records the final design and why it looks the way it
+does.
 
-> **Edge-to-edge may not display for all users.** From Android 15, apps targeting
-> SDK 35 will display edge-to-edge by default. Apps targeting SDK 35 should
-> handle insets to make sure that their app displays correctly on Android 15 and
-> later. … Alternatively, call `enableEdgeToEdge()` for Kotlin or
-> `EdgeToEdge.enable()` for Java for backward compatibility.
-> — <https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge>
+Sources: <https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge>
 
 ---
 
-## 1. What the app was doing
+## 1. The two advisories
 
-| Fact | Evidence |
-|---|---|
-| Targets SDK 36, compiles against 36 | `android/app/build.gradle` (`targetSdkVersion 36`, `compileSdkVersion 36`) |
-| The Activity never opted into edge-to-edge | no `enableEdgeToEdge` / `setDecorFitsSystemWindows` anywhere in the repo |
-| The window therefore had **two** different models: below Android 15 the system inset the view; from Android 15 the platform forces edge-to-edge and stops insetting it | the behaviour change itself |
-| The root only consumed the **bottom** inset, leaving the top to each page | `lib/pages/root/root_app.dart` (`SafeArea(top: false)`) |
-| The Activity is a `FlutterActivity`, not a `ComponentActivity` | `MainActivity : AudioServiceActivity()` → `AudioServiceActivity extends FlutterActivity` |
+**A1 — "Edge-to-edge may not display for all users."**
+Apps targeting SDK 35 display edge-to-edge by default; the app should handle
+insets, or call `enableEdgeToEdge()` for backward compatibility.
 
-So on Android 14 and below everything looked right, and on Android 15+ the app
-entered edge-to-edge by force with the top inset handled only where an individual
-page happened to use a `SafeArea`.
+**A2 — "Your app uses deprecated APIs or parameters for edge-to-edge."**
+`Window.setStatusBarColor`, `Window.setNavigationBarColor`,
+`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`, reported at five places: two
+obfuscated `onCreate`s, Material's datepicker, Flutter's
+`PlatformPlugin.setSystemChromeSystemUIOverlayStyle`, and
+`androidx.credentials.provider`.
 
-## 2. The fix (three parts, all verified)
-
-### 2.1 Opt in with the current, non-deprecated API
-
-`MainActivity.onCreate`, **before** `super.onCreate`:
-
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    WindowCompat.enableEdgeToEdge(window)   // androidx.core.view
-    super.onCreate(savedInstanceState)
-}
-```
-
-Why this API and not the one Play literally names:
-
-- `ComponentActivity.enableEdgeToEdge()` is **deprecated** in current AndroidX;
-  its own `@Deprecated` message says *"Use `WindowCompat.enableEdgeToEdge(Window)`"*
-  (verified in `androidx-main/activity/.../EdgeToEdge.kt`).
-- It is also **not callable** here: it is an extension on `ComponentActivity`, and
-  `MainActivity` extends `com.ryanheise.audioservice.AudioServiceActivity`, which
-  extends `FlutterActivity` → `android.app.Activity`. Converting the Activity to a
-  `ComponentActivity` (audio_service does ship `AudioServiceFragmentActivity`)
-  would change lifecycle/plugin behaviour for a window flag — not worth it when an
-  equivalent, non-deprecated, window-level API exists.
-
-`WindowCompat.enableEdgeToEdge(window)` is the implementation AndroidX forwards to.
-Verified from the released source (`core-1.19.1-sources.jar`,
-`androidx/core/view/WindowCompat.java`):
+**A1 and A2 conflict.** `enableEdgeToEdge()` — the call A1 asks for — is *built
+out of* the APIs A2 reports. Verified in the released AndroidX source
+(`androidx/core/view/WindowCompat.java`, core 1.17.0/1.19.1):
 
 ```java
 public static void enableEdgeToEdge(@NonNull Window window) {
-    Objects.requireNonNull(window);
-    window.getDecorView();                 // force decor now, so later setup cannot overwrite
+    window.getDecorView();
     setDecorFitsSystemWindows(window, false);
-    window.setStatusBarColor(Color.TRANSPARENT);
-    window.setNavigationBarColor(Color.TRANSPARENT);
-    // API 30+: LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS, API 28–29: SHORT_EDGES
-    // API 29+: status/navigation bar contrast enforcement off
+    window.setStatusBarColor(Color.TRANSPARENT);        // ← A2
+    window.setNavigationBarColor(Color.TRANSPARENT);    // ← A2
+    // API 28–29: LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES   ← A2
 }
 ```
 
-Calling it before `super.onCreate` is what makes the "force the decor view first"
-note work: Flutter's own window setup runs later and must not undo it.
+So satisfying A2 means keeping A1's *effect* without the deprecated calls.
 
-### 2.2 Pin the dependency that provides it
+## 2. What was actually ours
 
-`android/app/build.gradle`:
+Three of the five reported sites were this app's code; two are library internals.
 
-```gradle
-implementation 'androidx.core:core-ktx:1.17.0'
+| Reported site | Owner | Action |
+|---|---|---|
+| the Activity's `onCreate` (via `enableEdgeToEdge`) | **ours** | replaced (below) |
+| `PlatformPlugin.setSystemChromeSystemUIOverlayStyle` | reached from **our** Dart | stopped passing bar colours |
+| `windowLayoutInDisplayCutoutMode=shortEdges` (theme) | **ours** | `always` |
+| `com.google.android.material.datepicker…` | library (transitive) | not our code — see §5 |
+| `androidx.credentials.provider…` | library (transitive) | not our code — see §5 |
+
+## 3. The fix
+
+### 3.1 The Activity opts in with the one call that is not deprecated
+
+`android/app/src/main/kotlin/com/sangeet/app/MainActivity.kt`, before
+`super.onCreate`:
+
+```kotlin
+WindowCompat.setDecorFitsSystemWindows(window, false)
 ```
 
-Verified, not guessed:
+That is the actual switch that makes the app own the insets — not deprecated, and
+not flagged. Deliberately **not** called any more:
 
-| Version | Has `WindowCompat.enableEdgeToEdge` | AAR `minCompileSdk` |
-|---|---|---|
-| 1.16.0 | **no** | – |
-| 1.17.0 | **yes** | **36** ✓ (this module compiles against 36) |
-| 1.19.1 | yes | **37** ✗ (would need compileSdk 37) |
+- `setStatusBarColor` / `setNavigationBarColor` — no-ops on Android 15+, and the
+  window background shows through instead (see 3.3);
+- no cutout-mode juggling in code — the theme owns it (see 3.2).
 
-1.17.0 is therefore the correct pin: the first release with the API, and the
-highest one this module's `compileSdk 36` accepts. Declared explicitly so a
-transitive dependency can't silently downgrade it.
+### 3.2 The theme uses the cutout mode Android 15 mandates
 
-### 2.3 Consume the top inset at the root
+All four style files (`values`, `values-night`, `values-v31`,
+`values-night-v31`):
 
-`lib/pages/root/root_app.dart`: `SafeArea(top: false)` → `SafeArea(top: true)`.
+```xml
+<item name="android:windowLayoutInDisplayCutoutMode">always</item>
+```
 
-With `decorFitsSystemWindows=false` the window spans the whole screen, so the
-status bar no longer insets the view — the app must. Doing it once at the root is
-what makes it correct for **every** page: a `SafeArea` hands zero padding to its
-descendants, so the per-page `SafeArea`s (home, library, profile, …) become
-no-ops and the app is inset exactly once, never twice.
+`SHORT_EDGES`, `NEVER` and `DEFAULT` are all interpreted as `ALWAYS` on Android 15
+for non-floating windows, so `always` is both the required value and the
+non-deprecated one.
 
-The bottom inset was already consumed there (navigation bar + floating footers),
-and that is unchanged.
+### 3.3 Transparent bars without the colour setters
 
-## 3. What does not change
+`NormalTheme` in every variant now sets:
 
-- **Look on Android 14 and below:** identical. The window now extends behind the
-  bars, and the root `SafeArea` puts the content back where it was. The status bar
-  area keeps the app's background colour (`SystemChrome.setSystemUIOverlayStyle`
-  in `root_app.dart` still sets it; on API 35+ that colour is simply ignored and
-  the Scaffold background shows instead — the same colour).
-- **Look on Android 15+:** unchanged content position, but now explicit rather
-  than accidental.
-- **Audio service:** untouched — the Activity keeps its `AudioServiceActivity`
-  base class.
-- **No new permissions, no manifest change, no ABI change.**
+```xml
+<item name="android:windowDrawsSystemBarBackgrounds">false</item>
+```
 
-## 4. Verification
+With that flag the window draws no bar background at all, so the status and
+navigation bars show the app's own background — exactly the look the colour
+setters produced — and no deprecated API is involved. Flutter keeps the icons
+legible against it (`statusBarIconBrightness` follows the app theme).
 
-`test/android_edge_to_edge_test.dart` (5 tests) pins the whole arrangement:
+### 3.4 Flutter passes no bar colours
 
-1. `WindowCompat.enableEdgeToEdge(window)` is called and imported;
-2. it runs **before** `super.onCreate`;
-3. the `AudioServiceActivity` base class is unchanged;
-4. `androidx.core:core-ktx:1.17.0` is pinned and the module still compiles against 36;
-5. the root `SafeArea` is `top: true` and the bottom inset handling is intact.
+`lib/pages/root/root_app.dart` used to send `statusBarColor: backgroundColor`;
+that value travels: Dart → engine `PlatformPlugin.setSystemChromeSystemUIOverlayStyle`
+→ `Window#setStatusBarColor`. The call now sends **only**
+`statusBarIconBrightness`.
 
-Run together with the layout and plan-card suites: **25 tests pass**;
-`flutter analyze` is clean.
+### 3.5 Insets are still consumed exactly once
 
-On-device checklist (needs an Android 15+ phone to be conclusive):
-1. status bar does not overlap the header on any tab;
-2. the bottom bar still clears the navigation bar / gesture bar;
-3. the home wallpaper starts just below the status bar, as before;
-4. audio playback and the mini player behave as before.
+Unchanged from the A1 fix: the root `SafeArea(top: true, bottom: true)` in
+`lib/pages/root/root_app.dart` applies both insets, and the per-page `SafeArea`s
+become no-ops (a `SafeArea` hands zero padding to its descendants).
 
-## 5. Rollback
+## 4. What this does not change
 
-Revert the three files (`MainActivity.kt`, `app/build.gradle`, `root_app.dart`)
-together — the call, the pin and the root inset are one unit; removing only the
-inset would put headers under the status bar on Android 15+.
+- No new dependency. The `androidx.core:core-ktx:1.17.0` pin stays (it guarantees
+  a current `WindowCompat`, and its AAR requires `compileSdk 36`, which this
+  module uses).
+- No manifest, permission, ABI or audio-service change; MainActivity keeps its
+  `AudioServiceActivity` base class.
+- Behaviour on Android 14 and below: the system bars show the app background, as
+  before. On Android 15+: edge-to-edge is enforced by the platform anyway, and the
+  insets are in the same place.
+
+## 5. The two library-owned sites (and why they are not a break)
+
+`com.google.android.material.datepicker…onStart` and
+`androidx.credentials.provider…` are pulled in transitively (Material Components
+via an SDK's UI, Credential Manager via the auth SDK). They are not this app's
+source, and no Flutter plugin in this project declares either directly, so there
+is nothing to bump without changing those SDKs.
+
+Google's own page classifies these as **deprecated and disabled**, not removed:
+
+> The following APIs are deprecated and disabled: `R.attr#statusBarColor`,
+> `Window#setDecorFitsSystemWindows`, `Window#setNavigationBarColor` (gesture
+> navigation), `Window#setStatusBarColor` …
+
+i.e. on Android 15 they are no-ops; nothing regresses at runtime. They disappear
+from the report when the SDKs that contain them ship updated versions.
+
+## 6. Verification
+
+`test/android_edge_to_edge_test.dart` (10 tests):
+
+- the Activity calls `setDecorFitsSystemWindows(window, false)` before
+  `super.onCreate`;
+- the compiled code contains **no** `setStatusBarColor`, `setNavigationBarColor`,
+  `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES` or `enableEdgeToEdge` (comments are
+  stripped first, because the KDoc names them to explain why they are avoided);
+- all four theme files use `always`, never `shortEdges`, and NormalTheme disables
+  system-bar backgrounds;
+- Flutter passes no `statusBarColor` / `systemNavigationBarColor` but still sets
+  the icon brightness;
+- the root `SafeArea` still consumes both insets.
+
+29 tests pass across the edge-to-edge, layout and plan-card suites.
+
+On-device: status bar and navigation bar must show the app background (not a grey
+scrim), no header under the clock, bottom bar clear of the system buttons, and
+audio playback unaffected. The Android 13 phone confirms the pre-15 path; the
+15+ path is the platform's own forced behaviour plus the same insets.
+
+## 7. Rollback
+
+Revert `MainActivity.kt`, the four `styles.xml` files, `root_app.dart` and the
+test together — they are one unit. Removing only the theme flags would leave the
+bars with a system-drawn scrim behind dark icons.

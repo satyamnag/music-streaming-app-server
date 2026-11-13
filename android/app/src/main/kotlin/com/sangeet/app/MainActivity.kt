@@ -27,8 +27,8 @@ class MainActivity: AudioServiceActivity() {
      *     below 15 the theme's window background shows through, which is what the
      *     app looked like before — nothing to set;
      *   - no cutout-mode juggling here: the theme declares
-     *     `windowLayoutInDisplayCutoutMode=always`
-     *     (`res/values*/styles.xml`), the mode Android 15 requires for
+     *     `windowLayoutInDisplayCutoutMode=always` in the res/values styles
+     *     (and its night / v31 variants), the mode Android 15 requires for
      *     non-floating windows, instead of the deprecated `shortEdges`.
      *
      * The Flutter side applies the insets: `lib/pages/root/root_app.dart` wraps
