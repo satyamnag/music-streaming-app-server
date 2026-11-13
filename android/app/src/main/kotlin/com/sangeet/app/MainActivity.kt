@@ -10,31 +10,32 @@ class MainActivity: AudioServiceActivity() {
     private var clerkBridge: ClerkBridge? = null
 
     /**
-     * Edge-to-edge, per Google's Play Console recommendation for apps targeting
-     * SDK 35+ ("call enableEdgeToEdge() … for backward compatibility").
+     * Edge-to-edge, without the APIs Android 15 deprecates.
      *
-     * `WindowCompat.enableEdgeToEdge(window)` is the current API: the older
-     * `ComponentActivity.enableEdgeToEdge()` is deprecated in androidx.main and
-     * is only available to ComponentActivity subclasses — this Activity extends
-     * audio_service's `AudioServiceActivity`, which is a `FlutterActivity`, so
-     * the Window-level call is the correct one here. It does exactly what the
-     * platform does from Android 15 onwards:
+     * Play's first advisory asked for `enableEdgeToEdge()`; its second reports
+     * that this very helper calls `Window#setStatusBarColor`,
+     * `Window#setNavigationBarColor` and `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`
+     * — all deprecated for apps targeting 35+
+     * (https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge).
+     * So the helper is replaced by the one call it makes that is NOT flagged and
+     * is still meaningful before Android 15:
      *
-     *   - `setDecorFitsSystemWindows(window, false)` — the app owns the insets;
-     *   - transparent status and navigation bars;
-     *   - display-cutout mode ALWAYS (API 30+) / SHORT_EDGES (API 28-29);
-     *   - system contrast enforcement off (API 29+).
+     *   - `WindowCompat.setDecorFitsSystemWindows(window, false)` — the app owns
+     *     the insets, i.e. edge-to-edge, on every API level;
+     *   - no `setStatusBarColor` / `setNavigationBarColor`: on Android 15+ the
+     *     platform makes both bars transparent and the setters are no-ops, and
+     *     below 15 the theme's window background shows through, which is what the
+     *     app looked like before — nothing to set;
+     *   - no cutout-mode juggling here: the theme declares
+     *     `windowLayoutInDisplayCutoutMode=always`
+     *     (`res/values*/styles.xml`), the mode Android 15 requires for
+     *     non-floating windows, instead of the deprecated `shortEdges`.
      *
-     * Called BEFORE `super.onCreate`, the order the AndroidX KDoc specifies: the
-     * call forces the decor view to exist first so Flutter's later window setup
-     * cannot overwrite these attributes.
-     *
-     * The Flutter side must therefore apply the insets itself, which it already
-     * does: `lib/pages/root/root_app.dart` insets the whole app (SafeArea) and
-     * every page keeps its own SafeArea for scrolling content.
+     * The Flutter side applies the insets: `lib/pages/root/root_app.dart` wraps
+     * the app in a `SafeArea(top: true, bottom: true)`.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.enableEdgeToEdge(window)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
     }
 

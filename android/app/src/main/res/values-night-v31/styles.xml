@@ -5,7 +5,7 @@
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
         <!-- See values-v31/styles.xml: the window behind the starting window is
              the same black backdrop with the centred medallion, so an OEM skin
              that ignores the windowSplashScreen* attributes still cannot show a
@@ -29,5 +29,8 @@
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
+        <!-- See values/styles.xml: transparent system bars without the
+             deprecated Window#setStatusBarColor / setNavigationBarColor. -->
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
     </style>
 </resources>

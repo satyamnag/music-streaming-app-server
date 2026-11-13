@@ -41,15 +41,23 @@ class RootAppPage extends HookConsumerWidget {
     useOneSignalDeepLinks();
 
     useEffect(() {
+      // Icon brightness ONLY. The bar colours used to be set here too, but
+      // `statusBarColor` / `systemNavigationBarColor` reach the platform through
+      // Flutter's `PlatformPlugin.setSystemChromeSystemUIOverlayStyle`, i.e.
+      // `Window#setStatusBarColor` / `Window#setNavigationBarColor` — both
+      // deprecated for apps targeting 35+, and no-ops on Android 15 where the
+      // bars are transparent and the app's background shows through them.
+      // Play Console reported exactly that call path, so it is no longer made.
       SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(
-          statusBarColor: backgroundColor, // status bar color
           statusBarIconBrightness: brightness == Brightness.dark
               ? Brightness.light
               : Brightness.dark,
         ),
       );
       return null;
+      // `backgroundColor` stays in the dependency list: it is what the bars show
+      // through now, so a theme change must still re-apply the icon contrast.
     }, [backgroundColor, brightness]);
 
     final scaffold = MediaQuery.removeViewInsets(

@@ -1,42 +1,73 @@
-// Guards the Play Console requirement for apps targeting SDK 35+:
+// Guards the Play Console requirements for apps targeting SDK 35+:
 //
-//   "Edge-to-edge may not display for all users … Apps targeting SDK 35 should
-//    handle insets … Alternatively, call enableEdgeToEdge() for Kotlin … for
-//    backward compatibility."
+//   1. "Edge-to-edge may not display for all users … call enableEdgeToEdge() …
+//      for backward compatibility"
+//   2. "Your app uses deprecated APIs or parameters for edge-to-edge …
+//      android.view.Window.setStatusBarColor,
+//      android.view.Window.setNavigationBarColor,
+//      LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES"
+//
 //   https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge
 //
-// Three things must stay true together, which is why they are asserted in one
-// place:
+// The two advisories pull in opposite directions: `enableEdgeToEdge()` satisfies
+// the first and is itself built out of the APIs the second reports (it calls both
+// colour setters and sets SHORT_EDGES on API 28-29). The resolution recorded here
+// is to keep the *effect* of edge-to-edge and drop every deprecated call:
 //
-//   1. the Activity opts in explicitly (the API Google names), so the app is
-//      edge-to-edge on EVERY Android version instead of only from 15 up;
-//   2. the androidx.core version that actually ships that API is pinned
-//      (`WindowCompat.enableEdgeToEdge` landed in 1.17.0, whose AAR metadata
-//      requires compileSdk 36 — 1.19.x would require 37);
-//   3. the Flutter side consumes BOTH insets at the root, because once the
-//      window spans the whole screen the status bar no longer insets the view.
+//   * `WindowCompat.setDecorFitsSystemWindows(window, false)` — one call, not
+//     deprecated, and the actual switch that makes the app own the insets;
+//   * no `setStatusBarColor` / `setNavigationBarColor` — from Kotlin or from
+//     Flutter's `setSystemChromeSystemUIOverlayStyle` (the engine forwards Dart's
+//     `SystemUiOverlayStyle.statusBarColor` straight to them);
+//   * transparent bars come from the theme
+//     (`android:windowDrawsSystemBarBackgrounds=false`) instead;
+//   * the cutout mode is `always` (what Android 15 requires of non-floating
+//     windows) instead of the deprecated `shortEdges`;
+//   * the Flutter root consumes both insets, so nothing hides under the bars.
 //
-// Source probes, matching the style of `bottom_nav_and_header_test.dart`: the
-// failure mode here is a silent regression (the app still looks right on an
-// Android 13 phone and breaks on Android 15), so a source-level tripwire is the
-// cheapest reliable guard.
+// Source probes, matching `bottom_nav_and_header_test.dart`: the failure mode is
+// silent (correct on Android 13, broken on 15, or older warnings returning).
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+const _themeFiles = [
+  'android/app/src/main/res/values/styles.xml',
+  'android/app/src/main/res/values-night/styles.xml',
+  'android/app/src/main/res/values-v31/styles.xml',
+  'android/app/src/main/res/values-night-v31/styles.xml',
+];
+
+/// Removes Kotlin comments before asserting that an API is NOT used.
+///
+/// The KDoc above `onCreate` has to *name* the deprecated calls to explain why
+/// they are avoided, so a raw substring search would match the explanation
+/// instead of the code.
+String _codeOnly(String source) {
+  final withoutBlocks = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+  return withoutBlocks
+      .split('\n')
+      .map((line) {
+        final i = line.indexOf('//');
+        return i >= 0 ? line.substring(0, i) : line;
+      })
+      .join('\n');
+}
+
 void main() {
-  group('the Activity opts into edge-to-edge', () {
+  group('the Activity opts into edge-to-edge without deprecated APIs', () {
     final mainActivity = File(
       'android/app/src/main/kotlin/com/sangeet/app/MainActivity.kt',
     ).readAsStringSync();
 
-    test('it calls WindowCompat.enableEdgeToEdge(window)', () {
+    test('it sets decorFitsSystemWindows=false', () {
       expect(
-        mainActivity.contains('WindowCompat.enableEdgeToEdge(window)'),
+        mainActivity.contains(
+          'WindowCompat.setDecorFitsSystemWindows(window, false)',
+        ),
         isTrue,
-        reason: 'Play asks for enableEdgeToEdge(); the Window-level API is the '
-            'non-deprecated form and the only one available to a '
-            'FlutterActivity (ComponentActivity.enableEdgeToEdge() is not)',
+        reason: 'this is the one call that turns on edge-to-edge and is not '
+            'flagged by Play',
       );
       expect(
         mainActivity.contains('import androidx.core.view.WindowCompat'),
@@ -44,76 +75,103 @@ void main() {
       );
     });
 
-    test('the call runs BEFORE super.onCreate, as the AndroidX KDoc requires',
-        () {
-      final callAt = mainActivity.indexOf('WindowCompat.enableEdgeToEdge(window)');
-      final superAt = mainActivity.indexOf('super.onCreate(savedInstanceState)');
+    test('it does NOT call the deprecated bar-colour setters', () {
+      final code = _codeOnly(mainActivity);
+      for (final api in [
+        'setStatusBarColor',
+        'setNavigationBarColor',
+        'LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES',
+      ]) {
+        expect(
+          code.contains(api),
+          isFalse,
+          reason: '$api is deprecated for targetSdk 35+ and was reported by '
+              'Play Console',
+        );
+      }
+    });
 
+    test('the deprecated enableEdgeToEdge helper is gone', () {
+      expect(
+        _codeOnly(mainActivity).contains('enableEdgeToEdge'),
+        isFalse,
+        reason: 'it calls both colour setters and SHORT_EDGES internally, which '
+            'is exactly what the second advisory reports',
+      );
+    });
+
+    test('the window flag is applied before super.onCreate', () {
+      final callAt = mainActivity.indexOf(
+        'WindowCompat.setDecorFitsSystemWindows(window, false)',
+      );
+      final superAt = mainActivity.indexOf('super.onCreate(savedInstanceState)');
       expect(callAt, greaterThan(-1));
       expect(superAt, greaterThan(-1));
-      expect(
-        callAt,
-        lessThan(superAt),
-        reason: 'enableEdgeToEdge() initialises the decor view so the later '
-            'window setup cannot overwrite the attributes',
-      );
+      expect(callAt, lessThan(superAt));
     });
 
     test('MainActivity keeps its audio_service base class', () {
       expect(
         mainActivity.contains('class MainActivity: AudioServiceActivity()'),
         isTrue,
-        reason: 'switching to a ComponentActivity would only be needed for the '
-            'deprecated ComponentActivity extension, and it would change '
-            'audio_service lifecycle behaviour',
       );
     });
   });
 
-  group('the dependency that provides the API is pinned, not incidental', () {
-    final gradle = File('android/app/build.gradle').readAsStringSync();
+  group('the theme provides transparent bars and the mandated cutout mode', () {
+    for (final path in _themeFiles) {
+      test('$path', () {
+        final xml = File(path).readAsStringSync();
 
-    test('androidx.core:core-ktx 1.17.0 is declared explicitly', () {
-      expect(
-        gradle.contains("implementation 'androidx.core:core-ktx:1.17.0'"),
-        isTrue,
-        reason: '1.17.0 is the first release with WindowCompat.enableEdgeToEdge '
-            'and its minCompileSdk is 36, which this module uses',
-      );
-    });
+        expect(
+          xml.contains('>always<'),
+          isTrue,
+          reason: 'Android 15 requires LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS for '
+              'non-floating windows',
+        );
+        expect(
+          xml.contains('shortEdges'),
+          isFalse,
+          reason: 'shortEdges is the deprecated value Play Console reported',
+        );
 
-    test('the module still compiles against SDK 36', () {
-      expect(gradle.contains('compileSdkVersion 36'), isTrue);
-    });
+        final normalTheme = xml.split('name="NormalTheme"').last;
+        expect(
+          normalTheme.contains('windowDrawsSystemBarBackgrounds">false<'),
+          isTrue,
+          reason: 'with the colour setters removed this is what keeps the bars '
+              'transparent (the app background shows through them)',
+        );
+      });
+    }
   });
 
-  group('Flutter consumes both insets at the root', () {
+  group('Flutter no longer sets bar colours and still consumes both insets', () {
     final root = File('lib/pages/root/root_app.dart').readAsStringSync();
 
-    test('the root SafeArea is not limited to the bottom', () {
+    test('no statusBarColor / systemNavigationBarColor is passed', () {
+      for (final key in ['statusBarColor:', 'systemNavigationBarColor:']) {
+        expect(
+          root.contains(key),
+          isFalse,
+          reason: '$key reaches Window#setStatusBarColor / setNavigationBarColor '
+              'through PlatformPlugin, which Play flagged',
+        );
+      }
       expect(
-        root.contains('SafeArea(') && root.contains('top: true'),
+        root.contains('statusBarIconBrightness'),
         isTrue,
-        reason: 'with decorFitsSystemWindows=false the status bar no longer '
-            'insets the view; the root must apply the top inset or every '
-            'header slides under the clock',
+        reason: 'icon contrast must still follow the app theme',
       );
-      // Only an actual argument counts — the explanatory comment above quotes
-      // the old value, so a naive substring search would match that instead.
+    });
+
+    test('the root SafeArea still handles both insets', () {
+      expect(root.contains('SafeArea(') && root.contains('top: true'), isTrue);
       final hasTopFalseArg = root
           .split('\n')
           .any((line) => line.trim() == 'top: false,' && !line.contains('//'));
-      expect(
-        hasTopFalseArg,
-        isFalse,
-        reason: 'top: false was correct only while the window was not '
-            'edge-to-edge',
-      );
-    });
-
-    test('the bottom inset is still handled (navigation bar, mini player)', () {
+      expect(hasTopFalseArg, isFalse);
       expect(root.contains('removeViewInsets'), isTrue);
-      expect(root.contains('footers:'), isTrue);
     });
   });
 }
