@@ -47,6 +47,7 @@ class PlayerView extends HookConsumerWidget {
     final karaokeAvailable = currentActiveTrack is SangeetFullTrackObject &&
         (currentActiveTrack.karaokeStoragePath?.trim().isNotEmpty ?? false);
     final mediaQuery = MediaQuery.sizeOf(context);
+    final theme = Theme.of(context);
 
     final shouldHide = useState(true);
 
@@ -97,194 +98,196 @@ class PlayerView extends HookConsumerWidget {
         padding: EdgeInsets.zero,
         child: Scaffold(
           backgroundColor: Colors.transparent,
+          headers: [
+            SafeArea(
+              bottom: false,
+              child: TitleBar(
+                surfaceOpacity: 0,
+                surfaceBlur: 0,
+                leading: [
+                  IconButton.ghost(
+                    size: const ButtonSize(1.2),
+                    icon: const Icon(SangeetIcons.angleDown),
+                    onPressed: panelController.close,
+                  )
+                ],
+                trailing: [
+                  if (!isLocalTrack)
+                    Tooltip(
+                      tooltip: TooltipContainer(
+                        child: Text(context.l10n.details),
+                      ).call,
+                      child: IconButton.ghost(
+                        size: const ButtonSize(1.2),
+                        icon: const Icon(SangeetIcons.info),
+                        onPressed: currentActiveTrackSource == null
+                            ? null
+                            : () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return TrackDetailsDialog(
+                                        track: currentActiveTrack
+                                            as SangeetFullTrackObject,
+                                      );
+                                    });
+                              },
+                      ),
+                    )
+                ],
+              ),
+            ),
+          ],
           child: SingleChildScrollView(
             controller: scrollController,
-            child: Column(
-              // The title bar is part of the scroll content, NOT the Scaffold's
-              // floating `headers` slot.
-              //
-              // Measured on the device: with the bar in `headers` it painted over
-              // the body instead of reserving space, so the cover started at y=0
-              // and its top edge - together with the close chevron and the info
-              // button - was cut by the status bar. As a child it takes real
-              // height, and its own SafeArea keeps it below the status bar.
-              children: [
-                SafeArea(
-                  bottom: false,
-                  child: TitleBar(
-                    surfaceOpacity: 0,
-                    surfaceBlur: 0,
-                    leading: [
-                      IconButton.ghost(
-                        size: const ButtonSize(1.2),
-                        icon: const Icon(SangeetIcons.angleDown),
-                        onPressed: panelController.close,
-                      )
-                    ],
-                    trailing: [
-                      if (!isLocalTrack)
-                        Tooltip(
-                          tooltip: TooltipContainer(
-                            child: Text(context.l10n.details),
-                          ).call,
-                          child: IconButton.ghost(
-                            size: const ButtonSize(1.2),
-                            icon: const Icon(SangeetIcons.info),
-                            onPressed: currentActiveTrackSource == null
-                                ? null
-                                : () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return TrackDetailsDialog(
-                                            track: currentActiveTrack
-                                                as SangeetFullTrackObject,
-                                          );
-                                        });
-                                  },
-                          ),
-                        )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        constraints:
-                            const BoxConstraints(maxHeight: 300, maxWidth: 300),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(100),
-                              spreadRadius: 2,
-                              blurRadius: 10,
-                              offset: Offset.zero,
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: UniversalImage(
-                            path: albumArt,
-                            coverPixels: CoverRendition.hero,
-                            placeholder: Assets.images.albumPlaceholder.path,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Original / Karaoke switch (only shown when a karaoke file
-                      // exists for the track; otherwise it would be inert).
-                      if (karaokeAvailable) ...[
-                        const _OriginalKaraokeToggle(karaokeAvailable: true),
-                        const SizedBox(height: 16),
-                      ],
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AutoSizeText(
-                              currentActiveTrack?.name ??
-                                  context.l10n.not_playing,
-                              style: const TextStyle(fontSize: 22),
-                              maxFontSize: 22,
-                              maxLines: 1,
-                              textAlign: TextAlign.start,
-                            ),
-                            if (isLocalTrack)
-                              const SizedBox.shrink()
-                            else
-                              const SizedBox.shrink(),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const PlayerControls(),
-                      const SizedBox(height: 12),
-                      const PlayerActions(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        showQueue: false,
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: OutlineButton(
-                              leading: const Icon(SangeetIcons.queue),
-                              child: Text(context.l10n.queue),
-                              onPressed: () {
-                                if (!context.mounted) return;
-                                context.pushRoute(const PlayerQueueRoute());
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlineButton(
-                              leading: const Icon(SangeetIcons.music),
-                              child: Text(context.l10n.lyrics),
-                              onPressed: () {
-                                if (!context.mounted) return;
-                                context.pushRoute(const PlayerLyricsRoute());
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          // Share sits with Queue and Lyrics because it acts on the
-                          // track that is playing, which is what this whole screen is
-                          // about - the user should not have to open a menu to send
-                          // the song they are listening to.
-                          //
-                          // The message carries the Play Store listing, so a
-                          // recipient WITHOUT the app gets something they can act on.
-                          // The previous share sent only the track's name, which gave
-                          // them nothing to tap.
-                          Expanded(
-                            child: OutlineButton(
-                              leading: const Icon(SangeetIcons.share),
-                              child: Text(context.l10n.share),
-                              onPressed: () {
-                                final track = currentActiveTrack;
-                                if (track == null) return;
-                                TrackShare.shareTrack(
-                                  track,
-                                  // iPad presents the sheet as a popover anchored to
-                                  // a rectangle; without one `share` throws there.
-                                  sharePositionOrigin: _shareAnchorFor(context),
-                                );
-                              },
-                            ),
+            // The Scaffold's `headers` slot FLOATS the title bar over the body
+            // instead of reserving layout space, so without this the cover started
+            // at y=0 and its top edge - together with the close chevron and the
+            // info button - was cut by the status bar (reproduced on the device).
+            //
+            // `48 * scaling` is not a guess: it is `TitleBar`'s own default height
+            // and the value its `preferredSize` reports
+            // (lib/components/titlebar/titlebar.dart). The status-bar inset is
+            // added because the bar itself is already offset by it via SafeArea.
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.paddingOf(context).top + 48 * theme.scaling,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(8),
+                      constraints:
+                          const BoxConstraints(maxHeight: 300, maxWidth: 300),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(100),
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            offset: Offset.zero,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Consumer(builder: (context, ref, _) {
-                          final volume = ref.watch(volumeProvider);
-                          return VolumeSlider(
-                            fullWidth: true,
-                            value: volume,
-                            onChanged: (value) {
-                              ref
-                                  .read(volumeProvider.notifier)
-                                  .setVolume(value);
-                            },
-                          );
-                        }),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: UniversalImage(
+                          path: albumArt,
+                          coverPixels: CoverRendition.hero,
+                          placeholder: Assets.images.albumPlaceholder.path,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      const Gap(16),
+                    ),
+                    const SizedBox(height: 12),
+                    // Original / Karaoke switch (only shown when a karaoke file
+                    // exists for the track; otherwise it would be inert).
+                    if (karaokeAvailable) ...[
+                      const _OriginalKaraokeToggle(karaokeAvailable: true),
+                      const SizedBox(height: 16),
                     ],
-                  ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AutoSizeText(
+                            currentActiveTrack?.name ??
+                                context.l10n.not_playing,
+                            style: const TextStyle(fontSize: 22),
+                            maxFontSize: 22,
+                            maxLines: 1,
+                            textAlign: TextAlign.start,
+                          ),
+                          if (isLocalTrack)
+                            const SizedBox.shrink()
+                          else
+                            const SizedBox.shrink(),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const PlayerControls(),
+                    const SizedBox(height: 12),
+                    const PlayerActions(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      showQueue: false,
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: OutlineButton(
+                            leading: const Icon(SangeetIcons.queue),
+                            child: Text(context.l10n.queue),
+                            onPressed: () {
+                              if (!context.mounted) return;
+                              context.pushRoute(const PlayerQueueRoute());
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlineButton(
+                            leading: const Icon(SangeetIcons.music),
+                            child: Text(context.l10n.lyrics),
+                            onPressed: () {
+                              if (!context.mounted) return;
+                              context.pushRoute(const PlayerLyricsRoute());
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Share sits with Queue and Lyrics because it acts on the
+                        // track that is playing, which is what this whole screen is
+                        // about - the user should not have to open a menu to send
+                        // the song they are listening to.
+                        //
+                        // The message carries the Play Store listing, so a
+                        // recipient WITHOUT the app gets something they can act on.
+                        // The previous share sent only the track's name, which gave
+                        // them nothing to tap.
+                        Expanded(
+                          child: OutlineButton(
+                            leading: const Icon(SangeetIcons.share),
+                            child: Text(context.l10n.share),
+                            onPressed: () {
+                              final track = currentActiveTrack;
+                              if (track == null) return;
+                              TrackShare.shareTrack(
+                                track,
+                                // iPad presents the sheet as a popover anchored to
+                                // a rectangle; without one `share` throws there.
+                                sharePositionOrigin: _shareAnchorFor(context),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Consumer(builder: (context, ref, _) {
+                        final volume = ref.watch(volumeProvider);
+                        return VolumeSlider(
+                          fullWidth: true,
+                          value: volume,
+                          onChanged: (value) {
+                            ref.read(volumeProvider.notifier).setVolume(value);
+                          },
+                        );
+                      }),
+                    ),
+                    const Gap(16),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
