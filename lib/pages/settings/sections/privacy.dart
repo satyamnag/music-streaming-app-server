@@ -6,6 +6,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/extensions/context.dart';
 import 'package:sangeet/modules/settings/section_card_with_heading.dart';
 import 'package:sangeet/provider/auth/clerk_auth_provider.dart';
+import 'package:sangeet/modules/analytics/analytics_consent.dart';
 import 'package:sangeet/services/analytics/firebase_analytics_service.dart';
 import 'package:sangeet/services/analytics/posthog_service.dart';
 import 'package:sangeet/services/logger/logger.dart';
@@ -69,6 +70,11 @@ class SettingsPrivacySection extends HookConsumerWidget {
                     await PostHogService.instance.identify(userId);
                   }
                 }
+
+                // Answering here counts as answering: without this the first-run
+                // disclosure would still appear for someone who already made the
+                // decision in Settings.
+                await AnalyticsConsent.markDecided();
               } catch (e, stack) {
                 AppLogger.reportError(e, stack, 'settings: analytics consent');
               }
