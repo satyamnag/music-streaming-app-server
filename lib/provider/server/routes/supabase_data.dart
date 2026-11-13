@@ -315,12 +315,17 @@ class ServerSupabaseDataRoutes {
   Future<Response> getLyrics(Request request, String id) async {
     try {
       final sb = await _supabase;
-      // Per-track and memory-only: reopening the lyrics screen for a track that
-      // was already opened should not cost another round trip. The row is
-      // immutable once uploaded, hence the long TTL.
+      // A SHORT ttl, deliberately NOT `_trackFactTtl`.
+      //
+      // Lyrics are edited in the admin panel, so this row is NOT immutable: with
+      // the 30-minute fact TTL, a track whose lyrics were just filled in kept
+      // serving the cached (empty) row, the client fell through to LRCLib, and
+      // the lyrics screen showed nothing until the app was restarted. One minute
+      // still collapses the repeated opens of a single screen while letting an
+      // admin edit appear without relaunching the app.
       final raw = await CatalogCache.instance.object(
         'lyrics-$id',
-        ttl: _trackFactTtl,
+        ttl: const Duration(minutes: 1),
         persist: false,
         fetch: () async {
           final row = await sb
@@ -513,7 +518,8 @@ class ServerSupabaseDataRoutes {
         // The row is cached only after a successful `.single()`, so a null here
         // means the entry was cleared and the refetch found nothing. Same status
         // the previous `.single()` failure produced, with a concrete message.
-        return Response.internalServerError(body: '{"error":"Track not found"}');
+        return Response.internalServerError(
+            body: '{"error":"Track not found"}');
       }
       // Listening requires a signed-in user for EVERY track, free or paid, so no
       // stream URL is handed out without a session — same rule the /stream/<id>
@@ -872,10 +878,8 @@ class ServerSupabaseDataRoutes {
 
       // Language albums: id `album-language-<lang>` -> all tracks of that lang.
       if (id.startsWith('album-language-')) {
-        final lang = id
-            .substring('album-language-'.length)
-            .replaceAll('-', ' ')
-            .trim();
+        final lang =
+            id.substring('album-language-'.length).replaceAll('-', ' ').trim();
         final langTracks = tracks
             .where((t) =>
                 (t['language']?.toString().trim() ?? '').toLowerCase() ==
@@ -992,10 +996,8 @@ class ServerSupabaseDataRoutes {
 
       // Language albums: id `album-language-<lang>` -> all tracks of that lang.
       if (id.startsWith('album-language-')) {
-        final lang = id
-            .substring('album-language-'.length)
-            .replaceAll('-', ' ')
-            .trim();
+        final lang =
+            id.substring('album-language-'.length).replaceAll('-', ' ').trim();
         final items = tracks
             .where((t) =>
                 (t['language']?.toString().trim() ?? '').toLowerCase() ==
@@ -1427,7 +1429,8 @@ class ServerSupabaseDataRoutes {
         for (final t in allTracks) {
           final albumId = t['album_id']?.toString();
           if (albumId == null || albumId.isEmpty) continue;
-          if ((inAlbum[albumId]?.contains(t['id'].toString())) ?? false) continue;
+          if ((inAlbum[albumId]?.contains(t['id'].toString())) ?? false)
+            continue;
           (byAlbum[albumId] = byAlbum[albumId] ?? []).add(_trackToJson(t));
         }
       } else {
@@ -2001,9 +2004,8 @@ class ServerSupabaseDataRoutes {
           ? const <String, dynamic>{}
           : jsonDecode(body) as Map<String, dynamic>;
       final code = (data['code'] ?? '').toString().trim();
-      final userId = (data['user_id'] ?? data['userId'] ?? '')
-          .toString()
-          .trim();
+      final userId =
+          (data['user_id'] ?? data['userId'] ?? '').toString().trim();
       if (code.isEmpty || userId.isEmpty) {
         return Response.badRequest(
             body: '{"error":"code and user_id required"}');
@@ -2039,9 +2041,8 @@ class ServerSupabaseDataRoutes {
           ? const <String, dynamic>{}
           : jsonDecode(body) as Map<String, dynamic>;
       final code = (data['referrer_code'] ?? '').toString().trim();
-      final userId = (data['user_id'] ?? data['userId'] ?? '')
-          .toString()
-          .trim();
+      final userId =
+          (data['user_id'] ?? data['userId'] ?? '').toString().trim();
       if (code.isEmpty || userId.isEmpty) {
         return Response.badRequest(
             body: '{"error":"referrer_code and user_id required"}');

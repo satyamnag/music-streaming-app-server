@@ -90,6 +90,11 @@ class HomePage extends HookConsumerWidget {
         confirmExit(context);
       },
       child: SafeArea(
+        // The wallpaper is full-bleed: it must start at y=0, under the status
+        // bar, or a strip of the scaffold background shows above it (white in
+        // light mode). The header row below is padded by the status-bar inset
+        // instead, so the logo and the two actions still clear the clock.
+        top: false,
         bottom: false,
         child: Scaffold(
           headers: [
@@ -155,15 +160,25 @@ class HomePage extends HookConsumerWidget {
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (mediaQuery.smAndDown ||
-                                layoutMode == LayoutMode.compact)
-                              _HomeHeaderRow(
-                                color: headerColor,
-                                shadows: headerShadows,
-
-                              )
-                            else if (kIsMacOS)
-                              const Gap(10),
+                            // The page is not inset at the top any more (the
+                            // wallpaper reaches y=0), so the header row carries
+                            // the status-bar padding. Only the row is padded: the
+                            // carousel below sits on the page surface and must
+                            // not gain a gap.
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: mediaQuery.padding.top,
+                              ),
+                              child: mediaQuery.smAndDown ||
+                                      layoutMode == LayoutMode.compact
+                                  ? _HomeHeaderRow(
+                                      color: headerColor,
+                                      shadows: headerShadows,
+                                    )
+                                  : (kIsMacOS
+                                      ? const Gap(10)
+                                      : const SizedBox.shrink()),
+                            ),
                             // The carousel paints no background of its own, so
                             // whatever is behind it shows through: now the page
                             // surface, since the band stops above it.

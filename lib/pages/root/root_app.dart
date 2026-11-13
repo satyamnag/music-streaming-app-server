@@ -68,20 +68,20 @@ class RootAppPage extends HookConsumerWidget {
       context: context,
       removeBottom: true,
       child: SafeArea(
-        // BOTH insets are handled here now.
+        // ONLY the bottom inset is consumed here.
         //
-        // `top: false` was correct while the Activity was NOT edge-to-edge: the
-        // window itself started below the status bar, so a page's own SafeArea
-        // was doing the work. `MainActivity` now calls
-        // `WindowCompat.enableEdgeToEdge(window)` (Play's recommendation for
-        // apps targeting SDK 35+), which makes the Flutter view span the whole
-        // screen on EVERY Android version — so the top inset must be consumed
-        // here, or the header would slide under the status bar.
+        // `top: true` was tried and it is what produced the white band above the
+        // home wallpaper: the Scaffold body then started BELOW the status bar, so
+        // the strip above it was the scaffold background (white in light mode)
+        // rather than the artwork. A full-bleed header cannot be painted from
+        // inside an inset child, so the top inset is left to the pages.
         //
-        // Nested SafeAreas are harmless: a SafeArea hands zero top padding to
-        // its descendants, so the per-page ones (home, library, profile, …)
-        // simply become no-ops and the app is inset exactly once.
-        top: true,
+        // Every page already wraps itself in its own `SafeArea` (home, library,
+        // profile, search, settings, notifications, connect, artist, lyrics,
+        // queue, recently played, about, logs, …), so each one now consumes the
+        // status-bar inset itself. Home deliberately opts out of it and pads its
+        // header row instead, because its wallpaper must reach y=0.
+        top: false,
         child: Scaffold(
           footers: const [
             BottomPlayer(),

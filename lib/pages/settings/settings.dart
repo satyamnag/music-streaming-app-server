@@ -10,6 +10,7 @@ import 'package:sangeet/pages/settings/sections/appearance.dart';
 import 'package:sangeet/pages/settings/sections/desktop.dart';
 import 'package:sangeet/pages/settings/sections/language_region.dart';
 import 'package:sangeet/pages/settings/sections/playback.dart';
+import 'package:sangeet/pages/settings/sections/account.dart';
 import 'package:sangeet/pages/settings/sections/privacy.dart';
 import 'package:sangeet/provider/user_preferences/user_preferences_provider.dart';
 import 'package:sangeet/utils/platform.dart';
@@ -98,6 +99,11 @@ class SettingsPage extends HookConsumerWidget {
                       const SettingsPlaybackSection(),
                       const Gap(12),
                       const SettingsPrivacySection(),
+                      const Gap(12),
+                      // ACCOUNT sits directly under Privacy: Play's account-deletion
+                      // guidance names account settings as the prominent place for
+                      // the pathway, and this is where a listener looks for it.
+                      const SettingsAccountSection(),
                       if (kIsDesktop) ...[
                         const Gap(12),
                         const SettingsDesktopSection(),

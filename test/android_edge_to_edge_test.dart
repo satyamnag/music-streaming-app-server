@@ -182,13 +182,29 @@ void main() {
       );
     });
 
-    test('the root SafeArea still handles both insets', () {
-      expect(root.contains('SafeArea(') && root.contains('top: true'), isTrue);
-      final hasTopFalseArg = root
-          .split('\n')
-          .any((line) => line.trim() == 'top: false,' && !line.contains('//'));
-      expect(hasTopFalseArg, isFalse);
+    test('the root consumes the BOTTOM inset only; pages own the top one', () {
+      // The root used to take both. That is what produced the white band above
+      // the home wallpaper: an inset Scaffold cannot paint a full-bleed header,
+      // so the strip above the artwork was the scaffold background. The top
+      // inset now belongs to each page, and home deliberately opts out of it and
+      // pads its header row instead.
+      expect(root.contains('SafeArea('), isTrue);
       expect(root.contains('removeViewInsets'), isTrue);
+      expect(
+        root.contains('top: false'),
+        isTrue,
+        reason: 'the root must not inset the top, or a full-bleed header is '
+            'impossible',
+      );
+
+      final home = File('lib/pages/home/home.dart').readAsStringSync();
+      expect(home.contains('top: false'), isTrue,
+          reason: 'the wallpaper reaches y=0');
+      expect(
+        home.contains('mediaQuery.padding.top'),
+        isTrue,
+        reason: 'the header row carries the status-bar padding itself',
+      );
     });
   });
 }

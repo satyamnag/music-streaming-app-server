@@ -433,73 +433,6 @@ class _NotificationRow extends HookConsumerWidget {
   }
 }
 
-/// A text-link action inside a profile section (currently "Delete account").
-///
-/// Deliberately not a card: no icon, no fill, no subtitle. It is still a
-/// first-class control, so it keeps the three properties that matter for
-/// accessibility and for Google's "prominent pathway" wording:
-///
-///  * a 48dp minimum touch target (`.profile_delete_link`);
-///  * the destructive colour plus an underline, so it reads as an action and not
-///    as body copy;
-///  * a [Semantics] label that spells out what it does for screen-reader users,
-///    which is where the removed subtitle's explanation now lives.
-class _ProfileLink extends StatelessWidget {
-  final String label;
-  final String semanticsLabel;
-  final VoidCallback onTap;
-
-  const _ProfileLink({
-    required this.label,
-    required this.semanticsLabel,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-    final colour = theme.colorScheme.destructive;
-
-    return Semantics(
-      button: true,
-      label: semanticsLabel,
-      excludeSemantics: true,
-      child: GestureDetector(
-        key: const Key('profile_delete_link'),
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: ConstrainedBox(
-          // 48dp is the documented minimum touch target; a bare text link would
-          // otherwise be ~20dp tall.
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 4 * scale,
-                vertical: 12 * scale,
-              ),
-              child: Text(
-                label,
-                style: theme.typography.small.copyWith(
-                  color: colour,
-                  fontWeight: FontWeight.w600,
-                  // Underlined at rest, not only on hover: on a phone there is no
-                  // hover, and the link has to look like an action.
-                  decoration: TextDecoration.underline,
-                  decorationColor: colour,
-                  decorationThickness: 1.2,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// The ACCOUNT ACTIONS group: Sign out and Delete account, each behind the
 /// same explicit confirmation the popup used.
 class _AccountActions extends ConsumerWidget {
@@ -507,9 +440,6 @@ class _AccountActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scale = theme.scaling;
-
     Future<void> signOut() async {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -543,39 +473,6 @@ class _AccountActions extends ConsumerWidget {
       ref.invalidate(clerkAuthProvider);
     }
 
-    Future<void> deleteAccount() async {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Delete account?'),
-          content: const Text(
-            'This will permanently delete your Soulful Bhakti account and '
-            'all data associated with it. This action cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            Button.destructive(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true || !context.mounted) return;
-
-      final failure =
-          await ref.read(clerkAuthProvider.notifier).deleteAccount();
-      if (!context.mounted) return;
-      if (failure != null) {
-        _showError(context, failure);
-        return;
-      }
-      ref.invalidate(clerkAuthProvider);
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -584,23 +481,12 @@ class _AccountActions extends ConsumerWidget {
           title: context.l10n.sign_out,
           onTap: signOut,
         ),
-        Gap(10 * scale),
-        // A link, not a filled card: the row is an account-settings action, and
-        // Google's account-deletion requirement is about the pathway being
-        // "prominent (for example, within the account settings or a similar
-        // section)" - the placement, not the widget. The same support article
-        // explicitly allows "a link within your app that takes users to your app
-        // account deletion web resource", so a labelled, underlined link in this
-        // section is compliant. What it must NOT become is small grey text
-        // somewhere peripheral: the target stays 48dp, keeps the destructive
-        // colour and the exact label "Delete account", and the confirmation
-        // dialog still spells out that the data is removed permanently.
-        _ProfileLink(
-          label: 'Delete account',
-          semanticsLabel: 'Delete account. Permanently remove your account and '
-              'all of its data.',
-          onTap: deleteAccount,
-        ),
+        // "Delete account" now lives in Settings -> Account, directly under
+        // Privacy (see lib/pages/settings/sections/account.dart). It is the
+        // placement Play's account-deletion guidance names, and the destructive
+        // card there is the UI this screen used to show. Keeping a second copy
+        // here would give the same irreversible action two doorways with two
+        // different styles.
       ],
     );
   }
