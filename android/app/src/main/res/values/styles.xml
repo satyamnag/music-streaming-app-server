@@ -18,14 +18,5 @@
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
-        <!-- Transparent system bars WITHOUT the deprecated colour setters.
-             `Window#setStatusBarColor` / `setNavigationBarColor` are deprecated
-             for apps targeting 35+ (and no-ops on Android 15), so the app no
-             longer calls them - from Kotlin or from Flutter's
-             setSystemChromeSystemUIOverlayStyle. With this flag the window draws
-             no bar background at all: the status bar and the navigation bar show
-             the app's own background, the same look the setters produced, and
-             the Flutter root SafeArea keeps content clear of both. -->
-        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
     </style>
 </resources>

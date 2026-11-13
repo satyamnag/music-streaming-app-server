@@ -1,5 +1,6 @@
 package com.sangeet.app
 
+import android.os.Build
 import android.os.Bundle
 import androidx.core.view.WindowCompat
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -10,32 +11,39 @@ class MainActivity: AudioServiceActivity() {
     private var clerkBridge: ClerkBridge? = null
 
     /**
-     * Edge-to-edge, without the APIs Android 15 deprecates.
+     * Edge-to-edge, version-guarded so the deprecated window APIs are only ever
+     * reached on Android versions where they are NOT deprecated.
      *
-     * Play's first advisory asked for `enableEdgeToEdge()`; its second reports
-     * that this very helper calls `Window#setStatusBarColor`,
-     * `Window#setNavigationBarColor` and `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`
-     * — all deprecated for apps targeting 35+
-     * (https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge).
-     * So the helper is replaced by the one call it makes that is NOT flagged and
-     * is still meaningful before Android 15:
+     * The two Play advisories pull against each other:
      *
-     *   - `WindowCompat.setDecorFitsSystemWindows(window, false)` — the app owns
-     *     the insets, i.e. edge-to-edge, on every API level;
-     *   - no `setStatusBarColor` / `setNavigationBarColor`: on Android 15+ the
-     *     platform makes both bars transparent and the setters are no-ops, and
-     *     below 15 the theme's window background shows through, which is what the
-     *     app looked like before — nothing to set;
-     *   - no cutout-mode juggling here: the theme declares
-     *     `windowLayoutInDisplayCutoutMode=always` in the res/values styles
-     *     (and its night / v31 variants), the mode Android 15 requires for
-     *     non-floating windows, instead of the deprecated `shortEdges`.
+     *   1. "Edge-to-edge may not display for all users … call enableEdgeToEdge()";
+     *   2. "deprecated APIs … Window.setStatusBarColor, setNavigationBarColor,
+     *      LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES".
      *
-     * The Flutter side applies the insets: `lib/pages/root/root_app.dart` wraps
-     * the app in a `SafeArea(top: true, bottom: true)`.
+     * `enableEdgeToEdge()` IS made of the APIs (2) reports, but those APIs were
+     * deprecated *in Android 15 / API 35* — below 35 they are still the only way
+     * to make the system bars transparent. So:
+     *
+     *   - API < 35: call the helper. It is the documented path (advisory 1) and
+     *     the calls it makes are not deprecated here;
+     *   - API >= 35: call NOTHING. The platform enforces edge-to-edge itself and
+     *     the setters are disabled no-ops, so anything we called would be dead
+     *     code.
+     *
+     * Supplying no bar colours from Flutter (`SystemChrome.setSystemUIOverlayStyle`
+     * in `lib/pages/root/root_app.dart` sends only the icon brightness) keeps the
+     * transparent bars the helper set, and the root `SafeArea(top: true,
+     * bottom: true)` consumes both insets.
+     *
+     * The display-cutout mode is the theme's job:
+     * `windowLayoutInDisplayCutoutMode=always` in res/values styles (and the
+     * night / v31 variants) — what Android 15 requires of non-floating windows,
+     * instead of the deprecated `shortEdges`.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            WindowCompat.enableEdgeToEdge(window)
+        }
         super.onCreate(savedInstanceState)
     }
 

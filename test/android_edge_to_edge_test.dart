@@ -60,49 +60,52 @@ void main() {
       'android/app/src/main/kotlin/com/sangeet/app/MainActivity.kt',
     ).readAsStringSync();
 
-    test('it sets decorFitsSystemWindows=false', () {
-      expect(
-        mainActivity.contains(
-          'WindowCompat.setDecorFitsSystemWindows(window, false)',
-        ),
-        isTrue,
-        reason: 'this is the one call that turns on edge-to-edge and is not '
-            'flagged by Play',
-      );
+    test('the WindowCompat import is the edge-to-edge entry point', () {
       expect(
         mainActivity.contains('import androidx.core.view.WindowCompat'),
         isTrue,
       );
+      expect(
+        mainActivity.contains('import android.os.Build'),
+        isTrue,
+        reason: 'the version guard needs Build.VERSION.SDK_INT',
+      );
     });
 
-    test('it does NOT call the deprecated bar-colour setters', () {
+    test('it does NOT call the deprecated bar-colour setters itself', () {
       final code = _codeOnly(mainActivity);
-      for (final api in [
-        'setStatusBarColor',
-        'setNavigationBarColor',
-        'LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES',
-      ]) {
+      for (final api in ['setStatusBarColor', 'setNavigationBarColor']) {
         expect(
           code.contains(api),
           isFalse,
           reason: '$api is deprecated for targetSdk 35+ and was reported by '
-              'Play Console',
+              'Play Console; the helper applies the bars for us',
         );
       }
     });
 
-    test('the deprecated enableEdgeToEdge helper is gone', () {
+    test('enableEdgeToEdge is guarded to API < 35, where it is not deprecated',
+        () {
+      final code = _codeOnly(mainActivity);
       expect(
-        _codeOnly(mainActivity).contains('enableEdgeToEdge'),
-        isFalse,
-        reason: 'it calls both colour setters and SHORT_EDGES internally, which '
-            'is exactly what the second advisory reports',
+        code.contains('WindowCompat.enableEdgeToEdge(window)'),
+        isTrue,
+        reason: 'below Android 15 it is the documented way to get transparent '
+            'bars; from 15 the platform enforces edge-to-edge and the call would '
+            'be dead code',
       );
+      final guardAt = code.indexOf('Build.VERSION.SDK_INT <');
+      final callAt = code.indexOf('WindowCompat.enableEdgeToEdge(window)');
+      expect(guardAt, greaterThan(-1));
+      expect(callAt, greaterThan(guardAt),
+          reason: 'the call must sit inside the version guard');
+      expect(code.contains('VANILLA_ICE_CREAM'), isTrue,
+          reason: 'API 35 / Android 15 is the boundary the deprecation starts at');
     });
 
-    test('the window flag is applied before super.onCreate', () {
+    test('the window setup runs before super.onCreate', () {
       final callAt = mainActivity.indexOf(
-        'WindowCompat.setDecorFitsSystemWindows(window, false)',
+        'WindowCompat.enableEdgeToEdge(window)',
       );
       final superAt = mainActivity.indexOf('super.onCreate(savedInstanceState)');
       expect(callAt, greaterThan(-1));
@@ -137,10 +140,12 @@ void main() {
 
         final normalTheme = xml.split('name="NormalTheme"').last;
         expect(
-          normalTheme.contains('windowDrawsSystemBarBackgrounds">false<'),
-          isTrue,
-          reason: 'with the colour setters removed this is what keeps the bars '
-              'transparent (the app background shows through them)',
+          normalTheme.contains('windowDrawsSystemBarBackgrounds'),
+          isFalse,
+          reason: 'on a MIUI device this flag produced a BLACK status bar with '
+              'dark icons (measured: rows 0-47 pure #000000, no icon pixels). '
+              'The bars stay transparent through enableEdgeToEdge below API 35 '
+              'and through the platform from 35 up',
         );
       });
     }
