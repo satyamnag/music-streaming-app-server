@@ -15,6 +15,13 @@ class UniversalImage extends HookWidget {
   final String? placeholder;
   final BoxFit? fit;
 
+  /// Where the image sits inside its box when [fit] crops it.
+  ///
+  /// BoxFit.cover crops symmetrically by default, which can cut the top of a
+  /// tall band. The home wallpaper passes [Alignment.topCenter] so its artwork is
+  /// never cropped at the top edge.
+  final Alignment alignment;
+
   /// Rendition size for cover art, in pixels.
   ///
   /// When set, a cover from the Supabase `thumbnails` bucket or the R2 CDN is
@@ -31,6 +38,7 @@ class UniversalImage extends HookWidget {
     this.width,
     this.placeholder,
     this.fit,
+    this.alignment = Alignment.center,
     this.scale = 1,
     this.coverPixels,
     super.key,
@@ -90,6 +98,7 @@ class UniversalImage extends HookWidget {
               height: height,
               scale: scale,
               fit: fit,
+              alignment: alignment,
               placeholder: placeholder,
             );
           }
@@ -103,6 +112,7 @@ class UniversalImage extends HookWidget {
           );
         },
         fit: fit,
+        alignment: alignment,
       );
     } else if (Uri.tryParse(path) != null && !path.startsWith("assets")) {
       return Image.file(
@@ -113,6 +123,7 @@ class UniversalImage extends HookWidget {
         cacheWidth: width?.toInt(),
         scale: scale,
         fit: fit,
+        alignment: alignment,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
             placeholder ?? Assets.images.placeholder.path,
@@ -133,6 +144,7 @@ class UniversalImage extends HookWidget {
         cacheWidth: width?.toInt(),
         scale: scale,
         fit: fit,
+        alignment: alignment,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
             placeholder ?? Assets.images.placeholder.path,
@@ -154,6 +166,7 @@ class UniversalImage extends HookWidget {
       cacheWidth: width?.toInt(),
       scale: scale,
       fit: fit,
+      alignment: alignment,
       errorBuilder: (context, error, stackTrace) {
         return Image.asset(
           placeholder ?? Assets.images.placeholder.path,

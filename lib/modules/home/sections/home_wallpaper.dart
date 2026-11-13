@@ -62,7 +62,20 @@ class HomeWallpaper extends StatelessWidget {
   /// widget when a wallpaper is actually configured.
   final String url;
 
-  const HomeWallpaper({super.key, required this.url});
+  /// Where the artwork sits inside the band.
+  ///
+  /// [Alignment.topCenter] by default: the band is a short strip, so
+  /// `BoxFit.cover` has to crop something, and cropping the BOTTOM keeps the top
+  /// edge of the artwork - the part a listener reads first - intact. Centred
+  /// cropping cut the top of the sky off, which is what the home screen was
+  /// reported for.
+  final Alignment alignment;
+
+  const HomeWallpaper({
+    super.key,
+    required this.url,
+    this.alignment = Alignment.topCenter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +84,11 @@ class HomeWallpaper extends StatelessWidget {
       // header's flexible space on the home screen, or a plain box in a test —
       // instead of taking its size from the image's intrinsic dimensions.
       child: SizedBox.expand(
-        child: UniversalImage(path: url, fit: BoxFit.cover),
+        child: UniversalImage(
+          path: url,
+          fit: BoxFit.cover,
+          alignment: alignment,
+        ),
       ),
     );
   }

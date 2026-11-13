@@ -55,6 +55,12 @@ class HomePage extends HookConsumerWidget {
 
     // Admin-managed home wallpaper. Null (unset, table absent, or a failed
     // fetch) simply renders the normal themed background.
+    // The band starts at y=0 (the page is not inset at the top) and must be
+    // taller by the status-bar inset: otherwise the same 135dp of artwork now
+    // has to cover the strip that used to be the white scaffold background, and
+    // the crop eats the top of the picture.
+    final wallpaperHeight =
+        HomeWallpaper.heightFor(mediaQuery.size) + mediaQuery.padding.top;
     final wallpaperUrl = ref.watch(homeWallpaperProvider).valueOrNull;
     final hasWallpaper = wallpaperUrl != null && wallpaperUrl.isNotEmpty;
     // Drives which shelf takes the slot under Featured Playlists: Recently Played
@@ -134,9 +140,7 @@ class HomePage extends HookConsumerWidget {
                     // still reads as a band rather than a thin strip when no
                     // shelf has any tracks and the carousel collapses to nothing.
                     constraints: BoxConstraints(
-                      minHeight: wallpaperUrl == null
-                          ? 0
-                          : HomeWallpaper.heightFor(mediaQuery.size),
+                      minHeight: wallpaperUrl == null ? 0 : wallpaperHeight,
                     ),
                     child: Stack(
                       children: [
@@ -154,8 +158,11 @@ class HomePage extends HookConsumerWidget {
                             top: 0,
                             left: 0,
                             right: 0,
-                            height: HomeWallpaper.heightFor(mediaQuery.size),
-                            child: HomeWallpaper(url: wallpaperUrl),
+                            height: wallpaperHeight,
+                            child: HomeWallpaper(
+                              url: wallpaperUrl,
+                              alignment: Alignment.topCenter,
+                            ),
                           ),
                         Column(
                           mainAxisSize: MainAxisSize.min,
