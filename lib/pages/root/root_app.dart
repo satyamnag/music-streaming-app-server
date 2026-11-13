@@ -41,23 +41,27 @@ class RootAppPage extends HookConsumerWidget {
     useOneSignalDeepLinks();
 
     useEffect(() {
-      // Icon brightness ONLY. The bar colours used to be set here too, but
-      // `statusBarColor` / `systemNavigationBarColor` reach the platform through
-      // Flutter's `PlatformPlugin.setSystemChromeSystemUIOverlayStyle`, i.e.
-      // `Window#setStatusBarColor` / `Window#setNavigationBarColor` — both
-      // deprecated for apps targeting 35+, and no-ops on Android 15 where the
-      // bars are transparent and the app's background shows through them.
-      // Play Console reported exactly that call path, so it is no longer made.
+      // The bar colour is set here ON PURPOSE, and it is the only place that
+      // does so.
+      //
+      // `Window#setStatusBarColor` is deprecated *from Android 15 onwards*, and
+      // this call is what keeps the status bar the app's own colour on Android
+      // 14 and below. Removing it was tried and measured on the device: the bar
+      // fell back to a black surface with dark icons, i.e. an invisible status
+      // bar. On Android 15+ the platform makes the bar transparent and this call
+      // is a no-op, so it can never fight the platform there.
+      //
+      // The genuinely deprecated *value* we could remove - the cutout mode - is
+      // gone from the theme (all four style files now declare `always`).
       SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(
+          statusBarColor: backgroundColor, // status bar color
           statusBarIconBrightness: brightness == Brightness.dark
               ? Brightness.light
               : Brightness.dark,
         ),
       );
       return null;
-      // `backgroundColor` stays in the dependency list: it is what the bars show
-      // through now, so a theme change must still re-apply the icon contrast.
     }, [backgroundColor, brightness]);
 
     final scaffold = MediaQuery.removeViewInsets(

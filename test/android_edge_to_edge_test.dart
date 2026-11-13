@@ -154,15 +154,27 @@ void main() {
   group('Flutter no longer sets bar colours and still consumes both insets', () {
     final root = File('lib/pages/root/root_app.dart').readAsStringSync();
 
-    test('no statusBarColor / systemNavigationBarColor is passed', () {
-      for (final key in ['statusBarColor:', 'systemNavigationBarColor:']) {
-        expect(
-          root.contains(key),
-          isFalse,
-          reason: '$key reaches Window#setStatusBarColor / setNavigationBarColor '
-              'through PlatformPlugin, which Play flagged',
-        );
-      }
+    test('the bar colour is set exactly once, for the pre-15 path', () {
+      // Measured on the device: dropping this call left the status bar black
+      // (window background) with dark icons, i.e. unusable. The API is deprecated
+      // only from Android 15, where it is a no-op, so the call is kept and the
+      // deprecated *value* we could remove (the cutout mode) is handled in the
+      // theme instead.
+      expect(
+        root.contains('statusBarColor: backgroundColor'),
+        isTrue,
+        reason: 'this is what keeps the status bar the app colour below Android 15',
+      );
+      expect(
+        'statusBarColor:'.allMatches(root).length,
+        1,
+        reason: 'exactly one place may touch the bar colour',
+      );
+      expect(
+        root.contains('systemNavigationBarColor:'),
+        isFalse,
+        reason: 'the navigation bar was never themed and needs no call',
+      );
       expect(
         root.contains('statusBarIconBrightness'),
         isTrue,
