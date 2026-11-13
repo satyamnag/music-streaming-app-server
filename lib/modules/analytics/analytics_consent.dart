@@ -47,15 +47,10 @@ class AnalyticsConsent {
   }
 
   /// The listener pressed "Allow analytics".
-  ///
-  /// The ANSWER is persisted first, then the SDKs are told, each with a timeout.
-  /// Ordering is deliberate and was found on a real device: the earlier version
-  /// awaited the SDK calls first, and a Firebase call that never completed left
-  /// the dialog on screen forever. An answer must always be recorded, and a
-  /// stuck SDK must never hold the UI hostage.
   static Future<void> grant() async {
+    await PostHogService.instance.setConsent(true);
+    await FirebaseAnalyticsService.instance.applyConsent(true);
     await markDecided();
-    await _applyToSdks(true);
   }
 
   /// The listener pressed "Not now".
@@ -64,30 +59,9 @@ class AnalyticsConsent {
   /// from an older install cannot outlive a deliberate decline, and so Google
   /// Analytics for Firebase is told the same thing.
   static Future<void> decline() async {
+    await PostHogService.instance.setConsent(false);
+    await FirebaseAnalyticsService.instance.applyConsent(false);
     await markDecided();
-    await _applyToSdks(false);
-  }
-
-  /// Tells each analytics SDK the decision, bounded and independent.
-  ///
-  /// A failure or a hang in one must not stop the other, and neither may bubble
-  /// out: consent is already stored by the time this runs.
-  static Future<void> _applyToSdks(bool granted) async {
-    try {
-      await PostHogService.instance
-          .setConsent(granted)
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {
-      // PostHogService reports its own failures; a timeout here only means the
-      // decision takes effect on the next launch.
-    }
-    try {
-      await FirebaseAnalyticsService.instance
-          .applyConsent(granted)
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {
-      // Same for GA4.
-    }
   }
 
   /// Shows the first-run disclosure, once, if it has never been answered.
@@ -114,17 +88,13 @@ Future<void> showAnalyticsConsentDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AnalyticsConsentDialog(
-      onAllow: () {
-        // Close the dialog FIRST, then do the work. The answer is what the
-        // listener sees, and a slow or hung SDK must never leave them staring at
-        // a button they already pressed (measured on a device: awaiting the SDKs
-        // first left this dialog on screen permanently).
+      onAllow: () async {
+        await (onAllow ?? AnalyticsConsent.grant)();
         if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-        (onAllow ?? AnalyticsConsent.grant)();
       },
-      onDecline: () {
+      onDecline: () async {
+        await (onDecline ?? AnalyticsConsent.decline)();
         if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-        (onDecline ?? AnalyticsConsent.decline)();
       },
     ),
   );
@@ -143,10 +113,8 @@ class AnalyticsConsentDialog extends StatelessWidget {
     required this.onDecline,
   });
 
-  /// Synchronous on purpose: the dialog must not wait on the SDKs before it
-  /// closes. Both helpers are fire-and-forget from here.
-  final VoidCallback onAllow;
-  final VoidCallback onDecline;
+  final Future<void> Function() onAllow;
+  final Future<void> Function() onDecline;
 
   static const String title = 'Help improve Soulful Bhakti?';
 
