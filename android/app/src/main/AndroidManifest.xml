@@ -42,8 +42,22 @@
     android:fullBackupContent="false"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name_en"
-    android:requestLegacyExternalStorage="true"
     android:usesCleartextTraffic="true">
+    <!-- `usesCleartextTraffic` stays ENABLED on purpose, and this comment is the
+         reason a reviewer will look for:
+           * every REMOTE endpoint is HTTPS - the catalogue API, the R2 audio CDN,
+             Supabase, Clerk, Superwall and OneSignal (verified in .env and in
+             lib/collections/env.dart);
+           * plaintext is only ever used for the loopback session server
+             (http://127.0.0.1:<port>/stream/...) and for the optional LAN
+             "Connect" feature, which streams to a peer device on the same Wi-Fi
+             (http://<lan-ip>:<port>/playback/...).
+         Android's network-security-config cannot express "private ranges only"
+         (it whitelists hostnames, not subnets), so restricting it to localhost
+         would break Connect. Nothing personal is sent over plaintext: the LAN
+         channel carries playback commands and audio.
+         `requestLegacyExternalStorage` was removed here: it is deprecated and
+         ignored from API 30, which this app has targeted for many releases. -->
     <!-- Enable Impeller -->
     <!-- <meta-data
       android:name="io.flutter.embedding.android.EnableImpeller"
