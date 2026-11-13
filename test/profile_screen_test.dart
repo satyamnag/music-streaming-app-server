@@ -162,15 +162,53 @@ void main() {
       expect(find.text('ACCOUNT ACTIONS'), findsOneWidget);
       expect(find.text('Sign out'), findsOneWidget);
       expect(find.text('Delete account'), findsOneWidget);
+
+      // "Delete account" is a LINK now (no card, no icon, no subtitle). Google's
+      // account-deletion requirement is about the pathway being prominent inside
+      // the account settings - which this section is - so the subtitle's job
+      // moves into the screen-reader label and the confirmation dialog.
       expect(
         find.text('Permanently remove your account and data'),
-        findsOneWidget,
+        findsNothing,
+        reason: 'link only: the explanation lives in Semantics + the dialog',
       );
+      expect(find.byKey(const Key('profile_delete_link')), findsOneWidget);
 
       // The plan card still reports the free plan with the upgrade entry point.
       expect(find.text('Free plan'), findsOneWidget);
       expect(find.text('CURRENT PLAN'), findsOneWidget);
       expect(find.text('Upgrade to Pro'), findsOneWidget);
+    });
+
+    testWidgets('the delete link is a 48dp target and still confirms first',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_harness(_signedIn));
+      await tester.pumpAndSettle();
+
+      final link = find.byKey(const Key('profile_delete_link'));
+      await tester.ensureVisible(link);
+      await tester.pumpAndSettle();
+
+      final hitRect = tester.getRect(link);
+      expect(
+        hitRect.height,
+        greaterThanOrEqualTo(48),
+        reason: 'a bare text link would be ~20dp tall; Google requires the '
+            'pathway to be readily usable, and Material requires 48dp targets',
+      );
+      expect(hitRect.width, greaterThan(0));
+
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete account?'), findsOneWidget,
+          reason: 'the destructive action still requires explicit confirmation');
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
     });
 
     testWidgets('Sign out asks for confirmation first', (tester) async {

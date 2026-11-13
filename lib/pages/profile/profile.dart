@@ -265,7 +265,6 @@ class _ProfileRow extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
-  final bool danger;
 
   const _ProfileRow({
     required this.icon,
@@ -273,15 +272,15 @@ class _ProfileRow extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.onTap,
-    this.danger = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scale = theme.scaling;
-    final accent =
-        danger ? theme.colorScheme.destructive : theme.colorScheme.primary;
+    // Destructive rows are no longer this widget's job: "Delete account" is a
+    // link (_ProfileLink), so every row here uses the normal accent.
+    final accent = theme.colorScheme.primary;
 
     final row = Container(
       width: double.infinity,
@@ -290,15 +289,9 @@ class _ProfileRow extends StatelessWidget {
         vertical: 12 * scale,
       ),
       decoration: BoxDecoration(
-        color: danger
-            ? theme.colorScheme.destructive.withValues(alpha: 0.06)
-            : theme.colorScheme.card,
+        color: theme.colorScheme.card,
         borderRadius: theme.borderRadiusLg,
-        border: Border.all(
-          color: danger
-              ? theme.colorScheme.destructive.withValues(alpha: 0.25)
-              : theme.colorScheme.border,
-        ),
+        border: Border.all(color: theme.colorScheme.border),
       ),
       child: Row(
         children: [
@@ -321,9 +314,7 @@ class _ProfileRow extends StatelessWidget {
                   title,
                   style: theme.typography.base.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: danger
-                        ? theme.colorScheme.destructive
-                        : theme.colorScheme.foreground,
+                    color: theme.colorScheme.foreground,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -442,6 +433,73 @@ class _NotificationRow extends HookConsumerWidget {
   }
 }
 
+/// A text-link action inside a profile section (currently "Delete account").
+///
+/// Deliberately not a card: no icon, no fill, no subtitle. It is still a
+/// first-class control, so it keeps the three properties that matter for
+/// accessibility and for Google's "prominent pathway" wording:
+///
+///  * a 48dp minimum touch target (`.profile_delete_link`);
+///  * the destructive colour plus an underline, so it reads as an action and not
+///    as body copy;
+///  * a [Semantics] label that spells out what it does for screen-reader users,
+///    which is where the removed subtitle's explanation now lives.
+class _ProfileLink extends StatelessWidget {
+  final String label;
+  final String semanticsLabel;
+  final VoidCallback onTap;
+
+  const _ProfileLink({
+    required this.label,
+    required this.semanticsLabel,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scale = theme.scaling;
+    final colour = theme.colorScheme.destructive;
+
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: const Key('profile_delete_link'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          // 48dp is the documented minimum touch target; a bare text link would
+          // otherwise be ~20dp tall.
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 4 * scale,
+                vertical: 12 * scale,
+              ),
+              child: Text(
+                label,
+                style: theme.typography.small.copyWith(
+                  color: colour,
+                  fontWeight: FontWeight.w600,
+                  // Underlined at rest, not only on hover: on a phone there is no
+                  // hover, and the link has to look like an action.
+                  decoration: TextDecoration.underline,
+                  decorationColor: colour,
+                  decorationThickness: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The ACCOUNT ACTIONS group: Sign out and Delete account, each behind the
 /// same explicit confirmation the popup used.
 class _AccountActions extends ConsumerWidget {
@@ -519,6 +577,7 @@ class _AccountActions extends ConsumerWidget {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _ProfileRow(
           icon: SangeetIcons.logout,
@@ -526,11 +585,20 @@ class _AccountActions extends ConsumerWidget {
           onTap: signOut,
         ),
         Gap(10 * scale),
-        _ProfileRow(
-          icon: SangeetIcons.trash,
-          title: 'Delete account',
-          subtitle: 'Permanently remove your account and data',
-          danger: true,
+        // A link, not a filled card: the row is an account-settings action, and
+        // Google's account-deletion requirement is about the pathway being
+        // "prominent (for example, within the account settings or a similar
+        // section)" - the placement, not the widget. The same support article
+        // explicitly allows "a link within your app that takes users to your app
+        // account deletion web resource", so a labelled, underlined link in this
+        // section is compliant. What it must NOT become is small grey text
+        // somewhere peripheral: the target stays 48dp, keeps the destructive
+        // colour and the exact label "Delete account", and the confirmation
+        // dialog still spells out that the data is removed permanently.
+        _ProfileLink(
+          label: 'Delete account',
+          semanticsLabel: 'Delete account. Permanently remove your account and '
+              'all of its data.',
           onTap: deleteAccount,
         ),
       ],
