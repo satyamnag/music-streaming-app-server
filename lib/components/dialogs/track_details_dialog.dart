@@ -10,9 +10,10 @@ import 'package:sangeet/provider/server/sourced_track_provider.dart';
 
 const soulfulBhaktiUrl = "https://www.youtube.com/@SoulfulBhaktiSongsTelugu";
 
-/// The same address without the scheme, which is what the details table shows:
-/// the full URL was being clipped at "https://" by the table cell.
+/// The same address without the scheme, which is what the details sheet shows.
 const soulfulBhaktiUrlLabel = "youtube.com/@SoulfulBhaktiSongsTelugu";
+
+const _channelName = "Soulful Bhakti Telugu";
 
 class TrackDetailsDialog extends HookConsumerWidget {
   final SangeetFullTrackObject track;
@@ -29,12 +30,6 @@ class TrackDetailsDialog extends HookConsumerWidget {
 
     final detailsMap = {
       context.l10n.title: track.name,
-      // context.l10n.album: LinkText(
-      //   track.album!.name!,
-      //   AlbumRoute(album: track.album!, id: track.album!.id!),
-      //   overflow: TextOverflow.ellipsis,
-      //   style: const TextStyle(color: Colors.blue),
-      // ),
       context.l10n.duration: sourcedTrack.asData != null
           ? sourcedTrack.asData!.value.info.duration.toHumanReadableString()
           : Duration(milliseconds: track.durationMs).toHumanReadableString(),
@@ -43,28 +38,6 @@ class TrackDetailsDialog extends HookConsumerWidget {
     };
 
     final sourceInfo = sourcedTrack.asData?.value.info;
-
-    final ytTracksDetailsMap = sourceInfo == null
-        ? {}
-        : {
-            // The address WITHOUT the scheme, and no maxLines.
-            //
-            // "https://www.youtube.com/@…" rendered as the bare string
-            // "https://" in this table (the value is clipped at the scheme, and an
-            // ellipsis never appears), so the row told the reader nothing. The
-            // scheme-free form is shorter, still recognisable as an address, and
-            // wraps instead of being cut; the full URL is what the tap opens.
-            context.l10n.youtube: const Hyperlink(
-              soulfulBhaktiUrlLabel,
-              soulfulBhaktiUrl,
-            ),
-            context.l10n.channel: const Text("Soulful Bhakti Telugu"),
-            if (sourcedTrack.asData?.value.url != null)
-              context.l10n.streamUrl: const Hyperlink(
-                soulfulBhaktiUrlLabel,
-                soulfulBhaktiUrl,
-              ),
-          };
 
     return AlertDialog(
       surfaceBlur: 0,
@@ -80,78 +53,118 @@ class TrackDetailsDialog extends HookConsumerWidget {
         ],
       ),
       content: SizedBox(
-        // `double.infinity` on a phone, a capped 700 on a tablet/desktop.
-        //
-        // The condition used to be inverted, so a phone got a 700dp-wide table
-        // inside a ~330dp dialog: every long value was clipped to its first few
-        // characters, which is why the YouTube and Stream URL rows read
-        // "https://" and nothing else.
         width: mediaQuery.mdAndUp ? 700 : double.infinity,
-        child: Table(
-          columnWidths: const {
-            0: FixedTableSize(95),
-            1: FixedTableSize(10),
-            2: FlexTableSize(),
-          },
-          theme: const TableTheme(
-            backgroundColor: Colors.transparent,
-            cellTheme: TableCellTheme(
-              backgroundColor: WidgetStatePropertyAll(Colors.transparent),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Table(
+              columnWidths: const {
+                0: FixedTableSize(95),
+                1: FixedTableSize(10),
+                2: FlexTableSize(),
+              },
+              theme: const TableTheme(
+                backgroundColor: Colors.transparent,
+                cellTheme: TableCellTheme(
+                  backgroundColor: WidgetStatePropertyAll(Colors.transparent),
+                ),
+              ),
+              rowHeights: const {0: FixedTableSize(40)},
+              rows: [
+                for (final entry in detailsMap.entries)
+                  TableRow(
+                    cells: [
+                      TableCell(
+                        child: Text(
+                          entry.key,
+                          style: theme.typography.bold,
+                        ),
+                      ),
+                      const TableCell(child: Text(":")),
+                      TableCell(
+                        child: entry.value is Widget
+                            ? entry.value as Widget
+                            : (entry.value is String)
+                                ? Text(
+                                    entry.value as String,
+                                    style: theme.typography.normal,
+                                  )
+                                : const Text(""),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-          ),
-          rowHeights: const {0: FixedTableSize(40)},
-          rows: [
-            for (final entry in detailsMap.entries)
-              TableRow(
-                cells: [
-                  TableCell(
-                    child: Text(
-                      entry.key,
-                      style: theme.typography.bold,
-                    ),
-                  ),
-                  const TableCell(
-                    child: Text(":"),
-                  ),
-                  TableCell(
-                    child: entry.value is Widget
-                        ? entry.value as Widget
-                        : (entry.value is String)
-                            ? Text(
-                                entry.value as String,
-                                style: theme.typography.normal,
-                              )
-                            : const Text(""),
-                  ),
-                ],
+            // The source rows are NOT table rows any more.
+            //
+            // Inside the table they got the third column's leftover width - about
+            // a third of the dialog - and a URL was clipped to its first few
+            // characters ("https://", later "youtube.com/@SoulfulBha"). As their
+            // own full-width rows the address is readable in one line and the
+            // label column still lines up with the table above it.
+            if (sourceInfo != null) ...[
+              const SizedBox(height: 14),
+              _DetailLinkRow(
+                label: context.l10n.youtube,
+                value: soulfulBhaktiUrlLabel,
+                url: soulfulBhaktiUrl,
+                theme: theme,
               ),
-            for (final entry in ytTracksDetailsMap.entries)
-              TableRow(
-                cells: [
-                  TableCell(
-                    child: Text(
-                      entry.key,
-                      style: theme.typography.bold,
-                    ),
-                  ),
-                  const TableCell(
-                    child: Text(":"),
-                  ),
-                  TableCell(
-                    child: entry.value is Widget
-                        ? entry.value as Widget
-                        : Text(
-                            entry.value,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.typography.normal,
-                          ),
-                  ),
-                ],
+              const SizedBox(height: 8),
+              _DetailLinkRow(
+                label: context.l10n.channel,
+                value: _channelName,
+                theme: theme,
               ),
+              if (sourcedTrack.asData?.value.url != null) ...[
+                const SizedBox(height: 8),
+                _DetailLinkRow(
+                  label: context.l10n.streamUrl,
+                  value: soulfulBhaktiUrlLabel,
+                  url: soulfulBhaktiUrl,
+                  theme: theme,
+                ),
+              ],
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A label/value row that spans the whole dialog, so a long value is never
+/// squeezed into a table column.
+class _DetailLinkRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final String? url;
+  final ThemeData theme;
+
+  const _DetailLinkRow({
+    required this.label,
+    required this.value,
+    required this.theme,
+    this.url,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 95,
+          child: Text(label, style: theme.typography.bold),
+        ),
+        const SizedBox(width: 10, child: Text(":")),
+        Expanded(
+          child: url == null
+              ? Text(value, style: theme.typography.normal)
+              : Hyperlink(value, url!, style: theme.typography.normal),
+        ),
+      ],
     );
   }
 }
