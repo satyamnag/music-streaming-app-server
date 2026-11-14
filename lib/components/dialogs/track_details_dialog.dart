@@ -10,6 +10,10 @@ import 'package:sangeet/provider/server/sourced_track_provider.dart';
 
 const soulfulBhaktiUrl = "https://www.youtube.com/@SoulfulBhaktiSongsTelugu";
 
+/// The same address without the scheme, which is what the details table shows:
+/// the full URL was being clipped at "https://" by the table cell.
+const soulfulBhaktiUrlLabel = "youtube.com/@SoulfulBhaktiSongsTelugu";
+
 class TrackDetailsDialog extends HookConsumerWidget {
   final SangeetFullTrackObject track;
   const TrackDetailsDialog({
@@ -43,19 +47,22 @@ class TrackDetailsDialog extends HookConsumerWidget {
     final ytTracksDetailsMap = sourceInfo == null
         ? {}
         : {
+            // The address WITHOUT the scheme, and no maxLines.
+            //
+            // "https://www.youtube.com/@…" rendered as the bare string
+            // "https://" in this table (the value is clipped at the scheme, and an
+            // ellipsis never appears), so the row told the reader nothing. The
+            // scheme-free form is shorter, still recognisable as an address, and
+            // wraps instead of being cut; the full URL is what the tap opens.
             context.l10n.youtube: const Hyperlink(
+              soulfulBhaktiUrlLabel,
               soulfulBhaktiUrl,
-              soulfulBhaktiUrl,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
             context.l10n.channel: const Text("Soulful Bhakti Telugu"),
             if (sourcedTrack.asData?.value.url != null)
               context.l10n.streamUrl: const Hyperlink(
+                soulfulBhaktiUrlLabel,
                 soulfulBhaktiUrl,
-                soulfulBhaktiUrl,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
           };
 
