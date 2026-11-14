@@ -39,7 +39,16 @@ class PlayerOverlay extends HookConsumerWidget {
       },
       controller: panelController,
       color: Colors.transparent,
-      parallaxEnabled: true,
+      // Parallax OFF.
+      //
+      // With it on, SlidingUpPanel offsets the expanded body by the collapsed
+      // header height (PlayerOverlayCollapsedSection.collapsedHeight = 86dp) as
+      // the panel slides. Measured on the device: that offset pushed the top of
+      // the player - the close chevron, the info button and the top of the cover -
+      // above the screen edge, which is the "upper part is cut" the player was
+      // reported for. Turning it off makes the body start exactly at the panel's
+      // top edge, so its own SafeArea is all the inset it needs.
+      parallaxEnabled: false,
       renderPanelSheet: false,
       header: SizedBox(
         height: PlayerOverlayCollapsedSection.collapsedHeight,
