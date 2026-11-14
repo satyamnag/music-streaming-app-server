@@ -11,6 +11,7 @@ import 'package:sangeet/collections/spotube_icons.dart';
 import 'package:sangeet/components/framework/app_pop_scope.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/modules/player/player_actions.dart';
+import 'package:sangeet/modules/player/player_overlay_collapsed.dart';
 import 'package:sangeet/services/share/track_share.dart';
 import 'package:sangeet/modules/player/player_controls.dart';
 import 'package:sangeet/modules/player/volume_slider.dart';
@@ -107,7 +108,17 @@ class PlayerView extends HookConsumerWidget {
           child: SingleChildScrollView(
             controller: scrollController,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              // The panel body is clipped by the collapsed-header height as the
+              // sheet expands: measured on the device, exactly the top 86dp - the
+              // close chevron, the info button and the top of the cover - sat
+              // above the screen edge. Reserving that constant puts the content
+              // inside the visible area (the clipped strip is empty anyway).
+              padding: const EdgeInsets.fromLTRB(
+                8,
+                8 + PlayerOverlayCollapsedSection.collapsedHeight,
+                8,
+                8,
+              ),
               child: Column(
                 children: [
                   // Close + details, in normal layout so they cannot vanish.
