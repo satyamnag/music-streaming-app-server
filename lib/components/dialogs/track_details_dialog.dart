@@ -8,7 +8,7 @@ import 'package:sangeet/extensions/duration.dart';
 import 'package:sangeet/models/metadata/metadata.dart';
 import 'package:sangeet/provider/server/sourced_track_provider.dart';
 
-const soulfulBhaktiUrl = "https://www.youtube.com/@SoulfulBhaktiTelugu";
+const soulfulBhaktiUrl = "https://www.youtube.com/@SoulfulBhaktiSongsTelugu";
 
 class TrackDetailsDialog extends HookConsumerWidget {
   final SangeetFullTrackObject track;
@@ -73,7 +73,13 @@ class TrackDetailsDialog extends HookConsumerWidget {
         ],
       ),
       content: SizedBox(
-        width: mediaQuery.mdAndUp ? double.infinity : 700,
+        // `double.infinity` on a phone, a capped 700 on a tablet/desktop.
+        //
+        // The condition used to be inverted, so a phone got a 700dp-wide table
+        // inside a ~330dp dialog: every long value was clipped to its first few
+        // characters, which is why the YouTube and Stream URL rows read
+        // "https://" and nothing else.
+        width: mediaQuery.mdAndUp ? 700 : double.infinity,
         child: Table(
           columnWidths: const {
             0: FixedTableSize(95),

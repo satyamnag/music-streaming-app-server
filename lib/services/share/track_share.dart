@@ -80,15 +80,18 @@ class TrackShare {
         ? known.join(', ')
         : (names.isEmpty ? '' : brandName);
 
+    // The Play Store listing only.
+    //
+    // The `sangeet://track/<id>` deep link used to be appended on a second line.
+    // It means nothing to a recipient - it does not resolve without this app
+    // installed, and in every messaging app it rendered as a stray, unclickable
+    // line under the real link. The listing works for everyone, which is what a
+    // share message needs.
     final buffer = StringBuffer()
       ..writeln('🎵 $title${artist.isEmpty ? '' : ' — $artist'}')
       ..writeln()
       ..writeln('Listen on Soulful Bhakti:')
-      // The https listing first: it is the link that works for everyone. The
-      // scheme is on the next line so a recipient WITH the app still gets a
-      // one-tap route to the track.
-      ..writeln(playStoreUrl)
-      ..write(deepLinkFor(track));
+      ..write(playStoreUrl);
 
     return buffer.toString();
   }

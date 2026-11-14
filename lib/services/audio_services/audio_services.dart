@@ -52,11 +52,27 @@ class AudioServices with WidgetsBindingObserver {
       id: track.id,
       album: track.album.name,
       title: track.name,
-      artist: track.artists.asString(),
+      artist: _notificationArtist(track),
       duration: Duration(milliseconds: track.durationMs),
       artUri: await _notificationArtUri(track),
       playable: true,
     ));
+  }
+
+  /// The artist line the media notification shows.
+  ///
+  /// `track.artists.asString()` is empty for a catalogue row with no artist, and
+  /// the model synthesises an artist literally named "Unknown Artist" for such
+  /// rows - so the notification read "Unknown Artist" on a lock screen that
+  /// otherwise carries the app's own artwork. The app's name is the honest label
+  /// there: it says where the song came from instead of admitting it knows
+  /// nothing.
+  static String _notificationArtist(SangeetTrackObject track) {
+    final names = track.artists
+        .map((a) => a.name.trim())
+        .where((n) => n.isNotEmpty && n.toLowerCase() != 'unknown artist')
+        .toList();
+    return names.isEmpty ? 'Soulful Bhakti' : names.join(', ');
   }
 
   /// The notification's artwork URI, preferring the copy already on disk.

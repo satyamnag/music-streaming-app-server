@@ -167,8 +167,20 @@ class PlayerView extends HookConsumerWidget {
                   ),
                   Container(
                     margin: const EdgeInsets.all(8),
-                    constraints:
-                        const BoxConstraints(maxHeight: 300, maxWidth: 300),
+                    // The cover yields 70dp when the Original/Karaoke switch is
+                    // present.
+                    //
+                    // That switch is an extra ~48dp row, and the player content
+                    // already fills the sheet: with a 300dp cover the switch
+                    // pushed everything below it down and the volume slider was
+                    // cut off the bottom edge, so it could not be dragged. A
+                    // smaller cover keeps the close/info row at the top AND the
+                    // volume bar at the end, which is the whole point of the
+                    // screen.
+                    constraints: BoxConstraints(
+                      maxHeight: karaokeAvailable ? 230 : 300,
+                      maxWidth: karaokeAvailable ? 230 : 300,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
@@ -195,7 +207,7 @@ class PlayerView extends HookConsumerWidget {
                   // exists for the track; otherwise it would be inert).
                   if (karaokeAvailable) ...[
                     const _OriginalKaraokeToggle(karaokeAvailable: true),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                   ],
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
