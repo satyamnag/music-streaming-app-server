@@ -56,11 +56,14 @@ class HomePage extends HookConsumerWidget {
     // Admin-managed home wallpaper. Null (unset, table absent, or a failed
     // fetch) simply renders the normal themed background.
     // The band starts at y=0 (the page is not inset at the top) and must be
-    // taller by the status-bar inset: otherwise the same 135dp of artwork now
-    // has to cover the strip that used to be the white scaffold background, and
-    // the crop eats the top of the picture.
-    final wallpaperHeight =
-        HomeWallpaper.heightFor(mediaQuery.size) + mediaQuery.padding.top;
+    // taller than `heightFor` for two reasons:
+    //   * the status-bar inset, otherwise the same artwork has to cover the strip
+    //     that used to be the white scaffold background;
+    //   * a 15% allowance, so the top-aligned cover crop shows MORE of the picture
+    //     instead of zooming it. Without it the temple spires were shaved off at
+    //     the top edge, which is the "wallpaper hidden at the top" report.
+    final wallpaperHeight = HomeWallpaper.heightFor(mediaQuery.size) * 1.15 +
+        mediaQuery.padding.top;
     final wallpaperUrl = ref.watch(homeWallpaperProvider).valueOrNull;
     final hasWallpaper = wallpaperUrl != null && wallpaperUrl.isNotEmpty;
     // Drives which shelf takes the slot under Featured Playlists: Recently Played

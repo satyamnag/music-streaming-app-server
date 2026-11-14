@@ -106,7 +106,15 @@ class PlayerView extends HookConsumerWidget {
           // Row of IconButtons inside the scroll content cannot fail to lay out,
           // and its SafeArea keeps it below the status bar.
           child: SingleChildScrollView(
-            controller: scrollController,
+            // The panel's own `scrollController` is deliberately NOT used here.
+            //
+            // SlidingUpPanel hands its body a controller that it also drives for
+            // the drag gesture, and it starts at a non-zero offset. That offset
+            // cancelled the top padding below, which is why several builds looked
+            // identical on the device no matter how much space was reserved. The
+            // content is only a few dp taller than the viewport, so it does not
+            // need scrolling.
+            physics: const NeverScrollableScrollPhysics(),
             child: Padding(
               // The panel body is clipped by the collapsed-header height as the
               // sheet expands: measured on the device, exactly the top 86dp - the
