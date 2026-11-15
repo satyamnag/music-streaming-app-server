@@ -42,6 +42,28 @@ test('an empty {{}} stays a banner row, unchanged', () => {
   assert.equal(variantBannerText('{{}}'), '{{}}')
 })
 
+// --- the braced form of a localized label ---------------------------------
+//
+// `{{ ♪ సంగీతం ♪ }}` is what the owner's editor actually stores. It IS a
+// double-brace banner, but its label is Telugu, so quoting it verbatim put
+// Telugu script into the English columns and the renderer refused to write.
+
+test('a braced Telugu label collapses to the canonical banner', () => {
+  assert.equal(variantBannerText(`{{ ${NOTE} ${TELUGU_LABEL} ${NOTE} }}`), MUSIC_LABEL)
+})
+
+test('a braced Telugu label without note glyphs also collapses', () => {
+  assert.equal(variantBannerText(`{{${TELUGU_LABEL}}}`), MUSIC_LABEL)
+})
+
+test('the collapsed braced banner honours a caller-supplied label', () => {
+  assert.equal(variantBannerText(`{{ ${NOTE} ${TELUGU_LABEL} ${NOTE} }}`, '{{Music2}}'), '{{Music2}}')
+})
+
+test('the braced banner is recognised as a banner either way', () => {
+  assert.equal(isVariantBanner(`{{ ${NOTE} ${TELUGU_LABEL} ${NOTE} }}`), true)
+})
+
 // --- the note-glyph marker -------------------------------------------------
 
 test('a Latin label in note glyphs is quoted verbatim', () => {

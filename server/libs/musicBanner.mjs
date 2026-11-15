@@ -28,6 +28,21 @@
 // transliteration column can never carry is Telugu script, so a banner whose
 // label IS Telugu is replaced by the canonical `{{Music}}`, which both apps
 // render as the same "Music" banner.
+//
+// The Telugu label arrives in BOTH spellings, because the owner's editor writes
+// the marker one way and the banner's own glyphs the other:
+//
+//   * `♪ సంగీతం ♪`        - the bare note-glyph form;
+//   * `{{ ♪ సంగీతం ♪ }}`  - the same label INSIDE double braces, which is what
+//                           the editor emits once the author wraps the banner.
+//
+// The braced form used to be quoted verbatim on the strength of "double braces
+// are always the canonical marker". That holds for `{{Music}}`, but a braced
+// label may itself be Telugu, and quoting it verbatim put Telugu script into the
+// English columns - the renderer's guard then refused to write at all. Both
+// spellings are therefore classified by the SAME rule: the LABEL decides, not
+// the wrapper. Braces are stripped, note glyphs are stripped, and if what is
+// left is Telugu the cue becomes `{{Music}}`.
 // ============================================================================
 
 import { MUSIC_LABEL } from './autoSyncLyrics.mjs'
@@ -48,6 +63,18 @@ const NOTE_GLYPH_BANNER = /^\s*\u266A\s*([^\u266A]+?)\s*\u266A\s*$/
 const TELUGU_SCRIPT = /[\u0C00-\u0C7F]/
 
 /**
+ * The label inside a banner, with its wrapper removed: the double braces and any
+ * note glyphs. `{{ ♪ సంగీతం ♪ }}` and `♪ సంగీతం ♪` both yield `సంగీతం`.
+ */
+function bannerLabel(line) {
+  return String(line)
+    .replace(/^\{\{/, '')
+    .replace(/\}\}$/, '')
+    .replace(/\u266A/g, '')
+    .trim()
+}
+
+/**
  * The text a banner cue should carry in a language-variant column.
  *
  * @param   {string} text        the cue's text, as stored (trimmed or not)
@@ -59,9 +86,12 @@ export function variantBannerText(text, musicLabel = MUSIC_LABEL) {
   const line = String(text ?? '').trim()
   if (!line) return null
 
-  // `{{...}}` is quoted verbatim, exactly as before this module existed: an
-  // author who writes `{{♪ Music ♪}}` gets that label on the banner.
-  if (BRACED_BANNER.test(line)) return line
+  // `{{...}}` is quoted verbatim - an author who writes `{{♪ Music ♪}}` gets that
+  // label on the banner - UNLESS the label is Telugu, which no translation or
+  // transliteration column can carry. See "THE RULE" above.
+  if (BRACED_BANNER.test(line)) {
+    return TELUGU_SCRIPT.test(bannerLabel(line)) ? String(musicLabel) : line
+  }
 
   const note = NOTE_GLYPH_BANNER.exec(line)
   if (!note) return null
