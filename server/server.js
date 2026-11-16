@@ -624,7 +624,7 @@ function razorpayStatusOf(entity) {
 // Webhook payloads do not always repeat `notes`, so the owner falls back to
 // the row already stored: an update must never be dropped (or misattributed)
 // because a later event omitted the notes block.
-async function persistRazorpaySubscription(entity, planSlugHint = null, eventId = null) {
+async function persistRazorpaySubscription(entity, planSlugHint = null, eventId = null, referralCode = null) {
   if (!entity?.id) return false
 
   let userId = entity.notes?.user_id || null
@@ -655,6 +655,9 @@ async function persistRazorpaySubscription(entity, planSlugHint = null, eventId 
     current_start: epochToIso(entity.current_start),
     current_end: epochToIso(entity.current_end),
     short_url: entity.short_url || null,
+    // Written only when this call actually knows the code. A webhook update
+    // must never erase the code stored when the subscription was created.
+    ...(referralCode ? { referral_code: referralCode } : {}),
     last_event_id: eventId,
     raw: entity,
     updated_at: new Date().toISOString(),
@@ -667,12 +670,137 @@ async function persistRazorpaySubscription(entity, planSlugHint = null, eventId 
   return true
 }
 
+// ------------------------------------------------------------------
+// Referral program (migration 039)
+// ------------------------------------------------------------------
+//
+// A paid Razorpay subscriber is an affiliate: they hold a code in
+// `referral_codes`, anyone may buy with it, and the referrer earns a FLAT
+// amount (default Rs.51, from `referral_program_config`) on the referred
+// user's FIRST successful payment only. Single level. The referrer must
+// still be an active subscriber when the credit is written.
+//
+// Every decision is made by a SECURITY DEFINER function that only the
+// service role may execute, so a browser can neither choose the amount nor
+// credit itself. This module only decides WHEN to ask.
+
+/** Codes are stored uppercase; trim whatever a human pasted. */
+function normaliseReferralCode(value) {
+  const code = String(value ?? '').trim().toUpperCase()
+  return code === '' ? null : code
+}
+
+/** Human-readable reason for each rejection the database can return. */
+const REFERRAL_ERROR_MESSAGES = {
+  unknown: 'That referral code was not found.',
+  self: 'You cannot use your own referral code.',
+  already_attributed: 'A referral code has already been used for this account.',
+  inactive_referrer: 'That referral code is not active right now.',
+  invalid: 'That referral code cannot be used.',
+}
+
+/**
+ * Asks Postgres whether a code may be used by this user.
+ * Returns 'valid' | 'unknown' | 'self' | 'already_attributed'
+ *         | 'inactive_referrer' | 'invalid'.
+ */
+async function validateReferralCodeForUser(code, userId) {
+  const { data, error } = await supabase.rpc('validate_referral_code', {
+    p_code: code,
+    p_user_id: userId,
+  })
+  if (error) throw new Error(error.message)
+  return String(data || 'invalid')
+}
+
+/** Gives a paying subscriber their referral code. Idempotent. */
+async function ensureReferralAffiliate(userId) {
+  if (!userId) return null
+  try {
+    const { data, error } = await supabase.rpc('get_or_create_referral_code', {
+      p_user_id: userId,
+    })
+    if (error) {
+      console.error('[referral] could not create code:', error.message)
+      return null
+    }
+    return data || null
+  } catch (err) {
+    console.error('[referral] could not create code:', err.message)
+    return null
+  }
+}
+
+/** The owner and the code stored when the subscription was created. */
+async function readReferralContextForSubscription(subscriptionId) {
+  try {
+    const { data, error } = await supabase
+      .from('razorpay_subscriptions')
+      .select('user_id, referral_code')
+      .eq('subscription_id', subscriptionId)
+      .maybeSingle()
+    if (error) {
+      console.error('[referral] could not read subscription context:', error.message)
+      return null
+    }
+    return data || null
+  } catch (err) {
+    console.error('[referral] could not read subscription context:', err.message)
+    return null
+  }
+}
+
+/**
+ * Credits the referrer for a verified payment.
+ *
+ * Safe to call repeatedly: Postgres enforces one credit per referred user
+ * for this program, so a renewal, a replayed webhook, and a verify after a
+ * webhook all resolve to the same single row.
+ */
+async function creditRazorpayReferral({ userId, referralCode, paymentId, planPrice }) {
+  if (!userId || !paymentId) return 'invalid'
+  try {
+    const { data, error } = await supabase.rpc('credit_razorpay_referral_commission', {
+      p_referred_user_id: userId,
+      p_referral_code: referralCode || null,
+      p_source_event_id: paymentId,
+      p_plan_price: Number.isFinite(Number(planPrice)) ? Number(planPrice) : 0,
+    })
+    if (error) {
+      console.error('[referral] credit failed:', error.message)
+      return 'error'
+    }
+    return String(data || 'invalid')
+  } catch (err) {
+    console.error('[referral] credit failed:', err.message)
+    return 'error'
+  }
+}
+
 async function applyRazorpayEvent(event, eventId) {
   const name = String(event?.event || '')
   if (!RAZORPAY_SUBSCRIPTION_EVENTS.has(name)) return
   const entity = event?.payload?.subscription?.entity
   if (!entity?.id) return
   await persistRazorpaySubscription(entity, null, eventId)
+
+  // The webhook is the only path that carries the payment amount, so the
+  // referral credit is written here as well as in /verify. Postgres keeps
+  // the two idempotent.
+  const payment = event?.payload?.payment?.entity || null
+  if (!payment?.id) return
+
+  const context = await readReferralContextForSubscription(entity.id)
+  if (!context?.user_id) return
+
+  await ensureReferralAffiliate(context.user_id)
+  const result = await creditRazorpayReferral({
+    userId: context.user_id,
+    referralCode: context.referral_code || null,
+    paymentId: String(payment.id),
+    planPrice: Number(payment.amount) / 100,
+  })
+  console.log(`[referral] webhook ${name} payment=${payment.id} -> ${result}`)
 }
 
 async function readEntitlement(userId) {
@@ -693,7 +821,7 @@ async function readEntitlement(userId) {
 // Creates (or reuses) a subscription for a user. Shared by the signed-in
 // route and the admin link route so both obey the same "one live
 // subscription per user" rule.
-async function createSubscriptionForUser({ userId, planSlug }) {
+async function createSubscriptionForUser({ userId, planSlug, referralCode = null }) {
   const planId = razorpay.planIdFor(planSlug)
   if (!planId) {
     const err = new Error(`no Razorpay plan id configured for "${planSlug}"`)
@@ -716,10 +844,39 @@ async function createSubscriptionForUser({ userId, planSlug }) {
     err.status = 409
     throw err
   }
+
+  // Validate the code BEFORE any subscription exists, so an unusable code is
+  // a clear 400 rather than a purchase that silently credits nobody.
+  let code = normaliseReferralCode(referralCode)
+  if (code) {
+    const status = await validateReferralCodeForUser(code, userId)
+    if (status === 'already_attributed') {
+      // Not an error. This account already has a referrer from sign-up (the
+      // Android app records it there), and that immutable attribution is the
+      // one that earns. Blocking the purchase over it would punish the
+      // customer for a code they were given; carry on without a second code.
+      code = null
+    } else if (status !== 'valid') {
+      const err = new Error(REFERRAL_ERROR_MESSAGES[status] || 'That referral code cannot be used.')
+      err.status = 400
+      throw err
+    }
+  }
+
   // An abandoned `created` subscription for the same plan is reusable: the
   // customer can still authorise it, and Razorpay caps subscriptions per
   // plan anyway.
   if (existing && existing.plan_slug === planSlug) {
+    // A reused checkout must still honour the code typed on this attempt.
+    if (code) {
+      const { error: updateError } = await supabase
+        .from('razorpay_subscriptions')
+        .update({ referral_code: code })
+        .eq('subscription_id', existing.subscription_id)
+      if (updateError) {
+        console.error('[referral] could not store code on reused subscription:', updateError.message)
+      }
+    }
     return {
       subscription_id: existing.subscription_id,
       short_url: existing.short_url || null,
@@ -731,11 +888,24 @@ async function createSubscriptionForUser({ userId, planSlug }) {
     planId,
     userId,
     totalCount: totalCountForPlan(planSlug),
+    referralCode: code,
   })
   // `notes` on the create response is not guaranteed; write the owner
   // explicitly so the very first webhook can attribute the event.
-  const withOwner = { ...entity, notes: { ...(entity.notes || {}), user_id: userId } }
-  await persistRazorpaySubscription({ ...withOwner, status: entity.status || 'created' }, planSlug, null)
+  const withOwner = {
+    ...entity,
+    notes: {
+      ...(entity.notes || {}),
+      user_id: userId,
+      ...(code ? { referral_code: code } : {}),
+    },
+  }
+  await persistRazorpaySubscription(
+    { ...withOwner, status: entity.status || 'created' },
+    planSlug,
+    null,
+    code,
+  )
   return {
     subscription_id: entity.id,
     short_url: entity.short_url || null,
@@ -847,7 +1017,13 @@ app.post(
     const planSlug = normalisePlanSlug(req.body?.plan)
     if (!planSlug) return res.status(400).json({ error: 'unknown plan' })
     try {
-      const result = await createSubscriptionForUser({ userId: req.clerkUserId, planSlug })
+      const result = await createSubscriptionForUser({
+        userId: req.clerkUserId,
+        planSlug,
+        // Optional. Accepts either casing so the web app and any older client
+        // can both send it. Validated server-side before a subscription exists.
+        referralCode: req.body?.referralCode ?? req.body?.referral_code ?? null,
+      })
       res.set('Cache-Control', 'no-store')
       res.json({ ...result, key_id: razorpay.keyId, plan: planSlug })
     } catch (err) {
@@ -899,9 +1075,40 @@ app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
     }
     await persistRazorpaySubscription(entity, null, null)
 
+    // Referral: credited here as well as in the webhook, so a webhook that
+    // was never registered for the current mode cannot lose a referrer their
+    // commission. Postgres makes the two paths idempotent.
+    const context = await readReferralContextForSubscription(row.subscription_id)
+    let planPrice = 0
+    try {
+      const payment = await razorpay.getPayment(String(paymentId))
+      if (payment?.subscription_id && payment.subscription_id !== row.subscription_id) {
+        // The signature proved this payment is genuine; it must also belong
+        // to this subscription, or the pair has been swapped.
+        return res.status(409).json({ error: 'payment does not belong to this subscription' })
+      }
+      planPrice = Number(payment?.amount) / 100
+    } catch (err) {
+      // A failed read must not block a verified purchase. The amount is
+      // informational; the flat credit is not derived from it.
+      console.warn('[referral] could not read payment:', err.message)
+    }
+    await ensureReferralAffiliate(req.clerkUserId)
+    const referralResult = await creditRazorpayReferral({
+      userId: req.clerkUserId,
+      referralCode: context?.referral_code || null,
+      paymentId: String(paymentId),
+      planPrice,
+    })
+
     const entitlement = await readEntitlement(req.clerkUserId)
     res.set('Cache-Control', 'no-store')
-    res.json({ verified: true, status: razorpayStatusOf(entity), entitlement })
+    res.json({
+      verified: true,
+      status: razorpayStatusOf(entity),
+      entitlement,
+      referral: referralResult,
+    })
   } catch (err) {
     console.error('[razorpay] verify failed:', err.message)
     res.status(502).json({ error: 'verification failed' })
@@ -924,6 +1131,60 @@ app.get('/api/razorpay/entitlement', requireClerkUser, async (req, res) => {
   } catch (err) {
     console.error('[razorpay] entitlement lookup failed:', err.message)
     res.status(500).json({ error: 'entitlement lookup failed' })
+  }
+})
+
+// The account page's referral card.
+//
+// The user id comes from the Clerk token, NEVER from the path. The older
+// /api/referrals/:userId/* aliases take the id from the URL, so they cannot
+// be used to read somebody else's earnings here.
+app.get('/api/razorpay/referral', requireClerkUser, async (req, res) => {
+  try {
+    const entitlement = await readEntitlement(req.clerkUserId)
+
+    // Only a paying subscriber is an affiliate, and the code is created on
+    // first need rather than for every visitor.
+    if (entitlement.active) {
+      await ensureReferralAffiliate(req.clerkUserId)
+    }
+
+    const { data, error } = await supabase.rpc('referral_program_summary', {
+      p_user_id: req.clerkUserId,
+    })
+    if (error) throw new Error(error.message)
+    const row = Array.isArray(data) ? data[0] : data
+
+    res.set('Cache-Control', 'no-store')
+    res.json({
+      code: row?.code || null,
+      is_affiliate: Boolean(row?.is_affiliate ?? entitlement.active),
+      referral_count: Number(row?.referral_count || 0),
+      credited_referrals: Number(row?.credited_referrals || 0),
+      pending_amount: Number(row?.pending_amount || 0),
+      settled_amount: Number(row?.settled_amount || 0),
+      total_amount: Number(row?.total_amount || 0),
+      amount_per_referral: Number(row?.amount_per_referral || 0),
+    })
+  } catch (err) {
+    console.error('[referral] summary failed:', err.message)
+    res.status(500).json({ error: 'referral summary failed' })
+  }
+})
+
+// Lets the checkout form confirm a code before the customer pays. The answer
+// names the reason so the UI can explain it, which is why it is authenticated:
+// probing codes anonymously would let anyone test whether a code exists.
+app.get('/api/razorpay/referral/validate', requireClerkUser, async (req, res) => {
+  const code = normaliseReferralCode(req.query?.code)
+  if (!code) return res.status(400).json({ error: 'code required' })
+  try {
+    const status = await validateReferralCodeForUser(code, req.clerkUserId)
+    res.set('Cache-Control', 'no-store')
+    res.json({ status, valid: status === 'valid' })
+  } catch (err) {
+    console.error('[referral] validate failed:', err.message)
+    res.status(500).json({ error: 'referral validation failed' })
   }
 })
 
