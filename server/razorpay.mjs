@@ -199,7 +199,7 @@ export function createRazorpayClient({
       return plans[slug] || null
     },
 
-    async createSubscription({ planId, userId, totalCount }) {
+    async createSubscription({ planId, userId, totalCount, referralCode = null }) {
       if (!planId) throw new RazorpayError('razorpay: unknown plan')
       if (!userId) throw new RazorpayError('razorpay: missing user id')
       return call('/subscriptions', {
@@ -213,13 +213,29 @@ export function createRazorpayClient({
           customer_notify: 1,
           // `notes.user_id` is how every webhook is attributed back to a
           // Clerk user without trusting anything the client sends later.
-          notes: { user_id: userId },
+          //
+          // `notes.referral_code` is a convenience copy only: the server
+          // stores the code on its own row, because the create response does
+          // not guarantee notes are echoed back.
+          notes: {
+            user_id: userId,
+            ...(referralCode ? { referral_code: referralCode } : {}),
+          },
         },
       })
     },
 
     getSubscription(subscriptionId) {
       return call(`/subscriptions/${encodeURIComponent(subscriptionId)}`)
+    },
+
+    /**
+     * Reads a payment. Used to take the billed amount from Razorpay itself
+     * (never from the client) and to confirm the payment belongs to the
+     * subscription being verified.
+     */
+    getPayment(paymentId) {
+      return call(`/payments/${encodeURIComponent(paymentId)}`)
     },
 
     cancelSubscription(subscriptionId) {
