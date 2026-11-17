@@ -22,6 +22,10 @@ name: Replace the {{Music}} marker in the Telugu sync column
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: 'telugu (synced_lyrics) or english (synced_lyrics_en + synced_lyrics_en_tr)'
+        required: true
+        default: 'telugu'
       track_ids:
         description: 'Comma-separated track ids'
         required: true
@@ -46,6 +50,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ap-south-1
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      MODE: ${{ inputs.mode }}
       IDS: ${{ inputs.track_ids }}
       CONFIRM: ${{ inputs.confirm }}
 
@@ -95,14 +100,14 @@ jobs:
         working-directory: server
         run: |
           set -euo pipefail
-          node tools/repair-music-banner.mjs --ids "$IDS" | tee repair.log
+          node tools/repair-music-banner.mjs --mode "$MODE" --ids "$IDS" | tee repair.log
 
       - name: Rewrite the marker
         if: ${{ inputs.confirm == 'WRITE' }}
         working-directory: server
         run: |
           set -euo pipefail
-          node tools/repair-music-banner.mjs --ids "$IDS" --write | tee repair.log
+          node tools/repair-music-banner.mjs --mode "$MODE" --ids "$IDS" --write | tee repair.log
 
       - name: Upload artifacts
         if: always()
