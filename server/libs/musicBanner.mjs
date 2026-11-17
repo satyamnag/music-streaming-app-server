@@ -104,18 +104,20 @@ export function variantBannerText(text, musicLabel = VARIANT_MUSIC_LABEL) {
   const line = String(text ?? '').trim()
   if (!line) return null
 
-  // `{{...}}` is quoted verbatim - an author who writes `{{♪ Music ♪}}` gets that
-  // label on the banner - UNLESS the label is Telugu, which no translation or
-  // transliteration column can carry. See "THE RULE" above.
+  // Every real banner is normalised to the variant banner, so the English columns carry
+  // ONE spelling: the owner asked for `{{ Music }}` in as many words, and a mix of
+  // `{{Music}}`, `{{ సంగీతం }}` and `♪ Music ♪` across the catalogue reads as noise.
+  // An EMPTY marker is left exactly as written - the apps treat `{{}}` as an ordinary
+  // line, and rewriting it would change the kind of the cue.
   if (BRACED_BANNER.test(line)) {
-    return TELUGU_SCRIPT.test(bannerLabel(line)) ? String(musicLabel) : line
+    return bannerLabel(line) ? String(musicLabel) : line
   }
 
   const note = NOTE_GLYPH_BANNER.exec(line)
   if (!note) return null
   const label = String(note[1] ?? '').trim()
   if (!label) return null
-  return TELUGU_SCRIPT.test(label) ? String(musicLabel) : line
+  return String(musicLabel)
 }
 
 /** True when the line is a music banner in either accepted spelling. */

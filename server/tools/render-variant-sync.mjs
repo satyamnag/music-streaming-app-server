@@ -164,12 +164,19 @@ function forMatch(text) {
 }
 
 /**
- * Shortest cue, in whitespace-stripped characters, that may be mapped to a SLICE of a
- * plain line. Below it a "match" is meaningless: the cue "రా..." reduces to "రా", which
- * occurs inside dozens of Telugu words, and matching it produced the nonsense cue
- * "In" / "Ramuni" on Ramuni Keerthi. A too-short cue is reported instead of guessed.
+ * Shortest cue, in whitespace-stripped characters, that may be mapped to a slice in the
+ * MIDDLE of a plain line. Below it a "match" is meaningless: the cue "రా..." reduces to
+ * "రా", which occurs inside dozens of Telugu words, and matching it produced the nonsense
+ * cue "In" / "Ramuni" on Ramuni Keerthi. A too-short cue is reported instead of guessed.
+ *
+ * A cue of three characters is still allowed when it is an exact HEAD or TAIL of a line,
+ * which is what a real one-word cue looks like - "నమో" on Gan Gan Ganapati, sung twice on
+ * its own before the full line "నమో నమో, శ్రీ వినాయక!". Restricting the relaxation to the
+ * ends of a line is what keeps it safe: a three-character match in the middle is exactly
+ * the kind of accidental hit this floor exists to stop.
  */
 const MIN_SLICE_CUE = 4
+const MIN_EDGE_CUE = 3
 
 /**
  * Resolve one cue's text to `{ lineIndex, piece }`, where `piece` is null for a whole
@@ -186,7 +193,7 @@ const MIN_SLICE_CUE = 4
  *
  * Returns null when nothing safe can be said - never a guess.
  */
-function resolveCue(text, near = -1) {
+function resolveCue(text, near = -1, prevTo = -1, prevSame = false) {
   const s = sq(forMatch(text))
   if (!s) return null
 
@@ -210,13 +217,19 @@ function resolveCue(text, near = -1) {
   // 1 & 2. a whole plain line, or a slice of one, ignoring whitespace
   const exact = lyricRows
     .filter((r) => r.sq.includes(s))
-    .map((r) => ({ row: r, tier: r.sq === s ? 1 : 2, at: r.sq.indexOf(s) }))
-  if (exact.length) {
-    const whole = exact.filter((c) => c.tier === 1)
-    if (!whole.length && s.length < MIN_SLICE_CUE) return null
-    const c = pick(whole.length ? whole : exact)
+    .map((r) => {
+      const at = r.sq.indexOf(s)
+      return { row: r, tier: r.sq === s ? 1 : 2, at,
+        edge: at === 0 || at + s.length >= r.sq.length }
+    })
+  const usable = exact.filter((c) => c.tier === 1 || c.edge || s.length >= MIN_SLICE_CUE)
+  if (usable.length) {
+    const whole = usable.filter((c) => c.tier === 1)
+    // A short cue may only take a slice at the END of a line; anything shorter than the
+    // floor is reported rather than guessed at.
+    const c = pick(whole.length ? whole : usable)
     const from = c.at
-    const to = c.at + s.length
+    const to = from + s.length
     if (from === 0 && to >= c.row.sq.length) return { lineIndex: c.row.i, piece: null }
     return {
       lineIndex: c.row.i,
@@ -268,6 +281,8 @@ function resolveCue(text, near = -1) {
 const cues = []
 const unmapped = []
 let lastLine = -1
+let lastTo = -1
+let lastSq = null
 for (const c of parsed) {
   const text = String(c.text || '').trim()
   // A music banner is written either in the canonical `{{Music}}` form or in the
@@ -281,9 +296,11 @@ for (const c of parsed) {
     cues.push({ kind: 'music', start: c.start, end: c.end, lineIndex: null, text: banner })
     continue
   }
-  const hit = resolveCue(text, lastLine)
+  const hit = resolveCue(text, lastLine, lastTo, lastSq === sq(forMatch(text)))
   if (hit) {
     lastLine = hit.lineIndex
+    lastTo = hit.piece ? hit.piece.to : -1
+    lastSq = sq(forMatch(text))
     cues.push({ kind: 'lyric', start: c.start, end: c.end, lineIndex: hit.lineIndex,
       piece: hit.piece, text })
     continue
@@ -317,11 +334,22 @@ function splitVariantForCue(piece, rowVariant) {
   // one position: measured on "శ్రీవేంకటేశ్వరుని సర్వదర్శనం" against "A complete vision of
   // Lord Sri Venkateswara.", cutting each side independently gave "...of Lord" and
   // "Venkateswara." and the word "Sri" was emitted by neither cue.
-  const left = piece.from <= 0 ? 0 : variantCut(piece.beforeFrom, v, piece.from / total)
-  const right = piece.to >= total ? vEnd : variantCut(piece.beforeTo, v, piece.to / total)
-  if (left === null || right === null) return null
-  if (!(left < right)) return null
-  return v.slice(left, right).trim() || null
+  //
+  // The punctuation preference is tried first and the plain word rule second, because the
+  // two can collapse onto the same mark: measured on Sri Maha Ganapati, where
+  // "సచ్చిదానంద, సమభావ గణపతి, ఓం" splits into three cues but its English line
+  // "Embodiment of Truth-Consciousness-Bliss and Equanimity, Om" has ONE comma, so both
+  // boundaries chose it, left === right, and the middle cue was dropped entirely.
+  const attempt = (allowPunct) => {
+    const left = piece.from <= 0 ? 0 : variantCut(piece.beforeFrom, v, piece.from / total, allowPunct)
+    const right = piece.to >= total ? vEnd : variantCut(piece.beforeTo, v, piece.to / total, allowPunct)
+    if (left === null || right === null) return null
+    if (!(left < right)) return null
+    return [left, right]
+  }
+  const cuts = attempt(true) || attempt(false)
+  if (!cuts) return null
+  return v.slice(cuts[0], cuts[1]).trim() || null
 }
 
 /**
@@ -333,10 +361,10 @@ function splitVariantForCue(piece, rowVariant) {
  * and the tail "Venkateswara.", so the word "Sri" was emitted by neither cue.
  * Returns null when no usable cut exists.
  */
-function variantCut(teBefore, v, f) {
+function variantCut(teBefore, v, f, allowPunct = true) {
   const vEnd = v.replace(/\s+$/, '').length
   let cut
-  if (/[,!?;:]$/.test(teBefore)) {
+  if (allowPunct && /[,!?;:]$/.test(teBefore)) {
     // A punctuation mark that is the LAST character cannot be the split point: the piece
     // after it would be empty (measured: "సౌశీల్య రామా," against "All-powerful Rama of
     // noble character," whose only comma is final).

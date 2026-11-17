@@ -25,17 +25,17 @@ const test = (name, fn) => tests.push([name, fn])
 
 // --- the canonical double-brace marker, quoted verbatim --------------------
 
-test('{{Music}} is a banner and is quoted verbatim', () => {
-  assert.equal(variantBannerText('{{Music}}'), '{{Music}}')
+test('{{Music}} is a banner and is normalised to the variant banner', () => {
+  assert.equal(variantBannerText('{{Music}}'), VARIANT_MUSIC_LABEL)
 })
 
 test('{{ Music }} keeps the author spacing', () => {
   assert.equal(variantBannerText('{{ Music }}'), '{{ Music }}')
 })
 
-test('a braced label with note glyphs inside is quoted verbatim', () => {
+test('a braced label with note glyphs inside is normalised too', () => {
   const line = `{{${NOTE} Music ${NOTE}}}`
-  assert.equal(variantBannerText(line), line)
+  assert.equal(variantBannerText(line), VARIANT_MUSIC_LABEL)
 })
 
 test('an empty {{}} stays a banner row, unchanged', () => {
@@ -76,14 +76,14 @@ test('the braced banner is recognised as a banner either way', () => {
 
 // --- the note-glyph marker -------------------------------------------------
 
-test('a Latin label in note glyphs is quoted verbatim', () => {
+test('a Latin label in note glyphs is normalised to the variant banner', () => {
   const line = `${NOTE} Music ${NOTE}`
-  assert.equal(variantBannerText(line), line)
+  assert.equal(variantBannerText(line), VARIANT_MUSIC_LABEL)
 })
 
 test('surrounding whitespace is tolerated', () => {
   const line = `  ${NOTE}  Music  ${NOTE}  `
-  assert.equal(variantBannerText(line), `${NOTE}  Music  ${NOTE}`)
+  assert.equal(variantBannerText(line), VARIANT_MUSIC_LABEL)
 })
 
 test('a Telugu label is replaced by the variant banner', () => {
