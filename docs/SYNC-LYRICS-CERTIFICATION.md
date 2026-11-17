@@ -1268,3 +1268,47 @@ closed.
 across the three synced columns, time lines identical to the Telugu at every index, `{{ Music }}`
 as the only banner, no Telugu script in an English column, every track starting at
 `00:00:00,000`, and all three plain columns line-parallel. **0 hard failures.**
+
+## Single track: Raama Raamayani Paadaro Nityamu (2026-11-17)
+
+`4de79d9e-a614-469f-9013-ba28845484b6` — 294.0 s. The owner re-segmented the Telugu to
+**44 cues (38 sung + 6 `{{ సంగీతం }}` banners)**; both English columns were empty, so this
+was a clean build rather than a rebuild. Written by `sync-variants.yml` run `44068420963`
+(`PATCH http=204`).
+
+| check | result |
+| --- | --- |
+| cues | 44 / 44 / 44, identical start+end at every index |
+| Telugu `synced_lyrics` | **unchanged** |
+| all three plain columns | **unchanged**, 31/31/31 lines |
+| English columns | empty → 38 sung cues each, 20/20 plain lines covered |
+| banner in a variant column | `{{ Music }}` only |
+| Telugu script in a variant column | **0** |
+| timeline | `00:00:00,000 → 00:04:53,960` against 294.007 s of audio |
+| stored vs the certified render | `6658ae18` / `3c87f743` — byte-identical |
+| independent verifier | green |
+
+### One line in the Telugu has no plain counterpart
+
+37 of the 38 sung cues are exact `plain_lyrics` lines. The exception is **cue 13**
+(`00:01:30,215 → 00:01:35,053`, the refrain slot that precedes Charanam 1):
+
+```
+sync cue : రామ నామ సుధని పాడరో నిత్యము,
+plain    : రామ రామయని పాడరో నిత్యము,        (line 1 — every other refrain cycle)
+```
+
+Every other refrain cycle in this track uses line 1 verbatim. Cue 13 differs in its middle
+phrase (`నామ సుధని` instead of `రామయని`) and has no line of its own in `plain_lyrics`, so it
+was resolved to line 1 — the same refrain, and the only English that exists for it — rather
+than left carrying Telugu. Its English therefore reads *"Sing the name "Rama, Rama" daily,"*
+where the singer sings *"…the nectar of Rama's name…"*. Adding that line to `plain_lyrics`
+and re-running `sync-variants.yml` gives it exact text; nothing else about the track changes.
+
+### Reported, not changed: the plain columns disagree on where Charanam 3 breaks
+
+`plain_lyrics` line 22 ends `… ఓ జీవా! బండన` and line 23 ends `… సేవించు`, while
+`plain_lyrics_en_tr` puts *Bandana* at the start of line 23 and *Sevinchu* at the start of
+line 24. `plain_lyrics_en` follows the transliteration's grouping. Each column is internally
+consistent and the sync columns take each row's own text, so nothing is wrong per column —
+but the Telugu row and the English row for the same cue break the clause in different places.
