@@ -1189,3 +1189,38 @@ edit from the owner and then a single `sync-variants.yml` run:
   `plain_lyrics_en_tr` has one line fewer than the other two plain columns: the
   transliteration of line 21 (`సిరుల దాహముతో`) is missing, so from there on that column
   is one line out of step and no cue after it can take its text from the right row.
+### Update 2026-11-17: four more defects found by the owner's follow-up edits
+
+The owner then edited the three blocked tracks. Two are now written; the third exposed a
+fourth defect of the same family and one row mix-up that is still open.
+
+**A variant column aligned by raw line index gave the wrong text.** `plain_lyrics_en_tr`
+for Sukha Madhuvu Kadalilo gained the missing line but also carried one blank too many
+after `{Charanam 4}`, so it was 32 lines against 31 and every row of the last stanza was
+read one line off — `Korkela Thufanulo,` where the cue sang `కోర్కెల తుఫానులో,`. Nothing
+failed; the text was simply wrong. Blank rows and `{...}` headings carry no sung text, so
+each variant column is now aligned by LYRIC ORDINAL and the column is refused unless the
+lyric count matches the Telugu plain column's — a genuinely missing or duplicated sung line
+is still caught. Non-regressive, proved before writing: all 29 written tracks re-render
+byte-identically (29/29, 0 differences) and all 29 re-certify.
+
+| track | state |
+| --- | --- |
+| Sukha Madhuvu Kadalilo | **written** (run `44053950011`, 37 cues, 32 sung + 5 banners). Advisory: its `plain_lyrics_en_tr` still has that one stray blank, so the plain-lyrics view — which stacks by line index — shifts the last stanza. The sync columns are correct regardless. |
+| Ramuni Keerthi | **written** (run `44056753054`, 39 cues, 34 sung + 5 banners). The owner's sync edit removed the held `రా...` cue and its plain columns are byte-identical to their original text; the timeline now ends 35 ms before the audio. |
+| Maa Inti Daivama | **still blocked, text not yet on its row** |
+
+**The still-open item.** The corrected Maa Inti Daivama plain lyrics were saved onto
+*Ramuni Keerthi's* row instead of Maa Inti Daivama's: 42 of 42 of Maa Inti Daivama's sung
+cues were found in the text on Ramuni Keerthi's row and 0 of 42 on its own row, while 34 of
+34 of Ramuni Keerthi's own cues were found in what its row held before that edit and 0 of 34
+in the new text. Ramuni Keerthi's text has since been restored, so that corrected Maa Inti
+Daivama text now exists only in `_patt_db/fix-rows/maa-inti-daivama/` (byte-identical to
+what had been pasted). Rendering Maa Inti Daivama's timeline against it validates cleanly —
+48 cues, 42 sung + 6 music, 22/22 lyric lines covered, `శ్రీకంఠ, స్రష్ట నుత శ్రీ
+వేంకటేశ్వర!` → "O Lord praised by Shiva and Brahma—Sri Venkateswara!" — so one
+`sync-variants.yml` run finishes the batch as soon as the text is on the right row.
+
+Worth chasing: the owner reported editing Maa Inti Daivama and the database recorded the
+write against Ramuni Keerthi. If the admin editor was showing the right track, that is a
+UI defect that silently writes to a different row.
