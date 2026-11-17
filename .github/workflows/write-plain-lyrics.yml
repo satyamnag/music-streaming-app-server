@@ -1,0 +1,249 @@
+name: Write plain lyrics (one track) and rebuild its English columns
+
+# ============================================================================
+# The ONLY writer in this repo that touches `plain_lyrics`, `plain_lyrics_en` or
+# `plain_lyrics_en_tr`.
+#
+# Every other write path is `synced_*`-only, on purpose: the plain columns are the
+# owner's text of record. This workflow exists because a corrected set of plain lyrics
+# for Maa Inti Daivama repeatedly failed to reach the database through the admin app
+# (the row was byte-identical before and after the save, and the corrected text's
+# signature line existed on none of the 85 tracks), and the owner authorised one
+# explicit, guarded writer for it.
+#
+# HOW IT STAYS SAFE
+#   * it refuses to run unless every `expect` input still matches the row, so a save
+#     that lands between review and dispatch aborts the run instead of being overwritten;
+#   * the three columns go together or not at all, and must be the same number of lines;
+#   * the current value of all six lyric columns is captured to a backup artifact BEFORE
+#     anything is written, and `if: failure()` puts the three plain columns back;
+#   * the English columns are re-rendered from the NEW plain text and the stored Telugu
+#     timeline before they are written, so the two can never be left describing different
+#     text; the render validates first and writes nothing on its own;
+#   * the run ends by reading the row back and comparing it with what it produced.
+#
+# Inputs are sha256 PREFIXES (16 hex characters) of the three columns as reviewed.
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_id:
+        description: 'Supabase track id'
+        required: true
+      expect_sha_te:
+        description: 'sha256 prefix of the CURRENT plain_lyrics'
+        required: true
+      expect_sha_en:
+        description: 'sha256 prefix of the CURRENT plain_lyrics_en'
+        required: true
+      expect_sha_en_tr:
+        description: 'sha256 prefix of the CURRENT plain_lyrics_en_tr'
+        required: true
+      confirm:
+        description: 'Type WRITE to apply; anything else is a dry run'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: write-plain-lyrics-${{ inputs.track_id }}
+  cancel-in-progress: false
+
+jobs:
+  write:
+    name: Guard, write plain, rebuild English
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TRACK_ID: ${{ inputs.track_id }}
+      EXPECT_TE: ${{ inputs.expect_sha_te }}
+      EXPECT_EN: ${{ inputs.expect_sha_en }}
+      EXPECT_EN_TR: ${{ inputs.expect_sha_en_tr }}
+      CONFIRM: ${{ inputs.confirm }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1
+          fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Guard - the row must still be the one that was reviewed
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/plain-lyrics-payload.mjs \
+            --track "$TRACK_ID" \
+            --dir "tools/inputs/plain/$TRACK_ID" \
+            --expect-te "$EXPECT_TE" \
+            --expect-en "$EXPECT_EN" \
+            --expect-tr "$EXPECT_EN_TR" \
+            --out plain-payload.json | tee guard.log
+
+      - name: Backup all six lyric columns
+        working-directory: server
+        run: |
+          set -eu
+          node -e '
+            const fs = require("fs");
+            const cols = ["plain_lyrics","plain_lyrics_en","plain_lyrics_en_tr",
+                          "synced_lyrics","synced_lyrics_en","synced_lyrics_en_tr"];
+            (async () => {
+              const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + process.env.TRACK_ID + "&select=id,title," + cols.join(","), {
+                headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
+              });
+              const rows = await r.json();
+              fs.writeFileSync("plain-backup.json", JSON.stringify(rows[0] || {}, null, 2));
+              console.log("backup written for columns:", cols.join(", "));
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - name: Dry run - stop here unless confirmed
+        if: ${{ inputs.confirm != 'WRITE' }}
+        run: |
+          echo "confirm was '$CONFIRM', not WRITE - this was a dry run; nothing was written."
+          echo "### Dry run - nothing written" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+
+      - name: Write the three plain columns
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -eu
+          if [ ! -f plain-payload.json ]; then echo "::error::plain-payload.json missing - refusing to write"; exit 1; fi
+          CODE="$(curl -sS -o /dev/null -w '%{http_code}' -X PATCH \
+            "$SUPABASE_URL/rest/v1/tracks?id=eq.$TRACK_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            --data-binary @plain-payload.json)"
+          echo "PATCH plain http=$CODE"
+          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then echo "::error::write failed (http $CODE)"; exit 1; fi
+          echo "WROTE the three plain lyric columns for $TRACK_ID"
+
+      - name: Render + validate the English columns against the NEW plain text
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/render-variant-sync.mjs \
+            --track "$TRACK_ID" --cols en,en_tr --out-dir . --emit-payload | tee render.log
+
+      - name: Write the two English sync columns
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -eu
+          if [ ! -f payload.json ]; then echo "::error::payload.json missing - refusing to write"; exit 1; fi
+          CODE="$(curl -sS -o /dev/null -w '%{http_code}' -X PATCH \
+            "$SUPABASE_URL/rest/v1/tracks?id=eq.$TRACK_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            --data-binary @payload.json)"
+          echo "PATCH variants http=$CODE"
+          if [ "$CODE" != "204" ] && [ "$CODE" != "200" ]; then echo "::error::write failed (http $CODE)"; exit 1; fi
+          echo "WROTE the two English sync columns for $TRACK_ID"
+
+      - name: Read back and compare
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -eu
+          node -e '
+            const fs = require("fs");
+            const crypto = require("crypto");
+            const sha = (s) => crypto.createHash("sha256").update(String(s || "")).digest("hex");
+            const plain = JSON.parse(fs.readFileSync("plain-payload.json", "utf8"));
+            const variant = JSON.parse(fs.readFileSync("payload.json", "utf8"));
+            (async () => {
+              const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + process.env.TRACK_ID + "&select=id,title," + Object.keys(plain).concat(Object.keys(variant)).join(","), {
+                headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
+              });
+              const [row] = await r.json();
+              let ok = true;
+              for (const [k, v] of Object.entries({ ...plain, ...variant })) {
+                const same = sha(row[k]) === sha(v);
+                console.log("read-back " + k.padEnd(20) + " identical: " + same);
+                if (!same) ok = false;
+              }
+              console.log(ok ? "WROTE plain + English; read-back matches exactly." : "READ-BACK MISMATCH");
+              process.exit(ok ? 0 : 1);
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - name: Restore the plain columns if anything after the write failed
+        if: failure()
+        working-directory: server
+        run: |
+          set -eu
+          # A failure BEFORE the backup (the guard, most of all) has nothing to restore,
+          # and must never touch the row.
+          if [ ! -f plain-backup.json ]; then
+            echo "no backup was taken, so there is nothing to restore"
+            exit 0
+          fi
+          echo "::warning::a later step failed - restoring the three plain columns from the backup"
+          node -e '
+            const fs = require("fs");
+            const b = JSON.parse(fs.readFileSync("plain-backup.json", "utf8"));
+            const body = {
+              plain_lyrics: b.plain_lyrics || "",
+              plain_lyrics_en: b.plain_lyrics_en || "",
+              plain_lyrics_en_tr: b.plain_lyrics_en_tr || "",
+            };
+            (async () => {
+              const p = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + process.env.TRACK_ID, {
+                method: "PATCH",
+                headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+                body: JSON.stringify(body),
+              });
+              console.log("restore http=" + p.status);
+              if (!p.ok) process.exit(1);
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: write-plain-lyrics
+          path: |
+            server/guard.log
+            server/plain-payload.json
+            server/payload.json
+            server/plain-backup.json
+            server/render.log
+            server/*-synced_*.srt
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Write plain lyrics"
+            echo ""
+            echo "Track: \`${{ inputs.track_id }}\` · confirm: \`${{ inputs.confirm }}\`"
+            echo ""
+            if [ -f server/guard.log ]; then echo '```'; tail -n 12 server/guard.log; echo '```'; fi
+            if [ -f server/render.log ]; then echo '```'; tail -n 20 server/render.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
