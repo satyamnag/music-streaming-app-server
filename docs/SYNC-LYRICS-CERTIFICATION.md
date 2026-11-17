@@ -1118,3 +1118,74 @@ either editing plain lyrics or loosening a gate.
 - Certification does not and cannot prove millisecond-exactness against ground
   truth; it proves structure, shared timeline, text fidelity, and that every cue
   is explained by the audio it covers.
+
+## Batch write: 29 tracks, English columns rebuilt from the owner's new Telugu (2026-11-16)
+
+The owner re-segmented the Telugu `synced_lyrics` of 32 tracks and asked for the English
+translation and transliteration columns to be rebuilt from them, with the rule unchanged:
+**Telugu timestamps are the authority for timing, the plain columns are the authority for
+spelling**, and neither the Telugu sync column nor any plain column may be edited.
+
+That rule has a consequence the renderer did not handle. The two Telugu columns are
+authored separately, so a sync cue is frequently *not* a byte-identical plain line even
+when it is obviously the same line. Three defects followed, each found by the certifier
+and each fixed in `render-variant-sync.mjs` before anything was written:
+
+1. **A head/tail pair dropped the words between its two cuts.** Each side divided the
+   variant line at its own offset, so `శ్రీవేంకటేశ్వరుని` + `సర్వదర్శనం` produced
+   "A complete vision of Lord" + "Venkateswara." and the word "Sri" was emitted by
+   neither. The cut is now one pure function of the boundary, so both sides read the same
+   position. Caught on Daiva Darshanam, Ramya Guna Dhama, Muddu Muddu Maatalatho.
+2. **Only two-way splits were supported.** A plain line split into three cues lost the
+   middle one (`శ్రీధర, | శ్రీకర, | శ్రీవేంకట రమణా!` on Madhava Mukundha). A cue now
+   resolves to any slice of a line and the variant is cut at both ends.
+3. **Only byte-identical slices were recognised.** The owner's sync differs by whitespace
+   (`కలిలోన` vs `కలి లోన`; a double space inside `మునిగి  తేలే`), by a dropped long vowel
+   (`రావమ్మ` vs `రావమ్మా`), and by the author's own annotations
+   (`రావమ్మ శ్రీలక్ష్మి (రా...)`, `రమణా!...`). Matching is now whitespace-insensitive,
+   falls back to a fuzzy word-span match, and strips a trailing parenthetical or ellipsis
+   from the **matching** text only — emitted text always comes from the plain columns, so
+   an annotation can never reach a variant column.
+
+A cue shorter than four characters may not be matched to a slice at all: `రా...` reduces
+to `రా`, which occurs inside dozens of Telugu words, and the guard was added after it
+produced the nonsense cue "In" / "Ramuni". Such a cue still blocks its track.
+
+The variant banner is now `{{ Music }}` (with the spaces), the spelling the owner asked
+for, held in `VARIANT_MUSIC_LABEL` and deliberately separate from the Telugu author
+marker `MUSIC_LABEL` (`{{Music}}`) so a variant render can never rewrite the Telugu column.
+
+### Certified
+
+29 of the 32 tracks, each written by its own `sync-variants.yml` run (all 29 runs
+`success`) and re-certified from the database afterwards:
+
+| check | result |
+| --- | --- |
+| Telugu `synced_lyrics` | **byte-identical before and after** on all 29 |
+| all three plain columns | **byte-identical before and after** on all 29 |
+| `synced_lyrics_en` / `_en_tr` | **byte-identical to the render certified before the write** |
+| cue counts | equal across all three synced columns, every track |
+| time lines | identical index by index to the Telugu, every track |
+| banner text in a variant column | `{{ Music }}` only |
+| Telugu script in a variant column | **0 cues** |
+| independent verifier | green on all 29 |
+
+Cue counts: 33 (Chintalu Maakela) up to 78 (Madhava Mukundha).
+
+### Blocked, reported, not guessed
+
+Three tracks cannot be rebuilt without editing a column the owner froze. Each needs one
+edit from the owner and then a single `sync-variants.yml` run:
+
+- **Ramuni Keerthi** `09cfc133-78f6-4c24-8085-c3b3e29e9eff` — cue 31
+  (`00:04:16,089 → 00:04:27,350`, 11.3 s) carries `రా...`, a held syllable with no
+  counterpart in `plain_lyrics`.
+- **Maa Inti Daivama** `c2b66e01-51c2-4256-b7cd-ce5991c28085` — cues 3, 10, 19, 28, 37, 45
+  carry `శ్రీకంఠ, స్రష్ట నుత శ్రీ వేంకటేశ్వర!`, which is not in `plain_lyrics`; plain
+  line 2 (`శ్రీ వేంకటేశ్వరా, మా రక్షకుడా!`) is a different line and is sung at cues
+  5 / 12 / ….
+- **Sukha Madhuvu Kadalilo** `592f01ec-6e19-4a10-a481-587e48e3c7da` —
+  `plain_lyrics_en_tr` has one line fewer than the other two plain columns: the
+  transliteration of line 21 (`సిరుల దాహముతో`) is missing, so from there on that column
+  is one line out of step and no cue after it can take its text from the right row.
