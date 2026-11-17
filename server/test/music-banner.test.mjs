@@ -29,8 +29,8 @@ test('{{Music}} is a banner and is normalised to the variant banner', () => {
   assert.equal(variantBannerText('{{Music}}'), VARIANT_MUSIC_LABEL)
 })
 
-test('{{ Music }} keeps the author spacing', () => {
-  assert.equal(variantBannerText('{{ Music }}'), '{{ Music }}')
+test('{{ Music }} is a banner and is normalised to the variant banner', () => {
+  assert.equal(variantBannerText('{{ Music }}'), VARIANT_MUSIC_LABEL)
 })
 
 test('a braced label with note glyphs inside is normalised too', () => {
@@ -58,10 +58,10 @@ test('a braced Telugu label without note glyphs also collapses', () => {
   assert.equal(variantBannerText(`{{${TELUGU_LABEL}}}`), VARIANT_MUSIC_LABEL)
 })
 
-// The owner's requested spelling: `{{ Music }}` with the spaces, and it is
-// deliberately NOT the same constant as the Telugu author marker.
-test('the variant banner is {{ Music }} with spaces, not {{Music}}', () => {
-  assert.equal(VARIANT_MUSIC_LABEL, '{{ Music }}')
+// The owner's requested spelling, mirroring the Telugu banner's shape:
+// `{{ ♪ Music ♪ }}`, deliberately NOT the same constant as the Telugu author marker.
+test('the variant banner is {{ ♪ Music ♪ }}, not {{Music}}', () => {
+  assert.equal(VARIANT_MUSIC_LABEL, `{{ ${NOTE} Music ${NOTE} }}`)
   assert.notEqual(VARIANT_MUSIC_LABEL, MUSIC_LABEL)
   assert.equal(MUSIC_LABEL, '{{Music}}')
 })

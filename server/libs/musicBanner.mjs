@@ -63,7 +63,7 @@
  * from the Telugu author marker `MUSIC_LABEL` (`{{Music}}`) so that the Telugu
  * column is never rewritten by a variant render.
  */
-export const VARIANT_MUSIC_LABEL = '{{ Music }}'
+export const VARIANT_MUSIC_LABEL = '{{ \u266A Music \u266A }}'
 
 /** A whole line wrapped in double braces: `{{...}}`, `{{ Music }}`, `{{♪ ♪}}`. */
 const BRACED_BANNER = /^\{\{[\s\S]*\}\}$/
