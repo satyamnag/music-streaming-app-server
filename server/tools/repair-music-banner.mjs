@@ -40,7 +40,9 @@ const arg = (n, d = null) => {
 const IDS = String(arg('ids', '')).split(',').map((s) => s.trim()).filter(Boolean)
 const WRITE = process.argv.includes('--write')
 const SUPA = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
-const ANON = process.env.SUPABASE_ANON_KEY || ''
+// Reads fall back to the service key: the workflow that runs this supplies only that one,
+// exactly like the other tools in this directory.
+const ANON = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
 if (!IDS.length) { console.error('--ids "<uuid>[,<uuid>...]" required'); process.exit(2) }
