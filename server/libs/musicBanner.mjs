@@ -42,10 +42,28 @@
 // English columns - the renderer's guard then refused to write at all. Both
 // spellings are therefore classified by the SAME rule: the LABEL decides, not
 // the wrapper. Braces are stripped, note glyphs are stripped, and if what is
-// left is Telugu the cue becomes `{{Music}}`.
+// left is Telugu the cue becomes the variant banner.
+//
+// WHICH TEXT THE VARIANT COLUMN GETS
+// ----------------------------------
+// The owner asked, in as many words, that the English columns carry `{{ Music }}`
+// (with the spaces) where the Telugu carries `{{ సంగీతం }}`. That is now the
+// default for a variant column and is deliberately NOT the same constant as the
+// Telugu author marker `MUSIC_LABEL` (`{{Music}}`): `MUSIC_LABEL` is what the
+// author types in the Telugu column and what the write gates look for, while
+// `VARIANT_MUSIC_LABEL` is the banner a translation/transliteration column
+// emits. Both apps render either spelling as the same "♪ Music ♪" banner, so the
+// two constants never have to agree.
 // ============================================================================
 
-import { MUSIC_LABEL } from './autoSyncLyrics.mjs'
+/**
+ * The banner a translation/transliteration column emits for a music cue.
+ *
+ * `{{ Music }}` - the owner's requested spelling, spaces included. Kept separate
+ * from the Telugu author marker `MUSIC_LABEL` (`{{Music}}`) so that the Telugu
+ * column is never rewritten by a variant render.
+ */
+export const VARIANT_MUSIC_LABEL = '{{ Music }}'
 
 /** A whole line wrapped in double braces: `{{...}}`, `{{ Music }}`, `{{♪ ♪}}`. */
 const BRACED_BANNER = /^\{\{[\s\S]*\}\}$/
@@ -78,11 +96,11 @@ function bannerLabel(line) {
  * The text a banner cue should carry in a language-variant column.
  *
  * @param   {string} text        the cue's text, as stored (trimmed or not)
- * @param   {string} [musicLabel] the canonical banner to substitute
+ * @param   {string} [musicLabel] the banner to substitute for a localized label
  * @returns {string|null}        the text to emit, or `null` when the line is not
  *                               a banner at all
  */
-export function variantBannerText(text, musicLabel = MUSIC_LABEL) {
+export function variantBannerText(text, musicLabel = VARIANT_MUSIC_LABEL) {
   const line = String(text ?? '').trim()
   if (!line) return null
 

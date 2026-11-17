@@ -30,9 +30,8 @@ import {
   splitLyricLines,
   splitVariantLines,
   classifyLine,
-  MUSIC_LABEL,
 } from '../libs/autoSyncLyrics.mjs'
-import { variantBannerText } from '../libs/musicBanner.mjs'
+import { variantBannerText, VARIANT_MUSIC_LABEL } from '../libs/musicBanner.mjs'
 
 const arg = (n, d = null) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -91,15 +90,185 @@ console.log(`telugu timeline: ${totalLines} plain lines`)
 const parsed = parseSrtTimeline(teluguSrt)
 if (!parsed.length) { console.error('Telugu synced_lyrics produced no cues'); process.exit(2) }
 
-// Telugu text -> line index in plain_lyrics (repeats reuse the same index).
-const textToIndex = new Map()
-plainLines.forEach((t, i) => {
-  const k = String(t).trim()
-  if (k && !textToIndex.has(k)) textToIndex.set(k, i)
-})
+// --- Map each Telugu cue onto a plain-lyric row -----------------------------
+// Four tiers, in order of how much they assume. The Telugu sync column and the
+// Telugu plain column are authored separately and neither may be edited, so a cue is
+// often not a byte-identical plain line even when it plainly IS that line:
+//
+//   1. the cue IS a plain line, ignoring whitespace                       -> whole line
+//   2. the cue is the HEAD or the TAIL of a plain line, ignoring spaces   -> split
+//   3. the cue is the head/tail of a plain line spelled slightly
+//      differently (a dropped long vowel, a closed word gap, ...)        -> split
+//   4. the cue CONTAINS a whole plain line (the sync carries extra words) -> whole line
+//
+// Measured in this catalogue: "రావమ్మ మహాలక్ష్మి" against the plain line
+// "రావమ్మా మహలక్ష్మీ! రావమ్మా శ్రీ లక్ష్మీ!" (tier 3, two vowel lengths differ),
+// "కలిలోన" against "కలి లోన" (tier 1), "మునిగి తేలే మాకు," against
+// "మాయ కడలి లోన మునిగి  తేలే మాకు," (tier 2, the plain line has a double space).
+const sq = (s) => String(s ?? '').replace(/\s+/g, '')
+
+/** 1 - (Levenshtein distance / longer length). Small alphabet, short strings. */
+function editRatio(a, b) {
+  if (a === b) return 1
+  const n = a.length
+  const m = b.length
+  if (!n || !m) return 0
+  let prev = Array.from({ length: m + 1 }, (_, j) => j)
+  const cur = new Array(m + 1)
+  for (let i = 1; i <= n; i += 1) {
+    cur[0] = i
+    for (let j = 1; j <= m; j += 1) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    }
+    for (let j = 0; j <= m; j += 1) prev[j] = cur[j]
+  }
+  return 1 - prev[m] / Math.max(n, m)
+}
+
+/** Word boundaries of a plain line in whitespace-stripped offsets. */
+function sqWords(text) {
+  const words = String(text).match(/\S+/g) || []
+  const out = []
+  let at = 0
+  for (const w of words) {
+    const s = sq(w)
+    out.push({ from: at, to: at + s.length })
+    at += s.length
+  }
+  return out
+}
+
+// Only rows the classifier calls a lyric can be sung; headings and blank rows cannot.
+const lyricRows = plainLines
+  .map((line, i) => ({ i, text: String(line), sq: sq(line) }))
+  .filter((r) => r.text.trim() && classifyLine(r.text.trim()) === 'lyric')
+  .map((r) => ({ ...r, words: sqWords(r.text) }))
+
+const MIN_FUZZY = 0.72
+
+/**
+ * The cue text with the author's own ANNOTATIONS removed - a trailing parenthetical note
+ * and a trailing ellipsis. Neither is sung and neither appears in the plain column, so
+ * they make an otherwise exact cue look unmappable:
+ *
+ *   * `రావమ్మ శ్రీలక్ష్మి (రా...)` - the parenthetical records what the singer repeats;
+ *   * `రమణా!...`                   - the ellipsis records a held vowel.
+ *
+ * Only the MATCHING text is stripped; the emitted text always comes from the plain
+ * columns, so no annotation can leak into a variant column.
+ */
+function forMatch(text) {
+  return String(text ?? '')
+    .replace(/\s*[(\uFF08][^()\uFF08\uFF09]*[)\uFF09]\s*$/, '')
+    .replace(/\s*[.\u2026]{2,}\s*$/, '')
+    .trim()
+}
+
+/**
+ * Shortest cue, in whitespace-stripped characters, that may be mapped to a SLICE of a
+ * plain line. Below it a "match" is meaningless: the cue "రా..." reduces to "రా", which
+ * occurs inside dozens of Telugu words, and matching it produced the nonsense cue
+ * "In" / "Ramuni" on Ramuni Keerthi. A too-short cue is reported instead of guessed.
+ */
+const MIN_SLICE_CUE = 4
+
+/**
+ * Resolve one cue's text to `{ lineIndex, piece }`, where `piece` is null for a whole
+ * line and `{ from, to, total, beforeFrom, beforeTo }` for a SLICE of a line (offsets
+ * are whitespace-stripped character offsets into the plain line).
+ *
+ * A slice can be the head, the tail or the MIDDLE: the owner's timeline splits some
+ * plain lines into three or more cues (measured on Madhava Mukundha, "శ్రీధర,  శ్రీకర,
+ * శ్రీవేంకట రమణా!" becomes three cues), and a head/tail-only model drops the middle.
+ *
+ * [near] is the line index the previous cue resolved to. It only breaks ties: several
+ * plain lines can contain the same short phrase, and the cue sequence walks the lyric
+ * in order, so the nearest candidate is the right one.
+ *
+ * Returns null when nothing safe can be said - never a guess.
+ */
+function resolveCue(text, near = -1) {
+  const s = sq(forMatch(text))
+  if (!s) return null
+
+  const pick = (cands) => {
+    const base = Math.max(near, 0)
+    let best = null
+    for (const c of cands) {
+      // Distance to the line the previous cue resolved to, with a small penalty for
+      // stepping BACKWARDS: the lyric mostly walks forward, but a refrain legitimately
+      // returns to line 1 right after line 2 (measured on Rama Naamamu Madhuramu, where
+      // punishing a backward step at all cost sent "రామ నామము" to line 28).
+      const d = Math.abs(c.row.i - base) + (c.row.i < base ? 0.5 : 0)
+      if (best === null || d < best.d - 1e-9
+        || (Math.abs(d - best.d) < 1e-9 && c.row.i < best.c.row.i)) {
+        best = { d, c }
+      }
+    }
+    return best === null ? null : best.c
+  }
+
+  // 1 & 2. a whole plain line, or a slice of one, ignoring whitespace
+  const exact = lyricRows
+    .filter((r) => r.sq.includes(s))
+    .map((r) => ({ row: r, tier: r.sq === s ? 1 : 2, at: r.sq.indexOf(s) }))
+  if (exact.length) {
+    const whole = exact.filter((c) => c.tier === 1)
+    if (!whole.length && s.length < MIN_SLICE_CUE) return null
+    const c = pick(whole.length ? whole : exact)
+    const from = c.at
+    const to = c.at + s.length
+    if (from === 0 && to >= c.row.sq.length) return { lineIndex: c.row.i, piece: null }
+    return {
+      lineIndex: c.row.i,
+      piece: { from, to, total: c.row.sq.length,
+        beforeFrom: c.row.sq.slice(0, from), beforeTo: c.row.sq.slice(0, to) },
+    }
+  }
+
+  // 3. a slice of one line, spelled slightly differently
+  let best = null
+  for (const r of lyricRows) {
+    for (let a = 0; a < r.words.length; a += 1) {
+      let acc = ''
+      for (let b = a; b < r.words.length; b += 1) {
+        acc += r.sq.slice(r.words[b].from, r.words[b].to)
+        const ratio = editRatio(s, acc)
+        if (ratio < MIN_FUZZY) continue
+        // Prefer a slice that touches an end of the line, then the best ratio.
+        const touches = a === 0 || b === r.words.length - 1
+        const score = ratio + (touches ? 0.05 : 0)
+        if (best === null || score > best.score + 1e-9) {
+          best = { score, r, from: r.words[a].from, to: r.words[b].to }
+        }
+      }
+    }
+  }
+  if (best) {
+    if (best.from === 0 && best.to >= best.r.sq.length) return { lineIndex: best.r.i, piece: null }
+    return {
+      lineIndex: best.r.i,
+      piece: { from: best.from, to: best.to, total: best.r.sq.length,
+        beforeFrom: best.r.sq.slice(0, best.from), beforeTo: best.r.sq.slice(0, best.to) },
+    }
+  }
+
+  // 4. the cue CONTAINS a whole plain line - the sync carries extra words, so the
+  //    whole line's translation is the closest thing that exists for it.
+  let container = null
+  for (const r of lyricRows) {
+    if (!r.sq || r.sq.length < 0.5 * s.length) continue
+    if (!s.includes(r.sq)) continue
+    if (container === null || r.sq.length > container.sq.length) container = r
+  }
+  if (container) return { lineIndex: container.i, piece: null }
+
+  return null
+}
 
 const cues = []
 const unmapped = []
+let lastLine = -1
 for (const c of parsed) {
   const text = String(c.text || '').trim()
   // A music banner is written either in the canonical `{{Music}}` form or in the
@@ -113,20 +282,11 @@ for (const c of parsed) {
     cues.push({ kind: 'music', start: c.start, end: c.end, lineIndex: null, text: banner })
     continue
   }
-  if (textToIndex.has(text)) {
-    cues.push({ kind: 'lyric', start: c.start, end: c.end, lineIndex: textToIndex.get(text), text })
-    continue
-  }
-  // A cue that is only PART of a plain line (the Telugu timeline may split one plain
-  // line into two cues, e.g. "రమ్య గుణ ధామా," + "శ్రీరామ చంద్రా,"). Find the row that
-  // contains it so the variant line can be split at the matching point.
-  const holders = []
-  plainLines.forEach((line, i) => {
-    const at = String(line).indexOf(text)
-    if (at >= 0 && String(line).trim() !== text) holders.push({ i, at })
-  })
-  if (holders.length) {
-    cues.push({ kind: 'lyric', start: c.start, end: c.end, lineIndex: holders[0].i, piece: text, text })
+  const hit = resolveCue(text, lastLine)
+  if (hit) {
+    lastLine = hit.lineIndex
+    cues.push({ kind: 'lyric', start: c.start, end: c.end, lineIndex: hit.lineIndex,
+      piece: hit.piece, text })
     continue
   }
   // A cue whose text is not a plain line: keep the timeline row but let the
@@ -144,26 +304,39 @@ if (unmapped.length) {
 const FUNCTION_WORDS = /^(of|the|a|an|in|to|towards|with|and|or|for|on|at|by|from|o)$/i
 
 /**
- * The Telugu cue covers [at, at+len) of its plain line. Return the piece of the variant
- * line that corresponds to it, split at a punctuation mark when the Telugu split is at
- * punctuation, otherwise at the word boundary nearest the same relative position.
- * Returns null when the cue is a middle fragment (not supported, never guessed).
+ * The slice of the variant line that corresponds to a sliced cue, cut at a punctuation
+ * mark when the Telugu boundary is at punctuation, otherwise at the word boundary
+ * nearest the same relative position. Never guesses: null when no usable cut exists, and
+ * the caller then reports the cue instead of emitting something wrong.
  */
-function splitVariantForCue(rowTe, rowVariant, piece) {
-  const te = String(rowTe)
+function splitVariantForCue(piece, rowVariant) {
   const v = String(rowVariant)
-  const at = te.indexOf(piece)
-  if (at < 0 || !v.trim()) return null
-  const end = at + piece.length
-  const isPrefix = at === 0
-  const isSuffix = end >= te.replace(/\s+$/, '').length
-  if (!isPrefix && !isSuffix) return null
-  const splitTe = isPrefix ? end : at
-  const f = te.length ? splitTe / te.length : 0
-
-  let cut
+  if (!piece || !v.trim()) return null
   const vEnd = v.replace(/\s+$/, '').length
-  const teBefore = te.slice(0, splitTe).replace(/\s+$/, '')
+  const total = piece.total || 1
+  // Both cuts come from the same pure function, so a boundary shared by two cues yields
+  // one position: measured on "శ్రీవేంకటేశ్వరుని సర్వదర్శనం" against "A complete vision of
+  // Lord Sri Venkateswara.", cutting each side independently gave "...of Lord" and
+  // "Venkateswara." and the word "Sri" was emitted by neither cue.
+  const left = piece.from <= 0 ? 0 : variantCut(piece.beforeFrom, v, piece.from / total)
+  const right = piece.to >= total ? vEnd : variantCut(piece.beforeTo, v, piece.to / total)
+  if (left === null || right === null) return null
+  if (!(left < right)) return null
+  return v.slice(left, right).trim() || null
+}
+
+/**
+ * Where to cut the variant line for a split at relative position [f].
+ *
+ * Pure: the same boundary always yields the same cut, which is what keeps a head and its
+ * tail consistent. Measured on "శ్రీవేంకటేశ్వరుని సర్వదర్శనం" against "A complete vision
+ * of Lord Sri Venkateswara.": deciding each side separately gave the head "...of Lord"
+ * and the tail "Venkateswara.", so the word "Sri" was emitted by neither cue.
+ * Returns null when no usable cut exists.
+ */
+function variantCut(teBefore, v, f) {
+  const vEnd = v.replace(/\s+$/, '').length
+  let cut
   if (/[,!?;:]$/.test(teBefore)) {
     // A punctuation mark that is the LAST character cannot be the split point: the piece
     // after it would be empty (measured: "సౌశీల్య రామా," against "All-powerful Rama of
@@ -182,7 +355,9 @@ function splitVariantForCue(rowTe, rowVariant, piece) {
     let bestD = Infinity
     for (const m of words) {
       const b = m.index + m[0].length
-      if (b >= v.replace(/\s+$/, '').length) continue
+      // The LAST word end is a legitimate cut: a slice that runs to the end of the Telugu
+      // line ends with the last word of the variant too, and refusing it dropped the
+      // final word of every such slice (measured on Vedu Vaarike).
       const d = Math.abs(b - target)
       if (d < bestD) { bestD = d; best = b }
     }
@@ -195,9 +370,8 @@ function splitVariantForCue(rowTe, rowVariant, piece) {
       if (prev.length > 1) cut = prev[prev.length - 2].index + prev[prev.length - 2][0].length
     }
   }
-  if (!(cut > 0 && cut < vEnd)) return null
-  const out = isPrefix ? v.slice(0, cut) : v.slice(cut)
-  return out.trim() || null
+  if (!(cut >= 0 && cut <= vEnd)) return null
+  return cut
 }
 
 // --- Render each requested column ----------------------------------------
@@ -224,10 +398,12 @@ for (const col of COLS) {
   for (const c of cues) {
     let text
     if (c.kind === 'music') {
-      text = String(c.text || MUSIC_LABEL).trim()
+      // The banner a variant column carries: `{{ Music }}`, never the Telugu
+      // author marker - see VARIANT_MUSIC_LABEL in libs/musicBanner.mjs.
+      text = String(c.text || VARIANT_MUSIC_LABEL).trim()
     } else if (c.piece) {
-      text = splitVariantForCue(plainLines[c.lineIndex], variantLines[c.lineIndex], c.piece)
-      if (!text) missingPieces.push(c.piece)
+      text = splitVariantForCue(c.piece, variantLines[c.lineIndex])
+      if (!text) missingPieces.push(c.text)
     } else if (c.lineIndex !== null && c.lineIndex !== undefined) {
       text = String(variantLines[c.lineIndex] || '').trim()
     } else {

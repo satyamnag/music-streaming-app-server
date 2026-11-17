@@ -11,7 +11,9 @@
 
 import assert from 'node:assert/strict'
 import { MUSIC_LABEL } from '../libs/autoSyncLyrics.mjs'
-import { isVariantBanner, variantBannerText } from '../libs/musicBanner.mjs'
+import {
+  VARIANT_MUSIC_LABEL, isVariantBanner, variantBannerText,
+} from '../libs/musicBanner.mjs'
 
 const NOTE = '\u266A' // ♪
 const TELUGU_LABEL = '\u0C38\u0C02\u0C17\u0C40\u0C24\u0C02' // music, in Telugu
@@ -48,12 +50,20 @@ test('an empty {{}} stays a banner row, unchanged', () => {
 // double-brace banner, but its label is Telugu, so quoting it verbatim put
 // Telugu script into the English columns and the renderer refused to write.
 
-test('a braced Telugu label collapses to the canonical banner', () => {
-  assert.equal(variantBannerText(`{{ ${NOTE} ${TELUGU_LABEL} ${NOTE} }}`), MUSIC_LABEL)
+test('a braced Telugu label collapses to the variant banner', () => {
+  assert.equal(variantBannerText(`{{ ${NOTE} ${TELUGU_LABEL} ${NOTE} }}`), VARIANT_MUSIC_LABEL)
 })
 
 test('a braced Telugu label without note glyphs also collapses', () => {
-  assert.equal(variantBannerText(`{{${TELUGU_LABEL}}}`), MUSIC_LABEL)
+  assert.equal(variantBannerText(`{{${TELUGU_LABEL}}}`), VARIANT_MUSIC_LABEL)
+})
+
+// The owner's requested spelling: `{{ Music }}` with the spaces, and it is
+// deliberately NOT the same constant as the Telugu author marker.
+test('the variant banner is {{ Music }} with spaces, not {{Music}}', () => {
+  assert.equal(VARIANT_MUSIC_LABEL, '{{ Music }}')
+  assert.notEqual(VARIANT_MUSIC_LABEL, MUSIC_LABEL)
+  assert.equal(MUSIC_LABEL, '{{Music}}')
 })
 
 test('the collapsed braced banner honours a caller-supplied label', () => {
@@ -76,9 +86,8 @@ test('surrounding whitespace is tolerated', () => {
   assert.equal(variantBannerText(line), `${NOTE}  Music  ${NOTE}`)
 })
 
-test('a Telugu label is replaced by the canonical banner', () => {
-  assert.equal(variantBannerText(`${NOTE} ${TELUGU_LABEL} ${NOTE}`), MUSIC_LABEL)
-  assert.equal(MUSIC_LABEL, '{{Music}}')
+test('a Telugu label is replaced by the variant banner', () => {
+  assert.equal(variantBannerText(`${NOTE} ${TELUGU_LABEL} ${NOTE}`), VARIANT_MUSIC_LABEL)
 })
 
 test('the substituted banner honours a caller-supplied label', () => {
