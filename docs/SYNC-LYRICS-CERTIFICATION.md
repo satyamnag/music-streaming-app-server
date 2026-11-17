@@ -1224,3 +1224,47 @@ what had been pasted). Rendering Maa Inti Daivama's timeline against it validate
 Worth chasing: the owner reported editing Maa Inti Daivama and the database recorded the
 write against Ramuni Keerthi. If the admin editor was showing the right track, that is a
 UI defect that silently writes to a different row.
+### Batch closed 2026-11-17: all 32 tracks written and certified
+
+Maa Inti Daivama was the last one. Its plain lyrics had twice failed to reach the database
+through the admin app - the row was byte-identical before and after the reported save, and
+the corrected text's signature line (`శ్రీకంఠ`) existed on none of the 85 tracks - so the
+owner authorised one explicit writer for the frozen columns, and the preserved text was
+applied with it.
+
+**`write-plain-lyrics.yml`** is that writer, and it is the only path in this repo that
+touches `plain_lyrics*`. It:
+
+- refuses to run unless all three reviewed **sha256 prefixes** still match the row, so a save
+  that lands between review and dispatch aborts the run instead of being overwritten;
+- takes all three columns or none, and requires them to be the same number of lines;
+- backs up all six lyric columns before writing, and puts the three plain columns back on any
+  later failure (`if: failure()`), with nothing restored if the failure came before the backup;
+- **rebuilds the track's two English sync columns in the same job** from the new plain text and
+  the stored Telugu timeline, so the two can never be left describing different text;
+- ends by reading the row back and comparing it with what it produced.
+
+`plain-lyrics-payload.mjs` builds and checks the PATCH body and writes nothing itself.
+`confirm` must be exactly `WRITE`; anything else is a dry run. The dry run for this track
+(`44059644777`) passed the guard and wrote nothing; the confirmed run `44059821887` wrote
+`PATCH plain http=204`, then `PATCH variants http=204`, then reported all five columns
+`identical: true` on read-back.
+
+Certified afterwards from the database:
+
+| check | result |
+| --- | --- |
+| the three plain columns | **byte-identical to the reviewed input files** (721e991d / 8da8b0c1 / 035a727c) |
+| Telugu `synced_lyrics` | **unchanged** (f2b174aa) |
+| `synced_lyrics_en` / `_en_tr` | **reproduce exactly** from the stored plain + stored Telugu (2910a312 / 383683ba) |
+| cues | 48 / 48 / 48, 42 sung + 6 `{{ Music }}` banners, one shared timeline |
+| independent verifier | green |
+
+The owner also removed the stray blank line from Sukha Madhuvu Kadalilo's
+`plain_lyrics_en_tr`, so its plain columns are 31/31/31 and parallel again; that advisory is
+closed.
+
+**Final sweep over all 32 requested tracks:** 1,558 cues, every track with equal cue counts
+across the three synced columns, time lines identical to the Telugu at every index, `{{ Music }}`
+as the only banner, no Telugu script in an English column, every track starting at
+`00:00:00,000`, and all three plain columns line-parallel. **0 hard failures.**
