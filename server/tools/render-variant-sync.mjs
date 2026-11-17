@@ -28,7 +28,6 @@ import {
   formatSrtTime,
   renderCuesForVariant,
   splitLyricLines,
-  splitVariantLines,
   classifyLine,
 } from '../libs/autoSyncLyrics.mjs'
 import { variantBannerText, VARIANT_MUSIC_LABEL } from '../libs/musicBanner.mjs'
@@ -386,7 +385,36 @@ for (const col of COLS) {
     continue
   }
 
-  const variantLines = splitVariantLines(variantText, totalLines)
+  // Align this column to the Telugu plain column by LYRIC ORDINAL, not by raw line index.
+  //
+  // The columns are line-parallel by contract, so the two agree whenever the column is
+  // well formed. They stop agreeing as soon as one column carries an extra or missing
+  // BLANK line: measured on Sukha Madhuvu Kadalilo, where `plain_lyrics_en_tr` had one
+  // blank too many after `{Charanam 4}` and every row of the last stanza was therefore
+  // read one line off - structurally valid, silently wrong text. Blank rows and `{...}`
+  // headings carry no sung text at all, so counting only the lyric rows restores the
+  // intended mapping.
+  //
+  // The gate is the count: if the two columns do not hold the same number of LYRIC lines
+  // then a sung line really is missing or duplicated, the ordinal is meaningless, and the
+  // column is refused instead of being guessed at. That is what makes the ordinal safe.
+  const variantLines = splitLyricLines(variantText)
+  const variantLyricRows = []
+  variantLines.forEach((l, i) => { if (classifyLine(l) === 'lyric') variantLyricRows.push(i) })
+  const teluguLyricRows = []
+  plainLines.forEach((l, i) => { if (classifyLine(String(l).trim()) === 'lyric') teluguLyricRows.push(i) })
+  const variantForPlain = new Map()
+  teluguLyricRows.forEach((pi, ord) => variantForPlain.set(pi, variantLyricRows[ord]))
+  const rowOf = (plainIndex) => {
+    const r = variantForPlain.get(plainIndex)
+    return r === undefined ? '' : String(variantLines[r] || '')
+  }
+  const countProblem = variantLyricRows.length === teluguLyricRows.length
+    ? null
+    : `${plainCol} holds ${variantLyricRows.length} lyric line(s) but plain_lyrics holds `
+      + `${teluguLyricRows.length} - a sung line is missing or duplicated, so no cue can be `
+      + `matched to it safely`
+
   // Render the SAME cue list, taking each cue's text from this column. A cue that is
   // only part of a plain line gets the corresponding part of this column's line; a music
   // banner is mirrored verbatim. Rendering here (instead of calling
@@ -402,10 +430,10 @@ for (const col of COLS) {
       // author marker - see VARIANT_MUSIC_LABEL in libs/musicBanner.mjs.
       text = String(c.text || VARIANT_MUSIC_LABEL).trim()
     } else if (c.piece) {
-      text = splitVariantForCue(c.piece, variantLines[c.lineIndex])
+      text = splitVariantForCue(c.piece, rowOf(c.lineIndex))
       if (!text) missingPieces.push(c.text)
     } else if (c.lineIndex !== null && c.lineIndex !== undefined) {
-      text = String(variantLines[c.lineIndex] || '').trim()
+      text = rowOf(c.lineIndex).trim()
     } else {
       text = String(c.text || '').trim()
     }
@@ -417,6 +445,7 @@ for (const col of COLS) {
 
   // ---- Validation: shared-timeline + structural invariants --------------
   const problems = []
+  if (countProblem) problems.push(countProblem)
   if (renderedCues.length !== cues.length) {
     problems.push(`cue count ${renderedCues.length} != timeline ${cues.length}`)
   }
@@ -464,22 +493,18 @@ for (const col of COLS) {
   const blank = renderedCues.filter((c) => !String(c.text || '').trim()).length
   if (blank) problems.push(`${blank} blank cue(s)`)
 
-  // Coverage of distinct variant lines used
-  const variantLyric = variantLines.filter((l) => classifyLine(String(l).trim()) === 'lyric')
-  // A plain line counts as covered when at least one cue carries it, whole or as a piece.
-  const coveredIdx = new Set(cues.filter((c) => c.kind === 'lyric' && c.lineIndex !== null
+  // Coverage: how many of this column's lyric rows are actually carried by a cue.
+  const cuedPlain = new Set(cues.filter((c) => c.kind === 'lyric' && c.lineIndex !== null
     && c.lineIndex !== undefined).map((c) => c.lineIndex))
-  const covered = variantLyric.filter((_, i) => {
-    const rowIndex = variantLines.indexOf(variantLyric[i])
-    return coveredIdx.has(rowIndex)
-  }).length
+  const covered = teluguLyricRows.filter((pi) => cuedPlain.has(pi) && rowOf(pi).trim()).length
+  const variantLyric = teluguLyricRows
 
   const srtPath = path.join(OUT_DIR, `${TRACK_ID}-synced_${col}.srt`)
   fs.writeFileSync(srtPath, rendered, 'utf8')
   payload[COLUMN_TO_SYNCED[col]] = rendered
 
   console.log(`\n[${col}] ${plainCol}`)
-  console.log(`  variant lines: ${variantLines.length} (lyric ${variantLyric.length})`)
+  console.log(`  column lines: ${variantLines.length} (lyric ${variantLyricRows.length})`)
   console.log(`  cues rendered: ${renderedCues.length}`)
   console.log(`  lyric lines covered: ${covered}/${variantLyric.length}`)
   console.log(`  problems: ${problems.length ? problems.join('; ') : 'NONE'}`)
