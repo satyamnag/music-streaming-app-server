@@ -1,0 +1,126 @@
+name: Replace the {{Music}} marker in the Telugu sync column
+
+# ============================================================================
+# One job, one purpose: rewrite the music-banner marker `{{Music}}` to
+# `{{ ♪ సంగీతం ♪ }}` in the owner's TELUGU sync column, and change nothing
+# else. The marker is the only thing this workflow can alter.
+#
+# WHY IT IS SAFE
+#   * only a cue whose ENTIRE text is `{{Music}}` is rewritten - never a
+#     substring, never a lyric line that merely contains the marker;
+#   * every other block is copied through byte for byte, so the cue count, the
+#     index lines and EVERY time line are provably unchanged (the tool refuses
+#     otherwise, before it sends anything);
+#   * the PATCH body carries one key, `synced_lyrics` - no other column can be
+#     touched;
+#   * all six columns of every targeted track are captured to an artifact first;
+#   * the column is read back afterwards and compared exactly;
+#   * `confirm` must be the word WRITE; anything else is a dry run that writes
+#     nothing and still reports every replacement it would make.
+# ============================================================================
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_ids:
+        description: 'Comma-separated track ids'
+        required: true
+      confirm:
+        description: 'Type WRITE to apply; anything else is a dry run'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repair-music-banner
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    name: Rewrite the marker, keep every timestamp
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      IDS: ${{ inputs.track_ids }}
+      CONFIRM: ${{ inputs.confirm }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1
+          fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Back up all six lyric columns of every targeted track
+        working-directory: server
+        run: |
+          set -eu
+          node -e '
+            const fs = require("fs");
+            const cols = ["plain_lyrics","plain_lyrics_en","plain_lyrics_en_tr",
+                          "synced_lyrics","synced_lyrics_en","synced_lyrics_en_tr"];
+            const ids = process.env.IDS.split(",").map((s) => s.trim()).filter(Boolean);
+            (async () => {
+              const out = [];
+              for (const id of ids) {
+                const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + id + "&select=id,title," + cols.join(","), {
+                  headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
+                });
+                const [row] = await r.json();
+                if (row) out.push(row);
+              }
+              fs.writeFileSync("music-banner-backup.json", JSON.stringify(out, null, 1));
+              console.log("backed up", out.length, "track(s) x", cols.length, "column(s)");
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - name: Dry run - every replacement it would make, nothing written
+        if: ${{ inputs.confirm != 'WRITE' }}
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/repair-music-banner.mjs --ids "$IDS" | tee repair.log
+
+      - name: Rewrite the marker
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/repair-music-banner.mjs --ids "$IDS" --write | tee repair.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-music-banner
+          path: |
+            server/repair.log
+            server/music-banner-backup.json
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Replace the {{Music}} marker in the Telugu sync column"
+            echo ""
+            echo "confirm: \`${{ inputs.confirm }}\`"
+            echo ""
+            if [ -f server/repair.log ]; then echo '```'; head -n 70 server/repair.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
