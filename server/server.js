@@ -459,22 +459,58 @@ async function handleSuperwallEvent(event) {
   const name = data.name
   const store = data.store
   const environment = data.environment
-
-  // Only production Google Play purchases count. Never credit trials, intro
-  // offers, cancellations, refunds (negative price) or billing issues.
-  if (environment === 'SANDBOX') return
-  if (store !== 'PLAY_STORE' && store !== 'STRIPE') return
-  if (name !== 'initial_purchase' && name !== 'renewal' && name !== 'non_renewing_purchase') return
-  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) — reject any
-  // non-finite price, then any non-positive price.
-  const price = Number(data.price)
-  if (!Number.isFinite(price) || price <= 0) return
-  if (data.periodType === 'TRIAL' || data.periodType === 'INTRO') return
-
   const referredUserId = data.originalAppUserId || data.appUserId
   const productId = data.productId
   const sourceEventId = data.id
-  if (!referredUserId || !productId || !sourceEventId) return
+
+  // Log EVERY event before any filter runs. Without this, a purchase that is
+  // dropped (sandbox, trial, wrong store, unusable price, missing ids) leaves
+  // no trace at all, which makes "the commission never appeared" impossible to
+  // diagnose. Ids and amounts only - no PII.
+  console.log(
+    '[webhook] event name=%s store=%s env=%s product=%s price=%s period=%s user=%s',
+    name,
+    store,
+    environment,
+    productId ?? '-',
+    data.price ?? '-',
+    data.periodType ?? '-',
+    referredUserId ?? '-',
+  )
+
+  // Only production Google Play purchases count. Never credit trials, intro
+  // offers, cancellations, refunds (negative price) or billing issues.
+  //
+  // Sandbox is refused by default. SUPERWALL_ALLOW_SANDBOX=1 exists ONLY so a
+  // licence-tester purchase can be credited while testing the referral rail;
+  // leave it unset in normal operation.
+  if (environment === 'SANDBOX' && process.env.SUPERWALL_ALLOW_SANDBOX !== '1') {
+    console.log('[webhook] skipped: sandbox purchase (SUPERWALL_ALLOW_SANDBOX is not 1)')
+    return
+  }
+  if (store !== 'PLAY_STORE' && store !== 'STRIPE') {
+    console.log('[webhook] skipped: store=%s', store)
+    return
+  }
+  if (name !== 'initial_purchase' && name !== 'renewal' && name !== 'non_renewing_purchase') {
+    console.log('[webhook] skipped: event name=%s', name)
+    return
+  }
+  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) — reject any
+  // non-finite price, then any non-positive price.
+  const price = Number(data.price)
+  if (!Number.isFinite(price) || price <= 0) {
+    console.log('[webhook] skipped: unusable price=%s', data.price)
+    return
+  }
+  if (data.periodType === 'TRIAL' || data.periodType === 'INTRO') {
+    console.log('[webhook] skipped: periodType=%s', data.periodType)
+    return
+  }
+  if (!referredUserId || !productId || !sourceEventId) {
+    console.log('[webhook] skipped: missing ids (user/product/event)')
+    return
+  }
 
   // Look up the commission rate for this plan (server-side, authoritative).
   const { data: rateRows, error: rateError } = await supabase
