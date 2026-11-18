@@ -1188,6 +1188,36 @@ app.get('/api/razorpay/referral/validate', requireClerkUser, async (req, res) =>
   }
 })
 
+// Attributes a signed-in visitor who arrived through an invite link (?ref=…),
+// BEFORE any payment. This is the web twin of the app's install-referrer bind:
+// the referrer's "Friends joined" count moves as soon as the friend signs in,
+// which is what makes an invite link visibly work.
+//
+// It writes ONLY a `referral_attributions` row. No affiliate row, no coupon, no
+// commission, and no entitlement is touched, so a sign-up can never earn money
+// by itself — the credit still happens at the first verified payment
+// (`credit_razorpay_referral_commission`). The RPC is idempotent (at most one
+// attribution per referred user, ever) and rejects self-referral, so repeated
+// calls, reloads and a later checkout are all harmless.
+app.post('/api/razorpay/referral/attribute', requireClerkUser, async (req, res) => {
+  const code = normaliseReferralCode(req.body?.code)
+  if (!code) return res.status(400).json({ error: 'code required' })
+  try {
+    const { data, error } = await supabase.rpc('record_referral_attribution', {
+      p_code: code,
+      p_referred_user_id: req.clerkUserId,
+    })
+    if (error) throw new Error(error.message)
+    res.set('Cache-Control', 'no-store')
+    // `false` means the code is unknown or is the caller's own; the UI ignores
+    // this silently (it must never block someone from paying).
+    res.json({ attributed: Boolean(data), code })
+  } catch (err) {
+    console.error('[referral] attribute failed:', err.message)
+    res.status(500).json({ error: 'referral attribution failed' })
+  }
+})
+
 // Cancels the caller's live subscription. Irreversible on Razorpay's side:
 // access continues to current_end (see the entitlement function), then stops.
 app.post('/api/razorpay/cancel', requireClerkUser, async (req, res) => {
