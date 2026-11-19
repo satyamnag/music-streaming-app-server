@@ -4587,6 +4587,31 @@ app.post('/api/admin/featured/albums', requireAdmin, async (req, res, next) => {
 })
 
 
+// ------------------------------------------------------------------
+// Trending ordering (admin "Arrange Top Trending")
+//
+//   POST /api/admin/trending/tracks   { ids: ["uuid", ...] }
+//
+// Same contract as the featured endpoints: the COMPLETE desired pinned
+// list, in order. Delegates to the atomic reorder_trending_tracks, which
+// assigns trending_order = 1..n for the listed ids and clears it for any
+// previously-pinned row that is not in the list. An empty list clears
+// every pin, so Top Trending falls back to the play-count ranking.
+//
+// `trending_order` is a separate column from `featured_order` on purpose:
+// pinning a song as trending must not move it in Newest Arrivals.
+// ------------------------------------------------------------------
+app.post('/api/admin/trending/tracks', requireAdmin, async (req, res, next) => {
+  try {
+    const ids = parseFeaturedIds(req.body?.ids)
+    if (ids === null) return res.status(400).json({ error: 'ids must be an array of id strings (max 2000)' })
+    const { data, error } = await supabase.rpc('reorder_trending_tracks', { p_ids: ids })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) { next(err) }
+})
+
+
 // Upload file (audio -> Cloudflare R2 when configured, else Supabase Storage;
 // images -> Cloudflare R2 (immutable, far-future cache) when configured, else
 // Supabase Storage thumbnails bucket).

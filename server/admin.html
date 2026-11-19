@@ -838,6 +838,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-albums" title="Albums" onclick="showView('albums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span><span class="label">Albums</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-arrangeAlbums" title="Arrange Albums" onclick="showView('arrangeAlbums')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h13M3 12h13M3 16h13M20 8v8M20 16l-2-2M20 16l2-2"/></svg></span><span class="label">Arrange Albums</span></button>
+    <button class="sidebar-item" id="nav-arrangeTrending" title="Arrange Top Trending" onclick="showView('arrangeTrending')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 5-7 4 4"/><path d="M3 21h18"/></svg></span><span class="label">Arrange Top Trending</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-specials" title="Specials" onclick="showView('specials')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h6M6 14h4"/><circle cx="17" cy="12" r="2"/></svg></span><span class="label">Specials</span></button>
     <div class="sidebar-divider"></div>
@@ -932,6 +933,29 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
   <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
     <h3 style="margin-bottom:8px;">All albums — pin to feature</h3>
     <div id="arrangeAlbumResults"></div>
+  </div>
+</div>
+
+<div id="arrangeTrendingPanel" class="view">
+  <h2 style="margin-bottom:4px;">Arrange Top Trending</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:14px;">
+    Top Trending is normally ranked by how many times each song has been played.
+    Every song you pin below is shown <b>above</b> that ranking, in exactly this
+    order, on the home screen and the Top Trending screen. Songs you leave
+    unpinned keep the play-count order, so an empty list behaves exactly as it
+    does today. This order is independent of Newest Arrivals, so pinning a song
+    here does not move it there.
+  </p>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;">
+    <h3 style="margin-bottom:8px;">Pinned trending order <span id="trendingTracksCount" style="font-size:12px;color:#888;"></span></h3>
+    <div id="trendingTracksList"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;">
+    <h3 style="margin-bottom:8px;">All songs — pin to trending</h3>
+    <div class="search-row">
+      <input id="trendingSearch" type="text" placeholder="Search by title, artist, album or tag..." oninput="renderTrendingSearchResults()">
+    </div>
+    <div id="trendingResults"></div>
   </div>
 </div>
 
@@ -2798,6 +2822,7 @@ function showView(view) {
   if (view === 'tracks') loadTracks();
   else if (view === 'albums') loadAlbums();
   else if (view === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (view === 'arrangeTrending') { loadArrangeTrending(); }
   else if (view === 'specials') { loadSpecials(); }
   else if (view === 'featured') { loadFeaturedChips(); }
   else if (view === 'appearance') { loadWallpaper(); }
@@ -2809,6 +2834,7 @@ function refreshCurrent() {
   if (currentView === 'tracks') loadTracks();
   else if (currentView === 'albums') loadAlbums();
   else if (currentView === 'arrangeAlbums') { loadArrangeAlbums(); }
+  else if (currentView === 'arrangeTrending') { loadArrangeTrending(); }
   else if (currentView === 'specials') { loadSpecials(); }
   else if (currentView === 'featured') { loadFeaturedChips(); }
   else if (currentView === 'appearance') { loadWallpaper(); }
@@ -6592,6 +6618,142 @@ function unpinAlbum(id) {
   a.featured_order = null;
   renderArrangeAlbums();
   saveFeaturedAlbums().then(() => loadArrangeAlbums());
+}
+
+// ---------- Arrange Top Trending (trending_order) ----------
+// A separate column from featured_order on purpose: this pins songs above the
+// play-count ranking of Top Trending, and must not move them in Newest
+// Arrivals. Only the pinned subset carries a value, so arranging stays cheap at
+// any catalog size, exactly like featured_order.
+
+function trendingTracks() {
+  return tracks
+    .filter((t) => t.trending_order != null)
+    .sort((a, b) => Number(a.trending_order) - Number(b.trending_order));
+}
+
+function notTrendingTracks() {
+  return tracks.filter((t) => t.trending_order == null);
+}
+
+function trendingTrackSubtitle(t) {
+  const artists = t.artist_names_text || (t.artist_names || []).join(', ');
+  return esc(artists) + (t.album ? ' · ' + esc(t.album) : '');
+}
+
+// The "pin to trending" list: unpinned songs, filtered by the search box and
+// capped at 50 rows so the panel stays light even with 10k tracks.
+function renderTrendingSearchResults() {
+  const input = document.getElementById('trendingSearch');
+  const q = (input ? input.value : '').trim().toLowerCase();
+  const el = document.getElementById('trendingResults');
+  if (!el) return;
+  let list = notTrendingTracks();
+  if (q) {
+    list = list.filter((t) =>
+      (t.title || '').toLowerCase().includes(q) ||
+      (t.artist_names_text || (t.artist_names || []).join(', ')).toLowerCase().includes(q) ||
+      (t.album || '').toLowerCase().includes(q) ||
+      (t.tags || '').toLowerCase().includes(q)
+    );
+  }
+  if (!list.length) {
+    el.innerHTML = '<span class="empty-state" style="color:#999;">' +
+      (q ? 'No matching songs.' : 'Every song is already pinned.') + '</span>';
+    return;
+  }
+  el.innerHTML = list.slice(0, 50).map((t) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">
+      ${t.thumbnail ? '<img class="thumb-preview" src="' + esc(t.thumbnail) + '" onerror="this.style.display=\'none\'">' : ''}
+      <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${trendingTrackSubtitle(t)}</div></div>
+      <button class="btn btn-primary btn-sm" onclick="pinTrending('${t.id}')">Pin</button>
+    </div>`).join('');
+}
+
+function renderArrangeTrending() {
+  const f = trendingTracks();
+  const countEl = document.getElementById('trendingTracksCount');
+  if (countEl) countEl.textContent = f.length ? '(' + f.length + ' pinned)' : '';
+  const listEl = document.getElementById('trendingTracksList');
+  if (listEl) {
+    listEl.innerHTML = f.length
+      ? f.map((t, i) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;">
+          <span style="min-width:26px;font-size:13px;font-weight:700;color:#3b82f6;">${i + 1}.</span>
+          ${t.thumbnail ? '<img class="thumb-preview" src="' + esc(t.thumbnail) + '" onerror="this.style.display=\'none\'">' : ''}
+          <div style="flex:1;min-width:0;"><b style="font-size:13px;">${esc(t.title)}</b><div style="font-size:12px;color:#666;">${trendingTrackSubtitle(t)}</div></div>
+          <div class="actions">
+            <button class="btn btn-secondary btn-sm" ${i === 0 ? 'disabled' : ''} onclick="moveTrending('${t.id}', -1)" title="Move up">▲</button>
+            <button class="btn btn-secondary btn-sm" ${i === f.length - 1 ? 'disabled' : ''} onclick="moveTrending('${t.id}', 1)" title="Move down">▼</button>
+            <button class="btn btn-danger btn-sm" onclick="unpinTrending('${t.id}')">Remove</button>
+          </div>
+        </div>`).join('')
+      : '<span class="empty-state" style="color:#999;">Nothing pinned yet — Top Trending uses the play-count ranking. Pin a song below to put it on top.</span>';
+  }
+  renderTrendingSearchResults();
+}
+
+async function loadArrangeTrending() {
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/tracks', { credentials: 'same-origin' });
+    tracks = await res.json();
+    populateTrackFilterDropdowns();
+    renderTracks();
+    renderArrangeTrending();
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Failed to load songs: ' + e.message);
+  } finally { showLoading(false); }
+}
+
+// Persists the pinned order via the atomic reorder_trending_tracks RPC. An
+// empty list clears every pin, which is how the admin goes back to the plain
+// play-count ranking.
+async function saveTrendingTracks() {
+  const ids = trendingTracks().map((t) => t.id);
+  if (!lock()) return;
+  try {
+    showLoading(true);
+    const res = await authedFetch('/api/admin/trending/tracks', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Save failed'); }
+    toast('Trending order saved');
+  } catch (e) {
+    if (e.message !== 'Session expired — sign in again.') toast('Error: ' + e.message);
+  } finally { showLoading(false); unlock(); }
+}
+
+function pinTrending(id) {
+  const t = tracks.find((x) => x.id === id);
+  if (!t || t.trending_order != null) return;
+  const f = trendingTracks();
+  t.trending_order = f.length ? Math.max(...f.map((x) => Number(x.trending_order))) + 1 : 1;
+  renderArrangeTrending();
+  saveTrendingTracks().then(() => loadArrangeTrending());
+}
+
+function moveTrending(id, dir) {
+  const f = trendingTracks();
+  const i = f.findIndex((x) => x.id === id);
+  if (i === -1) return;
+  const j = i + dir;
+  if (j < 0 || j >= f.length) return;
+  const t1 = f[i], t2 = f[j];
+  const tmp = t1.trending_order;
+  t1.trending_order = t2.trending_order;
+  t2.trending_order = tmp;
+  renderArrangeTrending();
+  saveTrendingTracks().then(() => loadArrangeTrending());
+}
+
+function unpinTrending(id) {
+  const t = tracks.find((x) => x.id === id);
+  if (!t) return;
+  t.trending_order = null;
+  renderArrangeTrending();
+  saveTrendingTracks().then(() => loadArrangeTrending());
 }
 
 checkSession();
