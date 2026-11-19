@@ -81,21 +81,27 @@ for (const [col, file, expect] of FILES) {
     fail(`${col} has changed since review: stored sha256 is ${now.slice(0, 16)}, `
       + `the reviewed one was ${expect}. Re-read the row and review the text again.`)
   }
-  if (text === stored) fail(`${col} is byte-identical to what is stored - nothing to write`)
+  // A column may legitimately be supplied unchanged - a repair often touches only one or
+  // two of the three (measured on Ravamma Mahalakshmi, where the English and the
+  // transliteration plain columns had been pasted the wrong way round and the Telugu was
+  // correct). It is still supplied, still checked for line-parallelism, and simply left out
+  // of the PATCH. All three files stay mandatory, and at least one must differ.
+  const unchanged = text === stored
   const lines = (t) => t.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').length
   summary.push({ col, file, storedLen: stored.length, newLen: text.length,
-    storedSha: now.slice(0, 16), newSha: sha(text).slice(0, 16), lines: lines(text) })
-  payload[col] = text
+    storedSha: now.slice(0, 16), newSha: sha(text).slice(0, 16), lines: lines(text), unchanged })
+  if (!unchanged) payload[col] = text
 }
 
 const counts = new Set(summary.map((s) => s.lines))
 if (counts.size !== 1) {
   fail(`the three columns are not line-parallel: ${summary.map((s) => `${s.col}=${s.lines}`).join(' ')}`)
 }
+if (!Object.keys(payload).length) fail('all three columns are byte-identical to what is stored - nothing to write')
 
-console.log('\ncolumn                 lines   chars (stored -> new)   sha256 (stored -> new)')
+console.log('\ncolumn                 lines   chars (stored -> new)   sha256 (stored -> new)   action')
 for (const s of summary) {
-  console.log(`${s.col.padEnd(20)} ${String(s.lines).padStart(5)}   ${String(s.storedLen).padStart(6)} -> ${String(s.newLen).padStart(6)}   ${s.storedSha} -> ${s.newSha}`)
+  console.log(`${s.col.padEnd(20)} ${String(s.lines).padStart(5)}   ${String(s.storedLen).padStart(6)} -> ${String(s.newLen).padStart(6)}   ${s.storedSha} -> ${s.newSha}   ${s.unchanged ? 'unchanged' : 'WRITE'}`)
 }
 fs.writeFileSync(OUT, JSON.stringify(payload, null, 2), 'utf8')
 console.log(`\nwrote ${OUT} with ${Object.keys(payload).length} column(s); nothing sent to the database.`)
