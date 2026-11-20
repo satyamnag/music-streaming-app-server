@@ -26,6 +26,19 @@ import os from 'node:os'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SERVER_DIR = path.resolve(__dirname, '..')
 
+// The Express route table lives in app.js; server.js is only the long-lived
+// entrypoint (bootstrap + listen) so the same app can also run as a Vercel
+// function. These static assertions therefore read whichever file actually
+// holds the routes, so moving the code again cannot make them pass or fail for
+// the wrong reason.
+function readHandlerSource() {
+  const sources = ['app.js', 'server.js'].map(name => {
+    const full = path.join(SERVER_DIR, name)
+    return fs.existsSync(full) ? fs.readFileSync(full, 'utf8') : ''
+  })
+  return sources.find(source => source.includes('app.post(')) || sources.join('\n')
+}
+
 let passed = 0
 let failed = 0
 const results = []
@@ -354,10 +367,15 @@ process.on('unhandledRejection', (err) => {
 
 try {
   dg = await startDeepgramStub()
-  // NOTE: server.js currently hard-codes https://api.deepgram.com. That is
-  // verified below so this suite fails loudly if the URL becomes configurable
-  // without the tests being updated.
-  const serverSrc = fs.readFileSync(path.join(SERVER_DIR, 'server.js'), 'utf8')
+  // NOTE: the handler hard-codes https://api.deepgram.com. That is verified
+  // below so this suite fails loudly if the URL becomes configurable without
+  // the tests being updated.
+  //
+  // The handler lives in app.js (server.js is now only the long-lived
+  // entrypoint), so the source is read from whichever file holds it - that way
+  // a future move cannot make these assertions pass or fail for the wrong
+  // reason.
+  const serverSrc = readHandlerSource()
   const usesHardcodedUrl = serverSrc.includes("'https://api.deepgram.com/v1/listen'")
 
   if (usesHardcodedUrl) {
@@ -720,9 +738,9 @@ try {
 
   // ---- The central contract, asserted directly against the source ---------
   await test('the handler writes to `tracks` ONLY inside the gated write block', async () => {
-    const src = fs.readFileSync(path.join(SERVER_DIR, 'server.js'), 'utf8')
+    const src = readHandlerSource()
     const start = src.indexOf("app.post('/api/admin/tracks/:id/auto-sync'")
-    assert.ok(start > 0, 'auto-sync endpoint not found in server.js')
+    assert.ok(start > 0, 'auto-sync endpoint not found in the handler source')
     const end = src.indexOf('app.post(\'/api/admin/tracks/:id/auto-sync/rollback', start)
     const handler = src.slice(start, end)
 
