@@ -238,7 +238,22 @@ function resolveCue(text, near = -1, prevTo = -1, prevSame = false) {
     }
   }
 
-  // 3. a slice of one line, spelled slightly differently
+  // 3. a single cue may carry SEVERAL consecutive plain lines - the owner's editor writes
+  //    such a cue as a block with two text lines, and the shared parser flattens it to one
+  //    string joined by a space (measured on Andala Hamsapai: 9 cues, each the two lines of
+  //    one stanza). Without this tier the cue contains a whole plain line and tier 4 would
+  //    return only the FIRST line's text, silently dropping the second.
+  for (let i = 0; i < lyricRows.length; i += 1) {
+    let acc = lyricRows[i].sq
+    if (acc === s) return { lineIndex: lyricRows[i].i, span: 1 }
+    for (let k = i + 1; k < lyricRows.length; k += 1) {
+      acc += lyricRows[k].sq
+      if (acc === s) return { lineIndex: lyricRows[i].i, span: k - i + 1 }
+      if (acc.length >= s.length) break
+    }
+  }
+
+  // 3b. a slice of one line, spelled slightly differently
   let best = null
   for (const r of lyricRows) {
     for (let a = 0; a < r.words.length; a += 1) {
@@ -302,7 +317,7 @@ for (const c of parsed) {
     lastTo = hit.piece ? hit.piece.to : -1
     lastSq = sq(forMatch(text))
     cues.push({ kind: 'lyric', start: c.start, end: c.end, lineIndex: hit.lineIndex,
-      piece: hit.piece, text })
+      piece: hit.piece, span: hit.span || 1, text })
     continue
   }
   // A cue whose text is not a plain line: keep the timeline row but let the
@@ -460,6 +475,12 @@ for (const col of COLS) {
     } else if (c.piece) {
       text = splitVariantForCue(c.piece, rowOf(c.lineIndex))
       if (!text) missingPieces.push(c.text)
+    } else if (c.span && c.span > 1) {
+      // One cue covering several consecutive plain lines: emit those lines' text, joined
+      // the way the shared parser joins the Telugu cue's own text lines (a single space).
+      const parts = []
+      for (let k = 0; k < c.span; k += 1) parts.push(rowOf(c.lineIndex + k).trim())
+      text = parts.filter(Boolean).join(' ')
     } else if (c.lineIndex !== null && c.lineIndex !== undefined) {
       text = rowOf(c.lineIndex).trim()
     } else {
@@ -522,8 +543,11 @@ for (const col of COLS) {
   if (blank) problems.push(`${blank} blank cue(s)`)
 
   // Coverage: how many of this column's lyric rows are actually carried by a cue.
-  const cuedPlain = new Set(cues.filter((c) => c.kind === 'lyric' && c.lineIndex !== null
-    && c.lineIndex !== undefined).map((c) => c.lineIndex))
+  const cuedPlain = new Set()
+  for (const c of cues) {
+    if (c.kind !== 'lyric' || c.lineIndex === null || c.lineIndex === undefined) continue
+    for (let k = 0; k < (c.span || 1); k += 1) cuedPlain.add(c.lineIndex + k)
+  }
   const covered = teluguLyricRows.filter((pi) => cuedPlain.has(pi) && rowOf(pi).trim()).length
   const variantLyric = teluguLyricRows
 
