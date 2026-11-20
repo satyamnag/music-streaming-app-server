@@ -56,6 +56,17 @@ jobs:
           printf '%s\n' "$DOTENV" > .env
           sed -n 's/^\([A-Za-z0-9_]*\)=.*/\1/p' .env | sort -u
 
+      # The runner image moved to ubuntu-26.04, whose default Python is 3.14.
+      # pillow==10.4.0 publishes no wheel for 3.14, so pip fell back to a source
+      # build that failed after ~12 s and every scheduled run since 2026-11-19
+      # died here - which is why newly added covers had no 512 rendition and the
+      # app showed them only in the full player. Pinning 3.12 gives pip a wheel
+      # again, so the job renders variants instead of failing at its first step.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install Pillow
         run: python3 -m pip install --quiet --disable-pip-version-check "pillow==10.4.0"
 
