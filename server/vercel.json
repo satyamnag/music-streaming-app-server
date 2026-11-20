@@ -8,7 +8,7 @@
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": ["admin.html", "partner.html"],
+      "includeFiles": "{admin.html,partner.html}",
       "maxDuration": 60
     }
   }
