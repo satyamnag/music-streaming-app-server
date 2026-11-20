@@ -54,23 +54,62 @@ identical; on Vercel it survives a different bundle layout.
 2. **Root Directory: `server`.** Vercel then builds only that folder; the Flutter
    app is ignored.
 3. Framework preset: **Other**. No build command; output is a single function.
-4. Environment variables — the bootstrap pair is mandatory, the rest mirror the
-   Render environment:
-   `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ADMIN_TOKEN` (or keep relying on
-   Vault/AWS, accepting a Vault/AWS round trip per cold start), `CLERK_SECRET_KEY`,
-   `CLERK_PUBLISHABLE_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-   `R2_SECRET_ACCESS_KEY`, `R2_BASE_URL`, `DEEPGRAM_API_KEY`,
-   `GITHUB_ACTIONS_TOKEN`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
-   `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_MODE`, `UPSTASH_REDIS_REST_URL`,
-   `UPSTASH_REDIS_REST_TOKEN`, `PARTNER_KEK`, `PARTNER_IP_SALT`,
-   `OPENAI_SECOND_OPINION`, `AWS_SECRETS_ENABLED`, `AWS_REGION`.
+4. Environment variables — see the complete list below, extracted from the code
+   rather than from memory. **You must paste these in the Vercel dashboard**:
+   they are the one thing this repository cannot supply, because
+   `SUPABASE_SERVICE_KEY` exists only in the Render environment (AWS Secrets
+   Manager holds `supabase/url` and `supabase/anon-key`, never the service key).
 5. Deploy, then test on the `*.vercel.app` URL **before** touching DNS:
-   `/admin` renders, sign-in works with the current token,
-   `GET /api/admin/tracks` returns rows, saving one track's `synced_lyrics`
-   round-trips, one small `.webp` thumbnail upload succeeds, `/partner` loads.
+   `node server/tools/vercel-smoke.mjs https://<project>.vercel.app`
+   That script asserts the panel renders, both HTML pages serve, the admin and
+   partner APIs are guarded, and the login route rejects a wrong token. It needs
+   no credentials and writes nothing. 14/14 against production is the expected
+   result.
 6. Cut over: point the `admin.soulfulbhakti.com` CNAME from Render to Vercel.
    Keep the Render service running (and its env intact) until the Vercel
    deployment has served a full week without an error.
+
+## Environment variables the server actually reads
+
+Extracted from `app.js`, `partner_routes.mjs` and `libs/awsSecrets.mjs` — 37
+distinct names. Nothing outside this list is read.
+
+**Mandatory (the deployment is non-functional without them):**
+
+```
+SUPABASE_URL              the project URL
+SUPABASE_SERVICE_KEY      the service role key — bootstrap credential; also what
+                          lets the server read Supabase Vault. Present ONLY in
+                          the Render environment, not in AWS Secrets Manager.
+ADMIN_TOKEN               or leave unset and rely on Vault/AWS `admin_token`
+```
+
+**Required for the features that use them:**
+
+```
+CLERK_SECRET_KEY  CLERK_PUBLISHABLE_KEY  CLERK_AUTHORIZED_PARTIES
+R2_ACCOUNT_ID  R2_ACCESS_KEY_ID  R2_SECRET_ACCESS_KEY  R2_BASE_URL  R2_BUCKET_NAME
+DEEPGRAM_API_KEY  DEEPGRAM_API_URL  GITHUB_ACTIONS_TOKEN  GOOGLE_TRANSLATE_API_KEY
+OPENAI_API_KEY  OPENAI_SECOND_OPINION
+RAZORPAY_MODE  RAZORPAY_KEY_ID  RAZORPAY_KEY_SECRET  RAZORPAY_WEBHOOK_SECRET
+RAZORPAY_KEY_ID_TEST  RAZORPAY_KEY_SECRET_TEST  RAZORPAY_WEBHOOK_SECRET_TEST
+RAZORPAY_PLAN_MONTHLY  RAZORPAY_PLAN_YEARLY  RAZORPAY_PLAN_YEARLY_TEST
+SUPERWALL_WEBHOOK_SECRET  SUPERWALL_ALLOW_SANDBOX
+PARTNER_KEK  PARTNER_IP_SALT  PARTNER_PUBLIC_BASE_URL  PARTNER_BRAND_NAME
+PARTNER_CONSENT_VERSION  PARTNER_ADMIN_ALERT_EMAIL
+AWS_SECRETS_ENABLED  AWS_REGION
+AUTOSYNC_ALLOW_INTERPOLATED
+```
+
+Two notes that matter on Vercel specifically:
+
+* `SUPABASE_SERVICE_KEY` and `ADMIN_TOKEN` set as project environment variables
+  make every cold start cheap. If you leave them unset and rely on Vault/AWS, a
+  cold start pays for a Vault read per secret, and `AWS_SECRETS_ENABLED=1` also
+  needs AWS credentials in the project — which is a worse place to keep them than
+  Render's environment.
+* `PARTNER_IP_SALT` falls back to `ADMIN_TOKEN`. Set it explicitly so rotating
+  the admin token does not change the partner audit-log IP hashes.
 
 ## Rollback
 
