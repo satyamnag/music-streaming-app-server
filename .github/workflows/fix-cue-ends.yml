@@ -1,0 +1,124 @@
+name: Fix cue end times (one named column, nothing else)
+
+# A repair for a cue whose END is before its START - an editor slip that turns
+# `06:05,380` into `05:06,380`. Such a column cannot become a valid SRT, so every
+# downstream tool refuses it, yet the repair is a few characters on one time line.
+#
+# SAFETY
+#   * `confirm` must be exactly WRITE: any other value is a dry run.
+#   * fix-cue-ends.mjs refuses unless every new end is a valid SRT time AFTER that
+#     cue's start, the cue count is unchanged, and the ONLY differences between the
+#     stored column and the new one are the END halves of the named cues - the index
+#     line, the start time and the text are copied through byte for byte.
+#   * all six lyric columns are backed up to an artifact before anything is sent.
+#   * only the one column named by `col` is ever written, and it is re-read and
+#     compared byte for byte afterwards.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track_ids:
+        description: 'Comma-separated track ids'
+        required: true
+      fixes:
+        description: 'Cue fixes, e.g. 48=00:06:05,380;59=00:07:02,000'
+        required: true
+      col:
+        description: 'Which synced column to repair'
+        required: true
+        default: 'synced_lyrics'
+      confirm:
+        description: 'Type WRITE to apply; anything else is a dry run'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fix-cue-ends
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    name: Replace the named cue ends, keep every other byte
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-south-1
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      IDS: ${{ inputs.track_ids }}
+      FIXES: ${{ inputs.fixes }}
+      COL: ${{ inputs.col }}
+      CONFIRM: ${{ inputs.confirm }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve Supabase URL (masked)
+        run: |
+          set -eu
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY is not set"; exit 1
+          fi
+          SUPA_URL="$(aws secretsmanager get-secret-value --secret-id supabase/url --query SecretString --output text)"
+          if [ -z "$SUPA_URL" ]; then echo "::error::supabase/url came back empty"; exit 1; fi
+          echo "::add-mask::$SUPA_URL"
+          echo "SUPABASE_URL=$SUPA_URL" >> "$GITHUB_ENV"
+
+      - name: Back up all six lyric columns of every targeted track
+        working-directory: server
+        run: |
+          set -eu
+          node -e '
+            const fs = require("fs");
+            const cols = ["plain_lyrics","plain_lyrics_en","plain_lyrics_en_tr",
+                          "synced_lyrics","synced_lyrics_en","synced_lyrics_en_tr"];
+            const ids = process.env.IDS.split(",").map((s) => s.trim()).filter(Boolean);
+            (async () => {
+              const out = [];
+              for (const id of ids) {
+                const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/tracks?id=eq." + encodeURIComponent(id)
+                  + "&select=id,title," + cols.join(","), {
+                  headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+                             Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY } });
+                if (!r.ok) { console.error("backup read failed " + r.status); process.exit(1); }
+                out.push(...await r.json());
+              }
+              fs.mkdirSync("backup", { recursive: true });
+              fs.writeFileSync("backup/before.json", JSON.stringify(out, null, 1), "utf8");
+              console.log("backed up " + out.length + " row(s) x 6 columns -> server/backup/before.json");
+            })().catch((e) => { console.error(e); process.exit(1); });
+          '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cue-ends-backup
+          path: server/backup/before.json
+          if-no-files-found: error
+
+      - name: Dry run - every replacement it would make, nothing written
+        if: ${{ inputs.confirm != 'WRITE' }}
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/fix-cue-ends.mjs --ids "$IDS" --col "$COL" --fixes "$FIXES" | tee repair.log
+
+      - name: Fix the cue ends
+        if: ${{ inputs.confirm == 'WRITE' }}
+        working-directory: server
+        run: |
+          set -euo pipefail
+          node tools/fix-cue-ends.mjs --ids "$IDS" --col "$COL" --fixes "$FIXES" --write | tee repair.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cue-ends-log
+          path: server/repair.log
+          if-no-files-found: warn
