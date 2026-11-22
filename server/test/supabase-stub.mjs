@@ -26,6 +26,9 @@ export const db = {
   audit_log: new Map(),
   audit: [],
   email_events: new Map(),
+  // Referral attribution (migration 003). Read by the Superwall webhook to
+  // find the referrer before the credit/sync path runs.
+  referral_attributions: new Map(),
   // Razorpay rail (migration 038). Keyed by the table's own primary key
   // (subscription_id / event_id); the stub's synthesised `id` is irrelevant.
   razorpay_subscriptions: new Map(),
@@ -40,6 +43,7 @@ export const TABLES = {
   partner_documents: db.documents,
   partner_audit_log: db.audit_log,
   partner_email_events: db.email_events,
+  referral_attributions: db.referral_attributions,
   affiliates: db.affiliates,
   coupons: db.coupons,
   razorpay_subscriptions: db.razorpay_subscriptions,
@@ -66,6 +70,7 @@ export function resetStub() {
   db.coupons.clear()
   db.audit_log.clear()
   db.email_events.clear()
+  db.referral_attributions.clear()
   db.razorpay_subscriptions.clear()
   db.razorpay_webhook_events.clear()
   db.audit.length = 0

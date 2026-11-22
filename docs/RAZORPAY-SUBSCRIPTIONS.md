@@ -480,6 +480,32 @@ otherwise the Play row answers. The app is unchanged — it keeps calling
 (`source: 'razorpay' | 'play'`), so a Play-paid referrer is a valid affiliate
 and is credited the flat Rs.51 for a friend's first payment, on either rail.
 
+### 6.6 Self-heal via the Superwall API (backfill + drift repair)
+
+Webhooks only start writing rows the day they are deployed, so every Play
+subscriber from before that day has no row until their next renewal. Instead
+of waiting, the server asks Superwall's official API directly:
+
+`GET https://api.superwall.com/v3/users/{app_user_id}/subscriptions?application_id=…`
+(organization API key, **`users:read`** scope — Superwall API V2 docs).
+
+`syncPlayStateForUser` runs on three triggers, at most once per 24 h per user
+per instance (failures retry after 2 minutes), always through the same guarded
+`play_subscription_upsert`:
+
+1. the user has **no Play row** (new sign-in, pre-migration subscriber);
+2. the newest row has **no `last_event_name`** (a row inserted by hand — the
+   API's truth overwrites it);
+3. the newest row is **older than 30 days** (drift repair).
+
+It also runs for the REFERRER inside the Superwall webhook, before the credit
+is judged, so a purchase can never miss a credit just because the referrer
+has not opened the app since the deploy. The sync is fail-open: a Superwall
+outage, a 401/429, or a timeout (3 s) never blocks an entitlement answer and
+never deletes rows. Configuration: `SUPERWALL_API_KEY` (vault:
+`superwall/api-key`), `SUPERWALL_APPLICATION_ID` (non-secret);
+`SUPERWALL_API_BASE_URL` / `SUPERWALL_API_TIMEOUT_MS` exist as test seams.
+
 ---
 
 ## 7. Implementation — database

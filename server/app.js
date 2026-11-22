@@ -171,6 +171,14 @@ const secrets = {
   r2_access_key_id: process.env.R2_ACCESS_KEY_ID || '',
   r2_secret_access_key: process.env.R2_SECRET_ACCESS_KEY || '',
   superwall_webhook_secret: process.env.SUPERWALL_WEBHOOK_SECRET || '',
+  // Superwall ORGANIZATION API key (scope users:read) + the Superwall
+  // application id. Together they let the server read a user's Play
+  // subscription state straight from Superwall (migration 046, the API-sync
+  // self-heal) instead of waiting for the next webhook. The key is
+  // vault-preferred like every other credential; the application id is not a
+  // secret.
+  superwall_api_key: process.env.SUPERWALL_API_KEY || '',
+  superwall_application_id: process.env.SUPERWALL_APPLICATION_ID || '',
   google_translate_api_key: process.env.GOOGLE_TRANSLATE_API_KEY || '',
   // Deepgram API key for the admin "Auto-Sync Lyrics" feature. Stored in Vault
   // like every other secret; the env value is only a fallback. When unset the
@@ -243,6 +251,7 @@ const VAULT_SECRET_KEYS = [
   'r2_access_key_id',
   'r2_secret_access_key',
   'superwall_webhook_secret',
+  'superwall_api_key',
   'google_translate_api_key',
   // Auto-Sync Lyrics (Deepgram). Vault-preferred so a leaked Render env does
   // not hand over a billable third-party credential.
@@ -583,6 +592,154 @@ async function persistPlaySubscriptionEvent(event) {
   }
 }
 
+// ------------------------------------------------------------------
+// Superwall API sync (migration 046, self-heal)
+// ------------------------------------------------------------------
+// The webhook is the durable stream, but it only starts writing rows the day
+// it is deployed: every Play subscriber from before that day has no
+// play_subscriptions row until their next renewal. Instead of waiting, the
+// server asks Superwall's official API (GET /v3/users/{app_user_id}/subscriptions,
+// organization API key with the users:read scope) for the requesting user's
+// Play state and writes it through the SAME guarded upsert the webhook uses.
+//
+// Triggers (never on every request):
+//   * the user has no Play row at all (new sign-in, pre-migration subscriber);
+//   * the newest row was written by hand (last_event_name is null, e.g. the
+//     Option A manual insert) - the API's truth corrects it;
+//   * the newest row is older than PLAY_SYNC_STALE_MS (drift repair).
+// A sync happens at most once per 24 h per user per server instance; failures
+// retry after 2 minutes. It is fail-open: a Superwall outage or a missing key
+// never blocks an entitlement answer, and it never deletes rows.
+const SUPERWALL_API_BASE_URL = (
+  process.env.SUPERWALL_API_BASE_URL || 'https://api.superwall.com'
+).replace(/\/+$/, '')
+const SUPERWALL_API_TIMEOUT_MS =
+  Number(process.env.SUPERWALL_API_TIMEOUT_MS) > 0
+    ? Number(process.env.SUPERWALL_API_TIMEOUT_MS)
+    : 3000
+const PLAY_SYNC_OK_TTL_MS = 24 * 60 * 60 * 1000
+const PLAY_SYNC_FAIL_TTL_MS = 2 * 60 * 1000
+const PLAY_SYNC_STALE_MS = 30 * 24 * 60 * 60 * 1000
+const playSyncNextCheck = new Map()
+const playSyncInFlight = new Set()
+
+function superwallSyncConfigured() {
+  return Boolean(secrets.superwall_api_key) && Boolean(secrets.superwall_application_id)
+}
+
+function playSyncDueFor(userId, rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return true
+  const newest = rows[0]
+  // A row written by hand (no webhook/API event name) is exactly what the API
+  // sync must verify and, when Superwall disagrees, correct.
+  if (!newest?.last_event_name) return true
+  const ts = newest?.event_ts ? Date.parse(newest.event_ts) : NaN
+  if (!Number.isFinite(ts)) return true
+  return Date.now() - ts > PLAY_SYNC_STALE_MS
+}
+
+/** Superwall subscription state -> the play_subscriptions status. */
+function playStatusFromSuperwall(sub) {
+  if (sub?.state === 'revoked') return 'refunded'
+  if (sub?.is_active === true) return 'active'
+  return 'expired'
+}
+
+/**
+ * Reads the user's Play subscriptions from Superwall and upserts them.
+ * Never throws; bounded by SUPERWALL_API_TIMEOUT_MS; throttled per user.
+ */
+async function syncPlayStateForUser(userId, { force = false } = {}) {
+  if (!userId || !userId.startsWith('user_')) return
+  if (!superwallSyncConfigured()) return
+  if (playSyncInFlight.has(userId)) return
+  const due = playSyncNextCheck.get(userId)
+  if (!force && due && Date.now() < due) return
+
+  if (!force) {
+    const { data, error } = await supabase
+      .from('play_subscriptions')
+      .select('product_id, status, current_start, current_end, last_event_id, last_event_name, event_ts')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+    // Only a SUCCESSFUL read may prove "not due". A read error must fall
+    // through to the fetch: the sync is throttled, and skipping it silently
+    // would leave the user without a backfill for the whole TTL window.
+    if (!error && !playSyncDueFor(userId, Array.isArray(data) ? data : [])) {
+      playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_OK_TTL_MS)
+      return
+    }
+  }
+
+  playSyncInFlight.add(userId)
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), SUPERWALL_API_TIMEOUT_MS)
+    let res
+    try {
+      res = await fetch(
+        `${SUPERWALL_API_BASE_URL}/v3/users/${encodeURIComponent(userId)}/subscriptions?application_id=${encodeURIComponent(
+          secrets.superwall_application_id,
+        )}`,
+        {
+          headers: { Authorization: `Bearer ${secrets.superwall_api_key}` },
+          signal: controller.signal,
+        },
+      )
+    } finally {
+      clearTimeout(timer)
+    }
+
+    if (!res.ok) {
+      // 404 = Superwall has never seen this user: nothing to write. 401/403 =
+      // key/scope misconfigured, 429 = rate limited, 5xx = outage. Never block
+      // the caller; retry after the short failure TTL.
+      if (res.status !== 404) {
+        console.warn(`[superwall-sync] HTTP ${res.status} for ${userId.slice(0, 12)}…`)
+      }
+      playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
+      return
+    }
+
+    const payload = await res.json().catch(() => null)
+    const list = Array.isArray(payload?.data) ? payload.data : []
+    const nowIso = new Date().toISOString()
+    let wrote = 0
+    for (const sub of list) {
+      if (String(sub?.store) !== 'PLAY_STORE') continue
+      const productId = String(sub.product_id || '')
+      if (!productId) continue
+      const status = playStatusFromSuperwall(sub)
+      const { error } = await supabase.rpc('play_subscription_upsert', {
+        p_user_id: userId,
+        p_product_id: productId,
+        p_status: status,
+        p_current_start: sub.starts_at || sub.original_purchase_date || null,
+        p_current_end: sub.is_lifetime ? null : sub.expires_at || null,
+        p_store: 'PLAY_STORE',
+        p_environment: 'PRODUCTION',
+        p_last_event_id: `api_sync_${sub.subscription_id || ''}`,
+        p_last_event_name: 'api_sync',
+        p_event_ts: nowIso,
+        p_raw: { source: 'api_sync', state: sub.state ?? null, productId, store: sub.store },
+      })
+      if (!error) wrote++
+    }
+    playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_OK_TTL_MS)
+    if (wrote > 0) {
+      console.log(`[superwall-sync] ${userId.slice(0, 12)}… -> ${wrote} Play row(s) from Superwall`)
+    }
+  } catch (err) {
+    // Timeout/abort, DNS, TLS: fail open, retry soon.
+    console.warn(
+      `[superwall-sync] failed for ${userId.slice(0, 12)}…: ${err?.name || err?.message || err}`,
+    )
+    playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
+  } finally {
+    playSyncInFlight.delete(userId)
+  }
+}
+
 // Handles a verified Superwall subscription event: persists the Play
 // subscription STATE (migration 046) and credits a commission when a referred
 // user (coupon affiliate first, then in-app referral) makes a qualifying
@@ -677,6 +834,19 @@ async function handleSuperwallEvent(event) {
   // Amount in INR as billed. Webhook `price` is USD-normalized; the store
   // price in the user's currency is the source of truth for a ₹-priced app.
   const planPrice = Number(data.priceInPurchasedCurrency ?? data.price)
+
+  // Before judging the REFERRER, self-heal their Play state from Superwall:
+  // a pre-migration Play subscriber has no local row yet, and the credit rule
+  // requires an active referrer. Fail-open and bounded (see syncPlayStateForUser).
+  const { data: attribution } = await supabase
+    .from('referral_attributions')
+    .select('referrer_user_id')
+    .eq('referred_user_id', referredUserId)
+    .maybeSingle()
+  const referrerId = attribution?.referrer_user_id
+  if (referrerId) {
+    await syncPlayStateForUser(String(referrerId))
+  }
 
   // 1) Try the coupon affiliate program first. If the purchaser redeemed an
   //    affiliate coupon code in-app, the affiliate earns the commission.
@@ -1008,6 +1178,10 @@ function playPlanSlug(productId) {
 }
 
 async function readEntitlement(userId) {
+  // Self-heal the Play rail from Superwall first (bounded, throttled): this is
+  // what backfills pre-migration subscribers the first time they are asked.
+  await syncPlayStateForUser(userId)
+
   // Any rail: Razorpay (web) OR Play (Android). Migration 046. A Play-paid
   // user is now recognised by the web /account page and by the app's web-rail
   // check, exactly as a Razorpay-paid user always was.
