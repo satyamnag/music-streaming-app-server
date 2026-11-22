@@ -422,6 +422,9 @@ GET /api/razorpay/entitlement ◀─ computed from table          webhook ──
 `razorpay_subscriptions` — one row per subscription, keyed by `subscription_id`.
 `razorpay_webhook_events` — dedupe log keyed by `event_id`.
 A view/function `subscription_entitlement(user_id)` — the only thing the app reads.
+`play_subscriptions` — the Play (Android) rail's server-side mirror, written only
+from Svix-verified Superwall webhooks (§6.5), read through
+`subscription_entitlement_any_rail(user_id)`.
 
 `user_id` is **TEXT** (Clerk user id, e.g. `user_2ab…`), not `uuid`: every existing
 user-scoped table in this repo keys off the Clerk id passed explicitly to RPCs
@@ -433,7 +436,7 @@ user-scoped table in this repo keys off the Clerk id passed explicitly to RPCs
 |---|---|---|---|
 | POST | `/api/razorpay/subscription` | Clerk bearer | create subscription, return `subscription_id` + `key_id` |
 | POST | `/api/razorpay/verify` | Clerk bearer | verify checkout signature, activate entitlement |
-| GET | `/api/razorpay/entitlement` | Clerk bearer | `{ active, plan, current_end, source }` |
+| GET | `/api/razorpay/entitlement` | Clerk bearer | `{ active, plan, current_end, source }` — **either rail** (Razorpay or Play, §6.5) |
 | POST | `/api/razorpay/cancel` | Clerk bearer | cancel the caller's subscription |
 | POST | `/api/razorpay/webhook` | HMAC | lifecycle sync (**raw body, mounted before `express.json()`**) |
 
@@ -454,6 +457,28 @@ converge on the same upsert, so a duplicate is harmless.
 
 Make the 72 h a single constant so it can be tuned without a release, and keep the SQL
 function in §7 in step with this table — it is the only place the rule is enforced.
+
+### 6.5 The Play rail joins entitlement and referral (migration 046)
+
+`play_subscriptions` — one row per (Clerk user id, Play product id), written
+**only** by the Node server from Svix-verified Superwall webhooks
+(`/api/superwall/webhook` → `persistPlaySubscriptionEvent` →
+`play_subscription_upsert`). Events map to states with the same grace policy
+as §6.4:
+
+| Status | Access |
+|---|---|
+| `active` | yes, open-ended unless `current_end` is set |
+| `cancelled`, `paused` | until `current_end` (they paid for that period) |
+| `expired`, `refunded` | no |
+
+`subscription_entitlement_any_rail(user_id)` is the single read used by the
+entitlement endpoint, the referral credit/validation functions and the
+referral summary: an active Razorpay row wins when both rails are active,
+otherwise the Play row answers. The app is unchanged — it keeps calling
+`GET /api/razorpay/entitlement`, which now answers for either rail
+(`source: 'razorpay' | 'play'`), so a Play-paid referrer is a valid affiliate
+and is credited the flat Rs.51 for a friend's first payment, on either rail.
 
 ---
 

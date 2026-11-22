@@ -449,9 +449,144 @@ function verifySvixWebhook(payload, headers, secret) {
   })
 }
 
-// Handles a verified Superwall subscription event and credits a commission
-// when a referred user (coupon affiliate first, then in-app referral)
-// makes a qualifying purchase.
+// ------------------------------------------------------------------
+// Play subscription state (migration 046)
+// ------------------------------------------------------------------
+// The Play rail's entitlement used to live ONLY on the device (Superwall's
+// status), which is why every account on one device looked premium. Migration
+// 046 gives the server its own per-user record of Play subscriptions, written
+// exclusively from verified Superwall webhooks, so the server can answer "is
+// THIS user paid?" for the referral program, the /account page and the
+// entitlement endpoint. Nothing in the Android app reads or writes this.
+
+/**
+ * Maps a Superwall webhook event to the stored Play subscription state,
+ * mirroring the Razorpay grace table (docs/RAZORPAY-SUBSCRIPTIONS.md §6.4).
+ * Returns null when the event carries no state change for this rail.
+ */
+function playStateForEvent(data) {
+  const name = String(data?.name || '')
+  const price = Number(data?.price)
+  // A refund arrives as a negative-price event: never keep it active.
+  if (Number.isFinite(price) && price < 0) return 'refunded'
+  switch (name) {
+    case 'initial_purchase':
+    case 'renewal':
+    case 'uncancellation':
+    case 'billing_issue':
+    case 'non_renewing_purchase':
+      return 'active'
+    // The OLD plan retires at the moment of a product change; the new plan
+    // gets its own active row below.
+    case 'product_change':
+    case 'cancellation':
+      return 'cancelled'
+    case 'subscription_paused':
+      return 'paused'
+    case 'expiration':
+      return 'expired'
+    default:
+      return null
+  }
+}
+
+/**
+ * Persists one Play subscription state change from a verified webhook.
+ * Never throws: a state write must not break the commission path or the
+ * webhook acknowledgement.
+ */
+async function persistPlaySubscriptionEvent(event) {
+  const data = event?.data
+  if (!data) return
+  try {
+    if (String(data.store) !== 'PLAY_STORE') return
+    if (String(data.environment) === 'SANDBOX' && process.env.SUPERWALL_ALLOW_SANDBOX !== '1') {
+      return
+    }
+
+    // Only Clerk accounts can be entitled server-side. Superwall also reports
+    // the ANONYMOUS device user (an alias id) - persist nothing for it, or an
+    // anonymous row could later be mistaken for an account's entitlement.
+    const userId = String(data.originalAppUserId || data.appUserId || '')
+    if (!userId.startsWith('user_')) {
+      console.log('[webhook] play state skipped: not a Clerk user id')
+      return
+    }
+
+    const name = String(data.name || '')
+    const status = playStateForEvent(data)
+    if (!status) return
+
+    const productId = String(data.productId || '')
+    if (!productId) return
+
+    const msToIso = (v) => {
+      const n = Number(v)
+      return Number.isFinite(n) && n > 0 ? new Date(n).toISOString() : null
+    }
+    const eventTs = msToIso(data.ts || data.purchasedAt) || new Date().toISOString()
+    // On a product change the OLD plan retires at the switch moment (its own
+    // expirationAt would otherwise keep it "cancelled but still in period").
+    const isProductChange = name === 'product_change'
+
+    const row = {
+      p_user_id: userId,
+      p_product_id: productId,
+      p_status: status,
+      p_current_start: msToIso(data.purchasedAt),
+      p_current_end: isProductChange ? eventTs : msToIso(data.expirationAt),
+      p_store: String(data.store),
+      p_environment: String(data.environment),
+      p_last_event_id: String(data.id || ''),
+      p_last_event_name: name,
+      p_event_ts: eventTs,
+      // Ids and amounts only - no PII (same rule as the webhook log).
+      p_raw: {
+        name,
+        productId,
+        store: data.store,
+        environment: data.environment,
+        periodType: data.periodType ?? null,
+        price: data.price ?? null,
+        expirationAt: data.expirationAt ?? null,
+      },
+    }
+    const { error } = await supabase.rpc('play_subscription_upsert', row)
+    if (error) {
+      console.error('[webhook] play_subscription_upsert failed:', error.message)
+      return
+    }
+    console.log(
+      `[webhook] play state ${name} -> ${status} for ${userId.slice(0, 12)}… (${productId})`,
+    )
+
+    // A product change retires the previous product's row (the upsert above
+    // already wrote it as 'cancelled') and gives the new plan its own active
+    // row, so the old plan can never stay "active" forever.
+    if (name === 'product_change') {
+      const newProductId = data.newProductId ? String(data.newProductId) : ''
+      if (newProductId && newProductId !== productId) {
+        const { error: switchError } = await supabase.rpc('play_subscription_upsert', {
+          ...row,
+          p_product_id: newProductId,
+          p_status: 'active',
+          p_current_start: msToIso(data.purchasedAt) || eventTs,
+          p_current_end: msToIso(data.expirationAt),
+        })
+        if (switchError) {
+          console.error('[webhook] product_change upsert failed:', switchError.message)
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[webhook] play state persistence failed:', err.message)
+  }
+}
+
+// Handles a verified Superwall subscription event: persists the Play
+// subscription STATE (migration 046) and credits a commission when a referred
+// user (coupon affiliate first, then in-app referral) makes a qualifying
+// purchase.
 async function handleSuperwallEvent(event) {
   const data = event?.data
   if (!data) return
@@ -477,6 +612,12 @@ async function handleSuperwallEvent(event) {
     data.periodType ?? '-',
     referredUserId ?? '-',
   )
+
+  // Persist the Play subscription STATE first, before any commission filter:
+  // a cancellation, expiration or refund must reach the entitlement tables
+  // even though those events never earn commission. No-op for non-Play
+  // events and for anonymous users.
+  await persistPlaySubscriptionEvent(event)
 
   // Only production Google Play purchases count. Never credit trials, intro
   // offers, cancellations, refunds (negative price) or billing issues.
@@ -513,14 +654,24 @@ async function handleSuperwallEvent(event) {
   }
 
   // Look up the commission rate for this plan (server-side, authoritative).
+  // Only the coupon-affiliate rail uses the percentage. The user referral rail
+  // credits the FLAT referral_program_config amount (migration 042), so a
+  // missing rate row must never silently kill a referral credit - it only
+  // skips the affiliate branch.
+  let ratePercent = null
   const { data: rateRows, error: rateError } = await supabase
     .from('commission_rates')
     .select('rate_percent')
     .eq('product_id', productId)
     .maybeSingle()
-  if (rateError || !rateRows) {
-    console.log(`[webhook] no commission rate for product ${productId} — skipping`)
-    return
+  if (rateError) {
+    console.log(`[webhook] commission_rates lookup failed for ${productId}: ${rateError.message}`)
+  } else if (rateRows) {
+    ratePercent = Number(rateRows.rate_percent)
+  } else {
+    console.log(
+      `[webhook] no commission rate for product ${productId} — affiliate rail skipped, referral rail still runs`,
+    )
   }
 
   // Amount in INR as billed. Webhook `price` is USD-normalized; the store
@@ -532,29 +683,33 @@ async function handleSuperwallEvent(event) {
   //    `credit_affiliate_commission` returns false when there is no coupon
   //    attribution for this user, in which case we fall back to the in-app
   //    referral program below.
-  const { data: affiliateOk, error: affiliateError } = await supabase.rpc(
-    'credit_affiliate_commission',
-    {
-      p_purchaser_user_id: referredUserId,
-      p_product_id: productId,
-      p_plan_price: planPrice,
-      p_rate_percent: Number(rateRows.rate_percent),
-      p_source_event_id: sourceEventId,
+  if (ratePercent != null) {
+    const { data: affiliateOk, error: affiliateError } = await supabase.rpc(
+      'credit_affiliate_commission',
+      {
+        p_purchaser_user_id: referredUserId,
+        p_product_id: productId,
+        p_plan_price: planPrice,
+        p_rate_percent: ratePercent,
+        p_source_event_id: sourceEventId,
+      }
+    )
+    if (affiliateError) {
+      console.error('[webhook] credit_affiliate_commission failed:', affiliateError.message)
+    } else if (affiliateOk) {
+      console.log(`[webhook] affiliate commission credited for ${referredUserId} (${productId}): ok=${affiliateOk}`)
+      return
     }
-  )
-  if (affiliateError) {
-    console.error('[webhook] credit_affiliate_commission failed:', affiliateError.message)
-  } else if (affiliateOk) {
-    console.log(`[webhook] affiliate commission credited for ${referredUserId} (${productId}): ok=${affiliateOk}`)
-    return
   }
 
-  // 2) Fall back to the in-app referral program.
+  // 2) Fall back to the in-app referral program (flat Rs.51, once per
+  //    referred user, referrer must be active on either rail - migrations
+  //    042 + 046). The rate is passed for signature compatibility only.
   const { data: ok, error } = await supabase.rpc('credit_referral_commission', {
     p_referred_user_id: referredUserId,
     p_product_id: productId,
     p_plan_price: planPrice,
-    p_rate_percent: Number(rateRows.rate_percent),
+    p_rate_percent: ratePercent ?? 0,
     p_source_event_id: sourceEventId,
   })
   if (error) {
@@ -839,18 +994,35 @@ async function applyRazorpayEvent(event, eventId) {
   console.log(`[referral] webhook ${name} payment=${payment.id} -> ${result}`)
 }
 
+/**
+ * Maps a Play Console product id to the plan slug the UI understands.
+ * Exact ids first, keyword fallback after (the same heuristic the app's plan
+ * card uses), so plan names never depend on product naming drift.
+ */
+function playPlanSlug(productId) {
+  if (!productId) return null
+  const p = String(productId).toLowerCase()
+  if (p === 'soulful_yearly' || p.includes('year')) return 'yearly'
+  if (p === 'soulful_monthly' || p.includes('month')) return 'monthly'
+  return String(productId)
+}
+
 async function readEntitlement(userId) {
-  const { data, error } = await supabase.rpc('subscription_entitlement', {
+  // Any rail: Razorpay (web) OR Play (Android). Migration 046. A Play-paid
+  // user is now recognised by the web /account page and by the app's web-rail
+  // check, exactly as a Razorpay-paid user always was.
+  const { data, error } = await supabase.rpc('subscription_entitlement_any_rail', {
     p_user_id: userId,
   })
   if (error) throw new Error(error.message)
   const row = Array.isArray(data) ? data[0] : data
+  const source = row?.source === 'play' ? 'play' : 'razorpay'
   return {
     active: Boolean(row?.active),
-    plan: row?.plan_slug || null,
+    plan: source === 'play' ? playPlanSlug(row?.plan) : row?.plan || null,
     current_end: row?.current_end || null,
     status: row?.status || 'none',
-    source: 'razorpay',
+    source,
   }
 }
 
