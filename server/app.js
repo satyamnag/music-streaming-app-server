@@ -1620,6 +1620,18 @@ app.get('/health/auth', (req, res) => {
       monthly: Boolean(razorpayPlans.monthly),
     },
     awsSecretsEnabled: process.env.AWS_SECRETS_ENABLED === '1',
+    // Play-rail diagnostics (migration 046). Non-secret: whether the sync can
+    // run, and the application id it will use. A bundle id here is the one
+    // deployment mistake that silently disables the backfill, so it is
+    // reported as invalid instead of hiding in the logs.
+    superwallSync: {
+      apiKeyPresent: Boolean(secrets.superwall_api_key),
+      applicationId: /^\d+$/.test(String(secrets.superwall_application_id || ''))
+        ? String(secrets.superwall_application_id)
+        : null,
+      applicationIdValid: /^\d+$/.test(String(secrets.superwall_application_id || '')),
+      configured: superwallSyncConfigured(),
+    },
   })
 })
 
