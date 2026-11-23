@@ -439,6 +439,47 @@ function v2Event(overrides = {}) {
   )
 }
 
+// ------------------------------------------------------------------
+// 12. CASE: V2 lowercases every identity field except
+//     event_data.original_app_user_id. Clerk ids are case-sensitive, so the
+//     mixed-case value must be the one written and credited.
+// ------------------------------------------------------------------
+{
+  const body = v2Event({ id: 'evt_v2_case_1', app_user_id: 'user_casetest_lower' })
+  body.event_data = {
+    ...body.event_data,
+    id: 'evtdata_case_1',
+    original_app_user_id: 'user_CaseTest_Mixed',
+  }
+  body.subscriber = {
+    app_user_id: 'user_casetest_lower',
+    original_app_user_id: 'user_casetest_lower',
+    aliases: ['user_casetest_lower'],
+    identity_status: 'resolved',
+    attributes: {},
+  }
+  const res = await postEvent(body)
+  check('12a: V2 with lowercased envelope acknowledged (200)', res.status === 200)
+
+  const mixed = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_CaseTest_Mixed',
+  )
+  const lower = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_casetest_lower',
+  )
+  check(
+    '12b: the mixed-case Clerk id from event_data is written',
+    mixed.length === 1 && mixed[0].params?.p_status === 'active',
+  )
+  check('12c: no row is written for the lowercased envelope id', lower.length === 0)
+  check(
+    '12d: the referral credit uses the mixed-case id too',
+    rpcCalls('credit_referral_commission').some(
+      (c) => c.params?.p_referred_user_id === 'user_CaseTest_Mixed',
+    ),
+  )
+}
+
 console.log(`\n${pass} passed, ${fail} failed`)
 // Let the in-flight undici sockets settle before tearing the process down;
 // exiting mid-flight trips a libuv assertion on Windows (same convention as

@@ -513,8 +513,22 @@ function normalizeSuperwallEvent(event) {
       priceInPurchasedCurrency: ed.price_in_purchased_currency ?? null,
       periodType: ed.period_type ?? null,
       newProductId: ed.new_product_id ? baseProductId(ed.new_product_id) : null,
-      originalAppUserId: event.app_user_id || ed.original_app_user_id || null,
-      appUserId: event.app_user_id || null,
+      // CASE MATTERS. Observed in production: V2 lowercases every identity
+      // field (app_user_id, subscriber.app_user_id, aliases) while
+      // `event_data.original_app_user_id` keeps the true Clerk casing. Clerk
+      // ids are case-sensitive, so the mixed-case value is the only one that
+      // matches our rows: prefer it, then the subscriber block, then the
+      // envelope id.
+      originalAppUserId:
+        ed.original_app_user_id ||
+        event.subscriber?.original_app_user_id ||
+        event.app_user_id ||
+        null,
+      appUserId:
+        ed.original_app_user_id ||
+        event.subscriber?.original_app_user_id ||
+        event.app_user_id ||
+        null,
       purchasedAt: ed.purchased_at ?? null,
       expirationAt: ed.expiration_at ?? null,
       isRefund: ed.is_refund === true || event.type === 'refund',
