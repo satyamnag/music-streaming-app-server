@@ -45,6 +45,7 @@ const cases = [
   ['GET /api/admin/referrals', { method: 'GET', path: '/api/admin/referrals' }],
   ['GET /api/admin/referrals/:id', { method: 'GET', path: '/api/admin/referrals/user_abc' }],
   ['GET /api/admin/subscriptions', { method: 'GET', path: '/api/admin/subscriptions' }],
+  ['GET /api/admin/users', { method: 'GET', path: '/api/admin/users' }],
   [
     'POST /api/admin/referrals/sync-directory',
     { method: 'POST', path: '/api/admin/referrals/sync-directory', body: '{}' },

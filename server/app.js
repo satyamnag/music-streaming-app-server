@@ -5888,6 +5888,173 @@ app.get('/api/admin/subscriptions', requireAdmin, async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
+// ----- Every signed-up user, paid or not (Clerk + our entitlement tables) -----
+//
+// Clerk is the identity provider: it is the ONLY complete list of people who
+// signed up, and the only source of an email for a user who never opened the
+// Android app. Our tables then say whether that person is paying right now, on
+// which rail, and whether a referral earned ₹51.
+//
+// Read-only: two Clerk fields (created/last sign-in) plus a SELECT per table.
+// Bounded page size, admin session required, nothing cached.
+
+/** Paid state + referral context for a page of user ids. Never throws. */
+async function loadUserEnrichment(userIds) {
+  const ids = (userIds || []).filter((id) => typeof id === 'string' && id.startsWith('user_'))
+  const empty = { subs: new Map(), attributions: new Map(), commissions: new Map(), directory: new Map() }
+  if (!ids.length) return empty
+
+  const grab = async (table, column, select) => {
+    try {
+      const { data, error } = await supabase.from(table).select(select).in(column, ids)
+      if (error) return []
+      return Array.isArray(data) ? data : []
+    } catch (_) {
+      return []
+    }
+  }
+
+  const [playRows, webRows, attributionRows, commissionRows, directoryRows] = await Promise.all([
+    grab('play_subscriptions', 'user_id', 'user_id, product_id, status, current_end, subscription_id, updated_at'),
+    grab('razorpay_subscriptions', 'user_id', 'user_id, plan_slug, status, current_end, subscription_id, updated_at'),
+    grab('referral_attributions', 'referred_user_id', 'referred_user_id, referrer_user_id, code, created_at'),
+    grab('commissions', 'referred_user_id', 'referred_user_id, commission_amount, status, product_id, created_at'),
+    grab('user_directory', 'user_id', 'user_id, email, name'),
+  ])
+
+  const subs = new Map()
+  const put = (row, rail, product, storeRef) => {
+    const active =
+      rail === 'play'
+        ? (row.status === 'active' && (!row.current_end || new Date(row.current_end) >= new Date())) ||
+          (['cancelled', 'paused'].includes(row.status) &&
+            row.current_end &&
+            new Date(row.current_end) >= new Date())
+        : ['active', 'authenticated'].includes(row.status) ||
+          (row.status === 'pending' &&
+            row.current_end &&
+            new Date(row.current_end).getTime() + 72 * 3600 * 1000 > Date.now()) ||
+          (['cancelled', 'halted'].includes(row.status) &&
+            row.current_end &&
+            new Date(row.current_end) >= new Date())
+    const existing = subs.get(row.user_id)
+    // Prefer an active row; otherwise keep the one with the latest end date.
+    const better =
+      !existing ||
+      (active && !existing.active) ||
+      (active === existing.active &&
+        new Date(row.current_end || 0) > new Date(existing.current_end || 0))
+    if (better) {
+      subs.set(row.user_id, {
+        rail,
+        product,
+        status: row.status,
+        active: Boolean(active),
+        current_end: row.current_end || null,
+        store_ref: storeRef || null,
+      })
+    }
+  }
+  for (const row of playRows) put(row, 'play', row.product_id, row.subscription_id)
+  for (const row of webRows) put(row, 'web', row.plan_slug, row.subscription_id)
+
+  return {
+    subs,
+    attributions: new Map(attributionRows.map((r) => [r.referred_user_id, r])),
+    commissions: new Map(commissionRows.map((r) => [r.referred_user_id, r])),
+    directory: new Map(directoryRows.map((r) => [r.user_id, r])),
+  }
+}
+
+/** Primary email/name of a Clerk user object. */
+function clerkUserFields(user) {
+  const emails = Array.isArray(user?.emailAddresses) ? user.emailAddresses : []
+  const primary = emails.find((e) => e?.id === user?.primaryEmailAddressId) || emails[0]
+  const name = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+  return {
+    email: primary?.emailAddress || null,
+    name: name || user?.username || null,
+  }
+}
+
+app.get('/api/admin/users', requireAdmin, async (req, res, next) => {
+  if (!clerkClient) return res.status(503).json({ error: 'Clerk is not configured' })
+  const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100)
+  const offset = Math.max(Number(req.query.offset) || 0, 0)
+  const search = String(req.query.search || '').trim()
+  const plan = String(req.query.plan || '').trim() // '' | 'paid' | 'free'
+  try {
+    const params = { limit, offset, orderBy: '-created_at' }
+    if (search) params.query = search
+    const raw = await clerkClient.users.getUserList(params)
+    const users = Array.isArray(raw) ? raw : raw?.data || []
+    const totalCount = Array.isArray(raw) ? users.length : Number(raw?.totalCount ?? users.length)
+
+    // The referrer emails come from the same directory table.
+    const enrichment = await loadUserEnrichment(users.map((u) => u.id))
+    const referrerIds = [...enrichment.attributions.values()]
+      .map((a) => a.referrer_user_id)
+      .filter(Boolean)
+    let referrerEmails = new Map()
+    if (referrerIds.length) {
+      const refs = await loadUserEnrichment(referrerIds)
+      referrerEmails = new Map(
+        [...refs.directory.entries()].map(([id, row]) => [id, row.email]),
+      )
+      // Fall back to a Clerk lookup for a referrer who has no directory row.
+      for (const id of referrerIds) {
+        if (referrerEmails.get(id)) continue
+        const found = await lookupClerkEmail(id)
+        if (found?.email) referrerEmails.set(id, found.email)
+      }
+    }
+
+    const rows = users.map((user) => {
+      const { email, name } = clerkUserFields(user)
+      const dir = enrichment.directory.get(user.id)
+      const sub = enrichment.subs.get(user.id) || null
+      const attribution = enrichment.attributions.get(user.id) || null
+      const commission = enrichment.commissions.get(user.id) || null
+      return {
+        user_id: user.id,
+        email: email || dir?.email || null,
+        name: name || dir?.name || null,
+        signed_up_at: user.createdAt ? new Date(user.createdAt).toISOString() : null,
+        last_sign_in_at: user.lastSignInAt ? new Date(user.lastSignInAt).toISOString() : null,
+        paid: Boolean(sub?.active),
+        rail: sub?.rail || null,
+        product: sub?.product || null,
+        subscription_status: sub?.status || null,
+        subscription_end: sub?.current_end || null,
+        store_ref: sub?.store_ref || null,
+        referred_by_user_id: attribution?.referrer_user_id || null,
+        referred_by_email: attribution
+          ? referrerEmails.get(attribution.referrer_user_id) || null
+          : null,
+        referral_code: attribution?.code || null,
+        commission_amount: commission?.commission_amount ?? null,
+        commission_status: commission?.status ?? null,
+      }
+    })
+
+    const filtered =
+      plan === 'paid' ? rows.filter((r) => r.paid) : plan === 'free' ? rows.filter((r) => !r.paid) : rows
+
+    res.set('Cache-Control', 'no-store')
+    res.json({
+      users: filtered,
+      page: { limit, offset, total_count: totalCount, returned: rows.length },
+      counts: {
+        on_page_paid: rows.filter((r) => r.paid).length,
+        on_page_free: rows.filter((r) => !r.paid).length,
+      },
+    })
+  } catch (err) {
+    console.error('[admin] user list failed:', err.message)
+    res.status(502).json({ error: 'could not load users from Clerk' })
+  }
+})
+
 app.get('/api/admin/referrals', requireAdmin, async (req, res, next) => {
   try {
     // v2 adds the per-rail split (Play vs web). A commission's rail is decided by

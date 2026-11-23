@@ -849,6 +849,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
     <button class="sidebar-item" id="nav-referrals" title="Referrals &amp; affiliate customers" onclick="showView('referrals')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="label">Referrals</span></button>
     <button class="sidebar-item" id="nav-subscriptions" title="Subscriptions by store" onclick="showView('subscriptions')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="label">Subscriptions</span></button>
+    <button class="sidebar-item" id="nav-users" title="Signed-up users (paid &amp; free)" onclick="showView('users')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></span><span class="label">Users</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-partners" title="Partner Applications" onclick="showView('partners')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><path d="M19 8l1.5 1.5L23 7"/></svg></span><span class="label">Partner Applications</span></button>
   </nav>
@@ -1064,6 +1065,32 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     themed background.
   </p>
   <div id="wallpaperBox"></div>
+</div>
+
+<div id="usersPanel" class="view">
+  <h2 style="margin-bottom:12px;">Signed-up users</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Everyone who created an account (from Clerk), with their email and Clerk id, whether they are
+    <b>paid</b> right now, on which store, who referred them, and the ₹51 state. This is the only
+    complete list of sign-ups — subscribers alone would hide every free account.
+  </p>
+
+  <div class="toolbar" style="flex-wrap:wrap;">
+    <div id="userPlanSwitch" style="display:flex;gap:0;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <button type="button" class="user-plan-btn" data-plan="" onclick="setUserPlan(this,'')" style="padding:7px 14px;border:0;background:#3b82f6;color:#fff;cursor:pointer;font-size:13px;">All users</button>
+      <button type="button" class="user-plan-btn" data-plan="paid" onclick="setUserPlan(this,'paid')" style="padding:7px 14px;border:0;border-left:1px solid #ddd;background:#fff;color:#333;cursor:pointer;font-size:13px;">Paid only</button>
+      <button type="button" class="user-plan-btn" data-plan="free" onclick="setUserPlan(this,'free')" style="padding:7px 14px;border:0;border-left:1px solid #ddd;background:#fff;color:#333;cursor:pointer;font-size:13px;">Free only</button>
+    </div>
+    <input id="userSearch" placeholder="Search email, phone, username or Clerk id" style="min-width:300px;padding:6px 8px;" oninput="scheduleUserSearch()">
+    <button class="btn btn-secondary btn-sm" type="button" onclick="usersPage(-1)">&larr; Prev</button>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="usersPage(1)">Next &rarr;</button>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="exportUsersCsv()">Download CSV</button>
+    <span id="userCount" style="font-size:12px;color:#666;margin-left:auto;"></span>
+  </div>
+
+  <div id="userTableWrap" style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">
+    <div style="padding:16px;color:#666;font-size:13px;">Loading users…</div>
+  </div>
 </div>
 
 <div id="subscriptionsPanel" class="view">
@@ -2893,6 +2920,7 @@ function showView(view) {
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
   else if (view === 'referrals') { loadReferrals(); }
   else if (view === 'subscriptions') { loadSubscriptions(); }
+  else if (view === 'users') { loadUsers(); }
   else if (view === 'partners') { loadPartners(); }
 }
 
@@ -4955,6 +4983,148 @@ async function syncReferralEmails() {
   } finally {
     showLoading(false);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Signed-up users (paid & free)
+//
+// Clerk is the identity provider, so it is the only complete list of accounts
+// and the only source of an email for someone who never opened the Android app.
+// The paid state is joined from our own entitlement tables. Read-only.
+// ---------------------------------------------------------------------------
+let userRows = [];
+let userPlan = '';
+let userOffset = 0;
+let userLimit = 50;
+let userTotal = 0;
+let userSearchTimer = null;
+
+function scheduleUserSearch() {
+  clearTimeout(userSearchTimer);
+  userSearchTimer = setTimeout(function () { userOffset = 0; loadUsers(); }, 400);
+}
+
+function setUserPlan(btn, plan) {
+  userPlan = plan;
+  userOffset = 0;
+  const wrap = document.getElementById('userPlanSwitch');
+  if (wrap) {
+    wrap.querySelectorAll('button').forEach(function (b) {
+      const on = b === btn;
+      b.style.background = on ? '#3b82f6' : '#fff';
+      b.style.color = on ? '#fff' : '#333';
+    });
+  }
+  loadUsers();
+}
+
+function usersPage(direction) {
+  const next = userOffset + direction * userLimit;
+  if (next < 0) return;
+  if (direction > 0 && userOffset + userLimit >= userTotal && userTotal > 0) return;
+  userOffset = next;
+  loadUsers();
+}
+
+async function loadUsers() {
+  const wrap = document.getElementById('userTableWrap');
+  if (!wrap) return;
+  const search = (document.getElementById('userSearch') || {}).value || '';
+  wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">Loading users…</div>';
+  try {
+    const qs = new URLSearchParams({
+      plan: userPlan, search: search, limit: String(userLimit), offset: String(userOffset),
+    });
+    const res = await authedFetch('/api/admin/users?' + qs.toString(), { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    userRows = data.users || [];
+    userTotal = (data.page && data.page.total_count) || userRows.length;
+    renderUsers(userRows, data);
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:16px;color:#b91c1c;font-size:13px;">Could not load users: ' +
+      esc(e.message) + '</div>';
+  }
+}
+
+function renderUsers(rows, data) {
+  const wrap = document.getElementById('userTableWrap');
+  const count = document.getElementById('userCount');
+  if (count) {
+    const from = userTotal ? userOffset + 1 : 0;
+    const to = userOffset + rows.length;
+    count.textContent = 'showing ' + from + '–' + to + ' of ' + userTotal +
+      ' · page: ' + ((data && data.counts && data.counts.on_page_paid) || 0) + ' paid · ' +
+      ((data && data.counts && data.counts.on_page_free) || 0) + ' free';
+  }
+  if (!rows.length) {
+    wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">No user matches those filters.</div>';
+    return;
+  }
+  const head = '<tr>'
+    + '<th style="text-align:left;padding:8px 10px;">User</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Signed up</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Last sign-in</th>'
+    + '<th style="text-align:center;padding:8px 10px;">Plan</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Valid until</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Referred by</th>'
+    + '<th style="text-align:right;padding:8px 10px;">₹51</th>'
+    + '</tr>';
+  const body = rows.map(function (u) {
+    const plan = u.paid
+      ? '<span style="background:#dcfce7;color:#166534;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">PAID</span>'
+        + (u.rail ? ' <span style="font-size:11px;color:#666;">' + (u.rail === 'play' ? 'Play' : 'Web') + '</span>' : '')
+      : '<span style="background:#f3f4f6;color:#555;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">FREE</span>';
+    const refBy = u.referred_by_user_id
+      ? '<div>' + esc(u.referred_by_email || u.referred_by_user_id) + '</div>'
+        + '<div style="font-size:11px;color:#888;">' + esc(u.referral_code || '') + '</div>'
+      : '<span style="color:#999;font-size:12px;">—</span>';
+    const commission = u.commission_amount != null
+      ? referralMoney(u.commission_amount) + '<div style="font-size:11px;color:#888;">' + esc(u.commission_status || '') + '</div>'
+      : '<span style="color:#999;font-size:12px;">—</span>';
+    return '<tr style="border-top:1px solid #f0f0f0;">'
+      + '<td style="padding:8px 10px;"><div style="font-weight:600;">' + esc(u.email || u.name || u.user_id) + '</div>'
+      + '<div style="font-size:11px;color:#888;">' + esc(u.user_id) + '</div></td>'
+      + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(u.signed_up_at) + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(u.last_sign_in_at) + '</td>'
+      + '<td style="padding:8px 10px;text-align:center;">' + plan + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + (u.paid ? referralDate(u.subscription_end) : '—') + '</td>'
+      + '<td style="padding:8px 10px;">' + refBy + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + commission + '</td>'
+      + '</tr>';
+  }).join('');
+  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    + '<thead style="background:#fafafa;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#666;">'
+    + head + '</thead><tbody>' + body + '</tbody></table>';
+}
+
+function exportUsersCsv() {
+  if (!userRows.length) { toast('Nothing to export yet'); return; }
+  const header = ['email', 'name', 'user_id', 'signed_up_at', 'last_sign_in_at', 'paid', 'rail',
+    'product', 'subscription_status', 'subscription_end', 'store_ref',
+    'referred_by_email', 'referred_by_user_id', 'referral_code', 'commission_inr', 'commission_status'];
+  const lines = [header.join(',')];
+  userRows.forEach(function (u) {
+    lines.push([
+      u.email || '', u.name || '', u.user_id || '', u.signed_up_at || '', u.last_sign_in_at || '',
+      u.paid ? 'paid' : 'free', u.rail || '', u.product || '', u.subscription_status || '',
+      u.subscription_end || '', u.store_ref || '', u.referred_by_email || '',
+      u.referred_by_user_id || '', u.referral_code || '',
+      u.commission_amount != null ? u.commission_amount : '', u.commission_status || '',
+    ].map(function (v) {
+      const s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'users-' + (userPlan || 'all') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ---------------------------------------------------------------------------
