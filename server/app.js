@@ -1447,6 +1447,15 @@ async function applyRazorpayEvent(event, eventId) {
   const context = await readReferralContextForSubscription(entity.id)
   if (!context?.user_id) return
 
+  // A web subscriber has no Superwall record, so Clerk is the only source of
+  // their email for the admin lists. Fire-and-forget: it must never delay or
+  // break the credit path.
+  void lookupClerkEmail(context.user_id).then((found) => {
+    if (found?.email) {
+      void upsertUserDirectory(context.user_id, { email: found.email, name: found.name, source: 'clerk' })
+    }
+  })
+
   await ensureReferralAffiliate(context.user_id)
   const result = await creditRazorpayReferral({
     userId: context.user_id,
@@ -1781,6 +1790,17 @@ app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
       console.warn('[referral] could not read payment:', err.message)
     }
     await ensureReferralAffiliate(req.clerkUserId)
+    // Capture the buyer's email from Clerk (the only source for web subscribers).
+    // Fire-and-forget: never delays the verification answer.
+    void lookupClerkEmail(req.clerkUserId).then((found) => {
+      if (found?.email) {
+        void upsertUserDirectory(req.clerkUserId, {
+          email: found.email,
+          name: found.name,
+          source: 'clerk',
+        })
+      }
+    })
     const referralResult = await creditRazorpayReferral({
       userId: req.clerkUserId,
       referralCode: context?.referral_code || null,
@@ -5729,9 +5749,13 @@ async function syncReferralDirectory({ limit = 25 } = {}) {
   let updated = 0
   for (const userId of todo.slice(0, Math.min(Math.max(limit, 1), 50))) {
     try {
-      const email = await lookupSuperwallEmail(userId)
-      if (email) {
-        await upsertUserDirectory(userId, { email, name: null, source: 'superwall-api' })
+      const found = await lookupUserEmail(userId)
+      if (found?.email || found?.name) {
+        await upsertUserDirectory(userId, {
+          email: found.email || null,
+          name: found.name || null,
+          source: 'lookup',
+        })
         updated++
       }
     } catch (_) {
@@ -5742,11 +5766,49 @@ async function syncReferralDirectory({ limit = 25 } = {}) {
 }
 
 /**
+ * The email a user signed up with, from Clerk - the identity provider that
+ * actually owns it.
+ *
+ * Superwall only knows people who used the Android app, so a WEB (Razorpay)
+ * subscriber has no Superwall record and no attributes to read: their email
+ * exists only in Clerk. Bounded and fully guarded: any failure returns null so
+ * one lookup can never stop the batch.
+ */
+async function lookupClerkEmail(userId) {
+  if (!clerkClient || !String(userId || '').startsWith('user_')) return null
+  try {
+    const user = await clerkClient.users.getUser(String(userId))
+    const primaryId = user?.primaryEmailAddressId
+    const emails = Array.isArray(user?.emailAddresses) ? user.emailAddresses : []
+    const chosen = emails.find((e) => e?.id === primaryId) || emails[0]
+    const email = chosen?.emailAddress
+    if (!email) return null
+    return {
+      email: String(email),
+      name: [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.username || null,
+    }
+  } catch (err) {
+    // Unknown user, revoked key, network: none of these should break a batch.
+    return null
+  }
+}
+
+/**
+ * Resolves one user's email, trying every source that can legitimately answer:
+ * Superwall attributes (app users), the Superwall users query, then Clerk (the
+ * authoritative source, and the only one for web-only subscribers).
+ */
+async function lookupUserEmail(userId) {
+  const fromSuperwall = await lookupSuperwallEmail(userId)
+  if (fromSuperwall) return { email: fromSuperwall, name: null }
+  return await lookupClerkEmail(userId)
+}
+
+/**
  * Resolves one user's email from Superwall. Two official shapes are tried: the
  * user-attributes endpoint (cheap) and, if that yields nothing, the users query
  * with a search term (which returns the attribute columns as a table).
- */
-async function lookupSuperwallEmail(userId) {
+ */async function lookupSuperwallEmail(userId) {
   const withTimeout = async (fn) => {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), SUPERWALL_API_TIMEOUT_MS)
