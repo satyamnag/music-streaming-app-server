@@ -5707,6 +5707,14 @@ async function syncReferralDirectory({ limit = 25 } = {}) {
     if (row?.referrer_user_id) wanted.add(row.referrer_user_id)
     if (row?.referred_user_id) wanted.add(row.referred_user_id)
   }
+  // Subscribers who were never referred also need a face in the admin lists
+  // (the Subscriptions view shows the email next to the Clerk id).
+  for (const table of ['play_subscriptions', 'razorpay_subscriptions']) {
+    const { data: subs } = await supabase.from(table).select('user_id').limit(2000)
+    for (const row of subs || []) {
+      if (row?.user_id) wanted.add(row.user_id)
+    }
+  }
 
   const { data: known } = await supabase
     .from('user_directory')
@@ -5791,6 +5799,32 @@ async function lookupSuperwallEmail(userId) {
     return null
   }
 }
+
+// Every subscription, one list, rail as a filter (migration 051).
+// Play rows come from play_subscriptions, web rows from razorpay_subscriptions;
+// the customer's email sits next to their Clerk id, with the store reference,
+// the referrer and the ₹51 state.
+app.get('/api/admin/subscriptions', requireAdmin, async (req, res, next) => {
+  try {
+    const rail = String(req.query.rail || '').trim()
+    const status = String(req.query.status || '').trim()
+    if (rail && !['play', 'web'].includes(rail)) {
+      return res.status(400).json({ error: 'rail must be play or web' })
+    }
+    if (status && !['active', 'inactive'].includes(status)) {
+      return res.status(400).json({ error: 'status must be active or inactive' })
+    }
+    const { data, error } = await supabase.rpc('admin_subscriptions', {
+      p_rail: rail || null,
+      p_status: status || null,
+      p_search: String(req.query.search || '').trim() || null,
+      p_limit: Math.min(Math.max(Number(req.query.limit) || 200, 1), 500),
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.set('Cache-Control', 'no-store')
+    res.json({ subscriptions: data || [] })
+  } catch (err) { next(err) }
+})
 
 app.get('/api/admin/referrals', requireAdmin, async (req, res, next) => {
   try {

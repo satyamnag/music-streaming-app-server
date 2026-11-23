@@ -848,6 +848,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
     <button class="sidebar-item" id="nav-referrals" title="Referrals &amp; affiliate customers" onclick="showView('referrals')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="label">Referrals</span></button>
+    <button class="sidebar-item" id="nav-subscriptions" title="Subscriptions by store" onclick="showView('subscriptions')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="label">Subscriptions</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-partners" title="Partner Applications" onclick="showView('partners')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><path d="M19 8l1.5 1.5L23 7"/></svg></span><span class="label">Partner Applications</span></button>
   </nav>
@@ -1063,6 +1064,36 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     themed background.
   </p>
   <div id="wallpaperBox"></div>
+</div>
+
+<div id="subscriptionsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Subscriptions by store</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Every subscription the two rails know about. <b>Google Play</b> rows come from the Android app
+    (play_subscriptions), <b>Razorpay</b> rows from the web checkout. A customer who bought on both
+    rails appears once per rail — which is the truth, and how the two lists reconcile with each store.
+  </p>
+
+  <div class="toolbar" style="flex-wrap:wrap;">
+    <div id="subRailSwitch" style="display:flex;gap:0;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <button type="button" class="sub-rail-btn active" data-rail="" onclick="setSubRail(this,'')" style="padding:7px 14px;border:0;background:#3b82f6;color:#fff;cursor:pointer;font-size:13px;">All rails</button>
+      <button type="button" class="sub-rail-btn" data-rail="play" onclick="setSubRail(this,'play')" style="padding:7px 14px;border:0;border-left:1px solid #ddd;background:#fff;color:#333;cursor:pointer;font-size:13px;">Google Play</button>
+      <button type="button" class="sub-rail-btn" data-rail="web" onclick="setSubRail(this,'web')" style="padding:7px 14px;border:0;border-left:1px solid #ddd;background:#fff;color:#333;cursor:pointer;font-size:13px;">Razorpay (web)</button>
+    </div>
+    <select id="subStatus" onchange="loadSubscriptions()">
+      <option value="">Any status</option>
+      <option value="active">Active only</option>
+      <option value="inactive">Inactive only</option>
+    </select>
+    <input id="subSearch" placeholder="Search email, Clerk id, order / payment id or referrer" style="min-width:320px;padding:6px 8px;" oninput="scheduleSubSearch()">
+    <button class="btn btn-secondary btn-sm" type="button" onclick="syncReferralEmails()">Fill missing emails</button>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="exportSubscriptionsCsv()">Download CSV</button>
+    <span id="subCount" style="font-size:12px;color:#666;margin-left:auto;"></span>
+  </div>
+
+  <div id="subTableWrap" style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">
+    <div style="padding:16px;color:#666;font-size:13px;">Loading subscriptions…</div>
+  </div>
 </div>
 
 <div id="referralsPanel" class="view">
@@ -2861,6 +2892,7 @@ function showView(view) {
   else if (view === 'appearance') { loadWallpaper(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
   else if (view === 'referrals') { loadReferrals(); }
+  else if (view === 'subscriptions') { loadSubscriptions(); }
   else if (view === 'partners') { loadPartners(); }
 }
 
@@ -4923,6 +4955,142 @@ async function syncReferralEmails() {
   } finally {
     showLoading(false);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Subscriptions by store (migration 051)
+//
+// One list, rail as a filter. Play rows come from play_subscriptions, web rows
+// from razorpay_subscriptions; a customer who bought on both rails appears once
+// per rail, which is what reconciliation against each store needs. Read-only.
+// ---------------------------------------------------------------------------
+let subscriptionRows = [];
+let subSearchTimer = null;
+let subRail = '';
+
+function scheduleSubSearch() {
+  clearTimeout(subSearchTimer);
+  subSearchTimer = setTimeout(loadSubscriptions, 350);
+}
+
+function setSubRail(btn, rail) {
+  subRail = rail;
+  const wrap = document.getElementById('subRailSwitch');
+  if (wrap) {
+    wrap.querySelectorAll('button').forEach(function (b) {
+      const on = b === btn;
+      b.style.background = on ? '#3b82f6' : '#fff';
+      b.style.color = on ? '#fff' : '#333';
+    });
+  }
+  loadSubscriptions();
+}
+
+function subRailLabel(rail) {
+  return rail === 'play' ? 'Google Play' : rail === 'web' ? 'Razorpay' : rail;
+}
+
+function subRailBadge(rail) {
+  const play = rail === 'play';
+  return '<span style="background:' + (play ? '#dcfce7' : '#dbeafe') + ';color:' + (play ? '#166534' : '#1e40af') +
+    ';border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap;">' +
+    (play ? 'PLAY' : 'WEB') + '</span>';
+}
+
+async function loadSubscriptions() {
+  const wrap = document.getElementById('subTableWrap');
+  if (!wrap) return;
+  const status = (document.getElementById('subStatus') || {}).value || '';
+  const search = (document.getElementById('subSearch') || {}).value || '';
+  wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">Loading subscriptions…</div>';
+  try {
+    const qs = new URLSearchParams({ rail: subRail, status: status, search: search, limit: '300' });
+    const res = await authedFetch('/api/admin/subscriptions?' + qs.toString(), { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    subscriptionRows = data.subscriptions || [];
+    renderSubscriptions(subscriptionRows);
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:16px;color:#b91c1c;font-size:13px;">Could not load subscriptions: ' +
+      esc(e.message) + '</div>';
+  }
+}
+
+function renderSubscriptions(rows) {
+  const wrap = document.getElementById('subTableWrap');
+  const count = document.getElementById('subCount');
+  const playCount = rows.filter(function (r) { return r.rail === 'play'; }).length;
+  const webCount = rows.filter(function (r) { return r.rail === 'web'; }).length;
+  if (count) count.textContent = rows.length + ' shown · ' + playCount + ' Play · ' + webCount + ' Web';
+  if (!rows.length) {
+    wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">No subscription matches those filters.</div>';
+    return;
+  }
+  const head = '<tr>'
+    + '<th style="text-align:left;padding:8px 10px;">Customer</th>'
+    + '<th style="text-align:center;padding:8px 10px;">Store</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Product</th>'
+    + '<th style="text-align:center;padding:8px 10px;">Status</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Valid until</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Order / payment id</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Referred by</th>'
+    + '<th style="text-align:right;padding:8px 10px;">₹51</th>'
+    + '</tr>';
+  const body = rows.map(function (r) {
+    const customer = (r.email || r.name || r.customer_user_id);
+    const refBy = r.referrer_user_id
+      ? '<div>' + esc(r.referrer_email || r.referrer_user_id) + '</div>'
+        + '<div style="font-size:11px;color:#888;">' + esc(r.referrer_user_id) + '</div>'
+      : '<span style="color:#999;font-size:12px;">not referred</span>';
+    const commission = r.commission_amount != null
+      ? referralMoney(r.commission_amount) + '<div style="font-size:11px;color:#888;">' + esc(r.commission_status || '') + '</div>'
+      : '<span style="color:#999;font-size:12px;">—</span>';
+    const statusCell = r.is_active
+      ? '<span style="background:#dcfce7;color:#166534;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">ACTIVE</span>'
+      : '<span style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">' +
+        esc(String(r.status || 'inactive').toUpperCase()) + '</span>';
+    return '<tr style="border-top:1px solid #f0f0f0;">'
+      + '<td style="padding:8px 10px;"><div style="font-weight:600;">' + esc(customer) + '</div>'
+      + '<div style="font-size:11px;color:#888;">' + esc(r.customer_user_id) + '</div></td>'
+      + '<td style="padding:8px 10px;text-align:center;">' + subRailBadge(r.rail) + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;">' + esc(r.product_id || '—') + '</td>'
+      + '<td style="padding:8px 10px;text-align:center;">' + statusCell + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(r.current_end) + '</td>'
+      + '<td style="padding:8px 10px;font-family:monospace;font-size:11px;">' + esc(r.store_ref || '—') + '</td>'
+      + '<td style="padding:8px 10px;">' + refBy + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + commission + '</td>'
+      + '</tr>';
+  }).join('');
+  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    + '<thead style="background:#fafafa;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#666;">'
+    + head + '</thead><tbody>' + body + '</tbody></table>';
+}
+
+function exportSubscriptionsCsv() {
+  if (!subscriptionRows.length) { toast('Nothing to export yet'); return; }
+  const header = ['customer_email', 'customer_user_id', 'store', 'product', 'status', 'active',
+    'valid_until', 'store_ref', 'referrer_email', 'referrer_user_id', 'commission_inr', 'commission_status'];
+  const lines = [header.join(',')];
+  subscriptionRows.forEach(function (r) {
+    lines.push([
+      r.email || '', r.customer_user_id || '', subRailLabel(r.rail), r.product_id || '', r.status || '',
+      r.is_active ? 'active' : 'inactive', r.current_end || '', r.store_ref || '',
+      r.referrer_email || '', r.referrer_user_id || '',
+      r.commission_amount != null ? r.commission_amount : '', r.commission_status || '',
+    ].map(function (v) {
+      const s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'subscriptions-' + (subRail || 'all') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function exportReferralsCsv() {
