@@ -5707,27 +5707,9 @@ async function syncReferralDirectory({ limit = 25 } = {}) {
   let updated = 0
   for (const userId of todo.slice(0, Math.min(Math.max(limit, 1), 50))) {
     try {
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), SUPERWALL_API_TIMEOUT_MS)
-      let res
-      try {
-        res = await fetch(
-          `${SUPERWALL_API_BASE_URL}/v2/users/${encodeURIComponent(userId)}/attributes?application_id=${encodeURIComponent(
-            secrets.superwall_application_id,
-          )}`,
-          { headers: { Authorization: `Bearer ${secrets.superwall_api_key}` }, signal: controller.signal },
-        )
-      } finally {
-        clearTimeout(timer)
-      }
-      if (!res.ok) continue
-      const payload = await res.json().catch(() => null)
-      const attrs = payload?.attributes || payload?.data?.attributes || payload?.data || {}
-      const pick = (v) => (v && typeof v === 'object' && 'value' in v ? v.value : v)
-      const email = pick(attrs.email)
-      const name = pick(attrs.name)
-      if (email || name) {
-        await upsertUserDirectory(userId, { email, name, source: 'superwall-api' })
+      const email = await lookupSuperwallEmail(userId)
+      if (email) {
+        await upsertUserDirectory(userId, { email, name: null, source: 'superwall-api' })
         updated++
       }
     } catch (_) {
@@ -5735,6 +5717,65 @@ async function syncReferralDirectory({ limit = 25 } = {}) {
     }
   }
   return { updated, remaining: Math.max(todo.length - updated, 0) }
+}
+
+/**
+ * Resolves one user's email from Superwall. Two official shapes are tried: the
+ * user-attributes endpoint (cheap) and, if that yields nothing, the users query
+ * with a search term (which returns the attribute columns as a table).
+ */
+async function lookupSuperwallEmail(userId) {
+  const withTimeout = async (fn) => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), SUPERWALL_API_TIMEOUT_MS)
+    try {
+      return await fn(controller.signal)
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  const pick = (v) => (v && typeof v === 'object' && 'value' in v ? v.value : v)
+  const headers = { Authorization: `Bearer ${secrets.superwall_api_key}` }
+
+  // 1) GET /v2/users/{id}/attributes
+  try {
+    const res = await withTimeout((signal) =>
+      fetch(
+        `${SUPERWALL_API_BASE_URL}/v2/users/${encodeURIComponent(userId)}/attributes?application_id=${encodeURIComponent(
+          secrets.superwall_application_id,
+        )}`,
+        { headers, signal },
+      ),
+    )
+    if (res.ok) {
+      const payload = await res.json().catch(() => null)
+      const attrs = payload?.attributes || payload?.data?.attributes || payload?.data || {}
+      const email = pick(attrs.email)
+      if (email) return String(email)
+    }
+  } catch (_) {
+    /* fall through to the query */
+  }
+
+  // 2) POST /v2/users/query with a search term (documented, returns columns)
+  try {
+    const res = await withTimeout((signal) =>
+      fetch(`${SUPERWALL_API_BASE_URL}/v2/users/query`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ application_id: secrets.superwall_application_id, search_term: userId }),
+        signal,
+      }),
+    )
+    if (!res.ok) return null
+    const payload = await res.json().catch(() => null)
+    const row = (payload?.rows || []).find(
+      (r) => String(r?.appUserId || '').toLowerCase() === userId.toLowerCase(),
+    )
+    return row?.email ? String(row.email) : null
+  } catch (_) {
+    return null
+  }
 }
 
 app.get('/api/admin/referrals', requireAdmin, async (req, res, next) => {
