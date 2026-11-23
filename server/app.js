@@ -533,6 +533,9 @@ function normalizeSuperwallEvent(event) {
       expirationAt: ed.expiration_at ?? null,
       isRefund: ed.is_refund === true || event.type === 'refund',
       ts: ed.ts || event.occurred_at || null,
+      // The store subscription id (V2) / original transaction id (legacy).
+      // Used for the one-owner rule: a Play subscription belongs to ONE account.
+      subscriptionId: sub?.subscription_id || ed.original_transaction_id || ed.transaction_id || null,
     },
     subscription: sub,
     transfer: event.transfer || null,
@@ -605,6 +608,7 @@ async function upsertPlayRow({
   eventTs,
   store,
   environment,
+  subscriptionId = null,
   raw = {},
 }) {
   const { error } = await supabase.rpc('play_subscription_upsert', {
@@ -618,6 +622,9 @@ async function upsertPlayRow({
     p_last_event_id: String(eventId || ''),
     p_last_event_name: String(eventName || ''),
     p_event_ts: eventTs,
+    // The store subscription id drives the one-owner rule (migration 049): a
+    // subscription already entitled for another account is not granted again.
+    p_subscription_id: subscriptionId ? String(subscriptionId) : null,
     // Ids and amounts only - no PII (same rule as the webhook log).
     p_raw: raw,
   })
@@ -676,6 +683,7 @@ async function persistPlaySubscriptionEvent(normalized) {
           eventTs,
           store,
           environment,
+          subscriptionId: subscription?.subscription_id || data.subscriptionId || null,
           raw: { source: 'transfer_out', productId, store, environment },
         })
       }
@@ -691,6 +699,7 @@ async function persistPlaySubscriptionEvent(normalized) {
           eventTs,
           store,
           environment,
+          subscriptionId: subscription?.subscription_id || data.subscriptionId || null,
           raw: { source: 'transfer_in', productId, store, environment },
         })
       }
@@ -737,6 +746,7 @@ async function persistPlaySubscriptionEvent(normalized) {
       eventTs,
       store,
       environment,
+      subscriptionId: subscription?.subscription_id || data.subscriptionId || null,
       raw: {
         name,
         productId,
@@ -766,6 +776,7 @@ async function persistPlaySubscriptionEvent(normalized) {
           eventTs,
           store,
           environment,
+          subscriptionId: subscription?.subscription_id || data.subscriptionId || null,
           raw: { name, productId: newProductId, store, environment, source: 'product_change_in' },
         })
       }
@@ -954,6 +965,9 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
         p_last_event_id: `api_sync_${sub.subscription_id || ''}`,
         p_last_event_name: 'api_sync',
         p_event_ts: nowIso,
+        // One-owner rule (migration 049): the sync must never hand a second
+        // account a subscription that another account already holds.
+        p_subscription_id: sub.subscription_id || null,
         p_raw: { source: 'api_sync', state: sub.state ?? null, productId, store: sub.store },
       })
       if (!error) wrote++

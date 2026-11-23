@@ -321,6 +321,10 @@ function v2Event(overrides = {}) {
       (c) => c.params?.p_referred_user_id === 'user_v2_buyer',
     ),
   )
+  check(
+    '8f: the store subscription id is passed (one-owner rule, migration 049)',
+    last?.params?.p_subscription_id === 'GPA.V2TEST.1',
+  )
 }
 
 // ------------------------------------------------------------------

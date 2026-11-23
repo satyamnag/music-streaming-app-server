@@ -332,6 +332,14 @@ function addAttribution(id, referrer, referred) {
     '5b: the sync credit carries a stable api_sync source id',
     String(creditForReferrer[0]?.params?.p_source_event_id || '').startsWith('api_sync:'),
   )
+
+  const syncUpserts = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_ref_play' && c.params?.p_last_event_name === 'api_sync',
+  )
+  check(
+    '5c: the sync passes the store subscription id (one-owner rule)',
+    syncUpserts.length > 0 && syncUpserts[0].params?.p_subscription_id === 'sub_play_1',
+  )
 }
 
 // ------------------------------------------------------------------

@@ -102,9 +102,29 @@ union all
 select 'abhiaare05',     public.credit_referral_commission('user_3HujrPyIJLONDkazbQiwNEYN23W', 'soulful_yearly', 120, 0, 'backfill_credit_GPA3355');
 
 -- ------------------------------------------------------------------
+-- 3b) Record WHICH store subscription each row is, so the one-owner rule
+--     (migration 049) knows that these seven Play purchases already have an
+--     owner. Without this, the first account to open the app would claim a
+--     subscription that belongs to someone else.
+--     The subscription id of a first purchase is the order id itself.
+-- ------------------------------------------------------------------
+update public.play_subscriptions ps
+   set subscription_id = v.subscription_id
+from (values
+  ('user_3HcxrnLfXm9HM57XQDdoWRO8Lm8', 'GPA.3349-8814-0784-50213'),
+  ('user_3IJxJaGkq8JialXLifFwAI8wosP', 'GPA.3346-1937-0916-76332'),
+  ('user_3HujrPyIJLONDkazbQiwNEYN23W', 'GPA.3355-4742-8139-11196'),
+  ('user_3MSkMkthBkY7jVQuGKDNxoQkjzF', 'GPA.3329-9747-0967-60331'),
+  ('user_3MHp06PbInd7Vp0E5r630mRZZtD', 'GPA.3336-8784-6123-73288'),
+  ('user_3MMTQUBXG7MEUxTBmbo9zKSUfPC', 'GPA.3343-8388-9129-57514'),
+  ('user_3LmDxnP5fssCGshWnT4ptbWwamg', 'GPA.3398-1155-9438-39846')
+) as v(user_id, subscription_id)
+where ps.user_id = v.user_id
+  and ps.product_id = 'soulful_yearly';
+
+-- ------------------------------------------------------------------
 -- 4) THE REPORT. Read this after step 3.
 -- ------------------------------------------------------------------
-
 -- 4a. Every affiliate: friends, paid friends, money waiting.
 select referrer_user_id, email, code, is_active,
        friends_joined, paid_friends, pending_amount, total_amount
