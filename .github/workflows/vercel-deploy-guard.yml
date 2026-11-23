@@ -1,0 +1,68 @@
+name: Vercel deploy guard
+
+# WHY THIS EXISTS
+# The Vercel project must build from `server/` (Root Directory = server):
+# vercel.json and api/index.js live only there. If that setting is ever changed
+# or reset, Vercel still reports the build as READY but ships ZERO functions -
+# every route 404s while production silently keeps the previous deployment.
+# No error, no alert. That cost a full day of server fixes on 2026-11-23.
+#
+# This guard asserts, from outside, that production is serving the current
+# build. It needs no credentials and writes nothing.
+#
+# The marker used is "superwallSync" in /health/auth: that block ships with the
+# Play-rail work (migration 046). When you add a newer, equally cheap marker,
+# swap the grep - but never remove the check altogether.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'docs/VERCEL-ADMIN.md'
+      - '.github/workflows/vercel-deploy-guard.yml'
+  schedule:
+    # Every six hours, off the hour to avoid the busiest slot.
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-deploy-guard
+  cancel-in-progress: true
+
+jobs:
+  production-is-current:
+    name: Production serves the current build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Give a push-triggered deployment time to go live
+        if: github.event_name == 'push'
+        run: sleep 150
+
+      - name: Assert /health/auth returns the current feature marker
+        env:
+          HEALTH_URL: https://admin.soulfulbhakti.com/health/auth
+          MARKER: superwallSync
+        run: |
+          set -uo pipefail
+          for attempt in $(seq 1 12); do
+            body="$(curl -sS --max-time 20 "$HEALTH_URL" 2>/dev/null || true)"
+            if printf '%s' "$body" | grep -q "\"$MARKER\""; then
+              echo "OK (attempt $attempt): $body"
+              exit 0
+            fi
+            echo "attempt $attempt: production is not the current build yet"
+            echo "  response: ${body:-<empty>}"
+            sleep 30
+          done
+
+          echo "::error title=Deploy guard failed::admin.soulfulbhakti.com is not serving the current build."
+          echo "::error::Most likely cause: the Vercel project's Root Directory is no longer 'server'."
+          echo "::error::Then builds ship zero functions (all routes 404) and production keeps the previous deployment."
+          echo "::error::Fix: Vercel -> soulfulbhakti-admin -> Settings -> Build & Deployment -> Root Directory = server, then Redeploy."
+          echo "::error::Details and the API one-liner: docs/VERCEL-ADMIN.md (section 'Root Directory MUST be server')."
+          exit 1

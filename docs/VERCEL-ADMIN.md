@@ -1,7 +1,48 @@
 # Running the admin server on Vercel (optional, in progress)
 
-Status: **code is ready; the Vercel project is not created yet.** Render keeps
-serving production in the meantime, unchanged.
+Status: **production is live on Vercel** (`admin.soulfulbhakti.com`), built from
+this repository's `main` branch.
+
+## ⛔ Root Directory MUST be `server` — never change it
+
+The Vercel project (`soulfulbhakti-admin`) must have **Root Directory =
+`server`**. This is the single setting that fails *silently* when it is wrong:
+
+* `vercel.json` + `api/index.js` exist **only** under `server/`. No commit has
+  ever had a root-level copy.
+* With Root Directory = repository root, Vercel still reports the build as
+  **READY** — but it contains **zero functions**. Every route 404s, and
+  production keeps serving the *previous* deployment. Nothing else alerts you.
+* This is exactly what happened on 2026-11-23: a day of server fixes
+  (Superwall Webhooks V2, Play entitlement sync) sat on `main` while the live
+  site ran a three-day-old build. "Redeploy" does not help — it rebuilds the
+  same old commit with the same wrong root.
+
+**Detect** (one request, no credentials):
+
+```bash
+curl -s https://admin.soulfulbhakti.com/health/auth
+```
+
+The response must contain `"superwallSync":{...}`. If that key is missing, the
+build is not the current `server/` build.
+
+**Repair** (dashboard): Project → Settings → Build & Deployment → **Root
+Directory → `server`** → Save → Deployments → *Redeploy* (or push any commit).
+
+**Repair** (API, if you hold a token with project access):
+
+```bash
+curl -s -X PATCH \
+  "https://api.vercel.com/v9/projects/prj_FVuGu3AMO7kuENA1aEUesk4dmxdS?slug=famerelay" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"rootDirectory":"server"}'
+```
+
+`.github/workflows/vercel-deploy-guard.yml` re-checks this every six hours and on
+every push to `main`, and fails loudly if production stops serving the current
+build — so a silent regression is caught within minutes instead of days.
 
 ## What was changed
 
