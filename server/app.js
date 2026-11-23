@@ -148,7 +148,7 @@ const supabase = createClient(
 // must stay in the deployment env (they are what connects to the vault).
 // Every other risky credential (R2 keys, ADMIN_TOKEN, webhook secrets) is
 // loaded from vault.secrets via the public.get_secret RPC (service_role
-// only — the anon/app key cannot decrypt them).
+// only â€” the anon/app key cannot decrypt them).
 //
 // Each value falls back to process.env so local dev without a vault entry
 // keeps working, and a vault value always wins once present.
@@ -156,7 +156,7 @@ const supabase = createClient(
 // The admin token is compared byte-for-byte against a single-line browser
 // input that is trimmed client-side. If the value is pasted into the Vault
 // (or set as an env var) with a trailing newline or space, a *correct* token
-// would be impossible to enter — the browser strips it, the server does not,
+// would be impossible to enter â€” the browser strips it, the server does not,
 // and every attempt returns 401. Normalize the value once at load so that
 // signing, verifying and comparing all use exactly the same bytes.
 function normalizeAdminToken(value) {
@@ -190,7 +190,7 @@ const secrets = {
   // Actions, never in this process, so the admin needs a token to dispatch it.
   // Fine-grained PAT with Actions: read & write on the repo. Absent means the
   // endpoint answers 503 with an explicit message instead of doing anything
-  // partial — the same fail-closed rule as the Deepgram key above.
+  // partial â€” the same fail-closed rule as the Deepgram key above.
   github_actions_token: process.env.GITHUB_ACTIONS_TOKEN || '',
   // OpenAI key for the OPTIONAL lyric "second opinion" (see
   // libs/openaiLyricSecondOpinion.mjs). Off unless OPENAI_SECOND_OPINION=1, and
@@ -200,8 +200,8 @@ const secrets = {
   // --- Partner Program ---------------------------------------------------
   // NO EMAIL CONFIGURATION. The portal sends no automatic email: every send
   // path was removed (see the "NO AUTOMATIC EMAIL" note in partner_routes.mjs).
-  // The provider keys that used to live here — resend_api_key, postmark_token,
-  // mailgun_*, smtp_*, mail_from — are deliberately GONE rather than left as
+  // The provider keys that used to live here â€” resend_api_key, postmark_token,
+  // mailgun_*, smtp_*, mail_from â€” are deliberately GONE rather than left as
   // unused fields, because a half-configured transport is exactly what invites
   // someone to re-wire a send path without noticing it was removed on purpose.
   // If email is ever wanted again, it is a deliberate rebuild.
@@ -459,24 +459,83 @@ function verifySvixWebhook(payload, headers, secret) {
 }
 
 // ------------------------------------------------------------------
-// Play subscription state (migration 046)
+// Superwall webhook payloads: legacy AND V2
 // ------------------------------------------------------------------
-// The Play rail's entitlement used to live ONLY on the device (Superwall's
-// status), which is why every account on one device looked premium. Migration
-// 046 gives the server its own per-user record of Play subscriptions, written
-// exclusively from verified Superwall webhooks, so the server can answer "is
-// THIS user paid?" for the referral program, the /account page and the
-// entitlement endpoint. Nothing in the Android app reads or writes this.
+// Legacy: { timestamp, data: { id, name, store, productId, price, ... } }
+// V2:     { id, api_version, type, occurred_at, app_user_id, event_data,
+//           subscription, previous, subscriber, transfer }
+// Official docs: https://superwall.com/docs/integrations/webhooks/v2
+//
+// BOTH shapes reach this one route (the dashboard can run a legacy webhook
+// alongside a V2 one), so every field read goes through one normaliser and the
+// handlers never care which format arrived. V2 also carries a `subscription`
+// snapshot, which is the CURRENT state and therefore a better source for the
+// stored row than the event that triggered it - the docs say to grant or
+// revoke access from that snapshot, whatever the event type.
+
+/** True when the payload is a Superwall Webhooks V2 event. */
+function isSuperwallV2Payload(event) {
+  if (!event || typeof event !== 'object') return false
+  return Boolean(event.event_data || event.api_version || event.subscriber || event.subscription)
+}
+
+/** `soulful_yearly:soulful-yearly` -> `soulful_yearly` (the Play product id). */
+function baseProductId(value) {
+  const s = String(value || '')
+  const i = s.indexOf(':')
+  return i > 0 ? s.slice(0, i) : s
+}
+
+function msToIso(ms) {
+  const n = Number(ms)
+  return Number.isFinite(n) && n > 0 ? new Date(n).toISOString() : null
+}
 
 /**
- * Maps a Superwall webhook event to the stored Play subscription state,
- * mirroring the Razorpay grace table (docs/RAZORPAY-SUBSCRIPTIONS.md §6.4).
+ * Normalises legacy and V2 payloads into the shape the handlers use:
+ * { v2, data, subscription, transfer }.
+ */
+function normalizeSuperwallEvent(event) {
+  if (!isSuperwallV2Payload(event)) {
+    return { v2: false, data: event?.data || null, subscription: null, transfer: null }
+  }
+  const ed = event.event_data || {}
+  const sub = event.subscription || null
+  return {
+    v2: true,
+    data: {
+      id: event.id || ed.id || null,
+      name: event.type || ed.name || null,
+      store: ed.store || (sub?.store === 'play-store' ? 'PLAY_STORE' : null),
+      environment: ed.environment || (sub?.environment === 'live' ? 'PRODUCTION' : null),
+      productId: baseProductId(ed.product_id || sub?.product_id),
+      price: ed.price ?? null,
+      priceInPurchasedCurrency: ed.price_in_purchased_currency ?? null,
+      periodType: ed.period_type ?? null,
+      newProductId: ed.new_product_id ? baseProductId(ed.new_product_id) : null,
+      originalAppUserId: event.app_user_id || ed.original_app_user_id || null,
+      appUserId: event.app_user_id || null,
+      purchasedAt: ed.purchased_at ?? null,
+      expirationAt: ed.expiration_at ?? null,
+      isRefund: ed.is_refund === true || event.type === 'refund',
+      ts: ed.ts || event.occurred_at || null,
+    },
+    subscription: sub,
+    transfer: event.transfer || null,
+  }
+}
+
+/**
+ * Maps a Superwall event to the stored Play subscription state, mirroring the
+ * Razorpay grace table (docs/RAZORPAY-SUBSCRIPTIONS.md Â§6.4).
  * Returns null when the event carries no state change for this rail.
  */
 function playStateForEvent(data) {
   const name = String(data?.name || '')
   const price = Number(data?.price)
-  // A refund arrives as a negative-price event: never keep it active.
+  // A refund arrives as a negative-price event or an explicit is_refund flag:
+  // never keep it active.
+  if (data?.isRefund === true) return 'refunded'
   if (Number.isFinite(price) && price < 0) return 'refunded'
   switch (name) {
     case 'initial_purchase':
@@ -484,6 +543,7 @@ function playStateForEvent(data) {
     case 'uncancellation':
     case 'billing_issue':
     case 'non_renewing_purchase':
+    case 'subscription_extended':
       return 'active'
     // The OLD plan retires at the moment of a product change; the new plan
     // gets its own active row below.
@@ -494,22 +554,132 @@ function playStateForEvent(data) {
       return 'paused'
     case 'expiration':
       return 'expired'
+    case 'refund':
+      return 'refunded'
     default:
       return null
   }
 }
 
 /**
- * Persists one Play subscription state change from a verified webhook.
+ * State from the V2 `subscription` snapshot when it is present (the current
+ * truth), otherwise from the event itself (legacy, or V2 without a snapshot).
+ */
+function playStateFromEventOrSnapshot(data, subscription) {
+  if (subscription && subscription.state) {
+    if (subscription.is_active === true) return 'active'
+    if (subscription.state === 'revoked') return 'refunded'
+    if (subscription.state === 'expired') return 'expired'
+    if (subscription.state === 'inGracePeriod' || subscription.state === 'inBillingRetryPeriod') {
+      return 'active'
+    }
+    if (subscription.state === 'active') return 'active'
+    return playStateForEvent(data)
+  }
+  return playStateForEvent(data)
+}
+
+/** One guarded upsert, shared by every path below. Returns true on success. */
+async function upsertPlayRow({
+  userId,
+  productId,
+  status,
+  currentStart,
+  currentEnd,
+  eventId,
+  eventName,
+  eventTs,
+  store,
+  environment,
+  raw = {},
+}) {
+  const { error } = await supabase.rpc('play_subscription_upsert', {
+    p_user_id: userId,
+    p_product_id: productId,
+    p_status: status,
+    p_current_start: currentStart,
+    p_current_end: currentEnd,
+    p_store: store,
+    p_environment: environment,
+    p_last_event_id: String(eventId || ''),
+    p_last_event_name: String(eventName || ''),
+    p_event_ts: eventTs,
+    // Ids and amounts only - no PII (same rule as the webhook log).
+    p_raw: raw,
+  })
+  if (error) {
+    console.error('[webhook] play_subscription_upsert failed:', error.message)
+    return false
+  }
+  console.log(
+    `[webhook] play state ${eventName} -> ${status} for ${userId.slice(0, 12)}â€¦ (${productId})`,
+  )
+  return true
+}
+
+/**
+ * Persists one Play subscription state change (legacy or V2).
  * Never throws: a state write must not break the commission path or the
  * webhook acknowledgement.
  */
-async function persistPlaySubscriptionEvent(event) {
-  const data = event?.data
+async function persistPlaySubscriptionEvent(normalized) {
+  if (!normalized) return
+  const { data, subscription, transfer } = normalized
   if (!data) return
   try {
-    if (String(data.store) !== 'PLAY_STORE') return
-    if (String(data.environment) === 'SANDBOX' && process.env.SUPERWALL_ALLOW_SANDBOX !== '1') {
+    const store = String(
+      data.store || (subscription?.store === 'play-store' ? 'PLAY_STORE' : ''),
+    )
+    if (store !== 'PLAY_STORE') return
+    const environment = String(
+      data.environment ||
+        (subscription?.environment === 'live' ? 'PRODUCTION' : subscription?.environment || 'PRODUCTION'),
+    )
+    if (environment === 'SANDBOX' && process.env.SUPERWALL_ALLOW_SANDBOX !== '1') {
+      return
+    }
+
+    const name = String(data.name || '')
+    const eventTs = msToIso(data.ts || data.purchasedAt) || new Date().toISOString()
+
+    // A transferred subscription changes owner: revoke the old row and grant
+    // the new one (docs: remove access from transfer.from_app_user_id and
+    // grant it to transfer.to_app_user_id).
+    if (name === 'transferred' && transfer) {
+      const productId = baseProductId(subscription?.product_id || data.productId)
+      const fromId = String(transfer.from_app_user_id || '')
+      const toId = String(transfer.to_app_user_id || '')
+      if (!productId) return
+      if (fromId.startsWith('user_')) {
+        await upsertPlayRow({
+          userId: fromId,
+          productId,
+          status: 'cancelled',
+          currentStart: null,
+          currentEnd: eventTs,
+          eventId: data.id,
+          eventName: 'transferred',
+          eventTs,
+          store,
+          environment,
+          raw: { source: 'transfer_out', productId, store, environment },
+        })
+      }
+      if (toId.startsWith('user_')) {
+        await upsertPlayRow({
+          userId: toId,
+          productId,
+          status: 'active',
+          currentStart: msToIso(subscription?.starts_at),
+          currentEnd: subscription?.is_lifetime ? null : msToIso(subscription?.expires_at),
+          eventId: data.id,
+          eventName: 'transferred',
+          eventTs,
+          store,
+          environment,
+          raw: { source: 'transfer_in', productId, store, environment },
+        })
+      }
       return
     }
 
@@ -522,76 +692,74 @@ async function persistPlaySubscriptionEvent(event) {
       return
     }
 
-    const name = String(data.name || '')
-    const status = playStateForEvent(data)
+    const status = playStateFromEventOrSnapshot(data, subscription)
     if (!status) return
 
-    const productId = String(data.productId || '')
+    const productId = baseProductId(subscription?.product_id || data.productId)
     if (!productId) return
 
-    const msToIso = (v) => {
-      const n = Number(v)
-      return Number.isFinite(n) && n > 0 ? new Date(n).toISOString() : null
-    }
-    const eventTs = msToIso(data.ts || data.purchasedAt) || new Date().toISOString()
+    // Prefer the V2 snapshot for dates when it is present: it is the CURRENT
+    // period, not the period the triggering event described.
+    const currentStart = subscription
+      ? msToIso(subscription.starts_at)
+      : msToIso(data.purchasedAt)
+    const endMs = subscription ? subscription.expires_at : data.expirationAt
+    const currentEnd =
+      subscription?.is_lifetime === true
+        ? null
+        : msToIso(endMs) || (subscription ? null : msToIso(data.expirationAt))
     // On a product change the OLD plan retires at the switch moment (its own
-    // expirationAt would otherwise keep it "cancelled but still in period").
+    // expiry would otherwise keep it "cancelled but still in period").
     const isProductChange = name === 'product_change'
 
-    const row = {
-      p_user_id: userId,
-      p_product_id: productId,
-      p_status: status,
-      p_current_start: msToIso(data.purchasedAt),
-      p_current_end: isProductChange ? eventTs : msToIso(data.expirationAt),
-      p_store: String(data.store),
-      p_environment: String(data.environment),
-      p_last_event_id: String(data.id || ''),
-      p_last_event_name: name,
-      p_event_ts: eventTs,
-      // Ids and amounts only - no PII (same rule as the webhook log).
-      p_raw: {
+    await upsertPlayRow({
+      userId,
+      productId,
+      status,
+      currentStart,
+      currentEnd: isProductChange ? eventTs : currentEnd,
+      eventId: data.id,
+      eventName: name,
+      eventTs,
+      store,
+      environment,
+      raw: {
         name,
         productId,
-        store: data.store,
-        environment: data.environment,
+        store,
+        environment,
         periodType: data.periodType ?? null,
         price: data.price ?? null,
         expirationAt: data.expirationAt ?? null,
+        snapshotState: subscription?.state ?? null,
       },
-    }
-    const { error } = await supabase.rpc('play_subscription_upsert', row)
-    if (error) {
-      console.error('[webhook] play_subscription_upsert failed:', error.message)
-      return
-    }
-    console.log(
-      `[webhook] play state ${name} -> ${status} for ${userId.slice(0, 12)}… (${productId})`,
-    )
+    })
 
     // A product change retires the previous product's row (the upsert above
     // already wrote it as 'cancelled') and gives the new plan its own active
     // row, so the old plan can never stay "active" forever.
-    if (name === 'product_change') {
-      const newProductId = data.newProductId ? String(data.newProductId) : ''
+    if (isProductChange) {
+      const newProductId = String(data.newProductId || '')
       if (newProductId && newProductId !== productId) {
-        const { error: switchError } = await supabase.rpc('play_subscription_upsert', {
-          ...row,
-          p_product_id: newProductId,
-          p_status: 'active',
-          p_current_start: msToIso(data.purchasedAt) || eventTs,
-          p_current_end: msToIso(data.expirationAt),
+        await upsertPlayRow({
+          userId,
+          productId: newProductId,
+          status: 'active',
+          currentStart: currentStart || eventTs,
+          currentEnd: subscription ? currentEnd : msToIso(data.expirationAt),
+          eventId: data.id,
+          eventName: name,
+          eventTs,
+          store,
+          environment,
+          raw: { name, productId: newProductId, store, environment, source: 'product_change_in' },
         })
-        if (switchError) {
-          console.error('[webhook] product_change upsert failed:', switchError.message)
-        }
       }
     }
   } catch (err) {
     console.error('[webhook] play state persistence failed:', err.message)
   }
 }
-
 // ------------------------------------------------------------------
 // Superwall API sync (migration 046, self-heal)
 // ------------------------------------------------------------------
@@ -695,7 +863,7 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
       // key/scope misconfigured, 429 = rate limited, 5xx = outage. Never block
       // the caller; retry after the short failure TTL.
       if (res.status !== 404) {
-        console.warn(`[superwall-sync] HTTP ${res.status} for ${userId.slice(0, 12)}…`)
+        console.warn(`[superwall-sync] HTTP ${res.status} for ${userId.slice(0, 12)}â€¦`)
       }
       playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
       return
@@ -727,12 +895,12 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
     }
     playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_OK_TTL_MS)
     if (wrote > 0) {
-      console.log(`[superwall-sync] ${userId.slice(0, 12)}… -> ${wrote} Play row(s) from Superwall`)
+      console.log(`[superwall-sync] ${userId.slice(0, 12)}â€¦ -> ${wrote} Play row(s) from Superwall`)
     }
   } catch (err) {
     // Timeout/abort, DNS, TLS: fail open, retry soon.
     console.warn(
-      `[superwall-sync] failed for ${userId.slice(0, 12)}…: ${err?.name || err?.message || err}`,
+      `[superwall-sync] failed for ${userId.slice(0, 12)}â€¦: ${err?.name || err?.message || err}`,
     )
     playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
   } finally {
@@ -745,7 +913,10 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
 // user (coupon affiliate first, then in-app referral) makes a qualifying
 // purchase.
 async function handleSuperwallEvent(event) {
-  const data = event?.data
+  // ONE normaliser for both payload shapes (legacy `data` and V2
+  // `event_data` + `subscription`), so everything below reads one contract.
+  const normalized = normalizeSuperwallEvent(event)
+  const data = normalized.data
   if (!data) return
 
   const name = data.name
@@ -774,7 +945,7 @@ async function handleSuperwallEvent(event) {
   // a cancellation, expiration or refund must reach the entitlement tables
   // even though those events never earn commission. No-op for non-Play
   // events and for anonymous users.
-  await persistPlaySubscriptionEvent(event)
+  await persistPlaySubscriptionEvent(normalized)
 
   // Only production Google Play purchases count. Never credit trials, intro
   // offers, cancellations, refunds (negative price) or billing issues.
@@ -794,7 +965,7 @@ async function handleSuperwallEvent(event) {
     console.log('[webhook] skipped: event name=%s', name)
     return
   }
-  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) — reject any
+  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) â€” reject any
   // non-finite price, then any non-positive price.
   const price = Number(data.price)
   if (!Number.isFinite(price) || price <= 0) {
@@ -827,12 +998,12 @@ async function handleSuperwallEvent(event) {
     ratePercent = Number(rateRows.rate_percent)
   } else {
     console.log(
-      `[webhook] no commission rate for product ${productId} — affiliate rail skipped, referral rail still runs`,
+      `[webhook] no commission rate for product ${productId} â€” affiliate rail skipped, referral rail still runs`,
     )
   }
 
   // Amount in INR as billed. Webhook `price` is USD-normalized; the store
-  // price in the user's currency is the source of truth for a ₹-priced app.
+  // price in the user's currency is the source of truth for a â‚¹-priced app.
   const planPrice = Number(data.priceInPurchasedCurrency ?? data.price)
 
   // Before judging the REFERRER, self-heal their Play state from Superwall:
@@ -896,9 +1067,9 @@ async function handleSuperwallEvent(event) {
 // SCOPE / POLICY. The Play-distributed app may not sell its digital
 // subscription through anything but Google Play Billing (or Play's India
 // alternative-billing programme). These routes therefore serve purchases
-// made OUTSIDE the app — a web funnel, or a payment link an admin sends to
+// made OUTSIDE the app â€” a web funnel, or a payment link an admin sends to
 // a user. The app consumes only GET /api/razorpay/entitlement, which reads
-// a row written here. See docs/RAZORPAY-SUBSCRIPTIONS.md §2.
+// a row written here. See docs/RAZORPAY-SUBSCRIPTIONS.md Â§2.
 //
 // TRUST. Every write is derived from a Razorpay-signed payload or an
 // authenticated Razorpay API call:
@@ -942,10 +1113,10 @@ function initRazorpay() {
       .map(([slug]) => slug)
     console.log(`[razorpay] configured plans=${configuredPlans.join(',') || 'none'}`)
     if (!secrets.razorpay_webhook_secret) {
-      console.warn('[razorpay] RAZORPAY_WEBHOOK_SECRET is missing — the webhook will reject every event')
+      console.warn('[razorpay] RAZORPAY_WEBHOOK_SECRET is missing â€” the webhook will reject every event')
     }
     if (configuredPlans.length === 0) {
-      console.warn('[razorpay] no plan ids configured (RAZORPAY_PLAN_MONTHLY / _YEARLY) — creation will fail')
+      console.warn('[razorpay] no plan ids configured (RAZORPAY_PLAN_MONTHLY / _YEARLY) â€” creation will fail')
     }
   } catch (err) {
     razorpay = null
@@ -1000,7 +1171,7 @@ async function persistRazorpaySubscription(entity, planSlugHint = null, eventId 
   if (!userId) {
     // An unattributable row would grant nobody access and would poison the
     // entitlement function's "newest row wins" ordering. Skip it loudly.
-    console.warn(`[razorpay] subscription ${entity.id} has no owning user id — not stored`)
+    console.warn(`[razorpay] subscription ${entity.id} has no owning user id â€” not stored`)
     return false
   }
 
@@ -1432,7 +1603,7 @@ app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
 
   try {
     // Ownership is checked against the stored row FIRST, and the signature is
-    // computed with that stored id — a client cannot choose the pair to sign.
+    // computed with that stored id â€” a client cannot choose the pair to sign.
     const { data: row, error } = await supabase
       .from('razorpay_subscriptions')
       .select('subscription_id, user_id')
@@ -1504,7 +1675,7 @@ app.get('/api/razorpay/entitlement', requireClerkUser, async (req, res) => {
   // on the web but the app says free": either the app is asking (and with which
   // user id) or it is not asking at all. The token is never logged.
   console.log(
-    '[entitlement] check user=' + String(req.clerkUserId).slice(0, 12) + '…',
+    '[entitlement] check user=' + String(req.clerkUserId).slice(0, 12) + 'â€¦',
   )
   try {
     const entitlement = await readEntitlement(req.clerkUserId)
@@ -1570,14 +1741,14 @@ app.get('/api/razorpay/referral/validate', requireClerkUser, async (req, res) =>
   }
 })
 
-// Attributes a signed-in visitor who arrived through an invite link (?ref=…),
+// Attributes a signed-in visitor who arrived through an invite link (?ref=â€¦),
 // BEFORE any payment. This is the web twin of the app's install-referrer bind:
 // the referrer's "Friends joined" count moves as soon as the friend signs in,
 // which is what makes an invite link visibly work.
 //
 // It writes ONLY a `referral_attributions` row. No affiliate row, no coupon, no
 // commission, and no entitlement is touched, so a sign-up can never earn money
-// by itself — the credit still happens at the first verified payment
+// by itself â€” the credit still happens at the first verified payment
 // (`credit_razorpay_referral_commission`). The RPC is idempotent (at most one
 // attribution per referred user, ever) and rejects self-referral, so repeated
 // calls, reloads and a later checkout are all harmless.
@@ -1654,7 +1825,7 @@ app.post('/api/razorpay/sync', requireClerkUser, async (req, res) => {
   }
 })
 // Admin-only: create a subscription for an arbitrary user and hand back the
-// Razorpay-hosted payment link. This is the manual sales channel — the admin
+// Razorpay-hosted payment link. This is the manual sales channel â€” the admin
 // sends the link (WhatsApp/email) and the customer pays outside the app.
 app.post('/api/admin/razorpay/link', requireAdmin, async (req, res) => {
   if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
@@ -1836,7 +2007,7 @@ app.get('/stream/:id/file', async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
+      // Deliberately NO Supabase Storage fallback â€” see the cached-egress notes
       // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
       return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
@@ -1874,7 +2045,7 @@ app.get('/stream/:id/file', async (req, res, next) => {
 
 // Admin-only audio preview: streams an uploaded audio file (by storage path)
 // with Range support so the admin can verify a just-uploaded original/karaoke
-// .opus by playing it. Never exposes the raw path — the browser just plays
+// .opus by playing it. Never exposes the raw path â€” the browser just plays
 // this same-origin, admin-protected endpoint.
 app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
   try {
@@ -1889,7 +2060,7 @@ app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
+      // Deliberately NO Supabase Storage fallback â€” see the cached-egress notes
       // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
       return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
@@ -1977,7 +2148,7 @@ app.get('/api/admin/tracks/:id/audio-status', requireAdmin, async (req, res, nex
         note: unavailable
           ? 'Recorded (R2 check unavailable)'
           : head.exists
-            ? 'Updated · R2 verified'
+            ? 'Updated Â· R2 verified'
             : 'Path set, but object missing in R2',
       }
     }))
@@ -2005,7 +2176,7 @@ app.get('/browse/sections', async (req, res, next) => {
       return res.status(500).json({ error: 'Browse failed' })
     }
 
-    // Each track is its own section — completely independent, no grouping
+    // Each track is its own section â€” completely independent, no grouping
     const sections = data.map((t) => ({
       id: `section-${t.id}`,
       title: t.title,
@@ -2319,7 +2490,7 @@ app.get('/users/me', (req, res) => {  res.json(DEFAULT_USER)
 // with the same secret (so it cannot be forged without the token).
 //
 // Fail-closed: if ADMIN_TOKEN is not configured, admin endpoints return 503
-// and the /admin page shows a "not configured" message — never an open admin.
+// and the /admin page shows a "not configured" message â€” never an open admin.
 // Read live from `secrets` (populated from the vault at startup).
 const ADMIN_COOKIE_NAME = 'sangeet_admin_session'
 const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60 // 8 hours
@@ -2441,7 +2612,7 @@ function describeSessionToken(token) {
       len: raw.length,
       iss: json.iss || null,
       azp: json.azp || null,
-      sub: typeof json.sub === 'string' ? `${json.sub.slice(0, 8)}…` : null,
+      sub: typeof json.sub === 'string' ? `${json.sub.slice(0, 8)}â€¦` : null,
       expInSeconds: typeof json.exp === 'number' ? json.exp - Math.floor(Date.now() / 1000) : null,
     }
   } catch {
@@ -2507,11 +2678,11 @@ async function requireAdmin(req, res, next) {
       //  emailAddress claim; Clerk's DEFAULT template does NOT include it.)
       const email = (claims.emailAddress || claims.email || '').toLowerCase()
       // Fail CLOSED: a claim-less session (missing emailAddress) must never
-      // grant admin access — the old `email &&` guard skipped the domain
+      // grant admin access â€” the old `email &&` guard skipped the domain
       // check when email was '' and made every signed-in Clerk user an admin.
       if (!email || !email.endsWith('@soulfulbhakti.com')) {
         // A signed-in Clerk user from an unauthorized domain OR a session
-        // without the email claim must NOT be granted admin access — but must
+        // without the email claim must NOT be granted admin access â€” but must
         // NOT block a valid token session either. Fall through to the token
         // check; only 403 if that also fails, so a non-company Clerk session
         // cannot break token login.
@@ -2881,7 +3052,7 @@ function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
 // updating an existing row (verified against Postgres: an icon-only payload
 // fails with `null value in column "title" ... violates not-null constraint`
 // on an existing row too). So when the payload omits a title and the row
-// already exists, carry the existing title through — a content no-op, but it
+// already exists, carry the existing title through â€” a content no-op, but it
 // keeps the insert proposal constraint-valid on every branch.
 function ensureFeaturedTitle(row, existing) {
   if (!('title' in row) && existing && typeof existing.title === 'string') {
@@ -2899,7 +3070,7 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
       return res.status(400).json({ error: 'id must be lowercase letters, digits or dashes' })
     }
     // A PUT is an upsert: it either creates the chip or edits an existing one.
-    // Only CREATION really needs a name — an existing chip is edited
+    // Only CREATION really needs a name â€” an existing chip is edited
     // field-by-field (the icon upload/remove paths send `icon_url` alone), so a
     // missing title is fine once the row already exists. This mirrors the
     // specials endpoint, whose banner upload works the same way. A lookup
@@ -2919,7 +3090,7 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
     if (payloadError) return res.status(400).json({ error: payloadError })
     if (Object.keys(row).length === 0) return res.status(400).json({ error: 'nothing to update' })
     // Carry the existing title into the upsert when the payload omits it (icon
-    // upload / remove-icon only send { icon_url }) — see ensureFeaturedTitle.
+    // upload / remove-icon only send { icon_url }) â€” see ensureFeaturedTitle.
     ensureFeaturedTitle(row, existing)
 
     row.updated_at = new Date().toISOString()
@@ -3079,7 +3250,7 @@ const upload = multer({
 // ------------------------------------------------------------------
 // A Specials slide is a full-width landscape banner: the screen width less
 // slideMargin (12dp) each side, so 336dp on a 360dp phone. 8:3 makes that 126dp
-// tall — substantial, but it leaves the shelf below visible above the fold.
+// tall â€” substantial, but it leaves the shelf below visible above the fold.
 // See HomeSpecialsCarousel.bannerAspectRatio for the render side.
 //
 // 1440x540 is DERIVED rather than round. A slide is (screen width - 24dp), so
@@ -3087,7 +3258,7 @@ const upload = multer({
 // therefore 1:1 or better up to 4x density on a 360dp phone and up to 3.5x on a
 // 411dp one, which is every mainstream phone. 1080x405 is the smallest that still
 // looks sharp, 2160x810 the largest worth uploading (2.25x the bytes for no phone
-// benefit — only a tablet would ever use them). The admin panel shows the same
+// benefit â€” only a tablet would ever use them). The admin panel shows the same
 // numbers as a spec table and validates the ratio to within 2%, because the app
 // sizes the slide from the artwork's own ratio and would otherwise letterbox or
 // stretch it.
@@ -3105,12 +3276,12 @@ const DEITY_BANNER_HEIGHT = 540
 
 // The home wallpaper is NOT a full-screen background. The app draws it as a
 // LANDSCAPE band across the top of the home page, behind the "Soulful Bhakti"
-// header (see lib/modules/home/sections/home_wallpaper.dart) — the content
+// header (see lib/modules/home/sections/home_wallpaper.dart) â€” the content
 // below paints its own surface, so a full-screen image was only ever visible as
 // that strip anyway. The upload is therefore landscape.
 //
-// The band is 8:3 — 0.75 of the height of the 2:1 band it used to be, at the same
-// width — and the admin trims every upload to that shape before sending it here,
+// The band is 8:3 â€” 0.75 of the height of the 2:1 band it used to be, at the same
+// width â€” and the admin trims every upload to that shape before sending it here,
 // so 1920x720 is the canonical stored size. One exact ratio is still deliberately
 // NOT enforced at this layer: a client that skips the trim (an older admin page,
 // a direct API call) must still be able to upload the artwork people actually
@@ -3289,7 +3460,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
           if (byTrack[t.id] && byTrack[t.id].length) t.album_ids = byTrack[t.id]
         }
       }
-    } catch (_) { /* migration 015 not applied — fall back to album_id only */ }
+    } catch (_) { /* migration 015 not applied â€” fall back to album_id only */ }
 
     res.json(out)
   } catch (err) { next(err) }
@@ -3774,7 +3945,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     const plain = (track.plain_lyrics || '').trim()
     if (!plain) {
       return res.status(400).json({
-        error: 'This track has no plain lyrics to align against. Fill in the Plain Telugu lyrics first — ' +
+        error: 'This track has no plain lyrics to align against. Fill in the Plain Telugu lyrics first â€” ' +
                'they are the script the timings are matched to.',
       })
     }
@@ -4018,7 +4189,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     // Reached only with an explicit ?write=true. Four independent conditions
     // must ALL hold before a single byte is written:
     //
-    //   1. alignment.ok is true — every line cleared the confidence bar. A
+    //   1. alignment.ok is true â€” every line cleared the confidence bar. A
     //      partial alignment is never written; that is the whole point of the
     //      gate, and it is why the response can still say "Needs review".
     //   2. The track has no existing timed lyrics. Verified against the DB row
@@ -4223,7 +4394,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
         // with a different threshold than the one that gates the write.
         flagged: l.startSeconds === null || l.confidence < effFloor,
       })),
-      // Proposed SRT text per column — pre-filled into the editor, NOT saved.
+      // Proposed SRT text per column â€” pre-filled into the editor, NOT saved.
       proposed: proposedOut,
       // The same proposal with {{Music}} gaps and repeated occurrences timed.
       // Returned alongside the legacy shape so the admin can choose, and so an
@@ -4525,7 +4696,7 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
 //     (translate_a/single with dt=rm), the same service translate.google.com
 //     uses.
 //   * Telugu -> Devanagari (Hindi column): deterministic 1:1 Brahmic script
-//     conversion (teluguToDevanagari) — always phonetically exact.
+//     conversion (teluguToDevanagari) â€” always phonetically exact.
 // ------------------------------------------------------------------
 
 // Normalizes a comma-separated tags string (e.g. "bhajan, devotional") to a
@@ -4537,7 +4708,7 @@ function cleanTags(v) {
 }
 
 // ------------------------------------------------------------------
-// Cover image proxy (admin only) — powers the "From cover" palette picker.
+// Cover image proxy (admin only) â€” powers the "From cover" palette picker.
 // ------------------------------------------------------------------
 // The admin panel extracts a palette from a cover by drawing it to a canvas
 // and reading the pixels. That requires the image host to send CORS headers;
@@ -4736,7 +4907,7 @@ app.post('/api/admin/google/translate', requireAdmin, async (req, res, next) => 
 })
 
 // ------------------------------------------------------------------
-// Google Transliteration (Telugu -> Latin) — Google Translate romanization
+// Google Transliteration (Telugu -> Latin) â€” Google Translate romanization
 // endpoint (translate_a/single with dt=rm, tl=te = pure phonetic). This is
 // the same Google transliteration service translate.google.com uses. The
 // official Cloud Translation romanizeText API does NOT support Telugu (the
@@ -4818,7 +4989,7 @@ app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next)
     const failed = lines.filter((_, i) => !en[i]).length
     if (failed === lines.length) {
       return res.status(502).json({
-        error: 'Google transliteration returned no results — the romanization service may be temporarily blocked from this server',
+        error: 'Google transliteration returned no results â€” the romanization service may be temporarily blocked from this server',
       })
     }
     res.json({ en, hi, warning: failed > 0 ? `${failed} line(s) could not be transliterated` : undefined })
@@ -4998,7 +5169,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     }
 
     // Featured Playlist chip icons: STRICTLY WebP as well. No aspect ratio is
-    // enforced on purpose — the app draws the icon inside a circle with
+    // enforced on purpose â€” the app draws the icon inside a circle with
     // BoxFit.cover, so a slightly non-square export is cropped to its centre
     // rather than distorted, and rejecting it would be friction with no benefit.
     // A square export is still what the admin panel asks for.
@@ -5081,7 +5252,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
       // quota, so we refuse rather than silently falling back to it.
       if (!r2Enabled) {
         return res.status(503).json({
-          error: 'Audio storage (R2) is not configured — refusing to store audio in Supabase Storage',
+          error: 'Audio storage (R2) is not configured â€” refusing to store audio in Supabase Storage',
         })
       }
       const key = await uploadAudioToR2(fileName, req.file.buffer, contentType)
@@ -5115,7 +5286,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
 // Affiliate marketing rules (enforced server-side):
 //  - Coupons are attribution-only codes issued to external marketers.
 //  - Affiliate commission applies ONLY to the yearly plan (soulful_yearly)
-//    and is a FLAT ₹100 per successful yearly sale (see migration 007).
+//    and is a FLAT â‚¹100 per successful yearly sale (see migration 007).
 //  - Commission is credited exclusively from verified Superwall webhooks.
 
 // List affiliates (with their coupon count)

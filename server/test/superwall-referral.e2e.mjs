@@ -239,6 +239,206 @@ function event(overrides = {}) {
   )
 }
 
+// ------------------------------------------------------------------
+// 8. Webhooks V2: `event_data` + `subscription` snapshot.
+// ------------------------------------------------------------------
+function v2Event(overrides = {}) {
+  const now = Date.now()
+  return {
+    id: 'evt_v2_' + crypto.randomBytes(6).toString('hex'),
+    api_version: '2026-09-22',
+    type: 'initial_purchase',
+    occurred_at: now,
+    project_id: '28422',
+    app_user_id: 'user_v2_buyer',
+    ordering_key: '28422/user_v2_buyer',
+    event_data: {
+      id: 'evtdata_' + crypto.randomBytes(6).toString('hex'),
+      name: 'initial_purchase',
+      application_id: '52776',
+      store: 'PLAY_STORE',
+      environment: 'PRODUCTION',
+      product_id: 'soulful_yearly',
+      product_type: 'autorenewable',
+      period_type: 'NORMAL',
+      price: 1.49,
+      proceeds: 1.04,
+      price_in_purchased_currency: 120,
+      currency_code: 'INR',
+      purchased_at: now - 1000,
+      expiration_at: now + 365 * 24 * 3600 * 1000,
+      is_refund: false,
+      ts: now,
+    },
+    subscription: {
+      subscription_id: 'GPA.V2TEST.1',
+      transaction_id: 'GPA.V2TEST.1',
+      sequence: 1,
+      store: 'play-store',
+      environment: 'live',
+      product_id: 'soulful_yearly:soulful-yearly',
+      product_type: 'autorenewable',
+      state: 'active',
+      is_active: true,
+      is_lifetime: false,
+      will_renew: true,
+      starts_at: now - 1000,
+      expires_at: now + 365 * 24 * 3600 * 1000,
+    },
+    previous: null,
+    transfer: null,
+    subscriber: {
+      app_user_id: 'user_v2_buyer',
+      original_app_user_id: 'user_v2_buyer',
+      aliases: ['user_v2_buyer'],
+      identity_status: 'resolved',
+      attributes: {},
+    },
+    ...overrides,
+  }
+}
+
+{
+  const res = await postEvent(v2Event())
+  check('8a: V2 initial_purchase acknowledged (200)', res.status === 200)
+
+  const mine = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_v2_buyer',
+  )
+  const last = mine[mine.length - 1]
+  check('8b: V2 play state persisted as active', last?.params?.p_status === 'active')
+  check(
+    '8c: V2 product id normalised to the Play base id',
+    last?.params?.p_product_id === 'soulful_yearly',
+  )
+  check(
+    '8d: V2 expiry taken from the subscription snapshot',
+    typeof last?.params?.p_current_end === 'string' && last.params.p_current_end.startsWith('20'),
+  )
+  check(
+    '8e: V2 purchase still attempts the referral credit',
+    rpcCalls('credit_referral_commission').some(
+      (c) => c.params?.p_referred_user_id === 'user_v2_buyer',
+    ),
+  )
+}
+
+// ------------------------------------------------------------------
+// 9. V2 refund => refunded state, never a credit.
+// ------------------------------------------------------------------
+{
+  const before = rpcCalls('credit_referral_commission').length
+  const base = v2Event()
+  const res = await postEvent({
+    ...base,
+    id: 'evt_v2_refund_1',
+    type: 'refund',
+    event_data: {
+      ...base.event_data,
+      name: 'refund',
+      price: -1.49,
+      proceeds: -1.04,
+      price_in_purchased_currency: -120,
+      is_refund: true,
+    },
+    subscription: {
+      ...base.subscription,
+      state: 'revoked',
+      is_active: false,
+      will_renew: false,
+    },
+  })
+  check('9a: V2 refund acknowledged (200)', res.status === 200)
+  const mine = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_v2_buyer',
+  )
+  check('9b: V2 refund persisted as refunded', mine[mine.length - 1]?.params?.p_status === 'refunded')
+  check('9c: V2 refund earns no referral credit', rpcCalls('credit_referral_commission').length === before)
+}
+
+// ------------------------------------------------------------------
+// 10. V2 without a subscription snapshot falls back to the event facts.
+// ------------------------------------------------------------------
+{
+  const base = v2Event()
+  const res = await postEvent({
+    ...base,
+    id: 'evt_v2_nosnapshot_1',
+    app_user_id: 'user_v2_nosnap',
+    subscription: null,
+    subscriber: { app_user_id: 'user_v2_nosnap', original_app_user_id: 'user_v2_nosnap', aliases: [], identity_status: 'resolved', attributes: {} },
+  })
+  check('10a: V2 without snapshot acknowledged (200)', res.status === 200)
+  const mine = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_v2_nosnap',
+  )
+  const last = mine[mine.length - 1]
+  check(
+    '10b: state and dates fall back to event_data',
+    last?.params?.p_status === 'active' &&
+      last?.params?.p_product_id === 'soulful_yearly' &&
+      typeof last?.params?.p_current_end === 'string',
+  )
+}
+
+// ------------------------------------------------------------------
+// 11. V2 `transferred`: the old owner loses access, the new owner gains it.
+// ------------------------------------------------------------------
+{
+  const now = Date.now()
+  const res = await postEvent({
+    id: 'evt_v2_transfer_1',
+    api_version: '2026-09-22',
+    type: 'transferred',
+    occurred_at: now,
+    project_id: '28422',
+    app_user_id: 'user_v2_to',
+    ordering_key: '28422/user_v2_to',
+    event_data: null,
+    subscription: {
+      subscription_id: 'GPA.V2TEST.1',
+      transaction_id: 'GPA.V2TEST.1',
+      sequence: 2,
+      store: 'play-store',
+      environment: 'live',
+      product_id: 'soulful_yearly:soulful-yearly',
+      product_type: 'autorenewable',
+      state: 'active',
+      is_active: true,
+      is_lifetime: false,
+      will_renew: true,
+      starts_at: now - 1000,
+      expires_at: now + 365 * 24 * 3600 * 1000,
+    },
+    previous: null,
+    transfer: {
+      from_app_user_id: 'user_v2_from',
+      to_app_user_id: 'user_v2_to',
+      subscription_id: 'GPA.V2TEST.1',
+      store: 'play-store',
+      environment: 'live',
+    },
+    subscriber: { app_user_id: 'user_v2_to', original_app_user_id: 'user_v2_to', aliases: [], identity_status: 'resolved', attributes: {} },
+  })
+  check('11a: V2 transferred acknowledged (200)', res.status === 200)
+  const fromRow = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_v2_from',
+  )
+  const toRow = rpcCalls('play_subscription_upsert').filter(
+    (c) => c.params?.p_user_id === 'user_v2_to',
+  )
+  check(
+    '11b: previous owner revoked as cancelled',
+    fromRow.length === 1 && fromRow[0].params?.p_status === 'cancelled',
+  )
+  check(
+    '11c: new owner granted as active',
+    toRow.length === 1 &&
+      toRow[0].params?.p_status === 'active' &&
+      toRow[0].params?.p_product_id === 'soulful_yearly',
+  )
+}
+
 console.log(`\n${pass} passed, ${fail} failed`)
 // Let the in-flight undici sockets settle before tearing the process down;
 // exiting mid-flight trips a libuv assertion on Windows (same convention as
