@@ -44,6 +44,11 @@ const mockServer = http.createServer((req, res) => {
     res.end(JSON.stringify({ error: 'unauthorized' }))
     return
   }
+  if (mock.mode === 'inactive') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(inactiveFixture(decodeURIComponent(m[1]))))
+    return
+  }
   if (mock.mode === 'slow') {
     setTimeout(() => {
       res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -56,6 +61,37 @@ const mockServer = http.createServer((req, res) => {
 })
 await new Promise((resolve) => mockServer.listen(0, '127.0.0.1', resolve))
 process.env.SUPERWALL_API_BASE_URL = `http://127.0.0.1:${mockServer.address().port}`
+
+/** A PUT/GET-able fixture whose only Play subscription is EXPIRED. */
+function inactiveFixture(userId) {
+  return {
+    object: 'user_subscriptions',
+    app_user_id: userId,
+    data: [
+      {
+        subscription_id: 'sub_play_old',
+        product_id: 'soulful_yearly',
+        product_type: 'autorenewable',
+        store: 'PLAY_STORE',
+        transaction_id: 'GPA.OLD',
+        state: 'expired',
+        is_active: false,
+        is_lifetime: false,
+        will_renew: false,
+        offer_type: null,
+        starts_at: '2025-01-01T00:00:00Z',
+        renewed_at: null,
+        expires_at: '2026-01-01T00:00:00Z',
+        original_purchase_date: '2025-01-01T00:00:00Z',
+        amount: 120,
+        currency: 'INR',
+        invoice_id: null,
+        invoice_url: null,
+        metadata: {},
+      },
+    ],
+  }
+}
 
 function subscriptionsFixture(userId) {
   return {
@@ -277,6 +313,42 @@ function addAttribution(id, referrer, referred) {
       (c) => c.params?.p_referred_user_id === 'user_friend4',
     ),
   )
+  mock.mode = 'ok'
+}
+
+// ------------------------------------------------------------------
+// 5. Credit-on-sync: the referrer's purchase is credited from the API sync
+//    even when no webhook ever arrived (the situation that lost ₹51 before).
+// ------------------------------------------------------------------
+{
+  const creditForReferrer = rpcCalls('credit_referral_commission').filter(
+    (c) => c.params?.p_referred_user_id === 'user_ref_play',
+  )
+  check(
+    '5a: sync wrote the referral credit for the referrer',
+    creditForReferrer.length === 1,
+  )
+  check(
+    '5b: the sync credit carries a stable api_sync source id',
+    String(creditForReferrer[0]?.params?.p_source_event_id || '').startsWith('api_sync:'),
+  )
+}
+
+// ------------------------------------------------------------------
+// 6. An EXPIRED subscription must never be credited.
+// ------------------------------------------------------------------
+{
+  mock.mode = 'inactive'
+  addAttribution('att5', 'user_ref_inactive', 'user_friend5')
+  const before = rpcCalls('credit_referral_commission').filter(
+    (c) => c.params?.p_referred_user_id === 'user_ref_inactive',
+  ).length
+  const res = await postEvent(event('user_friend5', 'evt_sync_5'))
+  const after = rpcCalls('credit_referral_commission').filter(
+    (c) => c.params?.p_referred_user_id === 'user_ref_inactive',
+  ).length
+  check('6a: inactive-subscription webhook acknowledged (200)', res.status === 200)
+  check('6b: no credit is written for an expired subscription', before === after)
   mock.mode = 'ok'
 }
 

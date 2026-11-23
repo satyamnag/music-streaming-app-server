@@ -148,7 +148,7 @@ const supabase = createClient(
 // must stay in the deployment env (they are what connects to the vault).
 // Every other risky credential (R2 keys, ADMIN_TOKEN, webhook secrets) is
 // loaded from vault.secrets via the public.get_secret RPC (service_role
-// only â€” the anon/app key cannot decrypt them).
+// only — the anon/app key cannot decrypt them).
 //
 // Each value falls back to process.env so local dev without a vault entry
 // keeps working, and a vault value always wins once present.
@@ -156,7 +156,7 @@ const supabase = createClient(
 // The admin token is compared byte-for-byte against a single-line browser
 // input that is trimmed client-side. If the value is pasted into the Vault
 // (or set as an env var) with a trailing newline or space, a *correct* token
-// would be impossible to enter â€” the browser strips it, the server does not,
+// would be impossible to enter — the browser strips it, the server does not,
 // and every attempt returns 401. Normalize the value once at load so that
 // signing, verifying and comparing all use exactly the same bytes.
 function normalizeAdminToken(value) {
@@ -190,7 +190,7 @@ const secrets = {
   // Actions, never in this process, so the admin needs a token to dispatch it.
   // Fine-grained PAT with Actions: read & write on the repo. Absent means the
   // endpoint answers 503 with an explicit message instead of doing anything
-  // partial â€” the same fail-closed rule as the Deepgram key above.
+  // partial — the same fail-closed rule as the Deepgram key above.
   github_actions_token: process.env.GITHUB_ACTIONS_TOKEN || '',
   // OpenAI key for the OPTIONAL lyric "second opinion" (see
   // libs/openaiLyricSecondOpinion.mjs). Off unless OPENAI_SECOND_OPINION=1, and
@@ -200,8 +200,8 @@ const secrets = {
   // --- Partner Program ---------------------------------------------------
   // NO EMAIL CONFIGURATION. The portal sends no automatic email: every send
   // path was removed (see the "NO AUTOMATIC EMAIL" note in partner_routes.mjs).
-  // The provider keys that used to live here â€” resend_api_key, postmark_token,
-  // mailgun_*, smtp_*, mail_from â€” are deliberately GONE rather than left as
+  // The provider keys that used to live here — resend_api_key, postmark_token,
+  // mailgun_*, smtp_*, mail_from — are deliberately GONE rather than left as
   // unused fields, because a half-configured transport is exactly what invites
   // someone to re-wire a send path without noticing it was removed on purpose.
   // If email is ever wanted again, it is a deliberate rebuild.
@@ -541,7 +541,7 @@ function normalizeSuperwallEvent(event) {
 
 /**
  * Maps a Superwall event to the stored Play subscription state, mirroring the
- * Razorpay grace table (docs/RAZORPAY-SUBSCRIPTIONS.md Â§6.4).
+ * Razorpay grace table (docs/RAZORPAY-SUBSCRIPTIONS.md §6.4).
  * Returns null when the event carries no state change for this rail.
  */
 function playStateForEvent(data) {
@@ -626,7 +626,7 @@ async function upsertPlayRow({
     return false
   }
   console.log(
-    `[webhook] play state ${eventName} -> ${status} for ${userId.slice(0, 12)}â€¦ (${productId})`,
+    `[webhook] play state ${eventName} -> ${status} for ${userId.slice(0, 12)}… (${productId})`,
   )
   return true
 }
@@ -828,6 +828,37 @@ function playStatusFromSuperwall(sub) {
 }
 
 /**
+ * Writes the flat referral credit for a Play subscription the API sync just
+ * discovered. The webhook is the primary path, but it can be lost (secret
+ * rotation, an outage, or a payload-format mismatch on the receiving side),
+ * and an entitlement that self-heals without its credit would silently rob
+ * the referrer. Idempotent by construction: the database allows ONE credit
+ * per referred user for the Play products and answers false on any repeat.
+ */
+async function creditReferralForSyncedPlay(userId, productId, planPrice) {
+  try {
+    const { data, error } = await supabase.rpc('credit_referral_commission', {
+      p_referred_user_id: userId,
+      p_product_id: productId,
+      p_plan_price: Number.isFinite(Number(planPrice)) ? Number(planPrice) : 0,
+      p_rate_percent: 0,
+      // Stable id: the database's one-per-referred-user guard decides, so a
+      // repeat call can never create a second row.
+      p_source_event_id: `api_sync:${userId}:${productId}`,
+    })
+    if (error) {
+      console.error('[superwall-sync] referral credit failed:', error.message)
+    } else if (data === true) {
+      console.log(
+        `[superwall-sync] referral credited for ${userId.slice(0, 12)}… (${productId})`,
+      )
+    }
+  } catch (err) {
+    console.error('[superwall-sync] referral credit failed:', err.message)
+  }
+}
+
+/**
  * Reads the user's Play subscriptions from Superwall and upserts them.
  * Never throws; bounded by SUPERWALL_API_TIMEOUT_MS; throttled per user.
  */
@@ -877,7 +908,7 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
       // key/scope misconfigured, 429 = rate limited, 5xx = outage. Never block
       // the caller; retry after the short failure TTL.
       if (res.status !== 404) {
-        console.warn(`[superwall-sync] HTTP ${res.status} for ${userId.slice(0, 12)}â€¦`)
+        console.warn(`[superwall-sync] HTTP ${res.status} for ${userId.slice(0, 12)}…`)
       }
       playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
       return
@@ -887,6 +918,7 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
     const list = Array.isArray(payload?.data) ? payload.data : []
     const nowIso = new Date().toISOString()
     let wrote = 0
+    const activePlay = []
     for (const sub of list) {
       if (String(sub?.store) !== 'PLAY_STORE') continue
       const productId = String(sub.product_id || '')
@@ -906,15 +938,24 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
         p_raw: { source: 'api_sync', state: sub.state ?? null, productId, store: sub.store },
       })
       if (!error) wrote++
+      // The credit decision follows SUPERWALL's state, not the success of the
+      // local state write: a transient upsert failure must not also lose the
+      // reward, and the credit itself is idempotent.
+      if (status === 'active') activePlay.push({ productId, amount: sub.amount })
     }
     playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_OK_TTL_MS)
     if (wrote > 0) {
-      console.log(`[superwall-sync] ${userId.slice(0, 12)}â€¦ -> ${wrote} Play row(s) from Superwall`)
+      console.log(`[superwall-sync] ${userId.slice(0, 12)}… -> ${wrote} Play row(s) from Superwall`)
+    }
+    // The entitlement now agrees with Superwall; make sure its referral credit
+    // exists too, in case the webhook for this purchase never landed.
+    for (const row of activePlay) {
+      await creditReferralForSyncedPlay(userId, row.productId, row.amount)
     }
   } catch (err) {
     // Timeout/abort, DNS, TLS: fail open, retry soon.
     console.warn(
-      `[superwall-sync] failed for ${userId.slice(0, 12)}â€¦: ${err?.name || err?.message || err}`,
+      `[superwall-sync] failed for ${userId.slice(0, 12)}…: ${err?.name || err?.message || err}`,
     )
     playSyncNextCheck.set(userId, Date.now() + PLAY_SYNC_FAIL_TTL_MS)
   } finally {
@@ -979,7 +1020,7 @@ async function handleSuperwallEvent(event) {
     console.log('[webhook] skipped: event name=%s', name)
     return
   }
-  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) â€” reject any
+  // NaN must not pass the `<= 0` guard (`NaN <= 0` is false) — reject any
   // non-finite price, then any non-positive price.
   const price = Number(data.price)
   if (!Number.isFinite(price) || price <= 0) {
@@ -1012,12 +1053,12 @@ async function handleSuperwallEvent(event) {
     ratePercent = Number(rateRows.rate_percent)
   } else {
     console.log(
-      `[webhook] no commission rate for product ${productId} â€” affiliate rail skipped, referral rail still runs`,
+      `[webhook] no commission rate for product ${productId} — affiliate rail skipped, referral rail still runs`,
     )
   }
 
   // Amount in INR as billed. Webhook `price` is USD-normalized; the store
-  // price in the user's currency is the source of truth for a â‚¹-priced app.
+  // price in the user's currency is the source of truth for a ₹-priced app.
   const planPrice = Number(data.priceInPurchasedCurrency ?? data.price)
 
   // Before judging the REFERRER, self-heal their Play state from Superwall:
@@ -1081,9 +1122,9 @@ async function handleSuperwallEvent(event) {
 // SCOPE / POLICY. The Play-distributed app may not sell its digital
 // subscription through anything but Google Play Billing (or Play's India
 // alternative-billing programme). These routes therefore serve purchases
-// made OUTSIDE the app â€” a web funnel, or a payment link an admin sends to
+// made OUTSIDE the app — a web funnel, or a payment link an admin sends to
 // a user. The app consumes only GET /api/razorpay/entitlement, which reads
-// a row written here. See docs/RAZORPAY-SUBSCRIPTIONS.md Â§2.
+// a row written here. See docs/RAZORPAY-SUBSCRIPTIONS.md §2.
 //
 // TRUST. Every write is derived from a Razorpay-signed payload or an
 // authenticated Razorpay API call:
@@ -1127,10 +1168,10 @@ function initRazorpay() {
       .map(([slug]) => slug)
     console.log(`[razorpay] configured plans=${configuredPlans.join(',') || 'none'}`)
     if (!secrets.razorpay_webhook_secret) {
-      console.warn('[razorpay] RAZORPAY_WEBHOOK_SECRET is missing â€” the webhook will reject every event')
+      console.warn('[razorpay] RAZORPAY_WEBHOOK_SECRET is missing — the webhook will reject every event')
     }
     if (configuredPlans.length === 0) {
-      console.warn('[razorpay] no plan ids configured (RAZORPAY_PLAN_MONTHLY / _YEARLY) â€” creation will fail')
+      console.warn('[razorpay] no plan ids configured (RAZORPAY_PLAN_MONTHLY / _YEARLY) — creation will fail')
     }
   } catch (err) {
     razorpay = null
@@ -1185,7 +1226,7 @@ async function persistRazorpaySubscription(entity, planSlugHint = null, eventId 
   if (!userId) {
     // An unattributable row would grant nobody access and would poison the
     // entitlement function's "newest row wins" ordering. Skip it loudly.
-    console.warn(`[razorpay] subscription ${entity.id} has no owning user id â€” not stored`)
+    console.warn(`[razorpay] subscription ${entity.id} has no owning user id — not stored`)
     return false
   }
 
@@ -1617,7 +1658,7 @@ app.post('/api/razorpay/verify', requireClerkUser, async (req, res) => {
 
   try {
     // Ownership is checked against the stored row FIRST, and the signature is
-    // computed with that stored id â€” a client cannot choose the pair to sign.
+    // computed with that stored id — a client cannot choose the pair to sign.
     const { data: row, error } = await supabase
       .from('razorpay_subscriptions')
       .select('subscription_id, user_id')
@@ -1689,7 +1730,7 @@ app.get('/api/razorpay/entitlement', requireClerkUser, async (req, res) => {
   // on the web but the app says free": either the app is asking (and with which
   // user id) or it is not asking at all. The token is never logged.
   console.log(
-    '[entitlement] check user=' + String(req.clerkUserId).slice(0, 12) + 'â€¦',
+    '[entitlement] check user=' + String(req.clerkUserId).slice(0, 12) + '…',
   )
   try {
     const entitlement = await readEntitlement(req.clerkUserId)
@@ -1755,14 +1796,14 @@ app.get('/api/razorpay/referral/validate', requireClerkUser, async (req, res) =>
   }
 })
 
-// Attributes a signed-in visitor who arrived through an invite link (?ref=â€¦),
+// Attributes a signed-in visitor who arrived through an invite link (?ref=…),
 // BEFORE any payment. This is the web twin of the app's install-referrer bind:
 // the referrer's "Friends joined" count moves as soon as the friend signs in,
 // which is what makes an invite link visibly work.
 //
 // It writes ONLY a `referral_attributions` row. No affiliate row, no coupon, no
 // commission, and no entitlement is touched, so a sign-up can never earn money
-// by itself â€” the credit still happens at the first verified payment
+// by itself — the credit still happens at the first verified payment
 // (`credit_razorpay_referral_commission`). The RPC is idempotent (at most one
 // attribution per referred user, ever) and rejects self-referral, so repeated
 // calls, reloads and a later checkout are all harmless.
@@ -1839,7 +1880,7 @@ app.post('/api/razorpay/sync', requireClerkUser, async (req, res) => {
   }
 })
 // Admin-only: create a subscription for an arbitrary user and hand back the
-// Razorpay-hosted payment link. This is the manual sales channel â€” the admin
+// Razorpay-hosted payment link. This is the manual sales channel — the admin
 // sends the link (WhatsApp/email) and the customer pays outside the app.
 app.post('/api/admin/razorpay/link', requireAdmin, async (req, res) => {
   if (!razorpay) return res.status(503).json({ error: 'razorpay not configured' })
@@ -2021,7 +2062,7 @@ app.get('/stream/:id/file', async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      // Deliberately NO Supabase Storage fallback â€” see the cached-egress notes
+      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
       // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
       return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
@@ -2059,7 +2100,7 @@ app.get('/stream/:id/file', async (req, res, next) => {
 
 // Admin-only audio preview: streams an uploaded audio file (by storage path)
 // with Range support so the admin can verify a just-uploaded original/karaoke
-// .opus by playing it. Never exposes the raw path â€” the browser just plays
+// .opus by playing it. Never exposes the raw path — the browser just plays
 // this same-origin, admin-protected endpoint.
 app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
   try {
@@ -2074,7 +2115,7 @@ app.get('/api/admin/audio/file', requireAdmin, async (req, res, next) => {
       } catch (_) { /* fall through to Supabase Storage */ }
     }
     if (!buf) {
-      // Deliberately NO Supabase Storage fallback â€” see the cached-egress notes
+      // Deliberately NO Supabase Storage fallback — see the cached-egress notes
       // at R2_PUBLIC_BASE_URL. Fail loudly so a CDN outage is visible.
       return res.status(503).json({ error: 'Audio CDN unavailable (R2 fetch failed)' })
     }
@@ -2162,7 +2203,7 @@ app.get('/api/admin/tracks/:id/audio-status', requireAdmin, async (req, res, nex
         note: unavailable
           ? 'Recorded (R2 check unavailable)'
           : head.exists
-            ? 'Updated Â· R2 verified'
+            ? 'Updated · R2 verified'
             : 'Path set, but object missing in R2',
       }
     }))
@@ -2190,7 +2231,7 @@ app.get('/browse/sections', async (req, res, next) => {
       return res.status(500).json({ error: 'Browse failed' })
     }
 
-    // Each track is its own section â€” completely independent, no grouping
+    // Each track is its own section — completely independent, no grouping
     const sections = data.map((t) => ({
       id: `section-${t.id}`,
       title: t.title,
@@ -2504,7 +2545,7 @@ app.get('/users/me', (req, res) => {  res.json(DEFAULT_USER)
 // with the same secret (so it cannot be forged without the token).
 //
 // Fail-closed: if ADMIN_TOKEN is not configured, admin endpoints return 503
-// and the /admin page shows a "not configured" message â€” never an open admin.
+// and the /admin page shows a "not configured" message — never an open admin.
 // Read live from `secrets` (populated from the vault at startup).
 const ADMIN_COOKIE_NAME = 'sangeet_admin_session'
 const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60 // 8 hours
@@ -2626,7 +2667,7 @@ function describeSessionToken(token) {
       len: raw.length,
       iss: json.iss || null,
       azp: json.azp || null,
-      sub: typeof json.sub === 'string' ? `${json.sub.slice(0, 8)}â€¦` : null,
+      sub: typeof json.sub === 'string' ? `${json.sub.slice(0, 8)}…` : null,
       expInSeconds: typeof json.exp === 'number' ? json.exp - Math.floor(Date.now() / 1000) : null,
     }
   } catch {
@@ -2692,11 +2733,11 @@ async function requireAdmin(req, res, next) {
       //  emailAddress claim; Clerk's DEFAULT template does NOT include it.)
       const email = (claims.emailAddress || claims.email || '').toLowerCase()
       // Fail CLOSED: a claim-less session (missing emailAddress) must never
-      // grant admin access â€” the old `email &&` guard skipped the domain
+      // grant admin access — the old `email &&` guard skipped the domain
       // check when email was '' and made every signed-in Clerk user an admin.
       if (!email || !email.endsWith('@soulfulbhakti.com')) {
         // A signed-in Clerk user from an unauthorized domain OR a session
-        // without the email claim must NOT be granted admin access â€” but must
+        // without the email claim must NOT be granted admin access — but must
         // NOT block a valid token session either. Fall through to the token
         // check; only 403 if that also fails, so a non-company Clerk session
         // cannot break token login.
@@ -3066,7 +3107,7 @@ function readFeaturedPlaylistPayload(body, { requireTitle = true } = {}) {
 // updating an existing row (verified against Postgres: an icon-only payload
 // fails with `null value in column "title" ... violates not-null constraint`
 // on an existing row too). So when the payload omits a title and the row
-// already exists, carry the existing title through â€” a content no-op, but it
+// already exists, carry the existing title through — a content no-op, but it
 // keeps the insert proposal constraint-valid on every branch.
 function ensureFeaturedTitle(row, existing) {
   if (!('title' in row) && existing && typeof existing.title === 'string') {
@@ -3084,7 +3125,7 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
       return res.status(400).json({ error: 'id must be lowercase letters, digits or dashes' })
     }
     // A PUT is an upsert: it either creates the chip or edits an existing one.
-    // Only CREATION really needs a name â€” an existing chip is edited
+    // Only CREATION really needs a name — an existing chip is edited
     // field-by-field (the icon upload/remove paths send `icon_url` alone), so a
     // missing title is fine once the row already exists. This mirrors the
     // specials endpoint, whose banner upload works the same way. A lookup
@@ -3104,7 +3145,7 @@ app.put('/api/admin/featured-playlists/:id', requireAdmin, async (req, res, next
     if (payloadError) return res.status(400).json({ error: payloadError })
     if (Object.keys(row).length === 0) return res.status(400).json({ error: 'nothing to update' })
     // Carry the existing title into the upsert when the payload omits it (icon
-    // upload / remove-icon only send { icon_url }) â€” see ensureFeaturedTitle.
+    // upload / remove-icon only send { icon_url }) — see ensureFeaturedTitle.
     ensureFeaturedTitle(row, existing)
 
     row.updated_at = new Date().toISOString()
@@ -3264,7 +3305,7 @@ const upload = multer({
 // ------------------------------------------------------------------
 // A Specials slide is a full-width landscape banner: the screen width less
 // slideMargin (12dp) each side, so 336dp on a 360dp phone. 8:3 makes that 126dp
-// tall â€” substantial, but it leaves the shelf below visible above the fold.
+// tall — substantial, but it leaves the shelf below visible above the fold.
 // See HomeSpecialsCarousel.bannerAspectRatio for the render side.
 //
 // 1440x540 is DERIVED rather than round. A slide is (screen width - 24dp), so
@@ -3272,7 +3313,7 @@ const upload = multer({
 // therefore 1:1 or better up to 4x density on a 360dp phone and up to 3.5x on a
 // 411dp one, which is every mainstream phone. 1080x405 is the smallest that still
 // looks sharp, 2160x810 the largest worth uploading (2.25x the bytes for no phone
-// benefit â€” only a tablet would ever use them). The admin panel shows the same
+// benefit — only a tablet would ever use them). The admin panel shows the same
 // numbers as a spec table and validates the ratio to within 2%, because the app
 // sizes the slide from the artwork's own ratio and would otherwise letterbox or
 // stretch it.
@@ -3290,12 +3331,12 @@ const DEITY_BANNER_HEIGHT = 540
 
 // The home wallpaper is NOT a full-screen background. The app draws it as a
 // LANDSCAPE band across the top of the home page, behind the "Soulful Bhakti"
-// header (see lib/modules/home/sections/home_wallpaper.dart) â€” the content
+// header (see lib/modules/home/sections/home_wallpaper.dart) — the content
 // below paints its own surface, so a full-screen image was only ever visible as
 // that strip anyway. The upload is therefore landscape.
 //
-// The band is 8:3 â€” 0.75 of the height of the 2:1 band it used to be, at the same
-// width â€” and the admin trims every upload to that shape before sending it here,
+// The band is 8:3 — 0.75 of the height of the 2:1 band it used to be, at the same
+// width — and the admin trims every upload to that shape before sending it here,
 // so 1920x720 is the canonical stored size. One exact ratio is still deliberately
 // NOT enforced at this layer: a client that skips the trim (an older admin page,
 // a direct API call) must still be able to upload the artwork people actually
@@ -3474,7 +3515,7 @@ app.get('/api/admin/tracks', requireAdmin, async (req, res, next) => {
           if (byTrack[t.id] && byTrack[t.id].length) t.album_ids = byTrack[t.id]
         }
       }
-    } catch (_) { /* migration 015 not applied â€” fall back to album_id only */ }
+    } catch (_) { /* migration 015 not applied — fall back to album_id only */ }
 
     res.json(out)
   } catch (err) { next(err) }
@@ -3959,7 +4000,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     const plain = (track.plain_lyrics || '').trim()
     if (!plain) {
       return res.status(400).json({
-        error: 'This track has no plain lyrics to align against. Fill in the Plain Telugu lyrics first â€” ' +
+        error: 'This track has no plain lyrics to align against. Fill in the Plain Telugu lyrics first — ' +
                'they are the script the timings are matched to.',
       })
     }
@@ -4203,7 +4244,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
     // Reached only with an explicit ?write=true. Four independent conditions
     // must ALL hold before a single byte is written:
     //
-    //   1. alignment.ok is true â€” every line cleared the confidence bar. A
+    //   1. alignment.ok is true — every line cleared the confidence bar. A
     //      partial alignment is never written; that is the whole point of the
     //      gate, and it is why the response can still say "Needs review".
     //   2. The track has no existing timed lyrics. Verified against the DB row
@@ -4408,7 +4449,7 @@ app.post('/api/admin/tracks/:id/auto-sync', requireAdmin, async (req, res, next)
         // with a different threshold than the one that gates the write.
         flagged: l.startSeconds === null || l.confidence < effFloor,
       })),
-      // Proposed SRT text per column â€” pre-filled into the editor, NOT saved.
+      // Proposed SRT text per column — pre-filled into the editor, NOT saved.
       proposed: proposedOut,
       // The same proposal with {{Music}} gaps and repeated occurrences timed.
       // Returned alongside the legacy shape so the admin can choose, and so an
@@ -4710,7 +4751,7 @@ app.delete('/api/admin/tracks/:id', requireAdmin, async (req, res, next) => {
 //     (translate_a/single with dt=rm), the same service translate.google.com
 //     uses.
 //   * Telugu -> Devanagari (Hindi column): deterministic 1:1 Brahmic script
-//     conversion (teluguToDevanagari) â€” always phonetically exact.
+//     conversion (teluguToDevanagari) — always phonetically exact.
 // ------------------------------------------------------------------
 
 // Normalizes a comma-separated tags string (e.g. "bhajan, devotional") to a
@@ -4722,7 +4763,7 @@ function cleanTags(v) {
 }
 
 // ------------------------------------------------------------------
-// Cover image proxy (admin only) â€” powers the "From cover" palette picker.
+// Cover image proxy (admin only) — powers the "From cover" palette picker.
 // ------------------------------------------------------------------
 // The admin panel extracts a palette from a cover by drawing it to a canvas
 // and reading the pixels. That requires the image host to send CORS headers;
@@ -4921,7 +4962,7 @@ app.post('/api/admin/google/translate', requireAdmin, async (req, res, next) => 
 })
 
 // ------------------------------------------------------------------
-// Google Transliteration (Telugu -> Latin) â€” Google Translate romanization
+// Google Transliteration (Telugu -> Latin) — Google Translate romanization
 // endpoint (translate_a/single with dt=rm, tl=te = pure phonetic). This is
 // the same Google transliteration service translate.google.com uses. The
 // official Cloud Translation romanizeText API does NOT support Telugu (the
@@ -5003,7 +5044,7 @@ app.post('/api/admin/google/transliterate', requireAdmin, async (req, res, next)
     const failed = lines.filter((_, i) => !en[i]).length
     if (failed === lines.length) {
       return res.status(502).json({
-        error: 'Google transliteration returned no results â€” the romanization service may be temporarily blocked from this server',
+        error: 'Google transliteration returned no results — the romanization service may be temporarily blocked from this server',
       })
     }
     res.json({ en, hi, warning: failed > 0 ? `${failed} line(s) could not be transliterated` : undefined })
@@ -5183,7 +5224,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     }
 
     // Featured Playlist chip icons: STRICTLY WebP as well. No aspect ratio is
-    // enforced on purpose â€” the app draws the icon inside a circle with
+    // enforced on purpose — the app draws the icon inside a circle with
     // BoxFit.cover, so a slightly non-square export is cropped to its centre
     // rather than distorted, and rejecting it would be friction with no benefit.
     // A square export is still what the admin panel asks for.
@@ -5266,7 +5307,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
       // quota, so we refuse rather than silently falling back to it.
       if (!r2Enabled) {
         return res.status(503).json({
-          error: 'Audio storage (R2) is not configured â€” refusing to store audio in Supabase Storage',
+          error: 'Audio storage (R2) is not configured — refusing to store audio in Supabase Storage',
         })
       }
       const key = await uploadAudioToR2(fileName, req.file.buffer, contentType)
@@ -5300,7 +5341,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
 // Affiliate marketing rules (enforced server-side):
 //  - Coupons are attribution-only codes issued to external marketers.
 //  - Affiliate commission applies ONLY to the yearly plan (soulful_yearly)
-//    and is a FLAT â‚¹100 per successful yearly sale (see migration 007).
+//    and is a FLAT ₹100 per successful yearly sale (see migration 007).
 //  - Commission is credited exclusively from verified Superwall webhooks.
 
 // List affiliates (with their coupon count)
