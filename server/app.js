@@ -804,6 +804,7 @@ const PLAY_SYNC_FAIL_TTL_MS = 2 * 60 * 1000
 const PLAY_SYNC_STALE_MS = 30 * 24 * 60 * 60 * 1000
 const playSyncNextCheck = new Map()
 const playSyncInFlight = new Set()
+let syncMisconfigWarned = false
 
 function superwallSyncConfigured() {
   return Boolean(secrets.superwall_api_key) && Boolean(secrets.superwall_application_id)
@@ -866,6 +867,22 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
   if (!userId || !userId.startsWith('user_')) return
   if (!superwallSyncConfigured()) return
   if (playSyncInFlight.has(userId)) return
+
+  // The v3 endpoint takes the NUMERIC application id (52776), not the bundle
+  // id (com.soulfulbhakti.app); a bundle id is rejected with HTTP 400 and the
+  // sync would silently produce nothing. Say so loudly, once per process, so
+  // a wrong deployment value is never mistaken for "user has no subscription".
+  const appIdRaw = String(secrets.superwall_application_id || '')
+  if (!/^\d+$/.test(appIdRaw)) {
+    if (!syncMisconfigWarned) {
+      syncMisconfigWarned = true
+      console.warn(
+        `[superwall-sync] SUPERWALL_APPLICATION_ID must be the NUMERIC application id (e.g. 52776), got "${appIdRaw.slice(0, 40)}" - sync disabled until fixed`,
+      )
+    }
+    return
+  }
+
   const due = playSyncNextCheck.get(userId)
   if (!force && due && Date.now() < due) return
 
@@ -921,7 +938,9 @@ async function syncPlayStateForUser(userId, { force = false } = {}) {
     const activePlay = []
     for (const sub of list) {
       if (String(sub?.store) !== 'PLAY_STORE') continue
-      const productId = String(sub.product_id || '')
+      // Superwall's API returns `soulful_yearly:soulful-yearly`; the database
+      // and the referral program key off the Play product id itself.
+      const productId = baseProductId(sub.product_id)
       if (!productId) continue
       const status = playStatusFromSuperwall(sub)
       const { error } = await supabase.rpc('play_subscription_upsert', {

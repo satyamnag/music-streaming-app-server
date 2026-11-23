@@ -25,7 +25,7 @@ process.env.SUPABASE_SERVICE_KEY = 'stub-service-key'
 process.env.SUPERWALL_WEBHOOK_SECRET =
   'whsec_' + Buffer.from('test-superwall-webhook-secret-32b!!').toString('base64')
 process.env.SUPERWALL_API_KEY = 'test-superwall-api-key'
-process.env.SUPERWALL_APPLICATION_ID = 'app_test_1'
+process.env.SUPERWALL_APPLICATION_ID = '52776'
 process.env.SUPERWALL_API_TIMEOUT_MS = '200'
 process.env.PORT = '0'
 
