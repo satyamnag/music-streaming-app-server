@@ -4839,8 +4839,10 @@ function renderReferralTable(rows) {
         ? '<span style="background:#dcfce7;color:#166534;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">ACTIVE</span>'
         : '<span style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">LAPSED</span>') + '</td>'
       + '<td style="padding:8px 10px;text-align:right;">' + pl(a.friends_joined) + '</td>'
-      + '<td style="padding:8px 10px;text-align:right;">' + pl(a.paid_friends) + '</td>'
-      + '<td style="padding:8px 10px;text-align:right;">' + referralMoney(a.pending_amount) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + pl(a.paid_friends)
+      + '<div style="font-size:11px;color:#888;white-space:nowrap;">' + pl(a.paid_play) + ' play · ' + pl(a.paid_web) + ' web</div></td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + referralMoney(a.pending_amount)
+      + '<div style="font-size:11px;color:#888;white-space:nowrap;">' + referralMoney(a.pending_play) + ' · ' + referralMoney(a.pending_web) + '</div></td>'
       + '<td style="padding:8px 10px;text-align:right;font-weight:600;">' + referralMoney(a.total_amount) + '</td>'
       + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(a.last_credit_at) + '</td>'
       + '<td style="padding:8px 10px;text-align:right;"><button class="btn btn-secondary btn-sm" type="button" '
@@ -4926,12 +4928,15 @@ async function syncReferralEmails() {
 function exportReferralsCsv() {
   if (!referralRows.length) { toast('Nothing to export yet'); return; }
   const header = ['affiliate_email', 'affiliate_name', 'affiliate_user_id', 'code', 'plan_active',
-    'friends_joined', 'paid_friends', 'awaiting_inr', 'settled_inr', 'total_inr', 'last_credit'];
+    'friends_joined', 'paid_friends', 'paid_play', 'paid_web',
+    'awaiting_inr', 'awaiting_play_inr', 'awaiting_web_inr', 'settled_inr', 'total_inr', 'last_credit'];
   const lines = [header.join(',')];
   referralRows.forEach(function (a) {
     lines.push([
       a.email || '', a.name || '', a.referrer_user_id || '', a.code || '', a.is_active ? 'active' : 'lapsed',
-      pl(a.friends_joined), pl(a.paid_friends), a.pending_amount || 0, a.settled_amount || 0, a.total_amount || 0,
+      pl(a.friends_joined), pl(a.paid_friends), pl(a.paid_play), pl(a.paid_web),
+      a.pending_amount || 0, a.pending_play || 0, a.pending_web || 0,
+      a.settled_amount || 0, a.total_amount || 0,
       a.last_credit_at || '',
     ].map(function (v) {
       const s = String(v == null ? '' : v);

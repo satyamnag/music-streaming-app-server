@@ -5794,7 +5794,10 @@ async function lookupSuperwallEmail(userId) {
 
 app.get('/api/admin/referrals', requireAdmin, async (req, res, next) => {
   try {
-    const { data, error } = await supabase.rpc('admin_affiliate_summary', {
+    // v2 adds the per-rail split (Play vs web). A commission's rail is decided by
+    // the product it was earned on, so the Play count must reconcile with the
+    // Play orders and the web count with the Razorpay subscriptions.
+    const { data, error } = await supabase.rpc('admin_affiliate_summary_v2', {
       p_search: String(req.query.search || '').trim() || null,
       p_status: String(req.query.status || '').trim() || null,
       p_rail: String(req.query.rail || '').trim() || null,

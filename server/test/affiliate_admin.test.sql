@@ -152,4 +152,39 @@ begin
   raise notice 'PASS 5: lapsed affiliate reported inactive';
 end $$;
 
+-- ------------------------------------------------------------------
+-- 6. The per-rail split (migration 050): one Play commission + one web
+--    commission must be counted separately, and their sums must add up.
+-- ------------------------------------------------------------------
+do $$
+declare r record;
+begin
+  -- a second friend paid on the WEB rail
+  insert into public.referral_attributions (code, referrer_user_id, referred_user_id)
+  values ('SBADMIN001', 'admin_ref', 'admin_webpayer')
+  on conflict (referred_user_id) do nothing;
+
+  insert into public.commissions
+    (referrer_user_id, referred_user_id, product_id, plan_price, rate_percent,
+     commission_amount, status, source_event_id)
+  values
+    ('admin_ref', 'admin_webpayer', 'razorpay_yearly', 120, 0, 51, 'pending', 'evt_admin_050')
+  on conflict (source_event_id) do nothing;
+
+  select * into r from public.admin_affiliate_summary_v2('admin_ref', null, null, 50);
+  if r.paid_play <> 1 or r.paid_web <> 1 then
+    raise exception 'FAIL 6a: split is play=% web=% (want 1/1)', r.paid_play, r.paid_web;
+  end if;
+  if r.paid_friends <> 2 then
+    raise exception 'FAIL 6b: paid total=% (want 2)', r.paid_friends;
+  end if;
+  if r.pending_play <> 51 or r.pending_web <> 51 then
+    raise exception 'FAIL 6c: pending split is play=% web=% (want 51/51)', r.pending_play, r.pending_web;
+  end if;
+  if r.pending_amount <> r.pending_play + r.pending_web then
+    raise exception 'FAIL 6d: the split does not add up to the total';
+  end if;
+  raise notice 'PASS 6: the Play and web commissions are counted separately and sum to the total';
+end $$;
+
 rollback;
