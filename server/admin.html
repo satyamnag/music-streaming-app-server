@@ -847,6 +847,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-appearance" title="Appearance" onclick="showView('appearance')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="label">Appearance</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-affiliates" title="Affiliate &amp; QR Code" onclick="showView('affiliates')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 21h-4M21 14v3M14 21v-4"/></svg></span><span class="label">Affiliate &amp; QR Code</span></button>
+    <button class="sidebar-item" id="nav-referrals" title="Referrals &amp; affiliate customers" onclick="showView('referrals')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="label">Referrals</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-partners" title="Partner Applications" onclick="showView('partners')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><path d="M19 8l1.5 1.5L23 7"/></svg></span><span class="label">Partner Applications</span></button>
   </nav>
@@ -1062,6 +1063,38 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     themed background.
   </p>
   <div id="wallpaperBox"></div>
+</div>
+
+<div id="referralsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Referrals &amp; affiliate customers</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Which affiliate brought which paying customer, with the store order id and the commission state.
+    Emails come from Superwall's subscriber attributes (use <b>Fill missing emails</b> to backfill).
+    Commission is a flat amount per paying friend, credited once, only while the affiliate's own plan is active.
+  </p>
+
+  <div class="toolbar">
+    <input id="refSearch" placeholder="Search email, code or user id" style="min-width:280px;padding:6px 8px;" oninput="scheduleReferralSearch()">
+    <select id="refStatus" onchange="loadReferrals()">
+      <option value="">All commissions</option>
+      <option value="pending">Has pending ₹</option>
+      <option value="credited">Has credited ₹</option>
+    </select>
+    <select id="refRail" onchange="loadReferrals()">
+      <option value="">Both rails</option>
+      <option value="play">Play (Android)</option>
+      <option value="web">Web (Razorpay)</option>
+    </select>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="syncReferralEmails()">Fill missing emails</button>
+    <button class="btn btn-secondary btn-sm" type="button" onclick="exportReferralsCsv()">Download CSV</button>
+    <span id="refCount" style="font-size:12px;color:#666;margin-left:auto;"></span>
+  </div>
+
+  <div id="refTableWrap" style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">
+    <div style="padding:16px;color:#666;font-size:13px;">Loading affiliates…</div>
+  </div>
+
+  <div id="refDetailWrap" style="margin-top:16px;"></div>
 </div>
 
 <div id="affiliatesPanel" class="view">
@@ -2827,6 +2860,7 @@ function showView(view) {
   else if (view === 'featured') { loadFeaturedChips(); }
   else if (view === 'appearance') { loadWallpaper(); }
   else if (view === 'affiliates') { loadAffiliates(); loadCommissions(); }
+  else if (view === 'referrals') { loadReferrals(); }
   else if (view === 'partners') { loadPartners(); }
 }
 
@@ -4728,6 +4762,193 @@ function confirmDeleteTrack(id) {
 
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function pl(v) { return v || 0; }
+
+// ---------------------------------------------------------------------------
+// Referrals & affiliate customers (migration 047)
+//
+// Two tables from one screen: the affiliate directory (filterable by email,
+// code, user id, commission state and rail) and, on demand, the drill-down of
+// that affiliate's friends with their order id, product, rail, commission and
+// subscription state. Read-only: nothing here moves money.
+// ---------------------------------------------------------------------------
+let referralRows = [];
+let referralSearchTimer = null;
+
+function referralMoney(v) {
+  return '₹' + Number(v || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+}
+
+function referralDate(v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function scheduleReferralSearch() {
+  clearTimeout(referralSearchTimer);
+  referralSearchTimer = setTimeout(loadReferrals, 350);
+}
+
+async function loadReferrals() {
+  const wrap = document.getElementById('refTableWrap');
+  if (!wrap) return;
+  const search = (document.getElementById('refSearch') || {}).value || '';
+  const status = (document.getElementById('refStatus') || {}).value || '';
+  const rail = (document.getElementById('refRail') || {}).value || '';
+  wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">Loading affiliates…</div>';
+  try {
+    const qs = new URLSearchParams({ search, status, rail, limit: '200' });
+    const res = await authedFetch('/api/admin/referrals?' + qs.toString(), { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    referralRows = data.affiliates || [];
+    renderReferralTable(referralRows);
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:16px;color:#b91c1c;font-size:13px;">Could not load referrals: ' + esc(e.message) + '</div>';
+  }
+}
+
+function renderReferralTable(rows) {
+  const wrap = document.getElementById('refTableWrap');
+  const count = document.getElementById('refCount');
+  if (count) count.textContent = rows.length + ' affiliate' + (rows.length === 1 ? '' : 's');
+  if (!rows.length) {
+    wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">No affiliate matches those filters yet. '
+      + 'Affiliates appear once a friend joins with their code.</div>';
+    return;
+  }
+  const head = '<tr>'
+    + '<th style="text-align:left;padding:8px 10px;">Affiliate</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Code</th>'
+    + '<th style="text-align:center;padding:8px 10px;">Plan</th>'
+    + '<th style="text-align:right;padding:8px 10px;">Friends</th>'
+    + '<th style="text-align:right;padding:8px 10px;">Paid</th>'
+    + '<th style="text-align:right;padding:8px 10px;">Awaiting</th>'
+    + '<th style="text-align:right;padding:8px 10px;">Total</th>'
+    + '<th style="text-align:left;padding:8px 10px;">Last credit</th>'
+    + '<th style="padding:8px 10px;"></th>'
+    + '</tr>';
+  const body = rows.map(function (a) {
+    const label = a.email || a.name || a.referrer_user_id;
+    return '<tr style="border-top:1px solid #f0f0f0;">'
+      + '<td style="padding:8px 10px;"><div style="font-weight:600;">' + esc(label) + '</div>'
+      + '<div style="font-size:11px;color:#888;">' + esc(a.referrer_user_id) + '</div></td>'
+      + '<td style="padding:8px 10px;font-family:monospace;font-size:12px;">' + esc(a.code || '—') + '</td>'
+      + '<td style="padding:8px 10px;text-align:center;">' + (a.is_active
+        ? '<span style="background:#dcfce7;color:#166534;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">ACTIVE</span>'
+        : '<span style="background:#fee2e2;color:#991b1b;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">LAPSED</span>') + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + pl(a.friends_joined) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + pl(a.paid_friends) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;">' + referralMoney(a.pending_amount) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;font-weight:600;">' + referralMoney(a.total_amount) + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(a.last_credit_at) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;"><button class="btn btn-secondary btn-sm" type="button" '
+      + 'onclick="openReferralDetail(' + JSON.stringify(String(a.referrer_user_id)) + ',' + JSON.stringify(String(label)) + ')">View</button></td>'
+      + '</tr>';
+  }).join('');
+  wrap.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    + '<thead style="background:#fafafa;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#666;">' + head + '</thead>'
+    + '<tbody>' + body + '</tbody></table>';
+}
+
+async function openReferralDetail(referrerId, label) {
+  const wrap = document.getElementById('refDetailWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="padding:12px;color:#666;font-size:13px;">Loading friends of ' + esc(label) + '…</div>';
+  try {
+    const res = await authedFetch('/api/admin/referrals/' + encodeURIComponent(referrerId), { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    const rows = data.referrals || [];
+    const head = '<tr>'
+      + '<th style="text-align:left;padding:8px 10px;">Friend</th>'
+      + '<th style="text-align:left;padding:8px 10px;">Order id</th>'
+      + '<th style="text-align:left;padding:8px 10px;">Product</th>'
+      + '<th style="text-align:center;padding:8px 10px;">Rail</th>'
+      + '<th style="text-align:right;padding:8px 10px;">Paid</th>'
+      + '<th style="text-align:right;padding:8px 10px;">Commission</th>'
+      + '<th style="text-align:center;padding:8px 10px;">Status</th>'
+      + '<th style="text-align:left;padding:8px 10px;">Subscribed until</th>'
+      + '</tr>';
+    const body = rows.length ? rows.map(function (r) {
+      const paid = r.commission_amount != null;
+      const badge = r.commission_status === 'pending'
+        ? '<span style="background:#fef3c7;color:#92400e;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">PENDING</span>'
+        : r.commission_status
+          ? '<span style="background:#dcfce7;color:#166534;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;">' + esc(String(r.commission_status).toUpperCase()) + '</span>'
+          : '<span style="color:#999;font-size:11px;">not paid</span>';
+      return '<tr style="border-top:1px solid #f0f0f0;">'
+        + '<td style="padding:8px 10px;"><div>' + esc(r.email || r.name || r.referred_user_id) + '</div>'
+        + '<div style="font-size:11px;color:#888;">' + esc(r.referred_user_id) + ' · joined ' + referralDate(r.attributed_at) + '</div></td>'
+        + '<td style="padding:8px 10px;font-family:monospace;font-size:11px;">' + esc(r.order_id || '—') + '</td>'
+        + '<td style="padding:8px 10px;font-size:12px;">' + esc(r.product_id || '—') + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;font-size:11px;">' + esc(r.rail || '—') + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;">' + (r.amount != null ? referralMoney(r.amount) : '—') + '</td>'
+        + '<td style="padding:8px 10px;text-align:right;">' + (paid ? referralMoney(r.commission_amount) : '—') + '</td>'
+        + '<td style="padding:8px 10px;text-align:center;">' + badge + '</td>'
+        + '<td style="padding:8px 10px;font-size:12px;color:#666;">' + referralDate(r.subscription_end) + '</td>'
+        + '</tr>';
+    }).join('') : '<tr><td colspan="8" style="padding:16px;color:#666;">No friends recorded for this affiliate.</td></tr>';
+    wrap.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+      + '<h3 style="margin:0;">' + esc(label) + ' — referred customers</h3>'
+      + '<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById(\'refDetailWrap\').innerHTML=\'\'">Close</button>'
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">'
+      + '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<thead style="background:#fafafa;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#666;">' + head + '</thead>'
+      + '<tbody>' + body + '</tbody></table></div>';
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:12px;color:#b91c1c;font-size:13px;">Could not load the drill-down: ' + esc(e.message) + '</div>';
+  }
+}
+
+async function syncReferralEmails() {
+  showLoading(true);
+  try {
+    const res = await authedFetch('/api/admin/referrals/sync-directory', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ limit: 25 }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    toast('Emails updated: ' + pl(data.updated) + (data.remaining ? ' · ' + data.remaining + ' still missing (run again)' : ''));
+    await loadReferrals();
+  } catch (e) {
+    toast('Could not fill emails: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function exportReferralsCsv() {
+  if (!referralRows.length) { toast('Nothing to export yet'); return; }
+  const header = ['affiliate_email', 'affiliate_name', 'affiliate_user_id', 'code', 'plan_active',
+    'friends_joined', 'paid_friends', 'awaiting_inr', 'settled_inr', 'total_inr', 'last_credit'];
+  const lines = [header.join(',')];
+  referralRows.forEach(function (a) {
+    lines.push([
+      a.email || '', a.name || '', a.referrer_user_id || '', a.code || '', a.is_active ? 'active' : 'lapsed',
+      pl(a.friends_joined), pl(a.paid_friends), a.pending_amount || 0, a.settled_amount || 0, a.total_amount || 0,
+      a.last_credit_at || '',
+    ].map(function (v) {
+      const s = String(v == null ? '' : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'affiliates-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 
 // ==================================================================
 // Card color picker (tracks + albums)

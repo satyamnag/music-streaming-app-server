@@ -1021,6 +1021,40 @@ async function handleSuperwallEvent(event) {
   // events and for anonymous users.
   await persistPlaySubscriptionEvent(normalized)
 
+  // Admin bookkeeping (migration 047), also unfiltered: the email a subscriber
+  // signed up with, and the store order id of every purchase, so the admin
+  // directory can answer "which affiliate brought which paying customer".
+  // V2 carries the attributes under `subscriber`; legacy under userAttributes.
+  {
+    const raw = normalized.v2 ? null : event?.data
+    const attrs = (normalized.v2 ? event?.subscriber?.attributes : raw?.userAttributes) || {}
+    const pick = (v) => (v && typeof v === 'object' && 'value' in v ? v.value : v)
+    const email = pick(attrs.email)
+    const displayName = pick(attrs.name) || pick(attrs.username)
+    if (email || displayName) {
+      await upsertUserDirectory(
+        String(data.originalAppUserId || data.appUserId || ''),
+        { email, name: displayName, source: 'superwall-webhook' },
+      )
+    }
+    const orderId =
+      normalized.v2
+        ? (event?.event_data?.original_transaction_id || event?.subscription?.subscription_id || null)
+        : (data.originalTransactionId || data.transactionId || null)
+    if (orderId && data.productId) {
+      await recordReferralPurchase({
+        userId: String(data.originalAppUserId || data.appUserId || ''),
+        orderId,
+        productId: String(data.productId),
+        rail: String(data.store) === 'PLAY_STORE' ? 'play' : 'web',
+        amount: Number(data.priceInPurchasedCurrency ?? data.price),
+        occurredAt: msToIso(data.ts || data.purchasedAt) || new Date().toISOString(),
+        status: 'processed',
+        sourceEventId: `evt:${String(data.id || orderId)}`,
+      })
+    }
+  }
+
   // Only production Google Play purchases count. Never credit trials, intro
   // offers, cancellations, refunds (negative price) or billing issues.
   //
@@ -5572,6 +5606,202 @@ app.put('/api/admin/coupons/:id', requireAdmin, async (req, res, next) => {
 })
 
 // List affiliate commissions (earnings ledger)
+// ----- Affiliate / referral administration (migration 047) -----
+//
+// The customer-facing /account card answers "what did I earn". These endpoints
+// answer the business questions: which affiliate brought which paying customer,
+// with which store order id, on which rail, and is the ₹51 credited.
+//
+// Emails are not stored by Clerk-side tables, so `user_directory` holds them
+// (written from Superwall's subscriber attributes). `sync-directory` fills the
+// gaps from Superwall's official API on demand, in bounded batches.
+
+/** Upserts one email/name pair into the admin directory. Never throws. */
+async function upsertUserDirectory(userId, { email, name, source }) {
+  const id = String(userId || '')
+  if (!id.startsWith('user_')) return
+  if (!email && !name) return
+  try {
+    const { error } = await supabase.from('user_directory').upsert(
+      {
+        user_id: id,
+        email: email ? String(email).trim().toLowerCase().slice(0, 320) : null,
+        name: name ? String(name).trim().slice(0, 200) : null,
+        source: String(source || 'superwall-webhook'),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    )
+    if (error) console.warn('[directory] upsert failed:', error.message)
+  } catch (err) {
+    console.warn('[directory] upsert failed:', err.message)
+  }
+}
+
+/** Records one store purchase by a referred user (admin audit trail). */
+async function recordReferralPurchase({ userId, orderId, productId, rail, amount, occurredAt, status, sourceEventId }) {
+  const id = String(userId || '')
+  if (!id.startsWith('user_')) return
+  if (!orderId || !productId) return
+  try {
+    const { error } = await supabase.from('referral_purchases').upsert(
+      {
+        source_event_id: String(sourceEventId || `order:${orderId}`).slice(0, 200),
+        referred_user_id: id,
+        order_id: String(orderId).slice(0, 120),
+        product_id: String(productId).slice(0, 120),
+        rail: rail === 'web' ? 'web' : rail === 'play' ? 'play' : 'other',
+        amount: Number.isFinite(Number(amount)) ? Number(amount) : null,
+        status: String(status || 'processed').slice(0, 40),
+        occurred_at: occurredAt || new Date().toISOString(),
+      },
+      { onConflict: 'source_event_id' },
+    )
+    if (error) console.warn('[referral] purchase link failed:', error.message)
+  } catch (err) {
+    console.warn('[referral] purchase link failed:', err.message)
+  }
+}
+
+/**
+ * Fills `user_directory` from Superwall for users that appear in the referral
+ * tables but have no email yet. Bounded so one click cannot hammer the API.
+ */
+async function syncReferralDirectory({ limit = 25 } = {}) {
+  const { data: missing, error } = await supabase
+    .from('user_directory')
+    .select('user_id')
+    .limit(1)
+  // The directory read only tells us it exists; the real missing set comes from
+  // the referral tables below, so a failed probe is not fatal.
+  if (error) console.warn('[directory] probe failed:', error.message)
+
+  const wanted = new Set()
+  const { data: attributions } = await supabase
+    .from('referral_attributions')
+    .select('referrer_user_id, referred_user_id')
+    .limit(1000)
+  for (const row of attributions || []) {
+    if (row?.referrer_user_id) wanted.add(row.referrer_user_id)
+    if (row?.referred_user_id) wanted.add(row.referred_user_id)
+  }
+  const { data: commissions } = await supabase
+    .from('commissions')
+    .select('referrer_user_id, referred_user_id')
+    .limit(1000)
+  for (const row of commissions || []) {
+    if (row?.referrer_user_id) wanted.add(row.referrer_user_id)
+    if (row?.referred_user_id) wanted.add(row.referred_user_id)
+  }
+
+  const { data: known } = await supabase
+    .from('user_directory')
+    .select('user_id')
+    .limit(2000)
+  const have = new Set((known || []).map((r) => r.user_id))
+  const todo = [...wanted].filter((id) => id && id.startsWith('user_') && !have.has(id))
+
+  if (!superwallSyncConfigured()) {
+    return { updated: 0, remaining: todo.length, reason: 'superwall sync not configured' }
+  }
+  let updated = 0
+  for (const userId of todo.slice(0, Math.min(Math.max(limit, 1), 50))) {
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), SUPERWALL_API_TIMEOUT_MS)
+      let res
+      try {
+        res = await fetch(
+          `${SUPERWALL_API_BASE_URL}/v2/users/${encodeURIComponent(userId)}/attributes?application_id=${encodeURIComponent(
+            secrets.superwall_application_id,
+          )}`,
+          { headers: { Authorization: `Bearer ${secrets.superwall_api_key}` }, signal: controller.signal },
+        )
+      } finally {
+        clearTimeout(timer)
+      }
+      if (!res.ok) continue
+      const payload = await res.json().catch(() => null)
+      const attrs = payload?.attributes || payload?.data?.attributes || payload?.data || {}
+      const pick = (v) => (v && typeof v === 'object' && 'value' in v ? v.value : v)
+      const email = pick(attrs.email)
+      const name = pick(attrs.name)
+      if (email || name) {
+        await upsertUserDirectory(userId, { email, name, source: 'superwall-api' })
+        updated++
+      }
+    } catch (_) {
+      /* bounded best-effort: one user must not stop the batch */
+    }
+  }
+  return { updated, remaining: Math.max(todo.length - updated, 0) }
+}
+
+app.get('/api/admin/referrals', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.rpc('admin_affiliate_summary', {
+      p_search: String(req.query.search || '').trim() || null,
+      p_status: String(req.query.status || '').trim() || null,
+      p_rail: String(req.query.rail || '').trim() || null,
+      p_limit: Math.min(Math.max(Number(req.query.limit) || 200, 1), 500),
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.set('Cache-Control', 'no-store')
+    res.json({ affiliates: data || [] })
+  } catch (err) { next(err) }
+})
+
+app.get('/api/admin/referrals/:referrerId', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.rpc('admin_affiliate_referrals', {
+      p_referrer: String(req.params.referrerId || ''),
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.set('Cache-Control', 'no-store')
+    res.json({ referrals: data || [] })
+  } catch (err) { next(err) }
+})
+
+app.post('/api/admin/referrals/sync-directory', requireAdmin, async (req, res, next) => {
+  try {
+    const limit = Math.min(Math.max(Number(req.body?.limit) || 25, 1), 50)
+    res.json(await syncReferralDirectory({ limit }))
+  } catch (err) { next(err) }
+})
+
+// Records an order discovered outside the webhook (Play Developer API or the
+// Play Console), so older purchases appear in the affiliate view too.
+app.post('/api/admin/referrals/order', requireAdmin, async (req, res, next) => {
+  const {
+    referred_user_id: referredUserId,
+    order_id: orderId,
+    product_id: productId,
+    rail,
+    amount,
+    occurred_at: occurredAt,
+    status,
+  } = req.body || {}
+  if (!referredUserId || !orderId || !productId) {
+    return res.status(400).json({ error: 'referred_user_id, order_id and product_id are required' })
+  }
+  if (!['play', 'web', 'other'].includes(String(rail || ''))) {
+    return res.status(400).json({ error: 'rail must be play, web or other' })
+  }
+  try {
+    const { data, error } = await supabase.rpc('admin_order_backfill', {
+      p_referred_user_id: String(referredUserId),
+      p_order_id: String(orderId),
+      p_product_id: String(productId),
+      p_rail: String(rail),
+      p_amount: Number.isFinite(Number(amount)) ? Number(amount) : null,
+      p_occurred_at: occurredAt ? String(occurredAt) : new Date().toISOString(),
+      p_status: String(status || 'processed'),
+    })
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ ok: Boolean(data) })
+  } catch (err) { next(err) }
+})
+
 app.get('/api/admin/commissions', requireAdmin, async (req, res, next) => {
   try {
     const { data, error } = await supabase
