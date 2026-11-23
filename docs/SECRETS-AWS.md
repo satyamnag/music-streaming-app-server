@@ -150,7 +150,7 @@ update-check/enabled         tutrtalk/prod/* (6 secrets, unrelated project)
 |---|---|
 | `razorpay/key-secret` | **missing** (`ResourceNotFoundException`) |
 | `razorpay/webhook-secret` | **missing** (`ResourceNotFoundException`) |
-| `superwall/api-key` | ✅ **required again (migration 046)** — org API key with the `users:read` scope for the Play-rail self-heal sync; the old `sk_` org key was retired 2026-11-09. Env fallback: `SUPERWALL_API_KEY`. Also set `SUPERWALL_APPLICATION_ID` (non-secret, from the Superwall dashboard). |
+| `superwall/api-key` | ✅ **created 2026-11-12 (migration 046)** — org API key with the `users:read` scope for the Play-rail self-heal sync (the old `sk_` org key was retired 2026-11-09). Readback byte-identical; live probe `GET /v3/users/…/subscriptions?application_id=52776` → HTTP 200; server loader `loadAwsSecrets` → loaded. Env fallback: `SUPERWALL_API_KEY`. Pair it with `SUPERWALL_APPLICATION_ID=52776` (non-secret, from the Superwall dashboard). |
 | `superwall/publishable-key` | ✅ **created 2026-11-09** — `pk_` prefix, len 24, readback verified; `.env` now reads it |
 
 Consequence: the app cannot initialise Superwall (secret key where `pk_` is expected),

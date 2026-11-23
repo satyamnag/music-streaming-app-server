@@ -114,11 +114,12 @@ test('internal keys are translated to the account service/api-key convention', (
   // The rest of the account stores secrets as `superwall/api-key`,
   // `onesignal/api-key`, `posthog/api-key`. These two follow the same shape
   // while the server keeps its original internal names.
-  const mapped = resolveAwsNames(['deepgram_api_key', 'openai_api_key', 'admin_token'])
+  const mapped = resolveAwsNames(['deepgram_api_key', 'openai_api_key', 'admin_token', 'superwall_api_key'])
   eq(mapped, [
     { internal: 'deepgram_api_key', aws: 'deepgram/api-key' },
     { internal: 'openai_api_key', aws: 'openai/api-key' },
     { internal: 'admin_token', aws: 'admin_token' },
+    { internal: 'superwall_api_key', aws: 'superwall/api-key' },
   ])
   eq(resolveAwsNames([]), [])
   eq(resolveAwsNames(null), [])

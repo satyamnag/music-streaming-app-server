@@ -47,6 +47,9 @@ export const AWS_SECRET_NAME_OVERRIDES = {
   // TEST-mode pair, selected by RAZORPAY_MODE=test on the server.
   razorpay_key_secret_test: 'razorpay/key-secret-test',
   razorpay_webhook_secret_test: 'razorpay/webhook-secret-test',
+  // Superwall organization API key (users:read) for the Play-rail self-heal
+  // sync (migration 046). Account convention is `superwall/api-key`.
+  superwall_api_key: 'superwall/api-key',
 }
 
 /**
