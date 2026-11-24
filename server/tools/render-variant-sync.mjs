@@ -345,6 +345,11 @@ function splitVariantForCue(piece, rowVariant) {
   if (!piece || !v.trim()) return null
   const vEnd = v.replace(/\s+$/, '').length
   const total = piece.total || 1
+  // A piece that spans the WHOLE line carries the whole line: emit it verbatim. Without this
+  // the proportional cut can stop short (measured on Kalyaanamu Loka Kalyaanamu, where the cue
+  // 'వేడుకగ యీ పెండ్లి నేడు చూడండి.' covering the whole line emitted only 'Come, witness this
+  // joyous' of 'Come, witness this joyous wedding today.').
+  if (piece.from <= 0 && piece.to >= total) return { text: v.trim() || null, left: 0, right: vEnd }
   // Both cuts come from the same pure function, so a boundary shared by two cues yields
   // one position: measured on "శ్రీవేంకటేశ్వరుని సర్వదర్శనం" against "A complete vision of
   // Lord Sri Venkateswara.", cutting each side independently gave "...of Lord" and
