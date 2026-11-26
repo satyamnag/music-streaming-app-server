@@ -850,6 +850,7 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     <button class="sidebar-item" id="nav-referrals" title="Referrals &amp; affiliate customers" onclick="showView('referrals')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="label">Referrals</span></button>
     <button class="sidebar-item" id="nav-subscriptions" title="Subscriptions by store" onclick="showView('subscriptions')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="label">Subscriptions</span></button>
     <button class="sidebar-item" id="nav-users" title="Signed-up users (paid &amp; free)" onclick="showView('users')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></span><span class="label">Users</span></button>
+    <button class="sidebar-item" id="nav-channels" title="Channel links (Facebook / Instagram / YouTube)" onclick="showView('channels')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.4z"/><path d="M8 9h8M8 12h5"/></svg></span><span class="label">Channel links</span></button>
     <div class="sidebar-divider"></div>
     <button class="sidebar-item" id="nav-partners" title="Partner Applications" onclick="showView('partners')"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><path d="M19 8l1.5 1.5L23 7"/></svg></span><span class="label">Partner Applications</span></button>
   </nav>
@@ -1065,6 +1066,25 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     themed background.
   </p>
   <div id="wallpaperBox"></div>
+</div>
+
+<div id="channelsPanel" class="view">
+  <h2 style="margin-bottom:12px;">Channel links</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px;">
+    Three brand-owned invite links, one per traffic source. They are <b>not</b> affiliate links:
+    nobody earns ₹51 from them. What they give is the meaningful number instead —
+    <b>clicks, sign-ups and paying accounts per channel</b>. Post the short link; it counts the click
+    and forwards to the Play Store with the channel tag attached.
+  </p>
+
+  <div class="toolbar">
+    <button class="btn btn-secondary btn-sm" type="button" onclick="loadChannels()">Refresh</button>
+    <span style="font-size:12px;color:#666;margin-left:auto;">Sign-ups count only after a devotee installs from the link and signs in.</span>
+  </div>
+
+  <div id="channelTableWrap" style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">
+    <div style="padding:16px;color:#666;font-size:13px;">Loading channels…</div>
+  </div>
 </div>
 
 <div id="usersPanel" class="view">
@@ -2921,6 +2941,7 @@ function showView(view) {
   else if (view === 'referrals') { loadReferrals(); }
   else if (view === 'subscriptions') { loadSubscriptions(); }
   else if (view === 'users') { loadUsers(); }
+  else if (view === 'channels') { loadChannels(); }
   else if (view === 'partners') { loadPartners(); }
 }
 
@@ -4983,6 +5004,75 @@ async function syncReferralEmails() {
   } finally {
     showLoading(false);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Channel links (migration 052)
+//
+// Brand-owned Facebook / Instagram / YouTube invite links. No ₹51 is paid on
+// them (their codes belong to channel_* identities that can never be active
+// subscribers); the meaningful numbers are clicks, sign-ups and paying accounts.
+// ---------------------------------------------------------------------------
+let channelRows = [];
+
+function copyText(text, label) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { toast(label + ' copied'); })
+      .catch(function () { toast('Could not copy — select the text manually'); });
+  } else {
+    toast('Copy not available — select the text manually');
+  }
+}
+
+async function loadChannels() {
+  const wrap = document.getElementById('channelTableWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">Loading channels…</div>';
+  try {
+    const res = await authedFetch('/api/admin/channels', { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'request failed');
+    channelRows = data.channels || [];
+    renderChannels(channelRows);
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:16px;color:#b91c1c;font-size:13px;">Could not load channels: ' +
+      esc(e.message) + '</div>';
+  }
+}
+
+function renderChannels(rows) {
+  const wrap = document.getElementById('channelTableWrap');
+  if (!rows.length) {
+    wrap.innerHTML = '<div style="padding:16px;color:#666;font-size:13px;">No channel codes found. ' +
+      'Apply migration 052 in Supabase first.</div>';
+    return;
+  }
+  const labels = { facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube' };
+  const body = rows.map(function (c) {
+    const rev = c.play_revenue == null ? '—' : referralMoney(c.play_revenue);
+    return '<div style="border-bottom:1px solid #f0f0f0;padding:14px 16px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">'
+      + '<b style="font-size:15px;">' + esc(labels[c.channel] || c.channel) + '</b>'
+      + '<span style="font-family:monospace;font-size:11px;background:#f3f4f6;border-radius:6px;padding:2px 8px;">' + esc(c.code) + '</span>'
+      + '<span style="font-size:12px;color:#666;">' + pl(c.clicks) + ' clicks · ' + pl(c.signups) + ' sign-ups · '
+      + pl(c.paid_users) + ' paying · Play revenue ' + rev + '</span>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;">'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+      + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;width:110px;">Short link</span>'
+      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;">' + esc(c.short_link) + '</code>'
+      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyText(' + JSON.stringify(String(c.short_link)) + ',' + JSON.stringify((labels[c.channel] || c.channel) + ' short link') + ')">Copy</button>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+      + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;width:110px;">Play link</span>'
+      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;">' + esc(c.play_link) + '</code>'
+      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyText(' + JSON.stringify(String(c.play_link)) + ',' + JSON.stringify((labels[c.channel] || c.channel) + ' Play link') + ')">Copy</button>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#999;margin-top:2px;">Last click: ' + referralDate(c.last_click_at)
+      + ' · Last sign-up: ' + referralDate(c.last_signup_at) + '</div>'
+      + '</div></div>';
+  }).join('');
+  wrap.innerHTML = body;
 }
 
 // ---------------------------------------------------------------------------

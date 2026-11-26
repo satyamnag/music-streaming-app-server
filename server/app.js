@@ -5640,6 +5640,70 @@ app.put('/api/admin/coupons/:id', requireAdmin, async (req, res, next) => {
 })
 
 // List affiliate commissions (earnings ledger)
+// ----- Brand-owned channel links (migration 052) -----
+//
+// Three invite links, one per traffic source. They are NOT affiliate links: the
+// code they carry belongs to a `channel_*` identity that can never be an active
+// subscriber, so the referral credit rule refuses to pay ₹51 on them by
+// construction. What they give instead is measurement: clicks (recorded here),
+// plus sign-ups and paying accounts (joined in admin_channel_summary).
+//
+// The Android app reads the code from `utm_source` (ReferrerBridge
+// .parseUtmSource) and tolerates the extra utm_medium / utm_campaign params, so
+// the channel tags travel with the install without any app change.
+const PLAY_PACKAGE = 'com.soulfulbhakti.app'
+
+const CHANNEL_LINKS = {
+  fb: { channel: 'facebook', code: 'SBFBORG' },
+  ig: { channel: 'instagram', code: 'SBIGORG' },
+  yt: { channel: 'youtube', code: 'SBYTORG' },
+}
+
+function channelSlug(channel) {
+  return channel === 'facebook' ? 'fb' : channel === 'instagram' ? 'ig' : channel === 'youtube' ? 'yt' : channel
+}
+
+/** The Play Store URL whose install-referrer carries the channel code + tags. */
+function channelPlayLink(channel, code) {
+  const referrer = `utm_source=${code}&utm_medium=social&utm_campaign=${channel}`
+  return `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}&referrer=${encodeURIComponent(referrer)}`
+}
+
+/** Public short link: counts the click, then sends the visitor to the store. */
+app.get('/go/:slug', async (req, res) => {
+  const cfg = CHANNEL_LINKS[String(req.params.slug || '').toLowerCase()]
+  if (!cfg) return res.status(404).type('text/plain').send('Unknown link')
+  // Best-effort click log. A logging failure must never block the visitor.
+  try {
+    const { error } = await supabase.from('referral_channel_clicks').insert({
+      channel: cfg.channel,
+      code: cfg.code,
+      source_path: `/go/${String(req.params.slug || '').toLowerCase()}`,
+    })
+    if (error) console.warn('[channels] click not recorded:', error.message)
+  } catch (err) {
+    console.warn('[channels] click not recorded:', err.message)
+  }
+  res.set('Cache-Control', 'no-store')
+  return res.redirect(302, channelPlayLink(cfg.channel, cfg.code))
+})
+
+/** Admin: per-channel clicks, sign-ups, paying accounts, Play revenue + links. */
+app.get('/api/admin/channels', requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase.rpc('admin_channel_summary')
+    if (error) return res.status(500).json({ error: error.message })
+    const base = String(process.env.PUBLIC_BASE_URL || 'https://admin.soulfulbhakti.com').replace(/\/+$/, '')
+    const channels = (data || []).map((row) => ({
+      ...row,
+      short_link: `${base}/go/${channelSlug(row.channel)}`,
+      play_link: channelPlayLink(row.channel, row.code),
+    }))
+    res.set('Cache-Control', 'no-store')
+    res.json({ channels })
+  } catch (err) { next(err) }
+})
+
 // ----- Affiliate / referral administration (migration 047) -----
 //
 // The customer-facing /account card answers "what did I earn". These endpoints
