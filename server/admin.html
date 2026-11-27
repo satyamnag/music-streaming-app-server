@@ -4335,10 +4335,46 @@ async function doLogout() {
   showLogin();
 }
 
+// Measured on the live host: a 4.2 MB body is accepted and a 4.4 MB body is
+// refused, so the platform ceiling is 4,500,000 bytes. Above it the platform
+// answers 413 with a PLAIN-TEXT "Request Entity Too Large" body - it never
+// reaches Express - so the panel's res.json() used to fail with
+//   Unexpected token 'R', "Request En"... is not valid JSON
+// which named neither the cause nor the fix. Remember the ceiling per session so
+// the next attempt fails instantly with coordinates instead.
+const HOST_PAYLOAD_CAP_BYTES = 4500000;
+let uploadCeilingBytes = null;
+
+// Bytes a FormData body carries, so the message can name the file's real size.
+function formDataBytes(body) {
+  if (typeof FormData === 'undefined' || !(body instanceof FormData)) return 0;
+  let total = 0;
+  for (const value of body.values()) {
+    if (typeof File !== 'undefined' && value instanceof File) total += value.size;
+  }
+  return total;
+}
+
+function uploadTooLargeMessage(bytes) {
+  const mb = value => (value / 1048576).toFixed(2);
+  const limit = uploadCeilingBytes ? mb(uploadCeilingBytes) : '4.29';
+  return `This file is ${mb(bytes)} MB and this host refuses uploads over ${limit} MB. `
+    + 'Upload it at the Render admin panel (music-streaming-app-server.onrender.com/admin, up to 110 MB), '
+    + 'or re-encode it smaller.';
+}
+
 // If any admin API call returns 401 (session expired), return to login.
 async function authedFetch(url, options) {
+  const uploadBytes = formDataBytes(options && options.body);
+  if (uploadBytes && uploadCeilingBytes && uploadBytes > uploadCeilingBytes) {
+    throw new Error(uploadTooLargeMessage(uploadBytes));
+  }
   const res = await fetch(url, options);
   if (res.status === 401) { showLogin(); throw new Error('Session expired — sign in again.'); }
+  if (res.status === 413) {
+    uploadCeilingBytes = HOST_PAYLOAD_CAP_BYTES;
+    throw new Error(uploadTooLargeMessage(uploadBytes || HOST_PAYLOAD_CAP_BYTES));
+  }
   return res;
 }
 
