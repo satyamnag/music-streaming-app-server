@@ -5663,11 +5663,59 @@ function channelSlug(channel) {
   return channel === 'facebook' ? 'fb' : channel === 'instagram' ? 'ig' : channel === 'youtube' ? 'yt' : channel
 }
 
-/** The Play Store URL whose install-referrer carries the channel code + tags. */
-function channelPlayLink(channel, code) {
-  const referrer = `utm_source=${code}&utm_medium=social&utm_campaign=${channel}`
+/** The Play Store URL whose install-referrer carries the code + utm tags. */
+function playLinkWithReferrer(code, medium, campaign) {
+  const referrer = `utm_source=${code}&utm_medium=${medium}&utm_campaign=${campaign}`
   return `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}&referrer=${encodeURIComponent(referrer)}`
 }
+
+/** The Play Store URL whose install-referrer carries the channel code + tags. */
+function channelPlayLink(channel, code) {
+  return playLinkWithReferrer(code, 'social', channel)
+}
+
+/**
+ * Public short link for ONE subscriber's invite: /r/<CODE>.
+ *
+ * The published form is https://soulfulbhakti.com/i/<CODE> (web app route that
+ * forwards here). Only a code that exists in referral_codes is forwarded, so
+ * this can never act as an open redirect; the click is recorded best-effort and
+ * the redirect carries the code in `utm_source` exactly as the app expects.
+ */
+app.get('/r/:code', async (req, res) => {
+  const code = String(req.params.code || '').trim().toUpperCase()
+  if (!/^[A-Z0-9]{4,32}$/.test(code)) {
+    return res.status(404).type('text/plain').send('Unknown link')
+  }
+  try {
+    const { data, error } = await supabase
+      .from('referral_codes')
+      .select('code')
+      .eq('code', code)
+      .maybeSingle()
+    if (error) {
+      console.warn('[invite] code lookup failed:', error.message)
+      return res.status(503).type('text/plain').send('Link temporarily unavailable')
+    }
+    if (!data) return res.status(404).type('text/plain').send('Unknown link')
+
+    // Best-effort click log: a failure here must never block the devotee.
+    try {
+      const { error: clickError } = await supabase
+        .from('referral_invite_clicks')
+        .insert({ code, source_path: `/i/${code}` })
+      if (clickError) console.warn('[invite] click not recorded:', clickError.message)
+    } catch (clickErr) {
+      console.warn('[invite] click not recorded:', clickErr.message)
+    }
+
+    res.set('Cache-Control', 'no-store')
+    return res.redirect(302, playLinkWithReferrer(code, 'referral', 'affiliate'))
+  } catch (err) {
+    console.warn('[invite] failed:', err.message)
+    return res.status(503).type('text/plain').send('Link temporarily unavailable')
+  }
+})
 
 /** Public short link: counts the click, then sends the visitor to the store. */
 app.get('/go/:slug', async (req, res) => {
