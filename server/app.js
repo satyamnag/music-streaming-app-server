@@ -5693,7 +5693,11 @@ app.get('/api/admin/channels', requireAdmin, async (req, res, next) => {
   try {
     const { data, error } = await supabase.rpc('admin_channel_summary')
     if (error) return res.status(500).json({ error: error.message })
-    const base = String(process.env.PUBLIC_BASE_URL || 'https://admin.soulfulbhakti.com').replace(/\/+$/, '')
+    // The published short link must live on the PUBLIC domain, never on `admin.`
+    // (a devotee should never see an infrastructure hostname). The web app owns
+    // /go/<slug> there and forwards to this server's /go/<slug>, which records
+    // the click and answers with the store redirect.
+    const base = String(process.env.CHANNEL_LINK_BASE || 'https://soulfulbhakti.com').replace(/\/+$/, '')
     const channels = (data || []).map((row) => ({
       ...row,
       short_link: `${base}/go/${channelSlug(row.channel)}`,
