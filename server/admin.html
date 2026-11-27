@@ -1077,9 +1077,9 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
     and forwards to the Play Store with the channel tag attached.
   </p>
 
-  <div class="toolbar">
+  <div class="toolbar" style="flex-wrap:wrap;gap:10px;">
     <button class="btn btn-secondary btn-sm" type="button" onclick="loadChannels()">Refresh</button>
-    <span style="font-size:12px;color:#666;margin-left:auto;">Sign-ups count only after a devotee installs from the link and signs in.</span>
+    <span style="font-size:12px;color:#666;flex:1 1 320px;min-width:0;text-align:right;white-space:normal;line-height:1.4;">Sign-ups count only after a devotee installs from the link and signs in.</span>
   </div>
 
   <div id="channelTableWrap" style="background:#fff;border:1px solid #eee;border-radius:8px;overflow:auto;">
@@ -5015,13 +5015,60 @@ async function syncReferralEmails() {
 // ---------------------------------------------------------------------------
 let channelRows = [];
 
+/**
+ * Copies text with a fallback for browsers where the async clipboard API is
+ * unavailable or blocked (older WebView, no secure context, permission denied).
+ * Never throws: the caller only sees a toast either way.
+ */
 function copyText(text, label) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function () { toast(label + ' copied'); })
-      .catch(function () { toast('Could not copy — select the text manually'); });
+  const done = function (ok) {
+    toast(ok ? label + ' copied' : 'Could not copy — select the text with the mouse and copy');
+  };
+  const legacyCopy = function () {
+    try {
+      const area = document.createElement('textarea');
+      area.value = String(text == null ? '' : text);
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.top = '-1000px';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      area.setSelectionRange(0, area.value.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(area);
+      done(ok);
+      return ok;
+    } catch (e) {
+      done(false);
+      return false;
+    }
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(String(text == null ? '' : text)).then(
+      function () { done(true); },
+      function () { legacyCopy(); },
+    );
   } else {
-    toast('Copy not available — select the text manually');
+    legacyCopy();
   }
+}
+
+/**
+ * Copy handler for one channel row.
+ *
+ * The handler is addressed by INDEX and a field name, never by embedding the URL
+ * in the markup: an attribute built from JSON.stringify produced
+ * onclick="copyText("https://…")" - double quotes inside a double-quoted
+ * attribute - which silently killed the handler. Indices cannot be mis-quoted.
+ */
+function copyChannelLink(index, which) {
+  const row = channelRows[index];
+  if (!row) return;
+  const isPlay = which === 'play';
+  const text = isPlay ? row.play_link : row.short_link;
+  const name = row.channel ? row.channel.charAt(0).toUpperCase() + row.channel.slice(1) : 'Channel';
+  copyText(String(text || ''), name + (isPlay ? ' Play link' : ' short link'));
 }
 
 async function loadChannels() {
@@ -5048,7 +5095,7 @@ function renderChannels(rows) {
     return;
   }
   const labels = { facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube' };
-  const body = rows.map(function (c) {
+  const body = rows.map(function (c, i) {
     const rev = c.play_revenue == null ? '—' : referralMoney(c.play_revenue);
     return '<div style="border-bottom:1px solid #f0f0f0;padding:14px 16px;">'
       + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">'
@@ -5060,13 +5107,13 @@ function renderChannels(rows) {
       + '<div style="display:flex;flex-direction:column;gap:6px;">'
       + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
       + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;width:110px;">Short link</span>'
-      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;">' + esc(c.short_link) + '</code>'
-      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyText(' + JSON.stringify(String(c.short_link)) + ',' + JSON.stringify((labels[c.channel] || c.channel) + ' short link') + ')">Copy</button>'
+      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;user-select:all;">' + esc(c.short_link) + '</code>'
+      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyChannelLink(' + i + ', \'short\')">Copy</button>'
       + '</div>'
       + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
       + '<span style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;width:110px;">Play link</span>'
-      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;">' + esc(c.play_link) + '</code>'
-      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyText(' + JSON.stringify(String(c.play_link)) + ',' + JSON.stringify((labels[c.channel] || c.channel) + ' Play link') + ')">Copy</button>'
+      + '<code style="font-size:12px;background:#f9fafb;border:1px solid #eee;border-radius:6px;padding:4px 8px;overflow:auto;max-width:720px;user-select:all;">' + esc(c.play_link) + '</code>'
+      + '<button class="btn btn-secondary btn-sm" type="button" onclick="copyChannelLink(' + i + ', \'play\')">Copy</button>'
       + '</div>'
       + '<div style="font-size:11px;color:#999;margin-top:2px;">Last click: ' + referralDate(c.last_click_at)
       + ' · Last sign-up: ' + referralDate(c.last_signup_at) + '</div>'
