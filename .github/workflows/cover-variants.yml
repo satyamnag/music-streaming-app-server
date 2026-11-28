@@ -23,6 +23,15 @@ on:
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
+    inputs:
+      targets:
+        description: >-
+          Comma-separated cover file names to refresh. Leave blank to sweep every
+          cover. The admin server sets this automatically right after a cover is
+          uploaded, so the app gets its 512 rendition in seconds instead of at
+          the next six-hour sweep.
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -74,7 +83,17 @@ jobs:
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://ngemrcsdfxufxnazeqke.supabase.co' }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: python3 tool/generate_cover_variants.py
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          # A dispatched run carries the covers that were just uploaded; a
+          # scheduled run has no inputs, so TARGETS is empty and the sweep runs.
+          if [ -n "$TARGETS" ]; then
+            echo "targeted run for: $TARGETS"
+            python3 tool/generate_cover_variants.py --only "$TARGETS"
+          else
+            echo "full sweep of every cover"
+            python3 tool/generate_cover_variants.py
+          fi
 
       - name: Upload manifest
         uses: actions/upload-artifact@v4

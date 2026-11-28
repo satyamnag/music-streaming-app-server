@@ -3908,6 +3908,98 @@ const GH_WORKFLOW_FILE = 'sync-from-srt.yml'
 const GH_REF = 'main'
 const SYNC_FROM_SRT_MAX_CHARS = 200000
 
+// ============================================================================
+// Automatic 512x512 cover renditions
+//
+// The Android app draws grid cards, list rows, the miniplayer and the media
+// notification from `thumbnails/variants/512/<name>`, and only the full player
+// uses the original (lib/services/images/cover_renditions.dart). Those
+// renditions are built by the "Cover Variants (512x512 WebP)" workflow, which
+// runs on a six-hour schedule - so a cover uploaded now would be missing from
+// every small surface for up to six hours, and the track would look coverless
+// everywhere except the full player.
+//
+// Fix: dispatch a TARGETED run as soon as a cover lands, passing the file names
+// that need a rendition. One cover takes seconds instead of a full sweep.
+//
+// Two deliberate properties:
+//   * batched - names are collected briefly and sent as a single run, so
+//     uploading twenty covers starts one job rather than twenty;
+//   * fire-and-forget - the upload response never waits on GitHub, and every
+//     failure is swallowed with a warning. The six-hour sweep remains the
+//     safety net, so a failed dispatch delays a rendition, never loses it.
+// ============================================================================
+const COVER_VARIANTS_WORKFLOW = 'cover-variants.yml'
+const COVER_DISPATCH_WINDOW_MS = 20000
+const COVER_DISPATCH_MAX_BATCH = 25
+const pendingCoverNames = new Set()
+let coverDispatchTimer = null
+
+async function dispatchCoverVariants(names) {
+  const token = String(secrets.github_actions_token || '').trim()
+  if (!token) {
+    console.warn('[covers] no github_actions_token: skipping the rendition dispatch (the six-hour sweep will catch up)')
+    return
+  }
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${COVER_VARIANTS_WORKFLOW}/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'Content-Type': 'application/json',
+          'User-Agent': 'soulful-bhakti-admin',
+        },
+        body: JSON.stringify({ ref: GH_REF, inputs: { targets: names.join(',') } }),
+      },
+    )
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '')
+      console.warn(`[covers] dispatch refused (HTTP ${response.status}): ${detail.slice(0, 160)}; the sweep will catch up`)
+      return
+    }
+    console.log(`[covers] rendition run dispatched for ${names.length} cover(s)`)
+  } catch (error) {
+    console.warn(`[covers] dispatch failed (${error.message}); the sweep will catch up`)
+  }
+}
+
+function flushPendingCoverVariants() {
+  if (coverDispatchTimer) {
+    clearTimeout(coverDispatchTimer)
+    coverDispatchTimer = null
+  }
+  const batch = [...pendingCoverNames]
+  pendingCoverNames.clear()
+  if (batch.length) void dispatchCoverVariants(batch)
+}
+
+// Queue one cover for a rendition. Safe to call on every upload.
+function queueCoverVariant(name) {
+  const clean = String(name || '').trim()
+  if (!clean) return
+  pendingCoverNames.add(clean)
+  if (pendingCoverNames.size >= COVER_DISPATCH_MAX_BATCH) {
+    flushPendingCoverVariants()
+    return
+  }
+  if (coverDispatchTimer) return
+  coverDispatchTimer = setTimeout(() => {
+    coverDispatchTimer = null
+    const batch = [...pendingCoverNames]
+    pendingCoverNames.clear()
+    if (batch.length) void dispatchCoverVariants(batch)
+  }, COVER_DISPATCH_WINDOW_MS)
+  // A serverless instance can be frozen before the timer fires; that is safe
+  // because the sweep covers it. unref() keeps a long-lived host from being held
+  // open by a pending dispatch.
+  if (typeof coverDispatchTimer.unref === 'function') coverDispatchTimer.unref()
+}
+
+
 // Minimal, dependency-free SRT reader. Deliberately local: this route must not
 // depend on the shape of any other helper.
 function parseSrtCueList(srt) {
@@ -5421,6 +5513,9 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     const imageKey = `images/${fileName}`
     if (r2Enabled) {
       await uploadImageToR2(imageKey, req.file.buffer, contentType)
+      // Ask for the 512 rendition the app's cards request, so a freshly uploaded
+      // cover is not missing from every small surface until the next sweep.
+      queueCoverVariant(fileName)
       return res.json({ thumbnail_url: r2PublicUrl(imageKey) })
     }
     const bucket = 'thumbnails'
@@ -5431,6 +5526,7 @@ app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, r
     })
     if (error) return res.status(500).json({ error: error.message })
     const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName)
+    queueCoverVariant(fileName)
     res.json({ thumbnail_url: publicUrl })
   } catch (err) { next(err) }
 })

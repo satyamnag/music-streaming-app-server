@@ -52,6 +52,23 @@ MANIFEST_CSV = OUT / "cover-variants.csv"
 MANIFEST_JSON = OUT / "cover-variants.json"
 REQUIRED_ENV = ("SUPABASE_URL", "SUPABASE_ANON_KEY")
 
+# Optional filter, set by --only. The admin server dispatches a TARGETED run the
+# moment a cover is uploaded, so the rendition the app asks for exists within
+# seconds instead of waiting for the six-hour sweep. Matched against the derived
+# object name (and the raw name), so both forms work. Empty means "every cover".
+ONLY_NAMES: set[str] = set()
+
+
+def parse_only(argv: list[str]) -> set[str]:
+    """Read `--only a.webp,b.webp` from argv without pulling in argparse."""
+    for index, argument in enumerate(argv):
+        if argument == "--only" and index + 1 < len(argv):
+            return {part.strip() for part in argv[index + 1].split(",") if part.strip()}
+        if argument.startswith("--only="):
+            return {part.strip() for part in argument.split("=", 1)[1].split(",") if part.strip()}
+    return set()
+
+
 
 def load_env(path: str = ".env") -> dict[str, str]:
     env: dict[str, str] = {}
@@ -124,6 +141,10 @@ def download(url: str, attempts: int = 3) -> bytes:
 
 def main() -> int:
     print(f"pillow {Image.__version__}")
+    global ONLY_NAMES
+    ONLY_NAMES = parse_only(sys.argv[1:])
+    if ONLY_NAMES:
+        print(f"--only: {len(ONLY_NAMES)} requested name(s): {', '.join(sorted(ONLY_NAMES))}")
     env = load_env()
     if os.environ.get("SUPABASE_URL"):
         env["SUPABASE_URL"] = os.environ["SUPABASE_URL"]
@@ -176,6 +197,11 @@ def main() -> int:
             problems.append(f"{source['role']}: cannot derive a file name from {source['url']}")
             continue
         key_name = variant_name(name)
+        # Targeted run: skip every cover the caller did not ask for. Matching on
+        # both forms means the server can pass the stored file name verbatim
+        # even when the key would rewrite a non-ASCII character.
+        if ONLY_NAMES and key_name not in ONLY_NAMES and name not in ONLY_NAMES:
+            continue
         if not key_name.strip():
             problems.append(f"{source['role']}: stored name has no addressable characters: {name!r}")
             continue
@@ -250,6 +276,16 @@ def main() -> int:
         })
         if index % 20 == 0:
             print(f"  {index}/{len(sources)} done")
+
+    # A targeted run that matched nothing is a real problem (the app would stay
+    # coverless), so say so here. Failing at this step also prevents the manifest
+    # upload step from reporting its own, less useful, "no files found" error.
+    if ONLY_NAMES and not rows:
+        print("::error::no catalogue cover matched --only; the rendition cannot be built")
+        for requested in sorted(ONLY_NAMES):
+            print(f"  requested: {requested!r}")
+        print(f"  considered {len(sources)} catalogue cover(s)")
+        return 1
 
     OUT.mkdir(parents=True, exist_ok=True)
     if rows:
