@@ -1071,7 +1071,8 @@ th .sort-arrow { font-size: 10px; margin-left: 4px; color: #3b82f6; }
 <div id="channelsPanel" class="view">
   <h2 style="margin-bottom:12px;">Channel links</h2>
   <p style="font-size:13px;color:#666;margin-bottom:12px;">
-    Three brand-owned invite links, one per traffic source. They are <b>not</b> affiliate links:
+    One brand-owned invite link per traffic source &mdash; Facebook, Instagram, YouTube,
+    WhatsApp, Pinterest, LinkedIn, TikTok and Email Marketing. They are <b>not</b> affiliate links:
     nobody earns ₹51 from them. What they give is the meaningful number instead —
     <b>clicks, sign-ups and paying accounts per channel</b>. Post the short link; it counts the click
     and forwards to the Play Store with the channel tag attached.
@@ -5130,7 +5131,16 @@ function renderChannels(rows) {
       'Apply migration 052 in Supabase first.</div>';
     return;
   }
-  const labels = { facebook: 'Facebook', instagram: 'Instagram', youtube: 'YouTube' };
+  const labels = {
+    facebook: 'Facebook',
+    instagram: 'Instagram',
+    youtube: 'YouTube',
+    whatsapp: 'WhatsApp',
+    pinterest: 'Pinterest',
+    linkedin: 'LinkedIn',
+    tiktok: 'TikTok',
+    email: 'Email Marketing',
+  };
   const body = rows.map(function (c, i) {
     const rev = c.play_revenue == null ? '—' : referralMoney(c.play_revenue);
     return '<div style="border-bottom:1px solid #f0f0f0;padding:14px 16px;">'

@@ -18,12 +18,15 @@ do $$
 declare n integer;
 begin
   select count(*) into n from public.referral_codes where is_channel;
-  if n < 3 then raise exception 'FAIL 1a: expected at least 3 channel codes, found %', n; end if;
+  if n < 8 then raise exception 'FAIL 1a: expected at least 8 channel codes, found %', n; end if;
 
   select count(*) into n
   from public.referral_codes
-  where is_channel and channel in ('facebook', 'instagram', 'youtube');
-  if n < 3 then raise exception 'FAIL 1b: expected one code per channel, found %', n; end if;
+  where is_channel and channel in (
+    'facebook', 'instagram', 'youtube',
+    'whatsapp', 'pinterest', 'linkedin', 'tiktok', 'email'
+  );
+  if n < 8 then raise exception 'FAIL 1b: expected one code per channel, found %', n; end if;
 
   select count(*) into n
   from public.referral_codes rc
@@ -32,7 +35,7 @@ begin
   );
   if n <> 0 then raise exception 'FAIL 1c: a channel identity is an active subscriber (% rows)', n; end if;
 
-  raise notice 'PASS 1: three channel codes, none of them a paying identity';
+  raise notice 'PASS 1: eight channel codes, none of them a paying identity';
 end $$;
 
 -- ------------------------------------------------------------------

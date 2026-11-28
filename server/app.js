@@ -5657,10 +5657,27 @@ const CHANNEL_LINKS = {
   fb: { channel: 'facebook', code: 'SBFBORG' },
   ig: { channel: 'instagram', code: 'SBIGORG' },
   yt: { channel: 'youtube', code: 'SBYTORG' },
+  wa: { channel: 'whatsapp', code: 'SBWAORG' },
+  pin: { channel: 'pinterest', code: 'SBPINORG' },
+  li: { channel: 'linkedin', code: 'SBLINORG' },
+  tk: { channel: 'tiktok', code: 'SBTIKORG' },
+  em: { channel: 'email', code: 'SBEMAILORG' },
+}
+
+/** channel name -> the slug used in the published short link. */
+const CHANNEL_SLUGS = {
+  facebook: 'fb',
+  instagram: 'ig',
+  youtube: 'yt',
+  whatsapp: 'wa',
+  pinterest: 'pin',
+  linkedin: 'li',
+  tiktok: 'tk',
+  email: 'em',
 }
 
 function channelSlug(channel) {
-  return channel === 'facebook' ? 'fb' : channel === 'instagram' ? 'ig' : channel === 'youtube' ? 'yt' : channel
+  return CHANNEL_SLUGS[channel] || String(channel || '')
 }
 
 /** The Play Store URL whose install-referrer carries the code + utm tags. */
