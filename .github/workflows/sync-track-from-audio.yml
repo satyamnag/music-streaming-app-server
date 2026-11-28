@@ -96,6 +96,13 @@ jobs:
         if: ${{ inputs.separate_vocals }}
         run: |
           set -eu
+          # Demucs shells out to the system ffmpeg to decode the stored .opus. sphn (its other
+          # loader) cannot decode Opus, and without ffmpeg the run died with
+          # 'demucs.api.LoadAudioError: ... unsupported codec' on Varaaha Narasimha, so vocal
+          # isolation was unavailable and the dense passages were transcribed from the mix.
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
           python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 torchaudio==2.8.0
           python -m pip install demucs
           python -c "import importlib.metadata as m, torch; print('demucs', m.version('demucs'), '| torch', torch.__version__)"
