@@ -28,6 +28,7 @@ import fs from 'node:fs'
 import {
   parseSrtTimeline, MUSIC_LABEL, splitLyricLines, classifyLine,
 } from '../libs/autoSyncLyrics.mjs'
+import { VARIANT_MUSIC_LABEL } from '../libs/musicBanner.mjs'
 
 const arg = (n, d = null) => {
   const i = process.argv.indexOf(`--${n}`)
@@ -77,7 +78,7 @@ if (!fail) {
   for (let i = 0; i < te.length; i++) {
     for (const [tag, col] of [['en', en], ['en_tr', tr]]) {
       if (col[i].s !== te[i].s || col[i].e !== te[i].e) failIf(true, `${tag} cue ${i + 1} timing differs from te`)
-      if ((col[i].text === MUSIC_LABEL) !== (te[i].text === MUSIC_LABEL)) failIf(true, `${tag} cue ${i + 1} music mask differs`)
+      if ((col[i].text === VARIANT_MUSIC_LABEL) !== (te[i].text === MUSIC_LABEL)) failIf(true, `${tag} cue ${i + 1} music mask differs`)
       if (te[i].text !== MUSIC_LABEL && !col[i].text.trim()) failIf(true, `${tag} cue ${i + 1} is empty`)
     }
   }
